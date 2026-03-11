@@ -1,0 +1,145 @@
+.estudante-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.gamification-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+.trilhas-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.trilha-title {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.trilha-desc {
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.progress-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background-color: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 4px;
+  transition: width 1s ease-out;
+}
+
+.trilha-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.btn-continue {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.activity-icon-large {
+  width: 64px;
+  height: 64px;
+  background-color: var(--bg-surface);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.achievement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--bg-main);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.achievement-icon {
+  background: var(--premium-gradient);
+  color: white;
+  padding: 0.75rem;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.achievement-info h4 {
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+}
+
+.achievement-info p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* AI Card Styling */
+.ai-card {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--color-primary-alpha-20);
+}
+
+.ai-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 3px;
+  background: var(--premium-gradient);
+}
+
+.ai-tip-text {
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  padding: 0.5rem;
+  background: var(--color-primary-alpha-10);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 4px 4px 0;
+}

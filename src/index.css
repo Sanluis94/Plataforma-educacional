@@ -1,0 +1,333 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  /* Cores Principais - Glassmorphism Premium HSL */
+  --hue-primary: 245;
+  --color-primary: hsl(var(--hue-primary), 85%, 55%);
+  --color-primary-hover: hsl(var(--hue-primary), 85%, 45%);
+  --color-primary-alpha-10: hsla(var(--hue-primary), 85%, 55%, 0.1);
+  --color-primary-alpha-20: hsla(var(--hue-primary), 85%, 55%, 0.2);
+  
+  --color-secondary: hsl(190, 90%, 55%);
+  --color-accent: hsl(350, 85%, 65%);
+  
+  /* Gradientes Dinâmicos */
+  --premium-gradient: linear-gradient(135deg, hsl(245, 85%, 60%), hsl(290, 85%, 55%));
+  --mesh-gradient: radial-gradient(at 0% 0%, hsla(245, 85%, 60%, 0.15) 0px, transparent 50%),
+                   radial-gradient(at 100% 0%, hsla(190, 90%, 55%, 0.15) 0px, transparent 50%),
+                   radial-gradient(at 100% 100%, hsla(350, 85%, 65%, 0.15) 0px, transparent 50%);
+                   
+  /* Backgrounds */
+  --bg-main: #fcfcfd;
+  --bg-surface: rgba(255, 255, 255, 0.7); /* Para Efeito Glass */
+  --bg-surface-opaque: #ffffff;
+  --bg-surface-hover: rgba(255, 255, 255, 0.9);
+  
+  /* Efeito Vidro Fosco (Glassmorphism) */
+  --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+  --glass-blur: blur(12px);
+  --glass-blur-heavy: blur(20px);
+  
+  /* Textos */
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --text-on-primary: #ffffff;
+  
+  /* Estados / Feedbacks */
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  
+  /* Bordas e Sombras Físicas/3D */
+  --border-color: rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 20px 40px -10px rgba(0,0,0,0.1), 0 10px 20px -15px rgba(0,0,0,0.05);
+  --shadow-glow: 0 0 20px hsla(var(--hue-primary), 85%, 55%, 0.3);
+  
+  /* Tipografia Moderna */
+  --font-family-display: 'Outfit', system-ui, sans-serif;
+  --font-family: 'Inter', system-ui, sans-serif;
+  
+  --border-radius-sm: 0.5rem;
+  --border-radius: 1rem;
+  --border-radius-lg: 1.5rem;
+  --border-radius-pill: 9999px;
+  
+  /* Animações e Transições */
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Modo Premium Escuro (Dark Glass) */
+.dark-theme {
+  --hue-primary: 250;
+  --color-primary: hsl(var(--hue-primary), 80%, 65%);
+  --color-primary-hover: hsl(var(--hue-primary), 80%, 75%);
+  
+  --bg-main: #0B0E14;
+  --bg-surface: rgba(20, 25, 35, 0.65);
+  --bg-surface-opaque: #111827;
+  --bg-surface-hover: rgba(30, 40, 55, 0.85);
+  
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-muted: #6b7280;
+  
+  --border-color: rgba(255, 255, 255, 0.08);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  
+  --mesh-gradient: radial-gradient(at 0% 0%, hsla(245, 80%, 60%, 0.15) 0px, transparent 50%),
+                   radial-gradient(at 100% 0%, hsla(190, 80%, 55%, 0.1) 0px, transparent 50%),
+                   radial-gradient(at 100% 100%, hsla(350, 80%, 65%, 0.1) 0px, transparent 50%);
+}
+
+.high-contrast {
+  --color-primary: #ffff00;
+  --color-primary-hover: #ffcc00;
+  --bg-main: #000000;
+  --bg-surface: #000000;
+  --bg-surface-opaque: #000000;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-on-primary: #000000;
+  --border-color: #ffffff;
+  --glass-border: 1px solid #ffffff;
+  --glass-shadow: none;
+  --mesh-gradient: none;
+  --glass-blur: none;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+html, body {
+  font-family: var(--font-family);
+  background-color: var(--bg-main);
+  background-image: var(--mesh-gradient);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background-color var(--transition-base), color var(--transition-base), font-size var(--transition-base);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-display);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* Tamanhos Acessibilidade */
+.text-lg { font-size: 18px; }
+.text-lg h1 { font-size: 2.5rem; }
+.text-lg h2 { font-size: 2rem; }
+.text-lg p { font-size: 1.125rem; }
+
+.text-xl { font-size: 20px; }
+.text-xl h1 { font-size: 3rem; }
+.text-xl h2 { font-size: 2.25rem; }
+.text-xl p { font-size: 1.25rem; }
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--color-primary-hover);
+}
+
+/* Base de Utilidades Ocultas */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+  background: var(--bg-surface-opaque);
+  color: var(--text-primary);
+  padding: 1rem;
+  z-index: 9999;
+}
+
+/* Layout Premium */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-header {
+  padding: 1.25rem 2.5rem;
+  background: var(--bg-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: var(--glass-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.main-header h2 {
+  background: var(--premium-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.header-nav {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.header-nav li a {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-family: var(--font-family-display);
+  text-decoration: none;
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.header-nav li a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--premium-gradient);
+  transition: width var(--transition-bounce);
+}
+
+.header-nav li a:hover::after {
+  width: 100%;
+}
+
+.icon-button {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  backdrop-filter: var(--glass-blur);
+}
+
+.icon-button:hover {
+  background: var(--color-primary-alpha-10);
+  color: var(--color-primary);
+  border-color: var(--color-primary-alpha-20);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.icon-button:active {
+  transform: translateY(0);
+}
+
+.main-content {
+  flex: 1;
+  padding: 3rem 2rem;
+  max-width: 1300px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1.5rem 1rem;
+  }
+}
+
+/* Spinners/Loading */
+.premium-loader {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 4px solid var(--color-primary-alpha-20);
+  border-top-color: var(--color-primary);
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Home Genérica */
+.home-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+  animation: fadeIn 0.6s var(--transition-bounce);
+}
+
+.home-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  background: var(--premium-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2rem;
+}

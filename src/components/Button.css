@@ -1,0 +1,92 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-family);
+  font-weight: 600;
+  border-radius: var(--border-radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-bounce);
+  border: none;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* focus styles - Acessibilidade */
+.btn:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Variante: Primary */
+.btn-primary {
+  background: var(--premium-gradient);
+  color: white;
+  box-shadow: 0 4px 15px hsla(var(--hue-primary), 85%, 55%, 0.3);
+}
+
+.btn-primary:not(:disabled):hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px hsla(var(--hue-primary), 85%, 55%, 0.5);
+}
+
+.btn-primary:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+/* Variante: Oultine Premium */
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 2px solid var(--color-primary);
+  backdrop-filter: var(--glass-blur);
+}
+
+.btn-outline:not(:disabled):hover {
+  background: var(--color-primary-alpha-10);
+  border-color: var(--color-primary-hover);
+  color: var(--color-primary-hover);
+  transform: translateY(-2px);
+}
+
+/* Variante: Ghost Premium */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:not(:disabled):hover {
+  background: var(--color-primary-alpha-10);
+  color: var(--color-primary);
+}
+
+/* Tamanhos */
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.btn-md {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+}
+
+/* Full width */
+.btn-full-width {
+  width: 100%;
+}
