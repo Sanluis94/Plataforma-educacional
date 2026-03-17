@@ -1,115 +1,30 @@
-import { useState, useEffect, useMemo } from 'react';
 import { Star, Award, BrainCircuit } from 'lucide-react';
-import { getAdaptiveRecommendation } from '../../data/services/aiAdaptiveEngine';
-import { useAuth } from '../../core/contexts/AuthContext';
-import type { GradeLevel } from '../../core/contexts/AuthContext';
-import { MathSimulator } from './simuladores/MathSimulator';
-import { ChemistryLab } from './simuladores/ChemistryLab';
-import { MicroscopeSimulator } from './simuladores/MicroscopeSimulator';
-import { PortugueseModule } from './simuladores/PortugueseModule';
-import { EssayModule } from './simuladores/EssayModule';
-import { HistoryTimeline } from './simuladores/HistoryTimeline';
-import { LanguagesModule } from './simuladores/LanguagesModule';
-import { SoftSkillsModule } from './simuladores/SoftSkillsModule';
-import { HardSkillsSimulator } from './simuladores/HardSkillsSimulator';
+import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
+import { SUBJECT_THEMES } from '../../core/constants/dashboardConstants';
 import './EstudanteDashboard.css';
 
-// Phase 27: Subject themes with dynamic color theming
-const SUBJECT_THEMES: Record<string, { primary: string; secondary: string; emoji: string; bg: string }> = {
-  matematica: { primary: '#7c4dff', secondary: '#b388ff', emoji: '📐', bg: 'linear-gradient(135deg, #1a1035 0%, #12002a 100%)' },
-  fisica: { primary: '#ef5350', secondary: '#ff8a80', emoji: '⚛️', bg: 'linear-gradient(135deg, #1c0505 0%, #0d0000 100%)' },
-  quimica: { primary: '#00bcd4', secondary: '#80deea', emoji: '🧪', bg: 'linear-gradient(135deg, #001a1f 0%, #00080d 100%)' },
-  biologia: { primary: '#4caf50', secondary: '#a5d6a7', emoji: '🔬', bg: 'linear-gradient(135deg, #0a1f0a 0%, #010d01 100%)' },
-  portugues: { primary: '#ff7043', secondary: '#ffccbc', emoji: '📖', bg: 'linear-gradient(135deg, #1a0c08 0%, #0d0400 100%)' },
-  redacao: { primary: '#ec407a', secondary: '#f48fb1', emoji: '✍️', bg: 'linear-gradient(135deg, #1a0610 0%, #0d0008 100%)' },
-  historia: { primary: '#ff8f00', secondary: '#ffe082', emoji: '🌍', bg: 'linear-gradient(135deg, #1a1000 0%, #0d0800 100%)' },
-  idiomas: { primary: '#26a69a', secondary: '#80cbc4', emoji: '🌐', bg: 'linear-gradient(135deg, #001a18 0%, #000d0c 100%)' },
-  softskills: { primary: '#5c6bc0', secondary: '#9fa8da', emoji: '💼', bg: 'linear-gradient(135deg, #0a0c1a 0%, #03040d 100%)' },
-  hardskills: { primary: '#0288d1', secondary: '#81d4fa', emoji: '🖥️', bg: 'linear-gradient(135deg, #00060f 0%, #000208 100%)' },
-};
-
-// All modules definition
-const ALL_MODULES = [
-  { id: 'matematica', label: 'Matemática', component: MathSimulator, props: { functionType: 'linear' as const } },
-  { id: 'fisica', label: 'Física', component: null },
-  { id: 'quimica', label: 'Química', component: ChemistryLab, props: {} },
-  { id: 'biologia', label: 'Biologia', component: MicroscopeSimulator, props: {} },
-  { id: 'portugues', label: 'Português', component: PortugueseModule, props: {} },
-  { id: 'redacao', label: 'Redação', component: EssayModule, props: {} },
-  { id: 'historia', label: 'História', component: HistoryTimeline, props: {} },
-  { id: 'idiomas', label: 'Idiomas', component: LanguagesModule, props: {} },
-  { id: 'softskills', label: 'Soft Skills', component: SoftSkillsModule, props: {} },
-  { id: 'hardskills', label: 'Hard Skills', component: HardSkillsSimulator, props: {} },
-];
-
-// Grade-based access control: which module IDs are visible per school segment
-const MODULES_BY_GRADE: Record<GradeLevel, string[]> = {
-  fundamental_1: ['matematica', 'portugues'],
-  fundamental_2: ['matematica', 'portugues', 'historia', 'biologia', 'idiomas'],
-  medio: ['matematica', 'fisica', 'quimica', 'biologia', 'portugues', 'redacao', 'historia', 'idiomas'],
-  profissional: ['softskills', 'hardskills', 'portugues', 'redacao', 'idiomas'],
-};
-
-// Phase 28: Virtual Economy items
-const SHOP_ITEMS = [
-  { id: 'avatar_hero', name: 'Avatar Herói', price: 200, icon: '🦸', owned: false },
-  { id: 'frame_gold', name: 'Moldura Dourada', price: 150, icon: '🏅', owned: false },
-  { id: 'badge_genius', name: 'Badge Gênio', price: 100, icon: '🧠', owned: false },
-  { id: 'theme_neon', name: 'Tema Neon', price: 300, icon: '✨', owned: false },
-];
-
 export function EstudanteDashboard() {
-  const { userData } = useAuth();
-  const gradeLevel: GradeLevel = userData?.gradeLevel || 'medio';
+  const {
+    progress,
+    aiTip,
+    activeSubject,
+    setActiveSubject,
+    activeView,
+    setActiveView,
+    shopItems,
+    modules,
+    handleModuleComplete,
+    buyItem
+  } = useStudentDashboard();
 
-  // Filter modules by school segment (Phase 27 extension)
-  const MODULES = useMemo(() => {
-    const allowed = MODULES_BY_GRADE[gradeLevel] || [];
-    return ALL_MODULES.filter(m => allowed.includes(m.id));
-  }, [gradeLevel]);
-
-  const [level, setLevel] = useState(5);
-  const [xp, setXp] = useState(1250);
-  const [coins, setCoins] = useState(450);
-  const [aiTip, setAiTip] = useState('Analisando seu progresso educacional...');
-  const [activeSubject, setActiveSubject] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'learning' | 'shop' | 'achievements'>('learning');
-  const [shopItems, setShopItems] = useState(SHOP_ITEMS);
+  const { level, xp, coins } = progress;
 
   const theme = activeSubject ? SUBJECT_THEMES[activeSubject] : {
     primary: 'var(--color-primary)', secondary: 'var(--color-secondary)',
     emoji: '🎓', bg: 'var(--bg-main)'
   };
 
-  useEffect(() => {
-    async function fetchTip() {
-      const tip = await getAdaptiveRecommendation({
-        level, xp,
-        recentModules: activeSubject ? [activeSubject] : [],
-        weaknesses: level < 5 ? ['fundamentos'] : [],
-      });
-      setAiTip(tip);
-    }
-    fetchTip();
-  }, [level, xp, activeSubject]);
-
-  const handleModuleComplete = (score: number) => {
-    const earnedXP = Math.floor(score * 0.8);
-    const earnedCoins = Math.floor(score * 0.3);
-    setXp(x => x + earnedXP);
-    setCoins(c => c + earnedCoins);
-    if (xp + earnedXP >= level * 500) setLevel(l => l + 1);
-    setActiveSubject(null);
-  };
-
-  const buyItem = (itemId: string) => {
-    const item = shopItems.find(i => i.id === itemId);
-    if (!item || item.owned || coins < item.price) return;
-    setCoins(c => c - item.price);
-    setShopItems(items => items.map(i => i.id === itemId ? { ...i, owned: true } : i));
-  };
-
-  const activeModule = activeSubject ? MODULES.find(m => m.id === activeSubject) : null;
+  const activeModule = activeSubject ? modules.find(m => m.id === activeSubject) : null;
   const ActiveComponent = activeModule?.component;
 
   return (
@@ -125,9 +40,9 @@ export function EstudanteDashboard() {
       <header className="dashboard-header estudante-header"
         style={{ '--header-primary': typeof theme.primary === 'string' ? theme.primary : 'var(--color-primary)' } as React.CSSProperties}>
         <div>
-          <h1>
+            <h1>
             {activeSubject ? `${(SUBJECT_THEMES[activeSubject] || {}).emoji || '🎓'} ` : ''}
-            {activeSubject ? (MODULES.find(m => m.id === activeSubject)?.label || 'Laboratório') : 'Área do Estudante'}
+            {activeSubject ? (modules.find(m => m.id === activeSubject)?.label || 'Laboratório') : 'Área do Estudante'}
           </h1>
           <p className="text-secondary">
             {activeSubject ? 'Laboratório Virtual — modo imersivo ativo' : 'Pronto para aprender e ganhar pontos hoje?'}
@@ -195,7 +110,7 @@ export function EstudanteDashboard() {
 
               <h2 style={{ marginBottom: '1rem', color: 'var(--text-main)' }}>Laboratórios Disponíveis</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
-                {MODULES.map(mod => {
+                {modules.map(mod => {
                   const t = SUBJECT_THEMES[mod.id];
                   return (
                     <button key={mod.id}

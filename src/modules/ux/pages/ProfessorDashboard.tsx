@@ -1,51 +1,24 @@
-import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardFooter, Button, Badge } from '../components';
 import { PlusCircle, Users, BookOpen, BarChart } from 'lucide-react';
+import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
 import './ProfessorDashboard.css';
 
-interface Turma {
-  id: string;
-  name: string;
-  studentsCount: number;
-}
-
-interface NewActivity {
-  type: 'quiz' | 'simulation_physics' | 'simulation_chemistry' | 'simulation_biology' | 'simulation_math' | 'professional_training';
-  title: string;
-  module: string;
-  config: any; // Armazena configurações específicas dinamicamente
-}
-
 export function ProfessorDashboard() {
-  const [turmas, setTurmas] = useState<Turma[]>([
-    { id: '1', name: 'Física Moderna - 3º Ano', studentsCount: 45 },
-    { id: '2', name: 'Matemática Aplicada - 2º Ano', studentsCount: 38 },
-  ]);
-
-  const [isCreatingClass, setIsCreatingClass] = useState(false);
-  const [newClassName, setNewClassName] = useState('');
-  
-  // Controle de Abas
-  const [activeTab, setActiveTab] = useState<'classes' | 'activityBuilder' | 'reports'>('classes');
-
-  // Estado do Construtor de Aulas
-  const [builderStep, setBuilderStep] = useState(1);
-  const [activityConfig, setActivityConfig] = useState<NewActivity>({ type: 'quiz', title: '', module: '', config: {} });
-
-  const handleCreateClass = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newClassName.trim() === '') return;
-    
-    const novaTurma: Turma = {
-      id: Date.now().toString(),
-      name: newClassName,
-      studentsCount: 0,
-    };
-    
-    setTurmas([...turmas, novaTurma]);
-    setNewClassName('');
-    setIsCreatingClass(false);
-  };
+  const {
+    turmas,
+    isCreatingClass,
+    setIsCreatingClass,
+    newClassName,
+    setNewClassName,
+    activeTab,
+    setActiveTab,
+    builderStep,
+    setBuilderStep,
+    activityConfig,
+    setActivityConfig,
+    handleCreateClass,
+    publishActivity
+  } = useProfessorDashboard();
 
   return (
     <div className="dashboard-container">
@@ -242,7 +215,7 @@ export function ProfessorDashboard() {
                {builderStep < 3 ? (
                  <Button variant="primary" onClick={() => setBuilderStep(b => b + 1)}>Próximo Passo</Button>
                ) : (
-                 <Button variant="primary" onClick={() => { alert('Atividade salva mock no Firebase!'); setActiveTab('classes'); setBuilderStep(1); }}>
+                 <Button variant="primary" onClick={publishActivity}>
                    Publicar Atividade Mágica
                  </Button>
                )}
