@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Star, Award, BrainCircuit } from 'lucide-react';
-import { getAdaptiveRecommendation } from '../services/aiAdaptiveEngine';
-import { useAuth } from '../contexts/AuthContext';
-import type { GradeLevel } from '../contexts/AuthContext';
+import { getAdaptiveRecommendation } from '../../data/services/aiAdaptiveEngine';
+import { useAuth } from '../../core/contexts/AuthContext';
+import type { GradeLevel } from '../../core/contexts/AuthContext';
 import { MathSimulator } from './simuladores/MathSimulator';
 import { ChemistryLab } from './simuladores/ChemistryLab';
 import { MicroscopeSimulator } from './simuladores/MicroscopeSimulator';
