@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Usuários ──────────────────────────────────────────
+    // Qualquer autenticado pode ler perfis (necessário para admin listar professores)
+    // Apenas o próprio usuário pode editar seu perfil
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth.uid == userId;
+      allow update: if request.auth.uid == userId;
+    }
+
+    // ─── Turmas ────────────────────────────────────────────
+    // Qualquer autenticado pode ler turmas
+    // Apenas professores podem criar turmas
+    // Apenas o professor dono pode editar/deletar
+    match /classes/{classId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'professor';
+      allow update: if request.auth != null
+        && resource.data.professorId == request.auth.uid;
+      allow delete: if request.auth != null
+        && resource.data.professorId == request.auth.uid;
+    }
+
+    // ─── Atividades ────────────────────────────────────────
+    // Qualquer autenticado pode ler atividades
+    // Apenas professores podem criar
+    // Apenas o professor criador pode editar/deletar
+    match /activities/{activityId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'professor';
+      allow update, delete: if request.auth != null
+        && resource.data.professorId == request.auth.uid;
+    }
+
+    // ─── Progresso do Estudante ────────────────────────────
+    // Apenas o próprio estudante pode ler/escrever seu progresso
+    match /progress/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+
+    // ─── Logs do Sistema ───────────────────────────────────
+    // Qualquer autenticado pode criar logs (ações de qualquer usuário)
+    // Apenas admins podem ler todos os logs
+    match /system_logs/{logId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+  }
+}

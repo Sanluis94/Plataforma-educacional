@@ -1,3 +1,14 @@
+/**
+ * Admin Repository — Dados administrativos do Firestore.
+ * Busca professores reais da coleção "users" e logs do sistema.
+ */
+import {
+  collection, query, where, getDocs, orderBy, limit as firestoreLimit, getCountFromServer
+} from 'firebase/firestore';
+import { db } from '../../core/services/firebaseConfig';
+import type { SystemLog } from '../types';
+
+// Interface legada mantida para compatibilidade com UI
 export interface Teacher {
   name: string;
   email: string;
@@ -7,27 +18,133 @@ export interface Teacher {
 
 export interface LogEntry {
   time: string;
-  type: 'auth' | 'ai' | 'error';
+  type: 'auth' | 'ai' | 'error' | 'activity' | 'system';
   message: string;
 }
 
-export const MOCK_TEACHERS: Teacher[] = [
-  { name: 'Profa. Ana Lima', email: 'ana@escola.edu.br', classes: 3, students: 87 },
-  { name: 'Prof. Carlos Melo', email: 'carlos@escola.edu.br', classes: 2, students: 61 },
-  { name: 'Profa. Fernanda Costa', email: 'fernanda@escola.edu.br', classes: 4, students: 112 },
-];
+/**
+ * Busca todos os professores cadastrados e enriquece com contagem de turmas.
+ */
+export const getTeachers = async (): Promise<Teacher[]> => {
+  if (!db) {
+    console.warn('[AdminRepository] Firestore não inicializado.');
+    return [];
+  }
 
-export const MOCK_LOGS: LogEntry[] = [
-  { time: '14:32:01', type: 'auth', message: 'Login via Google — ana@escola.edu.br (Professor)' },
-  { time: '14:35:10', type: 'ai', message: 'Gemini API chamada — Recomendação adaptativa para estudante #1041' },
-  { time: '14:40:05', type: 'auth', message: 'Login via Google — joao.silva@escola.edu.br (Estudante)' },
-  { time: '14:41:33', type: 'ai', message: 'Gemini API — Cache HIT para perfil level=5 (sem chamada à API)' },
-  { time: '14:55:00', type: 'error', message: 'Tentativa de acessar dados sem autenticação — IP 192.168.1.45 bloqueado' },
-];
+  try {
+    // 1. Buscar usuários com role 'professor'
+    const usersQuery = query(
+      collection(db, 'users'),
+      where('role', '==', 'professor')
+    );
+    const usersSnap = await getDocs(usersQuery);
 
+    // 2. Para cada professor, contar turmas e alunos
+    const teachers: Teacher[] = [];
+
+    for (const userDoc of usersSnap.docs) {
+      const userData = userDoc.data();
+      const professorId = userDoc.id;
+
+      // Buscar turmas deste professor
+      const classesQuery = query(
+        collection(db, 'classes'),
+        where('professorId', '==', professorId)
+      );
+      const classesSnap = await getDocs(classesQuery);
+
+      let totalStudents = 0;
+      classesSnap.docs.forEach(c => {
+        totalStudents += c.data().studentsCount || 0;
+      });
+
+      teachers.push({
+        name: userData.name || 'Professor',
+        email: userData.email || '',
+        classes: classesSnap.size,
+        students: totalStudents,
+      });
+    }
+
+    return teachers;
+  } catch (error) {
+    console.error('[AdminRepository] Erro ao buscar professores:', error);
+    return [];
+  }
+};
+
+/**
+ * Busca logs do sistema ordenados por timestamp (mais recentes primeiro).
+ */
+export const getLogs = async (maxResults = 50): Promise<LogEntry[]> => {
+  if (!db) return [];
+
+  try {
+    const logsQuery = query(
+      collection(db, 'system_logs'),
+      orderBy('timestamp', 'desc'),
+      firestoreLimit(maxResults)
+    );
+    const snap = await getDocs(logsQuery);
+
+    return snap.docs.map(d => {
+      const data = d.data() as SystemLog;
+      // Extrair hora do timestamp ISO para compatibilidade com UI
+      const time = data.timestamp
+        ? new Date(data.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        : '--:--:--';
+      return {
+        time,
+        type: data.type as LogEntry['type'],
+        message: data.message,
+      };
+    });
+  } catch (error) {
+    console.error('[AdminRepository] Erro ao buscar logs:', error);
+    return [];
+  }
+};
+
+/**
+ * Obtém estatísticas globais da plataforma.
+ */
+export const getGlobalStats = async (): Promise<{
+  totalStudents: number;
+  totalTeachers: number;
+  totalClasses: number;
+  totalActivities: number;
+}> => {
+  if (!db) {
+    return { totalStudents: 0, totalTeachers: 0, totalClasses: 0, totalActivities: 0 };
+  }
+
+  try {
+    const [studentsSnap, teachersSnap, classesSnap, activitiesSnap] = await Promise.all([
+      getCountFromServer(query(collection(db, 'users'), where('role', '==', 'estudante'))),
+      getCountFromServer(query(collection(db, 'users'), where('role', '==', 'professor'))),
+      getCountFromServer(collection(db, 'classes')),
+      getCountFromServer(collection(db, 'activities')),
+    ]);
+
+    return {
+      totalStudents: studentsSnap.data().count,
+      totalTeachers: teachersSnap.data().count,
+      totalClasses: classesSnap.data().count,
+      totalActivities: activitiesSnap.data().count,
+    };
+  } catch (error) {
+    console.error('[AdminRepository] Erro ao calcular estatísticas:', error);
+    return { totalStudents: 0, totalTeachers: 0, totalClasses: 0, totalActivities: 0 };
+  }
+};
+
+/**
+ * Wrapper legado para compatibilidade com useAdminDashboard.
+ */
 export const getAdminData = async () => {
-  return {
-    teachers: MOCK_TEACHERS,
-    logs: MOCK_LOGS,
-  };
+  const [teachers, logs] = await Promise.all([
+    getTeachers(),
+    getLogs(),
+  ]);
+  return { teachers, logs };
 };

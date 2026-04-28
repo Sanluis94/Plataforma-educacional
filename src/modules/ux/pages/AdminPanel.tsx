@@ -10,7 +10,7 @@ export function AdminPanel() {
     stats
   } = useAdminDashboard();
 
-  const { totalStudents, totalClasses, totalTeachers, iaInteractions } = stats;
+  const { totalStudents, totalClasses, totalTeachers, totalActivities } = stats;
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1100px', margin: '0 auto' }}>
@@ -19,7 +19,7 @@ export function AdminPanel() {
         <Shield size={28} style={{ color: 'var(--color-primary)' }} />
         <div>
           <h1 style={{ color: 'var(--text-main)', margin: 0 }}>Painel do Administrador</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>Visão global da institução, professores e logs de segurança.</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>Visão global da instituição, professores e logs de segurança.</p>
         </div>
       </div>
 
@@ -29,7 +29,7 @@ export function AdminPanel() {
           { icon: <Users size={20} />, label: 'Estudantes', value: totalStudents, color: '#42a5f5' },
           { icon: <BookOpen size={20} />, label: 'Turmas Ativas', value: totalClasses, color: '#66bb6a' },
           { icon: <Activity size={20} />, label: 'Professores', value: totalTeachers, color: '#ffa726' },
-          { icon: <TrendingUp size={20} />, label: 'Interações de IA (hoje)', value: iaInteractions, color: '#7c4dff' },
+          { icon: <TrendingUp size={20} />, label: 'Atividades Publicadas', value: totalActivities, color: '#7c4dff' },
         ].map((stat, i) => (
           <div key={i} style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.25rem', border: `1px solid ${stat.color}22` }}>
             <div style={{ color: stat.color, marginBottom: '0.5rem' }}>{stat.icon}</div>

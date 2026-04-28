@@ -1,9 +1,16 @@
+/**
+ * AuthContext — Contexto de autenticação global.
+ * Gerencia login/logout com Google, perfis no Firestore,
+ * criação automática de progresso para estudantes e logs de sistema.
+ */
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { auth, db } from '../services/firebaseConfig';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { writeLog } from '../../data/repositories/logRepository';
+import { DEFAULT_PROGRESS } from '../../data/types';
 
 export type GradeLevel = 'fundamental_1' | 'fundamental_2' | 'medio' | 'profissional';
 
@@ -55,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const docSnap = await getDoc(userDocRef);
       
       if (!docSnap.exists()) {
+        // Primeiro login — cria perfil
         const newData: UserData = {
           name: user.displayName || 'Novo Usuário',
           email: user.email || '',
@@ -63,11 +71,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         await setDoc(userDocRef, { ...newData, createdAt: new Date().toISOString() });
         setUserData(newData);
+
+        // Se for estudante, cria documento de progresso default
+        if (role === 'estudante') {
+          const progressRef = doc(db!, 'progress', user.uid);
+          await setDoc(progressRef, {
+            ...DEFAULT_PROGRESS,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+
+        // Log de registro
+        await writeLog(
+          'auth',
+          `Novo usuário registrado: ${user.email} (${role})`,
+          user.uid
+        );
       } else {
         setUserData(docSnap.data() as UserData);
       }
+
+      // Log de login
+      await writeLog(
+        'auth',
+        `Login via Google — ${user.email} (${role})`,
+        user.uid
+      );
     } catch (error) {
       console.error("Erro no login com Google:", error);
+      await writeLog('error', `Falha no login: ${(error as Error).message}`);
       throw error;
     }
   };
@@ -81,6 +113,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     if (!auth) return;
+    
+    // Log de logout antes de sair
+    if (auth.currentUser) {
+      await writeLog(
+        'auth',
+        `Logout — ${auth.currentUser.email}`,
+        auth.currentUser.uid
+      );
+    }
+
     await signOut(auth!);
   };
 
@@ -92,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth!, async (user) => {
       setCurrentUser(user);
       if (user) {
-        // Fetch user rol data from firestore
+        // Fetch user role data from Firestore
         const docRef = doc(db!, 'users', user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
