@@ -97,9 +97,35 @@ export const addPurchasedItem = async (uid: string, itemId: string): Promise<voi
     const docRef = doc(db, COLLECTION, uid);
     await updateDoc(docRef, {
       purchasedItems: arrayUnion(itemId),
-      updatedAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error('[StudentRepository] Erro ao registrar compra:', error);
+  }
+};
+
+/**
+ * Gera um relatório de desempenho para o estudante.
+ */
+export const getStudentPerformanceReport = async (uid: string) => {
+  if (!db || !uid) return null;
+
+  try {
+    const progress = await getStudentProgress(uid);
+    // Para simplificar, o relatório de desempenho é derivado dos dados de progressão
+    // e de logs ou submissões, caso existissem em uma sub-coleção separada.
+    const performance = {
+      level: progress.level,
+      xp: progress.xp,
+      completedModulesCount: progress.completedModules.length,
+      purchasedItemsCount: progress.purchasedItems.length,
+      lastActive: progress.updatedAt,
+      // Uma nota simulada baseada nos módulos completados vs total (assumindo 10 como base).
+      averageScore: Math.min(10, progress.completedModules.length * 2.5), 
+    };
+
+    return performance;
+  } catch (error) {
+    console.error('[StudentRepository] Erro ao gerar relatório de desempenho:', error);
+    return null;
   }
 };

@@ -3,7 +3,8 @@
  * Busca professores reais da coleção "users" e logs do sistema.
  */
 import {
-  collection, query, where, getDocs, orderBy, limit as firestoreLimit, getCountFromServer
+  collection, query, where, getDocs, orderBy, limit as firestoreLimit, getCountFromServer,
+  doc, updateDoc, deleteDoc
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import type { SystemLog } from '../types';
@@ -147,4 +148,22 @@ export const getAdminData = async () => {
     getLogs(),
   ]);
   return { teachers, logs };
+};
+
+/**
+ * Atualiza o papel (role) de um usuário.
+ */
+export const updateUserRole = async (userId: string, newRole: 'admin' | 'professor' | 'estudante'): Promise<void> => {
+  if (!db) return;
+  const userDoc = doc(db, 'users', userId);
+  await updateDoc(userDoc, { role: newRole });
+};
+
+/**
+ * Deleta (ou bane) um usuário do sistema.
+ */
+export const deleteUser = async (userId: string): Promise<void> => {
+  if (!db) return;
+  const userDoc = doc(db, 'users', userId);
+  await deleteDoc(userDoc);
 };

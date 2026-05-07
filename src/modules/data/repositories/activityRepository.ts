@@ -2,7 +2,7 @@
  * Activity Repository — Persistência de atividades educacionais no Firestore.
  * Criadas pelo professor via Construtor de Experiências.
  */
-import { collection, addDoc, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import type { ActivityData } from '../types';
 
@@ -57,4 +57,28 @@ export const getActivitiesByClass = async (classId: string): Promise<ActivityDat
     id: doc.id,
     ...doc.data(),
   })) as ActivityData[];
+};
+
+/**
+ * Atualiza uma atividade existente.
+ */
+export const updateActivity = async (id: string, data: Partial<Omit<ActivityData, 'id'>>): Promise<void> => {
+  if (!db) {
+    console.warn('[ActivityRepository] Firestore não inicializado.');
+    return;
+  }
+  const docRef = doc(db, COLLECTION, id);
+  await updateDoc(docRef, data);
+};
+
+/**
+ * Deleta uma atividade pelo ID.
+ */
+export const deleteActivity = async (id: string): Promise<void> => {
+  if (!db) {
+    console.warn('[ActivityRepository] Firestore não inicializado.');
+    return;
+  }
+  const docRef = doc(db, COLLECTION, id);
+  await deleteDoc(docRef);
 };

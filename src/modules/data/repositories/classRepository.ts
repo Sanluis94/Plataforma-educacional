@@ -4,7 +4,7 @@
  */
 import {
   collection, addDoc, query, where, getDocs,
-  doc, deleteDoc, updateDoc, arrayUnion, increment, orderBy
+  doc, deleteDoc, updateDoc, arrayUnion, arrayRemove, increment, orderBy
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import type { ClassData } from '../types';
@@ -91,6 +91,20 @@ export const enrollStudent = async (classId: string, studentId: string): Promise
   await updateDoc(classDoc, {
     studentIds: arrayUnion(studentId),
     studentsCount: increment(1),
+    updatedAt: new Date().toISOString(),
+  });
+};
+
+/**
+ * Remove um estudante de uma turma (remove do array + decrementa counter).
+ */
+export const unenrollStudent = async (classId: string, studentId: string): Promise<void> => {
+  if (!db) return;
+
+  const classDoc = doc(db, COLLECTION, classId);
+  await updateDoc(classDoc, {
+    studentIds: arrayRemove(studentId),
+    studentsCount: increment(-1),
     updatedAt: new Date().toISOString(),
   });
 };
