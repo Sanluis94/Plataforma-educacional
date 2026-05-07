@@ -1,7 +1,6 @@
-import { Star, Award, BrainCircuit } from 'lucide-react';
+import { Star, Award, BrainCircuit, Beaker, TrendingUp, Trophy, ShoppingBag } from 'lucide-react';
 import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
 import { SUBJECT_THEMES } from '../../core/constants/dashboardConstants';
-import './EstudanteDashboard.css';
 
 export function EstudanteDashboard() {
   const {
@@ -19,206 +18,279 @@ export function EstudanteDashboard() {
 
   const { level, xp, coins } = progress;
 
-  const theme = activeSubject ? SUBJECT_THEMES[activeSubject] : {
-    primary: 'var(--color-primary)', secondary: 'var(--color-secondary)',
-    emoji: '🎓', bg: 'var(--bg-main)'
-  };
-
   const activeModule = activeSubject ? modules.find(m => m.id === activeSubject) : null;
   const ActiveComponent = activeModule?.component;
 
+  const completedLabs = modules.filter(m => m.component).length; // total available
+  const stats = [
+    { label: 'Labs Disponíveis', value: `${completedLabs}`, icon: Beaker },
+    { label: 'Progresso Médio', value: `${Math.min(100, Math.round((xp / Math.max(1, level * 500)) * 100))}%`, icon: TrendingUp },
+    { label: 'Nível Atual', value: String(level), icon: Trophy },
+    { label: 'Moedas', value: String(coins), icon: ShoppingBag },
+  ];
+
+  const tabs = [
+    { id: 'learning' as const, label: 'Aprendizado', icon: Beaker },
+    { id: 'shop' as const, label: 'Loja', icon: ShoppingBag },
+    { id: 'achievements' as const, label: 'Conquistas', icon: Trophy },
+  ];
+
   return (
-    <div
-      className="dashboard-container fade-in"
-      style={{
-        background: activeSubject ? theme.bg : undefined,
+    <div className="fade-in" style={{
+      padding: '2rem 1rem', maxWidth: '80rem', margin: '0 auto', minHeight: 'calc(100vh - 4rem)',
+      ...(activeSubject ? {
+        background: SUBJECT_THEMES[activeSubject]?.bg || undefined,
         transition: 'background 0.8s ease',
-        minHeight: '100vh',
-      } as React.CSSProperties}
-    >
+      } : {}),
+    }}>
       {/* Header */}
-      <header className="dashboard-header estudante-header"
-        style={{ '--header-primary': typeof theme.primary === 'string' ? theme.primary : 'var(--color-primary)' } as React.CSSProperties}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
         <div>
-            <h1>
-            {activeSubject ? `${(SUBJECT_THEMES[activeSubject] || {}).emoji || '🎓'} ` : ''}
-            {activeSubject ? (modules.find(m => m.id === activeSubject)?.label || 'Laboratório') : 'Área do Estudante'}
+          <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+            {activeSubject
+              ? `${SUBJECT_THEMES[activeSubject]?.emoji || '🎓'} ${modules.find(m => m.id === activeSubject)?.label || 'Laboratório'}`
+              : 'Painel do Estudante'}
           </h1>
-          <p className="text-secondary">
-            {activeSubject ? 'Laboratório Virtual — modo imersivo ativo' : 'Pronto para aprender e ganhar pontos hoje?'}
+          <p style={{ color: 'var(--text-secondary)' }}>
+            {activeSubject ? 'Laboratório Virtual — modo imersivo ativo' : 'Continue sua jornada de aprendizado'}
           </p>
         </div>
-        <div className="gamification-stats" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <span style={{ background: 'rgba(255,215,0,0.15)', border: '1px solid rgba(255,215,0,0.3)', color: '#ffd700', padding: '0.3rem 0.75rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <Star size={14} fill="currentColor" /> {xp} XP
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <span className="badge-yellow" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600 }}>
+            <Star style={{ width: '0.85rem', height: '0.85rem' }} fill="currentColor" /> {xp} XP
           </span>
-          <span style={{ background: 'rgba(255,167,38,0.15)', border: '1px solid rgba(255,167,38,0.3)', color: '#ffa726', padding: '0.3rem 0.75rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.25rem 0.75rem',
+            borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600,
+            color: '#ffa726', background: 'rgba(255,167,38,0.1)', border: '1px solid rgba(255,167,38,0.3)',
+          }}>
             🪙 {coins}
           </span>
-          <span style={{ background: 'rgba(var(--color-primary-rgb),0.15)', border: '1px solid rgba(var(--color-primary-rgb),0.3)', color: 'var(--color-primary)', padding: '0.3rem 0.75rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <Award size={14} /> Nível {level}
+          <span className="badge-violet" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600 }}>
+            <Award style={{ width: '0.85rem', height: '0.85rem' }} /> Nível {level}
           </span>
         </div>
-      </header>
+      </div>
 
-      {/* Nav Tabs */}
-      {!activeSubject && (
-        <div style={{ display: 'flex', gap: '0.5rem', padding: '1rem 1.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          {[
-           { id: 'learning', label: '📚 Aprendizado' },
-            { id: 'shop', label: '🛍️ Loja' },
-            { id: 'achievements', label: '🏆 Conquistas' },
-          ].map(tab => (
-            <button key={tab.id} onClick={() => setActiveView(tab.id as typeof activeView)}
-              style={{ padding: '0.5rem 1rem', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem',
-                color: activeView === tab.id ? 'var(--color-primary)' : 'var(--text-secondary)',
-                borderBottom: activeView === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
-                fontWeight: activeView === tab.id ? 'bold' : 'normal', transition: 'all 0.2s' }}>
-              {tab.label}
-            </button>
-          ))}
+      {/* Active Module View */}
+      {activeSubject && ActiveComponent && (
+        <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
+          <button
+            onClick={() => setActiveSubject(null)}
+            className="btn-outline-cyan"
+            style={{ marginBottom: '1.5rem', padding: '0.4rem 1rem', fontSize: '0.82rem' }}
+          >
+            ← Voltar ao Dashboard
+          </button>
+          <ActiveComponent
+            {...(activeModule?.props || {})}
+            onComplete={handleModuleComplete}
+          />
         </div>
       )}
 
-      <main className="dashboard-main" id="main-content">
-        {/* Active module view */}
-        {activeSubject && ActiveComponent && (
-          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-            <button onClick={() => setActiveSubject(null)}
-              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              ← Voltar ao Dashboard
-            </button>
-            <ActiveComponent
-              {...(activeModule?.props || {})}
-              onComplete={handleModuleComplete}
-            />
+      {/* Nav Tabs */}
+      {!activeSubject && (
+        <>
+          <div style={{
+            display: 'flex', gap: '0.25rem', marginBottom: '1.5rem',
+            borderBottom: '1px solid var(--border-color)', paddingBottom: 0,
+          }}>
+            {tabs.map(tab => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveView(tab.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    padding: '0.65rem 1rem', background: 'none', border: 'none', cursor: 'pointer',
+                    fontSize: '0.875rem', transition: 'all 0.2s',
+                    color: activeView === tab.id ? '#06b6d4' : 'var(--text-muted)',
+                    borderBottom: activeView === tab.id ? '2px solid #06b6d4' : '2px solid transparent',
+                    fontWeight: activeView === tab.id ? 600 : 400,
+                  }}
+                >
+                  <Icon style={{ width: '1rem', height: '1rem' }} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
-        )}
 
-        {/* Learning view */}
-        {!activeSubject && activeView === 'learning' && (
-          <div className="dashboard-grid">
-            <section className="trails-section">
-              {/* AI Tip */}
-              <div style={{ background: 'rgba(var(--color-primary-rgb),0.08)', border: '1px solid rgba(var(--color-primary-rgb),0.2)', borderRadius: '12px', padding: '1rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <BrainCircuit size={20} style={{ color: 'var(--color-primary)', flexShrink: 0, marginTop: '2px' }} />
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 'bold', marginBottom: '0.25rem' }}>IA ADAPTATIVA</div>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0, lineHeight: '1.6' }}>{aiTip}</p>
+          {/* Stats Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+            {stats.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <div key={stat.label} className="stat-card cyan">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <Icon style={{ width: '1.25rem', height: '1.25rem', color: '#06b6d4' }} />
+                    <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)' }}>{stat.value}</span>
+                  </div>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{stat.label}</p>
                 </div>
-              </div>
+              );
+            })}
+          </div>
+        </>
+      )}
 
-              <h2 style={{ marginBottom: '1rem', color: 'var(--text-main)' }}>Laboratórios Disponíveis</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
+      {/* Learning View */}
+      {!activeSubject && activeView === 'learning' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
+          {/* AI Tip */}
+          <div style={{
+            display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
+            padding: '1rem 1.25rem', borderRadius: '0.75rem',
+            background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)',
+          }}>
+            <BrainCircuit style={{ width: '1.25rem', height: '1.25rem', color: '#06b6d4', flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <div style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, marginBottom: '0.25rem', letterSpacing: '0.05em' }}>IA ADAPTATIVA</div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0, lineHeight: 1.7 }}>{aiTip}</p>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+            {/* Labs Grid */}
+            <div>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1rem' }}>
+                Laboratórios Disponíveis
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem' }}>
                 {modules.map(mod => {
                   const t = SUBJECT_THEMES[mod.id];
                   return (
-                    <button key={mod.id}
+                    <button
+                      key={mod.id}
                       onClick={() => mod.component && setActiveSubject(mod.id)}
                       disabled={!mod.component}
+                      className="glass-card"
                       style={{
-                        display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1.1rem',
-                        borderRadius: '12px', cursor: mod.component ? 'pointer' : 'not-allowed',
-                        border: `1px solid ${t?.primary || 'rgba(255,255,255,0.1)'}33`,
-                        background: `${t?.primary || 'rgba(255,255,255,0.05)'}11`,
-                        textAlign: 'left', transition: 'all 0.25s', opacity: mod.component ? 1 : 0.45,
-                      }}>
+                        display: 'flex', flexDirection: 'column', gap: '0.5rem',
+                        padding: '1.1rem', textAlign: 'left', cursor: mod.component ? 'pointer' : 'not-allowed',
+                        opacity: mod.component ? 1 : 0.45,
+                        borderColor: t?.primary ? `${t.primary}33` : 'var(--border-color)',
+                      }}
+                    >
                       <div style={{ fontSize: '1.75rem' }}>{t?.emoji || '📚'}</div>
-                      <div style={{ color: 'var(--text-main)', fontWeight: '600', fontSize: '0.88rem' }}>{mod.label}</div>
-                      <div style={{ color: t?.primary || 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 'bold' }}>
+                      <div style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: '0.88rem' }}>{mod.label}</div>
+                      <div style={{
+                        color: t?.primary || 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 700,
+                      }}>
                         {mod.component ? 'Acessar →' : 'Em breve'}
                       </div>
                     </button>
                   );
                 })}
               </div>
-            </section>
+            </div>
 
             {/* Right sidebar */}
-            <aside className="dashboard-sidebar">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {/* XP Progress */}
-              <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.25rem', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="glass-card" style={{ padding: '1.25rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                  <span style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '0.9rem' }}>Nível {level}</span>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{xp} / {level * 500} XP</span>
+                  <span style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '0.9rem' }}>Nível {level}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{xp} / {level * 500} XP</span>
                 </div>
-                <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px' }}>
-                  <div style={{ height: '100%', background: 'var(--color-primary)', borderRadius: '3px', width: `${Math.min(100, (xp / (level * 500)) * 100)}%`, transition: 'width 0.6s' }} />
+                <div className="progress-bar">
+                  <div className="progress-bar-bg">
+                    <div className="progress-bar-fill" style={{ width: `${Math.min(100, (xp / (level * 500)) * 100)}%` }} />
+                  </div>
                 </div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', marginTop: '0.5rem' }}>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '0.5rem' }}>
                   Faltam {Math.max(0, level * 500 - xp)} XP para o Nível {level + 1}
                 </div>
               </div>
 
-              {/* Coins balance */}
-              <div style={{ background: 'rgba(255,167,38,0.07)', border: '1px solid rgba(255,167,38,0.2)', borderRadius: '12px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {/* Coins */}
+              <div style={{
+                padding: '1rem', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
+                background: 'rgba(255,167,38,0.07)', border: '1px solid rgba(255,167,38,0.2)',
+              }}>
                 <span style={{ fontSize: '1.75rem' }}>🪙</span>
                 <div>
-                  <div style={{ color: '#ffa726', fontWeight: 'bold' }}>{coins} Moedas</div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem' }}>Use na loja para personalizar!</div>
+                  <div style={{ color: '#ffa726', fontWeight: 700 }}>{coins} Moedas</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>Use na loja para personalizar!</div>
                 </div>
               </div>
-            </aside>
-          </div>
-        )}
-
-        {/* Shop view (Phase 28) */}
-        {!activeSubject && activeView === 'shop' && (
-          <div style={{ maxWidth: '700px', margin: '0 auto', padding: '1rem 0' }}>
-            <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🛍️ Loja de Itens</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Gaste suas moedas em personalizações exclusivas.</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
-              {shopItems.map(item => (
-                <div key={item.id} style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.25rem', textAlign: 'center', border: item.owned ? '1px solid var(--color-primary)' : '1px solid rgba(255,255,255,0.1)' }}>
-                  <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{item.icon}</div>
-                  <div style={{ color: 'var(--text-main)', fontWeight: 'bold', marginBottom: '0.25rem', fontSize: '0.88rem' }}>{item.name}</div>
-                  {item.owned ? (
-                    <div style={{ color: 'var(--color-primary)', fontSize: '0.8rem', fontWeight: 'bold' }}>✅ Adquirido</div>
-                  ) : (
-                    <button onClick={() => buyItem(item.id)} disabled={coins < item.price}
-                      style={{ marginTop: '0.5rem', padding: '0.35rem 0.75rem', borderRadius: '6px', border: 'none', cursor: coins >= item.price ? 'pointer' : 'not-allowed',
-                        background: coins >= item.price ? '#ffa726' : 'rgba(255,255,255,0.1)', color: coins >= item.price ? '#000' : 'var(--text-secondary)', fontWeight: 'bold', fontSize: '0.8rem' }}>
-                      🪙 {item.price}
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginTop: '1.5rem', textAlign: 'center' }}>
-              Saldo atual: <strong style={{ color: '#ffa726' }}>🪙 {coins}</strong> — complete laboratórios para ganhar mais moedas!
-            </p>
-          </div>
-        )}
-
-        {/* Achievements view */}
-        {!activeSubject && activeView === 'achievements' && (
-          <div style={{ maxWidth: '700px', margin: '0 auto', padding: '1rem 0' }}>
-            <h2 style={{ color: 'var(--text-main)', marginBottom: '1.5rem' }}>🏆 Suas Conquistas</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {[
-                { icon: '🏅', name: 'Pioneiro', desc: 'Completou sua primeira atividade', unlocked: true },
-                { icon: '⭐', name: 'Matemático Célere', desc: 'Resolveu 3 equações seguidas', unlocked: true },
-                { icon: '🧪', name: 'Cientista Iniciante', desc: 'Completou o lab de Química', unlocked: xp > 1500 },
-                { icon: '🌍', name: 'Viajante do Tempo', desc: 'Explorou a Linha do Tempo da História', unlocked: false },
-                { icon: '🎓', name: 'Poliglota', desc: 'Concluiu o módulo de Idiomas', unlocked: false },
-                { icon: '💡', name: 'Arguto Literário', desc: 'Acertou 100% no quiz de Literatura', unlocked: false },
-              ].map((ach, i) => (
-                <div key={i} style={{ display: 'flex', gap: '1rem', alignItems: 'center', padding: '1rem', borderRadius: '10px',
-                  background: ach.unlocked ? 'rgba(var(--color-primary-rgb),0.08)' : 'rgba(255,255,255,0.03)',
-                  border: ach.unlocked ? '1px solid rgba(var(--color-primary-rgb),0.25)' : '1px solid rgba(255,255,255,0.06)',
-                  opacity: ach.unlocked ? 1 : 0.5 }}>
-                  <div style={{ fontSize: '2rem', filter: ach.unlocked ? 'none' : 'grayscale(1)' }}>{ach.icon}</div>
-                  <div>
-                    <div style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '0.9rem' }}>{ach.name}</div>
-                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{ach.desc}</div>
-                  </div>
-                  {ach.unlocked && <div style={{ marginLeft: 'auto', color: 'var(--color-primary)', fontSize: '0.8rem', fontWeight: 'bold' }}>✅</div>}
-                </div>
-              ))}
             </div>
           </div>
-        )}
-      </main>
+        </div>
+      )}
+
+      {/* Shop View */}
+      {!activeSubject && activeView === 'shop' && (
+        <div style={{ maxWidth: '44rem', margin: '0 auto' }}>
+          <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem', fontSize: '1.25rem', fontWeight: 600 }}>🛍️ Loja de Itens</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.875rem' }}>Gaste suas moedas em personalizações exclusivas.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
+            {shopItems.map(item => (
+              <div key={item.id} className="glass-card" style={{
+                padding: '1.25rem', textAlign: 'center',
+                borderColor: item.owned ? '#06b6d4' : undefined,
+              }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{item.icon}</div>
+                <div style={{ color: 'var(--text-main)', fontWeight: 700, marginBottom: '0.25rem', fontSize: '0.88rem' }}>{item.name}</div>
+                {item.owned ? (
+                  <div style={{ color: '#06b6d4', fontSize: '0.8rem', fontWeight: 700 }}>✅ Adquirido</div>
+                ) : (
+                  <button
+                    onClick={() => buyItem(item.id)}
+                    disabled={coins < item.price}
+                    className="btn-gradient"
+                    style={{
+                      marginTop: '0.5rem', padding: '0.3rem 0.75rem', fontSize: '0.8rem',
+                      opacity: coins >= item.price ? 1 : 0.4,
+                      cursor: coins >= item.price ? 'pointer' : 'not-allowed',
+                    }}
+                  >
+                    🪙 {item.price}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginTop: '1.5rem', textAlign: 'center' }}>
+            Saldo atual: <strong style={{ color: '#ffa726' }}>🪙 {coins}</strong> — complete laboratórios para ganhar mais moedas!
+          </p>
+        </div>
+      )}
+
+      {/* Achievements View */}
+      {!activeSubject && activeView === 'achievements' && (
+        <div style={{ maxWidth: '44rem', margin: '0 auto' }}>
+          <h2 style={{ color: 'var(--text-main)', marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 600 }}>🏆 Suas Conquistas</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {[
+              { icon: '🏅', name: 'Pioneiro', desc: 'Completou sua primeira atividade', unlocked: true },
+              { icon: '⭐', name: 'Matemático Célere', desc: 'Resolveu 3 equações seguidas', unlocked: true },
+              { icon: '🧪', name: 'Cientista Iniciante', desc: 'Completou o lab de Química', unlocked: xp > 1500 },
+              { icon: '🌍', name: 'Viajante do Tempo', desc: 'Explorou a Linha do Tempo da História', unlocked: false },
+              { icon: '🎓', name: 'Poliglota', desc: 'Concluiu o módulo de Idiomas', unlocked: false },
+              { icon: '💡', name: 'Arguto Literário', desc: 'Acertou 100% no quiz de Literatura', unlocked: false },
+            ].map((ach, i) => (
+              <div key={i} className="glass-card" style={{
+                display: 'flex', gap: '1rem', alignItems: 'center', padding: '1rem',
+                opacity: ach.unlocked ? 1 : 0.45,
+                borderColor: ach.unlocked ? 'rgba(6,182,212,0.25)' : undefined,
+                background: ach.unlocked ? 'rgba(6,182,212,0.05)' : undefined,
+              }}>
+                <div style={{ fontSize: '2rem', filter: ach.unlocked ? 'none' : 'grayscale(1)' }}>{ach.icon}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '0.9rem' }}>{ach.name}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{ach.desc}</div>
+                </div>
+                {ach.unlocked && <div style={{ color: '#06b6d4', fontSize: '0.8rem', fontWeight: 700, flexShrink: 0 }}>✅</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+export default EstudanteDashboard;

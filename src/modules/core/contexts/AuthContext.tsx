@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginWithGoogle = async (role: 'professor' | 'estudante', gradeLevel: GradeLevel) => {
     if (!auth || !db) {
        console.warn("Firebase Auth ou DB não estão inicializados. Verifique as chaves.");
-       return;
+       throw { code: 'auth/not-configured', message: 'Firebase não está configurado.' };
     }
     const provider = new GoogleAuthProvider();
     try {
