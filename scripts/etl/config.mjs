@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 export const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 export const defaultSource = resolve(repoRoot, 'scripts/etl/source/educational-platform.seed.json');
 export const defaultOutputDir = resolve(repoRoot, 'public/local-data/etl');
+export const FIREBASE_SOURCE = 'firebase';
 
 export async function loadDotEnv() {
   for (const filename of ['.env', '.env.local']) {
@@ -79,5 +80,5 @@ export function resolveRepoPath(value) {
 }
 
 export function resolveSource(value) {
-  return /^https?:\/\//i.test(value) || value.startsWith('file://') ? value : resolveRepoPath(value);
+  return value === FIREBASE_SOURCE || /^https?:\/\//i.test(value) || value.startsWith('file://') ? value : resolveRepoPath(value);
 }

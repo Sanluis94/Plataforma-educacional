@@ -2,6 +2,7 @@ import { readFile, rm, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  FIREBASE_SOURCE,
   defaultOutputDir,
   defaultSource,
   loadDotEnv,
@@ -20,25 +21,41 @@ const ROLE_MAP = new Map([
   ['aluno', 'estudante'],
 ]);
 
-await loadDotEnv();
+try {
+  await main();
+} catch (error) {
+  console.error(JSON.stringify({
+    status: 'error',
+    message: error instanceof Error ? error.message : String(error),
+  }, null, 2));
+  process.exitCode = 1;
+}
 
-const args = parseArgs(process.argv.slice(2));
-const source = resolveSource(args.source ?? process.env.ETL_SOURCE ?? defaultSource);
-const outputDir = resolveRepoPath(args.output ?? process.env.ETL_OUTPUT_DIR ?? defaultOutputDir);
+async function main() {
+  await loadDotEnv();
 
-const rawPayload = await extract(source);
-const snapshot = transform(rawPayload, source);
-await load(snapshot, outputDir);
+  const args = parseArgs(process.argv.slice(2));
+  const source = resolveSource(args.source ?? process.env.ETL_SOURCE ?? defaultSource);
+  const outputDir = resolveRepoPath(args.output ?? process.env.ETL_OUTPUT_DIR ?? defaultOutputDir);
 
-console.log(JSON.stringify({
-  status: 'ok',
-  source,
-  outputDir,
-  generatedAt: snapshot.generatedAt,
-  totals: snapshot.metrics.summary,
-}, null, 2));
+  const rawPayload = await extract(source);
+  const snapshot = transform(rawPayload, source);
+  await load(snapshot, outputDir);
+
+  console.log(JSON.stringify({
+    status: 'ok',
+    source,
+    outputDir,
+    generatedAt: snapshot.generatedAt,
+    totals: snapshot.metrics.summary,
+  }, null, 2));
+}
 
 async function extract(sourceLocation) {
+  if (sourceLocation === FIREBASE_SOURCE) {
+    return extractFirebase();
+  }
+
   if (/^https?:\/\//i.test(sourceLocation)) {
     const response = await fetch(sourceLocation, {
       headers: {
@@ -60,6 +77,112 @@ async function extract(sourceLocation) {
 
   const content = await readFile(filePath, 'utf8');
   return JSON.parse(content);
+}
+
+async function extractFirebase() {
+  const { initializeApp, applicationDefault, cert, getApps } = await import('firebase-admin/app');
+  const { getFirestore, Timestamp, GeoPoint, DocumentReference } = await import('firebase-admin/firestore');
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID;
+  const credential = await resolveFirebaseCredential({ applicationDefault, cert });
+
+  if (getApps().length === 0) {
+    initializeApp({
+      credential,
+      ...(projectId ? { projectId } : {}),
+    });
+  }
+
+  const db = getFirestore();
+  const extractedAt = new Date().toISOString();
+  const [usersSnap, classesSnap, activitiesSnap, progressSnap, logsSnap] = await Promise.all([
+    db.collection('users').get(),
+    db.collection('classes').get(),
+    db.collection('activities').get(),
+    db.collection('progress').get(),
+    db.collection('system_logs').get(),
+  ]);
+
+  return {
+    metadata: {
+      source: FIREBASE_SOURCE,
+      projectId: projectId ?? null,
+      extractedAt,
+      collectionCounts: {
+        users: usersSnap.size,
+        classes: classesSnap.size,
+        activities: activitiesSnap.size,
+        progress: progressSnap.size,
+        systemLogs: logsSnap.size,
+      },
+    },
+    collections: {
+      users: docsToRecords(usersSnap, convertFirestoreValue),
+      classes: docsToRecords(classesSnap, convertFirestoreValue),
+      activities: docsToRecords(activitiesSnap, convertFirestoreValue),
+      progress: docsToRecords(progressSnap, convertFirestoreValue).map((entry) => ({
+        studentId: entry.studentId ?? entry.userId ?? entry.id,
+        ...entry,
+      })),
+      systemLogs: docsToRecords(logsSnap, convertFirestoreValue),
+    },
+  };
+
+  function convertFirestoreValue(value) {
+    if (value instanceof Timestamp) {
+      return value.toDate().toISOString();
+    }
+
+    if (value instanceof GeoPoint) {
+      return {
+        latitude: value.latitude,
+        longitude: value.longitude,
+      };
+    }
+
+    if (value instanceof DocumentReference) {
+      return value.path;
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(convertFirestoreValue);
+    }
+
+    if (isRecord(value)) {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, nestedValue]) => [key, convertFirestoreValue(nestedValue)]),
+      );
+    }
+
+    return value;
+  }
+}
+
+async function resolveFirebaseCredential({ applicationDefault, cert }) {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    return cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON));
+  }
+
+  const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || process.env.GOOGLE_APPLICATION_CREDENTIALS;
+
+  if (serviceAccountPath) {
+    const content = await readFile(resolveRepoPath(serviceAccountPath), 'utf8');
+    return cert(JSON.parse(content));
+  }
+
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    return applicationDefault();
+  }
+
+  throw new Error(
+    'Firebase ETL requires FIREBASE_SERVICE_ACCOUNT_PATH, FIREBASE_SERVICE_ACCOUNT_JSON or GOOGLE_APPLICATION_CREDENTIALS.',
+  );
+}
+
+function docsToRecords(snapshot, convertValue) {
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...convertValue(doc.data()),
+  }));
 }
 
 function transform(payload, sourceLocation) {
@@ -165,6 +288,7 @@ function normalizeClass(rawClass, index, usersById, generatedAt) {
   const professorId = requiredString(rawClass, ['professorId', 'teacherId'], `classes[${index}].professorId`);
   const professor = usersById.get(professorId);
   const studentIds = uniqueStrings(rawClass.studentIds ?? rawClass.students ?? []);
+  const studentsCount = studentIds.length || Math.max(0, Math.floor(numberValue(rawClass.studentsCount, 0)));
 
   if (professor && professor.role !== 'professor') {
     throw new Error(`ETL transform failed: class ${id} references a non-professor user.`);
@@ -183,7 +307,7 @@ function normalizeClass(rawClass, index, usersById, generatedAt) {
     name: requiredString(rawClass, ['name', 'title'], `classes[${index}].name`),
     professorId,
     professorName: professor?.name ?? optionalString(rawClass, ['professorName', 'teacherName']) ?? 'Professor',
-    studentsCount: studentIds.length,
+    studentsCount,
     studentIds,
     createdAt: toIsoDate(rawClass.createdAt, generatedAt),
     updatedAt: toIsoDate(rawClass.updatedAt, rawClass.createdAt ?? generatedAt),
@@ -383,13 +507,14 @@ function buildTeacherMetric(teacher, classes, activities, learningEvents) {
   const teacherActivityIds = new Set(teacherActivities.map((activity) => activity.id));
   const teacherEvents = learningEvents.filter((event) => teacherActivityIds.has(event.activityId));
   const studentIds = new Set(teacherClasses.flatMap((classData) => classData.studentIds));
+  const inferredStudentsCount = teacherClasses.reduce((total, classData) => total + classData.studentsCount, 0);
 
   return {
     teacherId: teacher.id,
     teacherName: teacher.name,
     email: teacher.email,
     classesCount: teacherClasses.length,
-    studentsCount: studentIds.size,
+    studentsCount: studentIds.size || inferredStudentsCount,
     activitiesCount: teacherActivities.length,
     averageScore: average(teacherEvents.map((event) => event.score)),
   };
