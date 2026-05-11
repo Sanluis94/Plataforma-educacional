@@ -11,6 +11,7 @@ import { auth, db } from '../services/firebaseConfig';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { writeLog } from '../../data/repositories/logRepository';
 import { DEFAULT_PROGRESS } from '../../data/types';
+import { getLocalEtlUserByRole } from '../../data/services/localEtlClient';
 
 export type GradeLevel = 'fundamental_1' | 'fundamental_2' | 'medio' | 'profissional';
 
@@ -28,31 +29,97 @@ interface UserData {
   gradeLevel: GradeLevel;
 }
 
+type AuthRole = UserData['role'];
+
+type LocalAuthUser = {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL: string | null;
+};
+
+type LocalSession = {
+  currentUser: LocalAuthUser;
+  userData: UserData;
+};
+
 interface AuthContextType {
-  currentUser: User | null;
+  currentUser: User | LocalAuthUser | null;
   userData: UserData | null;
   loading: boolean;
-  loginWithGoogle: (role: 'professor' | 'estudante', gradeLevel: GradeLevel) => Promise<void>;
+  isLocalAuthMode: boolean;
+  loginWithGoogle: (role: AuthRole, gradeLevel: GradeLevel) => Promise<void>;
   logout: () => Promise<void>;
   updateGradeLevel: (gradeLevel: GradeLevel) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+const LOCAL_SESSION_KEY = 'edu-interact-local-auth-session';
+
+const LOCAL_PROFILES: Record<AuthRole, { uid: string; name: string; email: string }> = {
+  estudante: {
+    uid: 'local-student-001',
+    name: 'Ana Clara',
+    email: 'ana.clara.local@edu-interact.test',
+  },
+  professor: {
+    uid: 'local-professor-001',
+    name: 'Marina Azevedo',
+    email: 'marina.local@edu-interact.test',
+  },
+  admin: {
+    uid: 'local-admin-001',
+    name: 'Admin Local',
+    email: 'admin.local@edu-interact.test',
+  },
+};
 
 export function useAuth() {
   return useContext(AuthContext);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | LocalAuthUser | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const isLocalAuthMode = !auth || !db;
 
-  const loginWithGoogle = async (role: 'professor' | 'estudante', gradeLevel: GradeLevel) => {
+  const loginWithGoogle = async (role: AuthRole, gradeLevel: GradeLevel) => {
     if (!auth || !db) {
-       console.warn("Firebase Auth ou DB não estão inicializados. Verifique as chaves.");
-       return;
+      const etlProfile = await getLocalEtlUserByRole(role);
+      const fallbackProfile = LOCAL_PROFILES[role];
+      const profile = {
+        uid: etlProfile?.id ?? fallbackProfile.uid,
+        name: etlProfile?.name ?? fallbackProfile.name,
+        email: etlProfile?.email ?? fallbackProfile.email,
+        gradeLevel: etlProfile?.gradeLevel ?? gradeLevel,
+      };
+      const localUser: LocalAuthUser = {
+        uid: profile.uid,
+        displayName: profile.name,
+        email: profile.email,
+        photoURL: null,
+      };
+      const localUserData: UserData = {
+        name: profile.name,
+        email: profile.email,
+        role,
+        gradeLevel: normalizeGradeLevel(profile.gradeLevel, gradeLevel),
+      };
+
+      setCurrentUser(localUser);
+      setUserData(localUserData);
+      localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify({
+        currentUser: localUser,
+        userData: localUserData,
+      } satisfies LocalSession));
+      return;
     }
+
+    if (role === 'admin') {
+      throw { code: 'auth/admin-local-only', message: 'Admin local só está disponível sem Firebase configurado.' };
+    }
+
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth!, provider);
@@ -105,6 +172,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateGradeLevel = async (gradeLevel: GradeLevel) => {
+    if (isLocalAuthMode) {
+      setUserData(prev => {
+        if (!prev || !currentUser) return prev;
+        const updatedUserData = { ...prev, gradeLevel };
+        const localUser = currentUser as LocalAuthUser;
+        localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify({
+          currentUser: localUser,
+          userData: updatedUserData,
+        } satisfies LocalSession));
+        return updatedUserData;
+      });
+      return;
+    }
+
     if (!auth?.currentUser || !db) return;
     const userDocRef = doc(db!, 'users', auth.currentUser.uid);
     await setDoc(userDocRef, { gradeLevel }, { merge: true });
@@ -112,6 +193,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    if (isLocalAuthMode) {
+      localStorage.removeItem(LOCAL_SESSION_KEY);
+      setCurrentUser(null);
+      setUserData(null);
+      return;
+    }
+
     if (!auth) return;
     
     // Log de logout antes de sair
@@ -128,8 +216,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!auth || !db) {
-       setLoading(false);
-       return;
+      const storedSession = localStorage.getItem(LOCAL_SESSION_KEY);
+
+      if (storedSession) {
+        try {
+          const parsedSession = JSON.parse(storedSession) as LocalSession;
+          setCurrentUser(parsedSession.currentUser);
+          setUserData(parsedSession.userData);
+        } catch {
+          localStorage.removeItem(LOCAL_SESSION_KEY);
+        }
+      }
+
+      setLoading(false);
+      return;
     }
     const unsubscribe = onAuthStateChanged(auth!, async (user) => {
       setCurrentUser(user);
@@ -151,11 +251,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []);
 
-  const value: AuthContextType = { currentUser, userData, loading, loginWithGoogle, logout, updateGradeLevel };
+const value: AuthContextType = { currentUser, userData, loading, isLocalAuthMode, loginWithGoogle, logout, updateGradeLevel };
 
   return (
     <AuthContext.Provider value={value}>
       {!loading && children}
     </AuthContext.Provider>
   );
+}
+
+function normalizeGradeLevel(value: string | undefined, fallback: GradeLevel): GradeLevel {
+  return value && value in GRADE_LABELS ? value as GradeLevel : fallback;
 }

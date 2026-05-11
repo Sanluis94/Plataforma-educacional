@@ -1,62 +1,231 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
+import { ArrowRight, Beaker, Brain, Trophy, Zap, BookOpen, Users } from 'lucide-react';
 
-export function Home() {
+interface HomeProps {
+  onLoginOpen: () => void;
+}
+
+export function Home({ onLoginOpen }: HomeProps) {
   const { currentUser, userData } = useAuth();
 
+  const features = [
+    {
+      icon: Beaker,
+      title: 'Laboratórios Virtuais',
+      description: 'Experimentos de física interativos com simulações em tempo real',
+    },
+    {
+      icon: Brain,
+      title: 'IA Adaptativa',
+      description: 'Recomendações personalizadas baseadas no seu progresso',
+    },
+    {
+      icon: Trophy,
+      title: 'Gamificação',
+      description: 'XP, moedas, conquistas e loja para engajar estudantes',
+    },
+    {
+      icon: Zap,
+      title: 'Feedback Instantâneo',
+      description: 'Análise em tempo real do desempenho e progresso',
+    },
+  ];
+
   return (
-    <div style={{ padding: '3rem 2rem', textAlign: 'center', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎓</div>
-      <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-        {currentUser ? `Olá, ${userData?.name?.split(' ')[0]}!` : 'Plataforma Educacional'}
-      </h1>
-      <p style={{ fontSize: '1.1rem', marginBottom: '2.5rem', color: 'var(--text-secondary)', maxWidth: '560px', margin: '0 auto 2.5rem' }}>
-        {currentUser
-          ? `Bem-vindo de volta. Acesse sua área de ${userData?.role === 'professor' ? 'gerenciamento' : 'aprendizado'} abaixo.`
-          : 'Aprendizado imersivo, gamificado e adaptado ao seu ritmo. Faça login para começar.'}
-      </p>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-        {currentUser && userData?.role === 'professor' && (
-          <>
-            <Link to="/professor" style={cardStyle('#7c4dff')}>
-              <span style={{ fontSize: '2.5rem' }}>🏫</span>
-              <strong>Minhas Turmas</strong>
-              <span style={{ fontSize: '0.82rem', opacity: 0.7 }}>Gerenciar e criar atividades</span>
-            </Link>
-            <Link to="/simulacao" style={cardStyle('#ef5350')}>
-              <span style={{ fontSize: '2.5rem' }}>⚗️</span>
-              <strong>Laboratórios</strong>
-              <span style={{ fontSize: '0.82rem', opacity: 0.7 }}>Simulações interativas</span>
-            </Link>
-          </>
-        )}
-        {currentUser && userData?.role === 'estudante' && (
-          <>
-            <Link to="/estudante" style={cardStyle('#7c4dff')}>
-              <span style={{ fontSize: '2.5rem' }}>📚</span>
-              <strong>Meu Aprendizado</strong>
-              <span style={{ fontSize: '0.82rem', opacity: 0.7 }}>Trilhas e laboratórios</span>
-            </Link>
-            <Link to="/simulacao" style={cardStyle('#ef5350')}>
-              <span style={{ fontSize: '2.5rem' }}>⚗️</span>
-              <strong>Laboratórios de Física</strong>
-              <span style={{ fontSize: '0.82rem', opacity: 0.7 }}>Simulação de pêndulos e colisões</span>
-            </Link>
-          </>
-        )}
-        {!currentUser && (
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-            👆 Clique em <strong style={{ color: 'var(--color-primary)' }}>Entrar</strong> no topo da página para começar.
+    <div style={{ minHeight: 'calc(100vh - 4rem)' }}>
+      {/* Hero Section */}
+      <section style={{ position: 'relative', overflow: 'hidden', padding: '5rem 1rem' }}>
+        {/* Background gradient */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(180deg, rgba(6,182,212,0.05) 0%, rgba(139,92,246,0.05) 50%, transparent 100%)',
+        }} />
+
+        <div style={{ position: 'relative', maxWidth: '80rem', margin: '0 auto', textAlign: 'center' }}>
+          <h1 className="gradient-text" style={{
+            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+            fontWeight: 700, marginBottom: '1.5rem', lineHeight: 1.1,
+          }}>
+            Edu-Interact
+          </h1>
+          <p style={{
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            color: 'var(--text-secondary)',
+            maxWidth: '42rem', margin: '0 auto 2rem',
+            lineHeight: 1.7,
+          }}>
+            Plataforma educacional com Laboratórios Virtuais de Física, Metodologias Ativas e Gamificação inteligente.
+          </p>
+
+          {/* CTAs based on auth state */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center' }}>
+            {currentUser && userData ? (
+              <>
+                {userData.role === 'professor' && (
+                  <>
+                    <Link to="/professor" className="btn-gradient" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}>
+                      <Users style={{ width: '1.25rem', height: '1.25rem' }} />
+                      Minhas Turmas
+                      <ArrowRight style={{ width: '1.25rem', height: '1.25rem' }} />
+                    </Link>
+                    <Link to="/simulacao" className="btn-outline-cyan" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}>
+                      <Beaker style={{ width: '1.25rem', height: '1.25rem' }} />
+                      Laboratórios
+                    </Link>
+                  </>
+                )}
+                {userData.role === 'estudante' && (
+                  <>
+                    <Link to="/estudante" className="btn-gradient" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}>
+                      <BookOpen style={{ width: '1.25rem', height: '1.25rem' }} />
+                      Meu Aprendizado
+                      <ArrowRight style={{ width: '1.25rem', height: '1.25rem' }} />
+                    </Link>
+                    <Link to="/simulacao" className="btn-outline-cyan" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}>
+                      <Beaker style={{ width: '1.25rem', height: '1.25rem' }} />
+                      Laboratórios
+                    </Link>
+                  </>
+                )}
+                {userData.role === 'admin' && (
+                  <Link to="/admin" className="btn-gradient" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}>
+                    Admin
+                    <ArrowRight style={{ width: '1.25rem', height: '1.25rem' }} />
+                  </Link>
+                )}
+              </>
+            ) : (
+              <>
+                <button onClick={onLoginOpen} className="btn-gradient" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}>
+                  Começar Agora
+                  <ArrowRight style={{ width: '1.25rem', height: '1.25rem' }} />
+                </button>
+                <Link to="/simulacao" className="btn-outline-cyan" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}>
+                  Ver Laboratórios
+                </Link>
+              </>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+
+        {/* Preview Card */}
+        <div style={{ maxWidth: '64rem', margin: '5rem auto 0' }}>
+          <div className="glass-card" style={{
+            padding: '2rem',
+            background: 'linear-gradient(135deg, var(--bg-card), var(--bg-card-hover))',
+            boxShadow: '0 0 50px rgba(6, 182, 212, 0.1)',
+          }}>
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '2rem', alignItems: 'center',
+            }}>
+              <div>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1rem' }}>
+                  Experimente agora
+                </h2>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+                  Simule pêndulos, colisões elásticas e muito mais em nossos laboratórios virtuais interativos.
+                </p>
+                <Link to="/simulacao" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  color: '#06b6d4', textDecoration: 'none', fontWeight: 500,
+                  transition: 'gap 0.2s',
+                }}>
+                  Ver demonstração
+                  <ArrowRight style={{ width: '1rem', height: '1rem' }} />
+                </Link>
+              </div>
+              <div style={{
+                height: '12rem', borderRadius: '0.75rem',
+                background: 'linear-gradient(135deg, rgba(6,182,212,0.1), rgba(139,92,246,0.1))',
+                border: '1px solid rgba(139,92,246,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Beaker style={{ width: '6rem', height: '6rem', color: 'rgba(6,182,212,0.5)' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section style={{ padding: '3rem 1rem 5rem' }}>
+        <div style={{ maxWidth: '80rem', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+              Recursos da Plataforma
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>
+              Tudo que você precisa para ensinar e aprender
+            </p>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+            gap: '1.5rem',
+          }}>
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <div key={feature.title} className="glass-card" style={{ padding: '1.5rem' }}>
+                  <div style={{
+                    width: '3rem', height: '3rem', borderRadius: '0.5rem',
+                    background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(139,92,246,0.2))',
+                    border: '1px solid rgba(139,92,246,0.3)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: '1rem',
+                  }}>
+                    <Icon style={{ width: '1.5rem', height: '1.5rem', color: '#8b5cf6' }} />
+                  </div>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                    {feature.title}
+                  </h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                    {feature.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section style={{ padding: '0 1rem 5rem' }}>
+        <div style={{ maxWidth: '52rem', margin: '0 auto' }}>
+          <div style={{
+            borderRadius: '1rem', padding: '3rem 2rem', textAlign: 'center',
+            border: '1px solid rgba(6,182,212,0.2)',
+            background: 'linear-gradient(90deg, rgba(6,182,212,0.1), rgba(139,92,246,0.1), rgba(6,182,212,0.1))',
+          }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+              Pronto para começar?
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '2rem' }}>
+              Junte-se a estudantes e professores que já utilizam a plataforma
+            </p>
+            {currentUser ? (
+              <Link
+                to={userData?.role === 'professor' ? '/professor' : '/estudante'}
+                className="btn-gradient"
+                style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}
+              >
+                Ir para meu painel
+                <ArrowRight style={{ width: '1.25rem', height: '1.25rem' }} />
+              </Link>
+            ) : (
+              <button onClick={onLoginOpen} className="btn-gradient" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}>
+                Iniciar agora
+                <ArrowRight style={{ width: '1.25rem', height: '1.25rem' }} />
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
 
-const cardStyle = (accent: string): React.CSSProperties => ({
-  display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1.75rem',
-  borderRadius: '14px', textDecoration: 'none', color: 'var(--text-main)',
-  background: `${accent}11`, border: `1px solid ${accent}33`,
-  transition: 'all 0.25s', width: '180px', alignItems: 'center',
-});
+export default Home;

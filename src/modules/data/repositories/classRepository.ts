@@ -7,6 +7,7 @@ import {
   doc, deleteDoc, updateDoc, arrayUnion, arrayRemove, increment, orderBy
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
+import { getLocalEtlClassesByProfessor } from '../services/localEtlClient';
 import type { ClassData } from '../types';
 
 // Manter a interface Turma para compatibilidade com o front-end existente
@@ -24,7 +25,7 @@ const COLLECTION = 'classes';
 export const getProfessorClasses = async (professorId?: string): Promise<Turma[]> => {
   if (!db || !professorId) {
     console.warn('[ClassRepository] Firestore não inicializado ou sem professorId.');
-    return [];
+    return getLocalEtlClassesByProfessor(professorId);
   }
 
   try {
@@ -42,7 +43,7 @@ export const getProfessorClasses = async (professorId?: string): Promise<Turma[]
     }));
   } catch (error) {
     console.error('[ClassRepository] Erro ao buscar turmas:', error);
-    return [];
+    return getLocalEtlClassesByProfessor(professorId);
   }
 };
 

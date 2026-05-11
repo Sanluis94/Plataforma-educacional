@@ -5,6 +5,8 @@
 import { useState, useEffect } from 'react';
 import type { Turma } from '../../data/repositories/classRepository';
 import { getProfessorClasses } from '../../data/repositories/classRepository';
+import { getLocalEtlClassReport } from '../../data/services/localEtlClient';
+import type { LocalClassReport } from '../../data/services/localEtlClient';
 import { createNewClass, validateClassName, publishActivity } from '../services/professorService';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -14,6 +16,9 @@ export const useProfessorDashboard = () => {
   const [isCreatingClass, setIsCreatingClass] = useState(false);
   const [newClassName, setNewClassName] = useState('');
   const [activeTab, setActiveTab] = useState<'classes' | 'activityBuilder' | 'reports'>('classes');
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [classReport, setClassReport] = useState<LocalClassReport | null>(null);
+  const [reportLoading, setReportLoading] = useState(false);
   const [builderStep, setBuilderStep] = useState(1);
   const [activityConfig, setActivityConfig] = useState<any>({ type: 'quiz', title: '', module: '', config: {} });
   const [loading, setLoading] = useState(true);
@@ -36,6 +41,35 @@ export const useProfessorDashboard = () => {
     };
     loadClasses();
   }, [currentUser?.uid]);
+
+  useEffect(() => {
+    if (activeTab !== 'reports') return;
+
+    const classId = selectedClassId ?? turmas[0]?.id;
+    if (!classId) {
+      setClassReport(null);
+      return;
+    }
+
+    if (!selectedClassId) {
+      setSelectedClassId(classId);
+    }
+
+    const loadReport = async () => {
+      setReportLoading(true);
+      try {
+        const report = await getLocalEtlClassReport(classId);
+        setClassReport(report);
+      } catch (error) {
+        console.error('[useProfessorDashboard] Erro ao carregar relatório da turma:', error);
+        setClassReport(null);
+      } finally {
+        setReportLoading(false);
+      }
+    };
+
+    loadReport();
+  }, [activeTab, selectedClassId, turmas]);
 
   // Cria turma vinculada ao professor autenticado
   const handleCreateClass = async (e: React.FormEvent) => {
@@ -75,6 +109,11 @@ export const useProfessorDashboard = () => {
     }
   };
 
+  const handleViewClassReport = (classId: string) => {
+    setSelectedClassId(classId);
+    setActiveTab('reports');
+  };
+
   return {
     turmas,
     isCreatingClass,
@@ -83,11 +122,16 @@ export const useProfessorDashboard = () => {
     setNewClassName,
     activeTab,
     setActiveTab,
+    selectedClassId,
+    setSelectedClassId,
+    classReport,
+    reportLoading,
     builderStep,
     setBuilderStep,
     activityConfig,
     setActivityConfig,
     handleCreateClass,
+    handleViewClassReport,
     publishActivity: handlePublishActivity,
     loading,
   };

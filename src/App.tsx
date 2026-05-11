@@ -1,6 +1,8 @@
 import { useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './modules/core/contexts/AuthContext';
+import { Layout } from './modules/ux/components/Layout';
+import { LoginModal } from './modules/ux/components/LoginModal';
 import './index.css';
 
 // Lazy load pages from modules
@@ -9,27 +11,24 @@ const EstudanteDashboard = lazy(() => import('./modules/ux/pages/EstudanteDashbo
 const Simulacao = lazy(() => import('./modules/ux/pages/Simulacao').then(m => ({ default: m.Simulacao })));
 const AdminPanel = lazy(() => import('./modules/ux/pages/AdminPanel'));
 const Home = lazy(() => import('./modules/ux/pages/Home').then(m => ({ default: m.Home })));
-
-// Components from modules
-import { Navbar } from './modules/ux/components/Navbar';
-import { LoginModal } from './modules/ux/components/LoginModal';
+const NotFound = lazy(() => import('./modules/ux/pages/NotFound'));
 
 const LoadingFallback = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-main)' }}>
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-base)' }}>
     <div className="premium-loader"></div>
   </div>
 );
 
 function App() {
-  const [theme, setTheme] = useState<'light' | 'dark' | 'high-contrast'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [loginOpen, setLoginOpen] = useState(false);
   const { currentUser, userData } = useAuth();
 
   const toggleTheme = () => {
-    setTheme(t => t === 'light' ? 'dark' : t === 'dark' ? 'high-contrast' : 'light');
+    setTheme(t => t === 'light' ? 'dark' : 'light');
   };
 
-  const themeClass = theme === 'dark' ? 'dark-theme' : theme === 'high-contrast' ? 'high-contrast' : '';
+  const themeClass = theme === 'dark' ? 'dark-theme' : 'light-theme';
 
   // Auto-redirect based on role after login
   const RoleRedirect = () => {
@@ -48,21 +47,26 @@ function App() {
 
         <RoleRedirect />
 
-        <Navbar theme={theme} onThemeToggle={toggleTheme} onLoginOpen={() => setLoginOpen(true)} />
-
         {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}
 
-        <main id="main-content" className="main-content">
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route element={
+              <Layout
+                theme={theme}
+                onThemeToggle={toggleTheme}
+                onLoginOpen={() => setLoginOpen(true)}
+              />
+            }>
+              <Route path="/" element={<Home onLoginOpen={() => setLoginOpen(true)} />} />
               <Route path="/professor" element={<ProfessorDashboard />} />
               <Route path="/estudante" element={<EstudanteDashboard />} />
               <Route path="/simulacao" element={<Simulacao />} />
               <Route path="/admin" element={<AdminPanel />} />
-            </Routes>
-          </Suspense>
-        </main>
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </Suspense>
       </div>
     </Router>
   );
