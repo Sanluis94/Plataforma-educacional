@@ -9,8 +9,8 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ onClose }: LoginModalProps) {
-  const { loginWithGoogle } = useAuth();
-  const [selectedRole, setSelectedRole] = useState<'estudante' | 'professor'>('estudante');
+  const { isLocalAuthMode, loginWithGoogle } = useAuth();
+  const [selectedRole, setSelectedRole] = useState<'estudante' | 'professor' | 'admin'>('estudante');
   const [selectedGrade, setSelectedGrade] = useState<GradeLevel>('medio');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,9 @@ export function LoginModal({ onClose }: LoginModalProps) {
       onClose();
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code || '';
-      if (code === 'auth/not-configured') {
+      if (code === 'auth/admin-local-only') {
+        setError('Login como administrador só está disponível no modo local.');
+      } else if (code === 'auth/not-configured') {
         setError('Firebase não está configurado. Crie um arquivo .env na raiz do projeto com as chaves do Firebase. Consulte .env.example para referência.');
       } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
         setError('Login cancelado. Tente novamente e conclua o processo na janela do Google.');
@@ -85,8 +87,8 @@ export function LoginModal({ onClose }: LoginModalProps) {
         </div>
 
         {/* Role Selector */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.25rem' }}>
-          {(['estudante', 'professor'] as const).map(role => (
+        <div style={{ display: 'grid', gridTemplateColumns: isLocalAuthMode ? 'repeat(3, 1fr)' : '1fr 1fr', gap: '0.5rem', marginBottom: '1.25rem' }}>
+          {(['estudante', 'professor', ...(isLocalAuthMode ? ['admin' as const] : [])] as const).map(role => (
             <button
               key={role}
               onClick={() => setSelectedRole(role)}
@@ -102,16 +104,17 @@ export function LoginModal({ onClose }: LoginModalProps) {
               }}
             >
               <div style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>
-                {role === 'estudante' ? '🎓' : '👨‍🏫'}
+                {role === 'estudante' ? '🎓' : role === 'professor' ? '👨‍🏫' : '🛡️'}
               </div>
               <div style={{ fontSize: '0.88rem' }}>
-                {role === 'estudante' ? 'Sou Estudante' : 'Sou Professor'}
+                {role === 'estudante' ? 'Sou Estudante' : role === 'professor' ? 'Sou Professor' : 'Sou Admin'}
               </div>
             </button>
           ))}
         </div>
 
         {/* Grade Selector */}
+        {selectedRole !== 'admin' && (
         <div style={{ marginBottom: '1.5rem' }}>
           <label style={{
             color: 'var(--text-secondary)', fontSize: '0.82rem',
@@ -139,6 +142,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
             ))}
           </div>
         </div>
+        )}
 
         {/* Login Button */}
         <button
@@ -151,7 +155,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
             cursor: loading ? 'not-allowed' : 'pointer',
           }}
         >
-          {loading ? '⏳ Entrando...' : '🚀 Entrar com Google'}
+          {loading ? '⏳ Entrando...' : isLocalAuthMode ? '🚀 Entrar localmente' : '🚀 Entrar com Google'}
         </button>
 
         {/* Error */}
@@ -166,7 +170,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
         )}
 
         <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.75rem' }}>
-          Seus dados são armazenados com segurança no Firebase.
+          {isLocalAuthMode ? 'Modo local ativo para testes neste clone.' : 'Seus dados são armazenados com segurança no Firebase.'}
         </p>
       </div>
     </div>

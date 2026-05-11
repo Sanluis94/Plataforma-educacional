@@ -15,7 +15,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+.local/
 *.local
+
+# Local ETL generated artifacts
+public/local-data/etl/
 
 # Editor directories and files
 .vscode/*

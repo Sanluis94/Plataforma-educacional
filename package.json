@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "etl": "node scripts/etl/run-local-etl.mjs",
+    "etl:serve": "node scripts/etl/serve-local-etl.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

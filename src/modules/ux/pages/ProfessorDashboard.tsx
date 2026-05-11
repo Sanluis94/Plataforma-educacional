@@ -11,11 +11,16 @@ export function ProfessorDashboard() {
     setNewClassName,
     activeTab,
     setActiveTab,
+    selectedClassId,
+    setSelectedClassId,
+    classReport,
+    reportLoading,
     builderStep,
     setBuilderStep,
     activityConfig,
     setActivityConfig,
     handleCreateClass,
+    handleViewClassReport,
     publishActivity
   } = useProfessorDashboard();
 
@@ -195,7 +200,11 @@ export function ProfessorDashboard() {
                   <Users style={{ width: '1rem', height: '1rem' }} />
                   {turma.studentsCount} Alunos Matriculados
                 </div>
-                <button className="btn-outline-violet" style={{ width: '100%', padding: '0.5rem', fontSize: '0.82rem' }}>
+                <button
+                  className="btn-outline-violet"
+                  style={{ width: '100%', padding: '0.5rem', fontSize: '0.82rem' }}
+                  onClick={() => handleViewClassReport(turma.id)}
+                >
                   <Eye style={{ width: '0.85rem', height: '0.85rem' }} />
                   Visualizar Relatório
                 </button>
@@ -252,6 +261,147 @@ export function ProfessorDashboard() {
           </div>
         </div>
       </div>
+
+      {activeTab === 'reports' && (
+        <div className="glass-card fade-in" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+            <div>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.25rem' }}>
+                Relatório da Turma
+              </h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                Indicadores consolidados pelo ETL local para apoiar acompanhamento pedagógico.
+              </p>
+            </div>
+            <button className="btn-outline-violet" style={{ padding: '0.45rem 0.9rem' }} onClick={() => setActiveTab('classes')}>
+              Fechar
+            </button>
+          </div>
+
+          {turmas.length > 0 && (
+            <div style={{ maxWidth: '420px', marginBottom: '1.25rem' }}>
+              <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.82rem', marginBottom: '0.35rem' }}>
+                Turma analisada
+              </label>
+              <select
+                value={selectedClassId ?? turmas[0]?.id ?? ''}
+                onChange={(event) => setSelectedClassId(event.target.value)}
+              >
+                {turmas.map((turma) => (
+                  <option key={turma.id} value={turma.id}>{turma.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {reportLoading && (
+            <div style={{ padding: '2rem', color: 'var(--text-secondary)' }}>Carregando relatório...</div>
+          )}
+
+          {!reportLoading && !classReport && (
+            <div style={{ padding: '2rem', border: '1px dashed var(--border-color)', borderRadius: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+              Nenhum relatório encontrado. Rode <code>npm run etl</code> para gerar os dados locais.
+            </div>
+          )}
+
+          {!reportLoading && classReport && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
+                {[
+                  { label: 'Alunos', value: classReport.studentsCount },
+                  { label: 'Atividades', value: classReport.activitiesCount },
+                  { label: 'Média geral', value: `${classReport.averageScore}%` },
+                  { label: 'Conclusão', value: `${classReport.completionRate}%` },
+                ].map((metric) => (
+                  <div key={metric.label} className="stat-card cyan">
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', marginBottom: '0.35rem' }}>{metric.label}</p>
+                    <strong style={{ color: 'var(--text-main)', fontSize: '1.55rem' }}>{metric.value}</strong>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                <div style={{ padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--border-card)', background: 'rgba(255,255,255,0.03)' }}>
+                  <h4 style={{ color: 'var(--text-main)', fontWeight: 600, marginBottom: '0.45rem' }}>{classReport.className}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Professor(a): {classReport.professorName}</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Módulo de maior engajamento: <strong>{classReport.topModule}</strong></p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Tempo médio por atividade: <strong>{classReport.averageTimeSpentMinutes} min</strong></p>
+                </div>
+
+                <div style={{
+                  padding: '1rem',
+                  borderRadius: '0.75rem',
+                  border: `1px solid ${classReport.atRiskStudents.length ? 'rgba(245,158,11,0.35)' : 'rgba(16,185,129,0.35)'}`,
+                  background: classReport.atRiskStudents.length ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)',
+                }}>
+                  <h4 style={{ color: 'var(--text-main)', fontWeight: 600, marginBottom: '0.45rem' }}>
+                    {classReport.atRiskStudents.length ? 'Atenção pedagógica' : 'Turma estável'}
+                  </h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6 }}>
+                    {classReport.atRiskStudents.length
+                      ? `${classReport.atRiskStudents.join(', ')} precisam de apoio.`
+                      : 'Nenhum aluno abaixo do limiar de acompanhamento.'}
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <h4 style={{ color: 'var(--text-main)', fontWeight: 600, marginBottom: '0.75rem' }}>Desempenho por aluno</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {classReport.students.map((student) => (
+                      <div key={student.studentId} style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'minmax(120px, 1fr) repeat(3, auto)',
+                        gap: '0.75rem',
+                        alignItems: 'center',
+                        padding: '0.75rem',
+                        borderRadius: '0.6rem',
+                        border: '1px solid var(--border-card)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.82rem',
+                      }}>
+                        <strong style={{ color: 'var(--text-main)' }}>{student.studentName}</strong>
+                        <span>Nível {student.level}</span>
+                        <span>{student.averageScore}%</span>
+                        <span style={{
+                          color: student.status === 'precisa_apoio' ? '#f59e0b' : student.status === 'em_destaque' ? '#10b981' : 'var(--text-muted)',
+                          fontWeight: 600,
+                        }}>
+                          {student.status === 'precisa_apoio' ? 'Apoio' : student.status === 'em_destaque' ? 'Destaque' : 'Regular'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 style={{ color: 'var(--text-main)', fontWeight: 600, marginBottom: '0.75rem' }}>Engajamento por módulo</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {classReport.modules.map((module) => (
+                      <div key={module.module} style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'minmax(120px, 1fr) repeat(2, auto)',
+                        gap: '0.75rem',
+                        alignItems: 'center',
+                        padding: '0.75rem',
+                        borderRadius: '0.6rem',
+                        border: '1px solid var(--border-card)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.82rem',
+                      }}>
+                        <strong style={{ color: 'var(--text-main)' }}>{module.module}</strong>
+                        <span>{module.eventsCount} entregas</span>
+                        <span>{module.averageScore}% média</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Activity Builder Modal */}
       {activeTab === 'activityBuilder' && (

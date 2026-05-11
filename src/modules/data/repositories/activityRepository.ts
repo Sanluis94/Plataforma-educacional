@@ -4,6 +4,7 @@
  */
 import { collection, addDoc, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
+import { getLocalEtlActivitiesByClass, getLocalEtlActivitiesByProfessor } from '../services/localEtlClient';
 import type { ActivityData } from '../types';
 
 const COLLECTION = 'activities';
@@ -25,7 +26,7 @@ export const saveActivity = async (activity: Omit<ActivityData, 'id'>): Promise<
  * Busca atividades de um professor.
  */
 export const getActivitiesByProfessor = async (professorId: string): Promise<ActivityData[]> => {
-  if (!db) return [];
+  if (!db) return getLocalEtlActivitiesByProfessor(professorId);
 
   const q = query(
     collection(db, COLLECTION),
@@ -44,7 +45,7 @@ export const getActivitiesByProfessor = async (professorId: string): Promise<Act
  * Busca atividades de uma turma específica.
  */
 export const getActivitiesByClass = async (classId: string): Promise<ActivityData[]> => {
-  if (!db) return [];
+  if (!db) return getLocalEtlActivitiesByClass(classId);
 
   const q = query(
     collection(db, COLLECTION),

@@ -1,4 +1,56 @@
-# React + TypeScript + Vite
+# Plataforma Educacional
+
+## ETL local
+
+Este branch inclui um ETL versionado para desenvolvimento e homologacao local. Ele executa o ciclo completo:
+
+1. Extrai dados de arquivo local, `file://`, HTTP ou HTTPS.
+2. Transforma usuarios, turmas, atividades, progresso e logs para os contratos da plataforma.
+3. Gera colecoes normalizadas e metricas educacionais.
+4. Expoe os dados por arquivos estaticos do Vite e, opcionalmente, por uma API HTTP local.
+
+Fonte padrao:
+
+```bash
+scripts/etl/source/educational-platform.seed.json
+```
+
+Executar o ETL:
+
+```bash
+npm run etl
+```
+
+Usar outra fonte:
+
+```bash
+npm run etl -- --source ./caminho/para/dados.json
+npm run etl -- --source https://exemplo.com/dados.json
+```
+
+Os artefatos gerados ficam em `public/local-data/etl/` e nao sao versionados. Durante o `npm run dev`, o frontend consome esses arquivos em `/local-data/etl/...` quando o Firebase nao esta configurado.
+
+API auxiliar do ETL:
+
+```bash
+npm run etl:serve
+```
+
+Endpoints:
+
+- `GET /health`
+- `GET /snapshot`
+- `GET /collections/users`
+- `GET /collections/classes`
+- `GET /collections/activities`
+- `GET /collections/progress`
+- `GET /collections/systemLogs`
+- `GET /metrics/summary`
+- `GET /metrics/teacher-performance`
+- `GET /metrics/student-performance`
+- `GET /metrics/subject-engagement`
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

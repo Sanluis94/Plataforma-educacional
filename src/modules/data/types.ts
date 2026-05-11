@@ -3,6 +3,20 @@
  * Definem a estrutura dos documentos no Cloud Firestore.
  */
 
+// ─── Coleção: users ───────────────────────────────────────────
+export type UserRole = 'admin' | 'professor' | 'estudante';
+
+export interface UserData {
+  id?: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  gradeLevel?: string;
+  createdAt: string;
+  updatedAt?: string;
+  lastLoginAt?: string;
+}
+
 // ─── Coleção: classes ─────────────────────────────────────────
 export interface ClassData {
   id?: string;

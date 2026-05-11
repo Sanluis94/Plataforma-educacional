@@ -1,0 +1,247 @@
+{
+  "metadata": {
+    "name": "local-educational-platform-seed",
+    "generatedFor": "plataforma-educacional",
+    "version": "1.0.0"
+  },
+  "users": [
+    {
+      "id": "admin-001",
+      "name": "Admin Local",
+      "email": "admin.local@plataforma.test",
+      "role": "admin",
+      "createdAt": "2026-05-01T09:00:00-03:00",
+      "updatedAt": "2026-05-01T09:00:00-03:00"
+    },
+    {
+      "id": "prof-001",
+      "name": "Marina Azevedo",
+      "email": "marina@plataforma.test",
+      "role": "professor",
+      "createdAt": "2026-05-01T09:20:00-03:00",
+      "updatedAt": "2026-05-03T11:30:00-03:00"
+    },
+    {
+      "id": "prof-002",
+      "name": "Carlos Henrique",
+      "email": "carlos@plataforma.test",
+      "role": "professor",
+      "createdAt": "2026-05-01T09:40:00-03:00",
+      "updatedAt": "2026-05-04T15:00:00-03:00"
+    },
+    {
+      "id": "stud-001",
+      "name": "Ana Clara",
+      "email": "ana.clara@plataforma.test",
+      "role": "estudante",
+      "gradeLevel": "medio",
+      "createdAt": "2026-05-01T10:00:00-03:00",
+      "updatedAt": "2026-05-05T18:10:00-03:00",
+      "lastLoginAt": "2026-05-05T18:10:00-03:00"
+    },
+    {
+      "id": "stud-002",
+      "name": "Bruno Lima",
+      "email": "bruno.lima@plataforma.test",
+      "role": "estudante",
+      "gradeLevel": "medio",
+      "createdAt": "2026-05-01T10:10:00-03:00",
+      "updatedAt": "2026-05-05T17:40:00-03:00",
+      "lastLoginAt": "2026-05-05T17:40:00-03:00"
+    },
+    {
+      "id": "stud-003",
+      "name": "Camila Rocha",
+      "email": "camila.rocha@plataforma.test",
+      "role": "estudante",
+      "gradeLevel": "fundamental",
+      "createdAt": "2026-05-01T10:20:00-03:00",
+      "updatedAt": "2026-05-04T16:30:00-03:00",
+      "lastLoginAt": "2026-05-04T16:30:00-03:00"
+    },
+    {
+      "id": "stud-004",
+      "name": "Diego Santos",
+      "email": "diego.santos@plataforma.test",
+      "role": "estudante",
+      "gradeLevel": "fundamental",
+      "createdAt": "2026-05-01T10:25:00-03:00",
+      "updatedAt": "2026-05-04T20:15:00-03:00",
+      "lastLoginAt": "2026-05-04T20:15:00-03:00"
+    }
+  ],
+  "classes": [
+    {
+      "id": "class-001",
+      "name": "Ensino Medio - Matematica Aplicada",
+      "professorId": "prof-001",
+      "studentIds": ["stud-001", "stud-002"],
+      "createdAt": "2026-05-02T08:00:00-03:00",
+      "updatedAt": "2026-05-05T12:00:00-03:00"
+    },
+    {
+      "id": "class-002",
+      "name": "Fundamental - Ciencias Integradas",
+      "professorId": "prof-002",
+      "studentIds": ["stud-003", "stud-004"],
+      "createdAt": "2026-05-02T08:30:00-03:00",
+      "updatedAt": "2026-05-05T12:20:00-03:00"
+    }
+  ],
+  "activities": [
+    {
+      "id": "act-001",
+      "title": "Quiz de Funcoes do 1 grau",
+      "type": "quiz",
+      "module": "matematica",
+      "difficulty": "intermediario",
+      "classId": "class-001",
+      "professorId": "prof-001",
+      "status": "published",
+      "createdAt": "2026-05-03T09:00:00-03:00",
+      "config": {
+        "questions": 10,
+        "estimatedMinutes": 25
+      },
+      "submissions": [
+        {
+          "studentId": "stud-001",
+          "score": 92,
+          "status": "completed",
+          "timeSpentMinutes": 21,
+          "completedAt": "2026-05-04T15:00:00-03:00"
+        },
+        {
+          "studentId": "stud-002",
+          "score": 74,
+          "status": "completed",
+          "timeSpentMinutes": 28,
+          "completedAt": "2026-05-04T15:30:00-03:00"
+        }
+      ]
+    },
+    {
+      "id": "act-002",
+      "title": "Simulador de Laboratorio Quimico",
+      "type": "simulador",
+      "module": "quimica",
+      "difficulty": "avancado",
+      "classId": "class-002",
+      "professorId": "prof-002",
+      "status": "published",
+      "createdAt": "2026-05-03T10:30:00-03:00",
+      "config": {
+        "experiment": "misturas",
+        "estimatedMinutes": 35
+      },
+      "submissions": [
+        {
+          "studentId": "stud-003",
+          "score": 88,
+          "status": "completed",
+          "timeSpentMinutes": 33,
+          "completedAt": "2026-05-04T16:00:00-03:00"
+        },
+        {
+          "studentId": "stud-004",
+          "score": 61,
+          "status": "completed",
+          "timeSpentMinutes": 39,
+          "completedAt": "2026-05-04T16:45:00-03:00"
+        }
+      ]
+    },
+    {
+      "id": "act-003",
+      "title": "Linha do Tempo: Era Vargas",
+      "type": "timeline",
+      "module": "historia",
+      "difficulty": "basico",
+      "classId": "class-001",
+      "professorId": "prof-001",
+      "status": "published",
+      "createdAt": "2026-05-04T09:15:00-03:00",
+      "config": {
+        "events": 8,
+        "estimatedMinutes": 20
+      },
+      "submissions": [
+        {
+          "studentId": "stud-001",
+          "score": 85,
+          "status": "completed",
+          "timeSpentMinutes": 18,
+          "completedAt": "2026-05-05T11:00:00-03:00"
+        }
+      ]
+    },
+    {
+      "id": "act-004",
+      "title": "Redacao: Argumentacao",
+      "type": "redacao",
+      "module": "portugues",
+      "difficulty": "intermediario",
+      "classId": "class-001",
+      "professorId": "prof-001",
+      "status": "draft",
+      "createdAt": "2026-05-05T09:15:00-03:00",
+      "config": {
+        "theme": "tecnologia e educacao",
+        "estimatedMinutes": 50
+      },
+      "submissions": []
+    }
+  ],
+  "progress": [
+    {
+      "studentId": "stud-001",
+      "level": 3,
+      "xp": 1280,
+      "coins": 420,
+      "completedModules": ["matematica"],
+      "purchasedItems": ["avatar-cientista"],
+      "updatedAt": "2026-05-05T18:10:00-03:00"
+    },
+    {
+      "studentId": "stud-002",
+      "level": 2,
+      "xp": 760,
+      "coins": 210,
+      "completedModules": ["matematica"],
+      "purchasedItems": [],
+      "updatedAt": "2026-05-05T17:40:00-03:00"
+    },
+    {
+      "studentId": "stud-003",
+      "level": 2,
+      "xp": 890,
+      "coins": 250,
+      "completedModules": ["quimica"],
+      "purchasedItems": ["tema-espaco"],
+      "updatedAt": "2026-05-04T16:30:00-03:00"
+    }
+  ],
+  "systemLogs": [
+    {
+      "id": "log-001",
+      "timestamp": "2026-05-04T15:00:00-03:00",
+      "type": "activity",
+      "message": "Ana Clara concluiu Quiz de Funcoes do 1 grau",
+      "userId": "stud-001"
+    },
+    {
+      "id": "log-002",
+      "timestamp": "2026-05-04T16:00:00-03:00",
+      "type": "activity",
+      "message": "Camila Rocha concluiu Simulador de Laboratorio Quimico",
+      "userId": "stud-003"
+    },
+    {
+      "id": "log-003",
+      "timestamp": "2026-05-05T09:15:00-03:00",
+      "type": "system",
+      "message": "Atividade em rascunho criada para revisao pedagogica",
+      "userId": "prof-001"
+    }
+  ]
+}
