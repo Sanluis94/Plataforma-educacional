@@ -6,7 +6,6 @@ import {
   collection, query, where, getDocs, orderBy, limit as firestoreLimit, getCountFromServer
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
-import { getLocalEtlGlobalStats, getLocalEtlLogs, getLocalEtlTeachers } from '../services/localEtlClient';
 import type { SystemLog } from '../types';
 
 // Interface legada mantida para compatibilidade com UI
@@ -29,7 +28,7 @@ export interface LogEntry {
 export const getTeachers = async (): Promise<Teacher[]> => {
   if (!db) {
     console.warn('[AdminRepository] Firestore não inicializado.');
-    return getLocalEtlTeachers();
+    return [];
   }
 
   try {
@@ -70,7 +69,7 @@ export const getTeachers = async (): Promise<Teacher[]> => {
     return teachers;
   } catch (error) {
     console.error('[AdminRepository] Erro ao buscar professores:', error);
-    return getLocalEtlTeachers();
+    return [];
   }
 };
 
@@ -78,7 +77,7 @@ export const getTeachers = async (): Promise<Teacher[]> => {
  * Busca logs do sistema ordenados por timestamp (mais recentes primeiro).
  */
 export const getLogs = async (maxResults = 50): Promise<LogEntry[]> => {
-  if (!db) return getLocalEtlLogs(maxResults);
+  if (!db) return [];
 
   try {
     const logsQuery = query(
@@ -102,7 +101,7 @@ export const getLogs = async (maxResults = 50): Promise<LogEntry[]> => {
     });
   } catch (error) {
     console.error('[AdminRepository] Erro ao buscar logs:', error);
-    return getLocalEtlLogs(maxResults);
+    return [];
   }
 };
 
@@ -116,7 +115,7 @@ export const getGlobalStats = async (): Promise<{
   totalActivities: number;
 }> => {
   if (!db) {
-    return getLocalEtlGlobalStats();
+    return emptyGlobalStats();
   }
 
   try {
@@ -135,9 +134,18 @@ export const getGlobalStats = async (): Promise<{
     };
   } catch (error) {
     console.error('[AdminRepository] Erro ao calcular estatísticas:', error);
-    return getLocalEtlGlobalStats();
+    return emptyGlobalStats();
   }
 };
+
+function emptyGlobalStats() {
+  return {
+    totalStudents: 0,
+    totalTeachers: 0,
+    totalClasses: 0,
+    totalActivities: 0,
+  };
+}
 
 /**
  * Wrapper legado para compatibilidade com useAdminDashboard.

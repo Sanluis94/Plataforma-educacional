@@ -4,9 +4,9 @@ import { dirname, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-export const defaultSource = resolve(repoRoot, 'scripts/etl/source/educational-platform.seed.json');
-export const defaultOutputDir = resolve(repoRoot, 'public/local-data/etl');
 export const FIREBASE_SOURCE = 'firebase';
+export const defaultSource = FIREBASE_SOURCE;
+export const defaultOutputDir = resolve(repoRoot, 'public/local-data/etl');
 
 export async function loadDotEnv() {
   for (const filename of ['.env', '.env.local']) {

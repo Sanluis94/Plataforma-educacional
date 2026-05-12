@@ -5,8 +5,8 @@
 import { useState, useEffect } from 'react';
 import type { Turma } from '../../data/repositories/classRepository';
 import { getProfessorClasses } from '../../data/repositories/classRepository';
-import { getLocalEtlClassReport } from '../../data/services/localEtlClient';
-import type { LocalClassReport } from '../../data/services/localEtlClient';
+import { getClassReport } from '../../data/repositories/classReportRepository';
+import type { ClassReport } from '../../data/repositories/classReportRepository';
 import { createNewClass, validateClassName, publishActivity } from '../services/professorService';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -17,7 +17,7 @@ export const useProfessorDashboard = () => {
   const [newClassName, setNewClassName] = useState('');
   const [activeTab, setActiveTab] = useState<'classes' | 'activityBuilder' | 'reports'>('classes');
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
-  const [classReport, setClassReport] = useState<LocalClassReport | null>(null);
+  const [classReport, setClassReport] = useState<ClassReport | null>(null);
   const [reportLoading, setReportLoading] = useState(false);
   const [builderStep, setBuilderStep] = useState(1);
   const [activityConfig, setActivityConfig] = useState<any>({ type: 'quiz', title: '', module: '', config: {} });
@@ -58,7 +58,7 @@ export const useProfessorDashboard = () => {
     const loadReport = async () => {
       setReportLoading(true);
       try {
-        const report = await getLocalEtlClassReport(classId);
+        const report = await getClassReport(classId);
         setClassReport(report);
       } catch (error) {
         console.error('[useProfessorDashboard] Erro ao carregar relatório da turma:', error);

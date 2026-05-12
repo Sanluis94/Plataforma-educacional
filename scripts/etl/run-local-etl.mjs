@@ -60,7 +60,7 @@ async function extract(sourceLocation) {
     const response = await fetch(sourceLocation, {
       headers: {
         accept: 'application/json',
-        'user-agent': 'plataforma-educacional-local-etl/1.0',
+        'user-agent': 'plataforma-educacional-firebase-etl/1.0',
       },
     });
 
@@ -209,7 +209,7 @@ function transform(payload, sourceLocation) {
   const metrics = buildMetrics(users, classes, activityResult.activities, progress, systemLogs, activityResult.learningEvents);
 
   return {
-    version: 'local-etl-v1',
+    version: 'firebase-etl-v1',
     source: sourceLocation,
     generatedAt,
     collections: {
@@ -446,7 +446,7 @@ function normalizeSystemLogs(rawLogs, generatedAt) {
     assertRecord(rawLog, `systemLogs[${index}]`);
 
     return {
-      id: optionalString(rawLog, ['id']) ?? `local-log-${index + 1}`,
+      id: optionalString(rawLog, ['id']) ?? `etl-log-${index + 1}`,
       timestamp: toIsoDate(rawLog.timestamp ?? rawLog.createdAt, generatedAt),
       type: normalizeLogType(optionalString(rawLog, ['type']) ?? 'system'),
       message: requiredString(rawLog, ['message'], `systemLogs[${index}].message`),
@@ -456,12 +456,12 @@ function normalizeSystemLogs(rawLogs, generatedAt) {
   });
 
   logs.push({
-    id: `local-etl-${Date.now()}`,
+    id: `firebase-etl-${Date.now()}`,
     timestamp: generatedAt,
     type: 'system',
-    message: 'ETL local executado e dados educacionais normalizados.',
+    message: 'ETL Firebase executado e dados educacionais normalizados.',
     metadata: {
-      source: 'local-etl',
+      source: 'firebase-etl',
     },
   });
 

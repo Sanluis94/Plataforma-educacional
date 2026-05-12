@@ -5,7 +5,6 @@
  */
 import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
-import { getLocalEtlProgress } from '../services/localEtlClient';
 import { DEFAULT_PROGRESS } from '../types';
 import type { ProgressData } from '../types';
 
@@ -24,7 +23,7 @@ const COLLECTION = 'progress';
 export const getStudentProgress = async (uid?: string): Promise<ProgressData> => {
   if (!db || !uid) {
     console.warn('[StudentRepository] Firestore não inicializado ou sem UID.');
-    return await getLocalEtlProgress(uid) ?? { ...DEFAULT_PROGRESS };
+    return { ...DEFAULT_PROGRESS };
   }
 
   try {
@@ -44,7 +43,7 @@ export const getStudentProgress = async (uid?: string): Promise<ProgressData> =>
     return defaultData;
   } catch (error) {
     console.error('[StudentRepository] Erro ao buscar progresso:', error);
-    return await getLocalEtlProgress(uid) ?? { ...DEFAULT_PROGRESS };
+    return { ...DEFAULT_PROGRESS };
   }
 };
 

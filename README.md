@@ -2,12 +2,12 @@
 
 ## ETL Firebase/Firestore
 
-Este branch inclui um ETL versionado para desenvolvimento e homologacao. A fonte principal e o Firebase/Firestore. Ele executa o ciclo completo:
+Este branch inclui um ETL versionado com Firebase/Firestore como fonte de dados. Ele executa o ciclo completo:
 
 1. Extrai dados das colecoes do Firestore: `users`, `classes`, `activities`, `progress` e `system_logs`.
 2. Transforma usuarios, turmas, atividades, progresso e logs para os contratos da plataforma.
 3. Gera colecoes normalizadas e metricas educacionais.
-4. Expoe os dados por arquivos estaticos do Vite e, opcionalmente, por uma API HTTP local.
+4. Expoe os dados por arquivos estaticos do Vite e, opcionalmente, por uma API HTTP de ETL.
 
 Configure uma credencial de service account fora do Git:
 
@@ -32,20 +32,7 @@ Executar o ETL usando Firebase:
 npm run etl
 ```
 
-Para validar o pipeline sem credenciais do Firebase, use o seed de exemplo:
-
-```bash
-npm run etl:seed
-```
-
-Tambem e possivel extrair de um arquivo/URL JSON, util para homologacao:
-
-```bash
-npm run etl -- --source ./caminho/para/dados.json
-npm run etl -- --source https://exemplo.com/dados.json
-```
-
-Os artefatos gerados ficam em `public/local-data/etl/` e nao sao versionados. Durante o `npm run dev`, o frontend consome esses arquivos em `/local-data/etl/...` quando o Firebase do app nao esta configurado.
+Os artefatos gerados ficam em `public/local-data/etl/` e nao sao versionados.
 
 API auxiliar do ETL:
 

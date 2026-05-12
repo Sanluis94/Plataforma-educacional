@@ -270,7 +270,7 @@ export function ProfessorDashboard() {
                 Relatório da Turma
               </h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                Indicadores consolidados pelo ETL local para apoiar acompanhamento pedagógico.
+                Indicadores consolidados com dados do Firebase para apoiar acompanhamento pedagógico.
               </p>
             </div>
             <button className="btn-outline-violet" style={{ padding: '0.45rem 0.9rem' }} onClick={() => setActiveTab('classes')}>
@@ -300,7 +300,7 @@ export function ProfessorDashboard() {
 
           {!reportLoading && !classReport && (
             <div style={{ padding: '2rem', border: '1px dashed var(--border-color)', borderRadius: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-              Nenhum relatório encontrado. Rode <code>npm run etl</code> para gerar os dados locais.
+              Nenhum relatório encontrado. Verifique se a turma possui dados no Firebase.
             </div>
           )}
 

@@ -81,13 +81,13 @@ const server = createServer(async (request, response) => {
     const statusCode = error.code === 'ENOENT' ? 503 : 500;
     sendJson(response, statusCode, {
       error: error.message,
-      hint: statusCode === 503 ? 'Run npm run etl before starting or querying the local ETL API.' : undefined,
+      hint: statusCode === 503 ? 'Run npm run etl before starting or querying the ETL API.' : undefined,
     });
   }
 });
 
 server.listen(port, host, () => {
-  console.log(`Local ETL API running at http://${host}:${port}`);
+  console.log(`ETL API running at http://${host}:${port}`);
   console.log(`Reading ETL artifacts from ${outputDir}`);
 });
 
@@ -109,7 +109,7 @@ async function handleHealth(response) {
       sendJson(response, 503, {
         status: 'missing_artifacts',
         outputDir,
-        hint: 'Run npm run etl to generate local data artifacts.',
+        hint: 'Run npm run etl to generate data artifacts.',
       });
       return;
     }
