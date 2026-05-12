@@ -11,7 +11,6 @@ import { getStudentProgress } from '../../data/repositories/studentRepository';
 import { evaluateAchievements } from '../services/achievementService';
 import type { Achievement } from '../services/achievementService';
 import type { ProgressData } from '../../data/types';
-import { DEFAULT_PROGRESS } from '../../data/types';
 
 export const useStudentDashboard = () => {
   const { currentUser, userData } = useAuth();
