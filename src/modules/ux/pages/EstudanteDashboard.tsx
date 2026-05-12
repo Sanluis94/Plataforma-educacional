@@ -13,7 +13,9 @@ export function EstudanteDashboard() {
     shopItems,
     modules,
     handleModuleComplete,
-    buyItem
+    buyItem,
+    achievements,
+    achievementToast,
   } = useStudentDashboard();
 
   const { level, xp, coins } = progress;
@@ -259,29 +261,54 @@ export function EstudanteDashboard() {
         </div>
       )}
 
+      {/* Achievement Toast */}
+      {achievementToast && (
+        <div className="slide-down" style={{
+          position: 'fixed', top: '5rem', right: '1.5rem', zIndex: 1000,
+          padding: '1rem 1.5rem', borderRadius: '0.75rem',
+          background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(139,92,246,0.15))',
+          border: '1px solid rgba(6,182,212,0.4)',
+          backdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', gap: '0.75rem',
+          animation: 'slideDown 0.4s ease-out',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        }}>
+          <span style={{ fontSize: '2rem' }}>{achievementToast.icon}</span>
+          <div>
+            <div style={{ color: '#06b6d4', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em' }}>CONQUISTA DESBLOQUEADA!</div>
+            <div style={{ color: 'var(--text-main)', fontWeight: 700 }}>{achievementToast.name}</div>
+          </div>
+        </div>
+      )}
+
       {/* Achievements View */}
       {!activeSubject && activeView === 'achievements' && (
         <div style={{ maxWidth: '44rem', margin: '0 auto' }}>
-          <h2 style={{ color: 'var(--text-main)', marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 600 }}>🏆 Suas Conquistas</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 600 }}>🏆 Suas Conquistas</h2>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              {achievements.filter(a => a.unlocked).length}/{achievements.length} desbloqueadas
+            </span>
+          </div>
+          {/* Progress bar */}
+          <div className="progress-bar" style={{ marginBottom: '1.5rem' }}>
+            <div className="progress-bar-bg">
+              <div className="progress-bar-fill" style={{ width: `${(achievements.filter(a => a.unlocked).length / achievements.length) * 100}%` }} />
+            </div>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {[
-              { icon: '🏅', name: 'Pioneiro', desc: 'Completou sua primeira atividade', unlocked: true },
-              { icon: '⭐', name: 'Matemático Célere', desc: 'Resolveu 3 equações seguidas', unlocked: true },
-              { icon: '🧪', name: 'Cientista Iniciante', desc: 'Completou o lab de Química', unlocked: xp > 1500 },
-              { icon: '🌍', name: 'Viajante do Tempo', desc: 'Explorou a Linha do Tempo da História', unlocked: false },
-              { icon: '🎓', name: 'Poliglota', desc: 'Concluiu o módulo de Idiomas', unlocked: false },
-              { icon: '💡', name: 'Arguto Literário', desc: 'Acertou 100% no quiz de Literatura', unlocked: false },
-            ].map((ach, i) => (
-              <div key={i} className="glass-card" style={{
+            {achievements.map((ach) => (
+              <div key={ach.id} className="glass-card" style={{
                 display: 'flex', gap: '1rem', alignItems: 'center', padding: '1rem',
                 opacity: ach.unlocked ? 1 : 0.45,
                 borderColor: ach.unlocked ? 'rgba(6,182,212,0.25)' : undefined,
                 background: ach.unlocked ? 'rgba(6,182,212,0.05)' : undefined,
+                transition: 'all 0.3s ease',
               }}>
-                <div style={{ fontSize: '2rem', filter: ach.unlocked ? 'none' : 'grayscale(1)' }}>{ach.icon}</div>
+                <div style={{ fontSize: '2rem', filter: ach.unlocked ? 'none' : 'grayscale(1)', transition: 'filter 0.3s' }}>{ach.icon}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '0.9rem' }}>{ach.name}</div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{ach.desc}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{ach.description}</div>
                 </div>
                 {ach.unlocked && <div style={{ color: '#06b6d4', fontSize: '0.8rem', fontWeight: 700, flexShrink: 0 }}>✅</div>}
               </div>

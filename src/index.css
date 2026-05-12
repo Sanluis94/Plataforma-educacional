@@ -503,3 +503,173 @@ textarea:focus {
 .light-theme .data-table tbody tr:hover {
   background: rgba(0,0,0,0.02);
 }
+
+/* ═══════════════════════════════════════════════════════
+   TCC-27: Responsive Design + Accessibility
+   ═══════════════════════════════════════════════════════ */
+
+/* Focus styles for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid #06b6d4;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #06b6d4;
+  outline-offset: 2px;
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Tablet (< 1024px) ─── */
+@media (max-width: 1024px) {
+  .fade-in > div[style*="gridTemplateColumns: '1fr 320px'"],
+  .fade-in > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── Mobile (< 768px) ─── */
+@media (max-width: 768px) {
+  /* Navigation */
+  nav {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  nav > div {
+    flex-wrap: wrap;
+  }
+
+  /* Typography scaling */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+
+  h2 {
+    font-size: 1.15rem !important;
+  }
+
+  /* Stats grid — 2 cols on mobile */
+  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(200px"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Chart grid — single column */
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(380px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(280px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(260px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(320px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(300px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Activity builder modal */
+  div[style*="maxWidth: '700px'"] {
+    max-width: 100% !important;
+    margin: 0.5rem !important;
+    padding: 1.25rem !important;
+  }
+
+  /* Buttons — full width on mobile */
+  .btn-gradient,
+  .btn-outline-cyan,
+  .btn-outline-violet {
+    font-size: 0.82rem;
+    padding: 0.6rem 1rem;
+  }
+
+  /* Stat cards */
+  .stat-card {
+    padding: 1rem;
+  }
+
+  /* Glass cards */
+  .glass-card {
+    border-radius: 0.5rem;
+  }
+
+  /* Activity listing grid — remove multi column */
+  div[style*="gridTemplateColumns: '1fr auto auto'"] {
+    grid-template-columns: 1fr auto !important;
+  }
+
+  /* Simulation canvas responsive */
+  canvas {
+    max-width: 100%;
+    height: auto !important;
+  }
+
+  /* Select full width */
+  select {
+    width: 100%;
+  }
+}
+
+/* ─── Small Mobile (< 480px) ─── */
+@media (max-width: 480px) {
+  /* Stats grid — single column */
+  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(200px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(180px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Module cards */
+  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(200px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(150px"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Padding reduction */
+  .fade-in {
+    padding: 1rem 0.5rem !important;
+  }
+}
+
+/* ─── Print Styles ─── */
+@media print {
+  nav, .btn-gradient, .btn-outline-cyan, .btn-outline-violet, button {
+    display: none !important;
+  }
+
+  .glass-card {
+    border: 1px solid #ccc;
+    background: white !important;
+    break-inside: avoid;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

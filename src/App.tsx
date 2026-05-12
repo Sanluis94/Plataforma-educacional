@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useAuth } from './modules/core/contexts/AuthContext';
 import { Layout } from './modules/ux/components/Layout';
 import { LoginModal } from './modules/ux/components/LoginModal';
+import { ProtectedRoute } from './modules/ux/components/ProtectedRoute';
 import './index.css';
 
 // Lazy load pages from modules
@@ -59,10 +60,32 @@ function App() {
               />
             }>
               <Route path="/" element={<Home onLoginOpen={() => setLoginOpen(true)} />} />
-              <Route path="/professor" element={<ProfessorDashboard />} />
-              <Route path="/estudante" element={<EstudanteDashboard />} />
-              <Route path="/simulacao" element={<Simulacao />} />
-              <Route path="/admin" element={<AdminPanel />} />
+
+              {/* Rotas protegidas por role */}
+              <Route path="/professor" element={
+                <ProtectedRoute allowedRoles={['professor', 'admin']}>
+                  <ProfessorDashboard />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/estudante" element={
+                <ProtectedRoute allowedRoles={['estudante', 'admin']}>
+                  <EstudanteDashboard />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/simulacao" element={
+                <ProtectedRoute allowedRoles={['estudante', 'professor', 'admin']}>
+                  <Simulacao />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/admin" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminPanel />
+                </ProtectedRoute>
+              } />
+
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

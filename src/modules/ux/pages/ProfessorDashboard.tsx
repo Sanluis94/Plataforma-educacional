@@ -1,10 +1,11 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { PlusCircle, Users, BookOpen, BarChart as BarChartIcon, TrendingUp, Award, Eye } from 'lucide-react';
+import { PlusCircle, Users, BookOpen, BarChart as BarChartIcon, TrendingUp, Award, Eye, Trash2, Download, ListTodo } from 'lucide-react';
 import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
 
 export function ProfessorDashboard() {
   const {
     turmas,
+    activities,
     isCreatingClass,
     setIsCreatingClass,
     newClassName,
@@ -21,7 +22,9 @@ export function ProfessorDashboard() {
     setActivityConfig,
     handleCreateClass,
     handleViewClassReport,
-    publishActivity
+    publishActivity,
+    handleDeleteActivity,
+    exportReportCSV,
   } = useProfessorDashboard();
 
   // Derive real stats from Firestore data
@@ -260,6 +263,26 @@ export function ProfessorDashboard() {
             </div>
           </div>
         </div>
+
+        <div
+          className="glass-card"
+          style={{ padding: '1.25rem', cursor: 'pointer', transition: 'all 0.3s' }}
+          onClick={() => setActiveTab('activities')}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{
+              width: '3rem', height: '3rem', borderRadius: '0.5rem',
+              background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <ListTodo style={{ width: '1.25rem', height: '1.25rem', color: '#10b981' }} />
+            </div>
+            <div>
+              <h4 style={{ color: 'var(--text-main)', fontWeight: 600, marginBottom: '0.25rem' }}>Minhas Atividades ({activities.length})</h4>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>Gerencie atividades publicadas</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {activeTab === 'reports' && (
@@ -276,6 +299,11 @@ export function ProfessorDashboard() {
             <button className="btn-outline-violet" style={{ padding: '0.45rem 0.9rem' }} onClick={() => setActiveTab('classes')}>
               Fechar
             </button>
+            {classReport && (
+              <button className="btn-gradient" style={{ padding: '0.45rem 0.9rem', fontSize: '0.82rem' }} onClick={exportReportCSV}>
+                <Download style={{ width: '0.85rem', height: '0.85rem' }} /> Exportar CSV
+              </button>
+            )}
           </div>
 
           {turmas.length > 0 && (
@@ -531,6 +559,78 @@ export function ProfessorDashboard() {
               )}
             </div>
           </div>
+        </div>
+      )}
+      {/* Activities Listing */}
+      {activeTab === 'activities' && (
+        <div className="glass-card fade-in" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <div>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.25rem' }}>Minhas Atividades</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{activities.length} atividade(s) publicada(s)</p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="btn-gradient" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }} onClick={() => setActiveTab('activityBuilder')}>
+                <PlusCircle style={{ width: '1rem', height: '1rem' }} /> Nova Atividade
+              </button>
+              <button className="btn-outline-violet" style={{ padding: '0.45rem 0.9rem' }} onClick={() => setActiveTab('classes')}>
+                Fechar
+              </button>
+            </div>
+          </div>
+
+          {activities.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {activities.map(activity => (
+                <div key={activity.id} style={{
+                  display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '1rem',
+                  alignItems: 'center', padding: '1rem', borderRadius: '0.75rem',
+                  border: '1px solid var(--border-card)', background: 'rgba(255,255,255,0.02)',
+                }}>
+                  <div>
+                    <h4 style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.25rem' }}>
+                      {activity.title}
+                    </h4>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <span style={{
+                        display: 'inline-flex', padding: '0.15rem 0.5rem', borderRadius: '9999px',
+                        fontSize: '0.7rem', fontWeight: 600,
+                        color: '#06b6d4', background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)',
+                      }}>{activity.type}</span>
+                      <span style={{
+                        display: 'inline-flex', padding: '0.15rem 0.5rem', borderRadius: '9999px',
+                        fontSize: '0.7rem', fontWeight: 600,
+                        color: activity.status === 'published' ? '#10b981' : '#f59e0b',
+                        background: activity.status === 'published' ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
+                        border: `1px solid ${activity.status === 'published' ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}`,
+                      }}>{activity.status === 'published' ? 'Publicada' : 'Rascunho'}</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                        {new Date(activity.createdAt).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => activity.id && handleDeleteActivity(activity.id)}
+                    style={{
+                      background: 'none', border: 'none', color: 'var(--text-muted)',
+                      cursor: 'pointer', padding: '0.5rem', borderRadius: '0.5rem',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#ef4444')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+                    aria-label={`Excluir atividade ${activity.title}`}
+                  >
+                    <Trash2 style={{ width: '1rem', height: '1rem' }} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+              <BookOpen style={{ width: '2.5rem', height: '2.5rem', margin: '0 auto 0.75rem', opacity: 0.5 }} />
+              <p>Nenhuma atividade criada. Clique em "Nova Atividade" para começar.</p>
+            </div>
+          )}
         </div>
       )}
     </div>
