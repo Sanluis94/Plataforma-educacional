@@ -15,6 +15,7 @@ export interface Turma {
   id: string;
   name: string;
   studentsCount: number;
+  professorName?: string;
 }
 
 const COLLECTION = 'classes';
@@ -48,6 +49,32 @@ export const getProfessorClasses = async (professorId?: string): Promise<Turma[]
 };
 
 /**
+ * Busca turmas nas quais um estudante está matriculado.
+ */
+export const getStudentClasses = async (studentId: string): Promise<Turma[]> => {
+  if (!db || !studentId) return [];
+
+  try {
+    const q = query(
+      collection(db, COLLECTION),
+      where('studentIds', 'array-contains', studentId),
+      orderBy('createdAt', 'desc')
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(docSnap => ({
+      id: docSnap.id,
+      name: docSnap.data().name,
+      studentsCount: docSnap.data().studentsCount || 0,
+      professorName: docSnap.data().professorName || 'Professor',
+    }));
+  } catch (error) {
+    console.error('[ClassRepository] Erro ao buscar turmas do estudante:', error);
+    return [];
+  }
+};
+
+/**
  * Cria uma nova turma no Firestore.
  */
 export const saveClass = async (
@@ -64,6 +91,7 @@ export const saveClass = async (
     name,
     professorId,
     professorName: professorName || 'Professor',
+    joinCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
     studentsCount: 0,
     studentIds: [],
     createdAt: new Date().toISOString(),

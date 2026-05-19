@@ -8,6 +8,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { MODULES_BY_GRADE, ALL_MODULES, SHOP_ITEMS } from '../constants/dashboardConstants';
 import { getAIRecommendation, processModuleCompletion, processItemPurchase } from '../services/studentService';
 import { getStudentProgress } from '../../data/repositories/studentRepository';
+import { getStudentClasses, enrollStudent } from '../../data/repositories/classRepository';
+import type { Turma } from '../../data/repositories/classRepository';
 import { evaluateAchievements } from '../services/achievementService';
 import type { Achievement } from '../services/achievementService';
 import type { ProgressData } from '../../data/types';
@@ -22,8 +24,9 @@ export const useStudentDashboard = () => {
   const [purchasedItems, setPurchasedItems] = useState<string[]>([]);
   const [aiTip, setAiTip] = useState('Analisando seu progresso educacional...');
   const [activeSubject, setActiveSubject] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'learning' | 'shop' | 'achievements'>('learning');
+  const [activeView, setActiveView] = useState<'learning' | 'shop' | 'achievements' | 'classes'>('learning');
   const [shopItems, setShopItems] = useState(SHOP_ITEMS);
+  const [studentClasses, setStudentClasses] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
   const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
   const prevProgressRef = useRef<ProgressData | null>(null);
@@ -98,7 +101,15 @@ export const useStudentDashboard = () => {
         setLoading(false);
       }
     };
+    
+    const loadClasses = async () => {
+      if (!uid) return;
+      const classes = await getStudentClasses(uid);
+      setStudentClasses(classes);
+    };
+
     loadProgress();
+    loadClasses();
   }, [uid]);
 
   // Busca recomendação da IA adaptativa
@@ -152,6 +163,20 @@ export const useStudentDashboard = () => {
     }
   }, [uid, progress.coins, shopItems]);
 
+  // Join a class
+  const joinClass = useCallback(async (classCode: string) => {
+    if (!uid || !classCode.trim()) return false;
+    try {
+      await enrollStudent(classCode.trim(), uid);
+      const classes = await getStudentClasses(uid);
+      setStudentClasses(classes);
+      return true;
+    } catch (error) {
+      console.error('[useStudentDashboard] Erro ao entrar na turma:', error);
+      return false;
+    }
+  }, [uid]);
+
   return {
     progress,
     aiTip,
@@ -168,5 +193,7 @@ export const useStudentDashboard = () => {
     achievements,
     achievementToast,
     completedModules,
+    studentClasses,
+    joinClass,
   };
 };

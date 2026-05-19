@@ -23,6 +23,8 @@ export interface ClassData {
   name: string;
   professorId: string;
   professorName: string;
+  joinCode: string;
+  gradeLevel?: string;
   studentsCount: number;
   studentIds: string[];
   createdAt: string;
@@ -36,9 +38,25 @@ export interface ActivityData {
   type: string;
   config: Record<string, unknown>;
   classId?: string;
+  className?: string;
   professorId: string;
+  dueDate?: string;
   createdAt: string;
   status: 'published' | 'draft';
+}
+
+// ─── Coleção: submissions ─────────────────────────────────────
+export interface SubmissionData {
+  id?: string;
+  activityId: string;
+  activityTitle: string;
+  classId: string;
+  studentId: string;
+  studentName: string;
+  score: number;
+  answers?: Record<string, unknown>;
+  submittedAt: string;
+  status: 'completed' | 'pending';
 }
 
 // ─── Coleção: progress ────────────────────────────────────────
@@ -48,6 +66,7 @@ export interface ProgressData {
   coins: number;
   completedModules: string[];
   purchasedItems: string[];
+  enrolledClasses?: string[];
   updatedAt: string;
 }
 
@@ -70,5 +89,6 @@ export const DEFAULT_PROGRESS: ProgressData = {
   coins: 0,
   completedModules: [],
   purchasedItems: [],
+  enrolledClasses: [],
   updatedAt: new Date().toISOString(),
 };

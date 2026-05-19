@@ -203,6 +203,9 @@ export function ProfessorDashboard() {
                   <Users style={{ width: '1rem', height: '1rem' }} />
                   {turma.studentsCount} Alunos Matriculados
                 </div>
+                <div style={{ padding: '0.5rem', background: 'rgba(0,0,0,0.15)', borderRadius: '0.5rem', marginBottom: '1rem', border: '1px dashed var(--border-color)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  Código da Turma: <strong style={{ color: 'var(--text-main)', letterSpacing: '0.5px' }}>{turma.id}</strong>
+                </div>
                 <button
                   className="btn-outline-violet"
                   style={{ width: '100%', padding: '0.5rem', fontSize: '0.82rem' }}

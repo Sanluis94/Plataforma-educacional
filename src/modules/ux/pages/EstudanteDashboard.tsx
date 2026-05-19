@@ -1,4 +1,5 @@
-import { Star, Award, BrainCircuit, Beaker, TrendingUp, Trophy, ShoppingBag } from 'lucide-react';
+import { useState } from 'react';
+import { Star, Award, BrainCircuit, Beaker, TrendingUp, Trophy, ShoppingBag, BookOpen } from 'lucide-react';
 import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
 import { SUBJECT_THEMES } from '../../core/constants/dashboardConstants';
 
@@ -16,7 +17,11 @@ export function EstudanteDashboard() {
     buyItem,
     achievements,
     achievementToast,
+    studentClasses,
+    joinClass,
   } = useStudentDashboard();
+
+  const [classCodeInput, setClassCodeInput] = useState('');
 
   const { level, xp, coins } = progress;
 
@@ -33,6 +38,7 @@ export function EstudanteDashboard() {
 
   const tabs = [
     { id: 'learning' as const, label: 'Aprendizado', icon: Beaker },
+    { id: 'classes' as const, label: 'Turmas', icon: BookOpen },
     { id: 'shop' as const, label: 'Loja', icon: ShoppingBag },
     { id: 'achievements' as const, label: 'Conquistas', icon: Trophy },
   ];
@@ -314,6 +320,75 @@ export function EstudanteDashboard() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Classes View */}
+      {!activeSubject && activeView === 'classes' && (
+        <div className="fade-in" style={{ maxWidth: '44rem', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 600 }}>👥 Minhas Turmas</h2>
+          </div>
+          
+          <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+            <h3 style={{ color: 'var(--text-main)', marginBottom: '0.75rem', fontSize: '1.1rem' }}>Entrar em uma nova Turma</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+              Insira o código de convite fornecido pelo seu professor para se matricular na turma.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <input 
+                type="text" 
+                placeholder="Ex: abc123def456" 
+                value={classCodeInput}
+                onChange={(e) => setClassCodeInput(e.target.value)}
+                style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid rgba(6,182,212,0.3)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)' }}
+              />
+              <button 
+                className="btn-gradient" 
+                style={{ padding: '0 1.5rem' }}
+                onClick={async () => {
+                  if (classCodeInput) {
+                    const success = await joinClass(classCodeInput);
+                    if (success) setClassCodeInput('');
+                  }
+                }}
+              >
+                Entrar
+              </button>
+            </div>
+          </div>
+
+          <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem', fontSize: '1.1rem' }}>Turmas Matriculadas ({studentClasses.length})</h3>
+          
+          {studentClasses.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+              {studentClasses.map(turma => (
+                <div key={turma.id} className="glass-card" style={{ padding: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                    <h4 style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: '1.05rem' }}>{turma.name}</h4>
+                    <span className="badge-green" style={{
+                      display: 'inline-flex', alignItems: 'center', padding: '0.2rem 0.6rem',
+                      borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 500, border: '1px solid',
+                      color: '#10b981', background: 'rgba(16,185,129,0.1)', borderColor: 'rgba(16,185,129,0.3)',
+                    }}>
+                      Inscrito
+                    </span>
+                  </div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                    Professor(a): <strong style={{ color: 'var(--text-main)' }}>{turma.professorName || 'Não informado'}</strong>
+                  </div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Colegas: {turma.studentsCount}</span>
+                    <span style={{ cursor: 'pointer', color: '#06b6d4' }} onClick={() => setActiveView('learning')}>Ver Atividades →</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', borderRadius: '1rem', border: '1px dashed var(--border-color)' }}>
+              <p>Você ainda não está matriculado em nenhuma turma.</p>
+            </div>
+          )}
         </div>
       )}
     </div>
