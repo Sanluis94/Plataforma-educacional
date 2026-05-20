@@ -8,7 +8,7 @@ const COMPETENCIAS = [
   { id: 5, name: 'Proposta de Intervenção', desc: 'Proposta detalhada, respeitando os direitos humanos e a realidade social.' },
 ];
 
-export function EssayModule() {
+export function EssayModule({ onComplete }: { onComplete?: (score: number) => void }) {
   const [essay, setEssay] = useState('');
   const [theme, setTheme] = useState('A influência das redes sociais na saúde mental dos jovens');
   const [feedback, setFeedback] = useState<null | { score: number; comments: string[] }>(null);
@@ -89,6 +89,17 @@ export function EssayModule() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+      {onComplete && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
+          <button
+            onClick={() => onComplete(100)}
+            className="btn-gradient"
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
+          >
+            ✓ Concluir Laboratório
+          </button>
         </div>
       )}
     </div>

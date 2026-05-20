@@ -32,7 +32,7 @@ const SCENARIOS: Scenario[] = [
   },
 ];
 
-export function SoftSkillsModule() {
+export function SoftSkillsModule({ onComplete }: { onComplete?: (score: number) => void }) {
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
   const [totalXP, setTotalXP] = useState(0);
@@ -116,6 +116,17 @@ export function SoftSkillsModule() {
           </div>
           <button onClick={next} style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
             {scenarioIdx < SCENARIOS.length - 1 ? 'Próximo Cenário →' : 'Finalizar Trilha'}
+          </button>
+        </div>
+      )}
+      {onComplete && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
+          <button
+            onClick={() => onComplete(100)}
+            className="btn-gradient"
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
+          >
+            ✓ Concluir Laboratório
           </button>
         </div>
       )}

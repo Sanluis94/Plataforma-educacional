@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 
 interface MathSimulatorProps {
-  functionType?: 'linear' | 'quadratic' | 'trigonometric';
+  functionType?: 'linear' | 'quadratic' | 'trigonometric' | 'generic';
+  title?: string;
   onComplete?: (score: number) => void;
 }
 
-export function MathSimulator({ functionType = 'linear', onComplete }: MathSimulatorProps) {
+export function MathSimulator({ functionType = 'linear', title, onComplete }: MathSimulatorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // Parâmetros da função f(x) = ax² + bx + c (ou a*sin(bx) + c, etc)
@@ -57,7 +58,7 @@ export function MathSimulator({ functionType = 'linear', onComplete }: MathSimul
       const x = (pixelX - width / 2) / scale;
       
       let y = 0;
-      if (functionType === 'linear') {
+      if (functionType === 'linear' || functionType === 'generic') {
         y = a * x + b;
       } else if (functionType === 'quadratic') {
         y = a * x * x + b * x + c;
@@ -89,10 +90,11 @@ export function MathSimulator({ functionType = 'linear', onComplete }: MathSimul
   return (
     <div className="math-simulator mt-4 p-4" style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--shadow-md)' }}>
       <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem' }}>
-        Laboratório Virtual: Plano Cartesiano
-        {functionType === 'linear' && ' - Função do 1º Grau'}
-        {functionType === 'quadratic' && ' - Função do 2º Grau'}
-        {functionType === 'trigonometric' && ' - Função Trigonométrica'}
+        Laboratório Virtual: {title || (
+          functionType === 'linear' ? 'Plano Cartesiano - Função do 1º Grau' :
+          functionType === 'quadratic' ? 'Plano Cartesiano - Função do 2º Grau' :
+          functionType === 'trigonometric' ? 'Plano Cartesiano - Função Trigonométrica' : 'Matemática Aplicada'
+        )}
       </h3>
 
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap-reverse' }}>

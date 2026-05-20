@@ -39,7 +39,7 @@ const SLIDES: Slide[] = [
   },
 ];
 
-export function MicroscopeSimulator() {
+export function MicroscopeSimulator({ onComplete }: { onComplete?: (score: number) => void }) {
   const [selectedSlide, setSelectedSlide] = useState<Slide>(SLIDES[0]);
   const [zoom, setZoom] = useState(10); // 10x, 40x, 100x, 400x
   const [focusOffset, setFocusOffset] = useState(0);
@@ -191,6 +191,17 @@ export function MicroscopeSimulator() {
           </div>
         </div>
       </div>
+      {onComplete && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
+          <button
+            onClick={() => onComplete(100)}
+            className="btn-gradient"
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
+          >
+            ✓ Concluir Laboratório
+          </button>
+        </div>
+      )}
     </div>
   );
 }

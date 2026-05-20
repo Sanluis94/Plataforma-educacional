@@ -16,7 +16,7 @@ const EVENTS = [
 
 const CATEGORIES = ['Todos', 'Brasil', 'Política', 'Guerra', 'Ciência'];
 
-export function HistoryTimeline() {
+export function HistoryTimeline({ onComplete }: { onComplete?: (score: number) => void }) {
   const [filter, setFilter] = useState('Todos');
   const [selected, setSelected] = useState<typeof EVENTS[0] | null>(null);
 
@@ -93,6 +93,17 @@ export function HistoryTimeline() {
       ) : (
         <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
           👆 Clique em um ponto da linha do tempo para ver os detalhes do evento.
+        </div>
+      )}
+      {onComplete && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
+          <button
+            onClick={() => onComplete(100)}
+            className="btn-gradient"
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
+          >
+            ✓ Concluir Laboratório
+          </button>
         </div>
       )}
     </div>

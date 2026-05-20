@@ -43,7 +43,7 @@ no meio do caminho tinha uma pedra.`,
   }
 ];
 
-export function PortugueseModule() {
+export function PortugueseModule({ onComplete }: { onComplete?: (score: number) => void }) {
   const [selectedFragment, setSelectedFragment] = useState(FRAGMENTS[0]);
   const [currentQ, setCurrentQ] = useState(0);
   const [answered, setAnswered] = useState<number | null>(null);
@@ -157,6 +157,17 @@ export function PortugueseModule() {
           </p>
           <button onClick={reset} style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer' }}>
             Refazer Quiz
+          </button>
+        </div>
+      )}
+      {onComplete && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
+          <button
+            onClick={() => onComplete(100)}
+            className="btn-gradient"
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
+          >
+            ✓ Concluir Laboratório
           </button>
         </div>
       )}

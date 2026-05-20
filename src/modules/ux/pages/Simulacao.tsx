@@ -2,7 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, Settings2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export const Simulacao: React.FC = () => {
+interface SimulacaoProps {
+  onComplete?: (score: number) => void;
+}
+
+export const Simulacao: React.FC<SimulacaoProps> = ({ onComplete }) => {
   const [activeTab, setActiveTab] = useState<'pendulum' | 'collisions'>('pendulum');
 
   // Pendulum states
@@ -253,6 +257,15 @@ export const Simulacao: React.FC = () => {
           >
             Colisões (1D)
           </button>
+          {onComplete && (
+            <button
+              onClick={() => onComplete(100)}
+              className="btn-gradient"
+              style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', background: '#10b981', borderColor: '#10b981' }}
+            >
+              ✓ Concluir Laboratório
+            </button>
+          )}
         </div>
       </div>
 

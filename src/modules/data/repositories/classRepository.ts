@@ -4,7 +4,7 @@
  */
 import {
   collection, addDoc, query, where, getDocs,
-  doc, deleteDoc, updateDoc, arrayUnion, arrayRemove, increment, orderBy
+  doc, getDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, increment
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import { getLocalEtlClassesByProfessor } from '../services/localEtlClient';
@@ -32,16 +32,20 @@ export const getProfessorClasses = async (professorId?: string): Promise<Turma[]
   try {
     const q = query(
       collection(db, COLLECTION),
-      where('professorId', '==', professorId),
-      orderBy('createdAt', 'desc')
+      where('professorId', '==', professorId)
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(docSnap => ({
+    const docs = snapshot.docs.map(docSnap => ({
       id: docSnap.id,
       name: docSnap.data().name,
       studentsCount: docSnap.data().studentsCount || 0,
+      createdAt: docSnap.data().createdAt || '',
     }));
+    
+    // Sort locally to avoid Firestore missing index issues
+    docs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return docs;
   } catch (error) {
     console.error('[ClassRepository] Erro ao buscar turmas:', error);
     return getLocalEtlClassesByProfessor(professorId);
@@ -57,17 +61,20 @@ export const getStudentClasses = async (studentId: string): Promise<Turma[]> => 
   try {
     const q = query(
       collection(db, COLLECTION),
-      where('studentIds', 'array-contains', studentId),
-      orderBy('createdAt', 'desc')
+      where('studentIds', 'array-contains', studentId)
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(docSnap => ({
+    const docs = snapshot.docs.map(docSnap => ({
       id: docSnap.id,
       name: docSnap.data().name,
       studentsCount: docSnap.data().studentsCount || 0,
       professorName: docSnap.data().professorName || 'Professor',
+      createdAt: docSnap.data().createdAt || '',
     }));
+    
+    docs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return docs;
   } catch (error) {
     console.error('[ClassRepository] Erro ao buscar turmas do estudante:', error);
     return [];
@@ -91,7 +98,6 @@ export const saveClass = async (
     name,
     professorId,
     professorName: professorName || 'Professor',
-    joinCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
     studentsCount: 0,
     studentIds: [],
     createdAt: new Date().toISOString(),
@@ -116,12 +122,23 @@ export const deleteClass = async (classId: string): Promise<void> => {
 export const enrollStudent = async (classId: string, studentId: string): Promise<void> => {
   if (!db) return;
 
-  const classDoc = doc(db, COLLECTION, classId);
-  await updateDoc(classDoc, {
-    studentIds: arrayUnion(studentId),
-    studentsCount: increment(1),
-    updatedAt: new Date().toISOString(),
-  });
+  const classDocRef = doc(db, COLLECTION, classId);
+  const classSnap = await getDoc(classDocRef);
+  
+  if (!classSnap.exists()) {
+    throw new Error('Turma não encontrada.');
+  }
+
+  const currentStudentIds = classSnap.data().studentIds || [];
+  
+  // Só adiciona se o aluno ainda não estiver na turma
+  if (!currentStudentIds.includes(studentId)) {
+    await updateDoc(classDocRef, {
+      studentIds: arrayUnion(studentId),
+      studentsCount: increment(1),
+      updatedAt: new Date().toISOString(),
+    });
+  }
 };
 
 /**

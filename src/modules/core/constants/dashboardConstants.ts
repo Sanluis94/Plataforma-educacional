@@ -7,6 +7,7 @@ import { HistoryTimeline } from '../../ux/pages/simuladores/HistoryTimeline';
 import { LanguagesModule } from '../../ux/pages/simuladores/LanguagesModule';
 import { SoftSkillsModule } from '../../ux/pages/simuladores/SoftSkillsModule';
 import { HardSkillsSimulator } from '../../ux/pages/simuladores/HardSkillsSimulator';
+import { Simulacao } from '../../ux/pages/Simulacao';
 import type { GradeLevel } from '../contexts/AuthContext';
 
 export const SUBJECT_THEMES: Record<string, { primary: string; secondary: string; emoji: string; bg: string }> = {
@@ -23,16 +24,116 @@ export const SUBJECT_THEMES: Record<string, { primary: string; secondary: string
 };
 
 export const ALL_MODULES = [
-  { id: 'matematica', label: 'Matemática', component: MathSimulator, props: { functionType: 'linear' as const } },
-  { id: 'fisica', label: 'Física', component: null },
-  { id: 'quimica', label: 'Química', component: ChemistryLab, props: {} },
-  { id: 'biologia', label: 'Biologia', component: MicroscopeSimulator, props: {} },
-  { id: 'portugues', label: 'Português', component: PortugueseModule, props: {} },
-  { id: 'redacao', label: 'Redação', component: EssayModule, props: {} },
-  { id: 'historia', label: 'História', component: HistoryTimeline, props: {} },
-  { id: 'idiomas', label: 'Idiomas', component: LanguagesModule, props: {} },
-  { id: 'softskills', label: 'Soft Skills', component: SoftSkillsModule, props: {} },
-  { id: 'hardskills', label: 'Hard Skills', component: HardSkillsSimulator, props: {} },
+  {
+    id: 'matematica', label: 'Matemática',
+    labs: [
+      { id: 'math_1', title: 'Função de 1º Grau', component: MathSimulator, props: { functionType: 'linear' } },
+      { id: 'math_2', title: 'Função de 2º Grau', component: MathSimulator, props: { functionType: 'quadratic' } },
+      { id: 'math_3', title: 'Funções Trigonométricas', component: MathSimulator, props: { functionType: 'trigonometric' } },
+      { id: 'math_4', title: 'Geometria Espacial', component: MathSimulator, props: { functionType: 'generic', title: 'Geometria Espacial - Volume e Área' } },
+      { id: 'math_5', title: 'Estatística Descritiva', component: MathSimulator, props: { functionType: 'generic', title: 'Estatística Descritiva - Gráficos de Dispersão' } },
+      { id: 'math_6', title: 'Matrizes e Sistemas', component: MathSimulator, props: { functionType: 'generic', title: 'Matrizes e Sistemas Lineares' } },
+    ]
+  },
+  {
+    id: 'fisica', label: 'Física',
+    labs: [
+      { id: 'fis_1', title: 'Cinemática do Pêndulo', component: Simulacao, props: {} },
+      { id: 'fis_2', title: 'Leis de Newton', component: Simulacao, props: {} },
+      { id: 'fis_3', title: 'Óptica Geométrica', component: Simulacao, props: {} },
+      { id: 'fis_4', title: 'Eletromagnetismo', component: Simulacao, props: {} },
+      { id: 'fis_5', title: 'Termodinâmica', component: Simulacao, props: {} },
+      { id: 'fis_6', title: 'Física Moderna', component: Simulacao, props: {} },
+    ]
+  },
+  {
+    id: 'quimica', label: 'Química',
+    labs: [
+      { id: 'qui_1', title: 'Escala de pH', component: ChemistryLab, props: {} },
+      { id: 'qui_2', title: 'Titulação Ácido-Base', component: ChemistryLab, props: {} },
+      { id: 'qui_3', title: 'Estequiometria', component: ChemistryLab, props: {} },
+      { id: 'qui_4', title: 'Química Orgânica', component: ChemistryLab, props: {} },
+      { id: 'qui_5', title: 'Eletroquímica', component: ChemistryLab, props: {} },
+      { id: 'qui_6', title: 'Gases Ideais', component: ChemistryLab, props: {} },
+    ]
+  },
+  {
+    id: 'biologia', label: 'Biologia',
+    labs: [
+      { id: 'bio_1', title: 'Microscopia Celular', component: MicroscopeSimulator, props: {} },
+      { id: 'bio_2', title: 'Genética Mandeliana', component: MicroscopeSimulator, props: {} },
+      { id: 'bio_3', title: 'Anatomia Humana', component: MicroscopeSimulator, props: {} },
+      { id: 'bio_4', title: 'Ecossistemas', component: MicroscopeSimulator, props: {} },
+      { id: 'bio_5', title: 'Evolução', component: MicroscopeSimulator, props: {} },
+      { id: 'bio_6', title: 'Bioquímica', component: MicroscopeSimulator, props: {} },
+    ]
+  },
+  {
+    id: 'portugues', label: 'Português',
+    labs: [
+      { id: 'port_1', title: 'Sintaxe Dinâmica', component: PortugueseModule, props: {} },
+      { id: 'port_2', title: 'Morfologia', component: PortugueseModule, props: {} },
+      { id: 'port_3', title: 'Literatura Clássica', component: PortugueseModule, props: {} },
+      { id: 'port_4', title: 'Figuras de Linguagem', component: PortugueseModule, props: {} },
+      { id: 'port_5', title: 'Interpretação de Texto', component: PortugueseModule, props: {} },
+      { id: 'port_6', title: 'Fonética', component: PortugueseModule, props: {} },
+    ]
+  },
+  {
+    id: 'redacao', label: 'Redação',
+    labs: [
+      { id: 'red_1', title: 'Estrutura Dissertativa', component: EssayModule, props: {} },
+      { id: 'red_2', title: 'Coesão e Coerência', component: EssayModule, props: {} },
+      { id: 'red_3', title: 'Proposta de Intervenção', component: EssayModule, props: {} },
+      { id: 'red_4', title: 'Análise de Tema', component: EssayModule, props: {} },
+      { id: 'red_5', title: 'Repertório Sociocultural', component: EssayModule, props: {} },
+      { id: 'red_6', title: 'Correção de Falhas', component: EssayModule, props: {} },
+    ]
+  },
+  {
+    id: 'historia', label: 'História',
+    labs: [
+      { id: 'hist_1', title: 'Linha do Tempo Interativa', component: HistoryTimeline, props: {} },
+      { id: 'hist_2', title: 'Brasil Colonial', component: HistoryTimeline, props: {} },
+      { id: 'hist_3', title: 'Revolução Industrial', component: HistoryTimeline, props: {} },
+      { id: 'hist_4', title: 'Guerras Mundiais', component: HistoryTimeline, props: {} },
+      { id: 'hist_5', title: 'Grécia e Roma', component: HistoryTimeline, props: {} },
+      { id: 'hist_6', title: 'Guerra Fria', component: HistoryTimeline, props: {} },
+    ]
+  },
+  {
+    id: 'idiomas', label: 'Idiomas',
+    labs: [
+      { id: 'lang_1', title: 'Vocabulário Essencial', component: LanguagesModule, props: {} },
+      { id: 'lang_2', title: 'Tempos Verbais', component: LanguagesModule, props: {} },
+      { id: 'lang_3', title: 'Listening Comprehension', component: LanguagesModule, props: {} },
+      { id: 'lang_4', title: 'Expressões Idiomáticas', component: LanguagesModule, props: {} },
+      { id: 'lang_5', title: 'Conversação Básica', component: LanguagesModule, props: {} },
+      { id: 'lang_6', title: 'Falsos Cognatos', component: LanguagesModule, props: {} },
+    ]
+  },
+  {
+    id: 'softskills', label: 'Soft Skills',
+    labs: [
+      { id: 'soft_1', title: 'Comunicação Interpessoal', component: SoftSkillsModule, props: {} },
+      { id: 'soft_2', title: 'Liderança', component: SoftSkillsModule, props: {} },
+      { id: 'soft_3', title: 'Gestão de Tempo', component: SoftSkillsModule, props: {} },
+      { id: 'soft_4', title: 'Inteligência Emocional', component: SoftSkillsModule, props: {} },
+      { id: 'soft_5', title: 'Resolução de Conflitos', component: SoftSkillsModule, props: {} },
+      { id: 'soft_6', title: 'Trabalho em Equipe', component: SoftSkillsModule, props: {} },
+    ]
+  },
+  {
+    id: 'hardskills', label: 'Hard Skills',
+    labs: [
+      { id: 'hard_1', title: 'Lógica de Programação', component: HardSkillsSimulator, props: {} },
+      { id: 'hard_2', title: 'Estruturas de Dados', component: HardSkillsSimulator, props: {} },
+      { id: 'hard_3', title: 'Banco de Dados', component: HardSkillsSimulator, props: {} },
+      { id: 'hard_4', title: 'Desenvolvimento Web', component: HardSkillsSimulator, props: {} },
+      { id: 'hard_5', title: 'Algoritmos', component: HardSkillsSimulator, props: {} },
+      { id: 'hard_6', title: 'Redes de Computadores', component: HardSkillsSimulator, props: {} },
+    ]
+  },
 ];
 
 export const MODULES_BY_GRADE: Record<GradeLevel, string[]> = {

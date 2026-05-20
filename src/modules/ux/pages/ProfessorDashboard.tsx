@@ -25,6 +25,7 @@ export function ProfessorDashboard() {
     publishActivity,
     handleDeleteActivity,
     exportReportCSV,
+    globalStats,
   } = useProfessorDashboard();
 
   // Derive real stats from Firestore data
@@ -51,8 +52,8 @@ export function ProfessorDashboard() {
   const stats = [
     { label: 'Total de Alunos', value: String(totalStudents), icon: Users, accent: 'cyan' as const },
     { label: 'Turmas Ativas', value: String(totalClasses), icon: BookOpen, accent: 'violet' as const },
-    { label: 'Taxa de Conclusão', value: totalStudents > 0 ? '89%' : '0%', icon: Award, accent: 'cyan' as const },
-    { label: 'Engajamento', value: totalStudents > 0 ? '73%' : '0%', icon: TrendingUp, accent: 'violet' as const },
+    { label: 'Taxa de Conclusão', value: `${globalStats.completionRate}%`, icon: Award, accent: 'cyan' as const },
+    { label: 'Engajamento', value: `${globalStats.engagement}%`, icon: TrendingUp, accent: 'violet' as const },
   ];
 
   const tooltipStyle = {
@@ -438,132 +439,198 @@ export function ProfessorDashboard() {
       {activeTab === 'activityBuilder' && (
         <div className="fade-in" style={{
           position: 'fixed', inset: 0, zIndex: 100,
-          background: 'var(--bg-overlay)', backdropFilter: 'blur(6px)',
+          background: 'var(--bg-overlay)', backdropFilter: 'blur(8px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           padding: '1rem',
         }}>
           <div className="glass-card" style={{
-            width: '100%', maxWidth: '700px', maxHeight: '85vh', overflow: 'auto',
-            padding: '2rem', borderRadius: '1rem',
-            background: 'var(--bg-card)',
+            width: '100%', maxWidth: '1000px', height: '80vh', display: 'flex', flexDirection: 'column',
+            borderRadius: '1rem', background: 'var(--bg-card)', overflow: 'hidden',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
           }}>
             {/* Builder Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 600 }}>
-                Construtor de Experiências (Passo {builderStep}/3)
-              </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem 2rem', borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
+              <div>
+                <h2 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 600 }}>
+                  Construtor de Experiências Estúdio
+                </h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.25rem' }}>Passo {builderStep} de 3</p>
+              </div>
               <button onClick={() => setActiveTab('classes')} style={{
-                background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.25rem',
+                background: 'rgba(255,255,255,0.05)', border: 'none', color: 'var(--text-main)', cursor: 'pointer',
+                width: '2.5rem', height: '2.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s'
               }}>✕</button>
             </div>
 
-            {/* Step 1 */}
-            {builderStep === 1 && (
-              <div>
-                <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem' }}>1. Qual o foco da atividade?</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem' }}>
-                  {[
-                    { type: 'simulation_physics', title: '🔭 Simulação de Física', desc: 'Cinemática, Dinâmica, Eletromagnetismo', config: { gravity: 9.8 } },
-                    { type: 'simulation_chemistry', title: '🧪 Lab de Química', desc: 'Reações, Titulação, Tabela Periódica', config: { reagents: [] } },
-                    { type: 'simulation_biology', title: '🔬 Microscópio Virtual', desc: 'Células, Genética, Anatomia', config: { microscopeZoom: 10 } },
-                    { type: 'simulation_math', title: '📐 Álgebra e Geometria', desc: 'Funções, Gráficos, Estatística', config: { functionType: 'linear', allowGraphing: true } },
-                    { type: 'professional_training', title: '💼 Capacitação', desc: 'Soft skills, Liderança', config: { skillLevel: 'iniciante' } },
-                    { type: 'quiz', title: '📝 Quiz Adaptativo', desc: 'Avaliação inteligente com IA', config: { difficulty: 'adaptative' } },
-                  ].map(item => (
-                    <div
-                      key={item.type}
-                      onClick={() => setActivityConfig({ ...activityConfig, type: item.type, config: item.config })}
-                      style={{
-                        padding: '1rem', borderRadius: '0.75rem', cursor: 'pointer',
-                        border: activityConfig.type === item.type ? '1px solid #06b6d4' : '1px solid var(--border-color)',
-                        background: activityConfig.type === item.type ? 'rgba(6,182,212,0.1)' : 'transparent',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '0.25rem' }}>{item.title}</h4>
-                      <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{item.desc}</p>
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+              {/* Left Controls Panel */}
+              <div style={{ flex: '1 1 55%', padding: '2rem', overflowY: 'auto', borderRight: '1px solid var(--border-color)' }}>
+                {builderStep === 1 && (
+                  <div className="fade-in">
+                    <h3 style={{ color: 'var(--text-main)', marginBottom: '1.5rem', fontSize: '1.1rem' }}>Selecione o tipo de laboratório</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
+                      {[
+                        { type: 'simulation_physics', title: '🔭 Física Avançada', desc: 'Gravidade, Cinemática e Colisões', config: { gravity: 9.8 } },
+                        { type: 'simulation_chemistry', title: '🧪 Laboratório Químico', desc: 'Reações e Titulação', config: { reagents: [] } },
+                        { type: 'simulation_biology', title: '🔬 Microscópio Virtual', desc: 'Análise Celular e Genética', config: { microscopeZoom: 10 } },
+                        { type: 'simulation_math', title: '📐 Álgebra e Geometria', desc: 'Visualização de Funções e Gráficos', config: { functionType: 'linear', allowGraphing: true } },
+                        { type: 'professional_training', title: '💼 Treinamento', desc: 'Soft skills e Liderança Corporativa', config: { skillLevel: 'iniciante' } },
+                        { type: 'quiz', title: '📝 Avaliação Adaptativa', desc: 'Questões com Inteligência Artificial', config: { difficulty: 'adaptative' } },
+                      ].map(item => (
+                        <div
+                          key={item.type}
+                          onClick={() => setActivityConfig({ ...activityConfig, type: item.type, config: item.config })}
+                          style={{
+                            padding: '1.25rem', borderRadius: '0.85rem', cursor: 'pointer',
+                            border: activityConfig.type === item.type ? '2px solid #06b6d4' : '1px solid var(--border-card)',
+                            background: activityConfig.type === item.type ? 'rgba(6,182,212,0.1)' : 'rgba(255,255,255,0.02)',
+                            transition: 'all 0.2s', transform: activityConfig.type === item.type ? 'translateY(-2px)' : 'none',
+                            boxShadow: activityConfig.type === item.type ? '0 10px 20px -10px rgba(6,182,212,0.3)' : 'none'
+                          }}
+                        >
+                          <h4 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '0.35rem' }}>{item.title}</h4>
+                          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{item.desc}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                {builderStep === 2 && (
+                  <div className="fade-in">
+                    <h3 style={{ color: 'var(--text-main)', marginBottom: '1.5rem', fontSize: '1.1rem' }}>Parametrização da Experiência</h3>
+                    
+                    <div style={{ marginBottom: '1.5rem', padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.75rem', border: '1px solid var(--border-color)' }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Título da Atividade</label>
+                      <input type="text" value={activityConfig.title} onChange={e => setActivityConfig({ ...activityConfig, title: e.target.value })} placeholder="Ex: Explorando Leis de Newton" style={{ width: '100%', fontSize: '1rem', padding: '0.75rem', background: 'var(--bg-main)', border: '1px solid var(--border-card)', borderRadius: '0.5rem', color: 'var(--text-main)' }} />
+                    </div>
+
+                    {activityConfig.type === 'simulation_physics' && (
+                      <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.75rem', border: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                          <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Gravidade Simulada (m/s²)</label>
+                          <span style={{ color: '#06b6d4', fontWeight: 600 }}>{activityConfig.config.gravity}</span>
+                        </div>
+                        <input type="range" min="1" max="25" value={activityConfig.config.gravity || 9.8} onChange={e => setActivityConfig({ ...activityConfig, config: { gravity: parseFloat(e.target.value) } })} step="0.1" style={{ width: '100%', accentColor: '#06b6d4' }} />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          <span>Lua (1.6)</span><span>Terra (9.8)</span><span>Júpiter (24.7)</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {activityConfig.type === 'simulation_math' && (
+                      <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.75rem', border: '1px solid var(--border-color)' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Categoria da Função</label>
+                        <select style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-main)', border: '1px solid var(--border-card)', borderRadius: '0.5rem', color: 'var(--text-main)', fontSize: '0.95rem' }} value={activityConfig.config.functionType} onChange={e => setActivityConfig({ ...activityConfig, config: { ...activityConfig.config, functionType: e.target.value } })}>
+                          <option value="linear">Linear (1º Grau)</option>
+                          <option value="quadratic">Quadrática (2º Grau)</option>
+                          <option value="trigonometric">Trigonométrica</option>
+                        </select>
+                      </div>
+                    )}
+                    
+                    {['simulation_physics', 'simulation_math'].indexOf(activityConfig.type) === -1 && (
+                       <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.75rem', border: '1px dashed var(--border-color)', color: 'var(--text-muted)', textAlign: 'center' }}>
+                         Configurações avançadas para este laboratório estão sendo implementadas. O título e a turma já são suficientes para publicação!
+                       </div>
+                    )}
+                  </div>
+                )}
+
+                {builderStep === 3 && (
+                  <div className="fade-in" style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '4rem', height: '4rem', borderRadius: '50%', background: 'rgba(16,185,129,0.1)', color: '#10b981', marginBottom: '1.5rem' }}>
+                      <BookOpen style={{ width: '2rem', height: '2rem' }} />
+                    </div>
+                    <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem', fontSize: '1.25rem' }}>Tudo Pronto!</h3>
+                    <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '0.95rem' }}>
+                      A atividade <strong style={{ color: 'var(--text-main)' }}>{activityConfig.title || 'Sem título'}</strong> está configurada.
+                      Ao publicar, ela será enviada instantaneamente para os dashboards dos alunos matriculados e liberada para consumo.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Preview Panel */}
+              <div style={{ flex: '1 1 45%', background: 'var(--bg-main)', padding: '2rem', display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem', fontWeight: 600 }}>Live Preview Visual</h3>
+                
+                <div style={{ flex: 1, borderRadius: '1rem', border: '1px solid var(--border-color)', background: 'var(--bg-card)', padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', top: '1rem', left: '1rem', padding: '0.25rem 0.75rem', background: 'rgba(139,92,246,0.15)', color: '#8b5cf6', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600 }}>
+                    {activityConfig.type.replace('_', ' ')}
+                  </div>
+                  
+                  {activityConfig.type === 'simulation_physics' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ width: '2px', height: '60px', background: '#06b6d4', borderStyle: 'dashed' }}></div>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'radial-gradient(circle, #06b6d4 0%, #8b5cf6 100%)', boxShadow: '0 0 20px rgba(6,182,212,0.4)', marginTop: '-2px' }}></div>
+                      <p style={{ marginTop: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600 }}>Pêndulo (Grav: {activityConfig.config.gravity || 9.8} m/s²)</p>
+                    </div>
+                  )}
+
+                  {activityConfig.type === 'simulation_chemistry' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#00bcd4' }}>
+                      <span style={{ fontSize: '3rem' }}>🧪</span>
+                      <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600 }}>Laboratório Químico</p>
+                    </div>
+                  )}
+
+                  {activityConfig.type === 'simulation_math' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#7c4dff', width: '100%' }}>
+                      <div style={{ width: '100%', height: '80px', borderBottom: '2px solid rgba(255,255,255,0.1)', borderLeft: '2px solid rgba(255,255,255,0.1)', position: 'relative' }}>
+                        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', bottom: 0, left: 0 }}>
+                          <path d="M0,100 C30,20 70,80 100,0" fill="none" stroke="#7c4dff" strokeWidth="3" />
+                        </svg>
+                      </div>
+                      <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600 }}>Gráfico: {activityConfig.config.functionType}</p>
+                    </div>
+                  )}
+                  
+                  {['simulation_physics', 'simulation_math', 'simulation_chemistry'].indexOf(activityConfig.type) === -1 && (
+                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                       <span style={{ fontSize: '3rem' }}>✨</span>
+                       <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textAlign: 'center' }}>Design Adaptativo em Construção<br/>Sua atividade ficará linda.</p>
+                     </div>
+                  )}
+
+                  <div style={{ position: 'absolute', bottom: '1.5rem', width: '80%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 600, fontSize: '1.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {activityConfig.title || 'Sem Título Definido'}
+                  </div>
                 </div>
               </div>
-            )}
-
-            {/* Step 2 */}
-            {builderStep === 2 && (
-              <div>
-                <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem' }}>2. Detalhes e Configurações</h3>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Título da Experiência</label>
-                  <input type="text" value={activityConfig.title} onChange={e => setActivityConfig({ ...activityConfig, title: e.target.value })} placeholder="Ex: Descobrindo Júpiter com Pêndulos" />
-                </div>
-
-                {activityConfig.type === 'simulation_physics' && (
-                  <div style={{ marginTop: '1rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Gravidade Simulada (m/s²)</label>
-                    <input type="number" value={activityConfig.config.gravity} onChange={e => setActivityConfig({ ...activityConfig, config: { gravity: parseFloat(e.target.value) } })} step="0.1" />
-                  </div>
-                )}
-
-                {activityConfig.type === 'simulation_chemistry' && (
-                  <div style={{ marginTop: '1rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Reagentes (separados por vírgula)</label>
-                    <input type="text" placeholder="Ex: H2O, NaCl, HCl" onChange={e => setActivityConfig({ ...activityConfig, config: { ...activityConfig.config, reagents: e.target.value.split(',') } })} />
-                  </div>
-                )}
-
-                {activityConfig.type === 'simulation_math' && (
-                  <div style={{ marginTop: '1rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Tipo de Função</label>
-                    <select value={activityConfig.config.functionType} onChange={e => setActivityConfig({ ...activityConfig, config: { ...activityConfig.config, functionType: e.target.value } })}>
-                      <option value="linear">Linear (1º Grau)</option>
-                      <option value="quadratic">Quadrática (2º Grau)</option>
-                      <option value="trigonometric">Trigonométrica</option>
-                    </select>
-                  </div>
-                )}
-
-                {activityConfig.type === 'professional_training' && (
-                  <div style={{ marginTop: '1rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Foco da Capacitação</label>
-                    <input type="text" placeholder="Ex: Gestão de Tempo, Liderança" onChange={e => setActivityConfig({ ...activityConfig, config: { focus: e.target.value } })} />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Step 3 */}
-            {builderStep === 3 && (
-              <div>
-                <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem' }}>3. Confirmação</h3>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                  A atividade "<strong style={{ color: 'var(--text-main)' }}>{activityConfig.title || 'Sem título'}</strong>" será publicada e o motor de IA irá recomendá-la para alunos com proficiência suficiente.
-                </p>
-              </div>
-            )}
+            </div>
 
             {/* Builder Footer */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 2rem', borderTop: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
               <button
                 onClick={() => setBuilderStep(b => b - 1)}
                 disabled={builderStep === 1}
                 className="btn-outline-violet"
-                style={{ opacity: builderStep === 1 ? 0.4 : 1, padding: '0.5rem 1.25rem' }}
+                style={{ opacity: builderStep === 1 ? 0.3 : 1, padding: '0.6rem 1.5rem', cursor: builderStep === 1 ? 'not-allowed' : 'pointer' }}
               >
-                Voltar
+                Passo Anterior
               </button>
+              
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {[1, 2, 3].map(step => (
+                  <div key={step} style={{ width: '2rem', height: '0.35rem', borderRadius: '99px', background: step <= builderStep ? '#06b6d4' : 'rgba(255,255,255,0.1)', transition: 'background 0.3s' }} />
+                ))}
+              </div>
+
               {builderStep < 3 ? (
-                <button onClick={() => setBuilderStep(b => b + 1)} className="btn-gradient" style={{ padding: '0.5rem 1.25rem' }}>
+                <button onClick={() => setBuilderStep(b => b + 1)} className="btn-gradient" style={{ padding: '0.6rem 1.5rem' }}>
                   Próximo Passo
                 </button>
               ) : (
-                <button onClick={publishActivity} className="btn-gradient" style={{ padding: '0.5rem 1.25rem' }}>
-                  Publicar Atividade
+                <button onClick={publishActivity} className="btn-gradient" style={{ padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Award style={{ width: '1.1rem', height: '1.1rem' }} /> Publicar Atividade
                 </button>
               )}
             </div>
           </div>
         </div>
       )}
+
       {/* Activities Listing */}
       {activeTab === 'activities' && (
         <div className="glass-card fade-in" style={{ padding: '1.5rem', marginBottom: '2rem' }}>

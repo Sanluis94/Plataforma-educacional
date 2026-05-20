@@ -42,7 +42,7 @@ interface Tube {
   mixed: boolean;
 }
 
-export function ChemistryLab() {
+export function ChemistryLab({ onComplete }: { onComplete?: (score: number) => void }) {
   const [tubes, setTubes] = useState<Tube[]>([
     { id: 1, reagents: [], mixed: false },
     { id: 2, reagents: [], mixed: false },
@@ -213,8 +213,19 @@ export function ChemistryLab() {
         color: 'var(--text-secondary)',
         fontSize: '0.9rem',
       }}>
-        ℹ️ {info}
+        💡 {info}
       </div>
+      {onComplete && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+          <button
+            onClick={() => onComplete(100)}
+            className="btn-gradient"
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
+          >
+            ✓ Concluir Laboratório de Química
+          </button>
+        </div>
+      )}
     </div>
   );
 }

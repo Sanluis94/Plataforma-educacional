@@ -28,7 +28,7 @@ const PROGRAMS: Record<string, Program> = {
   },
 };
 
-export function HardSkillsSimulator() {
+export function HardSkillsSimulator({ onComplete }: { onComplete?: (score: number) => void }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [step, setStep] = useState(0);
   const [input, setInput] = useState('');
@@ -116,6 +116,17 @@ export function HardSkillsSimulator() {
           </div>
         </div>
       ) : null}
+      {onComplete && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
+          <button
+            onClick={() => onComplete(100)}
+            className="btn-gradient"
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
+          >
+            ✓ Concluir Laboratório
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -23,7 +23,6 @@ export interface ClassData {
   name: string;
   professorId: string;
   professorName: string;
-  joinCode: string;
   gradeLevel?: string;
   studentsCount: number;
   studentIds: string[];

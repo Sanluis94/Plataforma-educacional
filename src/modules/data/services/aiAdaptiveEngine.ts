@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 // Inicializa o SDK do Gemini apenas se a chave estiver configurada
-export const genAI = apiKey !== "COLE_AQUI" ? new GoogleGenerativeAI(apiKey) : null;
+export const genAI = (apiKey && apiKey !== "COLE_AQUI") ? new GoogleGenerativeAI(apiKey) : null;
 
 // Sistema de Cache Local em Memória
 // Evita requisições repetitivas para o mesmo montante de XP/Nível da sessão atual

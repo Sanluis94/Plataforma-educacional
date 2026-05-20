@@ -9,6 +9,8 @@ export function EstudanteDashboard() {
     aiTip,
     activeSubject,
     setActiveSubject,
+    activeLab,
+    setActiveLab,
     activeView,
     setActiveView,
     shopItems,
@@ -26,9 +28,9 @@ export function EstudanteDashboard() {
   const { level, xp, coins } = progress;
 
   const activeModule = activeSubject ? modules.find(m => m.id === activeSubject) : null;
-  const ActiveComponent = activeModule?.component;
+  const ActiveComponent = activeLab?.component;
 
-  const completedLabs = modules.filter(m => m.component).length; // total available
+  const completedLabs = modules.reduce((acc, m) => acc + (m.labs?.filter((l: any) => l.component).length || 0), 0);
   const stats = [
     { label: 'Labs Disponíveis', value: `${completedLabs}`, icon: Beaker },
     { label: 'Progresso Médio', value: `${Math.min(100, Math.round((xp / Math.max(1, level * 500)) * 100))}%`, icon: TrendingUp },
@@ -56,11 +58,11 @@ export function EstudanteDashboard() {
         <div>
           <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
             {activeSubject
-              ? `${SUBJECT_THEMES[activeSubject]?.emoji || '🎓'} ${modules.find(m => m.id === activeSubject)?.label || 'Laboratório'}`
+              ? `${SUBJECT_THEMES[activeSubject]?.emoji || '🎓'} ${activeLab ? activeLab.title : (activeModule?.label || 'Laboratório')}`
               : 'Painel do Estudante'}
           </h1>
           <p style={{ color: 'var(--text-secondary)' }}>
-            {activeSubject ? 'Laboratório Virtual — modo imersivo ativo' : 'Continue sua jornada de aprendizado'}
+            {activeLab ? 'Laboratório Virtual — modo imersivo ativo' : (activeSubject ? 'Selecione um laboratório para iniciar' : 'Continue sua jornada de aprendizado')}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -80,20 +82,69 @@ export function EstudanteDashboard() {
         </div>
       </div>
 
-      {/* Active Module View */}
-      {activeSubject && ActiveComponent && (
+      {/* Active Lab View */}
+      {activeSubject && activeLab && ActiveComponent && (
         <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
+          <button
+            onClick={() => setActiveLab(null)}
+            className="btn-outline-cyan"
+            style={{ marginBottom: '1.5rem', padding: '0.4rem 1rem', fontSize: '0.82rem' }}
+          >
+            ← Voltar para {activeModule?.label}
+          </button>
+          <ActiveComponent
+            {...(activeLab.props || {})}
+            onComplete={handleModuleComplete}
+          />
+        </div>
+      )}
+
+      {/* Sub-modules View (Labs Grid for Active Subject) */}
+      {activeSubject && !activeLab && (
+        <div style={{ maxWidth: '64rem', margin: '0 auto', animation: 'fadeIn 0.3s ease' }}>
           <button
             onClick={() => setActiveSubject(null)}
             className="btn-outline-cyan"
             style={{ marginBottom: '1.5rem', padding: '0.4rem 1rem', fontSize: '0.82rem' }}
           >
-            ← Voltar ao Dashboard
+            ← Voltar para Disciplinas
           </button>
-          <ActiveComponent
-            {...(activeModule?.props || {})}
-            onComplete={handleModuleComplete}
-          />
+          
+          <h2 style={{ color: 'var(--text-main)', fontSize: '1.5rem', marginBottom: '1.5rem', fontWeight: 700 }}>
+            Trilha de Laboratórios: {activeModule?.label}
+          </h2>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
+            {activeModule?.labs?.map((lab: any) => {
+              const t = SUBJECT_THEMES[activeSubject];
+              const isAvailable = !!lab.component;
+              return (
+                <button
+                  key={lab.id}
+                  onClick={() => isAvailable && setActiveLab(lab)}
+                  disabled={!isAvailable}
+                  className="glass-card"
+                  style={{
+                    display: 'flex', flexDirection: 'column', gap: '0.5rem',
+                    padding: '1.25rem', textAlign: 'left', cursor: isAvailable ? 'pointer' : 'not-allowed',
+                    opacity: isAvailable ? 1 : 0.45,
+                    borderColor: isAvailable && t?.primary ? `${t.primary}44` : 'var(--border-color)',
+                    background: 'rgba(255,255,255,0.02)',
+                  }}
+                >
+                  <div style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: '1.05rem', marginBottom: '0.5rem' }}>
+                    {lab.title}
+                  </div>
+                  <div style={{
+                    color: isAvailable ? (t?.primary || '#06b6d4') : 'var(--text-muted)', 
+                    fontSize: '0.78rem', fontWeight: 700,
+                  }}>
+                    {isAvailable ? 'Acessar Laboratório →' : '🔒 Em Breve'}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -169,25 +220,30 @@ export function EstudanteDashboard() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem' }}>
                 {modules.map(mod => {
                   const t = SUBJECT_THEMES[mod.id];
+                  const availableLabs = mod.labs?.filter((l: any) => l.component).length || 0;
+                  const totalLabs = mod.labs?.length || 0;
                   return (
                     <button
                       key={mod.id}
-                      onClick={() => mod.component && setActiveSubject(mod.id)}
-                      disabled={!mod.component}
+                      onClick={() => setActiveSubject(mod.id)}
                       className="glass-card"
                       style={{
                         display: 'flex', flexDirection: 'column', gap: '0.5rem',
-                        padding: '1.1rem', textAlign: 'left', cursor: mod.component ? 'pointer' : 'not-allowed',
-                        opacity: mod.component ? 1 : 0.45,
+                        padding: '1.1rem', textAlign: 'left', cursor: 'pointer',
                         borderColor: t?.primary ? `${t.primary}33` : 'var(--border-color)',
                       }}
                     >
-                      <div style={{ fontSize: '1.75rem' }}>{t?.emoji || '📚'}</div>
-                      <div style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: '0.88rem' }}>{mod.label}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontSize: '1.75rem' }}>{t?.emoji || '📚'}</div>
+                        <div style={{ fontSize: '0.65rem', color: availableLabs > 0 ? '#06b6d4' : 'var(--text-muted)', background: 'var(--bg-secondary)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
+                          {availableLabs}/{totalLabs} Labs
+                        </div>
+                      </div>
+                      <div style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: '0.88rem', marginTop: '0.5rem' }}>{mod.label}</div>
                       <div style={{
                         color: t?.primary || 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 700,
                       }}>
-                        {mod.component ? 'Acessar →' : 'Em breve'}
+                        Acessar Trilha →
                       </div>
                     </button>
                   );
@@ -338,7 +394,7 @@ export function EstudanteDashboard() {
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <input 
                 type="text" 
-                placeholder="Ex: abc123def456" 
+                placeholder="Ex: tB4xY9qR12kL" 
                 value={classCodeInput}
                 onChange={(e) => setClassCodeInput(e.target.value)}
                 style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid rgba(6,182,212,0.3)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)' }}

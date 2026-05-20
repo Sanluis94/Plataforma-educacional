@@ -9,6 +9,7 @@ import { MODULES_BY_GRADE, ALL_MODULES, SHOP_ITEMS } from '../constants/dashboar
 import { getAIRecommendation, processModuleCompletion, processItemPurchase } from '../services/studentService';
 import { getStudentProgress } from '../../data/repositories/studentRepository';
 import { getStudentClasses, enrollStudent } from '../../data/repositories/classRepository';
+import { saveSubmission } from '../../data/repositories/submissionRepository';
 import type { Turma } from '../../data/repositories/classRepository';
 import { evaluateAchievements } from '../services/achievementService';
 import type { Achievement } from '../services/achievementService';
@@ -24,6 +25,7 @@ export const useStudentDashboard = () => {
   const [purchasedItems, setPurchasedItems] = useState<string[]>([]);
   const [aiTip, setAiTip] = useState('Analisando seu progresso educacional...');
   const [activeSubject, setActiveSubject] = useState<string | null>(null);
+  const [activeLab, setActiveLab] = useState<{id: string, title: string, component: any, props: any} | null>(null);
   const [activeView, setActiveView] = useState<'learning' | 'shop' | 'achievements' | 'classes'>('learning');
   const [shopItems, setShopItems] = useState(SHOP_ITEMS);
   const [studentClasses, setStudentClasses] = useState<Turma[]>([]);
@@ -128,24 +130,42 @@ export const useStudentDashboard = () => {
 
   // Completa módulo — salva no Firestore
   const handleModuleComplete = useCallback(async (score: number) => {
-    if (!uid || !activeSubject) return;
+    if (!uid || !activeSubject || !activeLab) return;
 
     try {
       const updated = await processModuleCompletion(
         uid,
-        activeSubject,
+        activeLab.id, // now tracking lab completion instead of generic subject
         score,
         progress.xp,
         progress.level,
         progress.coins
       );
+      
+      // Criar submissão real para as turmas do aluno, para que o professor veja
+      const userName = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Aluno';
+      
+      // Enviar submissão para cada turma onde o aluno está matriculado
+      for (const turma of studentClasses) {
+        await saveSubmission({
+          activityId: activeLab.id,
+          activityTitle: activeLab.title,
+          classId: turma.id,
+          studentId: uid,
+          studentName: userName,
+          score,
+          submittedAt: new Date().toISOString(),
+          status: 'completed'
+        });
+      }
+
       setProgress(updated);
-      setCompletedModules(prev => prev.includes(activeSubject) ? prev : [...prev, activeSubject]);
-      setActiveSubject(null);
+      setCompletedModules(prev => prev.includes(activeLab.id) ? prev : [...prev, activeLab.id]);
+      setActiveLab(null);
     } catch (error) {
       console.error('[useStudentDashboard] Erro ao completar módulo:', error);
     }
-  }, [uid, activeSubject, progress]);
+  }, [uid, activeSubject, activeLab, studentClasses, progress, currentUser]);
 
   // Compra item na loja — salva no Firestore
   const buyItem = useCallback(async (itemId: string) => {
@@ -180,10 +200,9 @@ export const useStudentDashboard = () => {
   return {
     progress,
     aiTip,
-    activeSubject,
-    setActiveSubject,
-    activeView,
-    setActiveView,
+    activeSubject, setActiveSubject,
+    activeLab, setActiveLab,
+    activeView, setActiveView,
     shopItems,
     modules,
     handleModuleComplete,

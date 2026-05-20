@@ -3,7 +3,7 @@
  * Conecta o trabalho do aluno com a visão do professor.
  */
 import {
-  collection, addDoc, query, where, getDocs, orderBy
+  collection, addDoc, query, where, getDocs
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import type { SubmissionData } from '../types';
@@ -35,15 +35,17 @@ export const getSubmissionsByActivity = async (
 
   const q = query(
     collection(db, COLLECTION),
-    where('activityId', '==', activityId),
-    orderBy('submittedAt', 'desc')
+    where('activityId', '==', activityId)
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(d => ({
+  const docs = snapshot.docs.map(d => ({
     id: d.id,
     ...d.data(),
   })) as SubmissionData[];
+  
+  docs.sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
+  return docs;
 };
 
 /**
@@ -58,15 +60,17 @@ export const getSubmissionsByStudentInClass = async (
   const q = query(
     collection(db, COLLECTION),
     where('studentId', '==', studentId),
-    where('classId', '==', classId),
-    orderBy('submittedAt', 'desc')
+    where('classId', '==', classId)
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(d => ({
+  const docs = snapshot.docs.map(d => ({
     id: d.id,
     ...d.data(),
   })) as SubmissionData[];
+  
+  docs.sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
+  return docs;
 };
 
 /**
@@ -79,15 +83,17 @@ export const getSubmissionsByStudent = async (
 
   const q = query(
     collection(db, COLLECTION),
-    where('studentId', '==', studentId),
-    orderBy('submittedAt', 'desc')
+    where('studentId', '==', studentId)
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(d => ({
+  const docs = snapshot.docs.map(d => ({
     id: d.id,
     ...d.data(),
   })) as SubmissionData[];
+  
+  docs.sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
+  return docs;
 };
 
 /**
@@ -100,15 +106,17 @@ export const getSubmissionsByClass = async (
 
   const q = query(
     collection(db, COLLECTION),
-    where('classId', '==', classId),
-    orderBy('submittedAt', 'desc')
+    where('classId', '==', classId)
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(d => ({
+  const docs = snapshot.docs.map(d => ({
     id: d.id,
     ...d.data(),
   })) as SubmissionData[];
+  
+  docs.sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
+  return docs;
 };
 
 /**
