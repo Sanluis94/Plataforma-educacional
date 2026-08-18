@@ -4,6 +4,7 @@ import { useAuth } from './modules/core/contexts/AuthContext';
 import { Layout } from './modules/ux/components/Layout';
 import { LoginModal } from './modules/ux/components/LoginModal';
 import { ProtectedRoute } from './modules/ux/components/ProtectedRoute';
+import { ErrorBoundary } from './modules/ux/components/ErrorBoundary';
 import './index.css';
 
 // Lazy load pages from modules
@@ -15,8 +16,25 @@ const Home = lazy(() => import('./modules/ux/pages/Home').then(m => ({ default: 
 const NotFound = lazy(() => import('./modules/ux/pages/NotFound'));
 
 const LoadingFallback = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-base)' }}>
-    <div className="premium-loader"></div>
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    background: 'var(--bg-base, #0b0f19)',
+    gap: '1.25rem'
+  }}>
+    <div className="premium-loader" style={{ width: '3.5rem', height: '3.5rem' }}></div>
+    <div style={{
+      color: 'var(--text-secondary, #94a3b8)',
+      fontSize: '0.9rem',
+      fontWeight: 500,
+      letterSpacing: '0.5px',
+      animation: 'pulse 1.5s infinite ease-in-out'
+    }}>
+      Carregando ambiente de aprendizagem...
+    </div>
   </div>
 );
 
@@ -42,56 +60,58 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className={`app-container ${themeClass}`}>
-        <a href="#main-content" className="sr-only">Pular para o conteúdo principal</a>
+    <ErrorBoundary>
+      <Router>
+        <div className={`app-container ${themeClass}`}>
+          <a href="#main-content" className="sr-only">Pular para o conteúdo principal</a>
 
-        <RoleRedirect />
+          <RoleRedirect />
 
-        {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}
+          {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}
 
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            <Route element={
-              <Layout
-                theme={theme}
-                onThemeToggle={toggleTheme}
-                onLoginOpen={() => setLoginOpen(true)}
-              />
-            }>
-              <Route path="/" element={<Home onLoginOpen={() => setLoginOpen(true)} />} />
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route element={
+                <Layout
+                  theme={theme}
+                  onThemeToggle={toggleTheme}
+                  onLoginOpen={() => setLoginOpen(true)}
+                />
+              }>
+                <Route path="/" element={<Home onLoginOpen={() => setLoginOpen(true)} />} />
 
-              {/* Rotas protegidas por role */}
-              <Route path="/professor" element={
-                <ProtectedRoute allowedRoles={['professor', 'admin']}>
-                  <ProfessorDashboard />
-                </ProtectedRoute>
-              } />
+                {/* Rotas protegidas por role */}
+                <Route path="/professor" element={
+                  <ProtectedRoute allowedRoles={['professor', 'admin']}>
+                    <ProfessorDashboard />
+                  </ProtectedRoute>
+                } />
 
-              <Route path="/estudante" element={
-                <ProtectedRoute allowedRoles={['estudante', 'admin']}>
-                  <EstudanteDashboard />
-                </ProtectedRoute>
-              } />
+                <Route path="/estudante" element={
+                  <ProtectedRoute allowedRoles={['estudante', 'admin']}>
+                    <EstudanteDashboard />
+                  </ProtectedRoute>
+                } />
 
-              <Route path="/simulacao" element={
-                <ProtectedRoute allowedRoles={['estudante', 'professor', 'admin']}>
-                  <Simulacao />
-                </ProtectedRoute>
-              } />
+                <Route path="/simulacao" element={
+                  <ProtectedRoute allowedRoles={['estudante', 'professor', 'admin']}>
+                    <Simulacao />
+                  </ProtectedRoute>
+                } />
 
-              <Route path="/admin" element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminPanel />
-                </ProtectedRoute>
-              } />
+                <Route path="/admin" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminPanel />
+                  </ProtectedRoute>
+                } />
 
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-        </Suspense>
-      </div>
-    </Router>
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </Suspense>
+        </div>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

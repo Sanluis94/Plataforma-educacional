@@ -1,0 +1,25 @@
+{
+  "name": "Edu-Interact — Plataforma Educacional",
+  "short_name": "Edu-Interact",
+  "description": "Plataforma educacional interativa com Laboratórios Virtuais, Simuladores de Ciências e Gamificação",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#06b6d4",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/vite.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "science", "productivity"]
+}
