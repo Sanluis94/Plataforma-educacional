@@ -7,6 +7,11 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import type { SubmissionData } from '../types';
+import { 
+  saveLocalSubmission, 
+  getLocalSubmissionsByStudent, 
+  getLocalSubmissionsByClass 
+} from '../services/localEtlClient';
 
 const COLLECTION = 'submissions';
 
@@ -17,8 +22,8 @@ export const saveSubmission = async (
   submission: Omit<SubmissionData, 'id'>
 ): Promise<SubmissionData> => {
   if (!db) {
-    console.warn('[SubmissionRepository] Firestore não inicializado.');
-    return { ...submission, id: `local-${Date.now()}` };
+    console.warn('[SubmissionRepository] Firestore não inicializado. Salvando no LocalStorage.');
+    return saveLocalSubmission(submission);
   }
 
   const docRef = await addDoc(collection(db, COLLECTION), submission);
@@ -79,7 +84,9 @@ export const getSubmissionsByStudentInClass = async (
 export const getSubmissionsByStudent = async (
   studentId: string
 ): Promise<SubmissionData[]> => {
-  if (!db) return [];
+  if (!db) {
+    return getLocalSubmissionsByStudent(studentId);
+  }
 
   const q = query(
     collection(db, COLLECTION),
@@ -102,7 +109,9 @@ export const getSubmissionsByStudent = async (
 export const getSubmissionsByClass = async (
   classId: string
 ): Promise<SubmissionData[]> => {
-  if (!db) return [];
+  if (!db) {
+    return getLocalSubmissionsByClass(classId);
+  }
 
   const q = query(
     collection(db, COLLECTION),

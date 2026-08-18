@@ -1,10 +1,13 @@
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
+import { getLocalEtlClassReport } from '../services/localEtlClient';
 import type { LocalClassReport } from '../services/localEtlClient';
 import type { ActivityData, SubmissionData, ClassData, ProgressData } from '../types';
 
 export const getLiveClassReport = async (classId: string): Promise<LocalClassReport | null> => {
-  if (!db) return null;
+  if (!db) {
+    return getLocalEtlClassReport(classId);
+  }
 
   try {
     // 1. Buscar a Turma

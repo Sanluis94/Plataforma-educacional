@@ -14,6 +14,7 @@ import type { Turma } from '../../data/repositories/classRepository';
 import { evaluateAchievements } from '../services/achievementService';
 import type { Achievement } from '../services/achievementService';
 import type { ProgressData } from '../../data/types';
+import SoundEffects from '../services/soundEffects';
 
 export const useStudentDashboard = () => {
   const { currentUser, userData } = useAuth();
@@ -23,7 +24,7 @@ export const useStudentDashboard = () => {
   const [progress, setProgress] = useState({ level: 1, xp: 0, coins: 0 });
   const [completedModules, setCompletedModules] = useState<string[]>([]);
   const [purchasedItems, setPurchasedItems] = useState<string[]>([]);
-  const [aiTip, setAiTip] = useState('Analisando seu progresso educacional...');
+  const [aiTip, setAiTip] = useState<any>({ message: 'Analisando seu progresso educacional...', actionType: 'none' });
   const [activeSubject, setActiveSubject] = useState<string | null>(null);
   const [activeLab, setActiveLab] = useState<{id: string, title: string, component: any, props: any} | null>(null);
   const [activeView, setActiveView] = useState<'learning' | 'shop' | 'achievements' | 'classes'>('learning');
@@ -60,6 +61,7 @@ export const useStudentDashboard = () => {
 
     if (newlyUnlocked.length > 0) {
       setAchievementToast(newlyUnlocked[0]);
+      SoundEffects.playUnlock();
       setTimeout(() => setAchievementToast(null), 4000);
     }
 
@@ -116,17 +118,20 @@ export const useStudentDashboard = () => {
 
   // Busca recomendação da IA adaptativa
   useEffect(() => {
+    if (loading) return;
     async function fetchTip() {
       const tip = await getAIRecommendation({
         level: progress.level,
         xp: progress.xp,
         recentModules: activeSubject ? [activeSubject] : [],
         weaknesses: progress.level < 5 ? ['fundamentos'] : [],
+        completedModules,
+        enrolledClasses: studentClasses.map(c => c.id),
       });
       setAiTip(tip);
     }
     fetchTip();
-  }, [progress.level, progress.xp, activeSubject]);
+  }, [progress.level, progress.xp, activeSubject, completedModules, studentClasses, loading]);
 
   // Completa módulo — salva no Firestore
   const handleModuleComplete = useCallback(async (score: number) => {
@@ -174,6 +179,7 @@ export const useStudentDashboard = () => {
     try {
       const result = await processItemPurchase(uid, itemId, progress.coins, shopItems);
       if (result) {
+        SoundEffects.playCoin();
         setProgress(prev => ({ ...prev, coins: result.newCoins }));
         setShopItems(result.newItems);
         setPurchasedItems(prev => prev.includes(itemId) ? prev : [...prev, itemId]);

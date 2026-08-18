@@ -7,6 +7,8 @@ import { HistoryTimeline } from '../../ux/pages/simuladores/HistoryTimeline';
 import { LanguagesModule } from '../../ux/pages/simuladores/LanguagesModule';
 import { SoftSkillsModule } from '../../ux/pages/simuladores/SoftSkillsModule';
 import { HardSkillsSimulator } from '../../ux/pages/simuladores/HardSkillsSimulator';
+import { GeographySimulator } from '../../ux/pages/simuladores/GeographySimulator';
+import { PhilosophySimulator } from '../../ux/pages/simuladores/PhilosophySimulator';
 import { Simulacao } from '../../ux/pages/Simulacao';
 import type { GradeLevel } from '../contexts/AuthContext';
 
@@ -21,6 +23,8 @@ export const SUBJECT_THEMES: Record<string, { primary: string; secondary: string
   idiomas: { primary: '#26a69a', secondary: '#80cbc4', emoji: '🌐', bg: 'linear-gradient(135deg, #001a18 0%, #000d0c 100%)' },
   softskills: { primary: '#5c6bc0', secondary: '#9fa8da', emoji: '💼', bg: 'linear-gradient(135deg, #0a0c1a 0%, #03040d 100%)' },
   hardskills: { primary: '#0288d1', secondary: '#81d4fa', emoji: '🖥️', bg: 'linear-gradient(135deg, #00060f 0%, #000208 100%)' },
+  geografia: { primary: '#00e676', secondary: '#69f0ae', emoji: '🌋', bg: 'linear-gradient(135deg, #001d0f 0%, #000a05 100%)' },
+  filosofia: { primary: '#ffc400', secondary: '#ffe082', emoji: '🏛️', bg: 'linear-gradient(135deg, #1d1600 0%, #0a0800 100%)' },
 };
 
 export const ALL_MODULES = [
@@ -134,13 +138,35 @@ export const ALL_MODULES = [
       { id: 'hard_6', title: 'Redes de Computadores', component: HardSkillsSimulator, props: {} },
     ]
   },
+  {
+    id: 'geografia', label: 'Geografia',
+    labs: [
+      { id: 'geo_1', title: 'Placas Tectônicas', component: GeographySimulator, props: {} },
+      { id: 'geo_2', title: 'Agentes do Relevo', component: GeographySimulator, props: {} },
+      { id: 'geo_3', title: 'Tipos de Clima', component: GeographySimulator, props: {} },
+      { id: 'geo_4', title: 'Cartografia Digital', component: GeographySimulator, props: {} },
+      { id: 'geo_5', title: 'Bacias Hidrográficas', component: GeographySimulator, props: {} },
+      { id: 'geo_6', title: 'Biomas Brasileiros', component: GeographySimulator, props: {} },
+    ]
+  },
+  {
+    id: 'filosofia', label: 'Filosofia',
+    labs: [
+      { id: 'fil_1', title: 'Dilemas Éticos', component: PhilosophySimulator, props: {} },
+      { id: 'fil_2', title: 'O Mito da Caverna', component: PhilosophySimulator, props: {} },
+      { id: 'fil_3', title: 'Contratualismo', component: PhilosophySimulator, props: {} },
+      { id: 'fil_4', title: 'Lógica e Argumentação', component: PhilosophySimulator, props: {} },
+      { id: 'fil_5', title: 'Filosofia Política', component: PhilosophySimulator, props: {} },
+      { id: 'fil_6', title: 'Ciência e Método', component: PhilosophySimulator, props: {} },
+    ]
+  },
 ];
 
 export const MODULES_BY_GRADE: Record<GradeLevel, string[]> = {
   fundamental_1: ['matematica', 'portugues'],
-  fundamental_2: ['matematica', 'portugues', 'historia', 'biologia', 'idiomas'],
-  medio: ['matematica', 'fisica', 'quimica', 'biologia', 'portugues', 'redacao', 'historia', 'idiomas'],
-  profissional: ['softskills', 'hardskills', 'portugues', 'redacao', 'idiomas'],
+  fundamental_2: ['matematica', 'portugues', 'historia', 'biologia', 'idiomas', 'geografia'],
+  medio: ['matematica', 'fisica', 'quimica', 'biologia', 'portugues', 'redacao', 'historia', 'idiomas', 'geografia', 'filosofia'],
+  profissional: ['softskills', 'hardskills', 'portugues', 'redacao', 'idiomas', 'filosofia'],
 };
 
 export const SHOP_ITEMS = [

@@ -5,7 +5,7 @@
  */
 import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
-import { getLocalEtlProgress } from '../services/localEtlClient';
+import { getLocalEtlProgress, saveLocalProgress } from '../services/localEtlClient';
 import { DEFAULT_PROGRESS } from '../types';
 import type { ProgressData } from '../types';
 
@@ -56,7 +56,10 @@ export const saveStudentProgress = async (
   progress: Partial<ProgressData>
 ): Promise<void> => {
   if (!db || !uid) {
-    console.warn('[StudentRepository] Firestore não inicializado. Progresso não salvo.');
+    console.warn('[StudentRepository] Firestore não inicializado. Salvando no LocalStorage.');
+    if (uid) {
+      await saveLocalProgress(uid, progress);
+    }
     return;
   }
 

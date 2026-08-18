@@ -1,7 +1,124 @@
-import { useState } from 'react';
-import { Star, Award, BrainCircuit, Beaker, TrendingUp, Trophy, ShoppingBag, BookOpen } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Star, Award, BrainCircuit, Beaker, TrendingUp, Trophy, ShoppingBag, BookOpen, MessageCircle } from 'lucide-react';
 import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
 import { SUBJECT_THEMES } from '../../core/constants/dashboardConstants';
+import SoundEffects from '../../core/services/soundEffects';
+import { 
+  getComplementaryMaterials, 
+  getStudentMessages, 
+  sendStudentMessage,
+  type ComplementaryMaterial,
+  type StudentMessage 
+} from '../../data/repositories/classRepository';
+import { useAuth } from '../../core/contexts/AuthContext';
+
+function ConfettiCanvas({ active, onComplete }: { active: boolean; onComplete: () => void }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!active) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    interface Particle {
+      x: number;
+      y: number;
+      size: number;
+      color: string;
+      speedX: number;
+      speedY: number;
+      rotation: number;
+      rotationSpeed: number;
+    }
+
+    const colors = ['#06b6d4', '#8b5cf6', '#a855f7', '#ec4899', '#10b981', '#f59e0b'];
+    const particles: Particle[] = [];
+
+    // Create 100 particles shooting from the center bottom
+    for (let i = 0; i < 100; i++) {
+      particles.push({
+        x: canvas.width / 2,
+        y: canvas.height + 10,
+        size: Math.random() * 8 + 6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        speedX: (Math.random() - 0.5) * 16,
+        speedY: -Math.random() * 15 - 10, // Shoot upwards
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 10,
+      });
+    }
+
+    let animId: number;
+    let frames = 0;
+
+    const tick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      let alive = false;
+      particles.forEach(p => {
+        // Physics
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.speedY += 0.28; // Gravity
+        p.speedX *= 0.98; // Air resistance
+        p.rotation += p.rotationSpeed;
+
+        if (p.y < canvas.height + 20) {
+          alive = true;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        }
+      });
+
+      frames++;
+      if (alive && frames < 180) {
+        animId = requestAnimationFrame(tick);
+      } else {
+        onComplete();
+      }
+    };
+
+    tick();
+
+    const handleResize = () => {
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [active]);
+
+  if (!active) return null;
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        width: '100vw',
+        height: '100vh',
+        pointerEvents: 'none',
+        zIndex: 9999,
+      }}
+    />
+  );
+}
 
 export function EstudanteDashboard() {
   const {
@@ -24,6 +141,31 @@ export function EstudanteDashboard() {
   } = useStudentDashboard();
 
   const [classCodeInput, setClassCodeInput] = useState('');
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [selectedClassDetail, setSelectedClassDetail] = useState<string | null>(null);
+  const [classMaterials, setClassMaterials] = useState<ComplementaryMaterial[]>([]);
+  const [classMessages, setClassMessages] = useState<StudentMessage[]>([]);
+  const [messageInput, setMessageInput] = useState('');
+  const [sendingMsg, setSendingMsg] = useState(false);
+  const { currentUser } = useAuth();
+
+  const handleInterceptComplete = async (score: number) => {
+    SoundEffects.playCoin();
+    setShowConfetti(true);
+    await handleModuleComplete(score);
+  };
+
+  const handleAIAction = () => {
+    const actionType = aiTip?.actionType;
+    const actionValue = aiTip?.actionValue;
+    
+    if (actionType === 'navigate_subject' && actionValue) {
+      setActiveSubject(actionValue);
+      setActiveLab(null);
+    } else if (actionType === 'navigate_tab' && actionValue) {
+      setActiveView(actionValue as any);
+    }
+  };
 
   const { level, xp, coins } = progress;
 
@@ -94,7 +236,7 @@ export function EstudanteDashboard() {
           </button>
           <ActiveComponent
             {...(activeLab.props || {})}
-            onComplete={handleModuleComplete}
+            onComplete={handleInterceptComplete}
           />
         </div>
       )}
@@ -201,13 +343,33 @@ export function EstudanteDashboard() {
           {/* AI Tip */}
           <div style={{
             display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
-            padding: '1rem 1.25rem', borderRadius: '0.75rem',
+            padding: '1.25rem', borderRadius: '0.75rem',
             background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)',
           }}>
             <BrainCircuit style={{ width: '1.25rem', height: '1.25rem', color: '#06b6d4', flexShrink: 0, marginTop: '2px' }} />
             <div>
               <div style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, marginBottom: '0.25rem', letterSpacing: '0.05em' }}>IA ADAPTATIVA</div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0, lineHeight: 1.7 }}>{aiTip}</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0, lineHeight: 1.7 }}>
+                {aiTip?.message || (typeof aiTip === 'string' ? aiTip : 'Analisando seu progresso...')}
+              </p>
+              {aiTip?.actionType && aiTip?.actionType !== 'none' && aiTip?.actionLabel && (
+                <button
+                  onClick={handleAIAction}
+                  className="premium-btn btn-primary"
+                  style={{
+                    marginTop: '0.75rem',
+                    padding: '0.35rem 0.9rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    boxShadow: '0 0 10px rgba(6, 182, 212, 0.3)'
+                  }}
+                >
+                  {aiTip.actionLabel} →
+                </button>
+              )}
             </div>
           </div>
 
@@ -435,7 +597,13 @@ export function EstudanteDashboard() {
                   </div>
                   <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
                     <span>Colegas: {turma.studentsCount}</span>
-                    <span style={{ cursor: 'pointer', color: '#06b6d4' }} onClick={() => setActiveView('learning')}>Ver Atividades →</span>
+                    <span style={{ cursor: 'pointer', color: '#06b6d4' }} onClick={async () => {
+                      setSelectedClassDetail(turma.id);
+                      const mats = await getComplementaryMaterials(turma.id);
+                      setClassMaterials(mats);
+                      const msgs = await getStudentMessages(turma.id);
+                      setClassMessages(msgs.filter(m => m.studentId === (currentUser?.uid || '')));
+                    }}>Ver Detalhes →</span>
                   </div>
                 </div>
               ))}
@@ -445,8 +613,125 @@ export function EstudanteDashboard() {
               <p>Você ainda não está matriculado em nenhuma turma.</p>
             </div>
           )}
+
+          {/* Detalhe da Turma — Materiais & Mensagens */}
+          {selectedClassDetail && (
+            <div className="fade-in" style={{ marginTop: '2rem' }}>
+              <button
+                onClick={() => setSelectedClassDetail(null)}
+                className="btn-outline-cyan"
+                style={{ marginBottom: '1rem', padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}
+              >
+                ← Voltar para lista de turmas
+              </button>
+
+              {/* Material de Apoio */}
+              <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+                <h3 style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: '1.05rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <BookOpen style={{ width: '1.1rem', height: '1.1rem', color: '#8b5cf6' }} />
+                  Material de Apoio
+                </h3>
+                {classMaterials.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {classMaterials.map(mat => (
+                      <div key={mat.id} style={{ padding: '0.85rem', borderRadius: '0.5rem', border: '1px solid rgba(139,92,246,0.15)', background: 'rgba(139,92,246,0.04)' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.25rem' }}>{mat.title}</div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginBottom: '0.4rem' }}>{mat.description}</div>
+                        {mat.link && (
+                          <a href={mat.link} target="_blank" rel="noopener noreferrer" style={{ color: '#06b6d4', fontSize: '0.8rem', textDecoration: 'underline' }}>
+                            Acessar recurso →
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Nenhum material compartilhado pelo professor ainda.</p>
+                )}
+              </div>
+
+              {/* Falar com Professor */}
+              <div className="glass-card" style={{ padding: '1.25rem' }}>
+                <h3 style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: '1.05rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <MessageCircle style={{ width: '1.1rem', height: '1.1rem', color: '#06b6d4' }} />
+                  Falar com o Professor
+                </h3>
+                <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.25rem' }}>
+                  <input
+                    type="text"
+                    placeholder="Escreva sua dúvida sobre um laboratório..."
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    style={{ flex: 1, padding: '0.7rem', borderRadius: '0.5rem', border: '1px solid rgba(6,182,212,0.25)', background: 'rgba(0,0,0,0.15)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                    onKeyDown={async (e) => {
+                      if (e.key === 'Enter' && messageInput.trim()) {
+                        setSendingMsg(true);
+                        await sendStudentMessage(
+                          selectedClassDetail,
+                          currentUser?.uid || 'local-student',
+                          currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Aluno',
+                          messageInput.trim()
+                        );
+                        setMessageInput('');
+                        const msgs = await getStudentMessages(selectedClassDetail);
+                        setClassMessages(msgs.filter(m => m.studentId === (currentUser?.uid || 'local-student')));
+                        setSendingMsg(false);
+                      }
+                    }}
+                  />
+                  <button
+                    className="btn-gradient"
+                    disabled={sendingMsg || !messageInput.trim()}
+                    style={{ padding: '0 1.25rem', fontSize: '0.85rem', opacity: messageInput.trim() ? 1 : 0.4 }}
+                    onClick={async () => {
+                      if (!messageInput.trim()) return;
+                      setSendingMsg(true);
+                      await sendStudentMessage(
+                        selectedClassDetail,
+                        currentUser?.uid || 'local-student',
+                        currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Aluno',
+                        messageInput.trim()
+                      );
+                      setMessageInput('');
+                      const msgs = await getStudentMessages(selectedClassDetail);
+                      setClassMessages(msgs.filter(m => m.studentId === (currentUser?.uid || 'local-student')));
+                      setSendingMsg(false);
+                    }}
+                  >
+                    Enviar
+                  </button>
+                </div>
+
+                {classMessages.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {classMessages.map(msg => (
+                      <div key={msg.id} style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+                        <div style={{ color: 'var(--text-main)', fontSize: '0.88rem', marginBottom: '0.4rem' }}>{msg.message}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                          Enviado em {new Date(msg.createdAt).toLocaleDateString('pt-BR')}
+                        </div>
+                        {msg.replied && msg.replyText && (
+                          <div style={{ marginTop: '0.5rem', padding: '0.6rem', borderRadius: '0.4rem', background: 'rgba(6,182,212,0.08)', borderLeft: '3px solid #06b6d4' }}>
+                            <div style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, marginBottom: '0.2rem' }}>Resposta do Professor</div>
+                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{msg.replyText}</div>
+                          </div>
+                        )}
+                        {!msg.replied && (
+                          <span style={{ color: '#f59e0b', fontSize: '0.72rem', fontWeight: 600 }}>⏳ Aguardando resposta</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Nenhuma mensagem enviada ainda.</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
+      {/* Confetti Explosion Canvas */}
+      <ConfettiCanvas active={showConfetti} onComplete={() => setShowConfetti(false)} />
     </div>
   );
 }

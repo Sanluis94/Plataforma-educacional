@@ -39,6 +39,288 @@ const SLIDES: Slide[] = [
   },
 ];
 
+const renderCellContent = (slideId: string, zoomLevel: number) => {
+  return (
+    <svg width="240" height="240" viewBox="0 0 200 200" style={{ overflow: 'visible' }}>
+      <defs>
+        <radialGradient id="animal-cyto" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#4338ca" stopOpacity="0.2" />
+          <stop offset="85%" stopColor="#6366f1" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#818cf8" stopOpacity="0.65" />
+        </radialGradient>
+        <radialGradient id="animal-nuc" cx="40%" cy="40%" r="60%">
+          <stop offset="0%" stopColor="#67e8f9" />
+          <stop offset="70%" stopColor="#0891b2" />
+          <stop offset="100%" stopColor="#0e7490" />
+        </radialGradient>
+        <radialGradient id="vegetal-cyto" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stopColor="#065f46" stopOpacity="0.15" />
+          <stop offset="80%" stopColor="#059669" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#10b981" stopOpacity="0.55" />
+        </radialGradient>
+        <radialGradient id="bacteria-cyto" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#78350f" stopOpacity="0.15" />
+          <stop offset="85%" stopColor="#d97706" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.6" />
+        </radialGradient>
+      </defs>
+
+      {slideId === 'celula_animal' && (
+        <g>
+          {zoomLevel === 10 ? (
+            <g transform="scale(0.55) translate(40, 40)">
+              <g transform="translate(80, 80)">
+                <circle cx="0" cy="0" r="45" fill="url(#animal-cyto)" stroke="#818cf8" strokeWidth="1.5" />
+                <circle cx="-5" cy="-5" r="15" fill="url(#animal-nuc)" stroke="#0891b2" strokeWidth="1" />
+              </g>
+              <g transform="translate(160, 50)">
+                <circle cx="0" cy="0" r="40" fill="url(#animal-cyto)" stroke="#818cf8" strokeWidth="1.5" />
+                <circle cx="2" cy="-2" r="13" fill="url(#animal-nuc)" stroke="#0891b2" strokeWidth="1" />
+              </g>
+              <g transform="translate(40, 140)">
+                <circle cx="0" cy="0" r="38" fill="url(#animal-cyto)" stroke="#818cf8" strokeWidth="1.5" />
+                <circle cx="-3" cy="3" r="12" fill="url(#animal-nuc)" stroke="#0891b2" strokeWidth="1" />
+              </g>
+              <g transform="translate(140, 140)">
+                <circle cx="0" cy="0" r="42" fill="url(#animal-cyto)" stroke="#818cf8" strokeWidth="1.5" />
+                <circle cx="0" cy="-4" r="14" fill="url(#animal-nuc)" stroke="#0891b2" strokeWidth="1" />
+              </g>
+            </g>
+          ) : (
+            <g transform="translate(100, 100)">
+              <circle cx="0" cy="0" r="80" fill="url(#animal-cyto)" stroke="#8b5cf6" strokeWidth="2.5" style={{ filter: 'drop-shadow(0 0 8px rgba(139,92,246,0.35))' }} />
+              
+              <g transform="translate(-45, -35) rotate(25)" style={{ opacity: zoomLevel >= 40 ? 1 : 0 }}>
+                <rect x="-16" y="-8" width="32" height="16" rx="8" fill="#ef5350" stroke="#ff8a80" strokeWidth="1" />
+                <path d="M-10,0 Q-5,-4 0,0 T10,0" fill="none" stroke="#fff" strokeWidth="1" opacity="0.7" />
+              </g>
+              <g transform="translate(45, 45) rotate(-35)" style={{ opacity: zoomLevel >= 40 ? 1 : 0 }}>
+                <rect x="-16" y="-8" width="32" height="16" rx="8" fill="#ef5350" stroke="#ff8a80" strokeWidth="1" />
+                <path d="M-10,0 Q-5,-4 0,0 T10,0" fill="none" stroke="#fff" strokeWidth="1" opacity="0.7" />
+              </g>
+
+              <g style={{ opacity: zoomLevel >= 100 ? 0.9 : 0.4 }}>
+                <path d="M-50,15 C-40,30 -20,30 -10,15 C0,0 20,0 30,15 C40,30 50,30 60,15" fill="none" stroke="#a21caf" strokeWidth="3" opacity="0.7" />
+                <path d="M-45,22 C-38,34 -22,34 -13,22 C-3,10 17,10 27,22 C37,34 45,34 55,22" fill="none" stroke="#a21caf" strokeWidth="2" opacity="0.5" />
+                {zoomLevel >= 100 && (
+                  <g fill="#fff">
+                    <circle cx="-45" cy="20" r="1.5" />
+                    <circle cx="-30" cy="26" r="1.5" />
+                    <circle cx="-10" cy="18" r="1.5" />
+                    <circle cx="10" cy="8" r="1.5" />
+                    <circle cx="25" cy="18" r="1.5" />
+                    <circle cx="45" cy="26" r="1.5" />
+                  </g>
+                )}
+              </g>
+
+              <circle cx="-35" cy="30" r="5" fill="#f59e0b" style={{ opacity: zoomLevel >= 40 ? 0.8 : 0 }} />
+              <circle cx="50" cy="-30" r="6" fill="#10b981" style={{ opacity: zoomLevel >= 40 ? 0.8 : 0 }} />
+
+              <g transform="translate(0, -10)" style={{ transform: zoomLevel === 400 ? 'scale(1.35) translate(0, 5px)' : 'none', transition: 'transform 0.4s' }}>
+                <circle cx="0" cy="0" r="28" fill="url(#animal-nuc)" stroke="#06b6d4" strokeWidth="2" />
+                <circle cx="5" cy="-5" r="9" fill="#0c4a6e" />
+                {zoomLevel >= 100 && (
+                  <path d="M-15,-5 Q-5,-10 0,-15 M-10,12 Q5,5 15,10 M-18,5 Q-8,0 -5,8" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
+                )}
+              </g>
+
+              <g transform="translate(-25, 45)" style={{ opacity: zoomLevel >= 100 ? 0.85 : 0 }}>
+                <rect x="-8" y="-3" width="16" height="6" fill="none" stroke="#f472b6" strokeWidth="2" />
+                <rect x="-3" y="-8" width="6" height="16" fill="none" stroke="#f472b6" strokeWidth="2" transform="rotate(90)" />
+              </g>
+            </g>
+          )}
+        </g>
+      )}
+
+      {slideId === 'celula_vegetal' && (
+        <g>
+          {zoomLevel === 10 ? (
+            <g transform="scale(0.55) translate(40, 40)">
+              <polygon points="90,15 150,45 150,115 90,145 30,115 30,45" fill="url(#vegetal-cyto)" stroke="#059669" strokeWidth="2" />
+              <circle cx="90" cy="80" r="25" fill="rgba(33,150,243,0.1)" stroke="#2196f3" strokeWidth="1.5" strokeDasharray="2" />
+              <circle cx="120" cy="95" r="12" fill="url(#animal-nuc)" stroke="#0891b2" strokeWidth="1" />
+
+              <polygon points="150,45 210,15 270,45 270,115 210,145 150,115" fill="url(#vegetal-cyto)" stroke="#059669" strokeWidth="2" />
+              <polygon points="30,115 90,145 90,215 30,245 -30,215 -30,145" fill="url(#vegetal-cyto)" stroke="#059669" strokeWidth="2" />
+            </g>
+          ) : (
+            <g transform="translate(100, 100)">
+              <polygon points="0,-85 75,-45 75,45 0,85 -75,45 -75,-45" fill="url(#vegetal-cyto)" stroke="#10b981" strokeWidth="4.5" style={{ filter: 'drop-shadow(0 0 8px rgba(16,185,129,0.3))' }} />
+              <polygon points="0,-80 70,-42 70,42 0,80 -70,42 -70,-42" fill="none" stroke="#059669" strokeWidth="1.5" opacity="0.6" />
+
+              <path d="M-45,-25 C-15,-55 15,-55 45,-25 C55,10 45,45 0,55 C-45,45 -55,10 -45,-25 Z" fill="rgba(14,165,233,0.12)" stroke="#0ea5e9" strokeWidth="2.5" strokeDasharray="3 3" />
+              {zoomLevel >= 100 && (
+                <g fill="#38bdf8" opacity="0.6">
+                  <circle cx="-15" cy="-10" r="1.5" />
+                  <circle cx="15" cy="15" r="1.5" />
+                  <circle cx="0" cy="-25" r="1" />
+                </g>
+              )}
+
+              <g style={{ opacity: zoomLevel >= 40 ? 1 : 0 }}>
+                <g transform="translate(-55, -45) rotate(35)">
+                  <ellipse cx="0" cy="0" rx="14" ry="9" fill="#047857" stroke="#34d399" strokeWidth="1" />
+                  {zoomLevel >= 100 && (
+                    <g stroke="#6ee7b7" strokeWidth="1" opacity="0.8">
+                      <line x1="-8" y1="-3" x2="-8" y2="3" />
+                      <line x1="-3" y1="-4" x2="-3" y2="4" />
+                      <line x1="2" y1="-4" x2="2" y2="4" />
+                      <line x1="7" y1="-3" x2="7" y2="3" />
+                    </g>
+                  )}
+                </g>
+                <g transform="translate(-60, 15) rotate(-55)">
+                  <ellipse cx="0" cy="0" rx="14" ry="9" fill="#047857" stroke="#34d399" strokeWidth="1" />
+                  {zoomLevel >= 100 && (
+                    <g stroke="#6ee7b7" strokeWidth="1" opacity="0.8">
+                      <line x1="-5" y1="-3" x2="-5" y2="3" />
+                      <line x1="0" y1="-4" x2="0" y2="4" />
+                      <line x1="5" y1="-3" x2="5" y2="3" />
+                    </g>
+                  )}
+                </g>
+                <g transform="translate(55, -40) rotate(-20)">
+                  <ellipse cx="0" cy="0" rx="13" ry="8" fill="#047857" stroke="#34d399" strokeWidth="1" />
+                </g>
+                <g transform="translate(30, 55) rotate(45)">
+                  <ellipse cx="0" cy="0" rx="14" ry="9" fill="#047857" stroke="#34d399" strokeWidth="1" />
+                </g>
+              </g>
+
+              <g transform="translate(42, 18)" style={{ transform: zoomLevel === 400 ? 'scale(1.4) translate(10px, 5px)' : 'none', transition: 'transform 0.4s' }}>
+                <circle cx="0" cy="0" r="18" fill="url(#animal-nuc)" stroke="#0284c7" strokeWidth="1.5" />
+                <circle cx="3" cy="-3" r="6" fill="#0c4a6e" />
+              </g>
+            </g>
+          )}
+        </g>
+      )}
+
+      {slideId === 'bacteria' && (
+        <g>
+          {zoomLevel === 10 ? (
+            <g transform="scale(0.55) translate(40, 40)">
+              <g transform="translate(60, 60) rotate(15)">
+                <rect x="-35" y="-18" width="70" height="36" rx="18" fill="url(#bacteria-cyto)" stroke="#d97706" strokeWidth="1.5" />
+              </g>
+              <g transform="translate(150, 80) rotate(-35)">
+                <rect x="-35" y="-18" width="70" height="36" rx="18" fill="url(#bacteria-cyto)" stroke="#d97706" strokeWidth="1.5" />
+              </g>
+              <g transform="translate(90, 140) rotate(70)">
+                <rect x="-35" y="-18" width="70" height="36" rx="18" fill="url(#bacteria-cyto)" stroke="#d97706" strokeWidth="1.5" />
+              </g>
+            </g>
+          ) : (
+            <g transform="translate(100, 100)">
+              <rect x="-65" y="-38" width="130" height="76" rx="38" fill="url(#bacteria-cyto)" stroke="#f59e0b" strokeWidth="3" style={{ filter: 'drop-shadow(0 0 10px rgba(245,158,11,0.4))' }} />
+              <rect x="-60" y="-33" width="120" height="66" rx="33" fill="none" stroke="#d97706" strokeWidth="1" opacity="0.5" />
+
+              <path d="M-65,0 C-90,-10 -105,15 -130,5 C-145,-5 -155,10 -175,0" fill="none" stroke="#ea580c" strokeWidth="3" strokeLinecap="round" />
+
+              <g stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" opacity="0.8">
+                <line x1="-30" y1="-38" x2="-35" y2="-46" />
+                <line x1="0" y1="-38" x2="0" y2="-47" />
+                <line x1="30" y1="-38" x2="35" y2="-46" />
+                <line x1="-30" y1="38" x2="-35" y2="46" />
+                <line x1="0" y1="38" x2="0" y2="47" />
+                <line x1="30" y1="38" x2="35" y2="46" />
+                <line x1="65" y1="-10" x2="74" y2="-15" />
+                <line x1="65" y1="10" x2="74" y2="15" />
+                <line x1="60" y1="-25" x2="68" y2="-32" />
+                <line x1="60" y1="25" x2="68" y2="32" />
+              </g>
+
+              <path d="M-40,-5 C-40,-25 -10,-30 5,-15 C20,0 40,-5 40,15 C40,30 10,25 -5,15 C-20,5 -40,15 -40,-5 Z M-25,-8 C-10,-5 10,-20 20,-8 C30,4 15,20 0,10 C-15,0 -20,20 -25,-8 Z" fill="none" stroke="#26a69a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+
+              <g style={{ opacity: zoomLevel >= 40 ? 1 : 0 }}>
+                <circle cx="-30" cy="-20" r="7" fill="none" stroke="#8b5cf6" strokeWidth="1.5" />
+                <circle cx="35" cy="20" r="5.5" fill="none" stroke="#8b5cf6" strokeWidth="1.5" />
+              </g>
+
+              <g fill="#fff" opacity="0.8" style={{ display: zoomLevel >= 100 ? 'block' : 'none' }}>
+                <circle cx="-42" cy="18" r="1.5" />
+                <circle cx="-15" cy="-22" r="1.5" />
+                <circle cx="22" cy="-18" r="1.5" />
+                <circle cx="35" cy="-5" r="1.5" />
+                <circle cx="10" cy="22" r="1.5" />
+                <circle cx="-10" cy="2" r="1.5" />
+              </g>
+            </g>
+          )}
+        </g>
+      )}
+
+      {slideId === 'sangue' && (
+        <g>
+          {zoomLevel === 10 ? (
+            <g transform="scale(0.55) translate(40, 40)">
+              {[
+                { x: 40, y: 40 }, { x: 90, y: 35 }, { x: 140, y: 45 },
+                { x: 60, y: 90 }, { x: 110, y: 85 }, { x: 160, y: 100 },
+                { x: 35, y: 140 }, { x: 85, y: 135 }, { x: 135, y: 150 }
+              ].map((pos, idx) => (
+                <g key={idx} transform={`translate(${pos.x}, ${pos.y})`}>
+                  <circle cx="0" cy="0" r="18" fill="#c62828" stroke="#8e0000" strokeWidth="1" />
+                  <circle cx="0" cy="0" r="8" fill="#e53935" opacity="0.6" />
+                </g>
+              ))}
+            </g>
+          ) : (
+            <g transform="translate(100, 100)">
+              <g transform="translate(0, -10)">
+                <circle cx="0" cy="0" r="32" fill="#c62828" stroke="#8e0000" strokeWidth="2" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.15))' }} />
+                <circle cx="0" cy="0" r="14" fill="#ef5350" opacity="0.75" />
+              </g>
+              <g transform="translate(-50, 45) rotate(20) scale(0.85)">
+                <circle cx="0" cy="0" r="32" fill="#c62828" stroke="#8e0000" strokeWidth="2" />
+                <circle cx="0" cy="0" r="14" fill="#ef5350" opacity="0.75" />
+              </g>
+              <g transform="translate(50, -45) rotate(-35) scale(0.9)">
+                <circle cx="0" cy="0" r="32" fill="#c62828" stroke="#8e0000" strokeWidth="2" />
+                <circle cx="0" cy="0" r="14" fill="#ef5350" opacity="0.75" />
+              </g>
+              <g transform="translate(55, 35) rotate(15) scale(0.75)">
+                <circle cx="0" cy="0" r="32" fill="#c62828" stroke="#8e0000" strokeWidth="2" />
+                <circle cx="0" cy="0" r="14" fill="#ef5350" opacity="0.75" />
+              </g>
+
+              <g transform="translate(-40, -40)" style={{ display: zoomLevel >= 40 ? 'block' : 'none' }}>
+                <circle cx="0" cy="0" r="36" fill="rgba(217, 70, 239, 0.15)" stroke="#d946ef" strokeWidth="2" style={{ filter: 'drop-shadow(0 0 6px rgba(217,70,239,0.3))' }} />
+                <g fill="#701a75" opacity="0.9">
+                  <circle cx="-8" cy="-5" r="9" />
+                  <circle cx="8" cy="-5" r="8" />
+                  <circle cx="0" cy="8" r="9" />
+                  <path d="M-8,-5 L8,-5 L0,8 Z" stroke="#701a75" strokeWidth="4" />
+                </g>
+                {zoomLevel >= 100 && (
+                  <g fill="#f472b6" opacity="0.5">
+                    <circle cx="-18" cy="-12" r="1.5" />
+                    <circle cx="-22" cy="5" r="1" />
+                    <circle cx="18" cy="12" r="1.5" />
+                    <circle cx="22" cy="-6" r="1" />
+                    <circle cx="5" cy="18" r="1.5" />
+                  </g>
+                )}
+              </g>
+
+              <g style={{ display: zoomLevel >= 100 ? 'block' : 'none' }}>
+                <g transform="translate(10, 50) scale(0.9)">
+                  <path d="M0,-8 L2,-2 L8,-2 L3,2 L5,8 L0,4 L-5,8 L-3,2 L-8,-2 L-2,-2 Z" fill="#b91c1c" opacity="0.8" />
+                </g>
+                <g transform="translate(-80, 5) scale(0.7) rotate(45)">
+                  <path d="M0,-8 L2,-2 L8,-2 L3,2 L5,8 L0,4 L-5,8 L-3,2 L-8,-2 L-2,-2 Z" fill="#b91c1c" opacity="0.8" />
+                </g>
+              </g>
+            </g>
+          )}
+        </g>
+      )}
+    </svg>
+  );
+};
+
 export function MicroscopeSimulator({ onComplete }: { onComplete?: (score: number) => void }) {
   const [selectedSlide, setSelectedSlide] = useState<Slide>(SLIDES[0]);
   const [zoom, setZoom] = useState(10); // 10x, 40x, 100x, 400x
@@ -117,51 +399,17 @@ export function MicroscopeSimulator({ onComplete }: { onComplete?: (score: numbe
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 0 40px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.5)',
             position: 'relative',
-            filter: `blur(${blurAmount}px)`,
-            transition: 'filter 0.3s ease',
           }}>
-            {/* Célula visual simplificada */}
-            <div style={{ transform: `scale(${cellScale})`, transition: 'transform 0.4s ease' }}>
-              <div style={{ position: 'relative', width: '120px', height: '120px' }}>
-
-                {/* Membrana externa */}
-                <div style={{
-                  width: '120px', height: '120px', borderRadius: '50%',
-                  background: selectedSlide.id === 'celula_vegetal' 
-                    ? 'radial-gradient(circle, #2e7d3244, #1b5e2044)' 
-                    : selectedSlide.id === 'bacteria'
-                      ? 'radial-gradient(circle, #f9a82544, #e65c0044)'
-                      : selectedSlide.id === 'sangue'
-                        ? 'radial-gradient(circle, #c6282822, #b7000044)'
-                        : 'radial-gradient(circle, #5c6bc044, #3949ab44)',
-                  border: `2px solid ${selectedSlide.id === 'celula_vegetal' ? '#4caf50' : selectedSlide.id === 'bacteria' ? '#ffa726' : '#5c6bc0'}66`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }} >
-                  {/* Núcleo */}
-                  {selectedSlide.id !== 'bacteria' && (
-                    <div style={{
-                      width: '40px', height: '40px', borderRadius: '50%',
-                      background: 'radial-gradient(circle, #7986cb, #3949ab)',
-                      border: '1.5px solid #7986cb',
-                    }} />
-                  )}
-                  {selectedSlide.id === 'bacteria' && (
-                    <div style={{ width: '30px', height: '8px', borderRadius: '4px', background: '#ffcc02' }} />
-                  )}
-                </div>
-
-                {/* Mitocôndrias / Cloroplastos (pequenas formas) */}
-                {[30, 90, 150, 210].map((deg, i) => (
-                  <div key={i} style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    width: '14px', height: '7px', borderRadius: '4px',
-                    background: selectedSlide.id === 'celula_vegetal' ? '#4caf50' : '#ef9a9a',
-                    transform: `rotate(${deg}deg) translateX(45px)`,
-                    transformOrigin: '0 0',
-                    opacity: 0.8,
-                  }} />
-                ))}
-              </div>
+            {/* Célula visual - blurAmount applied only to content */}
+            <div style={{ 
+              transform: `scale(${cellScale})`, 
+              transition: 'transform 0.4s ease',
+              filter: `blur(${blurAmount}px)`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              {renderCellContent(selectedSlide.id, zoom)}
             </div>
 
             {/* Crosshair */}

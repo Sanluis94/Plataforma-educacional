@@ -1,6 +1,15 @@
+import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { PlusCircle, Users, BookOpen, BarChart as BarChartIcon, TrendingUp, Award, Eye, Trash2, Download, ListTodo } from 'lucide-react';
+import { PlusCircle, Users, BookOpen, BarChart as BarChartIcon, TrendingUp, Award, Eye, Trash2, Download, ListTodo, MessageCircle, Send } from 'lucide-react';
 import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
+import {
+  getComplementaryMaterials,
+  addComplementaryMaterial,
+  getStudentMessages,
+  replyStudentMessage,
+  type ComplementaryMaterial,
+  type StudentMessage
+} from '../../data/repositories/classRepository';
 
 export function ProfessorDashboard() {
   const {
@@ -27,6 +36,26 @@ export function ProfessorDashboard() {
     exportReportCSV,
     globalStats,
   } = useProfessorDashboard();
+
+  // State for complementary materials and student messages
+  const [profMaterials, setProfMaterials] = useState<ComplementaryMaterial[]>([]);
+  const [profMessages, setProfMessages] = useState<StudentMessage[]>([]);
+  const [newMatTitle, setNewMatTitle] = useState('');
+  const [newMatDesc, setNewMatDesc] = useState('');
+  const [newMatLink, setNewMatLink] = useState('');
+  const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
+  const [replyBonusCoins, setReplyBonusCoins] = useState<Record<string, number>>({});
+
+  // Load materials & messages when a class report is viewed
+  useEffect(() => {
+    if (!selectedClassId) return;
+    (async () => {
+      const mats = await getComplementaryMaterials(selectedClassId);
+      setProfMaterials(mats);
+      const msgs = await getStudentMessages(selectedClassId);
+      setProfMessages(msgs);
+    })();
+  }, [selectedClassId, classReport]);
 
   // Derive real stats from Firestore data
   const totalStudents = turmas.reduce((sum, t) => sum + (t.studentsCount || 0), 0);
@@ -225,6 +254,106 @@ export function ProfessorDashboard() {
           </div>
         )}
       </div>
+
+      {/* Complementary Material & Student Inbox (only when a class is selected) */}
+      {selectedClassId && activeTab !== 'activityBuilder' && activeTab !== 'activities' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+          {/* Material Complementar */}
+          <div className="glass-card" style={{ padding: '1.25rem' }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <BookOpen style={{ width: '1rem', height: '1rem', color: '#8b5cf6' }} />
+              Material Complementar
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1rem', padding: '0.85rem', borderRadius: '0.5rem', border: '1px solid rgba(139,92,246,0.15)', background: 'rgba(139,92,246,0.03)' }}>
+              <input type="text" placeholder="Título do material" value={newMatTitle} onChange={e => setNewMatTitle(e.target.value)}
+                style={{ padding: '0.5rem', borderRadius: '0.4rem', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.15)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
+              <input type="text" placeholder="Descrição breve" value={newMatDesc} onChange={e => setNewMatDesc(e.target.value)}
+                style={{ padding: '0.5rem', borderRadius: '0.4rem', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.15)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
+              <input type="text" placeholder="Link do recurso (opcional)" value={newMatLink} onChange={e => setNewMatLink(e.target.value)}
+                style={{ padding: '0.5rem', borderRadius: '0.4rem', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.15)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
+              <button className="btn-gradient" style={{ padding: '0.45rem', fontSize: '0.82rem' }}
+                disabled={!newMatTitle.trim()}
+                onClick={async () => {
+                  if (!newMatTitle.trim() || !selectedClassId) return;
+                  await addComplementaryMaterial(selectedClassId, newMatTitle.trim(), newMatDesc.trim(), newMatLink.trim());
+                  setNewMatTitle(''); setNewMatDesc(''); setNewMatLink('');
+                  const mats = await getComplementaryMaterials(selectedClassId);
+                  setProfMaterials(mats);
+                }}>
+                Publicar Material
+              </button>
+            </div>
+            {profMaterials.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {profMaterials.map(mat => (
+                  <div key={mat.id} style={{ padding: '0.6rem', borderRadius: '0.4rem', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)' }}>
+                    <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem' }}>{mat.title}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>{mat.description}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>Nenhum material publicado ainda.</p>
+            )}
+          </div>
+
+          {/* Caixa de Entrada (Dúvidas dos Alunos) */}
+          <div className="glass-card" style={{ padding: '1.25rem' }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <MessageCircle style={{ width: '1rem', height: '1rem', color: '#06b6d4' }} />
+              Dúvidas dos Alunos ({profMessages.filter(m => !m.replied).length} pendentes)
+            </h3>
+            {profMessages.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {profMessages.map(msg => (
+                  <div key={msg.id} style={{ padding: '0.75rem', borderRadius: '0.5rem', border: msg.replied ? '1px solid rgba(16,185,129,0.2)' : '1px solid rgba(245,158,11,0.25)', background: msg.replied ? 'rgba(16,185,129,0.04)' : 'rgba(245,158,11,0.04)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem' }}>{msg.studentName}</span>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{new Date(msg.createdAt).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>{msg.message}</div>
+                    {msg.replied ? (
+                      <div style={{ padding: '0.5rem', borderRadius: '0.4rem', background: 'rgba(16,185,129,0.08)', borderLeft: '3px solid #10b981' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700 }}>Sua resposta</div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{msg.replyText}</div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <input type="text" placeholder="Escreva sua resposta..."
+                          value={replyTexts[msg.id!] || ''}
+                          onChange={e => setReplyTexts(prev => ({ ...prev, [msg.id!]: e.target.value }))}
+                          style={{ padding: '0.45rem', borderRadius: '0.4rem', border: '1px solid rgba(6,182,212,0.2)', background: 'rgba(0,0,0,0.15)', color: 'var(--text-main)', fontSize: '0.82rem' }} />
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Recompensa 🪙</label>
+                          <input type="number" min="0" max="50" value={replyBonusCoins[msg.id!] || 0}
+                            onChange={e => setReplyBonusCoins(prev => ({ ...prev, [msg.id!]: parseInt(e.target.value) || 0 }))}
+                            style={{ width: '55px', padding: '0.3rem', borderRadius: '0.3rem', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.15)', color: 'var(--text-main)', fontSize: '0.8rem', textAlign: 'center' }} />
+                          <button className="btn-gradient" style={{ padding: '0.3rem 0.7rem', fontSize: '0.78rem', marginLeft: 'auto' }}
+                            disabled={!(replyTexts[msg.id!] || '').trim()}
+                            onClick={async () => {
+                              const reply = (replyTexts[msg.id!] || '').trim();
+                              if (!reply || !selectedClassId) return;
+                              const coins = replyBonusCoins[msg.id!] || 0;
+                              await replyStudentMessage(selectedClassId, msg.id!, reply, coins, coins > 0 ? 50 : 0, msg.studentId);
+                              const msgs = await getStudentMessages(selectedClassId);
+                              setProfMessages(msgs);
+                              setReplyTexts(prev => { const n = { ...prev }; delete n[msg.id!]; return n; });
+                              setReplyBonusCoins(prev => { const n = { ...prev }; delete n[msg.id!]; return n; });
+                            }}>
+                            <Send style={{ width: '0.75rem', height: '0.75rem' }} /> Responder
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>Nenhuma dúvida recebida ainda.</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>

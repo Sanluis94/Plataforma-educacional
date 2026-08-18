@@ -16,7 +16,11 @@ vi.mock('../modules/data/repositories/logRepository', () => ({
 }));
 
 vi.mock('../modules/data/services/aiAdaptiveEngine', () => ({
-  getAdaptiveRecommendation: vi.fn().mockResolvedValue('Mock recommendation'),
+  getAdaptiveRecommendation: vi.fn().mockResolvedValue({
+    message: 'Mock recommendation',
+    actionType: 'none',
+    actionLabel: ''
+  }),
 }));
 
 // Import after mocks
@@ -88,9 +92,9 @@ describe('processItemPurchase', () => {
 });
 
 describe('getAIRecommendation', () => {
-  it('should return a recommendation string', async () => {
+  it('should return a recommendation object with message', async () => {
     const result = await getAIRecommendation({ level: 1, xp: 0 });
-    expect(typeof result).toBe('string');
-    expect(result.length).toBeGreaterThan(0);
+    expect(typeof result.message).toBe('string');
+    expect(result.message.length).toBeGreaterThan(0);
   });
 });

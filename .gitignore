@@ -32,3 +32,10 @@ firebase-service-account*.json
 *.njsproj
 *.sln
 *.sw?
+
+# Temporary files and scripts
+temp_service_account.json
+create_sa.mjs
+builder.txt
+update_modal.py
+.firebase/

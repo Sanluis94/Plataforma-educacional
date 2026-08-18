@@ -1,6 +1,179 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { ArrowRight, Beaker, Brain, Trophy, Zap, BookOpen, Users } from 'lucide-react';
+
+export function InteractivePendulum() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const angleRef = useRef<number>(Math.PI / 4); // 45 graus
+  const velRef = useRef<number>(0);
+  const isDragging = useRef<boolean>(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+    const length = 95;
+    const gravity = 0.35;
+    const damping = 0.994; // Resistência leve
+
+    const draw = () => {
+      const width = canvas.width;
+      const height = canvas.height;
+      ctx.clearRect(0, 0, width, height);
+
+      const pivotX = width / 2;
+      const pivotY = 15;
+
+      if (!isDragging.current) {
+        const accel = (-gravity / length) * Math.sin(angleRef.current);
+        velRef.current = (velRef.current + accel) * damping;
+        angleRef.current += velRef.current;
+      }
+
+      const bobX = pivotX + length * Math.sin(angleRef.current);
+      const bobY = pivotY + length * Math.cos(angleRef.current);
+
+      // Fundo em malha tecnológica
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.04)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < width; x += 20) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0); ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += 20) {
+        ctx.beginPath();
+        ctx.moveTo(0, y); ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      // Linha do arco do pêndulo
+      ctx.strokeStyle = 'rgba(139, 92, 246, 0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(pivotX, pivotY, length, 0.2 * Math.PI, 0.8 * Math.PI);
+      ctx.setLineDash([3, 6]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Fio do pêndulo
+      ctx.beginPath();
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 2;
+      ctx.moveTo(pivotX, pivotY);
+      ctx.lineTo(bobX, bobY);
+      ctx.stroke();
+
+      // Ponto do pivô
+      ctx.beginPath();
+      ctx.fillStyle = '#8b5cf6';
+      ctx.arc(pivotX, pivotY, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Glow do Bob
+      ctx.beginPath();
+      const radGlow = ctx.createRadialGradient(bobX, bobY, 0, bobX, bobY, 18);
+      radGlow.addColorStop(0, 'rgba(6, 182, 212, 0.7)');
+      radGlow.addColorStop(0.3, 'rgba(6, 182, 212, 0.3)');
+      radGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = radGlow;
+      ctx.arc(bobX, bobY, 18, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Centro do Bob
+      ctx.beginPath();
+      ctx.fillStyle = '#8b5cf6';
+      ctx.arc(bobX, bobY, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      animId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+    };
+  }, []);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const px = ((e.clientX - rect.left) / rect.width) * canvas.width;
+    const py = ((e.clientY - rect.top) / rect.height) * canvas.height;
+
+    const pivotX = canvas.width / 2;
+    const pivotY = 15;
+    const dx = px - pivotX;
+    const dy = py - pivotY;
+
+    if (isDragging.current) {
+      angleRef.current = Math.atan2(dx, dy);
+      velRef.current = 0;
+    } else {
+      const length = 95;
+      const bobX = pivotX + length * Math.sin(angleRef.current);
+      const bobY = pivotY + length * Math.cos(angleRef.current);
+      const dist = Math.hypot(px - bobX, py - bobY);
+      if (dist < 22) {
+        canvas.style.cursor = 'grab';
+      } else {
+        canvas.style.cursor = 'default';
+      }
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const px = ((e.clientX - rect.left) / rect.width) * canvas.width;
+    const py = ((e.clientY - rect.top) / rect.height) * canvas.height;
+
+    const pivotX = canvas.width / 2;
+    const pivotY = 15;
+    const length = 95;
+    const bobX = pivotX + length * Math.sin(angleRef.current);
+    const bobY = pivotY + length * Math.cos(angleRef.current);
+    const dist = Math.hypot(px - bobX, py - bobY);
+
+    if (dist < 25) {
+      isDragging.current = true;
+      canvas.style.cursor = 'grabbing';
+    }
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+    const canvas = canvasRef.current;
+    if (canvas) canvas.style.cursor = 'grab';
+  };
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={320}
+      height={150}
+      onMouseMove={handleMouseMove}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      style={{
+        width: '100%',
+        maxWidth: '300px',
+        height: '140px',
+        background: 'rgba(0,0,0,0.15)',
+        borderRadius: '8px',
+        border: '1px solid rgba(6, 182, 212, 0.15)',
+      }}
+    />
+  );
+}
 
 interface HomeProps {
   onLoginOpen: () => void;
@@ -138,11 +311,13 @@ export function Home({ onLoginOpen }: HomeProps) {
               </div>
               <div style={{
                 height: '12rem', borderRadius: '0.75rem',
-                background: 'linear-gradient(135deg, rgba(6,182,212,0.1), rgba(139,92,246,0.1))',
-                border: '1px solid rgba(139,92,246,0.2)',
+                background: 'linear-gradient(135deg, rgba(6,182,212,0.06), rgba(139,92,246,0.06))',
+                border: '1px solid rgba(139,92,246,0.15)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '1rem',
+                boxSizing: 'border-box'
               }}>
-                <Beaker style={{ width: '6rem', height: '6rem', color: 'rgba(6,182,212,0.5)' }} />
+                <InteractivePendulum />
               </div>
             </div>
           </div>
