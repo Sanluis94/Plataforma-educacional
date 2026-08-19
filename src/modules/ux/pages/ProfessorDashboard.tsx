@@ -7,6 +7,8 @@ import {
   addComplementaryMaterial,
   getStudentMessages,
   replyStudentMessage,
+  subscribeComplementaryMaterials,
+  subscribeStudentMessages,
   type ComplementaryMaterial,
   type StudentMessage
 } from '../../data/repositories/classRepository';
@@ -49,13 +51,20 @@ export function ProfessorDashboard() {
   // Load materials & messages when a class report is viewed
   useEffect(() => {
     if (!selectedClassId) return;
-    (async () => {
-      const mats = await getComplementaryMaterials(selectedClassId);
+
+    const unsubMaterials = subscribeComplementaryMaterials(selectedClassId, (mats) => {
       setProfMaterials(mats);
-      const msgs = await getStudentMessages(selectedClassId);
+    });
+
+    const unsubMessages = subscribeStudentMessages(selectedClassId, (msgs) => {
       setProfMessages(msgs);
-    })();
-  }, [selectedClassId, classReport]);
+    });
+
+    return () => {
+      unsubMaterials();
+      unsubMessages();
+    };
+  }, [selectedClassId]);
 
   // Derive real stats from Firestore data
   const totalStudents = turmas.reduce((sum, t) => sum + (t.studentsCount || 0), 0);

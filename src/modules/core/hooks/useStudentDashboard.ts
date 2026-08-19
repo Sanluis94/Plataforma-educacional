@@ -27,7 +27,7 @@ export const useStudentDashboard = () => {
   const [aiTip, setAiTip] = useState<any>({ message: 'Analisando seu progresso educacional...', actionType: 'none' });
   const [activeSubject, setActiveSubject] = useState<string | null>(null);
   const [activeLab, setActiveLab] = useState<{id: string, title: string, component: any, props: any} | null>(null);
-  const [activeView, setActiveView] = useState<'learning' | 'shop' | 'achievements' | 'classes'>('learning');
+  const [activeView, setActiveView] = useState<'learning' | 'shop' | 'achievements' | 'classes' | 'leaderboard'>('learning');
   const [shopItems, setShopItems] = useState(SHOP_ITEMS);
   const [studentClasses, setStudentClasses] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);

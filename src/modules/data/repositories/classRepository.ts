@@ -3,7 +3,7 @@
  * Gerencia CRUD de turmas do professor e matrícula de alunos.
  */
 import {
-  collection, addDoc, query, where, getDocs,
+  collection, addDoc, query, where, getDocs, onSnapshot,
   doc, getDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, increment
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
@@ -322,4 +322,48 @@ export const replyStudentMessage = async (
   } catch (error) {
     console.error('[ClassRepository] Erro ao responder dúvida:', error);
   }
+};
+
+/**
+ * Escuta reativa em tempo real de materiais complementares da turma.
+ */
+export const subscribeComplementaryMaterials = (
+  classId: string,
+  callback: (materials: ComplementaryMaterial[]) => void
+): () => void => {
+  if (!db) {
+    getLocalComplementaryMaterials(classId).then(callback);
+    return () => {};
+  }
+  const q = collection(db, COLLECTION, classId, 'materials');
+  return onSnapshot(q, (snap) => {
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() } as ComplementaryMaterial));
+    docs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    callback(docs);
+  }, (err) => {
+    console.error('[ClassRepository] Erro no listener de materiais:', err);
+    getLocalComplementaryMaterials(classId).then(callback);
+  });
+};
+
+/**
+ * Escuta reativa em tempo real de mensagens de alunos na turma.
+ */
+export const subscribeStudentMessages = (
+  classId: string,
+  callback: (messages: StudentMessage[]) => void
+): () => void => {
+  if (!db) {
+    getLocalStudentMessages(classId).then(callback);
+    return () => {};
+  }
+  const q = collection(db, COLLECTION, classId, 'messages');
+  return onSnapshot(q, (snap) => {
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() } as StudentMessage));
+    docs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    callback(docs);
+  }, (err) => {
+    console.error('[ClassRepository] Erro no listener de mensagens:', err);
+    getLocalStudentMessages(classId).then(callback);
+  });
 };

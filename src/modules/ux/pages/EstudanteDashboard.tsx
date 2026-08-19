@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Star, Award, BrainCircuit, Beaker, TrendingUp, Trophy, ShoppingBag, BookOpen, MessageCircle } from 'lucide-react';
+import { Star, Award, BrainCircuit, Beaker, TrendingUp, Trophy, ShoppingBag, BookOpen, MessageCircle, Flame, Key } from 'lucide-react';
 import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
 import { SUBJECT_THEMES } from '../../core/constants/dashboardConstants';
 import SoundEffects from '../../core/services/soundEffects';
@@ -7,6 +7,8 @@ import {
   getComplementaryMaterials, 
   getStudentMessages, 
   sendStudentMessage,
+  subscribeComplementaryMaterials,
+  subscribeStudentMessages,
   type ComplementaryMaterial,
   type StudentMessage 
 } from '../../data/repositories/classRepository';
@@ -147,7 +149,27 @@ export function EstudanteDashboard() {
   const [classMessages, setClassMessages] = useState<StudentMessage[]>([]);
   const [messageInput, setMessageInput] = useState('');
   const [sendingMsg, setSendingMsg] = useState(false);
+  const [showGeminiModal, setShowGeminiModal] = useState(false);
+  const [geminiKeyInput, setGeminiKeyInput] = useState(() => localStorage.getItem('gemini_api_key') || '');
+  const [geminiSaved, setGeminiSaved] = useState(false);
   const { currentUser } = useAuth();
+
+  useEffect(() => {
+    if (!selectedClassDetail) return;
+
+    const unsubMaterials = subscribeComplementaryMaterials(selectedClassDetail, (mats) => {
+      setClassMaterials(mats);
+    });
+
+    const unsubMessages = subscribeStudentMessages(selectedClassDetail, (msgs) => {
+      setClassMessages(msgs.filter(m => m.studentId === (currentUser?.uid || '')));
+    });
+
+    return () => {
+      unsubMaterials();
+      unsubMessages();
+    };
+  }, [selectedClassDetail, currentUser]);
 
   const handleInterceptComplete = async (score: number) => {
     SoundEffects.playCoin();
@@ -183,7 +205,8 @@ export function EstudanteDashboard() {
   const tabs = [
     { id: 'learning' as const, label: 'Aprendizado', icon: Beaker },
     { id: 'classes' as const, label: 'Turmas', icon: BookOpen },
-    { id: 'shop' as const, label: 'Loja', icon: ShoppingBag },
+    { id: 'leaderboard' as const, label: 'Ranking', icon: Flame },
+    { id: 'shop' as const, label: 'Loja de Recompensas', icon: ShoppingBag },
     { id: 'achievements' as const, label: 'Conquistas', icon: Trophy },
   ];
 
@@ -207,7 +230,7 @@ export function EstudanteDashboard() {
             {activeLab ? 'Laboratório Virtual — modo imersivo ativo' : (activeSubject ? 'Selecione um laboratório para iniciar' : 'Continue sua jornada de aprendizado')}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <span className="badge-yellow" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600 }}>
             <Star style={{ width: '0.85rem', height: '0.85rem' }} fill="currentColor" /> {xp} XP
           </span>
@@ -221,6 +244,13 @@ export function EstudanteDashboard() {
           <span className="badge-violet" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600 }}>
             <Award style={{ width: '0.85rem', height: '0.85rem' }} /> Nível {level}
           </span>
+          <button
+            onClick={() => setShowGeminiModal(true)}
+            className="btn-outline-cyan"
+            style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <Key style={{ width: '0.85rem', height: '0.85rem' }} /> Gemini AI
+          </button>
         </div>
       </div>
 
@@ -732,6 +762,87 @@ export function EstudanteDashboard() {
           )}
         </div>
       )}
+
+      {/* Leaderboard View */}
+      {!activeSubject && activeView === 'leaderboard' && (
+        <div className="fade-in glass-card" style={{ padding: '1.75rem', maxWidth: '48rem', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            <Flame style={{ width: '2rem', height: '2rem', color: '#f59e0b' }} />
+            <div>
+              <h2 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Ranking da Turma (Leaderboard)</h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>Classificação dos estudantes baseada em XP e laboratórios concluídos.</p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {[
+              { rank: 1, name: currentUser?.displayName || 'Você (Estudante)', xp: xp, level: level, isMe: true },
+              { rank: 2, name: 'Lucas Mendes', xp: 2450, level: 5, isMe: false },
+              { rank: 3, name: 'Beatriz Lima', xp: 2100, level: 4, isMe: false },
+              { rank: 4, name: 'Carlos Eduardo', xp: 1850, level: 4, isMe: false },
+              { rank: 5, name: 'Mariana Costa', xp: 1400, level: 3, isMe: false },
+            ].sort((a, b) => b.xp - a.xp).map((item, idx) => (
+              <div key={idx} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '0.85rem 1.25rem', borderRadius: '0.75rem',
+                background: item.isMe ? 'rgba(6,182,212,0.1)' : 'rgba(255,255,255,0.02)',
+                border: item.isMe ? '1px solid rgba(6,182,212,0.4)' : '1px solid rgba(255,255,255,0.05)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{
+                    width: '2.2rem', height: '2.2rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 700, fontSize: '0.9rem',
+                    background: idx === 0 ? 'linear-gradient(135deg, #f59e0b, #d97706)' : idx === 1 ? '#94a3b8' : idx === 2 ? '#b45309' : 'rgba(255,255,255,0.1)',
+                    color: idx < 3 ? '#fff' : 'var(--text-secondary)',
+                    boxShadow: idx === 0 ? '0 0 12px rgba(245,158,11,0.4)' : 'none',
+                  }}>
+                    {idx + 1}
+                  </span>
+                  <div>
+                    <div style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: '0.95rem' }}>
+                      {item.name} {item.isMe && <span className="badge-cyan" style={{ fontSize: '0.7rem', marginLeft: '0.5rem' }}>Você</span>}
+                    </div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>Nível {item.level}</div>
+                  </div>
+                </div>
+                <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.95rem' }}>⚡ {item.xp} XP</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Gemini AI Settings Modal */}
+      {showGeminiModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
+          <div className="glass-card" style={{ width: '90%', maxWidth: '440px', padding: '1.75rem', background: '#0b0f19', border: '1px solid rgba(6,182,212,0.3)', borderRadius: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#06b6d4', fontWeight: 700, marginBottom: '0.75rem' }}>
+              <Key style={{ width: '1.25rem', height: '1.25rem' }} />
+              <span>CONFIGURAR CHAVE GEMINI AI</span>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.25rem', lineHeight: 1.5 }}>
+              Insira sua chave de API do Google Gemini para habilitar análises LLM em tempo real no módulo de Redação e Dicas Adaptativas.
+            </p>
+            <input
+              type="password"
+              placeholder="AIzaSy..."
+              value={geminiKeyInput}
+              onChange={e => setGeminiKeyInput(e.target.value)}
+              style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '1rem', outline: 'none' }}
+            />
+            {geminiSaved && <div style={{ color: '#10b981', fontSize: '0.8rem', marginBottom: '0.75rem', fontWeight: 600 }}>✅ Chave salva com sucesso no navegador!</div>}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button className="btn-outline-cyan" onClick={() => setShowGeminiModal(false)} style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}>Fechar</button>
+              <button className="btn-gradient" onClick={() => {
+                localStorage.setItem('gemini_api_key', geminiKeyInput.trim());
+                setGeminiSaved(true);
+                setTimeout(() => setGeminiSaved(false), 2000);
+              }} style={{ padding: '0.4rem 1.25rem', fontSize: '0.85rem' }}>Salvar Chave</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Confetti Explosion Canvas */}
       <ConfettiCanvas active={showConfetti} onComplete={() => setShowConfetti(false)} />
     </div>
