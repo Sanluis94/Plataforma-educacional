@@ -116,14 +116,24 @@ export function HardSkillsSimulator({ labTitle, onComplete }: { labTitle?: strin
           </div>
         </div>
       ) : null}
+      {/* AI Code Diagnostic Box */}
+      <div style={{ marginTop: '1.25rem', padding: '0.85rem', borderRadius: '10px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+        <div style={{ color: '#06b6d4', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>🤖 ANALISADOR DE IA DE CÓDIGO</div>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
+          {selected
+            ? `Executando simulador de ${PROGRAMS[selected]?.title}. Verifique a sintaxe dos comandos antes do envio.`
+            : 'Selecione uma ferramenta técnica para iniciar a simulação guiada por IA.'}
+        </p>
+      </div>
+
       {onComplete && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem', marginBottom: '1rem' }}>
           <button
             onClick={() => onComplete(100)}
             className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
           >
-            ✓ Concluir Laboratório
+            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
           </button>
         </div>
       )}

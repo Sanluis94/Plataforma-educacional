@@ -246,12 +246,25 @@ export function MathSimulator({ functionType = 'linear', title, onComplete }: Ma
               </div>
             )}
 
+            <div style={{ marginTop: '1rem', padding: '0.85rem', borderRadius: '0.6rem', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#06b6d4', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.35rem' }}>
+                <span>🤖 IA ADAPTATIVA (DIAGNÓSTICO EM TEMPO REAL)</span>
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0, lineHeight: 1.5 }}>
+                {a > 0 
+                  ? `Com a = ${a.toFixed(1)}, a curva cresce rapidamente no 1º quadrante. Observe a variação das raízes!` 
+                  : a < 0 
+                    ? `Com a = ${a.toFixed(1)} negativo, a concavidade inverte para baixo (ponto de máximo em y = ${c.toFixed(1)}).`
+                    : 'Com a = 0, a função torna-se constante ou linear plana. Aumente o coeficiente para ver a curvatura.'}
+              </p>
+            </div>
+
             <button 
               className="premium-btn btn-primary mt-4" 
-              style={{ width: '100%' }}
+              style={{ width: '100%', background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', boxShadow: '0 0 15px rgba(6,182,212,0.4)', fontWeight: 'bold' }}
               onClick={handleFinish}
             >
-              Finalizar Análise
+              🏆 Concluir Análise (+50 XP & +10 Moedas)
             </button>
           </div>
         </div>

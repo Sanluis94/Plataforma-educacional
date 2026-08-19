@@ -165,9 +165,9 @@ export function PortugueseModule({ labTitle, onComplete }: { labTitle?: string; 
           <button
             onClick={() => onComplete(100)}
             className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
           >
-            ✓ Concluir Laboratório
+            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
           </button>
         </div>
       )}

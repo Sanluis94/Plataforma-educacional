@@ -436,6 +436,16 @@ export function MicroscopeSimulator({ labTitle, onComplete }: { labTitle?: strin
               ))}
             </ul>
             {zoom < 40 && <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontStyle: 'italic' }}>Aumente o zoom para ver mais detalhes.</p>}
+
+            {/* AI Diagnostics Box */}
+            <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: '8px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+              <div style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, marginBottom: '0.2rem' }}>🤖 DICA DA IA BIOLÓGICA</div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
+                {focusOffset === 0 
+                  ? `Foco micrométrico nítido! Em ${zoom}× você está observando a amostra de ${selectedSlide.name}.`
+                  : 'Ajuste o controle de foco micrométrico para remover a distorção da imagem.'}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -444,9 +454,9 @@ export function MicroscopeSimulator({ labTitle, onComplete }: { labTitle?: strin
           <button
             onClick={() => onComplete(100)}
             className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
           >
-            ✓ Concluir Laboratório
+            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
           </button>
         </div>
       )}

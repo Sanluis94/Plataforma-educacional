@@ -95,14 +95,24 @@ export function HistoryTimeline({ labTitle, onComplete }: { labTitle?: string; l
           👆 Clique em um ponto da linha do tempo para ver os detalhes do evento.
         </div>
       )}
+      {/* AI Historical Insight Box */}
+      <div style={{ marginTop: '1.25rem', padding: '1rem', borderRadius: '10px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+        <div style={{ color: '#06b6d4', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.25rem' }}>🤖 CONTEXTUALIZAÇÃO DA IA HISTÓRICA</div>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
+          {selected 
+            ? `Evento "${selected.label}" (${selected.year}): Note as relações de causa e efeito com o cenário geopolítico mundial.`
+            : 'Explore os eventos da linha do tempo para acionar análises causais da IA.'}
+        </p>
+      </div>
+
       {onComplete && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem', marginBottom: '1rem' }}>
           <button
             onClick={() => onComplete(100)}
             className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
           >
-            ✓ Concluir Laboratório
+            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
           </button>
         </div>
       )}

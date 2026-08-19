@@ -317,12 +317,22 @@ export function GeographySimulator({ labTitle, onComplete }: GeographySimulatorP
               {boundaryType === 'transform' && 'O deslizamento horizontal gera forte acúmulo de energia potencial elástica. Quando liberada, provoca tremores severos na crosta.'}
             </p>
 
+            {/* AI Geological Diagnostic Box */}
+            <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: '8px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+              <div style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, marginBottom: '0.2rem' }}>🤖 ANALISADOR GEOLÓGICO DE IA</div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
+                {isQuake
+                  ? '⚠️ Pressão crítica atingida! A IA registrou uma ruptura sismológica de alta magnitude.'
+                  : `Monitorando placa tectônica com pressão ${pressure}%.`}
+              </p>
+            </div>
+
             <button 
               className="premium-btn btn-primary mt-4" 
-              style={{ width: '100%' }}
+              style={{ width: '100%', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
               onClick={handleFinish}
             >
-              Registrar Conclusão Tectônica
+              🏆 Concluir Simulação (+50 XP & +10 Moedas)
             </button>
           </div>
         </div>
