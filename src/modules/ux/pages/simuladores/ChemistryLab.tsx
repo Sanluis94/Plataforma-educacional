@@ -210,8 +210,84 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
       
       <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🧪 {labTitle || 'Laboratório de Química Virtual'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-        Selecione reagentes e misture-os nos tubos de ensaio para observar reações e variações de pH.
+        {_mode === 'ph_scale' ? 'Selecione reagentes e misture-os nos tubos de ensaio para observar reações e variações de pH.' :
+         _mode === 'titration' ? 'Curva de Titulação Ácido-Base com adição ponto a ponto de titulante.' :
+         _mode === 'stoichiometry' ? 'Cálculos Estequiométricos e Conservação das Massas.' :
+         _mode === 'organic' ? 'Construção de Cadeias Carbônicas e Grupos Funcionais.' :
+         _mode === 'electrochemistry' ? 'Simulador de Pilhas Eletroquímicas e DDP.' :
+         'Comportamento de Gases Ideais e Transformações Gasosas.'}
       </p>
+
+      {_mode === 'titration' && (
+        <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>🫙 Titulação Ácido-Base</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Adição ponto a ponto de titulante (NaOH 0,1M) em uma solução de Erlenmeyer de HCl com indicador Fenolftaleína.</p>
+          <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ padding: '1rem', background: '#0b0f19', borderRadius: '0.5rem', border: '1px solid rgba(0,255,200,0.2)', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', color: '#06b6d4', marginBottom: '0.25rem' }}>Bureta Graduada</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f59e0b' }}>NaOH 0.10 M</div>
+              <div style={{ margin: '0.5rem 0', color: 'var(--text-muted)', fontSize: '0.78rem' }}>Volume Adicionado: 12.5 mL</div>
+            </div>
+            <div style={{ padding: '1rem', background: '#0b0f19', borderRadius: '0.5rem', border: '1px solid rgba(255,100,200,0.2)', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', color: '#ec407a', marginBottom: '0.25rem' }}>Erlenmeyer (Indicador)</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#ec407a' }}>pH = 8.2 (Viragem Rosa)</div>
+              <div style={{ margin: '0.5rem 0', color: 'var(--text-muted)', fontSize: '0.78rem' }}>Ponto de Equivalência Atingido</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {_mode === 'stoichiometry' && (
+        <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>⚖️ Estequiometria e Balancemento de Reações</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Ajuste os coeficientes estequiométricos para satisfazer a Lei de Lavoisier (Conservação das Massas):</p>
+          <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#06b6d4', padding: '1rem', background: '#0b0f19', borderRadius: '0.5rem', textAlign: 'center', marginBottom: '1rem' }}>
+            <span style={{ color: '#f59e0b' }}>1</span> N₂ + <span style={{ color: '#f59e0b' }}>3</span> H₂  →  <span style={{ color: '#10b981' }}>2</span> NH₃
+          </div>
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'center' }}>Massa dos Reagentes: 28g (N₂) + 6g (H₂) = 34g | Massa dos Produtos: 34g (NH₃)</div>
+        </div>
+      )}
+
+      {_mode === 'organic' && (
+        <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>🧬 Química Orgânica — Construtor de Cadeias</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Montagem de hidrocarbonetos e identificação de funções orgânicas oxigenadas e nitrogenadas.</p>
+          <div style={{ padding: '1rem', background: '#0b0f19', borderRadius: '0.5rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#a78bfa', marginBottom: '0.5rem' }}>Etanol (Álcool): CH₃ — CH₂ — OH</div>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Grupo Funcional: Hidroxila (—OH) ligada a carbono saturado | Fórmula Molecular: C₂H₆O</div>
+          </div>
+        </div>
+      )}
+
+      {_mode === 'electrochemistry' && (
+        <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>🔋 Eletroquímica — Pilha de Daniell</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Simulação de transferência de elétrons do Ânodo (Oxidação do Zinco) para o Cátodo (Redução do Cobre).</p>
+          <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
+            <div style={{ padding: '1rem', background: 'rgba(239,68,68,0.1)', borderRadius: '0.5rem', border: '1px solid #ef4444', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ef4444' }}>Ânodo (-) Oxidante</div>
+              <div style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Zn(s) → Zn²⁺(aq) + 2e⁻</div>
+            </div>
+            <div style={{ padding: '1rem', background: 'rgba(16,185,129,0.1)', borderRadius: '0.5rem', border: '1px solid #10b981', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>Cátodo (+) Redutor</div>
+              <div style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Cu²⁺(aq) + 2e⁻ → Cu(s)</div>
+            </div>
+          </div>
+          <div style={{ marginTop: '1rem', textAlign: 'center', fontWeight: 700, color: '#f59e0b' }}>DDP da Pilha (E⁰) = +1.10 Volts</div>
+        </div>
+      )}
+
+      {_mode === 'gases' && (
+        <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>🎈 Gases Ideais — Lei dos Gases</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Comportamento de partículas gasosas sob variação de Pressão (P), Volume (V) e Temperatura (T).</p>
+          <div style={{ padding: '1rem', background: '#0b0f19', borderRadius: '0.5rem', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+            <div><span style={{ color: '#06b6d4' }}>Pressão:</span> <strong>2.0 atm</strong></div>
+            <div><span style={{ color: '#f59e0b' }}>Volume:</span> <strong>5.0 L</strong></div>
+            <div><span style={{ color: '#ef4444' }}>Temperatura:</span> <strong>350 K</strong></div>
+          </div>
+        </div>
+      )}
 
       {/* Painel de Reagentes */}
       <div style={{ marginBottom: '1.5rem' }}>

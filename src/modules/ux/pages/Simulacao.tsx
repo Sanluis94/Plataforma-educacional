@@ -264,10 +264,10 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           </button>
           <button
             onClick={() => setActiveTab('collisions')}
-            className={activeTab === 'collisions' ? 'btn-gradient' : 'btn-outline-violet'}
+            className={activeTab === 'collisions' ? 'btn-gradient' : 'btn-outline-cyan'}
             style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
           >
-            Colisões (1D)
+            Leis de Newton
           </button>
           <button
             onClick={() => setActiveTab('optics')}
@@ -275,6 +275,27 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
             style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
           >
             Óptica Geométrica
+          </button>
+          <button
+            onClick={() => setActiveTab('electromagnetism')}
+            className={activeTab === 'electromagnetism' ? 'btn-gradient' : 'btn-outline-cyan'}
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+          >
+            Eletromagnetismo
+          </button>
+          <button
+            onClick={() => setActiveTab('thermodynamics')}
+            className={activeTab === 'thermodynamics' ? 'btn-gradient' : 'btn-outline-cyan'}
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+          >
+            Termodinâmica
+          </button>
+          <button
+            onClick={() => setActiveTab('modern_physics')}
+            className={activeTab === 'modern_physics' ? 'btn-gradient' : 'btn-outline-cyan'}
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+          >
+            Física Moderna
           </button>
           {onComplete && (
             <button
@@ -564,6 +585,95 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           </div>
         );
       })()}
+
+      {/* Electromagnetism Tab */}
+      {activeTab === 'electromagnetism' && (
+        <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
+          <div>
+            <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🧲 Eletromagnetismo — Força de Lorentz</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Uma partícula carregada sob um campo magnético constante B descreve movimento circular uniforme com raio r = mv / qB.</p>
+            <div style={{ width: '100%', height: '280px', background: '#0b0f19', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(6,182,212,0.2)', position: 'relative' }}>
+              <svg width="300" height="220">
+                <circle cx="150" cy="110" r="70" fill="none" stroke="#06b6d4" strokeWidth="2" strokeDasharray="6 4" />
+                <circle cx="220" cy="110" r="10" fill="#f59e0b" />
+                <text x="220" y="114" textAnchor="middle" fill="#000" fontSize="10" fontWeight="bold">q+</text>
+                <line x1="150" y1="110" x2="220" y2="110" stroke="#8b5cf6" strokeWidth="2" />
+                <text x="185" y="102" fill="#8b5cf6" fontSize="11" fontWeight="bold">r = mv/qB</text>
+              </svg>
+            </div>
+          </div>
+          <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <h4 style={{ color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>Variáveis Magnéticas</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              <div>Campo Magnético (B): <strong style={{ color: '#06b6d4' }}>0.5 T</strong></div>
+              <div>Carga Elétrica (q): <strong style={{ color: '#f59e0b' }}>1.6 × 10⁻¹⁹ C</strong></div>
+              <div>Massa (m): <strong style={{ color: '#93c5fd' }}>9.1 × 10⁻³¹ kg</strong></div>
+              <div>Velocidade (v): <strong style={{ color: '#10b981' }}>2.0 × 10⁶ m/s</strong></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Thermodynamics Tab */}
+      {activeTab === 'thermodynamics' && (
+        <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
+          <div>
+            <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🔥 Termodinâmica — Equação dos Gases Ideais</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Relação entre Pressão (P), Volume (V) e Temperatura (T) no modelo ideal P · V = n · R · T.</p>
+            <div style={{ width: '100%', height: '280px', background: '#0b0f19', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(239,68,68,0.2)' }}>
+              <div style={{ width: '140px', height: '180px', border: '3px solid #ef4444', borderTop: 'none', position: 'relative', background: 'rgba(239,68,68,0.05)' }}>
+                <div style={{ position: 'absolute', top: '40px', left: 0, right: 0, height: '14px', background: '#94a3b8', border: '1px solid #fff' }} />
+                <div style={{ position: 'absolute', bottom: '10px', left: '20px', right: '20px', height: '60px', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }} />
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b' }} />
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#06b6d4' }} />
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <h4 style={{ color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>Estado Termodinâmico</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              <div>Pressão (P): <strong style={{ color: '#ef4444' }}>1.5 atm</strong></div>
+              <div>Volume (V): <strong style={{ color: '#06b6d4' }}>2.0 L</strong></div>
+              <div>Temperatura (T): <strong style={{ color: '#f59e0b' }}>300 K (27°C)</strong></div>
+              <div>Quantidade de Matéria (n): <strong style={{ color: '#a78bfa' }}>1.0 mol</strong></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modern Physics Tab */}
+      {activeTab === 'modern_physics' && (
+        <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
+          <div>
+            <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>⚛️ Física Moderna — Efeito Fotoelétrico</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Fótons incidentes com energia E = h · f ejetam fotoelétrons com energia cinética K_máx = hf - Φ.</p>
+            <div style={{ width: '100%', height: '280px', background: '#0b0f19', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(139,92,246,0.2)' }}>
+              <svg width="320" height="200">
+                <rect x="40" y="40" width="20" height="120" fill="#94a3b8" rx="3" />
+                <text x="50" y="175" textAnchor="middle" fill="#94a3b8" fontSize="10">Placa (Catodo)</text>
+                <path d="M 120,40 L 55,90" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4 2" />
+                <path d="M 140,60 L 55,105" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4 2" />
+                <text x="135" y="45" fill="#f59e0b" fontSize="11" fontWeight="bold">h·f (Fótons)</text>
+                <circle cx="160" cy="95" r="6" fill="#06b6d4" />
+                <line x1="60" y1="95" x2="154" y2="95" stroke="#06b6d4" strokeWidth="1.5" strokeDasharray="3 2" />
+                <text x="180" y="99" fill="#06b6d4" fontSize="11" fontWeight="bold">e⁻ (Fotoelétron)</text>
+              </svg>
+            </div>
+          </div>
+          <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <h4 style={{ color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>Parâmetros Quânticos</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              <div>Constante de Planck (h): <strong style={{ color: '#a78bfa' }}>6.63 × 10⁻³⁴ J·s</strong></div>
+              <div>Frequência da Luz (f): <strong style={{ color: '#f59e0b' }}>7.5 × 10¹⁴ Hz (UV)</strong></div>
+              <div>Função Trabalho (Φ): <strong style={{ color: '#ef4444' }}>2.3 eV (Sódio)</strong></div>
+              <div>Energia Cinética (K_máx): <strong style={{ color: '#10b981' }}>0.8 eV</strong></div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
