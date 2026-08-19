@@ -196,7 +196,7 @@ export function EstudanteDashboard() {
 
   const completedLabs = modules.reduce((acc, m) => acc + (m.labs?.filter((l: any) => l.component).length || 0), 0);
   const stats = [
-    { label: 'Labs Disponíveis', value: `${completedLabs}`, icon: Beaker },
+    { label: 'Laboratórios Virtuais', value: `${completedLabs}`, icon: Beaker },
     { label: 'Progresso Médio', value: `${Math.min(100, Math.round((xp / Math.max(1, level * 500)) * 100))}%`, icon: TrendingUp },
     { label: 'Nível Atual', value: String(level), icon: Trophy },
     { label: 'Moedas', value: String(coins), icon: ShoppingBag },
@@ -285,7 +285,7 @@ export function EstudanteDashboard() {
           </button>
           
           <h2 style={{ color: 'var(--text-main)', fontSize: '1.5rem', marginBottom: '1.5rem', fontWeight: 700 }}>
-            Trilha de Laboratórios: {activeModule?.label}
+            🔬 Laboratórios Virtuais Interativos — {activeModule?.label}
           </h2>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
@@ -313,7 +313,7 @@ export function EstudanteDashboard() {
                     color: isAvailable ? (t?.primary || '#06b6d4') : 'var(--text-muted)', 
                     fontSize: '0.78rem', fontWeight: 700,
                   }}>
-                    {isAvailable ? 'Acessar Laboratório →' : '🔒 Em Breve'}
+                    {isAvailable ? 'Entrar no Laboratório Virtual →' : '🔒 Em Breve'}
                   </div>
                 </button>
               );
@@ -409,7 +409,7 @@ export function EstudanteDashboard() {
             {/* Labs Grid */}
             <div>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1rem' }}>
-                Laboratórios Disponíveis
+                Disciplinas & Áreas de Estudo (72 Laboratórios Virtuais)
               </h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem' }}>
                 {modules.map(mod => {
@@ -437,7 +437,7 @@ export function EstudanteDashboard() {
                       <div style={{
                         color: t?.primary || 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 700,
                       }}>
-                        Acessar Trilha →
+                        Ver Laboratórios Virtuais ({availableLabs}) →
                       </div>
                     </button>
                   );
@@ -661,7 +661,7 @@ export function EstudanteDashboard() {
               <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
                 <h3 style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: '1.05rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <BookOpen style={{ width: '1.1rem', height: '1.1rem', color: '#8b5cf6' }} />
-                  Material de Apoio
+                  📝 Exercícios & Materiais Complementares da Turma
                 </h3>
                 {classMaterials.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
