@@ -17,7 +17,7 @@ const VOCABULARY = {
   ]
 };
 
-export function LanguagesModule({ onComplete }: { onComplete?: (score: number) => void }) {
+export function LanguagesModule({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [lang, setLang] = useState<'english' | 'spanish'>('english');
   const [currentIdx, setCurrentIdx] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
@@ -62,7 +62,7 @@ export function LanguagesModule({ onComplete }: { onComplete?: (score: number) =
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🌐 Idiomas — Inglês & Espanhol</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🌐 {labTitle || 'Idiomas — Inglês & Espanhol'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>Pratique vocabulário avançado com pronunciação nativa (Text-to-Speech).</p>
 
       {/* Lang selector */}

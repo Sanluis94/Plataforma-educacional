@@ -32,7 +32,7 @@ const SCENARIOS: Scenario[] = [
   },
 ];
 
-export function SoftSkillsModule({ onComplete }: { onComplete?: (score: number) => void }) {
+export function SoftSkillsModule({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
   const [totalXP, setTotalXP] = useState(0);
@@ -59,8 +59,8 @@ export function SoftSkillsModule({ onComplete }: { onComplete?: (score: number) 
 
   if (finished) {
     return (
-      <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-        <div style={{ fontSize: '4rem', marginBottom: '0.5rem' }}>🏆</div>
+      <div style={{ padding: '2rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '16px' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🌟</div>
         <h2 style={{ color: 'var(--text-main)' }}>Trilha Concluída!</h2>
         <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--color-primary)', margin: '0.5rem 0' }}>+{totalXP} XP</div>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
@@ -75,7 +75,7 @@ export function SoftSkillsModule({ onComplete }: { onComplete?: (score: number) 
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.25rem' }}>💼 Soft Skills — Liderança & Comportamento</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.25rem' }}>💼 {labTitle || 'Soft Skills — Liderança & Comportamento'}</h2>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Cenário {scenarioIdx + 1}/{SCENARIOS.length}</span>
         <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>⚡ {totalXP} XP</span>

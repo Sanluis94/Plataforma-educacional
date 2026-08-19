@@ -8,7 +8,7 @@ const COMPETENCIAS = [
   { id: 5, name: 'Proposta de Intervenção', desc: 'Proposta detalhada, respeitando os direitos humanos e a realidade social.' },
 ];
 
-export function EssayModule({ onComplete }: { onComplete?: (score: number) => void }) {
+export function EssayModule({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [essay, setEssay] = useState('');
   const [theme, setTheme] = useState('A influência das redes sociais na saúde mental dos jovens');
   const [feedback, setFeedback] = useState<null | { score: number; comments: string[] }>(null);
@@ -41,7 +41,7 @@ export function EssayModule({ onComplete }: { onComplete?: (score: number) => vo
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>✍️ Redação Orientada por IA</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>✍️ {labTitle || 'Redação Orientada por IA'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>Escreva sua redação abaixo e receba análise baseada nas 5 competências do ENEM.</p>
 
       <div style={{ background: 'var(--bg-secondary)', borderRadius: '10px', padding: '1rem', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.1)' }}>

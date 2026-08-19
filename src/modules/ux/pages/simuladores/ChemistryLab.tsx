@@ -42,7 +42,7 @@ interface Tube {
   mixed: boolean;
 }
 
-export function ChemistryLab({ onComplete }: { onComplete?: (score: number) => void }) {
+export function ChemistryLab({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [tubes, setTubes] = useState<Tube[]>([
     { id: 1, reagents: [], mixed: false },
     { id: 2, reagents: [], mixed: false },
@@ -201,7 +201,7 @@ export function ChemistryLab({ onComplete }: { onComplete?: (score: number) => v
         }
       `}</style>
       
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🧪 Laboratório de Química Virtual</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🧪 {labTitle || 'Laboratório de Química Virtual'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
         Selecione reagentes e misture-os nos tubos de ensaio para observar reações e variações de pH.
       </p>

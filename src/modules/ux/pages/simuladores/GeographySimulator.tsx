@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 
 interface GeographySimulatorProps {
+  labTitle?: string;
+  labId?: string;
   onComplete?: (score: number) => void;
 }
 
 type PlateBoundary = 'divergent' | 'convergent' | 'transform';
 
-export function GeographySimulator({ onComplete }: GeographySimulatorProps) {
+export function GeographySimulator({ labTitle, onComplete }: GeographySimulatorProps) {
   const [boundaryType, setBoundaryType] = useState<PlateBoundary>('convergent');
   const [pressure, setPressure] = useState(50);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -246,7 +248,7 @@ export function GeographySimulator({ onComplete }: GeographySimulatorProps) {
   return (
     <div className="geography-simulator p-4 premium-glass-card" style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--shadow-md)' }}>
       <h3 style={{ color: 'var(--text-main)', marginBottom: '1.25rem' }}>
-        Laboratório Virtual: Dinâmica de Placas Tectônicas
+        🌋 {labTitle || 'Laboratório Virtual: Dinâmica de Placas Tectônicas'}
       </h3>
 
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap-reverse' }}>

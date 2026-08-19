@@ -16,7 +16,7 @@ const EVENTS = [
 
 const CATEGORIES = ['Todos', 'Brasil', 'Política', 'Guerra', 'Ciência'];
 
-export function HistoryTimeline({ onComplete }: { onComplete?: (score: number) => void }) {
+export function HistoryTimeline({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [filter, setFilter] = useState('Todos');
   const [selected, setSelected] = useState<typeof EVENTS[0] | null>(null);
 
@@ -27,7 +27,7 @@ export function HistoryTimeline({ onComplete }: { onComplete?: (score: number) =
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🌍 Linha do Tempo — História</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🌍 {labTitle || 'Linha do Tempo — História'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>Explore os marcos históricos. Clique em um evento para ver detalhes.</p>
 
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>

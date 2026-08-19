@@ -28,7 +28,7 @@ const PROGRAMS: Record<string, Program> = {
   },
 };
 
-export function HardSkillsSimulator({ onComplete }: { onComplete?: (score: number) => void }) {
+export function HardSkillsSimulator({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [step, setStep] = useState(0);
   const [input, setInput] = useState('');
@@ -50,7 +50,7 @@ export function HardSkillsSimulator({ onComplete }: { onComplete?: (score: numbe
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🖥️ Ferramentas Digitais (Hard Skills)</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🖥️ {labTitle || 'Ferramentas Digitais (Hard Skills)'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>Simuladores de software corporativo e fundamentos de programação.</p>
 
       {!selected ? (

@@ -43,7 +43,7 @@ no meio do caminho tinha uma pedra.`,
   }
 ];
 
-export function PortugueseModule({ onComplete }: { onComplete?: (score: number) => void }) {
+export function PortugueseModule({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [selectedFragment, setSelectedFragment] = useState(FRAGMENTS[0]);
   const [currentQ, setCurrentQ] = useState(0);
   const [answered, setAnswered] = useState<number | null>(null);
@@ -76,7 +76,7 @@ export function PortugueseModule({ onComplete }: { onComplete?: (score: number) 
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>📖 Português & Literatura</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>📖 {labTitle || 'Português & Literatura'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
         Leia o fragmento literário e responda ao quiz adaptativo com análise de figuras de linguagem.
       </p>

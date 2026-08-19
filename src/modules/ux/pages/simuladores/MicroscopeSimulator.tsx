@@ -321,7 +321,7 @@ const renderCellContent = (slideId: string, zoomLevel: number) => {
   );
 };
 
-export function MicroscopeSimulator({ onComplete }: { onComplete?: (score: number) => void }) {
+export function MicroscopeSimulator({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [selectedSlide, setSelectedSlide] = useState<Slide>(SLIDES[0]);
   const [zoom, setZoom] = useState(10); // 10x, 40x, 100x, 400x
   const [focusOffset, setFocusOffset] = useState(0);
@@ -333,7 +333,7 @@ export function MicroscopeSimulator({ onComplete }: { onComplete?: (score: numbe
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🔬 Microscópio Virtual</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🔬 {labTitle || 'Microscópio Virtual'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
         Selecione uma lâmina, ajuste o zoom e o foco micrométrico para observar as estruturas celulares.
       </p>

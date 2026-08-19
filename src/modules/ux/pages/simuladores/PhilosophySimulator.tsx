@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
 interface PhilosophySimulatorProps {
+  labTitle?: string;
+  labId?: string;
   onComplete?: (score: number) => void;
 }
 
@@ -76,7 +78,7 @@ const DILEMMAS: Dilemma[] = [
   }
 ];
 
-export function PhilosophySimulator({ onComplete }: PhilosophySimulatorProps) {
+export function PhilosophySimulator({ labTitle, onComplete }: PhilosophySimulatorProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOptionIdx, setSelectedOptionIdx] = useState<number | null>(null);
   const [profile, setProfile] = useState<Record<string, number>>({
@@ -118,7 +120,7 @@ export function PhilosophySimulator({ onComplete }: PhilosophySimulatorProps) {
   return (
     <div className="philosophy-simulator p-4 premium-glass-card" style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--shadow-md)' }}>
       <h3 style={{ color: 'var(--text-main)', marginBottom: '1.25rem' }}>
-        Laboratório de Ética: Dilemas Filosóficos
+        🏛️ {labTitle || 'Laboratório de Ética: Dilemas Filosóficos'}
       </h3>
 
       {!completed ? (

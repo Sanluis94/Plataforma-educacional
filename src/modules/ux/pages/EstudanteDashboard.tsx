@@ -236,6 +236,8 @@ export function EstudanteDashboard() {
           </button>
           <ActiveComponent
             {...(activeLab.props || {})}
+            labId={activeLab.id}
+            labTitle={activeLab.title}
             onComplete={handleInterceptComplete}
           />
         </div>
