@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { analyzeEssayWithGemini } from '../../../core/services/geminiService';
 
 const COMPETENCIAS = [
   { id: 1, name: 'Domínio da Língua Escrita', desc: 'Gramática, ortografia, pontuação e uso culto da língua.' },
@@ -19,30 +20,25 @@ export function EssayModule({ labTitle, onComplete }: { labTitle?: string; labId
   const analyzeEssay = async () => {
     if (wordCount < 40) return;
     setLoading(true);
-    // Mock analysis (IA real dependeria da API Gemini configurada)
-    await new Promise(r => setTimeout(r, 1500));
-    const hasIntroduction = essay.length > 100;
-    const hasSocioculturalRef = /inventor|cientista|lei|pesquisa|dado|sociedade|estudo/i.test(essay);
-    const hasIntervention = /portanto|dessa forma|propõe-se|é necessário|deve-se|medida|solução/i.test(essay);
-    const hasConnectives = /além disso|entretanto|no entanto|portanto|ademais|visto que/i.test(essay);
-
-    const scores = [
-      Math.min(200, 120 + (hasIntroduction ? 40 : 0) + (wordCount > 150 ? 40 : 0)),
-      Math.min(200, theme.split(' ').filter(w => essay.toLowerCase().includes(w.toLowerCase())).length * 30),
-      Math.min(200, 80 + (hasSocioculturalRef ? 80 : 0) + (hasConnectives ? 40 : 0)),
-      Math.min(200, 100 + (hasConnectives ? 100 : 0)),
-      Math.min(200, hasIntervention ? 180 : 60),
-    ];
-    const total = scores.reduce((a, b) => a + b, 0);
-    const comments = COMPETENCIAS.map((c, i) => `C${c.id} (${c.name}): ${scores[i]}/200 pts — ${scores[i] >= 160 ? '✅ Ótimo' : scores[i] >= 100 ? '⚠️ Regular' : '❌ Necessita revisão'}`);
-    setFeedback({ score: total, comments });
+    const result = await analyzeEssayWithGemini(theme, essay);
+    setFeedback(result);
     setLoading(false);
   };
 
   return (
     <div style={{ padding: '1.5rem' }}>
       <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>✍️ {labTitle || 'Redação Orientada por IA'}</h2>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>Escreva sua redação abaixo e receba análise baseada nas 5 competências do ENEM.</p>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>Escreva sua redação abaixo e receba análise baseada nas 5 competências do ENEM.</p>
+
+      {/* Guia de Competências ENEM */}
+      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', marginBottom: '1.25rem', paddingBottom: '0.25rem' }}>
+        {COMPETENCIAS.map(c => (
+          <div key={c.id} style={{ flex: '0 0 180px', padding: '0.6rem', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ color: '#06b6d4', fontSize: '0.75rem', fontWeight: 700 }}>C{c.id} — {c.name}</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', marginTop: '0.2rem' }}>{c.desc}</div>
+          </div>
+        ))}
+      </div>
 
       <div style={{ background: 'var(--bg-secondary)', borderRadius: '10px', padding: '1rem', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.1)' }}>
         <label style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', display: 'block', marginBottom: '0.4rem' }}>Tema da Redação:</label>
