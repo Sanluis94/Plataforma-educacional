@@ -17,15 +17,62 @@ const VOCABULARY = {
   ]
 };
 
-export function LanguagesModule({ mode: _mode = 'vocabulary', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+const MODE_DATA: Record<string, Record<'english' | 'spanish', Array<{ word: string; translation: string; example: string; phonetic: string }>>> = {
+  vocabulary: VOCABULARY,
+  grammar: {
+    english: [
+      { word: 'Present Perfect', translation: 'Passado com Conexão no Presente', example: 'I have studied for 3 hours.', phonetic: '/ˈpreznt ˈpɜːfɪkt/' },
+      { word: 'Past Continuous', translation: 'Ação em Andamento no Passado', example: 'They were working when I called.', phonetic: '/pɑːst kənˈtɪnjuəs/' },
+      { word: 'Conditionals', translation: 'Orações Condicionais (If)', example: 'If I had time, I would travel.', phonetic: '/kənˈdɪʃənlz/' },
+    ],
+    spanish: [
+      { word: 'Pretérito Indefinido', translation: 'Passado Pontual Concluído', example: 'Ayer hablé con María.', phonetic: '/preˈterito indefiˈniðo/' },
+      { word: 'Pretérito Imperfecto', translation: 'Hábito ou Ação Contínua no Passado', example: 'Cuando era niño jugaba en el parque.', phonetic: '/preˈterito imperˈfekto/' },
+    ],
+  },
+  listening: {
+    english: [
+      { word: 'Comprehensive', translation: 'Abrangente / Completo', example: 'The study offers a comprehensive view.', phonetic: '/ˌkɒmprɪˈhensɪv/' },
+      { word: 'Subtle Difference', translation: 'Diferença Sutil', example: 'Notice the subtle difference in tone.', phonetic: '/ˈsʌtl ˈdɪfrəns/' },
+    ],
+    spanish: [
+      { word: 'Pronunciación', translation: 'Pronúncia Fluida', example: 'Es importante practicar la pronunciación.', phonetic: '/pronunθjaˈθjon/' },
+    ],
+  },
+  idioms: {
+    english: [
+      { word: 'Piece of cake', translation: 'Fácil como tirar doce de criança', example: 'The test was a piece of cake!', phonetic: '/piːs əv keɪk/' },
+      { word: 'Break a leg', translation: 'Boa sorte! (no teatro)', example: 'Break a leg on your presentation!', phonetic: '/breɪk ə leɡ/' },
+      { word: 'Bite the bullet', translation: 'Encarar uma situação difícil', example: 'I decided to bite the bullet and pay.', phonetic: '/baɪt ðə ˈbʊlɪt/' },
+    ],
+    spanish: [
+      { word: 'Estar en las nubes', translation: 'Estar distraído / no mundo da lua', example: 'Juan siempre está en las nubes.', phonetic: '/esˈtar en las ˈnubes/' },
+      { word: 'Dar en el clavo', translation: 'Acertar em cheio', example: 'Has dado en el clavo con esa respuesta.', phonetic: '/dar en el ˈklaβo/' },
+    ],
+  },
+  false_friends: {
+    english: [
+      { word: 'Actually', translation: 'Na verdade (NÃO significa atualmente)', example: 'Actually, I prefer tea over coffee.', phonetic: '/ˈæk.tʃu.ə.li/' },
+      { word: 'Pretend', translation: 'Fingir (NÃO significa pretender)', example: 'Don\'t pretend you didn\'t hear me.', phonetic: '/prɪˈtend/' },
+      { word: 'Push', translation: 'Empurrar (NÃO significa puxar)', example: 'Push the door to enter.', phonetic: '/pʊʃ/' },
+    ],
+    spanish: [
+      { word: 'Embarazada', translation: 'Grávida (NÃO significa embaraçada)', example: 'María está embarazada de 5 meses.', phonetic: '/embaraˈθaða/' },
+      { word: 'Éxito', translation: 'Sucesso (NÃO significa saída)', example: 'La película fue un gran éxito.', phonetic: '/ˈeksito/' },
+    ],
+  },
+};
+
+export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [lang, setLang] = useState<'english' | 'spanish'>('english');
   const [currentIdx, setCurrentIdx] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState(false);
 
-  const words = VOCABULARY[lang];
-  const current = words[currentIdx];
+  const modeData = MODE_DATA[mode] || VOCABULARY;
+  const words = modeData[lang] || VOCABULARY[lang];
+  const current = words[currentIdx] || words[0];
 
   const speak = (text: string, language: string) => {
     if ('speechSynthesis' in window) {

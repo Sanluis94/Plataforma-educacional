@@ -265,6 +265,7 @@ export function EstudanteDashboard() {
             ← Voltar para {activeModule?.label}
           </button>
           <ActiveComponent
+            key={activeLab.id}
             {...(activeLab.props || {})}
             labId={activeLab.id}
             labTitle={activeLab.title}

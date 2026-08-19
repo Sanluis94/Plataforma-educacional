@@ -14,23 +14,57 @@ const EVENTS = [
   { year: 1989, label: 'Queda do Muro de Berlim', category: 'Política', color: '#ef5350', desc: 'Fim da Guerra Fria e reunificação da Alemanha; colapso do bloco socialista soviético.' },
 ];
 
+const MODE_EVENTS: Record<string, typeof EVENTS> = {
+  brazil_colony: [
+    { year: 1500, label: 'Chegada dos Portugueses', category: 'Brasil', color: '#42a5f5', desc: 'Esquadra de Pedro Álvares Cabral aporta em Porto Seguro, iniciando o domínio colonial português.' },
+    { year: 1534, label: 'Capitanias Hereditárias', category: 'Brasil', color: '#42a5f5', desc: 'D. João III divide o território brasileiro em 15 faixas de terra doadas a capitães donatários.' },
+    { year: 1789, label: 'Inconfidência Mineira', category: 'Brasil', color: '#ef5350', desc: 'Movimento separatista em Minas Gerais contra a derrama cobrada pela Coroa Portuguesa, liderado por Tiradentes.' },
+    { year: 1808, label: 'Chegada da Família Real', category: 'Brasil', color: '#42a5f5', desc: 'D. João VI transfere a corte para o Rio de Janeiro e decreta a Abertura dos Portos às Nações Amigas.' },
+    { year: 1822, label: 'Independência do Brasil', category: 'Brasil', color: '#66bb6a', desc: 'D. Pedro I proclama a independência às margens do Ipiranga, fundando o Império do Brasil.' },
+    { year: 1888, label: 'Abolição da Escravatura', category: 'Brasil', color: '#ab47bc', desc: 'Princesa Isabel assina a Lei Áurea, libertando os últimos escravizados no país.' },
+    { year: 1889, label: 'Proclamação da República', category: 'Brasil', color: '#66bb6a', desc: 'Marechal Deodoro lidera o golpe militar que banem a Família Imperial e instaura a República dos Estados Unidos do Brasil.' },
+  ],
+  industrial_rev: [
+    { year: 1765, label: 'Máquina a Vapor de Watt', category: 'Ciência', color: '#7c4dff', desc: 'James Watt aprimora o motor a vapor, impulsionando a mecanização das tecelagens britânicas.' },
+    { year: 1811, label: 'Movimento Ludista', category: 'Política', color: '#ef5350', desc: 'Trabalhadores ingleses destroem máquinas industriais em protesto contra as péssimas condições de trabalho.' },
+    { year: 1848, label: 'Manifesto Comunista', category: 'Política', color: '#ef5350', desc: 'Marx e Engels publicam a obra fundadora da análise das lutas de classes na sociedade industrializada.' },
+    { year: 1870, label: '2ª Revolução Industrial', category: 'Ciência', color: '#7c4dff', desc: 'Advento da eletricidade, aço, petróleo e do motor de combustão interna transformam a indústria global.' },
+    { year: 1913, label: 'Linha de Montagem de Ford', category: 'Política', color: '#ffa726', desc: 'Henry Ford introduz a esteira rolante automatizada na produção de automóveis (Fordismo).' },
+  ],
+  world_wars: [
+    { year: 1914, label: 'Início da 1ª Guerra Mundial', category: 'Guerra', color: '#ffa726', desc: 'Assassinato do Arquiduque Francisco Ferdinando em Sarajevo desencadeia a guerra de trincheiras europeia.' },
+    { year: 1919, label: 'Tratado de Versalhes', category: 'Política', color: '#ef5350', desc: 'Acordo de paz pune severamente a Alemanha derrotada, criando ressentimento que alimentaria o Nazismo.' },
+    { year: 1939, label: 'Invasão da Polônia', category: 'Guerra', color: '#ffa726', desc: 'Hitler ordena a invasão da Polônia via Blitzkrieg, dando início à 2ª Guerra Mundial.' },
+    { year: 1944, label: 'Dia D na Normandia', category: 'Guerra', color: '#ffa726', desc: 'Desembarque dos Aliados nas praias francesas abre a frente ocidental contra as forças nazistas.' },
+    { year: 1945, label: 'Bombas em Hiroshima / ONU', category: 'Política', color: '#ef5350', desc: 'Ataque atômico americano força a rendição do Japão; criação da ONU para mediação diplomática global.' },
+  ],
+  greece_rome: [
+    { year: -508, label: 'Democracia Ateniense', category: 'Política', color: '#ef5350', desc: 'Clístenes promove reformas políticas em Atenas, estabelecendo a primeira democracia direta da história.' },
+    { year: -490, label: 'Guerras Médicas', category: 'Guerra', color: '#ffa726', desc: 'Cidades-estado gregas se unem para derrotar as invasões do Império Persa em Maratona e Salamina.' },
+    { year: -44, label: 'Assassinato de Júlio César', category: 'Política', color: '#ef5350', desc: 'Senadores conspiradores assassinam o ditador Júlio César nos Idos de Março, precipitando a crise da República Romana.' },
+    { year: -27, label: 'Início do Império Romano', category: 'Política', color: '#66bb6a', desc: 'Otávio recebe o título de Augusto, tornando-se o primeiro imperador romano e iniciando a Pax Romana.' },
+    { year: 476, label: 'Queda do Império Romano', category: 'Política', color: '#ef5350', desc: 'Invasões germânicas destituem o imperador Rômulo Augusto, encerrando a Idade Antiga no Ocidente.' },
+  ],
+  cold_war: [
+    { year: 1947, label: 'Doutrina Truman', category: 'Política', color: '#ef5350', desc: 'EUA declaram contenção global ao expansionismo soviético, oficializando a Guerra Fria.' },
+    { year: 1962, label: 'Crise dos Mísseis em Cuba', category: 'Guerra', color: '#ffa726', desc: 'Tensão máxima entre EUA e URSS devido à instalação de ogivas nucleares soviéticas no Caribe.' },
+    { year: 1969, label: 'Chegada à Lua (Apollo 11)', category: 'Ciência', color: '#7c4dff', desc: 'Ápice da corrida espacial militar-tecnológica entre as duas superpotências globais.' },
+    { year: 1989, label: 'Queda do Muro de Berlim', category: 'Política', color: '#ef5350', desc: 'Colapso do símbolo da divisão bipolar da Europa e abertura das fronteiras da Alemanha Oriental.' },
+    { year: 1991, label: 'Dissolução da União Soviética', category: 'Política', color: '#66bb6a', desc: 'Renúncia de Gorbachev e fim da URSS encerram formalmente a Guerra Fria.' },
+  ],
+};
+
 const CATEGORIES = ['Todos', 'Brasil', 'Política', 'Guerra', 'Ciência'];
 
 export function HistoryTimeline({ mode = 'timeline', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
-  const initialCategory =
-    mode === 'brazil_colony' ? 'Brasil' :
-    mode === 'industrial_rev' ? 'Política' :
-    mode === 'world_wars' ? 'Guerra' :
-    mode === 'greece_rome' ? 'Política' :
-    mode === 'cold_war' ? 'Política' : 'Todos';
-
-  const [filter, setFilter] = useState(initialCategory);
+  const eventsList = MODE_EVENTS[mode] || EVENTS;
+  const [filter, setFilter] = useState('Todos');
   const [selected, setSelected] = useState<typeof EVENTS[0] | null>(null);
 
-  const filtered = filter === 'Todos' ? EVENTS : EVENTS.filter(e => e.category === filter);
-  const minYear = EVENTS[0].year;
-  const maxYear = EVENTS[EVENTS.length - 1].year;
-  const span = maxYear - minYear;
+  const filtered = filter === 'Todos' ? eventsList : eventsList.filter(e => e.category === filter);
+  const minYear = eventsList[0].year;
+  const maxYear = eventsList[eventsList.length - 1].year;
+  const span = Math.max(1, maxYear - minYear);
 
   return (
     <div style={{ padding: '1.5rem' }}>
