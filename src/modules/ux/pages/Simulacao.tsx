@@ -7,7 +7,10 @@ interface SimulacaoProps {
 }
 
 export const Simulacao: React.FC<SimulacaoProps> = ({ onComplete }) => {
-  const [activeTab, setActiveTab] = useState<'pendulum' | 'collisions'>('pendulum');
+  const [activeTab, setActiveTab] = useState<'pendulum' | 'collisions' | 'optics'>('pendulum');
+  const [refractionIndex1, setRefractionIndex1] = useState(1.0); // Ar
+  const [refractionIndex2, setRefractionIndex2] = useState(1.5); // Vidro
+  const [incidentAngle, setIncidentAngle] = useState(45); // Graus
 
   // Pendulum states
   const [isPlayingPendulum, setIsPlayingPendulum] = useState(false);
@@ -257,6 +260,13 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ onComplete }) => {
           >
             Colisões (1D)
           </button>
+          <button
+            onClick={() => setActiveTab('optics')}
+            className={activeTab === 'optics' ? 'btn-gradient' : 'btn-outline-cyan'}
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+          >
+            Óptica Geométrica
+          </button>
           {onComplete && (
             <button
               onClick={() => onComplete(100)}
@@ -453,6 +463,98 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ onComplete }) => {
           `}</style>
         </div>
       )}
+      {/* Optics Tab */}
+      {activeTab === 'optics' && (() => {
+        const rad1 = (incidentAngle * Math.PI) / 180;
+        const sinRad2 = (refractionIndex1 * Math.sin(rad1)) / refractionIndex2;
+        const isTotalInternalReflection = sinRad2 > 1.0;
+        const rad2 = isTotalInternalReflection ? rad1 : Math.asin(sinRad2);
+        const refractedAngle = isTotalInternalReflection ? incidentAngle : (rad2 * 180 / Math.PI);
+
+        return (
+          <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
+            <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ width: '100%', height: '300px', background: '#0b0f19', borderRadius: '0.75rem', position: 'relative', overflow: 'hidden', border: '1px solid rgba(6,182,212,0.2)' }}>
+                {/* Meio 1 (Ar / Meio Superior) */}
+                <div style={{ height: '50%', background: 'rgba(6,182,212,0.05)', borderBottom: '2px dashed #06b6d4', display: 'flex', alignItems: 'flex-start', padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                  Meio 1 (n₁ = {refractionIndex1.toFixed(2)})
+                </div>
+                {/* Meio 2 (Vidro / Meio Inferior) */}
+                <div style={{ height: '50%', background: 'rgba(139,92,246,0.1)', display: 'flex', alignItems: 'flex-end', padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                  Meio 2 (n₂ = {refractionIndex2.toFixed(2)})
+                </div>
+
+                {/* Linha Normal */}
+                <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', borderLeft: '1px dotted rgba(255,255,255,0.3)' }} />
+
+                {/* SVG dos Raios Luminosos */}
+                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+                  {/* Raio Incidente */}
+                  <line
+                    x1={250 - 140 * Math.sin(rad1)}
+                    y1={150 - 140 * Math.cos(rad1)}
+                    x2={250}
+                    y2={150}
+                    stroke="#eab308"
+                    strokeWidth="3"
+                  />
+                  {/* Raio Refratado ou Refletido */}
+                  {!isTotalInternalReflection ? (
+                    <line
+                      x1={250}
+                      y1={150}
+                      x2={250 + 140 * Math.sin(rad2)}
+                      y2={150 + 140 * Math.cos(rad2)}
+                      stroke="#06b6d4"
+                      strokeWidth="3"
+                    />
+                  ) : (
+                    <line
+                      x1={250}
+                      y1={150}
+                      x2={250 + 140 * Math.sin(rad1)}
+                      y2={150 - 140 * Math.cos(rad1)}
+                      stroke="#ef4444"
+                      strokeWidth="3"
+                    />
+                  )}
+                </svg>
+              </div>
+
+              <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                {isTotalInternalReflection ? (
+                  <span className="badge-red">⚠️ Reflexão Total Interna Ocorrida!</span>
+                ) : (
+                  <span className="badge-cyan">Ângulo de Refração θ₂ = {refractedAngle.toFixed(1)}° (Lei de Snell-Descartes)</span>
+                )}
+              </div>
+            </div>
+
+            <div className="glass-card" style={{ padding: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1.25rem' }}>
+                Controles de Óptica
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Índice de Refração Meio 1 (n₁)</label>
+                  <input type="range" min="1.0" max="2.5" step="0.1" value={refractionIndex1} onChange={e => setRefractionIndex1(Number(e.target.value))} />
+                  <span style={{ fontSize: '0.78rem', color: '#06b6d4' }}>{refractionIndex1.toFixed(2)}</span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Índice de Refração Meio 2 (n₂)</label>
+                  <input type="range" min="1.0" max="2.5" step="0.1" value={refractionIndex2} onChange={e => setRefractionIndex2(Number(e.target.value))} />
+                  <span style={{ fontSize: '0.78rem', color: '#8b5cf6' }}>{refractionIndex2.toFixed(2)}</span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Ângulo Incidente (θ₁)</label>
+                  <input type="range" min="0" max="85" value={incidentAngle} onChange={e => setIncidentAngle(Number(e.target.value))} />
+                  <span style={{ fontSize: '0.78rem', color: '#eab308' }}>{incidentAngle}°</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
