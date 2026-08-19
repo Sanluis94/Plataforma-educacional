@@ -17,7 +17,7 @@ const VOCABULARY = {
   ]
 };
 
-export function LanguagesModule({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function LanguagesModule({ mode: _mode = 'vocabulary', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [lang, setLang] = useState<'english' | 'spanish'>('english');
   const [currentIdx, setCurrentIdx] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);

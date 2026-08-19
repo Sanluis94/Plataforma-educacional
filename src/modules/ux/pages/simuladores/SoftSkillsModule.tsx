@@ -32,7 +32,7 @@ const SCENARIOS: Scenario[] = [
   },
 ];
 
-export function SoftSkillsModule({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function SoftSkillsModule({ mode: _mode = 'communication', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
   const [totalXP, setTotalXP] = useState(0);

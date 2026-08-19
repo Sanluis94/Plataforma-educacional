@@ -3,11 +3,20 @@ import { Play, Pause, RotateCcw, Settings2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface SimulacaoProps {
+  mode?: string;
+  labTitle?: string;
+  labId?: string;
   onComplete?: (score: number) => void;
 }
 
-export const Simulacao: React.FC<SimulacaoProps> = ({ onComplete }) => {
-  const [activeTab, setActiveTab] = useState<'pendulum' | 'collisions' | 'optics'>('pendulum');
+export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
+  const [activeTab, setActiveTab] = useState<string>(mode || 'pendulum');
+
+  useEffect(() => {
+    if (mode) {
+      setActiveTab(mode);
+    }
+  }, [mode]);
   const [refractionIndex1, setRefractionIndex1] = useState(1.0); // Ar
   const [refractionIndex2, setRefractionIndex2] = useState(1.5); // Vidro
   const [incidentAngle, setIncidentAngle] = useState(45); // Graus

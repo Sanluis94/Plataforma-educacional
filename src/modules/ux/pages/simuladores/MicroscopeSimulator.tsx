@@ -321,7 +321,7 @@ const renderCellContent = (slideId: string, zoomLevel: number) => {
   );
 };
 
-export function MicroscopeSimulator({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function MicroscopeSimulator({ mode: _mode = 'microscopy', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [selectedSlide, setSelectedSlide] = useState<Slide>(SLIDES[0]);
   const [zoom, setZoom] = useState(10); // 10x, 40x, 100x, 400x
   const [focusOffset, setFocusOffset] = useState(0);

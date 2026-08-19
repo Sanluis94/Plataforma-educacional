@@ -9,7 +9,7 @@ const COMPETENCIAS = [
   { id: 5, name: 'Proposta de Intervenção', desc: 'Proposta detalhada, respeitando os direitos humanos e a realidade social.' },
 ];
 
-export function EssayModule({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function EssayModule({ mode: _mode = 'structure', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [essay, setEssay] = useState('');
   const [theme, setTheme] = useState('A influência das redes sociais na saúde mental dos jovens');
   const [feedback, setFeedback] = useState<null | { score: number; comments: string[] }>(null);

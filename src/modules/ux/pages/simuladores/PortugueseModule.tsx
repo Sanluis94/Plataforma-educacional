@@ -43,7 +43,7 @@ no meio do caminho tinha uma pedra.`,
   }
 ];
 
-export function PortugueseModule({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function PortugueseModule({ mode: _mode = 'syntax', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const [selectedFragment, setSelectedFragment] = useState(FRAGMENTS[0]);
   const [currentQ, setCurrentQ] = useState(0);
   const [answered, setAnswered] = useState<number | null>(null);

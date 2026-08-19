@@ -1,12 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 
 interface MathSimulatorProps {
-  functionType?: 'linear' | 'quadratic' | 'trigonometric' | 'generic';
+  mode?: string;
+  functionType?: 'linear' | 'quadratic' | 'trigonometric' | 'generic' | string;
   title?: string;
+  labTitle?: string;
+  labId?: string;
   onComplete?: (score: number) => void;
 }
 
-export function MathSimulator({ functionType = 'linear', title, onComplete }: MathSimulatorProps) {
+export function MathSimulator({ mode, functionType = 'linear', title, labTitle, onComplete }: MathSimulatorProps) {
+  const effectiveType = mode || functionType;
+  const displayTitle = labTitle || title;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
   const mousePos = useRef<{ px: number; py: number; mx: number; my: number } | null>(null);
@@ -150,7 +155,7 @@ export function MathSimulator({ functionType = 'linear', title, onComplete }: Ma
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [a, b, c, functionType]);
+  }, [a, b, c, effectiveType]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -173,16 +178,18 @@ export function MathSimulator({ functionType = 'linear', title, onComplete }: Ma
   };
 
   const handleFinish = () => {
-    if (onComplete) onComplete(100); // Exemplo: Simulação finalizada com sucesso
+    if (onComplete) onComplete(100);
   };
 
   return (
     <div className="math-simulator mt-4 p-4" style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--shadow-md)' }}>
       <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem' }}>
-        Laboratório Virtual: {title || (
-          functionType === 'linear' ? 'Plano Cartesiano - Função do 1º Grau' :
-          functionType === 'quadratic' ? 'Plano Cartesiano - Função do 2º Grau' :
-          functionType === 'trigonometric' ? 'Plano Cartesiano - Função Trigonométrica' : 'Matemática Aplicada'
+        Laboratório Virtual: {displayTitle || (
+          effectiveType === 'linear' ? 'Plano Cartesiano - Função do 1º Grau' :
+          effectiveType === 'quadratic' ? 'Plano Cartesiano - Função do 2º Grau' :
+          effectiveType === 'trigonometric' ? 'Plano Cartesiano - Função Trigonométrica' :
+          effectiveType === 'spatial' ? 'Geometria Espacial - Volume e Área' :
+          effectiveType === 'statistics' ? 'Estatística Descritiva - Gráficos' : 'Matrizes e Sistemas Lineares'
         )}
       </h3>
 

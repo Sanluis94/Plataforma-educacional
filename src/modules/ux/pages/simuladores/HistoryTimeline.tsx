@@ -16,8 +16,15 @@ const EVENTS = [
 
 const CATEGORIES = ['Todos', 'Brasil', 'Política', 'Guerra', 'Ciência'];
 
-export function HistoryTimeline({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
-  const [filter, setFilter] = useState('Todos');
+export function HistoryTimeline({ mode = 'timeline', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+  const initialCategory =
+    mode === 'brazil_colony' ? 'Brasil' :
+    mode === 'industrial_rev' ? 'Política' :
+    mode === 'world_wars' ? 'Guerra' :
+    mode === 'greece_rome' ? 'Política' :
+    mode === 'cold_war' ? 'Política' : 'Todos';
+
+  const [filter, setFilter] = useState(initialCategory);
   const [selected, setSelected] = useState<typeof EVENTS[0] | null>(null);
 
   const filtered = filter === 'Todos' ? EVENTS : EVENTS.filter(e => e.category === filter);

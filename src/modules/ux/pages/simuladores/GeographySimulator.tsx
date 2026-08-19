@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 interface GeographySimulatorProps {
+  mode?: string;
   labTitle?: string;
   labId?: string;
   onComplete?: (score: number) => void;
@@ -8,7 +9,7 @@ interface GeographySimulatorProps {
 
 type PlateBoundary = 'divergent' | 'convergent' | 'transform';
 
-export function GeographySimulator({ labTitle, onComplete }: GeographySimulatorProps) {
+export function GeographySimulator({ mode: _mode = 'tectonics', labTitle, onComplete }: GeographySimulatorProps) {
   const [boundaryType, setBoundaryType] = useState<PlateBoundary>('convergent');
   const [pressure, setPressure] = useState(50);
   const canvasRef = useRef<HTMLCanvasElement>(null);

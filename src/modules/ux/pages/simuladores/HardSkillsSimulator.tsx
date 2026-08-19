@@ -28,8 +28,8 @@ const PROGRAMS: Record<string, Program> = {
   },
 };
 
-export function HardSkillsSimulator({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
-  const [selected, setSelected] = useState<string | null>(null);
+export function HardSkillsSimulator({ mode: _mode = 'programming', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+  const [selected, setSelected] = useState<string | null>('coding');
   const [step, setStep] = useState(0);
   const [input, setInput] = useState('');
   const [done, setDone] = useState(false);

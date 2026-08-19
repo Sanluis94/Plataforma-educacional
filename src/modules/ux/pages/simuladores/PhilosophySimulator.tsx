@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 interface PhilosophySimulatorProps {
+  mode?: string;
   labTitle?: string;
   labId?: string;
   onComplete?: (score: number) => void;
@@ -78,7 +79,7 @@ const DILEMMAS: Dilemma[] = [
   }
 ];
 
-export function PhilosophySimulator({ labTitle, onComplete }: PhilosophySimulatorProps) {
+export function PhilosophySimulator({ mode: _mode = 'ethics', labTitle, onComplete }: PhilosophySimulatorProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOptionIdx, setSelectedOptionIdx] = useState<number | null>(null);
   const [profile, setProfile] = useState<Record<string, number>>({

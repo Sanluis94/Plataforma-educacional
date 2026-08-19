@@ -42,7 +42,14 @@ interface Tube {
   mixed: boolean;
 }
 
-export function ChemistryLab({ labTitle, onComplete }: { labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+interface ChemistryLabProps {
+  mode?: string;
+  labTitle?: string;
+  labId?: string;
+  onComplete?: (score: number) => void;
+}
+
+export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }: ChemistryLabProps) {
   const [tubes, setTubes] = useState<Tube[]>([
     { id: 1, reagents: [], mixed: false },
     { id: 2, reagents: [], mixed: false },
