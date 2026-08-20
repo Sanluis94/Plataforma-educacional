@@ -7,38 +7,89 @@ interface Scenario {
   choices: { text: string; outcome: string; score: number; xp: number }[];
 }
 
-const SCENARIOS: Scenario[] = [
-  {
-    id: 's1',
-    title: 'O Conflito na Reunião',
-    context: 'Em uma reunião de equipe, dois colegas de trabalho discutem sobre responsabilidades e começam a elevar o tom. Como gestor(a), você precisa agir. O que você faz?',
-    choices: [
-      { text: 'Suspender a reunião, separar as partes e ouvir cada um individualmente.', outcome: '✅ Ação de liderança empática. Você desescalou o conflito e criou condições para uma resolução matura.', score: 100, xp: 80 },
-      { text: 'Deixar que resolvam entre si sem interferir.', outcome: '⚠️ Omissão de liderança. Conflitos sem mediação tendem a piorar e prejudicar o ambiente de trabalho.', score: 30, xp: 20 },
-      { text: 'Tomar partido de quem parece ter mais razão naquele momento.', outcome: '❌ Parcialidade sem dados completos. Essa ação gera desconfiança na equipe e percepção de injustiça.', score: 10, xp: 5 },
-      { text: 'Encerrar a reunião e registrar o ocorrido para análise posterior com RH.', outcome: '✅ Adequado em contextos gravas, mas deixa o conflito em aberto. Mediação imediata seria mais eficaz.', score: 75, xp: 55 },
-    ],
-  },
-  {
-    id: 's2',
-    title: 'O Prazo Impossível',
-    context: 'Seu gestor acabou de atribuir um projeto a você com um prazo que você acredita ser impossível de cumprir com qualidade. O que você faz?',
-    choices: [
-      { text: 'Aceitar sem questionar para não parecer incapaz.', outcome: '❌ Aceitar prazos irrealistas gera stress, erros e pode comprometer a entrega. Comunicação assertiva é essencial.', score: 10, xp: 5 },
-      { text: 'Apresentar ao gestor uma análise do escopo, cronograma realista e possíveis soluções (priorização, reforço de equipe).', outcome: '🏆 Postura profissional exemplar! Você demonstrou liderança, organização e comunicação assertiva.', score: 100, xp: 100 },
-      { text: 'Recusar o projeto de forma direta.', outcome: '❌ Recusa sem alternativas pode ser vista como falta de comprometimento. Ofereça soluções antes de recusar.', score: 15, xp: 10 },
-      { text: 'Pedir mais tempo à equipe sem consultar o gestor.', outcome: '⚠️ Iniciativa válida, mas decisões de prazo devem ser alinhadas com a hierarquia. Alinhe expectativas verticalmente.', score: 50, xp: 35 },
-    ],
-  },
-];
+const MODE_SCENARIOS: Record<string, Scenario[]> = {
+  communication: [
+    {
+      id: 'comm_1',
+      title: 'Feedback Construtivo',
+      context: 'Um membro do time cometeu um erro que atrasou a entrega de um relatório. Você precisa dar um feedback para que isso não volte a acontecer. Como você aborda a situação?',
+      choices: [
+        { text: 'Chamar a pessoa em particular, pontuar o fato com dados objetivos e propor um plano de ação conjunto.', outcome: '🏆 Excelente! Comunicação não-violenta (CNV) e foco na solução construtiva.', score: 100, xp: 80 },
+        { text: 'Enviar um e-mail com cópia para todo o time apontando o erro para servir de exemplo.', outcome: '❌ Exposição desnecessária e prejudicial ao clima psicológico de segurança.', score: 10, xp: 5 },
+        { text: 'Não falar nada para evitar constrangimento e refazer você mesmo o relatório.', outcome: '⚠️ Sobrecarga pessoal e ausência de desenvolvimento do colega.', score: 30, xp: 20 },
+      ]
+    }
+  ],
+  leadership: [
+    {
+      id: 'lead_1',
+      title: 'Delegação e Autonomia',
+      context: 'Sua equipe recebeu um projeto de alta complexidade. Você tem grande domínio técnico sobre o assunto. Como você gerencia as tarefas?',
+      choices: [
+        { text: 'Definir claramente os objetivos e entregáveis, delegando autonomia técnica e fazendo alinhamentos periódicos.', outcome: '🏆 Liderança inspiradora e empoderadora!', score: 100, xp: 100 },
+        { text: 'Centralizar todas as decisões críticas e ditar o passo a passo de cada tarefa.', outcome: '⚠️ Microgerenciamento: sufoca a iniciativa e gera gargalos.', score: 40, xp: 25 },
+        { text: 'Deixar o time completamente livre sem metas definidas ou suporte.', outcome: '❌ Ausência de liderança e direcionamento estratégico.', score: 20, xp: 10 },
+      ]
+    }
+  ],
+  time_management: [
+    {
+      id: 'time_1',
+      title: 'Matriz de Eisenhower e Priorização',
+      context: 'Você tem 10 tarefas acumuladas hoje, incluindo uma emergência de cliente, reuniões de rotina e o planejamento estratégico do próximo trimestre. O que faz primeiro?',
+      choices: [
+        { text: 'Classificar por Urgência vs Importância: resolver a crise urgente e bloquear tempo protegido para o estratégico.', outcome: '🏆 Domínio da Matriz de Eisenhower e alta eficácia!', score: 100, xp: 90 },
+        { text: 'Fazer as tarefas mais fáceis e rápidas primeiro, empurrando as complexas para o fim do dia.', outcome: '⚠️ Ilusão de produtividade: as tarefas estratégicas acabam não sendo feitas.', score: 45, xp: 30 },
+        { text: 'Tentar fazer tudo simultaneamente em multitarefa contínua.', outcome: '❌ Queda comprovada de 40% na produtividade e aumento do estresse.', score: 15, xp: 10 },
+      ]
+    }
+  ],
+  emotional_intelligence: [
+    {
+      id: 'eq_1',
+      title: 'Autocontrole sob Pressão',
+      context: 'Durante uma apresentação importante, um cliente critica duramente seu trabalho usando um tom agressivo e irônico. Qual sua reação imediata?',
+      choices: [
+        { text: 'Respirar fundo, acolher a preocupação do cliente sem rebater agressividade e focar nos pontos práticos a ajustar.', outcome: '🏆 Inteligência Emocional avançada (autorregulação e empatia de Goleman)!', score: 100, xp: 85 },
+        { text: 'Responder no mesmo tom irônico para não se mostrar frágil.', outcome: '❌ Escalada do conflito e perda de profissionalismo.', score: 10, xp: 5 },
+        { text: 'Ficar em silêncio absoluto e encerrar a reunião abruptamente.', outcome: '⚠️ Reação de fuga: prejudica a relação comercial.', score: 35, xp: 20 },
+      ]
+    }
+  ],
+  conflict_resolution: [
+    {
+      id: 'conf_1',
+      title: 'O Conflito na Reunião',
+      context: 'Dois colegas de trabalho discutem sobre responsabilidades e começam a elevar o tom na frente de outros setores. O que você faz?',
+      choices: [
+        { text: 'Suspender a discussão coletiva, acolher as partes em separado e mediar um acordo ganha-ganha.', outcome: '🏆 Mediação de conflito exemplar!', score: 100, xp: 80 },
+        { text: 'Tomar partido de quem parece ter mais razão naquele momento.', outcome: '❌ Parcialidade destrutiva.', score: 10, xp: 5 },
+        { text: 'Deixar que discutam até que alguém ceda.', outcome: '⚠️ Omissão prejudicial à segurança psicológica da equipe.', score: 30, xp: 20 },
+      ]
+    }
+  ],
+  teamwork: [
+    {
+      id: 'team_1',
+      title: 'Colaboração Interdisciplinar',
+      context: 'O time de design e o de desenvolvimento discordam sobre a viabilidade de uma tela no app. Os prazos estão apertados. Como você atua?',
+      choices: [
+        { text: 'Promover uma sessão de co-criação rápida (Design Sprint) para encontrar uma solução viável e visualmente elegante.', outcome: '🏆 Sinergia interdisciplinar e foco na entrega de valor!', score: 100, xp: 95 },
+        { text: 'Fazer o programador implementar exatamente o que o designer pediu sem questionar.', outcome: '⚠️ Pode inviabilizar o prazo técnico ou a performance.', score: 40, xp: 25 },
+        { text: 'Cortar todo o design visual e entregar apenas telas brutas.', outcome: '❌ Prejudica a experiência do usuário final.', score: 20, xp: 15 },
+      ]
+    }
+  ]
+};
 
-export function SoftSkillsModule({ mode: _mode = 'communication', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function SoftSkillsModule({ mode = 'communication', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+  const scenariosList = MODE_SCENARIOS[mode] || MODE_SCENARIOS['communication'];
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
   const [totalXP, setTotalXP] = useState(0);
   const [finished, setFinished] = useState(false);
 
-  const scenario = SCENARIOS[scenarioIdx];
+  const scenario = scenariosList[scenarioIdx];
 
   const handleChoice = (idx: number) => {
     if (chosen !== null) return;
@@ -47,7 +98,7 @@ export function SoftSkillsModule({ mode: _mode = 'communication', labTitle, onCo
   };
 
   const next = () => {
-    if (scenarioIdx < SCENARIOS.length - 1) {
+    if (scenarioIdx < scenariosList.length - 1) {
       setScenarioIdx(i => i + 1);
       setChosen(null);
     } else {
@@ -61,10 +112,10 @@ export function SoftSkillsModule({ mode: _mode = 'communication', labTitle, onCo
     return (
       <div style={{ padding: '2rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '16px' }}>
         <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🌟</div>
-        <h2 style={{ color: 'var(--text-main)' }}>Trilha Concluída!</h2>
+        <h2 style={{ color: 'var(--text-main)' }}>Trilha de Soft Skills Concluída!</h2>
         <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--color-primary)', margin: '0.5rem 0' }}>+{totalXP} XP</div>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          {totalXP >= 150 ? 'Excelente! Você demonstrou liderança e inteligência emocional avançadas.' : 'Bom progresso! Continue desenvolvendo suas soft skills com mais cenários.'}
+          {totalXP >= 70 ? 'Excelente! Você demonstrou maturidade comportamental e liderança avançada.' : 'Bom progresso! Continue desenvolvendo suas soft skills com mais cenários.'}
         </p>
         <button onClick={reset} style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
           Refazer Trilha
@@ -75,9 +126,9 @@ export function SoftSkillsModule({ mode: _mode = 'communication', labTitle, onCo
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.25rem' }}>💼 {labTitle || 'Soft Skills — Liderança & Comportamento'}</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.25rem' }}>💼 {labTitle || 'Laboratório de Habilidades Socioemocionais'}</h2>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Cenário {scenarioIdx + 1}/{SCENARIOS.length}</span>
+        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Cenário {scenarioIdx + 1}/{scenariosList.length}</span>
         <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>⚡ {totalXP} XP</span>
       </div>
 
@@ -108,24 +159,24 @@ export function SoftSkillsModule({ mode: _mode = 'communication', labTitle, onCo
       {chosen !== null && (
         <div>
           <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '1rem', marginBottom: '1rem', borderLeft: '3px solid var(--color-primary)' }}>
-            <strong style={{ color: 'var(--color-primary)' }}>Feedback:</strong>
+            <strong style={{ color: 'var(--color-primary)' }}>Feedback da IA:</strong>
             <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0', fontSize: '0.88rem', lineHeight: '1.6' }}>{scenario.choices[chosen].outcome}</p>
             <div style={{ marginTop: '0.5rem', color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '0.82rem' }}>
               +{scenario.choices[chosen].xp} XP conquistados
             </div>
           </div>
           <button onClick={next} style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
-            {scenarioIdx < SCENARIOS.length - 1 ? 'Próximo Cenário →' : 'Finalizar Trilha'}
+            {scenarioIdx < scenariosList.length - 1 ? 'Próximo Cenário →' : 'Finalizar Trilha'}
           </button>
         </div>
       )}
-      {/* AI Behavioral Diagnostic Box */}
+
       <div style={{ marginTop: '1.25rem', padding: '0.85rem', borderRadius: '10px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
         <div style={{ color: '#06b6d4', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>🤖 AVALIAÇÃO DE IA COMPORTAMENTAL</div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
           {chosen !== null
-            ? `Decisão analisada: Pontuação de liderança +${scenario.choices[chosen].xp} XP computada!`
-            : 'Analise os cenários hipotéticos e tome decisões orientadas pela inteligência emocional.'}
+            ? `Decisão analisada para a competência ${mode.toUpperCase()}: +${scenario.choices[chosen].xp} XP computada!`
+            : `Pratique competências de ${mode.replace('_', ' ')} através de tomada de decisão contextualizada.`}
         </p>
       </div>
 

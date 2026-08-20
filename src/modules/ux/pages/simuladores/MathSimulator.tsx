@@ -238,7 +238,7 @@ export function MathSimulator({ mode, functionType = 'linear', title, labTitle, 
               />
             </div>
 
-            {(functionType === 'quadratic' || functionType === 'trigonometric') && (
+            {(effectiveType === 'quadratic' || effectiveType === 'trigonometric' || effectiveType === 'spatial' || effectiveType === 'statistics' || effectiveType === 'matrices') && (
               <div className="slider-group mb-3">
                 <label style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
                   Coeficiente C <strong>{c.toFixed(1)}</strong>

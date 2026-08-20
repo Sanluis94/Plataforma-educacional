@@ -321,8 +321,14 @@ const renderCellContent = (slideId: string, zoomLevel: number) => {
   );
 };
 
-export function MicroscopeSimulator({ mode: _mode = 'microscopy', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
-  const [selectedSlide, setSelectedSlide] = useState<Slide>(SLIDES[0]);
+export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+  const initialSlide =
+    mode === 'genetics' ? SLIDES.find(s => s.id === 'blood') || SLIDES[0] :
+    mode === 'anatomy' ? SLIDES.find(s => s.id === 'muscle') || SLIDES[0] :
+    mode === 'ecosystems' ? SLIDES.find(s => s.id === 'protozoa') || SLIDES[0] :
+    mode === 'evolution' ? SLIDES.find(s => s.id === 'bacteria') || SLIDES[0] : SLIDES[0];
+
+  const [selectedSlide, setSelectedSlide] = useState<Slide>(initialSlide);
   const [zoom, setZoom] = useState(10); // 10x, 40x, 100x, 400x
   const [focusOffset, setFocusOffset] = useState(0);
 
@@ -333,9 +339,14 @@ export function MicroscopeSimulator({ mode: _mode = 'microscopy', labTitle, onCo
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🔬 {labTitle || 'Microscópio Virtual'}</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🔬 {labTitle || 'Laboratório de Biologia Virtual'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-        Selecione uma lâmina, ajuste o zoom e o foco micrométrico para observar as estruturas celulares.
+        {mode === 'microscopy' ? 'Análise Microscópica Celular de Estruturas Eucariotas e Procariontes.' :
+         mode === 'genetics' ? 'Observação de Material Genético e Núcleos Cromossômicos.' :
+         mode === 'anatomy' ? 'Análise Histológica de Tecidos Humanos e Sistema Muscular.' :
+         mode === 'ecosystems' ? 'Micro-organismos em Ecossistemas Aquáticos e Cadeias Alimentares.' :
+         mode === 'evolution' ? 'Evolução e Análise de Paredes Celulares Bacterianas.' :
+         'Bioquímica Celular, Reações Enzimáticas e Membranas Plasmáticas.'}
       </p>
 
       <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
