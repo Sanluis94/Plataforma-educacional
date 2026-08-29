@@ -31,14 +31,27 @@ export interface ClassData {
 }
 
 // ─── Coleção: activities ──────────────────────────────────────
+export interface ActivityQuestion {
+  q: string;
+  options: string[];
+  answer: number;
+  explanation: string;
+}
+
 export interface ActivityData {
   id?: string;
   title: string;
-  type: string;
+  type: string; // 'quiz' | 'simulation_physics' | 'simulation_chemistry' | 'simulation_biology' | 'simulation_math' | 'essay' | 'lesson_theory'
+  subject?: string;
+  description?: string;
+  theoryContent?: string;
+  questions?: ActivityQuestion[];
   config: Record<string, unknown>;
   classId?: string;
   className?: string;
   professorId: string;
+  xpReward?: number;
+  coinReward?: number;
   dueDate?: string;
   createdAt: string;
   status: 'published' | 'draft';

@@ -198,3 +198,155 @@ Gere um diagnóstico pedagógico formatado em JSON estrito com o seguinte format
     ]
   };
 };
+
+export interface GeneratedLessonPayload {
+  title: string;
+  description: string;
+  theoryContent: string;
+  questions: Array<{
+    q: string;
+    options: string[];
+    answer: number;
+    explanation: string;
+  }>;
+  simulationConfig?: Record<string, unknown>;
+  xpReward: number;
+  coinReward: number;
+}
+
+/**
+ * Cria uma aula e atividade completa com Inteligência Artificial Google Gemini
+ * com base no tema, disciplina e nível de ensino definidos pelo professor.
+ */
+export const generateCompleteLessonWithAI = async ({
+  topic,
+  subject,
+  gradeLevel = 'Ensino Médio',
+  activityType = 'quiz'
+}: {
+  topic: string;
+  subject: string;
+  gradeLevel?: string;
+  activityType?: string;
+}): Promise<GeneratedLessonPayload> => {
+  const apiKey = getEffectiveGeminiApiKey();
+
+  if (apiKey) {
+    try {
+      const prompt = `Você é um coordenador pedagógico e especialista em design de aprendizagem digital.
+Crie um plano de aula interativo e atividade estruturada sobre o seguinte tema:
+- Disciplina: ${subject}
+- Tema: "${topic}"
+- Nível de Ensino: ${gradeLevel}
+- Tipo de Atividade: ${activityType}
+
+Forneça um JSON estrito no seguinte formato:
+{
+  "title": "Título Criativo da Aula",
+  "description": "Objetivo pedagógico e resumo claro da atividade para os estudantes em 2 a 3 frases.",
+  "theoryContent": "Explicação teórica concisa, dinâmica e contextualizada sobre o tema (3 a 5 parágrafos com exemplos práticos).",
+  "questions": [
+    {
+      "q": "Enunciado claro da questão 1 contextualizada",
+      "options": ["Alternativa A", "Alternativa B", "Alternativa C", "Alternativa D"],
+      "answer": 0,
+      "explanation": "Explicação detalhada de por que a alternativa A é correta e onde reside o conceito-chave."
+    },
+    {
+      "q": "Enunciado da questão 2",
+      "options": ["Alternativa A", "Alternativa B", "Alternativa C", "Alternativa D"],
+      "answer": 1,
+      "explanation": "Explicação da questão 2."
+    },
+    {
+      "q": "Enunciado da questão 3",
+      "options": ["Alternativa A", "Alternativa B", "Alternativa C", "Alternativa D"],
+      "answer": 2,
+      "explanation": "Explicação da questão 3."
+    }
+  ],
+  "simulationConfig": {
+    "recommendedMode": "simulation_physics",
+    "params": { "gravity": 9.8, "scale": 1.0 }
+  },
+  "xpReward": 100,
+  "coinReward": 20
+}`;
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed.title && Array.isArray(parsed.questions)) {
+            return parsed;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[GeminiService] Falha ao gerar aula via Gemini API, recorrendo ao gerador pedagógico heurístico:', err);
+    }
+  }
+
+  // Fallback Pedagógico Inteligente Estruturado
+  const cleanTopic = topic.trim() || 'Fundamentos da Disciplina';
+  return {
+    title: `${cleanTopic} — Estudo Prático & Desafio`,
+    description: `Nesta atividade interativa de ${subject}, exploraremos os conceitos essenciais de ${cleanTopic}, aplicando metodologia ativa com checagem imediata de aprendizado.`,
+    theoryContent: `O estudo de ${cleanTopic} constitui um dos pilares fundamentais no aprendizado de ${subject}.\n\nAo analisar este tema sob a ótica científica e prática, identificamos relações causais diretas e aplicações cotidianas indispensáveis.\n\nDedique atenção aos princípios fundamentais, observe as variações dos parâmetros e teste suas hipóteses através dos exercícios a seguir.`,
+    questions: [
+      {
+        q: `Qual é o princípio fundamental que rege o conceito de ${cleanTopic} em ${subject}?`,
+        options: [
+          `Aplicação das leis e modelos fundamentais de ${cleanTopic} com base em evidências e deduções lógicas.`,
+          `Desconsideração dos dados experimentais em favor de hipóteses puramente empíricas.`,
+          `Dependência exclusiva de variáveis aleatórias sem regularidade conceitual.`,
+          `Interpretação restrita a casos isolados sem possibilidade de generalização.`
+        ],
+        answer: 0,
+        explanation: `A resposta correta baseia-se na aplicação rigorosa dos modelos teóricos e evidências que estruturam o conhecimento em ${subject}.`
+      },
+      {
+        q: `Em uma situação prática envolvendo ${cleanTopic}, como devemos interpretar uma variação proporcional nos resultados?`,
+        options: [
+          `Como um erro sistemático que invalida o modelo.`,
+          `Como uma correlação direta prevista pelas relações fundamentais da teoria.`,
+          `Como ausência de relação entre as variáveis testadas.`,
+          `Como um fenômeno puramente imprevisível.`
+        ],
+        answer: 1,
+        explanation: `Variações proporcionais refletem o comportamento matemático e conceitual previsto pelas equações e princípios de ${cleanTopic}.`
+      },
+      {
+        q: `Ao sintetizar as conclusões sobre ${cleanTopic}, qual competência é mais exigida para a resolução de problemas complexos?`,
+        options: [
+          `Memorização passiva de fórmulas sem contextualização.`,
+          `Pensamento crítico, análise lógica e capacidade de articulação interdisciplinar.`,
+          `Rejeição de verificações empíricas e simulações digitais.`,
+          `Foco em apenas um único aspecto do problema ignorando o contexto sistêmico.`
+        ],
+        answer: 1,
+        explanation: `O domínio pleno do conteúdo exige raciocínio crítico articulado e aplicação conceitual em problemas reais.`
+      }
+    ],
+    simulationConfig: {
+      gravity: 9.8,
+      functionType: 'linear',
+      difficulty: 'intermediario'
+    },
+    xpReward: 100,
+    coinReward: 20
+  };
+};

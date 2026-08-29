@@ -2,7 +2,7 @@
  * Activity Repository — Persistência de atividades educacionais no Firestore.
  * Criadas pelo professor via Construtor de Experiências.
  */
-import { collection, addDoc, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import { getLocalEtlActivitiesByClass, getLocalEtlActivitiesByProfessor } from '../services/localEtlClient';
 import type { ActivityData } from '../types';
@@ -58,6 +58,35 @@ export const getActivitiesByClass = async (classId: string): Promise<ActivityDat
     id: doc.id,
     ...doc.data(),
   })) as ActivityData[];
+};
+
+/**
+ * Escuta em tempo real as atividades publicadas para uma turma.
+ */
+export const subscribeActivitiesByClass = (
+  classId: string,
+  callback: (activities: ActivityData[]) => void
+): (() => void) => {
+  if (!db) {
+    getLocalEtlActivitiesByClass(classId).then(callback);
+    return () => {};
+  }
+
+  const q = query(
+    collection(db, COLLECTION),
+    where('classId', '==', classId),
+    orderBy('createdAt', 'desc')
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    })) as ActivityData[];
+    callback(data);
+  }, (error) => {
+    console.error('[ActivityRepository] Erro no listener de atividades:', error);
+  });
 };
 
 /**

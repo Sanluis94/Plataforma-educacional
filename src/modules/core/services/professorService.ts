@@ -29,13 +29,14 @@ export const createNewClass = async (
 };
 
 /**
- * Publica uma atividade educacional criada pelo Construtor de Experiências.
+ * Publica uma atividade educacional criada pelo Construtor de Experiências / Preparador de Aulas.
  */
 export const publishActivity = async (
   title: string,
   type: string,
   config: Record<string, unknown>,
-  professorId: string
+  professorId: string,
+  extra?: Partial<Omit<ActivityData, 'id' | 'title' | 'type' | 'config' | 'professorId'>>
 ): Promise<ActivityData> => {
   const activityData: Omit<ActivityData, 'id'> = {
     title,
@@ -44,6 +45,7 @@ export const publishActivity = async (
     professorId,
     createdAt: new Date().toISOString(),
     status: 'published',
+    ...(extra || {}),
   };
 
   const saved = await saveActivity(activityData);

@@ -5,11 +5,12 @@ import {
 import {
   PlusCircle, Users, BookOpen, BarChart as BarChartIcon,
   Award, Eye, Download, MessageCircle, Send, Sparkles, Key, CheckCircle,
-  AlertTriangle, Layers, RefreshCw
+  AlertTriangle, Layers, RefreshCw, Wand2, Plus, Trash2
 } from 'lucide-react';
 import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
-import { generatePedagogicalDiagnosis } from '../../core/services/geminiService';
+import { generatePedagogicalDiagnosis, generateCompleteLessonWithAI } from '../../core/services/geminiService';
+import type { ActivityQuestion } from '../../data/types';
 import {
   getComplementaryMaterials,
   addComplementaryMaterial,
@@ -39,10 +40,6 @@ export function ProfessorDashboard() {
     setSelectedClassId,
     classReport,
     reportLoading,
-    builderStep,
-    setBuilderStep,
-    activityConfig,
-    setActivityConfig,
     handleCreateClass,
     handleViewClassReport,
     publishActivity,
@@ -74,7 +71,30 @@ export function ProfessorDashboard() {
   const [geminiSaved, setGeminiSaved] = useState(false);
 
   // Active view filter
-  const [dashboardTab, setDashboardTab] = useState<'classes' | 'reports' | 'labs_overview' | 'messages' | 'activityBuilder'>('classes');
+  const [dashboardTab, setDashboardTab] = useState<'classes' | 'studio' | 'reports' | 'labs_overview' | 'messages'>('classes');
+
+  // AI Lesson & Module Studio State
+  const [studioSubject, setStudioSubject] = useState('Física');
+  const [studioTopic, setStudioTopic] = useState('');
+  const [studioGrade, setStudioGrade] = useState('Ensino Médio');
+  const [studioType, setStudioType] = useState<'quiz' | 'simulation_physics' | 'simulation_chemistry' | 'simulation_math' | 'essay' | 'lesson_theory'>('quiz');
+  const [studioTargetClass, setStudioTargetClass] = useState<string>('');
+  const [studioTitle, setStudioTitle] = useState('');
+  const [studioDescription, setStudioDescription] = useState('');
+  const [studioTheory, setStudioTheory] = useState('');
+  const [studioQuestions, setStudioQuestions] = useState<ActivityQuestion[]>([
+    {
+      q: 'Qual é o conceito fundamental abordado nesta experiência?',
+      options: ['Conservação de Energia e Leis Físicas', 'Variação descontrolada sem padrão', 'Ausência de forças e trabalho', 'Processo puramente estático'],
+      answer: 0,
+      explanation: 'A conservação de energia e a observação experimental estruturam a compreensão do fenômeno.'
+    }
+  ]);
+  const [studioXp, setStudioXp] = useState(100);
+  const [studioCoins, setStudioCoins] = useState(20);
+  const [studioGenerating, setStudioGenerating] = useState(false);
+  const [studioSuccessMsg, setStudioSuccessMsg] = useState(false);
+  const [studioActiveStep, setStudioActiveStep] = useState<1 | 2 | 3>(1);
 
   // Load materials & messages when a class report is viewed
   useEffect(() => {
@@ -127,7 +147,7 @@ export function ProfessorDashboard() {
   // Sync active tab
   useEffect(() => {
     if (activeTab === 'activityBuilder') {
-      setDashboardTab('activityBuilder');
+      setDashboardTab('studio');
     } else if (activeTab === 'reports') {
       setDashboardTab('reports');
     }
@@ -175,19 +195,78 @@ export function ProfessorDashboard() {
     }, 1200);
   };
 
+  // Generate Lesson with AI
+  const handleGenerateWithAI = async () => {
+    if (!studioTopic.trim()) return;
+    setStudioGenerating(true);
+    try {
+      const result = await generateCompleteLessonWithAI({
+        topic: studioTopic.trim(),
+        subject: studioSubject,
+        gradeLevel: studioGrade,
+        activityType: studioType,
+      });
+
+      setStudioTitle(result.title);
+      setStudioDescription(result.description);
+      setStudioTheory(result.theoryContent);
+      if (result.questions && result.questions.length > 0) {
+        setStudioQuestions(result.questions);
+      }
+      setStudioXp(result.xpReward || 100);
+      setStudioCoins(result.coinReward || 20);
+      setStudioActiveStep(2);
+    } catch (err) {
+      console.error('Erro ao gerar aula com IA:', err);
+    } finally {
+      setStudioGenerating(false);
+    }
+  };
+
+  // Publish Custom Lesson
+  const handlePublishCustomActivity = async () => {
+    if (!studioTitle.trim()) return;
+    const targetClass = studioTargetClass || selectedClassId || (turmas[0]?.id ?? '');
+
+    await publishActivity({
+      title: studioTitle.trim(),
+      type: studioType,
+      subject: studioSubject,
+      description: studioDescription,
+      theoryContent: studioTheory,
+      questions: studioQuestions,
+      xpReward: studioXp,
+      coinReward: studioCoins,
+      classId: targetClass || undefined,
+      className: turmas.find(t => t.id === targetClass)?.name || undefined,
+      config: {
+        type: studioType,
+        subject: studioSubject,
+        topic: studioTopic,
+      },
+    });
+
+    setStudioSuccessMsg(true);
+    setTimeout(() => {
+      setStudioSuccessMsg(false);
+      setDashboardTab('classes');
+      setActiveTab('classes');
+    }, 1800);
+  };
+
   return (
-    <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '82rem', margin: '0 auto' }}>
+    <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '84rem', margin: '0 auto' }}>
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
             <span style={{ fontSize: '1.75rem' }}>👨‍🏫</span>
             <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.5px' }}>
-              Painel do Professor & Gestão Pedagógica
+              Painel do Professor & Studio de Aulas
             </h1>
           </div>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
-            Acompanhe o desempenho em tempo real dos 72 laboratórios virtuais, gerencie turmas e acesse diagnósticos guiados por IA.
+            Crie atividades personalizadas com IA, acompanhe os 72 laboratórios virtuais e monitore turmas em tempo real.
           </p>
         </div>
 
@@ -202,9 +281,17 @@ export function ProfessorDashboard() {
             {localStorage.getItem('gemini_api_key') ? '🔑 Chave IA Conectada' : '⚙️ Configurar Chave IA'}
           </button>
           <button
-            onClick={() => { setIsCreatingClass(true); setDashboardTab('classes'); }}
+            onClick={() => { setDashboardTab('studio'); setStudioActiveStep(1); }}
             className="btn-gradient"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.25rem', fontSize: '0.85rem', borderRadius: '8px', fontWeight: 700 }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.25rem', fontSize: '0.85rem', borderRadius: '8px', fontWeight: 700, background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)' }}
+          >
+            <Wand2 style={{ width: '1rem', height: '1rem' }} />
+            Preparador de Aulas com IA
+          </button>
+          <button
+            onClick={() => { setIsCreatingClass(true); setDashboardTab('classes'); }}
+            className="btn-outline-cyan"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.1rem', fontSize: '0.85rem', borderRadius: '8px', fontWeight: 600 }}
           >
             <PlusCircle style={{ width: '1rem', height: '1rem' }} />
             Nova Turma
@@ -242,6 +329,7 @@ export function ProfessorDashboard() {
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         {[
           { id: 'classes', label: '🏫 Turmas & Aulas', icon: BookOpen },
+          { id: 'studio', label: '✨ Preparador de Aulas & Criador de Módulos', icon: Wand2 },
           { id: 'reports', label: '📊 Analytics & Relatórios', icon: BarChartIcon },
           { id: 'labs_overview', label: '🔬 72 Laboratórios Virtuais', icon: Layers },
           { id: 'messages', label: `💬 Dúvidas dos Alunos (${profMessages.filter(m => !m.replied).length})`, icon: MessageCircle },
@@ -369,13 +457,14 @@ export function ProfessorDashboard() {
                     <button
                       onClick={() => {
                         setSelectedClassId(turma.id);
-                        setDashboardTab('messages');
+                        setStudioTargetClass(turma.id);
+                        setDashboardTab('studio');
                       }}
                       className="btn-outline-cyan"
-                      style={{ padding: '0.55rem 0.85rem', fontSize: '0.85rem' }}
-                      title="Ver dúvidas e mensagens"
+                      style={{ padding: '0.55rem 0.85rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                      title="Criar atividade para esta turma"
                     >
-                      <MessageCircle style={{ width: '0.9rem', height: '0.9rem' }} />
+                      <Wand2 style={{ width: '0.9rem', height: '0.9rem' }} /> Criar Aula
                     </button>
                   </div>
                 </div>
@@ -388,25 +477,472 @@ export function ProfessorDashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: '0 0 0.35rem' }}>
-                  🛠️ Construtor de Experiências & Atividades Personalizadas
+                  🛠️ Studio Preparador de Aulas & Criador de Módulos
                 </h3>
                 <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.88rem' }}>
-                  Crie atividades adaptativas personalizadas, configure parâmetros de simulação física/química e envie diretamente aos estudantes.
+                  Crie aulas interativas completas, gere quizzes com IA em segundos e disponibilize simulações customizadas para as suas turmas.
                 </p>
               </div>
               <button
-                onClick={() => { setActiveTab('activityBuilder'); setDashboardTab('activityBuilder'); }}
+                onClick={() => { setDashboardTab('studio'); setStudioActiveStep(1); }}
                 className="btn-gradient"
                 style={{ padding: '0.65rem 1.5rem', fontWeight: 700, fontSize: '0.9rem' }}
               >
-                Abrir Construtor de Atividades
+                Abrir Studio de Criação de Aulas →
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── TAB 2: ANALYTICS & RELATÓRIOS DETALHADOS ── */}
+      {/* ── TAB 2: STUDIO PREPARADOR DE AULAS & CRIADOR DE MÓDULOS ── */}
+      {dashboardTab === 'studio' && (
+        <div className="fade-in">
+          {/* Header do Studio */}
+          <div className="glass-card mb-4" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(6,182,212,0.08) 100%)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#8b5cf6', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <Wand2 style={{ width: '1.1rem', height: '1.1rem' }} /> Studio de Criação Pedagógica & IA
+                </div>
+                <h2 style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: 800, margin: '0.2rem 0 0.35rem' }}>
+                  Preparador de Aulas e Atividades Interativas
+                </h2>
+                <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
+                  Configure os objetivos de aprendizagem, gere conteúdo inteligente com a IA Gemini e publique instantaneamente para os alunos.
+                </p>
+              </div>
+
+              {/* Steps Progress */}
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {[
+                  { step: 1, label: '1. Tema & IA' },
+                  { step: 2, label: '2. Conteúdo & Questões' },
+                  { step: 3, label: '3. Gamificação & Publicar' },
+                ].map(s => (
+                  <button
+                    key={s.step}
+                    onClick={() => setStudioActiveStep(s.step as any)}
+                    style={{
+                      padding: '0.45rem 0.9rem',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      border: studioActiveStep === s.step ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.1)',
+                      background: studioActiveStep === s.step ? 'rgba(6,182,212,0.2)' : 'rgba(0,0,0,0.2)',
+                      color: studioActiveStep === s.step ? '#06b6d4' : 'var(--text-secondary)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Success Banner */}
+          {studioSuccessMsg && (
+            <div className="glass-card mb-4" style={{ padding: '1rem', background: 'rgba(16,185,129,0.15)', border: '1px solid #10b981', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}>
+              <CheckCircle style={{ width: '1.25rem', height: '1.25rem' }} />
+              Atividade publicada com sucesso! Os estudantes já podem realizá-la em seus dashboards.
+            </div>
+          )}
+
+          {/* STEP 1: DEFINIÇÃO DE TEMA & GERAÇÃO IA */}
+          {studioActiveStep === 1 && (
+            <div className="glass-card" style={{ padding: '1.75rem' }}>
+              <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem' }}>
+                Passo 1: Definição da Aula e Geração Assistida por IA
+              </h3>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
+                    Disciplina:
+                  </label>
+                  <select
+                    value={studioSubject}
+                    onChange={e => setStudioSubject(e.target.value)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                  >
+                    {ALL_MODULES.map(m => (
+                      <option key={m.id} value={m.label} style={{ background: '#18181b', color: '#fff' }}>
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
+                    Nível de Ensino:
+                  </label>
+                  <select
+                    value={studioGrade}
+                    onChange={e => setStudioGrade(e.target.value)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                  >
+                    <option value="Ensino Fundamental 2">Ensino Fundamental 2</option>
+                    <option value="Ensino Médio">Ensino Médio</option>
+                    <option value="Técnico / Profissionalizante">Técnico / Profissionalizante</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
+                    Tipo de Módulo / Atividade:
+                  </label>
+                  <select
+                    value={studioType}
+                    onChange={e => setStudioType(e.target.value as any)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                  >
+                    <option value="quiz">📝 Quiz Adaptativo com Feedback da IA</option>
+                    <option value="lesson_theory">📚 Aula Teórica & Checagem de Conceitos</option>
+                    <option value="simulation_physics">🔭 Laboratório Virtual Parametrizado</option>
+                    <option value="essay">✍️ Desafio de Redação com Correção IA</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
+                    Turma de Destino:
+                  </label>
+                  <select
+                    value={studioTargetClass}
+                    onChange={e => setStudioTargetClass(e.target.value)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                  >
+                    <option value="">Todas as Turmas do Professor</option>
+                    {turmas.map(t => (
+                      <option key={t.id} value={t.id} style={{ background: '#18181b', color: '#fff' }}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Topic Input with AI Generator */}
+              <div style={{ marginBottom: '1.5rem', padding: '1.25rem', borderRadius: '10px', background: 'rgba(6,182,212,0.04)', border: '1px solid rgba(6,182,212,0.2)' }}>
+                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                  Tema da Aula / Atividade:
+                </label>
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <input
+                    type="text"
+                    placeholder="Ex: Leis da Termodinâmica e Ciclo de Carnot, Inconfidência Mineira, Funções Trigonométricas..."
+                    value={studioTopic}
+                    onChange={e => setStudioTopic(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleGenerateWithAI()}
+                    style={{ flex: 1, minWidth: '280px', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.95rem' }}
+                  />
+                  <button
+                    onClick={handleGenerateWithAI}
+                    disabled={studioGenerating || !studioTopic.trim()}
+                    className="btn-gradient"
+                    style={{ padding: '0.75rem 1.5rem', fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)' }}
+                  >
+                    <Sparkles style={{ width: '1.1rem', height: '1.1rem' }} />
+                    {studioGenerating ? 'Gerando Aula...' : '✨ Gerar Aula Completa com IA'}
+                  </button>
+                </div>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem', display: 'block' }}>
+                  💡 Dica: A IA criará objetivos pedagógicos, texto explicativo e questões de múltipla escolha com gabarito e justificativas automáticas.
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={() => setStudioActiveStep(2)}
+                  className="btn-gradient"
+                  style={{ padding: '0.65rem 1.75rem', fontWeight: 700 }}
+                >
+                  Avançar para Edição de Conteúdo →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: EDIÇÃO DE CONTEÚDO, TEORIA E QUESTÕES */}
+          {studioActiveStep === 2 && (
+            <div className="glass-card" style={{ padding: '1.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
+                  Passo 2: Edição do Conteúdo e Questões da Atividade
+                </h3>
+                <button
+                  onClick={() => setStudioActiveStep(1)}
+                  className="btn-outline-cyan"
+                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}
+                >
+                  ← Voltar ao Passo 1
+                </button>
+              </div>
+
+              {/* Title & Description */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
+                    Título da Atividade:
+                  </label>
+                  <input
+                    type="text"
+                    value={studioTitle}
+                    onChange={e => setStudioTitle(e.target.value)}
+                    placeholder="Título da atividade"
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 700 }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
+                    Objetivo Pedagógico / Instruções aos Alunos:
+                  </label>
+                  <input
+                    type="text"
+                    value={studioDescription}
+                    onChange={e => setStudioDescription(e.target.value)}
+                    placeholder="Instruções para o estudante"
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                  />
+                </div>
+              </div>
+
+              {/* Theory Content */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
+                  Conteúdo Teórico / Texto de Apoio (Opcional):
+                </label>
+                <textarea
+                  rows={4}
+                  value={studioTheory}
+                  onChange={e => setStudioTheory(e.target.value)}
+                  placeholder="Explicação teórica que o estudante lerá antes de responder aos desafios..."
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem', resize: 'vertical', lineHeight: 1.6 }}
+                />
+              </div>
+
+              {/* Questions Editor */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+                  <h4 style={{ color: '#06b6d4', fontSize: '1rem', fontWeight: 700, margin: 0 }}>
+                    Questões de Múltipla Escolha ({studioQuestions.length})
+                  </h4>
+                  <button
+                    onClick={() => {
+                      setStudioQuestions(prev => [
+                        ...prev,
+                        {
+                          q: 'Nova questão formulada pelo professor...',
+                          options: ['Alternativa A', 'Alternativa B', 'Alternativa C', 'Alternativa D'],
+                          answer: 0,
+                          explanation: 'Explicação do conceito correto.'
+                        }
+                      ]);
+                    }}
+                    className="btn-outline-cyan"
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
+                  >
+                    <Plus style={{ width: '0.85rem', height: '0.85rem' }} /> Adicionar Questão
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {studioQuestions.map((q, qIndex) => (
+                    <div key={qIndex} style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#06b6d4', fontWeight: 700 }}>
+                          Questão {qIndex + 1}
+                        </span>
+                        {studioQuestions.length > 1 && (
+                          <button
+                            onClick={() => setStudioQuestions(prev => prev.filter((_, i) => i !== qIndex))}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.75rem' }}
+                          >
+                            <Trash2 style={{ width: '0.85rem', height: '0.85rem' }} /> Remover
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Question Text */}
+                      <input
+                        type="text"
+                        value={q.q}
+                        onChange={e => {
+                          const val = e.target.value;
+                          setStudioQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, q: val } : item));
+                        }}
+                        placeholder="Enunciado da questão"
+                        style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}
+                      />
+
+                      {/* Options */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                        {q.options.map((opt, optIndex) => (
+                          <div key={optIndex} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <input
+                              type="radio"
+                              name={`correct_${qIndex}`}
+                              checked={q.answer === optIndex}
+                              onChange={() => {
+                                setStudioQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, answer: optIndex } : item));
+                              }}
+                              style={{ accentColor: '#10b981', cursor: 'pointer' }}
+                              title="Marcar como alternativa correta"
+                            />
+                            <input
+                              type="text"
+                              value={opt}
+                              onChange={e => {
+                                const val = e.target.value;
+                                setStudioQuestions(prev => prev.map((item, idx) => {
+                                  if (idx !== qIndex) return item;
+                                  const newOpts = [...item.options];
+                                  newOpts[optIndex] = val;
+                                  return { ...item, options: newOpts };
+                                }));
+                              }}
+                              style={{ flex: 1, padding: '0.45rem', borderRadius: '4px', border: q.answer === optIndex ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)', background: q.answer === optIndex ? 'rgba(16,185,129,0.06)' : 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.82rem' }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Explanation */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                          Justificativa / Feedback da IA para o estudante:
+                        </label>
+                        <input
+                          type="text"
+                          value={q.explanation}
+                          onChange={e => {
+                            const val = e.target.value;
+                            setStudioQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, explanation: val } : item));
+                          }}
+                          placeholder="Explicação do gabarito"
+                          style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-secondary)', fontSize: '0.8rem' }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <button
+                  onClick={() => setStudioActiveStep(1)}
+                  className="btn-outline-cyan"
+                  style={{ padding: '0.65rem 1.5rem' }}
+                >
+                  ← Passo Anterior
+                </button>
+                <button
+                  onClick={() => setStudioActiveStep(3)}
+                  className="btn-gradient"
+                  style={{ padding: '0.65rem 1.75rem', fontWeight: 700 }}
+                >
+                  Avançar para Gamificação & Publicação →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: GAMIFICAÇÃO & PUBLICAÇÃO */}
+          {studioActiveStep === 3 && (
+            <div className="glass-card" style={{ padding: '1.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
+                  Passo 3: Parâmetros de Gamificação & Publicação
+                </h3>
+                <button
+                  onClick={() => setStudioActiveStep(2)}
+                  className="btn-outline-cyan"
+                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}
+                >
+                  ← Voltar para Conteúdo
+                </button>
+              </div>
+
+              {/* Gamification Rewards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+                <div style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.2)' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#06b6d4', marginBottom: '0.5rem' }}>
+                    ⚡ Recompensa de Experiência (XP):
+                  </label>
+                  <input
+                    type="number"
+                    min="20"
+                    max="500"
+                    step="10"
+                    value={studioXp}
+                    onChange={e => setStudioXp(parseInt(e.target.value) || 100)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700 }}
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem', display: 'block' }}>
+                    O aluno receberá este XP ao concluir a atividade com aproveitamento.
+                  </span>
+                </div>
+
+                <div style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#f59e0b', marginBottom: '0.5rem' }}>
+                    🪙 Recompensa em Moedas:
+                  </label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="100"
+                    step="5"
+                    value={studioCoins}
+                    onChange={e => setStudioCoins(parseInt(e.target.value) || 20)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700 }}
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem', display: 'block' }}>
+                    Moedas para personalização de avatares na Loja Gamificada.
+                  </span>
+                </div>
+              </div>
+
+              {/* Review Summary Box */}
+              <div style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '1.5rem' }}>
+                <h4 style={{ color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                  Resumo da Atividade para os Alunos:
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  <div><strong>Título:</strong> {studioTitle || 'Sem título'}</div>
+                  <div><strong>Disciplina:</strong> {studioSubject}</div>
+                  <div><strong>Tipo:</strong> {studioType}</div>
+                  <div><strong>Qtd Questões:</strong> {studioQuestions.length}</div>
+                  <div><strong>Turma:</strong> {turmas.find(t => t.id === studioTargetClass)?.name || 'Todas as turmas'}</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <button
+                  onClick={() => setStudioActiveStep(2)}
+                  className="btn-outline-cyan"
+                  style={{ padding: '0.65rem 1.5rem' }}
+                >
+                  ← Voltar para Edição
+                </button>
+
+                <button
+                  onClick={handlePublishCustomActivity}
+                  disabled={!studioTitle.trim()}
+                  className="btn-gradient"
+                  style={{ padding: '0.75rem 2.25rem', fontSize: '1rem', fontWeight: 800, background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 20px rgba(16,185,129,0.3)' }}
+                >
+                  🚀 Publicar Atividade para os Estudantes
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── TAB 3: ANALYTICS & RELATÓRIOS DETALHADOS ── */}
       {dashboardTab === 'reports' && (
         <div>
           {/* Selector of Class for Report */}
@@ -600,7 +1136,7 @@ export function ProfessorDashboard() {
         </div>
       )}
 
-      {/* ── TAB 3: 72 LABORATÓRIOS VIRTUAIS & DISCIPLINAS ── */}
+      {/* ── TAB 4: 72 LABORATÓRIOS VIRTUAIS & DISCIPLINAS ── */}
       {dashboardTab === 'labs_overview' && (
         <div>
           <div style={{ marginBottom: '1.5rem' }}>
@@ -654,7 +1190,7 @@ export function ProfessorDashboard() {
         </div>
       )}
 
-      {/* ── TAB 4: MENSAGENS & MATERIAIS DA TURMA ── */}
+      {/* ── TAB 5: MENSAGENS & MATERIAIS DA TURMA ── */}
       {dashboardTab === 'messages' && (
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
@@ -757,209 +1293,6 @@ export function ProfessorDashboard() {
         </div>
       )}
 
-      {/* ── MODAL: CONSTRUTOR DE ATIVIDADES ── */}
-      {(dashboardTab === 'activityBuilder' || activeTab === 'activityBuilder') && (
-        <div className="fade-in" style={{
-          position: 'fixed', inset: 0, zIndex: 100,
-          background: 'var(--bg-overlay)', backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '1rem',
-        }}>
-          <div className="glass-card" style={{
-            width: '100%', maxWidth: '1000px', height: '80vh', display: 'flex', flexDirection: 'column',
-            borderRadius: '1rem', background: 'var(--bg-card)', overflow: 'hidden',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-          }}>
-            {/* Builder Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem 2rem', borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
-              <div>
-                <h2 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 600 }}>
-                  Construtor de Experiências & Aulas
-                </h2>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.25rem' }}>Passo {builderStep} de 3</p>
-              </div>
-              <button onClick={() => { setActiveTab('classes'); setDashboardTab('classes'); }} style={{
-                background: 'rgba(255,255,255,0.05)', border: 'none', color: 'var(--text-main)', cursor: 'pointer',
-                width: '2.5rem', height: '2.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s'
-              }}>✕</button>
-            </div>
-
-            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-              {/* Left Controls Panel */}
-              <div style={{ flex: '1 1 55%', padding: '2rem', overflowY: 'auto', borderRight: '1px solid var(--border-color)' }}>
-                {builderStep === 1 && (
-                  <div className="fade-in">
-                    <h3 style={{ color: 'var(--text-main)', marginBottom: '1.5rem', fontSize: '1.1rem' }}>Selecione o tipo de laboratório</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
-                      {[
-                        { type: 'simulation_physics', title: '🔭 Física Avançada', desc: 'Gravidade, Cinemática e Colisões', config: { gravity: 9.8 } },
-                        { type: 'simulation_chemistry', title: '🧪 Laboratório Químico', desc: 'Reações e Titulação', config: { reagents: [] } },
-                        { type: 'simulation_biology', title: '🔬 Microscópio Virtual', desc: 'Análise Celular e Genética', config: { microscopeZoom: 10 } },
-                        { type: 'simulation_math', title: '📐 Álgebra e Geometria', desc: 'Visualização de Funções e Gráficos', config: { functionType: 'linear', allowGraphing: true } },
-                        { type: 'professional_training', title: '💼 Treinamento', desc: 'Soft skills e Liderança Corporativa', config: { skillLevel: 'iniciante' } },
-                        { type: 'quiz', title: '📝 Avaliação Adaptativa', desc: 'Questões com Inteligência Artificial', config: { difficulty: 'adaptative' } },
-                      ].map(item => (
-                        <div
-                          key={item.type}
-                          onClick={() => setActivityConfig({ ...activityConfig, type: item.type, config: item.config })}
-                          style={{
-                            padding: '1.25rem', borderRadius: '0.85rem', cursor: 'pointer',
-                            border: activityConfig.type === item.type ? '2px solid #06b6d4' : '1px solid var(--border-card)',
-                            background: activityConfig.type === item.type ? 'rgba(6,182,212,0.1)' : 'rgba(255,255,255,0.02)',
-                            transition: 'all 0.2s', transform: activityConfig.type === item.type ? 'translateY(-2px)' : 'none',
-                            boxShadow: activityConfig.type === item.type ? '0 10px 20px -10px rgba(6,182,212,0.3)' : 'none'
-                          }}
-                        >
-                          <h4 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '0.35rem' }}>{item.title}</h4>
-                          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{item.desc}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {builderStep === 2 && (
-                  <div className="fade-in">
-                    <h3 style={{ color: 'var(--text-main)', marginBottom: '1.5rem', fontSize: '1.1rem' }}>Parametrização da Experiência</h3>
-                    
-                    <div style={{ marginBottom: '1.5rem', padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.75rem', border: '1px solid var(--border-color)' }}>
-                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Título da Atividade</label>
-                      <input type="text" value={activityConfig.title} onChange={e => setActivityConfig({ ...activityConfig, title: e.target.value })} placeholder="Ex: Explorando Leis de Newton" style={{ width: '100%', fontSize: '1rem', padding: '0.75rem', background: 'var(--bg-main)', border: '1px solid var(--border-card)', borderRadius: '0.5rem', color: 'var(--text-main)' }} />
-                    </div>
-
-                    {activityConfig.type === 'simulation_physics' && (
-                      <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.75rem', border: '1px solid var(--border-color)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                          <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Gravidade Simulada (m/s²)</label>
-                          <span style={{ color: '#06b6d4', fontWeight: 600 }}>{activityConfig.config.gravity}</span>
-                        </div>
-                        <input type="range" min="1" max="25" value={activityConfig.config.gravity || 9.8} onChange={e => setActivityConfig({ ...activityConfig, config: { gravity: parseFloat(e.target.value) } })} step="0.1" style={{ width: '100%', accentColor: '#06b6d4' }} />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          <span>Lua (1.6)</span><span>Terra (9.8)</span><span>Júpiter (24.7)</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {activityConfig.type === 'simulation_math' && (
-                      <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.75rem', border: '1px solid var(--border-color)' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Categoria da Função</label>
-                        <select style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-main)', border: '1px solid var(--border-card)', borderRadius: '0.5rem', color: 'var(--text-main)', fontSize: '0.95rem' }} value={activityConfig.config.functionType} onChange={e => setActivityConfig({ ...activityConfig, config: { ...activityConfig.config, functionType: e.target.value } })}>
-                          <option value="linear">Linear (1º Grau)</option>
-                          <option value="quadratic">Quadrática (2º Grau)</option>
-                          <option value="trigonometric">Trigonométrica</option>
-                        </select>
-                      </div>
-                    )}
-                    
-                    {['simulation_physics', 'simulation_math'].indexOf(activityConfig.type) === -1 && (
-                       <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.75rem', border: '1px dashed var(--border-color)', color: 'var(--text-muted)', textAlign: 'center' }}>
-                         Configurações avançadas para este laboratório estão prontas para distribuição. O título e a turma já são suficientes para publicação!
-                       </div>
-                    )}
-                  </div>
-                )}
-
-                {builderStep === 3 && (
-                  <div className="fade-in" style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '4rem', height: '4rem', borderRadius: '50%', background: 'rgba(16,185,129,0.1)', color: '#10b981', marginBottom: '1.5rem' }}>
-                      <BookOpen style={{ width: '2rem', height: '2rem' }} />
-                    </div>
-                    <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem', fontSize: '1.25rem' }}>Tudo Pronto para Publicação!</h3>
-                    <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '0.95rem' }}>
-                      A atividade <strong style={{ color: 'var(--text-main)' }}>{activityConfig.title || 'Sem título'}</strong> está configurada.
-                      Ao publicar, ela será liberada instantaneamente no painel dos estudantes matriculados.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Preview Panel */}
-              <div style={{ flex: '1 1 45%', background: 'var(--bg-main)', padding: '2rem', display: 'flex', flexDirection: 'column' }}>
-                <h3 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem', fontWeight: 600 }}>Live Preview Visual</h3>
-                
-                <div style={{ flex: 1, borderRadius: '1rem', border: '1px solid var(--border-color)', background: 'var(--bg-card)', padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', top: '1rem', left: '1rem', padding: '0.25rem 0.75rem', background: 'rgba(139,92,246,0.15)', color: '#8b5cf6', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600 }}>
-                    {activityConfig.type.replace('_', ' ')}
-                  </div>
-                  
-                  {activityConfig.type === 'simulation_physics' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <div style={{ width: '2px', height: '60px', background: '#06b6d4', borderStyle: 'dashed' }}></div>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'radial-gradient(circle, #06b6d4 0%, #8b5cf6 100%)', boxShadow: '0 0 20px rgba(6,182,212,0.4)', marginTop: '-2px' }}></div>
-                      <p style={{ marginTop: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600 }}>Pêndulo (Grav: {activityConfig.config.gravity || 9.8} m/s²)</p>
-                    </div>
-                  )}
-
-                  {activityConfig.type === 'simulation_chemistry' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#00bcd4' }}>
-                      <span style={{ fontSize: '3rem' }}>🧪</span>
-                      <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600 }}>Laboratório Químico</p>
-                    </div>
-                  )}
-
-                  {activityConfig.type === 'simulation_math' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#7c4dff', width: '100%' }}>
-                      <div style={{ width: '100%', height: '80px', borderBottom: '2px solid rgba(255,255,255,0.1)', borderLeft: '2px solid rgba(255,255,255,0.1)', position: 'relative' }}>
-                        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', bottom: 0, left: 0 }}>
-                          <path d="M0,100 C30,20 70,80 100,0" fill="none" stroke="#7c4dff" strokeWidth="3" />
-                        </svg>
-                      </div>
-                      <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600 }}>Gráfico: {activityConfig.config.functionType}</p>
-                    </div>
-                  )}
-                  
-                  {['simulation_physics', 'simulation_math', 'simulation_chemistry'].indexOf(activityConfig.type) === -1 && (
-                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                       <span style={{ fontSize: '3rem' }}>✨</span>
-                       <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textAlign: 'center' }}>Atividade Personalizada Pronta.<br/>Os alunos responderão em seus painéis.</p>
-                     </div>
-                  )}
-
-                  <div style={{ position: 'absolute', bottom: '1.5rem', width: '80%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 600, fontSize: '1.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {activityConfig.title || 'Sem Título Definido'}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Builder Footer */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 2rem', borderTop: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
-              <button
-                onClick={() => setBuilderStep(b => b - 1)}
-                disabled={builderStep === 1}
-                className="btn-outline-cyan"
-                style={{ opacity: builderStep === 1 ? 0.3 : 1, padding: '0.6rem 1.5rem', cursor: builderStep === 1 ? 'not-allowed' : 'pointer' }}
-              >
-                Passo Anterior
-              </button>
-
-              {builderStep < 3 ? (
-                <button
-                  onClick={() => setBuilderStep(b => b + 1)}
-                  disabled={builderStep === 2 && !activityConfig.title.trim()}
-                  className="btn-gradient"
-                  style={{ padding: '0.6rem 1.75rem', fontWeight: 700 }}
-                >
-                  Próximo Passo →
-                </button>
-              ) : (
-                <button
-                  onClick={async () => {
-                    await publishActivity();
-                    setActiveTab('classes');
-                    setDashboardTab('classes');
-                  }}
-                  className="btn-gradient"
-                  style={{ padding: '0.6rem 1.75rem', background: '#10b981', fontWeight: 700 }}
-                >
-                  🚀 Publicar Atividade
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ── MODAL DE CONFIGURAÇÃO DA CHAVE GEMINI IA ── */}
       {showGeminiModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
@@ -971,7 +1304,7 @@ export function ProfessorDashboard() {
               </h3>
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-              Insira sua chave de API para habilitar diagnósticos pedagógicos de alta precisão e relatórios analíticos em tempo real.
+              Insira sua chave de API para habilitar diagnósticos pedagógicos de alta precisão e geração automática de aulas interativas.
             </p>
             <input
               type="password"

@@ -128,21 +128,33 @@ export const useProfessorDashboard = () => {
   };
 
   // Publica atividade no Firestore
-  const handlePublishActivity = async () => {
+  const handlePublishActivity = async (customPayload?: Partial<ActivityData>) => {
     if (!currentUser?.uid) return;
+    const payload = customPayload || activityConfig;
 
     try {
       await publishActivity(
-        activityConfig.title || 'Atividade sem título',
-        activityConfig.type,
-        activityConfig.config || {},
-        currentUser.uid
+        payload.title || 'Atividade sem título',
+        payload.type || 'quiz',
+        payload.config || {},
+        currentUser.uid,
+        {
+          classId: payload.classId || selectedClassId || undefined,
+          className: payload.className || turmas.find(t => t.id === (payload.classId || selectedClassId))?.name || undefined,
+          subject: payload.subject,
+          description: payload.description,
+          theoryContent: payload.theoryContent,
+          questions: payload.questions,
+          xpReward: payload.xpReward || 100,
+          coinReward: payload.coinReward || 20,
+          dueDate: payload.dueDate,
+        }
       );
       // Reload activities
       const data = await getActivitiesByProfessor(currentUser.uid);
       setActivities(data);
 
-      setActiveTab('activities');
+      setActiveTab('classes');
       setBuilderStep(1);
       setActivityConfig({ type: 'quiz', title: '', module: '', config: {} });
     } catch (error) {

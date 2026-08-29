@@ -203,6 +203,40 @@ export const useStudentDashboard = () => {
     }
   }, [uid]);
 
+  // Submit custom teacher activity
+  const handleActivitySubmit = useCallback(async (activity: any, score: number, answers?: Record<string, unknown>) => {
+    if (!uid) return;
+    try {
+      const updated = await processModuleCompletion(
+        uid,
+        activity.id || 'custom_act',
+        score,
+        progress.xp,
+        progress.level,
+        progress.coins
+      );
+      setProgress({ level: updated.level, xp: updated.xp, coins: updated.coins });
+      setCompletedModules(prev => prev.includes(activity.id || 'custom_act') ? prev : [...prev, activity.id || 'custom_act']);
+
+      const userName = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Aluno';
+      if (activity.classId) {
+        await saveSubmission({
+          activityId: activity.id || 'custom_act',
+          activityTitle: activity.title,
+          classId: activity.classId,
+          studentId: uid,
+          studentName: userName,
+          score,
+          answers,
+          submittedAt: new Date().toISOString(),
+          status: 'completed',
+        });
+      }
+    } catch (err) {
+      console.error('[useStudentDashboard] Erro ao submeter atividade personalizada:', err);
+    }
+  }, [uid, progress, currentUser]);
+
   return {
     progress,
     aiTip,
@@ -212,6 +246,7 @@ export const useStudentDashboard = () => {
     shopItems,
     modules,
     handleModuleComplete,
+    handleActivitySubmit,
     buyItem,
     gradeLevel,
     loading,
