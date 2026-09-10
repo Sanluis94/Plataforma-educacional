@@ -11,6 +11,7 @@ import {
 import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
 import { generatePedagogicalDiagnosis, generateCompleteLessonWithAI } from '../../core/services/geminiService';
+import { ProfessorLmsModules } from '../components/ProfessorLmsModules';
 import type {
   ExamData, ExamQuestion, ExamAttempt,
   LessonPlanItem, BimesterPeriod
@@ -67,7 +68,7 @@ export function ProfessorDashboard() {
 
   // Active view tab
   const [dashboardTab, setDashboardTab] = useState<
-    'classes' | 'lesson_plans' | 'exams' | 'materials' | 'labs_overview' | 'reports' | 'messages'
+    'classes' | 'lesson_plans' | 'exams' | 'materials' | 'labs_overview' | 'reports' | 'messages' | 'lms_gradebook'
   >('classes');
 
   // State for Notices (Mural da Turma estilo Edu-Interact-v2)
@@ -537,6 +538,7 @@ export function ProfessorDashboard() {
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         {[
           { id: 'classes', label: '🏫 Minhas Turmas & Mural', icon: BookOpen },
+          { id: 'lms_gradebook', label: '📚 Diário, Notas & Fórum LMS', icon: Award },
           { id: 'lesson_plans', label: '📅 Plano de Aulas Bimestral', icon: Calendar },
           { id: 'exams', label: `📝 Provas & Avaliações (${examsList.length})`, icon: FileText },
           { id: 'materials', label: `📁 Materiais & Uploads (${enhancedMaterials.length})`, icon: Upload },
@@ -1976,6 +1978,16 @@ export function ProfessorDashboard() {
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Nenhuma dúvida recebida no momento.</p>
           )}
         </div>
+      )}
+
+      {/* ── TAB LMS: DIÁRIO DE CLASSE, LIVRO DE NOTAS & FÓRUM ── */}
+      {dashboardTab === 'lms_gradebook' && (
+        <ProfessorLmsModules
+          turmas={turmas}
+          selectedClassId={selectedClassId}
+          onSelectClass={(id) => setSelectedClassId(id)}
+          professorName="Docente"
+        />
       )}
 
       {/* ── GEMINI API KEY MODAL ── */}

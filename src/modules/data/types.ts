@@ -198,6 +198,83 @@ export interface ClassMaterial {
   criadoEm: string;
 }
 
+// ─── Coleção: attendance (Controle de Frequência e Diário de Classe) ───
+export interface StudentAttendance {
+  studentId: string;
+  studentName: string;
+  status: 'presente' | 'falta' | 'justificada';
+}
+
+export interface AttendanceRecord {
+  id?: string;
+  turmaId: string;
+  data: string;
+  aulaNumero?: number;
+  conteudoResumo?: string;
+  registros: StudentAttendance[];
+  criadoEm: string;
+}
+
+// ─── Coleção: forum_topics (Fórum Pedagógico da Turma) ────────────
+export interface ForumReply {
+  id: string;
+  autorId: string;
+  autorNome: string;
+  autorRole: 'professor' | 'estudante';
+  texto: string;
+  isMelhorResposta?: boolean;
+  moedasGanhas?: number;
+  criadoEm: string;
+}
+
+export interface ForumTopic {
+  id?: string;
+  turmaId: string;
+  autorId: string;
+  autorNome: string;
+  autorRole: 'professor' | 'estudante';
+  titulo: string;
+  conteudo: string;
+  disciplina: string;
+  periodo?: string;
+  respostas: ForumReply[];
+  resolvido?: boolean;
+  criadoEm: string;
+}
+
+// ─── Livro de Notas & Boletim Escolar (Gradebook Ponderado) ───────
+export interface GradebookWeights {
+  turmaId: string;
+  pesoProvas: number; // ex: 40%
+  pesoLabs: number; // ex: 30%
+  pesoAtividades: number; // ex: 20%
+  pesoParticipacao: number; // ex: 10%
+}
+
+export interface StudentGradeReport {
+  studentId: string;
+  studentName: string;
+  notaProvas: number; // 0 a 10
+  notaLabs: number; // 0 a 10
+  notaAtividades: number; // 0 a 10
+  notaParticipacao: number; // 0 a 10
+  mediaFinal: number; // 0 a 10
+  situacao: 'Aprovado' | 'Recuperação' | 'Insuficiente';
+  frequenciaPercentual: number; // 0 a 100%
+  alertaFrequencia: boolean; // true se < 75%
+}
+
+// ─── Certificados Digitais de Conclusão ────────────────────────────
+export interface DigitalCertificate {
+  id: string;
+  alunoId: string;
+  alunoNome: string;
+  tituloCurso: string;
+  cargaHorariaHoras: number;
+  dataEmissao: string;
+  codigoValidacao: string;
+}
+
 // ─── Constantes padrão ────────────────────────────────────────
 export const DEFAULT_PROGRESS: ProgressData = {
   level: 1,

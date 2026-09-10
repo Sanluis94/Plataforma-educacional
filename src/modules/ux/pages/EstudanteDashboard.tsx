@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Beaker, Trophy, BookOpen, Clock, FileText,
-  Calendar, Upload, ExternalLink, Play, Bell
+  Calendar, Upload, ExternalLink, Play, Bell,
+  Award, ShieldCheck, MessageSquare
 } from 'lucide-react';
 import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
 import SoundEffects from '../../core/services/soundEffects';
+import { StudentLmsModules } from '../components/StudentLmsModules';
 import { 
   sendStudentMessage,
   subscribeStudentMessages,
@@ -147,7 +149,7 @@ export function EstudanteDashboard() {
 
   // Active top-level navigation tab
   const [activeTab, setActiveTab] = useState<
-    'labs' | 'exams' | 'lesson_plans' | 'materials' | 'classes' | 'gamification'
+    'labs' | 'exams' | 'lesson_plans' | 'materials' | 'classes' | 'gamification' | 'gradebook' | 'forum' | 'certificates'
   >('labs');
 
   // Hub de Laboratórios Filter States
@@ -371,6 +373,9 @@ export function EstudanteDashboard() {
         {[
           { id: 'labs', label: '🔬 Laboratórios de Ciências', icon: Beaker },
           { id: 'exams', label: `📝 Provas & Avaliações (${classExams.length})`, icon: FileText },
+          { id: 'gradebook', label: '📊 Boletim & Frequência', icon: Award },
+          { id: 'forum', label: `💬 Fórum da Turma`, icon: MessageSquare },
+          { id: 'certificates', label: '📜 Meus Certificados', icon: ShieldCheck },
           { id: 'lesson_plans', label: `📅 Plano de Aulas (${classLessonPlans.length})`, icon: Calendar },
           { id: 'materials', label: `📁 Materiais & Downloads (${classMaterials.length})`, icon: Upload },
           { id: 'classes', label: `🏫 Minha Turma & Avisos (${classNotices.length})`, icon: BookOpen },
@@ -1143,6 +1148,17 @@ export function EstudanteDashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── TAB LMS: BOLETIM ESCOLAR, FÓRUM & CERTIFICADOS DIGITAIS ── */}
+      {(activeTab === 'gradebook' || activeTab === 'forum' || activeTab === 'certificates') && (
+        <StudentLmsModules
+          studentId={studentUid}
+          studentName={studentName}
+          selectedClassId={selectedClassId}
+          activeView={activeTab as 'gradebook' | 'forum' | 'certificates'}
+          onViewChange={(view) => setActiveTab(view)}
+        />
       )}
     </div>
   );
