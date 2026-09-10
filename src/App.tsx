@@ -1,5 +1,5 @@
-import { useState, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './modules/core/contexts/AuthContext';
 import { Layout } from './modules/ux/components/Layout';
 import { LoginModal } from './modules/ux/components/LoginModal';
@@ -38,6 +38,16 @@ const LoadingFallback = () => (
   </div>
 );
 
+function AuthRequirementHandler({ onOpenLogin, isAuthenticated }: { onOpenLogin: () => void; isAuthenticated: boolean }) {
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.requiresAuth && !isAuthenticated) {
+      onOpenLogin();
+    }
+  }, [location.state, isAuthenticated, onOpenLogin]);
+  return null;
+}
+
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [loginOpen, setLoginOpen] = useState(false);
@@ -65,6 +75,10 @@ function App() {
         <div className={`app-container ${themeClass}`}>
           <a href="#main-content" className="sr-only">Pular para o conteúdo principal</a>
 
+          <AuthRequirementHandler
+            onOpenLogin={() => setLoginOpen(true)}
+            isAuthenticated={!!currentUser}
+          />
           <RoleRedirect />
 
           {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}

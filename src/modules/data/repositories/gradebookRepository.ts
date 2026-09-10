@@ -6,6 +6,7 @@ import {
   collection, addDoc, query, where, getDocs, doc, updateDoc, onSnapshot
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
+import { sanitizeText } from '../../core/services/securityService';
 import type {
   AttendanceRecord,
   ForumTopic,
@@ -160,6 +161,8 @@ export const saveForumTopic = async (
 ): Promise<ForumTopic> => {
   const newTopic: ForumTopic = {
     ...topic,
+    titulo: sanitizeText(topic.titulo),
+    conteudo: sanitizeText(topic.conteudo),
     respostas: [],
     criadoEm: new Date().toISOString()
   };
@@ -221,6 +224,7 @@ export const addForumReply = async (
   const newReply: ForumReply = {
     id: `rep_${Date.now()}`,
     ...reply,
+    texto: sanitizeText(reply.texto),
     criadoEm: new Date().toISOString()
   };
 

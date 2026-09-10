@@ -5,6 +5,7 @@
  */
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
+import { isAuthorizedRole } from '../../core/services/securityService';
 import type { ReactNode } from 'react';
 
 type UserRole = 'professor' | 'estudante' | 'admin';
@@ -24,13 +25,19 @@ export function ProtectedRoute({ children, allowedRoles, redirectTo = '/' }: Pro
   // Enquanto carrega, não renderiza nada (o Suspense/LoadingFallback cuida disso)
   if (loading) return null;
 
-  // Não autenticado → redireciona para Home
+  // Não autenticado → redireciona para Home e sinaliza necessidade de login
   if (!currentUser || !userData) {
-    return <Navigate to={redirectTo} state={{ from: location.pathname }} replace />;
+    return (
+      <Navigate
+        to={redirectTo}
+        state={{ from: location.pathname, requiresAuth: true }}
+        replace
+      />
+    );
   }
 
   // Autenticado mas role não permitida → Forbidden
-  if (!allowedRoles.includes(userData.role as UserRole)) {
+  if (!isAuthorizedRole(userData.role, allowedRoles)) {
     return <Forbidden userRole={userData.role} />;
   }
 

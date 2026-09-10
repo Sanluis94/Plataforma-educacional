@@ -2,74 +2,168 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ─── Usuários ──────────────────────────────────────────
-    // Qualquer autenticado pode ler perfis (necessário para admin listar professores)
-    // Apenas o próprio usuário pode editar seu perfil
+    // ─── Funções Auxiliares de Autenticação e Autorização ───────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+
+    function isProfessor() {
+      return hasRole('professor');
+    }
+
+    function isStudent() {
+      return hasRole('estudante');
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    // ─── 1. Coleção: users ──────────────────────────────────────
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth.uid == userId;
-      allow update: if request.auth.uid == userId;
+      allow read: if isAuthenticated();
+      // Criação de perfil próprio: impede que usuário comum crie a si próprio como 'admin'
+      allow create: if isOwner(userId)
+        && (request.resource.data.role != 'admin' || isAdmin());
+      // Edição de perfil próprio: não pode alterar o próprio cargo a menos que seja admin
+      allow update: if isOwner(userId)
+        && (request.resource.data.role == resource.data.role || isAdmin());
+      allow delete: if isAdmin();
     }
 
-    // ─── Turmas ────────────────────────────────────────────
-    // Qualquer autenticado pode ler turmas
-    // Apenas professores podem criar turmas
-    // Apenas o professor dono pode editar/deletar
+    // ─── 2. Coleção: classes & Subcoleções ──────────────────────
     match /classes/{classId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'professor';
-      allow update: if request.auth != null
-        && resource.data.professorId == request.auth.uid;
-      allow delete: if request.auth != null
-        && resource.data.professorId == request.auth.uid;
+      allow read: if isAuthenticated();
+      // Apenas professores ou admins podem criar turmas
+      allow create: if isProfessor() || isAdmin();
+      
+      // Atualização:
+      // a) Professor dono ou Admin pode atualizar tudo
+      // b) Aluno autenticado pode atualizar APENAS matrícula (studentIds, studentsCount, updatedAt)
+      allow update: if isAuthenticated() && (
+        resource.data.professorId == request.auth.uid
+        || isAdmin()
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['studentIds', 'studentsCount', 'updatedAt'])
+      );
 
-      // Subcoleção de Materiais Complementares da Turma
+      // Exclusão apenas pelo professor dono ou admin
+      allow delete: if (isAuthenticated() && resource.data.professorId == request.auth.uid) || isAdmin();
+
+      // Subcoleções da Turma
       match /materials/{materialId} {
-        allow read: if request.auth != null;
-        allow create, delete: if request.auth != null
-          && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid;
+        allow read: if isAuthenticated();
+        allow create, delete: if (isAuthenticated() && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid) || isAdmin();
+        allow update: if (isAuthenticated() && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid) || isAdmin();
       }
 
-      // Subcoleção de Mensagens / Dúvidas dos Alunos
       match /messages/{messageId} {
-        allow read: if request.auth != null;
-        allow create: if request.auth != null;
-        allow update: if request.auth != null
-          && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid;
+        allow read: if isAuthenticated();
+        // Qualquer aluno/professor autenticado pode postar dúvidas
+        allow create: if isAuthenticated();
+        // Professor dono da turma pode responder
+        allow update: if (isAuthenticated() && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid) || isAdmin();
+        allow delete: if (isAuthenticated() && (resource.data.studentId == request.auth.uid || get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid)) || isAdmin();
+      }
+
+      match /notices/{noticeId} {
+        allow read: if isAuthenticated();
+        allow create, update, delete: if (isAuthenticated() && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid) || isAdmin();
+      }
+
+      match /enhanced_materials/{materialId} {
+        allow read: if isAuthenticated();
+        allow create, update, delete: if (isAuthenticated() && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid) || isAdmin();
       }
     }
 
-    // ─── Submissões de Atividades ──────────────────────────
-    match /submissions/{submissionId} {
-      allow read, create: if request.auth != null;
-    }
-
-    // ─── Atividades ────────────────────────────────────────
-    // Qualquer autenticado pode ler atividades
-    // Apenas professores podem criar
-    // Apenas o professor criador pode editar/deletar
+    // ─── 3. Coleção: activities ─────────────────────────────────
     match /activities/{activityId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'professor';
-      allow update, delete: if request.auth != null
-        && resource.data.professorId == request.auth.uid;
+      allow read: if isAuthenticated();
+      allow create: if isProfessor() || isAdmin();
+      allow update, delete: if (isAuthenticated() && resource.data.professorId == request.auth.uid) || isAdmin();
     }
 
-    // ─── Progresso do Estudante ────────────────────────────
-    // Apenas o próprio estudante pode ler/escrever seu progresso
+    // ─── 4. Coleção: submissions ────────────────────────────────
+    match /submissions/{submissionId} {
+      // Leitura permitida para o aluno autor, professor ou admin
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid
+        || isProfessor()
+        || isAdmin()
+      );
+      // Criação permitida apenas por estudante autenticado com o próprio ID
+      allow create: if (isStudent() || isAuthenticated()) && request.resource.data.studentId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ─── 5. Coleção: progress & student_progress ────────────────
     match /progress/{userId} {
-      allow read, write: if request.auth.uid == userId;
+      allow read: if isOwner(userId) || isProfessor() || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
 
-    // ─── Logs do Sistema ───────────────────────────────────
-    // Qualquer autenticado pode criar logs (ações de qualquer usuário)
-    // Apenas admins podem ler todos os logs
-    match /system_logs/{logId} {
-      allow create: if request.auth != null;
-      allow read: if request.auth != null
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    match /student_progress/{userId} {
+      allow read: if isOwner(userId) || isProfessor() || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
+
+    // ─── 6. Coleção: exams & exam_attempts ──────────────────────
+    match /exams/{examId} {
+      allow read: if isAuthenticated();
+      allow create: if isProfessor() || isAdmin();
+      allow update, delete: if (isAuthenticated() && resource.data.professorId == request.auth.uid) || isAdmin();
+    }
+
+    match /exam_attempts/{attemptId} {
+      allow read: if isAuthenticated() && (
+        resource.data.alunoId == request.auth.uid
+        || isProfessor()
+        || isAdmin()
+      );
+      allow create: if (isStudent() || isAuthenticated()) && request.resource.data.alunoId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ─── 7. Coleção: lesson_plans ───────────────────────────────
+    match /lesson_plans/{planId} {
+      allow read: if isAuthenticated();
+      allow create: if isProfessor() || isAdmin();
+      allow update, delete: if (isAuthenticated() && resource.data.professorId == request.auth.uid) || isAdmin();
+    }
+
+    // ─── 8. Coleção: attendance (Diário de Classe) ──────────────
+    match /attendance/{attendanceId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isProfessor() || isAdmin();
+    }
+
+    // ─── 9. Coleção: forum_topics (Fórum Pedagógico) ────────────
+    match /forum_topics/{topicId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      // Atualização permitida para respostas da turma ou moderação docente
+      allow update: if isAuthenticated();
+      allow delete: if (isAuthenticated() && resource.data.autorId == request.auth.uid) || isProfessor() || isAdmin();
+    }
+
+    // ─── 10. Coleção: system_logs ───────────────────────────────
+    match /system_logs/{logId} {
+      allow create: if isAuthenticated();
+      allow read: if isAdmin();
+      allow update, delete: if false; // Logs são imutáveis
+    }
+
   }
 }
