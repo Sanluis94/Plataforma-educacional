@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, Settings2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
 
 interface SimulacaoProps {
   mode?: string;
@@ -674,6 +675,12 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           </div>
         </div>
       )}
+
+      {/* Mediação Ativa: Tutor Socrático e Freiriano */}
+      <SocraticTutorWidget
+        labTitle={`Laboratório de ${activeTab.toUpperCase()}`}
+        subject="Ciências e Física Interativa"
+      />
     </div>
   );
 };

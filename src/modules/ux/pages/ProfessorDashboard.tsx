@@ -874,12 +874,49 @@ export function ProfessorDashboard() {
             </div>
 
             <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
-                Metodologia e Estratégia de Ensino:
-              </label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                  Metodologia e Estratégia de Ensino:
+                </label>
+                {/* Pedagogical Framework Templates */}
+                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => setNewPlanMethodology('[Metodologia Socrática]: 1) Pergunta norteadora desafiadora sem resposta imediata; 2) Investigação guiada no laboratório virtual pelos alunos; 3) Maiêutica: debate reflexivo para desconstruir contradições e formalizar o conceito.')}
+                    style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(139,92,246,0.4)', background: 'rgba(139,92,246,0.15)', color: '#c4b5fd', cursor: 'pointer' }}
+                    title="Inserir modelo de Maiêutica Socrática"
+                  >
+                    🏛️ Sócrates
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewPlanMethodology('[Metodologia Aristotélica]: 1) Observação empírica direta dos fenômenos na simulação; 2) Coleta e tabulação de dados sensoriais; 3) Análise de causalidade (material, formal, eficiente e final).')}
+                    style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.15)', color: '#67e8f9', cursor: 'pointer' }}
+                    title="Inserir modelo Empírico de Aristóteles"
+                  >
+                    🔬 Aristóteles
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewPlanMethodology('[Metodologia Freiriana]: 1) Tema Gerador vinculado à realidade e vivência social dos alunos; 2) Círculo de cultura e problematização crítica; 3) Ação transformadora da ciência no cotidiano.')}
+                    style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.15)', color: '#6ee7b7', cursor: 'pointer' }}
+                    title="Inserir modelo de Problematização Freiriana"
+                  >
+                    🌱 Paulo Freire
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewPlanMethodology('[Inclusão DUA / UDL]: 1) Múltiplos meios de representação (simulador visual + leitor de áudio + resumo sem sobrecarga); 2) Múltiplos meios de ação e expressão; 3) Engajamento adaptado para alunos com TDAH, TEA e dislexia.')}
+                    style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.15)', color: '#fcd34d', cursor: 'pointer' }}
+                    title="Inserir modelo DUA / Acessibilidade Cognitiva"
+                  >
+                    🧩 DUA (Inclusivo)
+                  </button>
+                </div>
+              </div>
               <textarea
                 rows={2}
-                placeholder="Descreva a dinâmica da aula, exercícios ou atividades práticas em grupo..."
+                placeholder="Descreva a dinâmica da aula ou clique em um dos métodos acima para preencher..."
                 value={newPlanMethodology}
                 onChange={e => setNewPlanMethodology(e.target.value)}
                 style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem', resize: 'vertical' }}

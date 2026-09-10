@@ -2,6 +2,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Home as HomeIcon, BookOpen, Users, Settings, Beaker, LogOut, Sun, Moon } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../core/contexts/AuthContext';
+import { AccessibilityToolbar } from './AccessibilityToolbar';
 
 interface LayoutProps {
   theme: 'dark' | 'light';
@@ -116,6 +117,9 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
 
           {/* Right Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {/* DUA Accessibility Toolbar */}
+            <AccessibilityToolbar />
+
             {/* Theme Toggle */}
             <button
               onClick={onThemeToggle}

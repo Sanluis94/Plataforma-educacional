@@ -350,3 +350,32 @@ Forneça um JSON estrito no seguinte formato:
     coinReward: 20
   };
 };
+
+/**
+ * Chamada direta ao modelo Google Gemini para prompts textuais abertos (como mediação socrática).
+ */
+export const callGeminiWithKey = async (apiKey: string, prompt: string): Promise<string> => {
+  if (!apiKey || !apiKey.trim()) {
+    throw new Error('Chave de API do Gemini não informada.');
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Erro na API Gemini: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  return answer || 'Não foi possível obter resposta do tutor no momento.';
+};
+
