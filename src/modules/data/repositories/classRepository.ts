@@ -367,3 +367,166 @@ export const subscribeStudentMessages = (
     getLocalStudentMessages(classId).then(callback);
   });
 };
+
+// ─── Avisos da Turma (Mural estilo Edu-Interact-v2) ───────────────
+const LOCAL_NOTICES_KEY = 'edu_local_notices';
+function getLocalNotices(classId: string): any[] {
+  try {
+    const raw = localStorage.getItem(`${LOCAL_NOTICES_KEY}_${classId}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+function saveLocalNotices(classId: string, notices: any[]) {
+  try {
+    localStorage.setItem(`${LOCAL_NOTICES_KEY}_${classId}`, JSON.stringify(notices));
+  } catch (err) {
+    console.error('Erro ao salvar avisos locais:', err);
+  }
+}
+
+export const createClassNotice = async (
+  classId: string,
+  professorId: string,
+  professorName: string,
+  titulo: string,
+  texto: string
+): Promise<any> => {
+  const newNotice = {
+    turmaId: classId,
+    professorId,
+    professorName,
+    titulo,
+    texto,
+    criadoEm: new Date().toISOString()
+  };
+
+  if (!db) {
+    const notices = getLocalNotices(classId);
+    const saved = { id: `notice_${Date.now()}`, ...newNotice };
+    notices.unshift(saved);
+    saveLocalNotices(classId, notices);
+    return saved;
+  }
+
+  const docRef = await addDoc(collection(db, COLLECTION, classId, 'notices'), newNotice);
+  return { id: docRef.id, ...newNotice };
+};
+
+export const getClassNotices = async (classId: string): Promise<any[]> => {
+  if (!db) {
+    return getLocalNotices(classId);
+  }
+  try {
+    const q = collection(db, COLLECTION, classId, 'notices');
+    const snap = await getDocs(q);
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    docs.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+    return docs;
+  } catch (err) {
+    console.error('[ClassRepository] Erro ao buscar avisos da turma:', err);
+    return getLocalNotices(classId);
+  }
+};
+
+export const subscribeClassNotices = (
+  classId: string,
+  callback: (notices: any[]) => void
+): () => void => {
+  if (!db) {
+    callback(getLocalNotices(classId));
+    return () => {};
+  }
+  const q = collection(db, COLLECTION, classId, 'notices');
+  return onSnapshot(q, (snap) => {
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    docs.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+    callback(docs);
+  }, (err) => {
+    console.error('[ClassRepository] Erro no listener de avisos:', err);
+    callback(getLocalNotices(classId));
+  });
+};
+
+export const deleteClassNotice = async (classId: string, noticeId: string): Promise<void> => {
+  if (!db) {
+    const notices = getLocalNotices(classId).filter(n => n.id !== noticeId);
+    saveLocalNotices(classId, notices);
+    return;
+  }
+  await deleteDoc(doc(db, COLLECTION, classId, 'notices', noticeId));
+};
+
+// ─── Materiais com Suporte a Upload & Categorização ───────────────
+export const addEnhancedMaterial = async (
+  classId: string,
+  material: {
+    title: string;
+    description: string;
+    tipo: 'pdf' | 'link' | 'texto' | 'arquivo';
+    linkOuConteudo: string;
+    nomeArquivo?: string;
+    tamanhoFormatado?: string;
+    disciplina?: string;
+    periodo?: string;
+    professorId?: string;
+  }
+): Promise<any> => {
+  const item = {
+    ...material,
+    turmaId: classId,
+    criadoEm: new Date().toISOString()
+  };
+
+  if (!db) {
+    const mats = getLocalComplementaryMaterials(classId);
+    const saved = { id: `mat_${Date.now()}`, ...item };
+    (await mats).unshift(saved as any);
+    return saved;
+  }
+
+  const docRef = await addDoc(collection(db, COLLECTION, classId, 'enhanced_materials'), item);
+  return { id: docRef.id, ...item };
+};
+
+export const getEnhancedMaterials = async (classId: string): Promise<any[]> => {
+  if (!db) {
+    return (await getLocalComplementaryMaterials(classId)) as any[];
+  }
+  try {
+    const q = collection(db, COLLECTION, classId, 'enhanced_materials');
+    const snap = await getDocs(q);
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    docs.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+    return docs;
+  } catch (err) {
+    console.error('[ClassRepository] Erro ao buscar materiais enriquecidos:', err);
+    return (await getLocalComplementaryMaterials(classId)) as any[];
+  }
+};
+
+export const subscribeEnhancedMaterials = (
+  classId: string,
+  callback: (materials: any[]) => void
+): () => void => {
+  if (!db) {
+    getEnhancedMaterials(classId).then(callback);
+    return () => {};
+  }
+  const q = collection(db, COLLECTION, classId, 'enhanced_materials');
+  return onSnapshot(q, (snap) => {
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    docs.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+    callback(docs);
+  }, (err) => {
+    console.error('[ClassRepository] Erro no listener de materiais enriquecidos:', err);
+    getEnhancedMaterials(classId).then(callback);
+  });
+};
+
+export const deleteEnhancedMaterial = async (classId: string, materialId: string): Promise<void> => {
+  if (!db) return;
+  await deleteDoc(doc(db, COLLECTION, classId, 'enhanced_materials', materialId));
+};
+

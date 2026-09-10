@@ -4,23 +4,44 @@ import {
 } from 'recharts';
 import {
   PlusCircle, Users, BookOpen, BarChart as BarChartIcon,
-  Award, Eye, Download, MessageCircle, Send, Sparkles, Key, CheckCircle,
-  AlertTriangle, Layers, RefreshCw, Wand2, Plus, Trash2
+  Award, Download, MessageCircle, Send, Sparkles, Key, CheckCircle,
+  AlertTriangle, Layers, RefreshCw, Plus, Trash2,
+  Calendar, FileText, Upload, ExternalLink, Bell
 } from 'lucide-react';
 import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
 import { generatePedagogicalDiagnosis, generateCompleteLessonWithAI } from '../../core/services/geminiService';
-import type { ActivityQuestion } from '../../data/types';
+import type {
+  ExamData, ExamQuestion, ExamAttempt,
+  LessonPlanItem, BimesterPeriod
+} from '../../data/types';
 import {
-  getComplementaryMaterials,
-  addComplementaryMaterial,
   getStudentMessages,
   replyStudentMessage,
-  subscribeComplementaryMaterials,
   subscribeStudentMessages,
-  type ComplementaryMaterial,
+  createClassNotice,
+  subscribeClassNotices,
+  deleteClassNotice,
+  addEnhancedMaterial,
+  subscribeEnhancedMaterials,
+  deleteEnhancedMaterial,
   type StudentMessage
 } from '../../data/repositories/classRepository';
+import {
+  saveExam,
+  getExamsByProfessor,
+  updateExam,
+  deleteExam,
+  getExamAttemptsByClass,
+  calculateExamQuestionAnalytics,
+  type ExamReportSummary
+} from '../../data/repositories/examRepository';
+import {
+  saveLessonPlanItem,
+  updateLessonPlanItem,
+  deleteLessonPlanItem,
+  subscribeLessonPlansByClass
+} from '../../data/repositories/lessonPlanRepository';
 
 const SUBJECT_COLORS = [
   '#06b6d4', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6',
@@ -34,25 +55,85 @@ export function ProfessorDashboard() {
     setIsCreatingClass,
     newClassName,
     setNewClassName,
-    activeTab,
-    setActiveTab,
     selectedClassId,
     setSelectedClassId,
     classReport,
     reportLoading,
     handleCreateClass,
     handleViewClassReport,
-    publishActivity,
     exportReportCSV,
     globalStats,
   } = useProfessorDashboard();
 
-  // State for complementary materials and student messages
-  const [profMaterials, setProfMaterials] = useState<ComplementaryMaterial[]>([]);
+  // Active view tab
+  const [dashboardTab, setDashboardTab] = useState<
+    'classes' | 'lesson_plans' | 'exams' | 'materials' | 'labs_overview' | 'reports' | 'messages'
+  >('classes');
+
+  // State for Notices (Mural da Turma estilo Edu-Interact-v2)
+  const [classNotices, setClassNotices] = useState<any[]>([]);
+  const [newNoticeTitle, setNewNoticeTitle] = useState('');
+  const [newNoticeText, setNewNoticeText] = useState('');
+  const [publishingNotice, setPublishingNotice] = useState(false);
+
+  // State for Enhanced Materials with File Upload
+  const [enhancedMaterials, setEnhancedMaterials] = useState<any[]>([]);
+  const [matTitle, setMatTitle] = useState('');
+  const [matDesc, setMatDesc] = useState('');
+  const [matType, setMatType] = useState<'arquivo' | 'link' | 'texto'>('arquivo');
+  const [matUrl, setMatUrl] = useState('');
+  const [matContent, setMatContent] = useState('');
+  const [matFileName, setMatFileName] = useState('');
+  const [matFileSize, setMatFileSize] = useState('');
+  const [matBimester, setMatBimester] = useState<string>('1º Bimestre');
+  const [matSubject, setMatSubject] = useState('Física');
+  const [uploadingMat, setUploadingMat] = useState(false);
+
+  // State for Lesson Plans (Bimestral / Semestral)
+  const [classLessonPlans, setClassLessonPlans] = useState<LessonPlanItem[]>([]);
+  const [selectedBimester, setSelectedBimester] = useState<BimesterPeriod>('1º Bimestre');
+  const [newPlanTopic, setNewPlanTopic] = useState('');
+  const [newPlanBNCC, setNewPlanBNCC] = useState('');
+  const [newPlanMethodology, setNewPlanMethodology] = useState('');
+  const [newPlanLabId, setNewPlanLabId] = useState('');
+  const [newPlanDate, setNewPlanDate] = useState('');
+  const [savingPlan, setSavingPlan] = useState(false);
+  const [generatingPlanAI, setGeneratingPlanAI] = useState(false);
+
+  // State for Exams (Provas e Avaliações Formais estilo Edu-Interact-v2)
+  const [examsList, setExamsList] = useState<ExamData[]>([]);
+  const [examMode, setExamMode] = useState<'list' | 'create' | 'analytics'>('list');
+  const [selectedExam, setSelectedExam] = useState<ExamData | null>(null);
+  const [examAnalytics, setExamAnalytics] = useState<ExamReportSummary | null>(null);
+  const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
+
+  // Exam Creator Form State
+  const [newExamTitle, setNewExamTitle] = useState('');
+  const [newExamDesc, setNewExamDesc] = useState('');
+  const [newExamSubject, setNewExamSubject] = useState('Física');
+  const [newExamDuration, setNewExamDuration] = useState(50);
+  const [newExamDeadline, setNewExamDeadline] = useState('');
+  const [newExamTargetClass, setNewExamTargetClass] = useState('');
+  const [newExamQuestions, setNewExamQuestions] = useState<ExamQuestion[]>([
+    {
+      enunciado: 'Qual é a principal consequência observada na conservação de energia do sistema?',
+      tema: 'Termodinâmica / Mecânica',
+      nivelDificuldade: 'Médio',
+      valorPeso: 2.5,
+      justificativa: 'A energia mecânica total permanece constante na ausência de forças dissipativas não-conservativas.',
+      opcoes: [
+        { texto: 'A energia mecânica total é conservada', isCorreta: true },
+        { texto: 'A energia é destruída gradualmente', isCorreta: false },
+        { texto: 'A velocidade aumenta infinitamente', isCorreta: false },
+        { texto: 'A massa do sistema é reduzida', isCorreta: false },
+      ]
+    }
+  ]);
+  const [examAiTopic, setExamAiTopic] = useState('');
+  const [examAiGenerating, setExamAiGenerating] = useState(false);
+
+  // Student messages state
   const [profMessages, setProfMessages] = useState<StudentMessage[]>([]);
-  const [newMatTitle, setNewMatTitle] = useState('');
-  const [newMatDesc, setNewMatDesc] = useState('');
-  const [newMatLink, setNewMatLink] = useState('');
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
   const [replyBonusCoins, setReplyBonusCoins] = useState<Record<string, number>>({});
 
@@ -70,38 +151,27 @@ export function ProfessorDashboard() {
   const [geminiKeyInput, setGeminiKeyInput] = useState(() => localStorage.getItem('gemini_api_key') || '');
   const [geminiSaved, setGeminiSaved] = useState(false);
 
-  // Active view filter
-  const [dashboardTab, setDashboardTab] = useState<'classes' | 'studio' | 'reports' | 'labs_overview' | 'messages'>('classes');
-
-  // AI Lesson & Module Studio State
-  const [studioSubject, setStudioSubject] = useState('Física');
-  const [studioTopic, setStudioTopic] = useState('');
-  const [studioGrade, setStudioGrade] = useState('Ensino Médio');
-  const [studioType, setStudioType] = useState<'quiz' | 'simulation_physics' | 'simulation_chemistry' | 'simulation_math' | 'essay' | 'lesson_theory'>('quiz');
-  const [studioTargetClass, setStudioTargetClass] = useState<string>('');
-  const [studioTitle, setStudioTitle] = useState('');
-  const [studioDescription, setStudioDescription] = useState('');
-  const [studioTheory, setStudioTheory] = useState('');
-  const [studioQuestions, setStudioQuestions] = useState<ActivityQuestion[]>([
-    {
-      q: 'Qual é o conceito fundamental abordado nesta experiência?',
-      options: ['Conservação de Energia e Leis Físicas', 'Variação descontrolada sem padrão', 'Ausência de forças e trabalho', 'Processo puramente estático'],
-      answer: 0,
-      explanation: 'A conservação de energia e a observação experimental estruturam a compreensão do fenômeno.'
+  // Sync selected class with first available if none selected
+  useEffect(() => {
+    if (!selectedClassId && turmas.length > 0) {
+      setSelectedClassId(turmas[0].id);
     }
-  ]);
-  const [studioXp, setStudioXp] = useState(100);
-  const [studioCoins, setStudioCoins] = useState(20);
-  const [studioGenerating, setStudioGenerating] = useState(false);
-  const [studioSuccessMsg, setStudioSuccessMsg] = useState(false);
-  const [studioActiveStep, setStudioActiveStep] = useState<1 | 2 | 3>(1);
+  }, [turmas, selectedClassId, setSelectedClassId]);
 
-  // Load materials & messages when a class report is viewed
+  // Load class data (notices, materials, lesson plans, messages)
   useEffect(() => {
     if (!selectedClassId) return;
 
-    const unsubMaterials = subscribeComplementaryMaterials(selectedClassId, (mats) => {
-      setProfMaterials(mats);
+    const unsubNotices = subscribeClassNotices(selectedClassId, (notices) => {
+      setClassNotices(notices);
+    });
+
+    const unsubMaterials = subscribeEnhancedMaterials(selectedClassId, (mats) => {
+      setEnhancedMaterials(mats);
+    });
+
+    const unsubLessonPlans = subscribeLessonPlansByClass(selectedClassId, (plans) => {
+      setClassLessonPlans(plans);
     });
 
     const unsubMessages = subscribeStudentMessages(selectedClassId, (msgs) => {
@@ -109,10 +179,34 @@ export function ProfessorDashboard() {
     });
 
     return () => {
+      unsubNotices();
       unsubMaterials();
+      unsubLessonPlans();
       unsubMessages();
     };
   }, [selectedClassId]);
+
+  // Load teacher exams
+  useEffect(() => {
+    const loadExams = async () => {
+      const exams = await getExamsByProfessor('prof_current');
+      setExamsList(exams);
+    };
+    loadExams();
+  }, []);
+
+  // Load exam analytics when selectedExam changes
+  useEffect(() => {
+    if (!selectedExam || !selectedExam.turmaId) return;
+    const fetchExamAnalytics = async () => {
+      const attempts = await getExamAttemptsByClass(selectedExam.turmaId!);
+      const filtered = attempts.filter(a => a.examId === selectedExam.id);
+      setExamAttempts(filtered);
+      const analytics = calculateExamQuestionAnalytics(selectedExam, filtered);
+      setExamAnalytics(analytics);
+    };
+    fetchExamAnalytics();
+  }, [selectedExam]);
 
   // Trigger AI Pedagogical Diagnosis when report changes
   useEffect(() => {
@@ -144,23 +238,14 @@ export function ProfessorDashboard() {
     fetchAiDiagnosis();
   }, [classReport]);
 
-  // Sync active tab
-  useEffect(() => {
-    if (activeTab === 'activityBuilder') {
-      setDashboardTab('studio');
-    } else if (activeTab === 'reports') {
-      setDashboardTab('reports');
-    }
-  }, [activeTab]);
-
   const totalStudents = turmas.reduce((sum, t) => sum + (t.studentsCount || 0), 0);
   const totalClasses = turmas.length;
 
   const stats = [
     { label: 'Total de Alunos', value: String(totalStudents), icon: Users, accent: '#06b6d4', desc: 'Em todas as turmas ativas' },
     { label: 'Turmas Ativas', value: String(totalClasses), icon: BookOpen, accent: '#8b5cf6', desc: 'Com códigos de acesso' },
-    { label: 'Taxa de Conclusão', value: `${globalStats.completionRate}%`, icon: Award, accent: '#10b981', desc: 'Média de entregas' },
-    { label: 'Laboratórios Virtuais', value: '72 Labs', icon: Layers, accent: '#f59e0b', desc: '12 Disciplinas disponíveis' },
+    { label: 'Taxa de Conclusão', value: `${globalStats.completionRate}%`, icon: Award, accent: 'Média de entregas', desc: 'Média geral da turma' },
+    { label: 'Provas Aplicadas', value: String(examsList.length), icon: FileText, accent: '#10b981', desc: 'Avaliações com gabarito' },
   ];
 
   // Subject engagement chart data
@@ -195,63 +280,186 @@ export function ProfessorDashboard() {
     }, 1200);
   };
 
-  // Generate Lesson with AI
-  const handleGenerateWithAI = async () => {
-    if (!studioTopic.trim()) return;
-    setStudioGenerating(true);
-    try {
-      const result = await generateCompleteLessonWithAI({
-        topic: studioTopic.trim(),
-        subject: studioSubject,
-        gradeLevel: studioGrade,
-        activityType: studioType,
-      });
+  // Handler for File Upload (base64)
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      setStudioTitle(result.title);
-      setStudioDescription(result.description);
-      setStudioTheory(result.theoryContent);
-      if (result.questions && result.questions.length > 0) {
-        setStudioQuestions(result.questions);
-      }
-      setStudioXp(result.xpReward || 100);
-      setStudioCoins(result.coinReward || 20);
-      setStudioActiveStep(2);
+    setMatFileName(file.name);
+    const sizeInKb = (file.size / 1024).toFixed(1);
+    setMatFileSize(file.size > 1024 * 1024 ? `${(file.size / (1024 * 1024)).toFixed(2)} MB` : `${sizeInKb} KB`);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setMatUrl(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Handler to publish material
+  const handlePublishMaterial = async () => {
+    if (!selectedClassId || !matTitle.trim()) return;
+    setUploadingMat(true);
+    try {
+      await addEnhancedMaterial(selectedClassId, {
+        title: matTitle.trim(),
+        description: matDesc.trim(),
+        tipo: matType === 'arquivo' ? 'pdf' : matType === 'link' ? 'link' : 'texto',
+        linkOuConteudo: matType === 'texto' ? matContent : matUrl,
+        nomeArquivo: matFileName || undefined,
+        tamanhoFormatado: matFileSize || undefined,
+        disciplina: matSubject,
+        periodo: matBimester,
+        professorId: 'prof_current'
+      });
+      setMatTitle('');
+      setMatDesc('');
+      setMatUrl('');
+      setMatContent('');
+      setMatFileName('');
+      setMatFileSize('');
     } catch (err) {
-      console.error('Erro ao gerar aula com IA:', err);
+      console.error('Erro ao publicar material:', err);
     } finally {
-      setStudioGenerating(false);
+      setUploadingMat(false);
     }
   };
 
-  // Publish Custom Lesson
-  const handlePublishCustomActivity = async () => {
-    if (!studioTitle.trim()) return;
-    const targetClass = studioTargetClass || selectedClassId || (turmas[0]?.id ?? '');
+  // Handler to publish Class Notice (Mural)
+  const handlePublishNotice = async () => {
+    if (!selectedClassId || !newNoticeTitle.trim() || !newNoticeText.trim()) return;
+    setPublishingNotice(true);
+    try {
+      await createClassNotice(
+        selectedClassId,
+        'prof_current',
+        'Professor',
+        newNoticeTitle.trim(),
+        newNoticeText.trim()
+      );
+      setNewNoticeTitle('');
+      setNewNoticeText('');
+    } catch (err) {
+      console.error('Erro ao publicar aviso:', err);
+    } finally {
+      setPublishingNotice(false);
+    }
+  };
 
-    await publishActivity({
-      title: studioTitle.trim(),
-      type: studioType,
-      subject: studioSubject,
-      description: studioDescription,
-      theoryContent: studioTheory,
-      questions: studioQuestions,
-      xpReward: studioXp,
-      coinReward: studioCoins,
-      classId: targetClass || undefined,
-      className: turmas.find(t => t.id === targetClass)?.name || undefined,
-      config: {
-        type: studioType,
-        subject: studioSubject,
-        topic: studioTopic,
-      },
+  // Handler to save Lesson Plan item
+  const handleSaveLessonPlan = async () => {
+    if (!selectedClassId || !newPlanTopic.trim()) return;
+    setSavingPlan(true);
+    try {
+      const associatedLab = (ALL_MODULES as any[]).flatMap((m: any) => m.labs).find((l: any) => l.id === newPlanLabId);
+      await saveLessonPlanItem({
+        professorId: 'prof_current',
+        turmaId: selectedClassId,
+        periodo: selectedBimester,
+        ordemSemana: (classLessonPlans.filter(p => p.periodo === selectedBimester).length + 1),
+        topico: newPlanTopic.trim(),
+        competenciasBNCC: newPlanBNCC.trim() || 'Habilidade Geral da BNCC',
+        metodologia: newPlanMethodology.trim() || 'Aula expositiva dialogada e prática em simulador virtual.',
+        laboratorioAssociadoId: newPlanLabId || undefined,
+        laboratorioTitulo: associatedLab?.title || undefined,
+        status: 'planejada',
+        dataPrevista: newPlanDate || undefined,
+        criadoEm: new Date().toISOString()
+      });
+      setNewPlanTopic('');
+      setNewPlanBNCC('');
+      setNewPlanMethodology('');
+      setNewPlanLabId('');
+      setNewPlanDate('');
+    } catch (err) {
+      console.error('Erro ao salvar item no plano de aula:', err);
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
+  // Handler to generate Lesson Plan with AI Gemini
+  const handleGeneratePlanWithAI = async () => {
+    if (!selectedClassId || !newPlanTopic.trim()) return;
+    setGeneratingPlanAI(true);
+    try {
+      await generateCompleteLessonWithAI({
+        topic: newPlanTopic.trim(),
+        subject: matSubject,
+        gradeLevel: 'Ensino Médio',
+        activityType: 'lesson_theory'
+      });
+      setNewPlanBNCC(`BNCC: Compreensão teórica e experimental de ${newPlanTopic.trim()}`);
+      setNewPlanMethodology(`Metodologia Ativa: 1) Apresentação conceitual. 2) Exploração em laboratório virtual interativo. 3) Debate e checagem de conceitos com feedback imediato.`);
+    } catch (err) {
+      console.error('Erro ao gerar plano com IA:', err);
+    } finally {
+      setGeneratingPlanAI(false);
+    }
+  };
+
+  // Handler to generate Exam with AI Gemini
+  const handleGenerateExamWithAI = async () => {
+    if (!examAiTopic.trim()) return;
+    setExamAiGenerating(true);
+    try {
+      const result = await generateCompleteLessonWithAI({
+        topic: examAiTopic.trim(),
+        subject: newExamSubject,
+        gradeLevel: 'Ensino Médio',
+        activityType: 'quiz'
+      });
+      setNewExamTitle(result.title || `Avaliação Formal: ${examAiTopic.trim()}`);
+      setNewExamDesc(result.description || `Exame avaliativo com correção automática.`);
+      if (result.questions && result.questions.length > 0) {
+        const convertedQuestions: ExamQuestion[] = result.questions.map((q, idx) => ({
+          enunciado: q.q,
+          tema: examAiTopic.trim(),
+          nivelDificuldade: idx === 0 ? 'Fácil' : idx === 1 ? 'Médio' : 'Difícil',
+          valorPeso: 2.5,
+          justificativa: q.explanation || 'Resolução baseada nos princípios científicos da disciplina.',
+          opcoes: q.options.map((opt, oIdx) => ({
+            texto: opt,
+            isCorreta: oIdx === q.answer
+          }))
+        }));
+        setNewExamQuestions(convertedQuestions);
+      }
+    } catch (err) {
+      console.error('Erro ao gerar prova com IA:', err);
+    } finally {
+      setExamAiGenerating(false);
+    }
+  };
+
+  // Handler to publish Exam for class
+  const handlePublishExam = async (status: 'Rascunho' | 'Aberta') => {
+    if (!newExamTitle.trim()) return;
+    const targetClass = newExamTargetClass || selectedClassId || turmas[0]?.id;
+    const targetClassObj = turmas.find(t => t.id === targetClass);
+
+    const pesoTotal = newExamQuestions.reduce((sum, q) => sum + (q.valorPeso || 1), 0);
+
+    const saved = await saveExam({
+      professorId: 'prof_current',
+      professorName: 'Professor',
+      titulo: newExamTitle.trim(),
+      descricao: newExamDesc.trim(),
+      disciplina: newExamSubject,
+      turmaId: targetClass,
+      turmaNome: targetClassObj?.name,
+      duracaoMinutos: newExamDuration || 50,
+      dataLimite: newExamDeadline || undefined,
+      status,
+      pesoTotal,
+      questoes: newExamQuestions,
+      criadoEm: new Date().toISOString()
     });
 
-    setStudioSuccessMsg(true);
-    setTimeout(() => {
-      setStudioSuccessMsg(false);
-      setDashboardTab('classes');
-      setActiveTab('classes');
-    }, 1800);
+    setExamsList(prev => [saved, ...prev]);
+    setExamMode('list');
+    setNewExamTitle('');
+    setNewExamDesc('');
   };
 
   return (
@@ -262,15 +470,15 @@ export function ProfessorDashboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
             <span style={{ fontSize: '1.75rem' }}>👨‍🏫</span>
             <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.5px' }}>
-              Painel do Professor & Studio de Aulas
+              Painel Docente & Gestão Escolar
             </h1>
           </div>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
-            Crie atividades personalizadas com IA, acompanhe os 72 laboratórios virtuais e monitore turmas em tempo real.
+            Planejamento curricular bimestral, provas com correção automática, upload de materiais e laboratórios integrados.
           </p>
         </div>
 
-        {/* Action Buttons Header */}
+        {/* Global Action Buttons */}
         <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setShowGeminiModal(true)}
@@ -281,12 +489,12 @@ export function ProfessorDashboard() {
             {localStorage.getItem('gemini_api_key') ? '🔑 Chave IA Conectada' : '⚙️ Configurar Chave IA'}
           </button>
           <button
-            onClick={() => { setDashboardTab('studio'); setStudioActiveStep(1); }}
+            onClick={() => { setDashboardTab('exams'); setExamMode('create'); }}
             className="btn-gradient"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.25rem', fontSize: '0.85rem', borderRadius: '8px', fontWeight: 700, background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.25rem', fontSize: '0.85rem', borderRadius: '8px', fontWeight: 700, background: 'linear-gradient(135deg, #10b981, #06b6d4)' }}
           >
-            <Wand2 style={{ width: '1rem', height: '1rem' }} />
-            Preparador de Aulas com IA
+            <PlusCircle style={{ width: '1rem', height: '1rem' }} />
+            Nova Prova / Avaliação
           </button>
           <button
             onClick={() => { setIsCreatingClass(true); setDashboardTab('classes'); }}
@@ -299,7 +507,7 @@ export function ProfessorDashboard() {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Global Stats Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
@@ -325,22 +533,20 @@ export function ProfessorDashboard() {
         })}
       </div>
 
-      {/* Navigation Tabs */}
+      {/* Reorganized Top Navigation Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         {[
-          { id: 'classes', label: '🏫 Turmas & Aulas', icon: BookOpen },
-          { id: 'studio', label: '✨ Preparador de Aulas & Criador de Módulos', icon: Wand2 },
-          { id: 'reports', label: '📊 Analytics & Relatórios', icon: BarChartIcon },
-          { id: 'labs_overview', label: '🔬 72 Laboratórios Virtuais', icon: Layers },
-          { id: 'messages', label: `💬 Dúvidas dos Alunos (${profMessages.filter(m => !m.replied).length})`, icon: MessageCircle },
+          { id: 'classes', label: '🏫 Minhas Turmas & Mural', icon: BookOpen },
+          { id: 'lesson_plans', label: '📅 Plano de Aulas Bimestral', icon: Calendar },
+          { id: 'exams', label: `📝 Provas & Avaliações (${examsList.length})`, icon: FileText },
+          { id: 'materials', label: `📁 Materiais & Uploads (${enhancedMaterials.length})`, icon: Upload },
+          { id: 'labs_overview', label: '🔬 Catálogo 72 Labs', icon: Layers },
+          { id: 'reports', label: '📊 Analytics & Diagnóstico IA', icon: BarChartIcon },
+          { id: 'messages', label: `💬 Dúvidas (${profMessages.filter(m => !m.replied).length})`, icon: MessageCircle },
         ].map(tab => (
           <button
             key={tab.id}
-            onClick={() => {
-              setDashboardTab(tab.id as any);
-              if (tab.id === 'reports') setActiveTab('reports');
-              else if (tab.id === 'classes') setActiveTab('classes');
-            }}
+            onClick={() => setDashboardTab(tab.id as any)}
             style={{
               padding: '0.65rem 1.25rem',
               borderRadius: '8px 8px 0 0',
@@ -364,10 +570,10 @@ export function ProfessorDashboard() {
         ))}
       </div>
 
-      {/* ── TAB 1: TURMAS & AULAS ── */}
+      {/* ── TAB 1: MINHAS TURMAS & MURAL DE AVISOS ── */}
       {dashboardTab === 'classes' && (
-        <div>
-          {/* Create Class Form */}
+        <div className="fade-in">
+          {/* Create Class Modal/Form */}
           {isCreatingClass && (
             <div className="glass-card mb-4" style={{ padding: '1.5rem', border: '1px solid rgba(6,182,212,0.3)', background: 'rgba(6,182,212,0.03)' }}>
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -376,12 +582,12 @@ export function ProfessorDashboard() {
               </h3>
               <form onSubmit={handleCreateClass} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                 <div style={{ flex: 1, minWidth: '220px' }}>
-                  <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Nome da Turma / Disciplina</label>
+                  <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Nome da Turma</label>
                   <input
                     type="text"
                     value={newClassName}
                     onChange={(e) => setNewClassName(e.target.value)}
-                    placeholder="Ex: Física e Química - 3º Ano Médio A"
+                    placeholder="Ex: 3º Ano Médio A - Ciências da Natureza"
                     autoFocus
                     style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.9rem' }}
                   />
@@ -391,14 +597,14 @@ export function ProfessorDashboard() {
                     Cancelar
                   </button>
                   <button type="submit" className="btn-gradient" style={{ padding: '0.65rem 1.5rem', fontWeight: 700 }}>
-                    Confirmar Criação
+                    Confirmar
                   </button>
                 </div>
               </form>
             </div>
           )}
 
-          {/* Classes Grid */}
+          {/* Classes Cards Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
             {turmas.map(turma => {
               const isSelected = selectedClassId === turma.id;
@@ -410,61 +616,55 @@ export function ProfessorDashboard() {
                     padding: '1.5rem',
                     border: isSelected ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
                     boxShadow: isSelected ? '0 0 20px rgba(6,182,212,0.15)' : 'none',
-                    transition: 'all 0.25s',
+                    cursor: 'pointer'
                   }}
+                  onClick={() => setSelectedClassId(turma.id)}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                     <div>
-                      <span style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        Turma Ativa
+                      <span style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase' }}>
+                        {isSelected ? '● Turma Selecionada' : 'Turma'}
                       </span>
                       <h3 style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1.15rem', margin: '0.2rem 0 0' }}>
                         {turma.name}
                       </h3>
                     </div>
                     <span style={{
-                      padding: '0.25rem 0.65rem',
-                      borderRadius: '9999px',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      background: turma.studentsCount > 0 ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
-                      color: turma.studentsCount > 0 ? '#10b981' : '#f59e0b',
-                      border: `1px solid ${turma.studentsCount > 0 ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}`
+                      padding: '0.25rem 0.65rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700,
+                      background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)'
                     }}>
-                      {turma.studentsCount} {turma.studentsCount === 1 ? 'Aluno' : 'Alunos'}
+                      {turma.studentsCount} Alunos
                     </span>
                   </div>
 
-                  <div style={{ padding: '0.65rem 0.85rem', background: 'rgba(0,0,0,0.25)', borderRadius: '8px', marginBottom: '1.25rem', border: '1px dashed rgba(255,255,255,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.25)', borderRadius: '8px', marginBottom: '1rem', border: '1px dashed rgba(255,255,255,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Código de Matrícula:</span>
-                    <strong style={{ color: '#06b6d4', fontSize: '0.95rem', letterSpacing: '1px', fontFamily: 'monospace' }}>
-                      {turma.id}
-                    </strong>
+                    <strong style={{ color: '#06b6d4', fontFamily: 'monospace', letterSpacing: '1px' }}>{turma.id}</strong>
                   </div>
 
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedClassId(turma.id);
                         handleViewClassReport(turma.id);
                         setDashboardTab('reports');
                       }}
-                      className="btn-gradient"
-                      style={{ flex: 1, padding: '0.55rem', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+                      className="btn-outline-cyan"
+                      style={{ flex: 1, padding: '0.45rem', fontSize: '0.8rem' }}
                     >
-                      <Eye style={{ width: '0.9rem', height: '0.9rem' }} />
                       Ver Relatório
                     </button>
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setSelectedClassId(turma.id);
-                        setStudioTargetClass(turma.id);
-                        setDashboardTab('studio');
+                        setDashboardTab('lesson_plans');
                       }}
-                      className="btn-outline-cyan"
-                      style={{ padding: '0.55rem 0.85rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                      title="Criar atividade para esta turma"
+                      className="btn-gradient"
+                      style={{ flex: 1, padding: '0.45rem', fontSize: '0.8rem' }}
                     >
-                      <Wand2 style={{ width: '0.9rem', height: '0.9rem' }} /> Criar Aula
+                      Plano de Aula →
                     </button>
                   </div>
                 </div>
@@ -472,357 +672,663 @@ export function ProfessorDashboard() {
             })}
           </div>
 
-          {/* Quick Action: Construtor de Aulas */}
-          <div className="glass-card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(6,182,212,0.05) 0%, rgba(139,92,246,0.05) 100%)', border: '1px solid rgba(6,182,212,0.2)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: '0 0 0.35rem' }}>
-                  🛠️ Studio Preparador de Aulas & Criador de Módulos
-                </h3>
-                <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.88rem' }}>
-                  Crie aulas interativas completas, gere quizzes com IA em segundos e disponibilize simulações customizadas para as suas turmas.
-                </p>
+          {/* Mural de Avisos da Turma Selecionada (Estilo Edu-Interact-v2) */}
+          {selectedClassId && (
+            <div className="glass-card" style={{ padding: '1.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Bell style={{ width: '1.25rem', height: '1.25rem', color: '#f59e0b' }} />
+                  <h3 style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>
+                    Mural de Avisos & Comunicados ({turmas.find(t => t.id === selectedClassId)?.name})
+                  </h3>
+                </div>
               </div>
-              <button
-                onClick={() => { setDashboardTab('studio'); setStudioActiveStep(1); }}
-                className="btn-gradient"
-                style={{ padding: '0.65rem 1.5rem', fontWeight: 700, fontSize: '0.9rem' }}
-              >
-                Abrir Studio de Criação de Aulas →
-              </button>
+
+              {/* Form to Post New Notice */}
+              <div style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '1.5rem' }}>
+                <h4 style={{ color: '#06b6d4', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.75rem' }}>
+                  📢 Publicar Novo Comunicado para os Alunos
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <input
+                    type="text"
+                    placeholder="Título do comunicado (ex: Data da Prova Bimestral de Física, Entrega do Relatório...)"
+                    value={newNoticeTitle}
+                    onChange={e => setNewNoticeTitle(e.target.value)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                  />
+                  <textarea
+                    rows={3}
+                    placeholder="Escreva as orientações, prazos ou recados que aparecerão no painel dos estudantes..."
+                    value={newNoticeText}
+                    onChange={e => setNewNoticeText(e.target.value)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem', resize: 'vertical' }}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <button
+                      onClick={handlePublishNotice}
+                      disabled={publishingNotice || !newNoticeTitle.trim() || !newNoticeText.trim()}
+                      className="btn-gradient"
+                      style={{ padding: '0.6rem 1.5rem', fontWeight: 700, fontSize: '0.85rem' }}
+                    >
+                      {publishingNotice ? 'Publicando...' : 'Publicar no Mural dos Alunos'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* List of Notices */}
+              {classNotices.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  {classNotices.map(notice => (
+                    <div key={notice.id} style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', borderLeft: '4px solid #f59e0b', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                          <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, margin: 0 }}>{notice.titulo}</h4>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                            {notice.criadoEm ? new Date(notice.criadoEm).toLocaleDateString('pt-BR') : ''}
+                          </span>
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0, lineHeight: 1.5 }}>
+                          {notice.texto}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => deleteClassNotice(selectedClassId, notice.id)}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.7 }}
+                        title="Excluir aviso"
+                      >
+                        <Trash2 style={{ width: '0.95rem', height: '0.95rem' }} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0 }}>
+                  Nenhum comunicado publicado para esta turma ainda.
+                </p>
+              )}
             </div>
-          </div>
+          )}
         </div>
       )}
 
-      {/* ── TAB 2: STUDIO PREPARADOR DE AULAS & CRIADOR DE MÓDULOS ── */}
-      {dashboardTab === 'studio' && (
+      {/* ── TAB 2: PLANO DE AULAS BIMESTRAL / SEMESTRAL ── */}
+      {dashboardTab === 'lesson_plans' && (
         <div className="fade-in">
-          {/* Header do Studio */}
           <div className="glass-card mb-4" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(6,182,212,0.08) 100%)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#8b5cf6', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  <Wand2 style={{ width: '1.1rem', height: '1.1rem' }} /> Studio de Criação Pedagógica & IA
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#8b5cf6', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                  <Calendar style={{ width: '1.1rem', height: '1.1rem' }} /> Planejamento Curricular & BNCC
                 </div>
                 <h2 style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: 800, margin: '0.2rem 0 0.35rem' }}>
-                  Preparador de Aulas e Atividades Interativas
+                  Plano de Aulas do Semestre / Bimestre
                 </h2>
                 <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
-                  Configure os objetivos de aprendizagem, gere conteúdo inteligente com a IA Gemini e publique instantaneamente para os alunos.
+                  Estruture o cronograma de conteúdos, competências da BNCC e laboratórios virtuais de cada semana.
                 </p>
               </div>
 
-              {/* Steps Progress */}
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {[
-                  { step: 1, label: '1. Tema & IA' },
-                  { step: 2, label: '2. Conteúdo & Questões' },
-                  { step: 3, label: '3. Gamificação & Publicar' },
-                ].map(s => (
+              {/* Bimester Selector Buttons */}
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                {(['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre'] as BimesterPeriod[]).map(b => (
                   <button
-                    key={s.step}
-                    onClick={() => setStudioActiveStep(s.step as any)}
+                    key={b}
+                    onClick={() => setSelectedBimester(b)}
                     style={{
-                      padding: '0.45rem 0.9rem',
+                      padding: '0.5rem 1rem',
                       borderRadius: '8px',
-                      fontSize: '0.8rem',
+                      fontSize: '0.82rem',
                       fontWeight: 700,
-                      border: studioActiveStep === s.step ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.1)',
-                      background: studioActiveStep === s.step ? 'rgba(6,182,212,0.2)' : 'rgba(0,0,0,0.2)',
-                      color: studioActiveStep === s.step ? '#06b6d4' : 'var(--text-secondary)',
-                      cursor: 'pointer',
+                      border: selectedBimester === b ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.1)',
+                      background: selectedBimester === b ? 'rgba(6,182,212,0.2)' : 'rgba(0,0,0,0.3)',
+                      color: selectedBimester === b ? '#06b6d4' : 'var(--text-secondary)',
+                      cursor: 'pointer'
                     }}
                   >
-                    {s.label}
+                    {b}
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Success Banner */}
-          {studioSuccessMsg && (
-            <div className="glass-card mb-4" style={{ padding: '1rem', background: 'rgba(16,185,129,0.15)', border: '1px solid #10b981', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}>
-              <CheckCircle style={{ width: '1.25rem', height: '1.25rem' }} />
-              Atividade publicada com sucesso! Os estudantes já podem realizá-la em seus dashboards.
-            </div>
-          )}
-
-          {/* STEP 1: DEFINIÇÃO DE TEMA & GERAÇÃO IA */}
-          {studioActiveStep === 1 && (
-            <div className="glass-card" style={{ padding: '1.75rem' }}>
-              <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem' }}>
-                Passo 1: Definição da Aula e Geração Assistida por IA
-              </h3>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                    Disciplina:
-                  </label>
-                  <select
-                    value={studioSubject}
-                    onChange={e => setStudioSubject(e.target.value)}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', fontSize: '0.9rem' }}
-                  >
-                    {ALL_MODULES.map(m => (
-                      <option key={m.id} value={m.label} style={{ background: '#18181b', color: '#fff' }}>
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                    Nível de Ensino:
-                  </label>
-                  <select
-                    value={studioGrade}
-                    onChange={e => setStudioGrade(e.target.value)}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', fontSize: '0.9rem' }}
-                  >
-                    <option value="Ensino Fundamental 2">Ensino Fundamental 2</option>
-                    <option value="Ensino Médio">Ensino Médio</option>
-                    <option value="Técnico / Profissionalizante">Técnico / Profissionalizante</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                    Tipo de Módulo / Atividade:
-                  </label>
-                  <select
-                    value={studioType}
-                    onChange={e => setStudioType(e.target.value as any)}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', fontSize: '0.9rem' }}
-                  >
-                    <option value="quiz">📝 Quiz Adaptativo com Feedback da IA</option>
-                    <option value="lesson_theory">📚 Aula Teórica & Checagem de Conceitos</option>
-                    <option value="simulation_physics">🔭 Laboratório Virtual Parametrizado</option>
-                    <option value="essay">✍️ Desafio de Redação com Correção IA</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                    Turma de Destino:
-                  </label>
-                  <select
-                    value={studioTargetClass}
-                    onChange={e => setStudioTargetClass(e.target.value)}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', fontSize: '0.9rem' }}
-                  >
-                    <option value="">Todas as Turmas do Professor</option>
-                    {turmas.map(t => (
-                      <option key={t.id} value={t.id} style={{ background: '#18181b', color: '#fff' }}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Topic Input with AI Generator */}
-              <div style={{ marginBottom: '1.5rem', padding: '1.25rem', borderRadius: '10px', background: 'rgba(6,182,212,0.04)', border: '1px solid rgba(6,182,212,0.2)' }}>
-                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-                  Tema da Aula / Atividade:
+          {/* Form to Add / Plan Lesson */}
+          <div className="glass-card mb-4" style={{ padding: '1.5rem' }}>
+            <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.25rem' }}>
+              ➕ Planejar Nova Aula ({selectedBimester})
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Tópico / Conteúdo da Aula:
                 </label>
-                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input
                     type="text"
-                    placeholder="Ex: Leis da Termodinâmica e Ciclo de Carnot, Inconfidência Mineira, Funções Trigonométricas..."
-                    value={studioTopic}
-                    onChange={e => setStudioTopic(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleGenerateWithAI()}
-                    style={{ flex: 1, minWidth: '280px', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.95rem' }}
+                    placeholder="Ex: Leis da Termodinâmica e Ciclo de Carnot"
+                    value={newPlanTopic}
+                    onChange={e => setNewPlanTopic(e.target.value)}
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem' }}
                   />
                   <button
-                    onClick={handleGenerateWithAI}
-                    disabled={studioGenerating || !studioTopic.trim()}
-                    className="btn-gradient"
-                    style={{ padding: '0.75rem 1.5rem', fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)' }}
+                    onClick={handleGeneratePlanWithAI}
+                    disabled={generatingPlanAI || !newPlanTopic.trim()}
+                    className="btn-outline-cyan"
+                    style={{ padding: '0.5rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }}
+                    title="Preencher BNCC e Metodologia com IA"
                   >
-                    <Sparkles style={{ width: '1.1rem', height: '1.1rem' }} />
-                    {studioGenerating ? 'Gerando Aula...' : '✨ Gerar Aula Completa com IA'}
+                    <Sparkles style={{ width: '0.9rem', height: '0.9rem' }} />
+                    {generatingPlanAI ? '...' : 'Sugerir IA'}
                   </button>
                 </div>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem', display: 'block' }}>
-                  💡 Dica: A IA criará objetivos pedagógicos, texto explicativo e questões de múltipla escolha com gabarito e justificativas automáticas.
-                </span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button
-                  onClick={() => setStudioActiveStep(2)}
-                  className="btn-gradient"
-                  style={{ padding: '0.65rem 1.75rem', fontWeight: 700 }}
-                >
-                  Avançar para Edição de Conteúdo →
-                </button>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Competências / Habilidades da BNCC:
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ex: EM13CNT102 - Explicar transformações de energia"
+                  value={newPlanBNCC}
+                  onChange={e => setNewPlanBNCC(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                />
               </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Laboratório Virtual Associado (72 Labs):
+                </label>
+                <select
+                  value={newPlanLabId}
+                  onChange={e => setNewPlanLabId(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                >
+                  <option value="">Nenhum / Apenas Teórica</option>
+                  {ALL_MODULES.map(m => (
+                    <optgroup key={m.id} label={m.label}>
+                      {m.labs.map(l => (
+                        <option key={l.id} value={l.id}>{m.label}: {l.title}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Data Prevista (Opcional):
+                </label>
+                <input
+                  type="date"
+                  value={newPlanDate}
+                  onChange={e => setNewPlanDate(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                Metodologia e Estratégia de Ensino:
+              </label>
+              <textarea
+                rows={2}
+                placeholder="Descreva a dinâmica da aula, exercícios ou atividades práticas em grupo..."
+                value={newPlanMethodology}
+                onChange={e => setNewPlanMethodology(e.target.value)}
+                style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem', resize: 'vertical' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={handleSaveLessonPlan}
+                disabled={savingPlan || !newPlanTopic.trim()}
+                className="btn-gradient"
+                style={{ padding: '0.65rem 1.75rem', fontWeight: 700 }}
+              >
+                {savingPlan ? 'Salvando...' : `Salvar Aula no ${selectedBimester}`}
+              </button>
+            </div>
+          </div>
+
+          {/* Timeline of Lessons in Current Bimester */}
+          <div className="glass-card" style={{ padding: '1.75rem' }}>
+            <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem' }}>
+              Cronograma de Aulas — {selectedBimester} ({classLessonPlans.filter(p => p.periodo === selectedBimester).length} Aulas)
+            </h3>
+
+            {classLessonPlans.filter(p => p.periodo === selectedBimester).length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {classLessonPlans.filter(p => p.periodo === selectedBimester).map((plan, idx) => (
+                  <div key={plan.id} style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', display: 'grid', gridTemplateColumns: '80px 1fr auto', gap: '1rem', alignItems: 'center' }}>
+                    <div style={{ textAlign: 'center', padding: '0.5rem', background: 'rgba(6,182,212,0.1)', borderRadius: '8px', border: '1px solid rgba(6,182,212,0.2)' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, display: 'block' }}>AULA</span>
+                      <strong style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>#{idx + 1}</strong>
+                    </div>
+
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
+                        <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>{plan.topico}</h4>
+                        <span style={{
+                          fontSize: '0.72rem', padding: '0.15rem 0.55rem', borderRadius: '9999px', fontWeight: 700,
+                          background: plan.status === 'concluida' ? 'rgba(16,185,129,0.15)' : plan.status === 'em_andamento' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.08)',
+                          color: plan.status === 'concluida' ? '#10b981' : plan.status === 'em_andamento' ? '#f59e0b' : 'var(--text-secondary)'
+                        }}>
+                          {plan.status === 'concluida' ? '✓ Concluída' : plan.status === 'em_andamento' ? '⏳ Em Andamento' : '📅 Planejada'}
+                        </span>
+                      </div>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.4rem' }}>
+                        {plan.metodologia}
+                      </div>
+                      <div style={{ display: 'flex', gap: '1rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        {plan.competenciasBNCC && <span>🎯 {plan.competenciasBNCC}</span>}
+                        {plan.laboratorioTitulo && <span style={{ color: '#06b6d4' }}>🔬 Lab: {plan.laboratorioTitulo}</span>}
+                        {plan.dataPrevista && <span>🗓️ {plan.dataPrevista}</span>}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      <select
+                        value={plan.status}
+                        onChange={e => updateLessonPlanItem(plan.id!, { status: e.target.value as any })}
+                        style={{ padding: '0.35rem 0.6rem', borderRadius: '6px', background: '#18181b', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', fontSize: '0.75rem' }}
+                      >
+                        <option value="planejada">Planejada</option>
+                        <option value="em_andamento">Em Andamento</option>
+                        <option value="concluida">Concluída</option>
+                      </select>
+                      <button
+                        onClick={() => deleteLessonPlanItem(plan.id!)}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem', textAlign: 'center' }}
+                      >
+                        Remover
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0 }}>
+                Nenhuma aula cadastrada no cronograma do {selectedBimester} ainda.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB 3: PROVAS & AVALIAÇÕES FORMAIS (ESTILO EDU-INTERACT-V2) ── */}
+      {dashboardTab === 'exams' && (
+        <div className="fade-in">
+          {/* Sub-navigation inside Exams */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={() => setExamMode('list')}
+                className={examMode === 'list' ? 'btn-gradient' : 'btn-outline-cyan'}
+                style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600 }}
+              >
+                📋 Provas Aplicadas ({examsList.length})
+              </button>
+              <button
+                onClick={() => setExamMode('create')}
+                className={examMode === 'create' ? 'btn-gradient' : 'btn-outline-cyan'}
+                style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600 }}
+              >
+                ➕ Criar Nova Prova
+              </button>
+            </div>
+          </div>
+
+          {/* EXAMS: LIST VIEW */}
+          {examMode === 'list' && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
+              {examsList.map(exam => (
+                <div key={exam.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase' }}>
+                        {exam.disciplina}
+                      </span>
+                      <span style={{
+                        fontSize: '0.72rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 700,
+                        background: exam.status === 'Aberta' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
+                        color: exam.status === 'Aberta' ? '#10b981' : '#f59e0b',
+                        border: `1px solid ${exam.status === 'Aberta' ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}`
+                      }}>
+                        {exam.status}
+                      </span>
+                    </div>
+
+                    <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: '0 0 0.4rem' }}>
+                      {exam.titulo}
+                    </h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 1rem', lineHeight: 1.4 }}>
+                      {exam.descricao || 'Avaliação formal com questões objetivas e gabarito.'}
+                    </p>
+
+                    <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: 'rgba(0,0,0,0.25)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1rem' }}>
+                      <div>Turma: <strong style={{ color: 'var(--text-main)' }}>{exam.turmaNome || 'Todas as turmas'}</strong></div>
+                      <div>Duração: <strong style={{ color: '#06b6d4' }}>{exam.duracaoMinutos ? `${exam.duracaoMinutos} minutos` : 'Sem limite'}</strong></div>
+                      <div>Questões: <strong style={{ color: '#f59e0b' }}>{exam.questoes.length} (Peso Total: {exam.pesoTotal})</strong></div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      onClick={() => {
+                        setSelectedExam(exam);
+                        setExamMode('analytics');
+                      }}
+                      className="btn-gradient"
+                      style={{ flex: 1, padding: '0.55rem', fontSize: '0.82rem', fontWeight: 700 }}
+                    >
+                      📊 Ver Acertos por Questão
+                    </button>
+                    {exam.status === 'Aberta' ? (
+                      <button
+                        onClick={async () => {
+                          await updateExam(exam.id!, { status: 'Encerrada' });
+                          setExamsList(prev => prev.map(e => e.id === exam.id ? { ...e, status: 'Encerrada' } : e));
+                        }}
+                        className="btn-outline-cyan"
+                        style={{ padding: '0.55rem', fontSize: '0.78rem' }}
+                      >
+                        Encerrar
+                      </button>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          await updateExam(exam.id!, { status: 'Aberta' });
+                          setExamsList(prev => prev.map(e => e.id === exam.id ? { ...e, status: 'Aberta' } : e));
+                        }}
+                        className="btn-outline-cyan"
+                        style={{ padding: '0.55rem', fontSize: '0.78rem', color: '#10b981' }}
+                      >
+                        Reabrir
+                      </button>
+                    )}
+                    <button
+                      onClick={async () => {
+                        await deleteExam(exam.id!);
+                        setExamsList(prev => prev.filter(e => e.id !== exam.id));
+                      }}
+                      style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0 0.5rem' }}
+                      title="Deletar prova"
+                    >
+                      <Trash2 style={{ width: '0.95rem', height: '0.95rem' }} />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* STEP 2: EDIÇÃO DE CONTEÚDO, TEORIA E QUESTÕES */}
-          {studioActiveStep === 2 && (
+          {/* EXAMS: CREATE EXAM VIEW (ESTILO Edu-Interact-v2 QuestionarioEditor) */}
+          {examMode === 'create' && (
             <div className="glass-card" style={{ padding: '1.75rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
-                  Passo 2: Edição do Conteúdo e Questões da Atividade
+                <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
+                  📝 Criador de Provas & Avaliações Formais
                 </h3>
-                <button
-                  onClick={() => setStudioActiveStep(1)}
-                  className="btn-outline-cyan"
-                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}
-                >
-                  ← Voltar ao Passo 1
+                <button onClick={() => setExamMode('list')} className="btn-outline-cyan" style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}>
+                  ← Voltar à Lista
                 </button>
               </div>
 
-              {/* Title & Description */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+              {/* AI Helper Banner */}
+              <div style={{ padding: '1rem', borderRadius: '10px', background: 'linear-gradient(135deg, rgba(6,182,212,0.08) 0%, rgba(139,92,246,0.08) 100%)', border: '1px solid rgba(6,182,212,0.3)', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <Sparkles style={{ width: '1.25rem', height: '1.25rem', color: '#06b6d4' }} />
+                <div style={{ flex: 1, minWidth: '220px' }}>
+                  <strong style={{ color: '#06b6d4', fontSize: '0.9rem', display: 'block' }}>Gerar Questões com IA Gemini</strong>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>Digite o assunto para formular automaticamente questões com gabarito e justificativa pedagógica.</span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Ex: Leis de Newton, Reações de Oxirredução, Trigonometria..."
+                  value={examAiTopic}
+                  onChange={e => setExamAiTopic(e.target.value)}
+                  style={{ flex: 1, minWidth: '240px', padding: '0.55rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                />
+                <button
+                  onClick={handleGenerateExamWithAI}
+                  disabled={examAiGenerating || !examAiTopic.trim()}
+                  className="btn-gradient"
+                  style={{ padding: '0.55rem 1.25rem', fontSize: '0.82rem', fontWeight: 700 }}
+                >
+                  {examAiGenerating ? 'Gerando...' : '✨ Gerar Questões'}
+                </button>
+              </div>
+
+              {/* Exam Metadata Form */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                    Título da Atividade:
-                  </label>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Título da Prova</label>
                   <input
                     type="text"
-                    value={studioTitle}
-                    onChange={e => setStudioTitle(e.target.value)}
-                    placeholder="Título da atividade"
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 700 }}
+                    placeholder="Ex: 1ª Avaliação Bimestral de Física"
+                    value={newExamTitle}
+                    onChange={e => setNewExamTitle(e.target.value)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 700 }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                    Objetivo Pedagógico / Instruções aos Alunos:
-                  </label>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Disciplina</label>
+                  <select
+                    value={newExamSubject}
+                    onChange={e => setNewExamSubject(e.target.value)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                  >
+                    {ALL_MODULES.map(m => (
+                      <option key={m.id} value={m.label}>{m.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Turma de Destino</label>
+                  <select
+                    value={newExamTargetClass}
+                    onChange={e => setNewExamTargetClass(e.target.value)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                  >
+                    <option value="">Todas as Turmas</option>
+                    {turmas.map(t => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Duração em Minutos (Cronômetro)</label>
                   <input
-                    type="text"
-                    value={studioDescription}
-                    onChange={e => setStudioDescription(e.target.value)}
-                    placeholder="Instruções para o estudante"
+                    type="number"
+                    min="0"
+                    step="5"
+                    placeholder="50 minutos (0 = sem limite)"
+                    value={newExamDuration}
+                    onChange={e => setNewExamDuration(parseInt(e.target.value) || 0)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Data Limite de Entrega</label>
+                  <input
+                    type="date"
+                    value={newExamDeadline}
+                    onChange={e => setNewExamDeadline(e.target.value)}
                     style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.9rem' }}
                   />
                 </div>
               </div>
 
-              {/* Theory Content */}
+              {/* Questions List Editor */}
               <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                  Conteúdo Teórico / Texto de Apoio (Opcional):
-                </label>
-                <textarea
-                  rows={4}
-                  value={studioTheory}
-                  onChange={e => setStudioTheory(e.target.value)}
-                  placeholder="Explicação teórica que o estudante lerá antes de responder aos desafios..."
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem', resize: 'vertical', lineHeight: 1.6 }}
-                />
-              </div>
-
-              {/* Questions Editor */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
-                  <h4 style={{ color: '#06b6d4', fontSize: '1rem', fontWeight: 700, margin: 0 }}>
-                    Questões de Múltipla Escolha ({studioQuestions.length})
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h4 style={{ color: '#06b6d4', fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
+                    Questões da Avaliação ({newExamQuestions.length})
                   </h4>
                   <button
                     onClick={() => {
-                      setStudioQuestions(prev => [
+                      setNewExamQuestions(prev => [
                         ...prev,
                         {
-                          q: 'Nova questão formulada pelo professor...',
-                          options: ['Alternativa A', 'Alternativa B', 'Alternativa C', 'Alternativa D'],
-                          answer: 0,
-                          explanation: 'Explicação do conceito correto.'
+                          enunciado: 'Enunciado da nova questão...',
+                          tema: newExamSubject,
+                          nivelDificuldade: 'Médio',
+                          valorPeso: 2.0,
+                          justificativa: 'Justificativa pedagógica e resolução comentada.',
+                          opcoes: [
+                            { texto: 'Opção A (Correta)', isCorreta: true },
+                            { texto: 'Opção B', isCorreta: false },
+                            { texto: 'Opção C', isCorreta: false },
+                            { texto: 'Opção D', isCorreta: false },
+                          ]
                         }
                       ]);
                     }}
                     className="btn-outline-cyan"
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
+                    style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                   >
                     <Plus style={{ width: '0.85rem', height: '0.85rem' }} /> Adicionar Questão
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {studioQuestions.map((q, qIndex) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {newExamQuestions.map((q, qIndex) => (
                     <div key={qIndex} style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
-                        <span style={{ fontSize: '0.8rem', color: '#06b6d4', fontWeight: 700 }}>
-                          Questão {qIndex + 1}
-                        </span>
-                        {studioQuestions.length > 1 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <span style={{ fontSize: '0.85rem', color: '#06b6d4', fontWeight: 800 }}>Questão #{qIndex + 1}</span>
+                          <span style={{ fontSize: '0.75rem', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 600 }}>
+                            Peso: {q.valorPeso} pts
+                          </span>
+                        </div>
+                        {newExamQuestions.length > 1 && (
                           <button
-                            onClick={() => setStudioQuestions(prev => prev.filter((_, i) => i !== qIndex))}
-                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.75rem' }}
+                            onClick={() => setNewExamQuestions(prev => prev.filter((_, i) => i !== qIndex))}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.78rem' }}
                           >
-                            <Trash2 style={{ width: '0.85rem', height: '0.85rem' }} /> Remover
+                            Remover
                           </button>
                         )}
                       </div>
 
-                      {/* Question Text */}
-                      <input
-                        type="text"
-                        value={q.q}
+                      {/* Question Enunciado */}
+                      <textarea
+                        rows={2}
+                        value={q.enunciado}
                         onChange={e => {
                           const val = e.target.value;
-                          setStudioQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, q: val } : item));
+                          setNewExamQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, enunciado: val } : item));
                         }}
-                        placeholder="Enunciado da questão"
-                        style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}
+                        placeholder="Enunciado detalhado da questão"
+                        style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}
                       />
 
-                      {/* Options */}
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                        {q.options.map((opt, optIndex) => (
-                          <div key={optIndex} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      {/* Metadata Row: Tema, Nível, Peso */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Tema / Eixo Temático</label>
+                          <input
+                            type="text"
+                            value={q.tema}
+                            onChange={e => {
+                              const val = e.target.value;
+                              setNewExamQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, tema: val } : item));
+                            }}
+                            style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.82rem' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Nível de Dificuldade</label>
+                          <select
+                            value={q.nivelDificuldade}
+                            onChange={e => {
+                              const val = e.target.value as any;
+                              setNewExamQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, nivelDificuldade: val } : item));
+                            }}
+                            style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.82rem' }}
+                          >
+                            <option value="Fácil">Fácil</option>
+                            <option value="Médio">Médio</option>
+                            <option value="Difícil">Difícil</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Pontuação / Peso</label>
+                          <input
+                            type="number"
+                            min="0.5"
+                            step="0.5"
+                            value={q.valorPeso}
+                            onChange={e => {
+                              const val = parseFloat(e.target.value) || 1;
+                              setNewExamQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, valorPeso: val } : item));
+                            }}
+                            style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.82rem' }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Options with Radio for Correct Option */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                        {q.opcoes.map((opt, oIndex) => (
+                          <div key={oIndex} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <input
                               type="radio"
-                              name={`correct_${qIndex}`}
-                              checked={q.answer === optIndex}
+                              name={`exam_correct_${qIndex}`}
+                              checked={opt.isCorreta}
                               onChange={() => {
-                                setStudioQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, answer: optIndex } : item));
+                                setNewExamQuestions(prev => prev.map((item, idx) => {
+                                  if (idx !== qIndex) return item;
+                                  return {
+                                    ...item,
+                                    opcoes: item.opcoes.map((o, oi) => ({ ...o, isCorreta: oi === oIndex }))
+                                  };
+                                }));
                               }}
                               style={{ accentColor: '#10b981', cursor: 'pointer' }}
                               title="Marcar como alternativa correta"
                             />
                             <input
                               type="text"
-                              value={opt}
+                              value={opt.texto}
                               onChange={e => {
                                 const val = e.target.value;
-                                setStudioQuestions(prev => prev.map((item, idx) => {
+                                setNewExamQuestions(prev => prev.map((item, idx) => {
                                   if (idx !== qIndex) return item;
-                                  const newOpts = [...item.options];
-                                  newOpts[optIndex] = val;
-                                  return { ...item, options: newOpts };
+                                  const newOpts = [...item.opcoes];
+                                  newOpts[oIndex] = { ...newOpts[oIndex], texto: val };
+                                  return { ...item, opcoes: newOpts };
                                 }));
                               }}
-                              style={{ flex: 1, padding: '0.45rem', borderRadius: '4px', border: q.answer === optIndex ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)', background: q.answer === optIndex ? 'rgba(16,185,129,0.06)' : 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.82rem' }}
+                              placeholder={`Alternativa ${String.fromCharCode(65 + oIndex)}`}
+                              style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: opt.isCorreta ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)', background: opt.isCorreta ? 'rgba(16,185,129,0.08)' : 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.85rem' }}
                             />
                           </div>
                         ))}
                       </div>
 
-                      {/* Explanation */}
+                      {/* Justificativa Pedagógica */}
                       <div>
                         <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
-                          Justificativa / Feedback da IA para o estudante:
+                          Justificativa Pedagógica & Gabarito Comentado (visível após a correção):
                         </label>
                         <input
                           type="text"
-                          value={q.explanation}
+                          value={q.justificativa}
                           onChange={e => {
                             const val = e.target.value;
-                            setStudioQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, explanation: val } : item));
+                            setNewExamQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, justificativa: val } : item));
                           }}
-                          placeholder="Explicação do gabarito"
+                          placeholder="Explicação da resolução comentada"
                           style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-secondary)', fontSize: '0.8rem' }}
                         />
                       </div>
@@ -831,320 +1337,407 @@ export function ProfessorDashboard() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              {/* Publish Action Buttons */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
                 <button
-                  onClick={() => setStudioActiveStep(1)}
+                  onClick={() => handlePublishExam('Rascunho')}
                   className="btn-outline-cyan"
                   style={{ padding: '0.65rem 1.5rem' }}
                 >
-                  ← Passo Anterior
+                  Salvar como Rascunho
                 </button>
                 <button
-                  onClick={() => setStudioActiveStep(3)}
+                  onClick={() => handlePublishExam('Aberta')}
+                  disabled={!newExamTitle.trim()}
                   className="btn-gradient"
-                  style={{ padding: '0.65rem 1.75rem', fontWeight: 700 }}
+                  style={{ padding: '0.65rem 2rem', fontWeight: 800, background: 'linear-gradient(135deg, #10b981, #06b6d4)' }}
                 >
-                  Avançar para Gamificação & Publicação →
+                  🚀 Aplicar Prova para a Turma
                 </button>
               </div>
             </div>
           )}
 
-          {/* STEP 3: GAMIFICAÇÃO & PUBLICAÇÃO */}
-          {studioActiveStep === 3 && (
+          {/* EXAMS: ANALYTICS VIEW (ESTILO EDU-INTERACT-V2: ACERTOS POR QUESTÃO) */}
+          {examMode === 'analytics' && selectedExam && (
             <div className="glass-card" style={{ padding: '1.75rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
-                  Passo 3: Parâmetros de Gamificação & Publicação
-                </h3>
-                <button
-                  onClick={() => setStudioActiveStep(2)}
-                  className="btn-outline-cyan"
-                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}
-                >
-                  ← Voltar para Conteúdo
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase' }}>
+                    Relatório Analítico de Prova
+                  </span>
+                  <h3 style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: 800, margin: '0.2rem 0' }}>
+                    {selectedExam.titulo}
+                  </h3>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Turma: {selectedExam.turmaNome || 'Turma Geral'} | Total de Questões: {selectedExam.questoes.length}
+                  </span>
+                </div>
+                <button onClick={() => setExamMode('list')} className="btn-outline-cyan" style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}>
+                  ← Voltar às Provas
                 </button>
               </div>
 
-              {/* Gamification Rewards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
-                <div style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.2)' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#06b6d4', marginBottom: '0.5rem' }}>
-                    ⚡ Recompensa de Experiência (XP):
-                  </label>
-                  <input
-                    type="number"
-                    min="20"
-                    max="500"
-                    step="10"
-                    value={studioXp}
-                    onChange={e => setStudioXp(parseInt(e.target.value) || 100)}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700 }}
-                  />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem', display: 'block' }}>
-                    O aluno receberá este XP ao concluir a atividade com aproveitamento.
-                  </span>
-                </div>
+              {/* Quick Summary Cards */}
+              {examAnalytics && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
+                  <div style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#06b6d4', fontWeight: 600 }}>Total de Entregas</span>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.2rem' }}>
+                      {examAnalytics.totalTentativas} Alunos
+                    </div>
+                  </div>
 
-                <div style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.2)' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#f59e0b', marginBottom: '0.5rem' }}>
-                    🪙 Recompensa em Moedas:
-                  </label>
-                  <input
-                    type="number"
-                    min="5"
-                    max="100"
-                    step="5"
-                    value={studioCoins}
-                    onChange={e => setStudioCoins(parseInt(e.target.value) || 20)}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700 }}
-                  />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem', display: 'block' }}>
-                    Moedas para personalização de avatares na Loja Gamificada.
-                  </span>
-                </div>
-              </div>
+                  <div style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>Média da Turma</span>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.2rem' }}>
+                      {examAnalytics.mediaTurmaPercentual}%
+                    </div>
+                  </div>
 
-              {/* Review Summary Box */}
-              <div style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '1.5rem' }}>
-                <h4 style={{ color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-                  Resumo da Atividade para os Alunos:
+                  <div style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#f59e0b', fontWeight: 600 }}>Excelente / Bom</span>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.2rem' }}>
+                      {examAnalytics.distribuicao.excelente + examAnalytics.distribuicao.bom}
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 600 }}>Apoio / Insuficiente</span>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.2rem' }}>
+                      {examAnalytics.distribuicao.insuficiente}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Análise por Questão com Alertas Pedagógicos */}
+              <div style={{ marginBottom: '2rem' }}>
+                <h4 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
+                  📊 Taxa de Acerto por Questão (Identificação de Falhas de Aprendizagem)
                 </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  <div><strong>Título:</strong> {studioTitle || 'Sem título'}</div>
-                  <div><strong>Disciplina:</strong> {studioSubject}</div>
-                  <div><strong>Tipo:</strong> {studioType}</div>
-                  <div><strong>Qtd Questões:</strong> {studioQuestions.length}</div>
-                  <div><strong>Turma:</strong> {turmas.find(t => t.id === studioTargetClass)?.name || 'Todas as turmas'}</div>
-                </div>
+
+                {examAnalytics && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {examAnalytics.analiseQuestoes.map((q) => (
+                      <div
+                        key={q.questaoIndex}
+                        style={{
+                          padding: '1.15rem',
+                          borderRadius: '8px',
+                          background: q.alertaPedagogico ? 'rgba(239,68,68,0.05)' : 'rgba(255,255,255,0.02)',
+                          border: q.alertaPedagogico ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(255,255,255,0.06)'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <strong style={{ color: '#06b6d4', fontSize: '0.95rem' }}>Questão #{q.questaoIndex + 1}</strong>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({q.tema})</span>
+                            {q.alertaPedagogico && (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.72rem', color: '#ef4444', background: 'rgba(239,68,68,0.15)', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 700 }}>
+                                <AlertTriangle style={{ width: '0.75rem', height: '0.75rem' }} /> Atenção Pedagógica
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontWeight: 800, fontSize: '1.05rem', color: q.taxaAcertoPercentual >= 70 ? '#10b981' : q.taxaAcertoPercentual >= 50 ? '#f59e0b' : '#ef4444' }}>
+                            {q.taxaAcertoPercentual}% de Acerto
+                          </div>
+                        </div>
+
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.5rem' }}>
+                          {q.enunciado}
+                        </p>
+
+                        <div className="progress-bar" style={{ height: '6px' }}>
+                          <div className="progress-bar-bg">
+                            <div
+                              className="progress-bar-fill"
+                              style={{
+                                width: `${q.taxaAcertoPercentual}%`,
+                                background: q.taxaAcertoPercentual >= 70 ? '#10b981' : q.taxaAcertoPercentual >= 50 ? '#f59e0b' : '#ef4444'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <button
-                  onClick={() => setStudioActiveStep(2)}
-                  className="btn-outline-cyan"
-                  style={{ padding: '0.65rem 1.5rem' }}
-                >
-                  ← Voltar para Edição
-                </button>
-
-                <button
-                  onClick={handlePublishCustomActivity}
-                  disabled={!studioTitle.trim()}
-                  className="btn-gradient"
-                  style={{ padding: '0.75rem 2.25rem', fontSize: '1rem', fontWeight: 800, background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 20px rgba(16,185,129,0.3)' }}
-                >
-                  🚀 Publicar Atividade para os Estudantes
-                </button>
+              {/* Tabela de Alunos e Notas na Prova */}
+              <div>
+                <h4 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
+                  👥 Notas Individuais dos Estudantes ({examAttempts.length})
+                </h4>
+                {examAttempts.length > 0 ? (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)' }}>
+                          <th style={{ padding: '0.75rem' }}>Estudante</th>
+                          <th style={{ padding: '0.75rem' }}>Pontuação Obtida</th>
+                          <th style={{ padding: '0.75rem' }}>Aproveitamento</th>
+                          <th style={{ padding: '0.75rem' }}>Classificação</th>
+                          <th style={{ padding: '0.75rem' }}>Data de Envio</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {examAttempts.map(att => (
+                          <tr key={att.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}>
+                            <td style={{ padding: '0.75rem', fontWeight: 600, color: 'var(--text-main)' }}>{att.alunoNome}</td>
+                            <td style={{ padding: '0.75rem' }}>{att.pontuacaoObtida} / {att.pontuacaoMaxima} pts</td>
+                            <td style={{ padding: '0.75rem', fontWeight: 700, color: att.porcentagemAproveitamento >= 70 ? '#10b981' : att.porcentagemAproveitamento >= 50 ? '#f59e0b' : '#ef4444' }}>
+                              {att.porcentagemAproveitamento}%
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <span style={{
+                                padding: '0.2rem 0.5rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700,
+                                background: att.classificacao === 'Excelente' ? 'rgba(16,185,129,0.15)' : att.classificacao === 'Bom' ? 'rgba(6,182,212,0.15)' : 'rgba(245,158,11,0.15)',
+                                color: att.classificacao === 'Excelente' ? '#10b981' : att.classificacao === 'Bom' ? '#06b6d4' : '#f59e0b'
+                              }}>
+                                {att.classificacao}
+                              </span>
+                            </td>
+                            <td style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                              {new Date(att.dataEnvio).toLocaleString('pt-BR')}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                    Nenhum estudante realizou esta avaliação até o momento.
+                  </p>
+                )}
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* ── TAB 3: ANALYTICS & RELATÓRIOS DETALHADOS ── */}
-      {dashboardTab === 'reports' && (
-        <div>
-          {/* Selector of Class for Report */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Filtrar por Turma:</label>
-              <select
-                value={selectedClassId || ''}
-                onChange={e => handleViewClassReport(e.target.value)}
-                style={{ padding: '0.5rem 1rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(6,182,212,0.3)', color: 'var(--text-main)', fontSize: '0.9rem', outline: 'none' }}
-              >
-                {turmas.map(t => (
-                  <option key={t.id} value={t.id} style={{ background: '#18181b', color: '#fff' }}>
-                    {t.name} ({t.studentsCount} alunos)
-                  </option>
-                ))}
-              </select>
+      {/* ── TAB 4: MATERIAIS DE APOIO & UPLOADS DE ARQUIVOS ── */}
+      {dashboardTab === 'materials' && (
+        <div className="fade-in">
+          <div className="glass-card mb-4" style={{ padding: '1.75rem' }}>
+            <h3 style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Upload style={{ width: '1.25rem', height: '1.25rem', color: '#06b6d4' }} />
+              Upload & Compartilhamento de Materiais de Apoio
+            </h3>
+
+            {/* Upload Selector */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Título do Material
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ex: Apostila de Física Térmica, Slides de Aula..."
+                  value={matTitle}
+                  onChange={e => setMatTitle(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Tipo de Material
+                </label>
+                <select
+                  value={matType}
+                  onChange={e => setMatType(e.target.value as any)}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                >
+                  <option value="arquivo">📄 Arquivo do Computador (PDF, Imagem, Doc)</option>
+                  <option value="link">🔗 Link Externo (YouTube, Google Drive, Artigo)</option>
+                  <option value="texto">📝 Resumo / Texto de Apoio Direto</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Bimestre de Associação
+                </label>
+                <select
+                  value={matBimester}
+                  onChange={e => setMatBimester(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                >
+                  <option value="1º Bimestre">1º Bimestre</option>
+                  <option value="2º Bimestre">2º Bimestre</option>
+                  <option value="3º Bimestre">3º Bimestre</option>
+                  <option value="4º Bimestre">4º Bimestre</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Disciplina
+                </label>
+                <select
+                  value={matSubject}
+                  onChange={e => setMatSubject(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                >
+                  {ALL_MODULES.map(m => (
+                    <option key={m.id} value={m.label}>{m.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {/* Input according to Type */}
+            {matType === 'arquivo' && (
+              <div style={{ marginBottom: '1.25rem', padding: '1.25rem', borderRadius: '10px', background: 'rgba(0,0,0,0.25)', border: '1px dashed rgba(6,182,212,0.3)', textAlign: 'center' }}>
+                <input
+                  type="file"
+                  id="mat_file_input"
+                  onChange={handleFileUpload}
+                  style={{ display: 'none' }}
+                />
+                <label
+                  htmlFor="mat_file_input"
+                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.5rem', borderRadius: '8px', background: 'rgba(6,182,212,0.15)', color: '#06b6d4', fontWeight: 700, fontSize: '0.88rem' }}
+                >
+                  <Upload style={{ width: '1rem', height: '1rem' }} /> Selecionar Arquivo do Dispositivo
+                </label>
+                {matFileName && (
+                  <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                    Arquivo Selecionado: <strong>{matFileName}</strong> ({matFileSize})
+                  </div>
+                )}
+              </div>
+            )}
+
+            {matType === 'link' && (
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Link / URL do Recurso:
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://drive.google.com/... ou https://youtube.com/..."
+                  value={matUrl}
+                  onChange={e => setMatUrl(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                />
+              </div>
+            )}
+
+            {matType === 'texto' && (
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Conteúdo do Resumo / Instruções:
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder="Escreva aqui o texto explicativo, fórmulas importantes ou orientações de estudo..."
+                  value={matContent}
+                  onChange={e => setMatContent(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem', resize: 'vertical' }}
+                />
+              </div>
+            )}
+
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                Descrição ou Orientações de Leitura:
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: Leitura recomendada para a aula da próxima semana."
+                value={matDesc}
+                onChange={e => setMatDesc(e.target.value)}
+                style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button
-                onClick={() => selectedClassId && handleViewClassReport(selectedClassId)}
-                className="btn-outline-cyan"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-              >
-                <RefreshCw style={{ width: '0.85rem', height: '0.85rem' }} />
-                Atualizar Dados
-              </button>
-              <button
-                onClick={exportReportCSV}
+                onClick={handlePublishMaterial}
+                disabled={uploadingMat || !matTitle.trim()}
                 className="btn-gradient"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600 }}
+                style={{ padding: '0.65rem 1.75rem', fontWeight: 700 }}
               >
-                <Download style={{ width: '0.85rem', height: '0.85rem' }} />
-                Exportar CSV
+                {uploadingMat ? 'Enviando...' : 'Publicar Material para a Turma'}
               </button>
             </div>
           </div>
 
-          {reportLoading ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-              <RefreshCw className="animate-spin" style={{ width: '2rem', height: '2rem', margin: '0 auto 1rem', color: '#06b6d4' }} />
-              <p>Carregando analytics da turma...</p>
-            </div>
-          ) : classReport ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-              {/* AI Pedagogical Diagnosis Banner */}
-              <div className="glass-card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(6,182,212,0.08) 0%, rgba(139,92,246,0.08) 100%)', border: '1px solid rgba(6,182,212,0.35)', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                  <Sparkles style={{ width: '1.25rem', height: '1.25rem', color: '#06b6d4' }} />
-                  <h3 style={{ color: '#06b6d4', fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
-                    Diagnóstico Pedagógico Assistido por IA ({classReport.className})
-                  </h3>
-                  {aiLoading && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Gerando análise...</span>}
-                </div>
+          {/* List of Published Materials */}
+          <div className="glass-card" style={{ padding: '1.75rem' }}>
+            <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem' }}>
+              Materiais Disponibilizados para a Turma ({enhancedMaterials.length})
+            </h3>
 
-                {aiDiagnosis ? (
-                  <div>
-                    <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                      {aiDiagnosis.summary}
-                    </p>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                      <div style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                          <CheckCircle style={{ width: '0.95rem', height: '0.95rem' }} /> Pontos Fortes da Turma
-                        </div>
-                        <ul style={{ margin: 0, paddingLeft: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.83rem', lineHeight: 1.5 }}>
-                          {aiDiagnosis.strengths.map((s, i) => <li key={i}>{s}</li>)}
-                        </ul>
+            {enhancedMaterials.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                {enhancedMaterials.map(mat => (
+                  <div key={mat.id} style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#8b5cf6', fontWeight: 700, textTransform: 'uppercase' }}>
+                          {mat.periodo || '1º Bimestre'}
+                        </span>
+                        <span style={{ fontSize: '0.72rem', color: '#06b6d4', background: 'rgba(6,182,212,0.1)', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 600 }}>
+                          {mat.tipo}
+                        </span>
                       </div>
-
-                      <div style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#f59e0b', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                          <AlertTriangle style={{ width: '0.95rem', height: '0.95rem' }} /> Recomendações e Intervenções
+                      <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.35rem' }}>{mat.title}</h4>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', margin: '0 0 0.75rem', lineHeight: 1.4 }}>
+                        {mat.description}
+                      </p>
+                      {mat.nomeArquivo && (
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                          📎 {mat.nomeArquivo} ({mat.tamanhoFormatado})
                         </div>
-                        <ul style={{ margin: 0, paddingLeft: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.83rem', lineHeight: 1.5 }}>
-                          {aiDiagnosis.recommendations.map((r, i) => <li key={i}>{r}</li>)}
-                        </ul>
-                      </div>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      {mat.linkOuConteudo && (
+                        <a
+                          href={mat.linkOuConteudo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download={mat.nomeArquivo || undefined}
+                          style={{ color: '#06b6d4', fontSize: '0.82rem', textDecoration: 'underline', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                        >
+                          <ExternalLink style={{ width: '0.85rem', height: '0.85rem' }} /> Baixar / Acessar
+                        </a>
+                      )}
+                      <button
+                        onClick={() => selectedClassId && deleteEnhancedMaterial(selectedClassId, mat.id)}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}
+                        title="Remover material"
+                      >
+                        <Trash2 style={{ width: '0.9rem', height: '0.9rem' }} />
+                      </button>
                     </div>
                   </div>
-                ) : (
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
-                    Calculando panorama pedagógico da turma com base nas submissões e tempo nos laboratórios...
-                  </p>
-                )}
+                ))}
               </div>
-
-              {/* Charts Row */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem' }}>
-                {/* Chart 1: Desempenho por Disciplina */}
-                <div className="glass-card" style={{ padding: '1.5rem' }}>
-                  <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>
-                    📊 Desempenho Médio por Disciplina (Aproveitamento %)
-                  </h4>
-                  <div style={{ width: '100%', height: '260px' }}>
-                    <ResponsiveContainer>
-                      <BarChart data={subjectProgressData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                        <XAxis dataKey="subject" stroke="var(--text-muted)" fontSize={11} angle={-35} textAnchor="end" interval={0} />
-                        <YAxis domain={[0, 100]} stroke="var(--text-muted)" fontSize={11} />
-                        <Tooltip contentStyle={tooltipStyle} />
-                        <Bar dataKey="score" fill="#06b6d4" radius={[4, 4, 0, 0]} name="Média (%)" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                {/* Chart 2: Entregas de Labs por Disciplina */}
-                <div className="glass-card" style={{ padding: '1.5rem' }}>
-                  <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>
-                    🔬 Volume de Entregas nos Laboratórios
-                  </h4>
-                  <div style={{ width: '100%', height: '260px' }}>
-                    <ResponsiveContainer>
-                      <BarChart data={subjectProgressData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                        <XAxis dataKey="subject" stroke="var(--text-muted)" fontSize={11} angle={-35} textAnchor="end" interval={0} />
-                        <YAxis stroke="var(--text-muted)" fontSize={11} />
-                        <Tooltip contentStyle={tooltipStyle} />
-                        <Bar dataKey="entregas" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Entregas" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-
-              {/* Student Individual Metrics Table */}
-              <div className="glass-card" style={{ padding: '1.5rem' }}>
-                <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, marginBottom: '1rem' }}>
-                  👥 Desempenho e Gamificação Individual dos Alunos
-                </h4>
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)' }}>
-                        <th style={{ padding: '0.75rem 1rem' }}>Estudante</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Nível & XP</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Moedas 🪙</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Labs Concluídos</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Aproveitamento</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Status Pedagógico</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {classReport.students.map((st) => (
-                        <tr key={st.studentId} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}>
-                          <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-main)' }}>
-                            {st.studentName}
-                          </td>
-                          <td style={{ padding: '0.85rem 1rem' }}>
-                            <span style={{ color: '#06b6d4', fontWeight: 700 }}>Nv. {st.level}</span>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginLeft: '0.4rem' }}>({st.xp} XP)</span>
-                          </td>
-                          <td style={{ padding: '0.85rem 1rem', color: '#f59e0b', fontWeight: 600 }}>
-                            {st.coins || 0}
-                          </td>
-                          <td style={{ padding: '0.85rem 1rem' }}>
-                            {st.completedModulesCount} labs
-                          </td>
-                          <td style={{ padding: '0.85rem 1rem' }}>
-                            <strong style={{ color: st.averageScore >= 80 ? '#10b981' : st.averageScore >= 60 ? '#f59e0b' : '#ef4444' }}>
-                              {st.averageScore}%
-                            </strong>
-                          </td>
-                          <td style={{ padding: '0.85rem 1rem' }}>
-                            <span style={{
-                              display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
-                              padding: '0.25rem 0.6rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700,
-                              background: st.status === 'em_destaque' ? 'rgba(16,185,129,0.15)' : st.status === 'precisa_apoio' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.05)',
-                              color: st.status === 'em_destaque' ? '#10b981' : st.status === 'precisa_apoio' ? '#f59e0b' : 'var(--text-muted)',
-                              border: `1px solid ${st.status === 'em_destaque' ? 'rgba(16,185,129,0.3)' : st.status === 'precisa_apoio' ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.1)'}`
-                            }}>
-                              {st.status === 'em_destaque' ? '⭐ Destaque' : st.status === 'precisa_apoio' ? '⚠️ Precisa Apoio' : '✓ Regular'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-              <BookOpen style={{ width: '2.5rem', height: '2.5rem', margin: '0 auto 0.75rem', opacity: 0.5 }} />
-              <p>Nenhuma turma selecionada para visualização de relatório.</p>
-            </div>
-          )}
+            ) : (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0 }}>
+                Nenhum material de apoio publicado para esta turma ainda.
+              </p>
+            )}
+          </div>
         </div>
       )}
 
-      {/* ── TAB 4: 72 LABORATÓRIOS VIRTUAIS & DISCIPLINAS ── */}
+      {/* ── TAB 5: CATÁLOGO DOS 72 LABORATÓRIOS VIRTUAIS ── */}
       {dashboardTab === 'labs_overview' && (
-        <div>
+        <div className="fade-in">
           <div style={{ marginBottom: '1.5rem' }}>
-            <h3 style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 700, margin: '0 0 0.4rem' }}>
+            <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 800, margin: '0 0 0.4rem' }}>
               🔬 Catálogo Completo dos 72 Laboratórios Virtuais
             </h3>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
-              Visualize a grade dos 6 laboratórios interativos especializados por disciplina disponíveis para os estudantes.
+              Grade especializada com 6 simuladores interativos e controle de parâmetros para cada uma das 12 disciplinas.
             </p>
           </div>
 
@@ -1179,7 +1772,7 @@ export function ProfessorDashboard() {
                         {i + 1}. {lab.title}
                       </span>
                       <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontFamily: 'monospace' }}>
-                        modo: {lab.props?.mode || 'padrão'}
+                        mode: {lab.props?.mode || 'padrão'}
                       </span>
                     </div>
                   ))}
@@ -1190,110 +1783,202 @@ export function ProfessorDashboard() {
         </div>
       )}
 
-      {/* ── TAB 5: MENSAGENS & MATERIAIS DA TURMA ── */}
-      {dashboardTab === 'messages' && (
-        <div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
-            {/* Dúvidas dos Alunos */}
-            <div className="glass-card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <MessageCircle style={{ width: '1.1rem', height: '1.1rem', color: '#06b6d4' }} />
-                Dúvidas Recebidas ({profMessages.filter(m => !m.replied).length} pendentes)
-              </h3>
-              {profMessages.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                  {profMessages.map(msg => (
-                    <div key={msg.id} style={{ padding: '0.85rem', borderRadius: '8px', border: msg.replied ? '1px solid rgba(16,185,129,0.25)' : '1px solid rgba(245,158,11,0.3)', background: msg.replied ? 'rgba(16,185,129,0.04)' : 'rgba(245,158,11,0.04)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                        <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.88rem' }}>{msg.studentName}</span>
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{new Date(msg.createdAt).toLocaleDateString('pt-BR')}</span>
-                      </div>
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.65rem' }}>{msg.message}</div>
-                      {msg.replied ? (
-                        <div style={{ padding: '0.6rem', borderRadius: '6px', background: 'rgba(16,185,129,0.08)', borderLeft: '3px solid #10b981' }}>
-                          <div style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>Sua resposta enviada:</div>
-                          <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{msg.replyText}</div>
-                        </div>
-                      ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                          <input type="text" placeholder="Digite sua orientação pedagógica..."
-                            value={replyTexts[msg.id!] || ''}
-                            onChange={e => setReplyTexts(prev => ({ ...prev, [msg.id!]: e.target.value }))}
-                            style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(6,182,212,0.25)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Recompensa de Incentivo 🪙</label>
-                            <input type="number" min="0" max="50" value={replyBonusCoins[msg.id!] || 0}
-                              onChange={e => setReplyBonusCoins(prev => ({ ...prev, [msg.id!]: parseInt(e.target.value) || 0 }))}
-                              style={{ width: '60px', padding: '0.35rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.82rem', textAlign: 'center' }} />
-                            <button className="btn-gradient" style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', marginLeft: 'auto', fontWeight: 600 }}
-                              disabled={!(replyTexts[msg.id!] || '').trim()}
-                              onClick={async () => {
-                                const reply = (replyTexts[msg.id!] || '').trim();
-                                if (!reply || !selectedClassId) return;
-                                const coins = replyBonusCoins[msg.id!] || 0;
-                                await replyStudentMessage(selectedClassId, msg.id!, reply, coins, coins > 0 ? 50 : 0, msg.studentId);
-                                const msgs = await getStudentMessages(selectedClassId);
-                                setProfMessages(msgs);
-                                setReplyTexts(prev => { const n = { ...prev }; delete n[msg.id!]; return n; });
-                                setReplyBonusCoins(prev => { const n = { ...prev }; delete n[msg.id!]; return n; });
-                              }}>
-                              <Send style={{ width: '0.8rem', height: '0.8rem' }} /> Responder
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Nenhuma dúvida de aluno recebida no momento.</p>
-              )}
+      {/* ── TAB 6: ANALYTICS & DIAGNÓSTICO IA ── */}
+      {dashboardTab === 'reports' && (
+        <div className="fade-in">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Turma:</label>
+              <select
+                value={selectedClassId || ''}
+                onChange={e => handleViewClassReport(e.target.value)}
+                style={{ padding: '0.5rem 1rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(6,182,212,0.3)', color: 'var(--text-main)', fontSize: '0.9rem', outline: 'none' }}
+              >
+                {turmas.map(t => (
+                  <option key={t.id} value={t.id}>{t.name} ({t.studentsCount} alunos)</option>
+                ))}
+              </select>
             </div>
 
-            {/* Materiais Complementares */}
-            <div className="glass-card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <BookOpen style={{ width: '1.1rem', height: '1.1rem', color: '#8b5cf6' }} />
-                Publicar Material Complementar
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '1rem', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(139,92,246,0.2)', background: 'rgba(139,92,246,0.03)' }}>
-                <input type="text" placeholder="Título do material (ex: Resumo de Termodinâmica)" value={newMatTitle} onChange={e => setNewMatTitle(e.target.value)}
-                  style={{ padding: '0.55rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
-                <input type="text" placeholder="Descrição ou instruções de estudo" value={newMatDesc} onChange={e => setNewMatDesc(e.target.value)}
-                  style={{ padding: '0.55rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
-                <input type="text" placeholder="Link externo ou PDF (opcional)" value={newMatLink} onChange={e => setNewMatLink(e.target.value)}
-                  style={{ padding: '0.55rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
-                <button className="btn-gradient" style={{ padding: '0.55rem', fontSize: '0.85rem', fontWeight: 600 }}
-                  disabled={!newMatTitle.trim()}
-                  onClick={async () => {
-                    if (!newMatTitle.trim() || !selectedClassId) return;
-                    await addComplementaryMaterial(selectedClassId, newMatTitle.trim(), newMatDesc.trim(), newMatLink.trim());
-                    setNewMatTitle(''); setNewMatDesc(''); setNewMatLink('');
-                    const mats = await getComplementaryMaterials(selectedClassId);
-                    setProfMaterials(mats);
-                  }}>
-                  Publicar Material para a Turma
-                </button>
-              </div>
-
-              {profMaterials.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {profMaterials.map(mat => (
-                    <div key={mat.id} style={{ padding: '0.75rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.88rem' }}>{mat.title}</div>
-                      <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{mat.description}</div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Nenhum material publicado para esta turma ainda.</p>
-              )}
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={() => selectedClassId && handleViewClassReport(selectedClassId)}
+                className="btn-outline-cyan"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+              >
+                <RefreshCw style={{ width: '0.85rem', height: '0.85rem' }} /> Atualizar
+              </button>
+              <button
+                onClick={exportReportCSV}
+                className="btn-gradient"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600 }}
+              >
+                <Download style={{ width: '0.85rem', height: '0.85rem' }} /> Exportar CSV
+              </button>
             </div>
           </div>
+
+          {reportLoading ? (
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+              <RefreshCw className="animate-spin" style={{ width: '2rem', height: '2rem', margin: '0 auto 1rem', color: '#06b6d4' }} />
+              <p>Carregando analytics...</p>
+            </div>
+          ) : classReport ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+              {/* AI Diagnosis */}
+              <div className="glass-card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(6,182,212,0.08) 0%, rgba(139,92,246,0.08) 100%)', border: '1px solid rgba(6,182,212,0.35)', borderRadius: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  <Sparkles style={{ width: '1.25rem', height: '1.25rem', color: '#06b6d4' }} />
+                  <h3 style={{ color: '#06b6d4', fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
+                    Diagnóstico Pedagógico Assistido por IA ({classReport.className})
+                  </h3>
+                  {aiLoading && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Gerando...</span>}
+                </div>
+
+                {aiDiagnosis ? (
+                  <div>
+                    <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+                      {aiDiagnosis.summary}
+                    </p>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                      <div style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                          <CheckCircle style={{ width: '0.95rem', height: '0.95rem' }} /> Pontos Fortes da Turma
+                        </div>
+                        <ul style={{ margin: 0, paddingLeft: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.83rem', lineHeight: 1.5 }}>
+                          {aiDiagnosis.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                        </ul>
+                      </div>
+
+                      <div style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#f59e0b', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                          <AlertTriangle style={{ width: '0.95rem', height: '0.95rem' }} /> Recomendações & Intervenções
+                        </div>
+                        <ul style={{ margin: 0, paddingLeft: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.83rem', lineHeight: 1.5 }}>
+                          {aiDiagnosis.recommendations.map((r, i) => <li key={i}>{r}</li>)}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
+                    Processando panorama pedagógico da turma...
+                  </p>
+                )}
+              </div>
+
+              {/* Charts */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem' }}>
+                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                  <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>
+                    📊 Desempenho Médio por Disciplina (%)
+                  </h4>
+                  <div style={{ width: '100%', height: '260px' }}>
+                    <ResponsiveContainer>
+                      <BarChart data={subjectProgressData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                        <XAxis dataKey="subject" stroke="var(--text-muted)" fontSize={11} angle={-35} textAnchor="end" interval={0} />
+                        <YAxis domain={[0, 100]} stroke="var(--text-muted)" fontSize={11} />
+                        <Tooltip contentStyle={tooltipStyle} />
+                        <Bar dataKey="score" fill="#06b6d4" radius={[4, 4, 0, 0]} name="Média (%)" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                  <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>
+                    🔬 Volume de Entregas nos Laboratórios
+                  </h4>
+                  <div style={{ width: '100%', height: '260px' }}>
+                    <ResponsiveContainer>
+                      <BarChart data={subjectProgressData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                        <XAxis dataKey="subject" stroke="var(--text-muted)" fontSize={11} angle={-35} textAnchor="end" interval={0} />
+                        <YAxis stroke="var(--text-muted)" fontSize={11} />
+                        <Tooltip contentStyle={tooltipStyle} />
+                        <Bar dataKey="entregas" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Entregas" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       )}
 
-      {/* ── MODAL DE CONFIGURAÇÃO DA CHAVE GEMINI IA ── */}
+      {/* ── TAB 7: DÚVIDAS & MENSAGENS DOS ALUNOS ── */}
+      {dashboardTab === 'messages' && (
+        <div className="fade-in glass-card" style={{ padding: '1.5rem' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <MessageCircle style={{ width: '1.1rem', height: '1.1rem', color: '#06b6d4' }} />
+            Dúvidas Recebidas ({profMessages.filter(m => !m.replied).length} pendentes)
+          </h3>
+          {profMessages.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {profMessages.map(msg => (
+                <div key={msg.id} style={{ padding: '0.85rem', borderRadius: '8px', border: msg.replied ? '1px solid rgba(16,185,129,0.25)' : '1px solid rgba(245,158,11,0.3)', background: msg.replied ? 'rgba(16,185,129,0.04)' : 'rgba(245,158,11,0.04)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                    <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.88rem' }}>{msg.studentName}</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{new Date(msg.createdAt).toLocaleDateString('pt-BR')}</span>
+                  </div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.65rem' }}>{msg.message}</div>
+                  {msg.replied ? (
+                    <div style={{ padding: '0.6rem', borderRadius: '6px', background: 'rgba(16,185,129,0.08)', borderLeft: '3px solid #10b981' }}>
+                      <div style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>Sua resposta enviada:</div>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{msg.replyText}</div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      <input
+                        type="text"
+                        placeholder="Digite sua orientação pedagógica..."
+                        value={replyTexts[msg.id!] || ''}
+                        onChange={e => setReplyTexts(prev => ({ ...prev, [msg.id!]: e.target.value }))}
+                        style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(6,182,212,0.25)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                      />
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Recompensa de Incentivo 🪙</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="50"
+                          value={replyBonusCoins[msg.id!] || 0}
+                          onChange={e => setReplyBonusCoins(prev => ({ ...prev, [msg.id!]: parseInt(e.target.value) || 0 }))}
+                          style={{ width: '60px', padding: '0.35rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.82rem', textAlign: 'center' }}
+                        />
+                        <button
+                          className="btn-gradient"
+                          style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', marginLeft: 'auto', fontWeight: 600 }}
+                          disabled={!(replyTexts[msg.id!] || '').trim()}
+                          onClick={async () => {
+                            const reply = (replyTexts[msg.id!] || '').trim();
+                            if (!reply || !selectedClassId) return;
+                            const coins = replyBonusCoins[msg.id!] || 0;
+                            await replyStudentMessage(selectedClassId, msg.id!, reply, coins, coins > 0 ? 50 : 0, msg.studentId);
+                            const msgs = await getStudentMessages(selectedClassId);
+                            setProfMessages(msgs);
+                            setReplyTexts(prev => { const n = { ...prev }; delete n[msg.id!]; return n; });
+                            setReplyBonusCoins(prev => { const n = { ...prev }; delete n[msg.id!]; return n; });
+                          }}
+                        >
+                          <Send style={{ width: '0.8rem', height: '0.8rem' }} /> Responder
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Nenhuma dúvida recebida no momento.</p>
+          )}
+        </div>
+      )}
+
+      {/* ── GEMINI API KEY MODAL ── */}
       {showGeminiModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div className="glass-card" style={{ maxWidth: '500px', width: '100%', padding: '1.75rem', background: '#121214', border: '1px solid rgba(6,182,212,0.3)', borderRadius: '12px' }}>
@@ -1304,7 +1989,7 @@ export function ProfessorDashboard() {
               </h3>
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-              Insira sua chave de API para habilitar diagnósticos pedagógicos de alta precisão e geração automática de aulas interativas.
+              Insira sua chave de API para habilitar diagnósticos pedagógicos de alta precisão e formulação automática de questões de provas e planos de aula.
             </p>
             <input
               type="password"

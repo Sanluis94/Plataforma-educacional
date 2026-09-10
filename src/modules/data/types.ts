@@ -94,6 +94,110 @@ export interface SystemLog {
   metadata?: Record<string, unknown>;
 }
 
+// ─── Coleção: exams (Provas e Avaliações Formais estilo Edu-Interact-v2) ───
+export interface ExamOption {
+  texto: string;
+  isCorreta: boolean;
+}
+
+export interface ExamQuestion {
+  enunciado: string;
+  tema: string;
+  nivelDificuldade: 'Fácil' | 'Médio' | 'Difícil';
+  valorPeso: number;
+  justificativa: string;
+  opcoes: ExamOption[];
+}
+
+export interface ExamData {
+  id?: string;
+  professorId: string;
+  professorName?: string;
+  titulo: string;
+  descricao?: string;
+  disciplina: string;
+  turmaId?: string; // se atribuída a uma turma
+  turmaNome?: string;
+  duracaoMinutos?: number; // ex: 45 minutos (ou sem limite se 0/undefined)
+  dataInicio?: string;
+  dataLimite?: string;
+  status: 'Rascunho' | 'Aberta' | 'Encerrada';
+  pesoTotal: number;
+  questoes: ExamQuestion[];
+  criadoEm: string;
+  atualizadoEm?: string;
+}
+
+export interface ExamAnswer {
+  questaoIndex: number;
+  opcaoEscolhidaIndex: number;
+  acertou: boolean;
+  pontosObtidos: number;
+}
+
+export interface ExamAttempt {
+  id?: string;
+  examId: string;
+  examTitle: string;
+  turmaId: string;
+  alunoId: string;
+  alunoNome: string;
+  pontuacaoObtida: number;
+  pontuacaoMaxima: number;
+  porcentagemAproveitamento: number;
+  classificacao: 'Insuficiente' | 'Regular' | 'Bom' | 'Excelente';
+  respostas: ExamAnswer[];
+  dataEnvio: string;
+}
+
+// ─── Coleção: lesson_plans (Plano de Aulas e Cronograma Bimestral/Semestral) ───
+export type BimesterPeriod = '1º Bimestre' | '2º Bimestre' | '3º Bimestre' | '4º Bimestre' | '1º Semestre' | '2º Semestre';
+
+export interface LessonPlanItem {
+  id?: string;
+  professorId: string;
+  turmaId: string;
+  turmaNome?: string;
+  periodo: BimesterPeriod;
+  ordemSemana?: number;
+  dataPrevista?: string;
+  topico: string;
+  competenciasBNCC?: string;
+  metodologia: string;
+  laboratorioAssociadoId?: string; // ID dos 72 labs
+  laboratorioTitulo?: string;
+  avaliacaoAssociadaId?: string;
+  status: 'planejada' | 'em_andamento' | 'concluida';
+  criadoEm: string;
+}
+
+// ─── Coleção: notices (Mural de Avisos da Turma) ───────────────────
+export interface ClassNotice {
+  id?: string;
+  turmaId: string;
+  professorId: string;
+  professorNome?: string;
+  titulo: string;
+  texto: string;
+  criadoEm: string;
+}
+
+// ─── Coleção: materials (Materiais de Apoio com Upload/Anexo) ─────
+export interface ClassMaterial {
+  id?: string;
+  turmaId: string;
+  professorId?: string;
+  title: string;
+  description: string;
+  tipo: 'pdf' | 'link' | 'texto' | 'arquivo';
+  linkOuConteudo: string; // URL do link ou Base64 data-uri do arquivo ou texto
+  nomeArquivo?: string;
+  tamanhoFormatado?: string;
+  disciplina?: string;
+  periodo?: BimesterPeriod;
+  criadoEm: string;
+}
+
 // ─── Constantes padrão ────────────────────────────────────────
 export const DEFAULT_PROGRESS: ProgressData = {
   level: 1,
@@ -104,3 +208,4 @@ export const DEFAULT_PROGRESS: ProgressData = {
   enrolledClasses: [],
   updatedAt: new Date().toISOString(),
 };
+
