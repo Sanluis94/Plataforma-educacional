@@ -12,6 +12,8 @@ const ProfessorDashboard = lazy(() => import('./modules/ux/pages/ProfessorDashbo
 const EstudanteDashboard = lazy(() => import('./modules/ux/pages/EstudanteDashboard').then(m => ({ default: m.EstudanteDashboard })));
 const Simulacao = lazy(() => import('./modules/ux/pages/Simulacao').then(m => ({ default: m.Simulacao })));
 const AdminPanel = lazy(() => import('./modules/ux/pages/AdminPanel'));
+const CoordenacaoDashboard = lazy(() => import('./modules/ux/pages/CoordenacaoDashboard'));
+const EnemSimuladoView = lazy(() => import('./modules/ux/pages/EnemSimuladoView'));
 const Home = lazy(() => import('./modules/ux/pages/Home').then(m => ({ default: m.Home })));
 const NotFound = lazy(() => import('./modules/ux/pages/NotFound'));
 
@@ -110,6 +112,18 @@ function App() {
                 <Route path="/simulacao" element={
                   <ProtectedRoute allowedRoles={['estudante', 'professor', 'admin']}>
                     <Simulacao />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/enem" element={
+                  <ProtectedRoute allowedRoles={['estudante', 'professor', 'admin']}>
+                    <EnemSimuladoView />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/coordenacao" element={
+                  <ProtectedRoute allowedRoles={['professor', 'admin']}>
+                    <CoordenacaoDashboard />
                   </ProtectedRoute>
                 } />
 

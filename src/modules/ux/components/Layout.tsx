@@ -1,8 +1,10 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Home as HomeIcon, BookOpen, Users, Settings, Beaker, LogOut, Sun, Moon } from 'lucide-react';
+import { Menu, X, Home as HomeIcon, BookOpen, Users, Settings, Beaker, LogOut, Sun, Moon, GraduationCap, Building2, Sparkles, Heart } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { AccessibilityToolbar } from './AccessibilityToolbar';
+import { PricingModal } from './PricingModal';
+import { ParentBridgeModal } from './ParentBridgeModal';
 
 interface LayoutProps {
   theme: 'dark' | 'light';
@@ -12,6 +14,8 @@ interface LayoutProps {
 
 export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
+  const [parentBridgeOpen, setParentBridgeOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, userData, logout } = useAuth();
@@ -28,13 +32,18 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
       return [
         { name: 'Início', href: '/', icon: HomeIcon },
         { name: 'Minhas Turmas', href: '/professor', icon: Users },
+        { name: 'Coordenação', href: '/coordenacao', icon: Building2 },
         { name: 'Laboratórios', href: '/simulacao', icon: Beaker },
+        { name: 'Simulado ENEM', href: '/enem', icon: GraduationCap },
       ];
     }
 
     if (userData.role === 'admin') {
       return [
         { name: 'Início', href: '/', icon: HomeIcon },
+        { name: 'Coordenação', href: '/coordenacao', icon: Building2 },
+        { name: 'Laboratórios', href: '/simulacao', icon: Beaker },
+        { name: 'Simulado ENEM', href: '/enem', icon: GraduationCap },
         { name: 'Admin', href: '/admin', icon: Settings },
       ];
     }
@@ -44,6 +53,7 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
       { name: 'Início', href: '/', icon: HomeIcon },
       { name: 'Meu Aprendizado', href: '/estudante', icon: BookOpen },
       { name: 'Laboratórios', href: '/simulacao', icon: Beaker },
+      { name: 'Simulado ENEM', href: '/enem', icon: GraduationCap },
     ];
   };
 
@@ -116,7 +126,42 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
           </nav>
 
           {/* Right Controls */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            {/* SaaS Pricing Button */}
+            <button
+              onClick={() => setPricingModalOpen(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.35rem',
+                padding: '0.45rem 0.75rem', borderRadius: '0.5rem',
+                background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(139,92,246,0.15))',
+                border: '1px solid rgba(6,182,212,0.3)',
+                color: '#06b6d4', cursor: 'pointer',
+                fontSize: '0.8rem', fontWeight: 700,
+                transition: 'all 0.2s',
+              }}
+              title="Planos Comerciais & Assinatura SaaS"
+            >
+              <Sparkles style={{ width: '0.85rem', height: '0.85rem' }} />
+              <span className="desktop-nav">Planos</span>
+            </button>
+
+            {/* Parent Bridge Modal Button */}
+            <button
+              onClick={() => setParentBridgeOpen(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.35rem',
+                padding: '0.45rem 0.75rem', borderRadius: '0.5rem',
+                background: 'none', border: '1px solid var(--border-color)',
+                color: '#ec4899', cursor: 'pointer',
+                fontSize: '0.8rem', fontWeight: 700,
+                transition: 'all 0.2s',
+              }}
+              title="Portal da Família & Notificações"
+            >
+              <Heart style={{ width: '0.85rem', height: '0.85rem' }} />
+              <span className="desktop-nav">Família</span>
+            </button>
+
             {/* DUA Accessibility Toolbar */}
             <AccessibilityToolbar />
 
@@ -256,6 +301,18 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
       {/* Main Content */}
       <main style={{ paddingTop: '4rem', minHeight: '100vh', flex: 1 }}>
         <Outlet />
+
+        {/* Modais Globais de Produto */}
+        {pricingModalOpen && (
+          <PricingModal onClose={() => setPricingModalOpen(false)} />
+        )}
+
+        {parentBridgeOpen && (
+          <ParentBridgeModal
+            studentName={userData?.name || 'Estudante'}
+            onClose={() => setParentBridgeOpen(false)}
+          />
+        )}
       </main>
 
       {/* Responsive styles */}
