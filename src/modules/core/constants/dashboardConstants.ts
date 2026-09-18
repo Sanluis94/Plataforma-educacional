@@ -34,9 +34,9 @@ export const ALL_MODULES = [
       { id: 'math_1', title: 'Função de 1º Grau', component: MathSimulator, props: { mode: 'linear', functionType: 'linear' } },
       { id: 'math_2', title: 'Função de 2º Grau', component: MathSimulator, props: { mode: 'quadratic', functionType: 'quadratic' } },
       { id: 'math_3', title: 'Funções Trigonométricas', component: MathSimulator, props: { mode: 'trigonometric', functionType: 'trigonometric' } },
-      { id: 'math_4', title: 'Geometria Espacial', component: MathSimulator, props: { mode: 'spatial', functionType: 'generic', title: 'Geometria Espacial - Volume e Área' } },
-      { id: 'math_5', title: 'Estatística Descritiva', component: MathSimulator, props: { mode: 'statistics', functionType: 'generic', title: 'Estatística Descritiva - Gráficos de Dispersão' } },
-      { id: 'math_6', title: 'Matrizes e Sistemas', component: MathSimulator, props: { mode: 'matrices', functionType: 'generic', title: 'Matrizes e Sistemas Lineares' } },
+      { id: 'math_4', title: 'Geometria Espacial', component: MathSimulator, props: { mode: 'spatial', functionType: 'spatial', title: 'Geometria Espacial - Volume e Área' } },
+      { id: 'math_5', title: 'Estatística Descritiva', component: MathSimulator, props: { mode: 'statistics', functionType: 'statistics', title: 'Estatística Descritiva - Amostragem e Boxplot' } },
+      { id: 'math_6', title: 'Matrizes e Sistemas', component: MathSimulator, props: { mode: 'matrices', functionType: 'matrices', title: 'Matrizes e Sistemas Lineares' } },
     ]
   },
   {
