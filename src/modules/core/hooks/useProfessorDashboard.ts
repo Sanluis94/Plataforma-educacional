@@ -38,6 +38,9 @@ export const useProfessorDashboard = () => {
       try {
         const data = await getProfessorClasses(currentUser.uid);
         setTurmas(data);
+        if (data.length > 0) {
+          setSelectedClassId(prev => prev || data[0].id);
+        }
       } catch (error) {
         console.error('[useProfessorDashboard] Erro ao carregar turmas:', error);
       } finally {
@@ -120,6 +123,7 @@ export const useProfessorDashboard = () => {
         userData?.name || currentUser.displayName || 'Professor'
       );
       setTurmas(prev => [...prev, novaTurma]);
+      setSelectedClassId(novaTurma.id);
       setNewClassName('');
       setIsCreatingClass(false);
     } catch (error) {

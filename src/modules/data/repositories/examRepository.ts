@@ -8,6 +8,8 @@ import {
 import { db } from '../../core/services/firebaseConfig';
 import type { ExamData, ExamAttempt } from '../types';
 
+import { sanitizeForFirestore } from '../../core/services/firestoreUtils';
+
 const EXAMS_COLLECTION = 'exams';
 const ATTEMPTS_COLLECTION = 'exam_attempts';
 
@@ -52,16 +54,31 @@ function saveLocalAttempts(attempts: ExamAttempt[]) {
  * Cria ou publica uma nova prova.
  */
 export const saveExam = async (exam: Omit<ExamData, 'id'>): Promise<ExamData> => {
+  const sanitized = sanitizeForFirestore(exam);
+
+  // Sempre sincroniza com cache local como garantia de consistência
+  const exams = getLocalExams();
+
   if (!db) {
-    const exams = getLocalExams();
-    const newExam: ExamData = { id: `exam_${Date.now()}`, ...exam };
+    const newExam: ExamData = { id: `exam_${Date.now()}`, ...sanitized } as ExamData;
     exams.unshift(newExam);
     saveLocalExams(exams);
     return newExam;
   }
 
-  const docRef = await addDoc(collection(db, EXAMS_COLLECTION), exam);
-  return { id: docRef.id, ...exam };
+  try {
+    const docRef = await addDoc(collection(db, EXAMS_COLLECTION), sanitized);
+    const savedExam: ExamData = { id: docRef.id, ...sanitized } as ExamData;
+    exams.unshift(savedExam);
+    saveLocalExams(exams);
+    return savedExam;
+  } catch (err) {
+    console.warn('[examRepository] Falha ao salvar no Firestore, utilizando persistência local resiliente:', err);
+    const fallbackExam: ExamData = { id: `exam_${Date.now()}`, ...sanitized } as ExamData;
+    exams.unshift(fallbackExam);
+    saveLocalExams(exams);
+    return fallbackExam;
+  }
 };
 
 /**
@@ -100,8 +117,9 @@ export const deleteExam = async (id: string): Promise<void> => {
  * Busca todas as provas criadas por um professor.
  */
 export const getExamsByProfessor = async (professorId: string): Promise<ExamData[]> => {
+  const localList = getLocalExams().filter(e => e.professorId === professorId || e.professorId === 'prof_current');
   if (!db) {
-    return getLocalExams().filter(e => e.professorId === professorId);
+    return localList;
   }
 
   try {
@@ -110,12 +128,17 @@ export const getExamsByProfessor = async (professorId: string): Promise<ExamData
       where('professorId', '==', professorId)
     );
     const snap = await getDocs(q);
-    const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as ExamData));
-    list.sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
-    return list;
+    const remoteList = snap.docs.map(d => ({ id: d.id, ...d.data() } as ExamData));
+    const map = new Map<string, ExamData>();
+    for (const e of localList) if (e.id) map.set(e.id, e);
+    for (const e of remoteList) if (e.id) map.set(e.id, e);
+
+    const combined = Array.from(map.values());
+    combined.sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+    return combined;
   } catch (err) {
     console.error('[examRepository] Erro ao buscar provas do professor:', err);
-    return getLocalExams().filter(e => e.professorId === professorId);
+    return localList;
   }
 };
 
@@ -123,8 +146,9 @@ export const getExamsByProfessor = async (professorId: string): Promise<ExamData
  * Busca todas as provas abertas atribuídas a uma turma específica.
  */
 export const getExamsByClass = async (classId: string): Promise<ExamData[]> => {
+  const localList = getLocalExams().filter(e => (e.turmaId === classId || e.turmaId === 'turma_geral' || !e.turmaId) && e.status === 'Aberta');
   if (!db) {
-    return getLocalExams().filter(e => e.turmaId === classId && e.status === 'Aberta');
+    return localList;
   }
 
   try {
@@ -134,14 +158,20 @@ export const getExamsByClass = async (classId: string): Promise<ExamData[]> => {
       where('status', '==', 'Aberta')
     );
     const snap = await getDocs(q);
-    const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as ExamData));
-    list.sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
-    return list;
+    const remoteList = snap.docs.map(d => ({ id: d.id, ...d.data() } as ExamData));
+    const map = new Map<string, ExamData>();
+    for (const e of localList) if (e.id) map.set(e.id, e);
+    for (const e of remoteList) if (e.id) map.set(e.id, e);
+
+    const combined = Array.from(map.values());
+    combined.sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+    return combined;
   } catch (err) {
     console.error('[examRepository] Erro ao buscar provas da turma:', err);
-    return getLocalExams().filter(e => e.turmaId === classId && e.status === 'Aberta');
+    return localList;
   }
 };
+
 
 /**
  * Escuta provas de uma turma em tempo real.

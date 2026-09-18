@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Beaker, Trophy, BookOpen, Clock, FileText,
   Calendar, Upload, ExternalLink, Play, Bell,
-  Award, ShieldCheck, MessageSquare
+  Award, ShieldCheck, MessageSquare, Copy, Check, Download
 } from 'lucide-react';
 import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
@@ -183,6 +183,7 @@ export function EstudanteDashboard() {
   const [examTimeRemaining, setExamTimeRemaining] = useState<number | null>(null);
   const [examResult, setExamResult] = useState<ExamAttempt | null>(null);
   const [submittingExam, setSubmittingExam] = useState(false);
+  const [copiedMatId, setCopiedMatId] = useState<string | null>(null);
 
   // Auto-select first class when available
   useEffect(() => {
@@ -956,25 +957,77 @@ export function EstudanteDashboard() {
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', margin: '0 0 0.75rem', lineHeight: 1.4 }}>
                       {mat.description}
                     </p>
+                    {/* Polymorphic Content Display */}
+                    {mat.tipo === 'texto' && mat.linkOuConteudo && (
+                      <div style={{
+                        padding: '0.75rem',
+                        borderRadius: '8px',
+                        background: 'rgba(0,0,0,0.3)',
+                        border: '1px solid rgba(139,92,246,0.2)',
+                        fontSize: '0.82rem',
+                        color: 'var(--text-secondary)',
+                        whiteSpace: 'pre-wrap',
+                        maxHeight: '140px',
+                        overflowY: 'auto',
+                        marginBottom: '0.75rem',
+                        lineHeight: 1.5
+                      }}>
+                        {mat.linkOuConteudo}
+                      </div>
+                    )}
+
                     {mat.nomeArquivo && (
                       <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-                        📎 {mat.nomeArquivo} ({mat.tamanhoFormatado})
+                        📎 {mat.nomeArquivo} ({mat.tamanhoFormatado || ''})
                       </div>
                     )}
                   </div>
 
-                  {mat.linkOuConteudo && (
-                    <a
-                      href={mat.linkOuConteudo}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download={mat.nomeArquivo || undefined}
-                      className="btn-gradient"
-                      style={{ padding: '0.55rem', fontSize: '0.82rem', textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
-                    >
-                      <ExternalLink style={{ width: '0.85rem', height: '0.85rem' }} /> Baixar / Visualizar
-                    </a>
-                  )}
+                  <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    {mat.tipo === 'texto' ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(mat.linkOuConteudo);
+                          setCopiedMatId(mat.id);
+                          setTimeout(() => setCopiedMatId(prev => prev === mat.id ? null : prev), 2000);
+                        }}
+                        className="btn-outline-cyan"
+                        style={{ width: '100%', padding: '0.5rem', fontSize: '0.82rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+                      >
+                        {copiedMatId === mat.id ? (
+                          <>
+                            <Check style={{ width: '0.85rem', height: '0.85rem', color: '#10b981' }} /> Texto Copiado!
+                          </>
+                        ) : (
+                          <>
+                            <Copy style={{ width: '0.85rem', height: '0.85rem' }} /> Copiar Conteúdo
+                          </>
+                        )}
+                      </button>
+                    ) : mat.tipo === 'link' ? (
+                      <a
+                        href={mat.linkOuConteudo.startsWith('http') ? mat.linkOuConteudo : `https://${mat.linkOuConteudo}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-outline-cyan"
+                        style={{ width: '100%', padding: '0.55rem', fontSize: '0.82rem', textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', boxSizing: 'border-box' }}
+                      >
+                        <ExternalLink style={{ width: '0.85rem', height: '0.85rem' }} /> Acessar Link Externo
+                      </a>
+                    ) : (
+                      <a
+                        href={mat.linkOuConteudo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download={mat.nomeArquivo || 'material_didatico'}
+                        className="btn-gradient"
+                        style={{ width: '100%', padding: '0.55rem', fontSize: '0.82rem', textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', boxSizing: 'border-box' }}
+                      >
+                        <Download style={{ width: '0.85rem', height: '0.85rem' }} /> Baixar Arquivo
+                      </a>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

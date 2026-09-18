@@ -19,6 +19,7 @@ import {
   saveLocalStudentMessage,
   replyLocalStudentMessage
 } from '../services/localEtlClient';
+import { sanitizeForFirestore } from '../../core/services/firestoreUtils';
 import type { ClassData } from '../types';
 
 // Manter a interface Turma para compatibilidade com o front-end existente
@@ -393,40 +394,51 @@ export const createClassNotice = async (
   titulo: string,
   texto: string
 ): Promise<any> => {
-  const newNotice = {
+  const newNotice = sanitizeForFirestore({
     turmaId: classId,
     professorId,
     professorName,
     titulo,
     texto,
     criadoEm: new Date().toISOString()
-  };
+  });
+
+  const notices = getLocalNotices(classId);
+  const localSaved = { id: `notice_${Date.now()}`, ...newNotice };
+  notices.unshift(localSaved);
+  saveLocalNotices(classId, notices);
 
   if (!db) {
-    const notices = getLocalNotices(classId);
-    const saved = { id: `notice_${Date.now()}`, ...newNotice };
-    notices.unshift(saved);
-    saveLocalNotices(classId, notices);
-    return saved;
+    return localSaved;
   }
 
-  const docRef = await addDoc(collection(db, COLLECTION, classId, 'notices'), newNotice);
-  return { id: docRef.id, ...newNotice };
+  try {
+    const docRef = await addDoc(collection(db, COLLECTION, classId, 'notices'), newNotice);
+    return { id: docRef.id, ...newNotice };
+  } catch (err) {
+    console.warn('[ClassRepository] Falha ao salvar aviso no Firestore, utilizando fallback local:', err);
+    return localSaved;
+  }
 };
 
 export const getClassNotices = async (classId: string): Promise<any[]> => {
+  const localDocs = getLocalNotices(classId);
   if (!db) {
-    return getLocalNotices(classId);
+    return localDocs;
   }
   try {
     const q = collection(db, COLLECTION, classId, 'notices');
     const snap = await getDocs(q);
-    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    docs.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
-    return docs;
+    const remoteDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const map = new Map<string, any>();
+    for (const d of localDocs) if (d.id) map.set(d.id, d);
+    for (const d of remoteDocs) if (d.id) map.set(d.id, d);
+    const merged = Array.from(map.values());
+    merged.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+    return merged;
   } catch (err) {
     console.error('[ClassRepository] Erro ao buscar avisos da turma:', err);
-    return getLocalNotices(classId);
+    return localDocs;
   }
 };
 
@@ -450,12 +462,14 @@ export const subscribeClassNotices = (
 };
 
 export const deleteClassNotice = async (classId: string, noticeId: string): Promise<void> => {
-  if (!db) {
-    const notices = getLocalNotices(classId).filter(n => n.id !== noticeId);
-    saveLocalNotices(classId, notices);
-    return;
+  const notices = getLocalNotices(classId).filter(n => n.id !== noticeId);
+  saveLocalNotices(classId, notices);
+  if (!db) return;
+  try {
+    await deleteDoc(doc(db, COLLECTION, classId, 'notices', noticeId));
+  } catch (err) {
+    console.warn('[ClassRepository] Erro ao deletar aviso no Firestore:', err);
   }
-  await deleteDoc(doc(db, COLLECTION, classId, 'notices', noticeId));
 };
 
 // ─── Materiais com Suporte a Upload & Categorização ───────────────
@@ -473,36 +487,81 @@ export const addEnhancedMaterial = async (
     professorId?: string;
   }
 ): Promise<any> => {
-  const item = {
+  const item = sanitizeForFirestore({
     ...material,
     turmaId: classId,
     criadoEm: new Date().toISOString()
-  };
+  });
 
-  if (!db) {
-    const mats = getLocalComplementaryMaterials(classId);
-    const saved = { id: `mat_${Date.now()}`, ...item };
-    (await mats).unshift(saved as any);
-    return saved;
+  // Salva no armazenamento local resiliente
+  try {
+    await saveLocalComplementaryMaterial(classId, {
+      title: item.title,
+      description: item.description,
+      type: item.tipo === 'texto' ? 'texto' : item.tipo === 'link' ? 'link' : 'pdf',
+      url: item.linkOuConteudo,
+      subject: item.disciplina,
+      bimester: item.periodo,
+      fileName: item.nomeArquivo,
+      fileSize: item.tamanhoFormatado
+    } as any);
+  } catch (err) {
+    console.warn('[ClassRepository] Falha ao salvar material em storage local:', err);
   }
 
-  const docRef = await addDoc(collection(db, COLLECTION, classId, 'enhanced_materials'), item);
-  return { id: docRef.id, ...item };
+  const localSaved = { id: `mat_${Date.now()}`, ...item };
+
+  if (!db) {
+    return localSaved;
+  }
+
+  try {
+    const docRef = await addDoc(collection(db, COLLECTION, classId, 'enhanced_materials'), item);
+    return { id: docRef.id, ...item };
+  } catch (err) {
+    console.warn('[ClassRepository] Falha ao salvar material no Firestore, utilizando fallback local:', err);
+    return localSaved;
+  }
 };
 
 export const getEnhancedMaterials = async (classId: string): Promise<any[]> => {
+  let localDocs: any[] = [];
+  try {
+    const local = await getLocalComplementaryMaterials(classId);
+    localDocs = (local || []).map((m: any) => ({
+      id: m.id,
+      title: m.title,
+      description: m.description,
+      tipo: m.type === 'link' ? 'link' : m.type === 'texto' ? 'texto' : 'pdf',
+      linkOuConteudo: m.url || m.linkOuConteudo || '',
+      nomeArquivo: m.fileName || m.nomeArquivo,
+      tamanhoFormatado: m.fileSize || m.tamanhoFormatado,
+      disciplina: m.subject || m.disciplina,
+      periodo: m.bimester || m.periodo,
+      turmaId: classId,
+      criadoEm: m.createdAt || m.criadoEm || new Date().toISOString()
+    }));
+  } catch {
+    localDocs = [];
+  }
+
   if (!db) {
-    return (await getLocalComplementaryMaterials(classId)) as any[];
+    return localDocs;
   }
   try {
     const q = collection(db, COLLECTION, classId, 'enhanced_materials');
     const snap = await getDocs(q);
-    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    docs.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
-    return docs;
+    const remoteDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const map = new Map<string, any>();
+    for (const d of localDocs) if (d.id) map.set(d.id, d);
+    for (const d of remoteDocs) if (d.id) map.set(d.id, d);
+
+    const merged = Array.from(map.values());
+    merged.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+    return merged;
   } catch (err) {
     console.error('[ClassRepository] Erro ao buscar materiais enriquecidos:', err);
-    return (await getLocalComplementaryMaterials(classId)) as any[];
+    return localDocs;
   }
 };
 

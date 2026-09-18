@@ -6,6 +6,7 @@ import {
   collection, addDoc, query, where, getDocs, doc, updateDoc, deleteDoc, onSnapshot
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
+import { sanitizeForFirestore } from '../../core/services/firestoreUtils';
 import type { LessonPlanItem, BimesterPeriod } from '../types';
 
 const COLLECTION = 'lesson_plans';
@@ -34,16 +35,23 @@ function saveLocalLessonPlans(items: LessonPlanItem[]) {
 export const saveLessonPlanItem = async (
   item: Omit<LessonPlanItem, 'id'>
 ): Promise<LessonPlanItem> => {
+  const sanitized = sanitizeForFirestore(item);
+  const plans = getLocalLessonPlans();
+  const localPlan: LessonPlanItem = { id: `lp_${Date.now()}`, ...sanitized } as LessonPlanItem;
+  plans.push(localPlan);
+  saveLocalLessonPlans(plans);
+
   if (!db) {
-    const plans = getLocalLessonPlans();
-    const newPlan: LessonPlanItem = { id: `lp_${Date.now()}`, ...item };
-    plans.push(newPlan);
-    saveLocalLessonPlans(plans);
-    return newPlan;
+    return localPlan;
   }
 
-  const docRef = await addDoc(collection(db, COLLECTION), item);
-  return { id: docRef.id, ...item };
+  try {
+    const docRef = await addDoc(collection(db, COLLECTION), sanitized);
+    return { id: docRef.id, ...sanitized } as LessonPlanItem;
+  } catch (err) {
+    console.warn('[LessonPlanRepository] Falha ao salvar no Firestore, usando fallback local:', err);
+    return localPlan;
+  }
 };
 
 /**

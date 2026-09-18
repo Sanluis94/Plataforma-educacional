@@ -6,8 +6,9 @@ import {
   PlusCircle, Users, BookOpen, BarChart as BarChartIcon,
   Award, Download, MessageCircle, Send, Sparkles, Key, CheckCircle,
   AlertTriangle, Layers, RefreshCw, Plus, Trash2,
-  Calendar, FileText, Upload, ExternalLink, Bell
+  Calendar, FileText, Upload, ExternalLink, Bell, Copy, Check
 } from 'lucide-react';
+import { useAuth } from '../../core/contexts/AuthContext';
 import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
 import { generatePedagogicalDiagnosis, generateCompleteLessonWithAI } from '../../core/services/geminiService';
@@ -152,6 +153,19 @@ export function ProfessorDashboard() {
   const [geminiKeyInput, setGeminiKeyInput] = useState(() => localStorage.getItem('gemini_api_key') || '');
   const [geminiSaved, setGeminiSaved] = useState(false);
 
+  // Auth user data
+  const { currentUser, userData } = useAuth();
+  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [copiedTextId, setCopiedTextId] = useState<string | null>(null);
+  const [savingExam, setSavingExam] = useState(false);
+
+  const showFeedback = (text: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToastMessage({ text, type });
+    setTimeout(() => {
+      setToastMessage(prev => (prev?.text === text ? null : prev));
+    }, 4500);
+  };
+
   // Sync selected class with first available if none selected
   useEffect(() => {
     if (!selectedClassId && turmas.length > 0) {
@@ -190,11 +204,12 @@ export function ProfessorDashboard() {
   // Load teacher exams
   useEffect(() => {
     const loadExams = async () => {
-      const exams = await getExamsByProfessor('prof_current');
+      const profId = currentUser?.uid || 'prof_current';
+      const exams = await getExamsByProfessor(profId);
       setExamsList(exams);
     };
     loadExams();
-  }, []);
+  }, [currentUser?.uid]);
 
   // Load exam analytics when selectedExam changes
   useEffect(() => {
@@ -299,28 +314,72 @@ export function ProfessorDashboard() {
 
   // Handler to publish material
   const handlePublishMaterial = async () => {
-    if (!selectedClassId || !matTitle.trim()) return;
+    const targetClass = selectedClassId || (turmas.length > 0 ? turmas[0].id : null);
+    if (!targetClass) {
+      showFeedback('Por favor, crie uma turma na aba "Minhas Turmas" antes de disponibilizar materiais didáticos.', 'error');
+      return;
+    }
+    if (!matTitle.trim()) {
+      showFeedback('Por favor, informe o título do material didático.', 'error');
+      return;
+    }
+    if (matType === 'link') {
+      if (!matUrl.trim()) {
+        showFeedback('Por favor, informe a URL ou link do recurso educacional.', 'error');
+        return;
+      }
+    } else if (matType === 'texto') {
+      if (!matContent.trim()) {
+        showFeedback('Por favor, insira o texto, resumo ou orientação de estudo.', 'error');
+        return;
+      }
+    } else if (matType === 'arquivo') {
+      if (!matUrl && !matFileName) {
+        showFeedback('Por favor, selecione um arquivo do dispositivo para envio.', 'error');
+        return;
+      }
+    }
+
     setUploadingMat(true);
     try {
-      await addEnhancedMaterial(selectedClassId, {
+      let finalLinkOuConteudo = '';
+      if (matType === 'texto') {
+        finalLinkOuConteudo = matContent.trim();
+      } else if (matType === 'link') {
+        let cleanUrl = matUrl.trim();
+        if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+          cleanUrl = 'https://' + cleanUrl;
+        }
+        finalLinkOuConteudo = cleanUrl;
+      } else {
+        finalLinkOuConteudo = matUrl;
+      }
+
+      const profId = currentUser?.uid || 'prof_current';
+
+      const saved = await addEnhancedMaterial(targetClass, {
         title: matTitle.trim(),
-        description: matDesc.trim(),
+        description: matDesc.trim() || (matType === 'texto' ? 'Resumo de leitura e orientações didáticas' : 'Material didático complementar'),
         tipo: matType === 'arquivo' ? 'pdf' : matType === 'link' ? 'link' : 'texto',
-        linkOuConteudo: matType === 'texto' ? matContent : matUrl,
-        nomeArquivo: matFileName || undefined,
-        tamanhoFormatado: matFileSize || undefined,
+        linkOuConteudo: finalLinkOuConteudo,
+        nomeArquivo: matType === 'arquivo' ? (matFileName || 'arquivo_anexo') : undefined,
+        tamanhoFormatado: matType === 'arquivo' ? (matFileSize || 'N/D') : undefined,
         disciplina: matSubject,
         periodo: matBimester,
-        professorId: 'prof_current'
+        professorId: profId
       });
+
+      setEnhancedMaterials(prev => [saved, ...prev.filter(m => m.id !== saved.id)]);
       setMatTitle('');
       setMatDesc('');
       setMatUrl('');
       setMatContent('');
       setMatFileName('');
       setMatFileSize('');
+      showFeedback('Material didático publicado com sucesso para a turma!', 'success');
     } catch (err) {
       console.error('Erro ao publicar material:', err);
+      showFeedback('Não foi possível salvar o material. Tente novamente.', 'error');
     } finally {
       setUploadingMat(false);
     }
@@ -328,20 +387,33 @@ export function ProfessorDashboard() {
 
   // Handler to publish Class Notice (Mural)
   const handlePublishNotice = async () => {
-    if (!selectedClassId || !newNoticeTitle.trim() || !newNoticeText.trim()) return;
+    const targetClass = selectedClassId || (turmas.length > 0 ? turmas[0].id : null);
+    if (!targetClass) {
+      showFeedback('Selecione ou crie uma turma para publicar comunicado no mural.', 'error');
+      return;
+    }
+    if (!newNoticeTitle.trim() || !newNoticeText.trim()) {
+      showFeedback('Preencha o título e o texto do comunicado.', 'error');
+      return;
+    }
     setPublishingNotice(true);
     try {
-      await createClassNotice(
-        selectedClassId,
-        'prof_current',
-        'Professor',
+      const profId = currentUser?.uid || 'prof_current';
+      const profName = userData?.name || currentUser?.displayName || 'Professor';
+      const savedNotice = await createClassNotice(
+        targetClass,
+        profId,
+        profName,
         newNoticeTitle.trim(),
         newNoticeText.trim()
       );
+      setClassNotices(prev => [savedNotice, ...prev]);
       setNewNoticeTitle('');
       setNewNoticeText('');
+      showFeedback('Comunicado publicado no mural da turma com sucesso!', 'success');
     } catch (err) {
       console.error('Erro ao publicar aviso:', err);
+      showFeedback('Erro ao publicar aviso. Tente novamente.', 'error');
     } finally {
       setPublishingNotice(false);
     }
@@ -349,13 +421,22 @@ export function ProfessorDashboard() {
 
   // Handler to save Lesson Plan item
   const handleSaveLessonPlan = async () => {
-    if (!selectedClassId || !newPlanTopic.trim()) return;
+    const targetClass = selectedClassId || (turmas.length > 0 ? turmas[0].id : null);
+    if (!targetClass) {
+      showFeedback('Selecione ou cadastre uma turma para registrar o planejamento.', 'error');
+      return;
+    }
+    if (!newPlanTopic.trim()) {
+      showFeedback('Informe o tópico ou conteúdo da aula a ser planejada.', 'error');
+      return;
+    }
     setSavingPlan(true);
     try {
+      const profId = currentUser?.uid || 'prof_current';
       const associatedLab = (ALL_MODULES as any[]).flatMap((m: any) => m.labs).find((l: any) => l.id === newPlanLabId);
-      await saveLessonPlanItem({
-        professorId: 'prof_current',
-        turmaId: selectedClassId,
+      const savedPlan = await saveLessonPlanItem({
+        professorId: profId,
+        turmaId: targetClass,
         periodo: selectedBimester,
         ordemSemana: (classLessonPlans.filter(p => p.periodo === selectedBimester).length + 1),
         topico: newPlanTopic.trim(),
@@ -367,13 +448,16 @@ export function ProfessorDashboard() {
         dataPrevista: newPlanDate || undefined,
         criadoEm: new Date().toISOString()
       });
+      setClassLessonPlans(prev => [...prev, savedPlan]);
       setNewPlanTopic('');
       setNewPlanBNCC('');
       setNewPlanMethodology('');
       setNewPlanLabId('');
       setNewPlanDate('');
+      showFeedback('Aula adicionada ao plano de estudos bimestral com sucesso!', 'success');
     } catch (err) {
       console.error('Erro ao salvar item no plano de aula:', err);
+      showFeedback('Erro ao salvar plano de aula.', 'error');
     } finally {
       setSavingPlan(false);
     }
@@ -381,7 +465,10 @@ export function ProfessorDashboard() {
 
   // Handler to generate Lesson Plan with AI Gemini
   const handleGeneratePlanWithAI = async () => {
-    if (!selectedClassId || !newPlanTopic.trim()) return;
+    if (!newPlanTopic.trim()) {
+      showFeedback('Digite o tópico da aula antes de solicitar a sugestão da IA.', 'info');
+      return;
+    }
     setGeneratingPlanAI(true);
     try {
       await generateCompleteLessonWithAI({
@@ -391,9 +478,11 @@ export function ProfessorDashboard() {
         activityType: 'lesson_theory'
       });
       setNewPlanBNCC(`BNCC: Compreensão teórica e experimental de ${newPlanTopic.trim()}`);
-      setNewPlanMethodology(`Metodologia Ativa: 1) Apresentação conceitual. 2) Exploração em laboratório virtual interativo. 3) Debate e checagem de conceitos com feedback imediato.`);
+      setNewPlanMethodology(`Metodologia Ativa: 1) Apresentação conceitual dialogada. 2) Exploração em laboratório virtual interativo. 3) Debate formativo e síntese conceitual com feedback imediato.`);
+      showFeedback('Sugestão pedagógica gerada com sucesso pela IA!', 'success');
     } catch (err) {
       console.error('Erro ao gerar plano com IA:', err);
+      showFeedback('Não foi possível gerar sugestão pela IA no momento.', 'error');
     } finally {
       setGeneratingPlanAI(false);
     }
@@ -401,7 +490,10 @@ export function ProfessorDashboard() {
 
   // Handler to generate Exam with AI Gemini
   const handleGenerateExamWithAI = async () => {
-    if (!examAiTopic.trim()) return;
+    if (!examAiTopic.trim()) {
+      showFeedback('Digite um assunto para gerar as questões da prova.', 'info');
+      return;
+    }
     setExamAiGenerating(true);
     try {
       const result = await generateCompleteLessonWithAI({
@@ -426,8 +518,10 @@ export function ProfessorDashboard() {
         }));
         setNewExamQuestions(convertedQuestions);
       }
+      showFeedback('Questões com gabarito e resolução comentada geradas com sucesso!', 'success');
     } catch (err) {
       console.error('Erro ao gerar prova com IA:', err);
+      showFeedback('Não foi possível gerar questões automáticas pela IA no momento.', 'error');
     } finally {
       setExamAiGenerating(false);
     }
@@ -435,36 +529,113 @@ export function ProfessorDashboard() {
 
   // Handler to publish Exam for class
   const handlePublishExam = async (status: 'Rascunho' | 'Aberta') => {
-    if (!newExamTitle.trim()) return;
-    const targetClass = newExamTargetClass || selectedClassId || turmas[0]?.id;
-    const targetClassObj = turmas.find(t => t.id === targetClass);
+    if (!newExamTitle.trim()) {
+      showFeedback('Por favor, informe o título da avaliação antes de salvar.', 'error');
+      return;
+    }
+    if (!newExamQuestions || newExamQuestions.length === 0) {
+      showFeedback('Adicione pelo menos 1 questão à avaliação antes de salvar.', 'error');
+      return;
+    }
+    for (let i = 0; i < newExamQuestions.length; i++) {
+      const q = newExamQuestions[i];
+      if (!q.enunciado.trim()) {
+        showFeedback(`A questão #${i + 1} precisa ter um enunciado preenchido.`, 'error');
+        return;
+      }
+      const hasCorrect = q.opcoes.some(opt => opt.isCorreta);
+      if (!hasCorrect) {
+        showFeedback(`Marque qual das alternativas da questão #${i + 1} é a correta.`, 'error');
+        return;
+      }
+    }
 
-    const pesoTotal = newExamQuestions.reduce((sum, q) => sum + (q.valorPeso || 1), 0);
+    setSavingExam(true);
+    try {
+      const targetClass = newExamTargetClass || selectedClassId || (turmas.length > 0 ? turmas[0].id : 'turma_geral');
+      const targetClassObj = turmas.find(t => t.id === targetClass);
+      const profId = currentUser?.uid || 'prof_current';
+      const profName = userData?.name || currentUser?.displayName || 'Professor';
 
-    const saved = await saveExam({
-      professorId: 'prof_current',
-      professorName: 'Professor',
-      titulo: newExamTitle.trim(),
-      descricao: newExamDesc.trim(),
-      disciplina: newExamSubject,
-      turmaId: targetClass,
-      turmaNome: targetClassObj?.name,
-      duracaoMinutos: newExamDuration || 50,
-      dataLimite: newExamDeadline || undefined,
-      status,
-      pesoTotal,
-      questoes: newExamQuestions,
-      criadoEm: new Date().toISOString()
-    });
+      const pesoTotal = newExamQuestions.reduce((sum, q) => sum + (q.valorPeso || 1), 0);
 
-    setExamsList(prev => [saved, ...prev]);
-    setExamMode('list');
-    setNewExamTitle('');
-    setNewExamDesc('');
+      const saved = await saveExam({
+        professorId: profId,
+        professorName: profName,
+        titulo: newExamTitle.trim(),
+        descricao: newExamDesc.trim() || 'Avaliação formal com questões de múltipla escolha e correção automática.',
+        disciplina: newExamSubject,
+        turmaId: targetClass,
+        turmaNome: targetClassObj?.name || (targetClass === 'turma_geral' ? 'Turma Geral' : 'Turma Vinculada'),
+        duracaoMinutos: newExamDuration || 50,
+        dataLimite: newExamDeadline || undefined,
+        status,
+        pesoTotal,
+        questoes: newExamQuestions,
+        criadoEm: new Date().toISOString()
+      });
+
+      setExamsList(prev => [saved, ...prev.filter(e => e.id !== saved.id)]);
+      setExamMode('list');
+      setNewExamTitle('');
+      setNewExamDesc('');
+      showFeedback(
+        status === 'Aberta'
+          ? '🚀 Avaliação formal publicada e disponibilizada para os alunos!'
+          : '📝 Rascunho da avaliação salvo com sucesso!',
+        'success'
+      );
+    } catch (err) {
+      console.error('Erro ao salvar avaliação:', err);
+      showFeedback('Houve um problema ao salvar a avaliação. Tente novamente.', 'error');
+    } finally {
+      setSavingExam(false);
+    }
   };
 
   return (
     <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '84rem', margin: '0 auto' }}>
+      {/* Toast Feedback Notification Banner */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '1.5rem',
+            right: '1.5rem',
+            zIndex: 9999,
+            padding: '0.85rem 1.25rem',
+            borderRadius: '10px',
+            background: toastMessage.type === 'error' ? 'rgba(239,68,68,0.95)' : toastMessage.type === 'info' ? 'rgba(6,182,212,0.95)' : 'rgba(16,185,129,0.95)',
+            color: '#ffffff',
+            boxShadow: '0 10px 35px rgba(0,0,0,0.5)',
+            fontWeight: 700,
+            fontSize: '0.9rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.65rem',
+            backdropFilter: 'blur(10px)',
+            maxWidth: '440px',
+            border: '1px solid rgba(255,255,255,0.2)'
+          }}
+        >
+          {toastMessage.type === 'error' ? (
+            <AlertTriangle style={{ width: '1.2rem', height: '1.2rem', flexShrink: 0 }} />
+          ) : toastMessage.type === 'info' ? (
+            <Sparkles style={{ width: '1.2rem', height: '1.2rem', flexShrink: 0 }} />
+          ) : (
+            <CheckCircle style={{ width: '1.2rem', height: '1.2rem', flexShrink: 0 }} />
+          )}
+          <span style={{ flex: 1 }}>{toastMessage.text}</span>
+          <button
+            onClick={() => setToastMessage(null)}
+            style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.1rem', padding: '0 0.2rem', opacity: 0.8 }}
+            title="Fechar aviso"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
         <div>
@@ -1379,19 +1550,22 @@ export function ProfessorDashboard() {
               {/* Publish Action Buttons */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
                 <button
+                  type="button"
                   onClick={() => handlePublishExam('Rascunho')}
+                  disabled={savingExam}
                   className="btn-outline-cyan"
-                  style={{ padding: '0.65rem 1.5rem' }}
+                  style={{ padding: '0.65rem 1.5rem', opacity: savingExam ? 0.7 : 1, cursor: savingExam ? 'not-allowed' : 'pointer' }}
                 >
-                  Salvar como Rascunho
+                  {savingExam ? 'Salvando...' : 'Salvar como Rascunho'}
                 </button>
                 <button
+                  type="button"
                   onClick={() => handlePublishExam('Aberta')}
-                  disabled={!newExamTitle.trim()}
+                  disabled={savingExam}
                   className="btn-gradient"
-                  style={{ padding: '0.65rem 2rem', fontWeight: 800, background: 'linear-gradient(135deg, #10b981, #06b6d4)' }}
+                  style={{ padding: '0.65rem 2rem', fontWeight: 800, background: 'linear-gradient(135deg, #10b981, #06b6d4)', opacity: savingExam ? 0.7 : 1, cursor: savingExam ? 'not-allowed' : 'pointer' }}
                 >
-                  🚀 Aplicar Prova para a Turma
+                  {savingExam ? 'Publicando Avaliação...' : '🚀 Aplicar Prova para a Turma'}
                 </button>
               </div>
             </div>
@@ -1566,6 +1740,47 @@ export function ProfessorDashboard() {
               Upload & Compartilhamento de Materiais de Apoio
             </h3>
 
+            {/* Class Selector for Materials */}
+            {turmas.length > 0 ? (
+              <div style={{ marginBottom: '1.25rem', padding: '0.85rem 1rem', borderRadius: '8px', background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Users style={{ width: '1.1rem', height: '1.1rem', color: '#06b6d4' }} />
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Turma de Destino:{' '}
+                    <strong style={{ color: 'var(--text-main)' }}>
+                      {turmas.find(t => t.id === selectedClassId)?.name || 'Selecione uma turma'}
+                    </strong>
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Trocar Turma:</label>
+                  <select
+                    value={selectedClassId || ''}
+                    onChange={(e) => setSelectedClassId(e.target.value)}
+                    style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.82rem' }}
+                  >
+                    {turmas.map(t => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            ) : (
+              <div style={{ marginBottom: '1.25rem', padding: '0.85rem 1rem', borderRadius: '8px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <AlertTriangle style={{ width: '1.2rem', height: '1.2rem', color: '#f59e0b', flexShrink: 0 }} />
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  Você ainda não possui turmas cadastradas. Crie sua primeira turma na aba{' '}
+                  <button
+                    onClick={() => { setDashboardTab('classes'); setIsCreatingClass(true); }}
+                    style={{ background: 'none', border: 'none', color: '#06b6d4', textDecoration: 'underline', cursor: 'pointer', fontWeight: 700, padding: 0 }}
+                  >
+                    Minhas Turmas
+                  </button>
+                  {' '}para que os estudantes possam acessar os materiais compartilhados.
+                </span>
+              </div>
+            )}
+
             {/* Upload Selector */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
               <div>
@@ -1669,11 +1884,11 @@ export function ProfessorDashboard() {
             {matType === 'texto' && (
               <div style={{ marginBottom: '1.25rem' }}>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
-                  Conteúdo do Resumo / Instruções:
+                  Conteúdo do Resumo / Instruções Pedagógicas:
                 </label>
                 <textarea
                   rows={4}
-                  placeholder="Escreva aqui o texto explicativo, fórmulas importantes ou orientações de estudo..."
+                  placeholder="Escreva aqui o texto explicativo, síntese da aula, fórmulas importantes ou orientações de estudo..."
                   value={matContent}
                   onChange={e => setMatContent(e.target.value)}
                   style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem', resize: 'vertical' }}
@@ -1696,24 +1911,32 @@ export function ProfessorDashboard() {
 
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button
+                type="button"
                 onClick={handlePublishMaterial}
-                disabled={uploadingMat || !matTitle.trim()}
+                disabled={uploadingMat}
                 className="btn-gradient"
-                style={{ padding: '0.65rem 1.75rem', fontWeight: 700 }}
+                style={{ padding: '0.65rem 1.75rem', fontWeight: 700, opacity: uploadingMat ? 0.7 : 1 }}
               >
-                {uploadingMat ? 'Enviando...' : 'Publicar Material para a Turma'}
+                {uploadingMat ? 'Publicando...' : 'Publicar Material para a Turma'}
               </button>
             </div>
           </div>
 
           {/* List of Published Materials */}
           <div className="glass-card" style={{ padding: '1.75rem' }}>
-            <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem' }}>
-              Materiais Disponibilizados para a Turma ({enhancedMaterials.length})
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
+                Materiais Disponibilizados para a Turma ({enhancedMaterials.length})
+              </h3>
+              {selectedClassId && turmas.length > 0 && (
+                <span style={{ fontSize: '0.82rem', color: '#06b6d4', background: 'rgba(6,182,212,0.1)', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 600 }}>
+                  {turmas.find(t => t.id === selectedClassId)?.name}
+                </span>
+              )}
+            </div>
 
             {enhancedMaterials.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
                 {enhancedMaterials.map(mat => (
                   <div key={mat.id} style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
@@ -1721,36 +1944,97 @@ export function ProfessorDashboard() {
                         <span style={{ fontSize: '0.72rem', color: '#8b5cf6', fontWeight: 700, textTransform: 'uppercase' }}>
                           {mat.periodo || '1º Bimestre'}
                         </span>
-                        <span style={{ fontSize: '0.72rem', color: '#06b6d4', background: 'rgba(6,182,212,0.1)', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 600 }}>
-                          {mat.tipo}
+                        <span style={{
+                          fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 600,
+                          background: mat.tipo === 'texto' ? 'rgba(139,92,246,0.15)' : mat.tipo === 'link' ? 'rgba(6,182,212,0.15)' : 'rgba(16,185,129,0.15)',
+                          color: mat.tipo === 'texto' ? '#8b5cf6' : mat.tipo === 'link' ? '#06b6d4' : '#10b981',
+                          border: `1px solid ${mat.tipo === 'texto' ? 'rgba(139,92,246,0.3)' : mat.tipo === 'link' ? 'rgba(6,182,212,0.3)' : 'rgba(16,185,129,0.3)'}`
+                        }}>
+                          {mat.tipo === 'texto' ? '📝 Resumo Textual' : mat.tipo === 'link' ? '🔗 Link Externo' : '📄 Arquivo / PDF'}
                         </span>
                       </div>
                       <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.35rem' }}>{mat.title}</h4>
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', margin: '0 0 0.75rem', lineHeight: 1.4 }}>
                         {mat.description}
                       </p>
+
+                      {/* Polymorphic Content Display */}
+                      {mat.tipo === 'texto' && mat.linkOuConteudo && (
+                        <div style={{
+                          padding: '0.75rem',
+                          borderRadius: '8px',
+                          background: 'rgba(0,0,0,0.3)',
+                          border: '1px solid rgba(139,92,246,0.2)',
+                          fontSize: '0.82rem',
+                          color: 'var(--text-secondary)',
+                          whiteSpace: 'pre-wrap',
+                          maxHeight: '140px',
+                          overflowY: 'auto',
+                          marginBottom: '0.75rem',
+                          lineHeight: 1.5
+                        }}>
+                          {mat.linkOuConteudo}
+                        </div>
+                      )}
+
                       {mat.nomeArquivo && (
                         <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                          📎 {mat.nomeArquivo} ({mat.tamanhoFormatado})
+                          📎 {mat.nomeArquivo} ({mat.tamanhoFormatado || ''})
                         </div>
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      {mat.linkOuConteudo && (
-                        <a
-                          href={mat.linkOuConteudo}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download={mat.nomeArquivo || undefined}
-                          style={{ color: '#06b6d4', fontSize: '0.82rem', textDecoration: 'underline', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                        >
-                          <ExternalLink style={{ width: '0.85rem', height: '0.85rem' }} /> Baixar / Acessar
-                        </a>
-                      )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div>
+                        {mat.tipo === 'texto' ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(mat.linkOuConteudo);
+                              setCopiedTextId(mat.id);
+                              setTimeout(() => setCopiedTextId(prev => prev === mat.id ? null : prev), 2000);
+                              showFeedback('Texto copiado para a área de transferência!', 'info');
+                            }}
+                            className="btn-outline-cyan"
+                            style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                          >
+                            {copiedTextId === mat.id ? (
+                              <>
+                                <Check style={{ width: '0.8rem', height: '0.8rem', color: '#10b981' }} /> Copiado!
+                              </>
+                            ) : (
+                              <>
+                                <Copy style={{ width: '0.8rem', height: '0.8rem' }} /> Copiar Texto
+                              </>
+                            )}
+                          </button>
+                        ) : mat.tipo === 'link' ? (
+                          <a
+                            href={mat.linkOuConteudo.startsWith('http') ? mat.linkOuConteudo : `https://${mat.linkOuConteudo}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-outline-cyan"
+                            style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                          >
+                            <ExternalLink style={{ width: '0.8rem', height: '0.8rem' }} /> Acessar Link
+                          </a>
+                        ) : (
+                          <a
+                            href={mat.linkOuConteudo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download={mat.nomeArquivo || 'material_didatico'}
+                            className="btn-gradient"
+                            style={{ padding: '0.35rem 0.85rem', fontSize: '0.78rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                          >
+                            <Download style={{ width: '0.8rem', height: '0.8rem' }} /> Baixar Arquivo
+                          </a>
+                        )}
+                      </div>
+
                       <button
                         onClick={() => selectedClassId && deleteEnhancedMaterial(selectedClassId, mat.id)}
-                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.25rem' }}
                         title="Remover material"
                       >
                         <Trash2 style={{ width: '0.9rem', height: '0.9rem' }} />
