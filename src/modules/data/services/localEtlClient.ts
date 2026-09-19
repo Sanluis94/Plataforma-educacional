@@ -178,6 +178,7 @@ export const getLocalEtlClassesByProfessor = async (professorId?: string) => {
     .map((classData: ClassData) => ({
       id: classData.id!,
       name: classData.name,
+      code: classData.code || classData.id?.slice(0, 6).toUpperCase(),
       studentsCount: classData.studentIds?.length || 0,
       studentIds: classData.studentIds || []
     }));
@@ -190,6 +191,7 @@ export const getLocalStudentClasses = async (studentId: string): Promise<any[]> 
     .map((classData: ClassData) => ({
       id: classData.id!,
       name: classData.name,
+      code: classData.code || classData.id?.slice(0, 6).toUpperCase(),
       studentsCount: classData.studentIds?.length || 0,
       professorName: classData.professorName || 'Professor'
     }));
@@ -299,12 +301,14 @@ export const getLocalEtlSnapshot = async (): Promise<LocalEtlSnapshot | null> =>
 export const saveLocalClass = async (
   name: string,
   professorId?: string,
-  professorName?: string
+  professorName?: string,
+  customCode?: string
 ): Promise<ClassData> => {
   const db = await getLocalDb();
   const newClass: ClassData = {
     id: `local-class-${Date.now()}`,
     name,
+    code: customCode || Math.random().toString(36).substring(2, 8).toUpperCase(),
     professorId: professorId || 'local-prof',
     professorName: professorName || 'Professor Local',
     studentsCount: 0,
@@ -317,9 +321,14 @@ export const saveLocalClass = async (
   return newClass;
 };
 
-export const enrollLocalStudent = async (classId: string, studentId: string): Promise<void> => {
+export const enrollLocalStudent = async (classCodeOrId: string, studentId: string): Promise<void> => {
   const db = await getLocalDb();
-  const classData = db.classes.find((c: ClassData) => c.id === classId);
+  const search = classCodeOrId.trim().toUpperCase();
+  const classData = db.classes.find((c: ClassData) => 
+    c.id === classCodeOrId.trim() || 
+    (c.code && c.code.toUpperCase() === search) || 
+    (c.id && c.id.toUpperCase().startsWith(search))
+  );
   if (classData) {
     if (!classData.studentIds) classData.studentIds = [];
     if (!classData.studentIds.includes(studentId)) {

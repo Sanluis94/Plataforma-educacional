@@ -72,6 +72,9 @@ export function ProfessorDashboard() {
     'classes' | 'lesson_plans' | 'exams' | 'materials' | 'labs_overview' | 'reports' | 'messages' | 'lms_gradebook'
   >('classes');
 
+  // State to track copied class code
+  const [copiedClassCode, setCopiedClassCode] = useState<string | null>(null);
+
   // State for Notices (Mural da Turma estilo Edu-Interact-v2)
   const [classNotices, setClassNotices] = useState<any[]>([]);
   const [newNoticeTitle, setNewNoticeTitle] = useState('');
@@ -810,9 +813,59 @@ export function ProfessorDashboard() {
                     </span>
                   </div>
 
-                  <div style={{ padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.25)', borderRadius: '8px', marginBottom: '1rem', border: '1px dashed rgba(255,255,255,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Código de Matrícula:</span>
-                    <strong style={{ color: '#06b6d4', fontFamily: 'monospace', letterSpacing: '1px' }}>{turma.id}</strong>
+                  {/* Código da Turma (6 dígitos) com Cópia Rápida */}
+                  <div style={{
+                    padding: '0.65rem 0.85rem',
+                    background: 'rgba(6,182,212,0.06)',
+                    borderRadius: '8px',
+                    marginBottom: '1rem',
+                    border: '1px dashed rgba(6,182,212,0.35)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Código da Turma (6 dígitos):
+                      </span>
+                      <strong style={{ color: '#06b6d4', fontFamily: 'monospace', fontWeight: 800, fontSize: '1.15rem', letterSpacing: '2px' }}>
+                        {turma.code || turma.id.slice(0, 6).toUpperCase()}
+                      </strong>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const codeToCopy = turma.code || turma.id.slice(0, 6).toUpperCase();
+                        navigator.clipboard.writeText(codeToCopy);
+                        setCopiedClassCode(turma.id);
+                        setTimeout(() => setCopiedClassCode(null), 2500);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        background: copiedClassCode === turma.id ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.08)',
+                        border: copiedClassCode === turma.id ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.15)',
+                        color: copiedClassCode === turma.id ? '#10b981' : 'var(--text-main)',
+                        borderRadius: '6px',
+                        padding: '0.35rem 0.65rem',
+                        fontSize: '0.75rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      title="Copiar código de 6 dígitos para os alunos"
+                    >
+                      {copiedClassCode === turma.id ? (
+                        <>
+                          <Check style={{ width: '0.85rem', height: '0.85rem' }} /> Copiado!
+                        </>
+                      ) : (
+                        <>
+                          <Copy style={{ width: '0.85rem', height: '0.85rem' }} /> Copiar
+                        </>
+                      )}
+                    </button>
                   </div>
 
                   <div style={{ display: 'flex', gap: '0.5rem' }}>

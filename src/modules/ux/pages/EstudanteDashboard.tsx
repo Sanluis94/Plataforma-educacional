@@ -1044,16 +1044,32 @@ export function EstudanteDashboard() {
         <div className="fade-in">
           {/* Join New Class Form */}
           <div className="glass-card mb-4" style={{ padding: '1.5rem' }}>
-            <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+            <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.35rem' }}>
               ➕ Matricular-se em uma Nova Turma
             </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', marginBottom: '1rem' }}>
+              Insira o <strong>código de 6 dígitos</strong> fornecido pelo seu professor (ex: <code>K7M9P2</code>) para acessar os avisos, materiais e provas da turma.
+            </p>
             <form onSubmit={handleJoinClassSubmit} style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <input
                 type="text"
-                placeholder="Digite o código da turma fornecido pelo professor..."
+                placeholder="Código de 6 dígitos (ex: K7M9P2)..."
                 value={classCodeInput}
-                onChange={e => setClassCodeInput(e.target.value)}
-                style={{ flex: 1, minWidth: '240px', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                maxLength={25}
+                onChange={e => setClassCodeInput(e.target.value.toUpperCase())}
+                style={{
+                  flex: 1,
+                  minWidth: '240px',
+                  padding: '0.65rem 0.85rem',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'rgba(0,0,0,0.2)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.95rem',
+                  fontFamily: 'monospace',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase'
+                }}
               />
               <button
                 type="submit"
@@ -1065,6 +1081,58 @@ export function EstudanteDashboard() {
               </button>
             </form>
           </div>
+
+          {/* Lista de Turmas Matriculadas */}
+          {studentClasses.length > 0 && (
+            <div className="glass-card mb-4" style={{ padding: '1.5rem' }}>
+              <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
+                🏫 Suas Turmas Matriculadas ({studentClasses.length})
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                {studentClasses.map(turma => {
+                  const isSelected = selectedClassId === turma.id;
+                  const shortCode = turma.code || turma.id.slice(0, 6).toUpperCase();
+                  return (
+                    <div
+                      key={turma.id}
+                      onClick={() => setSelectedClassId(turma.id)}
+                      style={{
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        background: isSelected ? 'rgba(6,182,212,0.08)' : 'rgba(255,255,255,0.02)',
+                        border: isSelected ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                        <span style={{ fontSize: '0.72rem', color: isSelected ? '#06b6d4' : 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                          {isSelected ? '● Turma Ativa' : 'Clique para Selecionar'}
+                        </span>
+                        <span style={{
+                          fontSize: '0.75rem',
+                          fontFamily: 'monospace',
+                          fontWeight: 700,
+                          color: '#06b6d4',
+                          background: 'rgba(6,182,212,0.12)',
+                          padding: '0.15rem 0.45rem',
+                          borderRadius: '4px'
+                        }}>
+                          {shortCode}
+                        </span>
+                      </div>
+                      <h4 style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1rem', margin: '0 0 0.25rem' }}>
+                        {turma.name}
+                      </h4>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        Professor: <strong>{turma.professorName || 'Docente'}</strong>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Mural de Avisos da Turma */}
           <div className="glass-card mb-4" style={{ padding: '1.75rem' }}>

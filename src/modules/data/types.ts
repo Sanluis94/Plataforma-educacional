@@ -21,6 +21,7 @@ export interface UserData {
 export interface ClassData {
   id?: string;
   name: string;
+  code?: string; // Código amigável de 6 caracteres (ex: K7M9P2)
   professorId: string;
   professorName: string;
   gradeLevel?: string;

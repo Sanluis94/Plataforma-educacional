@@ -28,9 +28,26 @@ export interface Turma {
   name: string;
   studentsCount: number;
   professorName?: string;
+  code?: string;
+  createdAt?: string;
 }
 
 const COLLECTION = 'classes';
+
+/** Alfabeto seguro para códigos de turma: sem ambiguidade visual (sem 0/O, 1/I) */
+const CODE_ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+
+/**
+ * Gera um código de 6 dígitos alfanuméricos legíveis para a turma.
+ */
+export const generateShortClassCode = (): string => {
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * CODE_ALPHABET.length);
+    code += CODE_ALPHABET[randomIndex];
+  }
+  return code;
+};
 
 /**
  * Busca turmas de um professor específico.
@@ -48,12 +65,16 @@ export const getProfessorClasses = async (professorId?: string): Promise<Turma[]
     );
 
     const snapshot = await getDocs(q);
-    const docs = snapshot.docs.map(docSnap => ({
-      id: docSnap.id,
-      name: docSnap.data().name,
-      studentsCount: docSnap.data().studentsCount || 0,
-      createdAt: docSnap.data().createdAt || '',
-    }));
+    const docs = snapshot.docs.map(docSnap => {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        name: data.name,
+        studentsCount: data.studentsCount || 0,
+        code: data.code || docSnap.id.slice(0, 6).toUpperCase(),
+        createdAt: data.createdAt || '',
+      };
+    });
     
     // Sort locally to avoid Firestore missing index issues
     docs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -79,13 +100,17 @@ export const getStudentClasses = async (studentId: string): Promise<Turma[]> => 
     );
 
     const snapshot = await getDocs(q);
-    const docs = snapshot.docs.map(docSnap => ({
-      id: docSnap.id,
-      name: docSnap.data().name,
-      studentsCount: docSnap.data().studentsCount || 0,
-      professorName: docSnap.data().professorName || 'Professor',
-      createdAt: docSnap.data().createdAt || '',
-    }));
+    const docs = snapshot.docs.map(docSnap => {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        name: data.name,
+        studentsCount: data.studentsCount || 0,
+        professorName: data.professorName || 'Professor',
+        code: data.code || docSnap.id.slice(0, 6).toUpperCase(),
+        createdAt: data.createdAt || '',
+      };
+    });
     
     docs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     return docs;
@@ -96,21 +121,24 @@ export const getStudentClasses = async (studentId: string): Promise<Turma[]> => 
 };
 
 /**
- * Cria uma nova turma no Firestore.
+ * Cria uma nova turma no Firestore gerando um código amigável de 6 dígitos.
  */
 export const saveClass = async (
   name: string,
   professorId?: string,
   professorName?: string
 ): Promise<Turma> => {
+  const shortCode = generateShortClassCode();
+
   if (!db || !professorId) {
     console.warn('[ClassRepository] Firestore não inicializado. Turma salva localmente no LocalStorage.');
-    const newClass = await saveLocalClass(name, professorId, professorName);
-    return { id: newClass.id!, name: newClass.name, studentsCount: 0 };
+    const newClass = await saveLocalClass(name, professorId, professorName, shortCode);
+    return { id: newClass.id!, name: newClass.name, studentsCount: 0, code: newClass.code || shortCode };
   }
 
   const classData: Omit<ClassData, 'id'> = {
     name,
+    code: shortCode,
     professorId,
     professorName: professorName || 'Professor',
     studentsCount: 0,
@@ -120,7 +148,7 @@ export const saveClass = async (
   };
 
   const docRef = await addDoc(collection(db, COLLECTION), classData);
-  return { id: docRef.id, name, studentsCount: 0 };
+  return { id: docRef.id, name, studentsCount: 0, code: shortCode };
 };
 
 /**
@@ -132,26 +160,77 @@ export const deleteClass = async (classId: string): Promise<void> => {
 };
 
 /**
- * Matricula um estudante em uma turma (adiciona no array + incrementa counter).
+ * Matricula um estudante em uma turma.
+ * Suporta busca retrocompatível tanto pelo código de 6 dígitos quanto pelo id do Firestore.
  */
-export const enrollStudent = async (classId: string, studentId: string): Promise<void> => {
+export const enrollStudent = async (classCodeOrId: string, studentId: string): Promise<void> => {
+  const normalized = classCodeOrId.trim().toUpperCase();
+
   if (!db) {
-    await enrollLocalStudent(classId, studentId);
+    await enrollLocalStudent(normalized, studentId);
     return;
   }
 
-  const classDocRef = doc(db, COLLECTION, classId);
-  const classSnap = await getDoc(classDocRef);
-  
-  if (!classSnap.exists()) {
-    throw new Error('Turma não encontrada.');
+  let targetDocRef = null;
+  let currentStudentIds: string[] = [];
+
+  // 1. Tenta buscar pelo campo 'code' (código de 6 dígitos amigável)
+  try {
+    const codeQuery = query(
+      collection(db, COLLECTION),
+      where('code', '==', normalized)
+    );
+    const codeSnap = await getDocs(codeQuery);
+
+    if (!codeSnap.empty) {
+      const foundDoc = codeSnap.docs[0];
+      targetDocRef = doc(db, COLLECTION, foundDoc.id);
+      currentStudentIds = foundDoc.data().studentIds || [];
+    }
+  } catch (err) {
+    console.warn('[ClassRepository] Falha ao consultar código de turma, tentando por ID:', err);
   }
 
-  const currentStudentIds = classSnap.data().studentIds || [];
-  
+  // 2. Se não encontrou por code, tenta buscar direto pelo id do documento
+  if (!targetDocRef) {
+    try {
+      const idDocRef = doc(db, COLLECTION, classCodeOrId.trim());
+      const idSnap = await getDoc(idDocRef);
+      if (idSnap.exists()) {
+        targetDocRef = idDocRef;
+        currentStudentIds = idSnap.data().studentIds || [];
+      }
+    } catch {
+      // Ignora erro se não for um doc ID válido
+    }
+  }
+
+  // 3. Fallback retrocompatível: busca turmas legadas onde o ID começa com os 6 dígitos digitados
+  if (!targetDocRef) {
+    try {
+      const allSnap = await getDocs(collection(db, COLLECTION));
+      const matched = allSnap.docs.find(d => {
+        const dCode = d.data().code;
+        return (dCode && dCode.toUpperCase() === normalized) ||
+               d.id.toUpperCase().startsWith(normalized) ||
+               d.id === classCodeOrId.trim();
+      });
+      if (matched) {
+        targetDocRef = doc(db, COLLECTION, matched.id);
+        currentStudentIds = matched.data().studentIds || [];
+      }
+    } catch (err) {
+      console.warn('[ClassRepository] Falha na busca por fallback:', err);
+    }
+  }
+
+  if (!targetDocRef) {
+    throw new Error('Turma não encontrada. Verifique o código de 6 dígitos digitado.');
+  }
+
   // Só adiciona se o aluno ainda não estiver na turma
   if (!currentStudentIds.includes(studentId)) {
-    await updateDoc(classDocRef, {
+    await updateDoc(targetDocRef, {
       studentIds: arrayUnion(studentId),
       studentsCount: increment(1),
       updatedAt: new Date().toISOString(),
