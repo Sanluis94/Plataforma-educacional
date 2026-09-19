@@ -110,12 +110,37 @@ export function StudentLmsModules({
     if (!selectedTopic?.id || !studentReplyText.trim() || !selectedClassId) return;
     setSendingReply(true);
     try {
-      await addForumReply(selectedClassId, selectedTopic.id, {
+      const newReply = await addForumReply(selectedClassId, selectedTopic.id, {
         autorId: studentId,
         autorNome: studentName,
         autorRole: 'estudante',
         texto: studentReplyText.trim()
       });
+
+      setSelectedTopic(prev => {
+        if (!prev) return null;
+        const currentList = prev.respostas || [];
+        const exists = currentList.some(r => r.id === newReply.id);
+        if (exists) return prev;
+        return {
+          ...prev,
+          respostas: [...currentList, newReply]
+        };
+      });
+
+      setForumTopics(prev => prev.map(top => {
+        if (top.id === selectedTopic.id) {
+          const currentList = top.respostas || [];
+          const exists = currentList.some(r => r.id === newReply.id);
+          if (exists) return top;
+          return {
+            ...top,
+            respostas: [...currentList, newReply]
+          };
+        }
+        return top;
+      }));
+
       setStudentReplyText('');
     } finally {
       setSendingReply(false);

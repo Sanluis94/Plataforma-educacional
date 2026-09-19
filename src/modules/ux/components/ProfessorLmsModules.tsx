@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   Calendar, CheckCircle, AlertTriangle, XCircle, Award,
-  Users, MessageSquare, Plus, ShieldCheck, Download, Star
+  Users, MessageSquare, Plus, ShieldCheck, Download, Star,
+  Send, Trash2, Filter
 } from 'lucide-react';
 import type { Turma } from '../../data/repositories/classRepository';
 import type {
@@ -20,7 +21,9 @@ import {
   saveForumTopic,
   subscribeForumTopicsByClass,
   addForumReply,
-  markForumBestReply
+  markForumBestReply,
+  deleteForumTopic,
+  deleteForumReply
 } from '../../data/repositories/gradebookRepository';
 import {
   issueCertificate,
@@ -176,6 +179,18 @@ export function ProfessorLmsModules({
   const [isCreatingTopic, setIsCreatingTopic] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
+  const [forumToast, setForumToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const [forumFilter, setForumFilter] = useState<'all' | 'unanswered' | 'answered'>('all');
+
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setForumToast({ msg, type });
+    setTimeout(() => setForumToast(null), 3500);
+  };
+
+  // Formata o nome do docente sem duplicação de 'Prof.'
+  const profDisplayName = professorName?.toLowerCase().startsWith('prof')
+    ? professorName
+    : `Prof. ${professorName || 'Docente'}`;
 
   // Inscreve no fórum da turma em tempo real
   useEffect(() => {
@@ -194,40 +209,135 @@ export function ProfessorLmsModules({
     e.preventDefault();
     if (!newTopicTitle.trim() || !newTopicContent.trim() || !activeClassId) return;
 
-    await saveForumTopic({
-      turmaId: activeClassId,
-      titulo: newTopicTitle.trim(),
-      conteudo: newTopicContent.trim(),
-      autorId: 'prof_current',
-      autorNome: `Prof. ${professorName || 'Docente'}`,
-      autorRole: 'professor',
-      disciplina: newTopicSubject
-    });
+    try {
+      const created = await saveForumTopic({
+        turmaId: activeClassId,
+        titulo: newTopicTitle.trim(),
+        conteudo: newTopicContent.trim(),
+        autorId: 'prof_current',
+        autorNome: profDisplayName,
+        autorRole: 'professor',
+        disciplina: newTopicSubject
+      });
 
-    setNewTopicTitle('');
-    setNewTopicContent('');
-    setIsCreatingTopic(false);
+      setForumTopics(prev => [created, ...prev.filter(t => t.id !== created.id)]);
+      setSelectedTopic(created);
+      setNewTopicTitle('');
+      setNewTopicContent('');
+      setIsCreatingTopic(false);
+      showToast('Novo tópico de discussão criado com sucesso!', 'success');
+    } catch (err) {
+      console.error('Erro ao criar tópico:', err);
+      showToast('Erro ao criar tópico no fórum.', 'error');
+    }
   };
 
   const handleSendReply = async () => {
     if (!selectedTopic?.id || !replyText.trim() || !activeClassId) return;
     setSendingReply(true);
     try {
-      await addForumReply(activeClassId, selectedTopic.id, {
+      const newReply = await addForumReply(activeClassId, selectedTopic.id, {
         autorId: 'prof_current',
-        autorNome: `Prof. ${professorName || 'Docente'}`,
+        autorNome: profDisplayName,
         autorRole: 'professor',
         texto: replyText.trim()
       });
+
+      // Atualização otimista imediata do selectedTopic
+      setSelectedTopic(prev => {
+        if (!prev) return null;
+        const currentList = prev.respostas || [];
+        const exists = currentList.some(r => r.id === newReply.id);
+        if (exists) return prev;
+        return {
+          ...prev,
+          respostas: [...currentList, newReply]
+        };
+      });
+
+      // Atualização otimista imediata da lista de tópicos
+      setForumTopics(prev => prev.map(top => {
+        if (top.id === selectedTopic.id) {
+          const currentList = top.respostas || [];
+          const exists = currentList.some(r => r.id === newReply.id);
+          if (exists) return top;
+          return {
+            ...top,
+            respostas: [...currentList, newReply]
+          };
+        }
+        return top;
+      }));
+
       setReplyText('');
+      showToast('Resposta do professor publicada com sucesso!', 'success');
+    } catch (err) {
+      console.error('Erro ao enviar resposta no fórum:', err);
+      showToast('Erro ao enviar resposta. Verifique a conexão e tente novamente.', 'error');
     } finally {
       setSendingReply(false);
     }
   };
 
-  const handleToggleBestReply = async (replyId: string, currentStatus: boolean) => {
-    if (!selectedTopic?.id || !activeClassId) return;
-    await markForumBestReply(activeClassId, selectedTopic.id, replyId, !currentStatus);
+  const handleToggleBestReply = async (replyId?: string, currentStatus?: boolean) => {
+    if (!selectedTopic?.id || !replyId || !activeClassId) return;
+    const newStatus = !currentStatus;
+    try {
+      await markForumBestReply(activeClassId, selectedTopic.id, replyId, newStatus);
+      setSelectedTopic(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          respostas: (prev.respostas || []).map(r => ({
+            ...r,
+            isMelhorResposta: r.id === replyId ? newStatus : (newStatus ? false : r.isMelhorResposta)
+          }))
+        };
+      });
+      showToast(newStatus ? 'Resposta destacada como a melhor da discussão! (+20 XP para o aluno)' : 'Destaque removido.', 'success');
+    } catch (err) {
+      console.error('Erro ao marcar melhor resposta:', err);
+    }
+  };
+
+  const handleDeleteTopic = async (topicId?: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!activeClassId || !topicId) return;
+    if (!window.confirm('Tem certeza de que deseja excluir este tópico da turma?')) return;
+    try {
+      await deleteForumTopic(activeClassId, topicId);
+      setForumTopics(prev => prev.filter(t => t.id !== topicId));
+      if (selectedTopic?.id === topicId) setSelectedTopic(null);
+      showToast('Tópico removido com sucesso.', 'success');
+    } catch (err) {
+      console.error('Erro ao excluir tópico:', err);
+      showToast('Falha ao excluir tópico.', 'error');
+    }
+  };
+
+  const handleDeleteReply = async (replyId?: string) => {
+    if (!selectedTopic?.id || !replyId || !activeClassId) return;
+    if (!window.confirm('Deseja realmente remover esta resposta?')) return;
+    try {
+      await deleteForumReply(activeClassId, selectedTopic.id, replyId);
+      setSelectedTopic(prev => prev ? {
+        ...prev,
+        respostas: (prev.respostas || []).filter(r => r.id !== replyId)
+      } : null);
+      setForumTopics(prev => prev.map(top => {
+        if (top.id === selectedTopic.id) {
+          return {
+            ...top,
+            respostas: (top.respostas || []).filter(r => r.id !== replyId)
+          };
+        }
+        return top;
+      }));
+      showToast('Resposta removida.', 'success');
+    } catch (err) {
+      console.error('Erro ao excluir resposta:', err);
+      showToast('Falha ao remover resposta.', 'error');
+    }
   };
 
   // ─────────────────────────────────────────────────────────────
@@ -728,7 +838,30 @@ export function ProfessorLmsModules({
           3. SUB-ABA: FÓRUM PEDAGÓGICO DA TURMA
           ───────────────────────────────────────────────────────────── */}
       {subTab === 'forum' && (
-        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Toast Notification do Fórum */}
+          {forumToast && (
+            <div style={{
+              padding: '0.75rem 1.25rem',
+              borderRadius: '8px',
+              background: forumToast.type === 'success' ? 'rgba(16,185,129,0.92)' : 'rgba(239,68,68,0.92)',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+              backdropFilter: 'blur(8px)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {forumToast.type === 'success' ? <CheckCircle style={{ width: '1.1rem', height: '1.1rem' }} /> : <AlertTriangle style={{ width: '1.1rem', height: '1.1rem' }} />}
+                <span>{forumToast.msg}</span>
+              </div>
+              <button onClick={() => setForumToast(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.1rem' }}>×</button>
+            </div>
+          )}
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -736,7 +869,7 @@ export function ProfessorLmsModules({
                 Fórum Pedagógico & Discussões Acadêmicas
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
-                Ambiente colaborativo para esclarecimento de dúvidas conceituais, debates científicos e destaque de melhores respostas.
+                Ambiente colaborativo para esclarecimento de dúvidas conceituais, debates científicos e respostas oficiais do corpo docente.
               </p>
             </div>
             <button
@@ -806,17 +939,85 @@ export function ProfessorLmsModules({
             </form>
           )}
 
+          {/* Barra de Filtros dos Tópicos */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem', marginRight: '0.25rem' }}>
+              <Filter style={{ width: '0.85rem', height: '0.85rem' }} /> Filtrar:
+            </span>
+            <button
+              onClick={() => setForumFilter('all')}
+              style={{
+                padding: '0.35rem 0.85rem',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                fontWeight: forumFilter === 'all' ? 700 : 500,
+                background: forumFilter === 'all' ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.04)',
+                border: forumFilter === 'all' ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
+                color: forumFilter === 'all' ? '#06b6d4' : 'var(--text-secondary)',
+                cursor: 'pointer'
+              }}
+            >
+              Todos ({forumTopics.length})
+            </button>
+            <button
+              onClick={() => setForumFilter('unanswered')}
+              style={{
+                padding: '0.35rem 0.85rem',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                fontWeight: forumFilter === 'unanswered' ? 700 : 500,
+                background: forumFilter === 'unanswered' ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.04)',
+                border: forumFilter === 'unanswered' ? '1px solid #f59e0b' : '1px solid rgba(255,255,255,0.08)',
+                color: forumFilter === 'unanswered' ? '#f59e0b' : 'var(--text-secondary)',
+                cursor: 'pointer'
+              }}
+            >
+              ⏳ Aguardando Professor ({forumTopics.filter(t => !t.respostas?.some(r => r.autorRole === 'professor')).length})
+            </button>
+            <button
+              onClick={() => setForumFilter('answered')}
+              style={{
+                padding: '0.35rem 0.85rem',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                fontWeight: forumFilter === 'answered' ? 700 : 500,
+                background: forumFilter === 'answered' ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.04)',
+                border: forumFilter === 'answered' ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
+                color: forumFilter === 'answered' ? '#10b981' : 'var(--text-secondary)',
+                cursor: 'pointer'
+              }}
+            >
+              ✓ Respondidos ({forumTopics.filter(t => t.respostas?.some(r => r.autorRole === 'professor')).length})
+            </button>
+          </div>
+
           {/* Grid de Tópicos e Visualizador de Thread */}
-          <div style={{ display: 'grid', gridTemplateColumns: selectedTopic ? '1fr 1.5fr' : '1fr', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: selectedTopic ? '1fr 1.6fr' : '1fr', gap: '1.5rem' }}>
             {/* Lista de Tópicos */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {forumTopics.length === 0 ? (
-                <div className="glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
-                  <p style={{ color: 'var(--text-muted)', margin: 0 }}>Nenhum tópico criado nesta turma ainda. Abra a primeira discussão!</p>
-                </div>
-              ) : (
-                forumTopics.map(top => {
+              {(() => {
+                const displayedTopics = forumTopics.filter(t => {
+                  const hasProf = t.respostas?.some(r => r.autorRole === 'professor');
+                  if (forumFilter === 'unanswered') return !hasProf;
+                  if (forumFilter === 'answered') return hasProf;
+                  return true;
+                });
+
+                if (displayedTopics.length === 0) {
+                  return (
+                    <div className="glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
+                      <p style={{ color: 'var(--text-muted)', margin: 0 }}>
+                        {forumTopics.length === 0
+                          ? 'Nenhum tópico criado nesta turma ainda. Abra a primeira discussão!'
+                          : 'Nenhum tópico corresponde ao filtro selecionado.'}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return displayedTopics.map(top => {
                   const isSelected = selectedTopic?.id === top.id;
+                  const hasProfReply = top.respostas?.some(r => r.autorRole === 'professor');
                   return (
                     <div
                       key={top.id}
@@ -826,17 +1027,39 @@ export function ProfessorLmsModules({
                         padding: '1.25rem',
                         cursor: 'pointer',
                         border: isSelected ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
-                        background: isSelected ? 'rgba(6,182,212,0.05)' : 'rgba(255,255,255,0.02)',
-                        transition: 'all 0.2s'
+                        background: isSelected ? 'rgba(6,182,212,0.06)' : 'rgba(255,255,255,0.02)',
+                        transition: 'all 0.2s',
+                        position: 'relative'
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#06b6d4', background: 'rgba(6,182,212,0.15)', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
-                          {top.disciplina || 'Ciências'}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {new Date(top.criadoEm).toLocaleDateString('pt-BR')}
-                        </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#06b6d4', background: 'rgba(6,182,212,0.15)', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
+                            {top.disciplina || 'Ciências'}
+                          </span>
+                          {hasProfReply ? (
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#10b981', background: 'rgba(16,185,129,0.15)', padding: '0.15rem 0.45rem', borderRadius: '4px', border: '1px solid rgba(16,185,129,0.3)' }}>
+                              ✓ Respondido
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.15)', padding: '0.15rem 0.45rem', borderRadius: '4px', border: '1px solid rgba(245,158,11,0.3)' }}>
+                              ⏳ Aguarda Professor
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                            {new Date(top.criadoEm).toLocaleDateString('pt-BR')}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteTopic(top.id, e)}
+                            title="Excluir tópico"
+                            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}
+                          >
+                            <Trash2 style={{ width: '0.85rem', height: '0.85rem' }} />
+                          </button>
+                        </div>
                       </div>
                       <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.35rem' }}>
                         {top.titulo}
@@ -852,8 +1075,8 @@ export function ProfessorLmsModules({
                       </div>
                     </div>
                   );
-                })
-              )}
+                });
+              })()}
             </div>
 
             {/* Thread de Discussão Selecionada */}
@@ -862,7 +1085,15 @@ export function ProfessorLmsModules({
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                     <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#06b6d4' }}>{selectedTopic.disciplina}</span>
-                    <button onClick={() => setSelectedTopic(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.82rem' }}>Fechar</button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <button
+                        onClick={(e) => handleDeleteTopic(selectedTopic.id, e)}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                      >
+                        <Trash2 style={{ width: '0.8rem', height: '0.8rem' }} /> Excluir Tópico
+                      </button>
+                      <button onClick={() => setSelectedTopic(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.82rem' }}>Fechar</button>
+                    </div>
                   </div>
                   <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 800, margin: '0 0 0.5rem' }}>
                     {selectedTopic.titulo}
@@ -876,13 +1107,17 @@ export function ProfessorLmsModules({
                 </div>
 
                 {/* Respostas encadeadas */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.5rem', maxHeight: '400px', overflowY: 'auto' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.25rem', maxHeight: '380px', overflowY: 'auto' }}>
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)' }}>
                     Respostas da Turma ({selectedTopic.respostas?.length || 0}):
                   </div>
 
                   {(!selectedTopic.respostas || selectedTopic.respostas.length === 0) ? (
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>Nenhuma resposta ainda. Seja o primeiro a responder!</p>
+                    <div style={{ padding: '1.5rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>
+                        Nenhuma resposta ainda. Escreva uma orientação pedagógica abaixo para ajudar a turma!
+                      </p>
+                    </div>
                   ) : (
                     selectedTopic.respostas.map(reply => (
                       <div
@@ -890,30 +1125,40 @@ export function ProfessorLmsModules({
                         style={{
                           padding: '0.85rem 1rem',
                           borderRadius: '8px',
-                          border: reply.isMelhorResposta ? '1px solid #f59e0b' : '1px solid rgba(255,255,255,0.06)',
+                          border: reply.isMelhorResposta ? '1px solid #f59e0b' : reply.autorRole === 'professor' ? '1px solid rgba(6,182,212,0.3)' : '1px solid rgba(255,255,255,0.06)',
                           background: reply.isMelhorResposta ? 'rgba(245,158,11,0.08)' : reply.autorRole === 'professor' ? 'rgba(6,182,212,0.06)' : 'rgba(255,255,255,0.02)'
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                             <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>{reply.autorNome}</strong>
                             {reply.autorRole === 'professor' && (
-                              <span style={{ fontSize: '0.68rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: '#06b6d4', color: '#000', fontWeight: 800 }}>
+                              <span style={{ fontSize: '0.68rem', padding: '0.1rem 0.45rem', borderRadius: '4px', background: '#06b6d4', color: '#000', fontWeight: 800 }}>
                                 PROFESSOR
                               </span>
                             )}
                             {reply.isMelhorResposta && (
-                              <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.68rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: '#f59e0b', color: '#000', fontWeight: 800 }}>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.68rem', padding: '0.1rem 0.45rem', borderRadius: '4px', background: '#f59e0b', color: '#000', fontWeight: 800 }}>
                                 <Star style={{ width: '0.7rem', height: '0.7rem', fill: '#000' }} />
                                 MELHOR RESPOSTA
                               </span>
                             )}
                           </div>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                            {new Date(reply.criadoEm).toLocaleDateString('pt-BR')}
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                              {new Date(reply.criadoEm).toLocaleDateString('pt-BR')}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteReply(reply.id)}
+                              title="Excluir resposta"
+                              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.1rem' }}
+                            >
+                              <Trash2 style={{ width: '0.75rem', height: '0.75rem' }} />
+                            </button>
+                          </div>
                         </div>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.4, marginBottom: '0.5rem' }}>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.45, marginBottom: '0.5rem', whiteSpace: 'pre-wrap' }}>
                           {reply.texto}
                         </div>
                         {/* Ação do Professor de Marcar Melhor Resposta */}
@@ -942,24 +1187,73 @@ export function ProfessorLmsModules({
                   )}
                 </div>
 
-                {/* Caixa de Resposta do Professor */}
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input
-                    type="text"
+                {/* Caixa de Resposta Aprimorada do Professor */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.6rem',
+                  background: 'rgba(0,0,0,0.25)',
+                  padding: '1rem',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(6,182,212,0.25)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label style={{ fontSize: '0.82rem', color: '#06b6d4', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <MessageSquare style={{ width: '0.9rem', height: '0.9rem' }} />
+                      Responder como Professor:
+                    </label>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                      Atalho: <kbd style={{ padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', fontSize: '0.68rem' }}>Ctrl</kbd> + <kbd style={{ padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', fontSize: '0.68rem' }}>Enter</kbd>
+                    </span>
+                  </div>
+                  <textarea
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Adicione um comentário orientador ou responda à dúvida..."
-                    onKeyDown={(e) => e.key === 'Enter' && handleSendReply()}
-                    style={{ flex: 1, padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.88rem' }}
+                    placeholder="Escreva uma orientação conceitual, resposta pedagógica ou resolução de dúvida para a turma..."
+                    rows={3}
+                    onKeyDown={(e) => {
+                      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSendReply();
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      background: 'rgba(0,0,0,0.3)',
+                      color: '#fff',
+                      fontSize: '0.88rem',
+                      resize: 'vertical',
+                      boxSizing: 'border-box',
+                      lineHeight: 1.45
+                    }}
                   />
-                  <button
-                    onClick={handleSendReply}
-                    disabled={sendingReply || !replyText.trim()}
-                    className="btn-gradient"
-                    style={{ padding: '0.65rem 1.25rem', fontWeight: 700, whiteSpace: 'nowrap' }}
-                  >
-                    Responder
-                  </button>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      Sua resposta será publicada com a insígnia oficial de Docente.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleSendReply}
+                      disabled={sendingReply || !replyText.trim()}
+                      className="btn-gradient"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.45rem',
+                        padding: '0.55rem 1.35rem',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        cursor: (sendingReply || !replyText.trim()) ? 'not-allowed' : 'pointer',
+                        opacity: (sendingReply || !replyText.trim()) ? 0.6 : 1
+                      }}
+                    >
+                      <Send style={{ width: '0.85rem', height: '0.85rem' }} />
+                      {sendingReply ? 'Publicando Resposta...' : 'Publicar Resposta'}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

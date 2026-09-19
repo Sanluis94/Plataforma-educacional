@@ -11,7 +11,10 @@ const {
   getAttendanceByClass,
   saveForumTopic,
   getForumTopicsByClass,
-  addForumReply
+  addForumReply,
+  markForumBestReply,
+  deleteForumTopic,
+  deleteForumReply
 } = await import('../modules/data/repositories/gradebookRepository');
 
 const {
@@ -101,10 +104,35 @@ describe('Gradebook & Attendance (Moodle Pattern)', () => {
       moedasGanhas: 15
     });
 
-    const topics = await getForumTopicsByClass(classId);
-    expect(topics).toHaveLength(1);
-    expect(topics[0].respostas).toHaveLength(1);
-    expect(topics[0].respostas[0].autorNome).toBe('Ana');
+    // Teste de resposta do Professor
+    const profReply = await addForumReply(classId, topic.id!, {
+      autorId: 'prof-1',
+      autorNome: 'Prof. Carlos',
+      autorRole: 'professor',
+      texto: 'Excelente colocação, Ana! Lembrem-se também da frequência de corte f_0.'
+    });
+
+    expect(profReply.autorRole).toBe('professor');
+    expect(profReply.id).toBeDefined();
+
+    let updatedTopics = await getForumTopicsByClass(classId);
+    expect(updatedTopics[0].respostas).toHaveLength(2);
+    expect(updatedTopics[0].respostas.some(r => r.autorRole === 'professor')).toBe(true);
+
+    // Teste de marcação de Melhor Resposta
+    await markForumBestReply(classId, topic.id!, profReply.id, true);
+    updatedTopics = await getForumTopicsByClass(classId);
+    expect(updatedTopics[0].respostas.find(r => r.id === profReply.id)?.isMelhorResposta).toBe(true);
+
+    // Teste de exclusão de resposta
+    await deleteForumReply(classId, topic.id!, profReply.id);
+    updatedTopics = await getForumTopicsByClass(classId);
+    expect(updatedTopics[0].respostas).toHaveLength(1);
+
+    // Teste de exclusão de tópico
+    await deleteForumTopic(classId, topic.id!);
+    updatedTopics = await getForumTopicsByClass(classId);
+    expect(updatedTopics).toHaveLength(0);
   });
 });
 

@@ -2360,7 +2360,7 @@ export function ProfessorDashboard() {
           turmas={turmas}
           selectedClassId={selectedClassId}
           onSelectClass={(id) => setSelectedClassId(id)}
-          professorName="Docente"
+          professorName={userData?.name || currentUser?.displayName || 'Professor'}
         />
       )}
 
