@@ -1,7 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { generateCompleteLessonWithAI, generatePedagogicalDiagnosis } from '../modules/core/services/geminiService';
 
 describe('Gemini Service - Pedagogical AI & Lesson Generator', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Unit test network stub')));
+  });
   it('should generate a complete structured lesson with questions and theory (with fallback)', async () => {
     const lesson = await generateCompleteLessonWithAI({
       topic: 'Leis da Termodinâmica',

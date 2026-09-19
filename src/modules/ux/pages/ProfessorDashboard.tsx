@@ -372,7 +372,19 @@ export function ProfessorDashboard() {
         professorId: profId
       });
 
-      setEnhancedMaterials(prev => [saved, ...prev.filter(m => m.id !== saved.id)]);
+      setEnhancedMaterials(prev => {
+        const titleTrimmed = (saved.title || '').trim().toLowerCase();
+        const contentTrimmed = (saved.linkOuConteudo || saved.nomeArquivo || '').trim().toLowerCase();
+        const exists = prev.some(
+          m => m.id === saved.id ||
+               (m.title?.trim().toLowerCase() === titleTrimmed &&
+                (m.linkOuConteudo || m.nomeArquivo || '').trim().toLowerCase() === contentTrimmed)
+        );
+        if (exists) {
+          return prev.map(m => (m.id === saved.id ? saved : m));
+        }
+        return [saved, ...prev];
+      });
       setMatTitle('');
       setMatDesc('');
       setMatUrl('');
@@ -410,7 +422,19 @@ export function ProfessorDashboard() {
         newNoticeTitle.trim(),
         newNoticeText.trim()
       );
-      setClassNotices(prev => [savedNotice, ...prev]);
+      setClassNotices(prev => {
+        const titleTrimmed = (savedNotice.titulo || '').trim().toLowerCase();
+        const textTrimmed = (savedNotice.texto || '').trim().toLowerCase();
+        const exists = prev.some(
+          n => n.id === savedNotice.id ||
+               (n.titulo?.trim().toLowerCase() === titleTrimmed &&
+                n.texto?.trim().toLowerCase() === textTrimmed)
+        );
+        if (exists) {
+          return prev.map(n => (n.id === savedNotice.id ? savedNotice : n));
+        }
+        return [savedNotice, ...prev];
+      });
       setNewNoticeTitle('');
       setNewNoticeText('');
       showFeedback('Comunicado publicado no mural da turma com sucesso!', 'success');
@@ -451,7 +475,20 @@ export function ProfessorDashboard() {
         dataPrevista: newPlanDate || undefined,
         criadoEm: new Date().toISOString()
       });
-      setClassLessonPlans(prev => [...prev, savedPlan]);
+      setClassLessonPlans(prev => {
+        const topicTrimmed = (savedPlan.topico || '').trim().toLowerCase();
+        const exists = prev.some(
+          p => p.id === savedPlan.id ||
+               (p.turmaId === savedPlan.turmaId &&
+                p.periodo === savedPlan.periodo &&
+                p.topico?.trim().toLowerCase() === topicTrimmed &&
+                p.ordemSemana === savedPlan.ordemSemana)
+        );
+        if (exists) {
+          return prev.map(p => (p.id === savedPlan.id ? savedPlan : p));
+        }
+        return [...prev, savedPlan];
+      });
       setNewPlanTopic('');
       setNewPlanBNCC('');
       setNewPlanMethodology('');

@@ -466,6 +466,35 @@ function saveLocalNotices(classId: string, notices: any[]) {
   }
 }
 
+/**
+ * Deduplica lista de avisos preservando integridade por ID e chave composta (título + texto).
+ */
+export function deduplicateNotices(notices: any[]): any[] {
+  const seenIds = new Set<string>();
+  const seenContent = new Set<string>();
+  const result: any[] = [];
+
+  for (const item of notices) {
+    if (!item) continue;
+    const id = item.id ? String(item.id).trim() : '';
+    const title = (item.titulo || '').trim().toLowerCase();
+    const text = (item.texto || '').trim().toLowerCase();
+    const contentKey = `${title}|${text}`;
+
+    if (id && seenIds.has(id)) {
+      continue;
+    }
+    if (contentKey && contentKey !== '|' && seenContent.has(contentKey)) {
+      continue;
+    }
+
+    if (id) seenIds.add(id);
+    if (contentKey && contentKey !== '|') seenContent.add(contentKey);
+    result.push(item);
+  }
+  return result;
+}
+
 export const createClassNotice = async (
   classId: string,
   professorId: string,
@@ -482,26 +511,36 @@ export const createClassNotice = async (
     criadoEm: new Date().toISOString()
   });
 
+  let savedNotice: any = null;
+
+  if (db) {
+    try {
+      const docRef = await addDoc(collection(db, COLLECTION, classId, 'notices'), newNotice);
+      savedNotice = { id: docRef.id, ...newNotice };
+    } catch (err) {
+      console.warn('[ClassRepository] Falha ao salvar aviso no Firestore, utilizando fallback local:', err);
+    }
+  }
+
+  if (!savedNotice) {
+    savedNotice = { id: `notice_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`, ...newNotice };
+  }
+
+  // Atualiza cache local garantindo mesmo ID e sem duplicatas
   const notices = getLocalNotices(classId);
-  const localSaved = { id: `notice_${Date.now()}`, ...newNotice };
-  notices.unshift(localSaved);
-  saveLocalNotices(classId, notices);
+  const filtered = notices.filter(
+    n => n.id !== savedNotice.id &&
+         !(n.titulo?.trim().toLowerCase() === newNotice.titulo.trim().toLowerCase() &&
+           n.texto?.trim().toLowerCase() === newNotice.texto.trim().toLowerCase())
+  );
+  filtered.unshift(savedNotice);
+  saveLocalNotices(classId, deduplicateNotices(filtered));
 
-  if (!db) {
-    return localSaved;
-  }
-
-  try {
-    const docRef = await addDoc(collection(db, COLLECTION, classId, 'notices'), newNotice);
-    return { id: docRef.id, ...newNotice };
-  } catch (err) {
-    console.warn('[ClassRepository] Falha ao salvar aviso no Firestore, utilizando fallback local:', err);
-    return localSaved;
-  }
+  return savedNotice;
 };
 
 export const getClassNotices = async (classId: string): Promise<any[]> => {
-  const localDocs = getLocalNotices(classId);
+  const localDocs = deduplicateNotices(getLocalNotices(classId));
   if (!db) {
     return localDocs;
   }
@@ -509,11 +548,11 @@ export const getClassNotices = async (classId: string): Promise<any[]> => {
     const q = collection(db, COLLECTION, classId, 'notices');
     const snap = await getDocs(q);
     const remoteDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const map = new Map<string, any>();
-    for (const d of localDocs) if (d.id) map.set(d.id, d);
-    for (const d of remoteDocs) if (d.id) map.set(d.id, d);
-    const merged = Array.from(map.values());
+
+    // Documentos remotos têm prioridade sobre qualquer cópia local com ID gerado localmente
+    const merged = deduplicateNotices([...remoteDocs, ...localDocs]);
     merged.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+    saveLocalNotices(classId, merged);
     return merged;
   } catch (err) {
     console.error('[ClassRepository] Erro ao buscar avisos da turma:', err);
@@ -526,17 +565,19 @@ export const subscribeClassNotices = (
   callback: (notices: any[]) => void
 ): () => void => {
   if (!db) {
-    callback(getLocalNotices(classId));
+    callback(deduplicateNotices(getLocalNotices(classId)));
     return () => {};
   }
   const q = collection(db, COLLECTION, classId, 'notices');
   return onSnapshot(q, (snap) => {
     const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     docs.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
-    callback(docs);
+    const deduped = deduplicateNotices(docs);
+    saveLocalNotices(classId, deduped);
+    callback(deduped);
   }, (err) => {
     console.error('[ClassRepository] Erro no listener de avisos:', err);
-    callback(getLocalNotices(classId));
+    callback(deduplicateNotices(getLocalNotices(classId)));
   });
 };
 
@@ -552,6 +593,36 @@ export const deleteClassNotice = async (classId: string, noticeId: string): Prom
 };
 
 // ─── Materiais com Suporte a Upload & Categorização ───────────────
+
+/**
+ * Deduplica lista de materiais didáticos garantindo chave única por ID e por conteúdo/arquivo.
+ */
+export function deduplicateMaterials(materials: any[]): any[] {
+  const seenIds = new Set<string>();
+  const seenContent = new Set<string>();
+  const result: any[] = [];
+
+  for (const item of materials) {
+    if (!item) continue;
+    const id = item.id ? String(item.id).trim() : '';
+    const title = (item.title || item.titulo || '').trim().toLowerCase();
+    const content = (item.nomeArquivo || item.linkOuConteudo || item.url || item.description || '').trim().toLowerCase();
+    const contentKey = `${title}|${content}`;
+
+    if (id && seenIds.has(id)) {
+      continue;
+    }
+    if (contentKey && contentKey !== '|' && seenContent.has(contentKey)) {
+      continue;
+    }
+
+    if (id) seenIds.add(id);
+    if (contentKey && contentKey !== '|') seenContent.add(contentKey);
+    result.push(item);
+  }
+  return result;
+}
+
 export const addEnhancedMaterial = async (
   classId: string,
   material: {
@@ -572,7 +643,22 @@ export const addEnhancedMaterial = async (
     criadoEm: new Date().toISOString()
   });
 
-  // Salva no armazenamento local resiliente
+  let savedItem: any = null;
+
+  if (db) {
+    try {
+      const docRef = await addDoc(collection(db, COLLECTION, classId, 'enhanced_materials'), item);
+      savedItem = { id: docRef.id, ...item };
+    } catch (err) {
+      console.warn('[ClassRepository] Falha ao salvar material no Firestore, utilizando fallback local:', err);
+    }
+  }
+
+  if (!savedItem) {
+    savedItem = { id: `mat_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`, ...item };
+  }
+
+  // Salva no armazenamento local com o ID consistente
   try {
     await saveLocalComplementaryMaterial(classId, {
       title: item.title,
@@ -588,19 +674,7 @@ export const addEnhancedMaterial = async (
     console.warn('[ClassRepository] Falha ao salvar material em storage local:', err);
   }
 
-  const localSaved = { id: `mat_${Date.now()}`, ...item };
-
-  if (!db) {
-    return localSaved;
-  }
-
-  try {
-    const docRef = await addDoc(collection(db, COLLECTION, classId, 'enhanced_materials'), item);
-    return { id: docRef.id, ...item };
-  } catch (err) {
-    console.warn('[ClassRepository] Falha ao salvar material no Firestore, utilizando fallback local:', err);
-    return localSaved;
-  }
+  return savedItem;
 };
 
 export const getEnhancedMaterials = async (classId: string): Promise<any[]> => {
@@ -625,22 +699,19 @@ export const getEnhancedMaterials = async (classId: string): Promise<any[]> => {
   }
 
   if (!db) {
-    return localDocs;
+    return deduplicateMaterials(localDocs);
   }
   try {
     const q = collection(db, COLLECTION, classId, 'enhanced_materials');
     const snap = await getDocs(q);
     const remoteDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const map = new Map<string, any>();
-    for (const d of localDocs) if (d.id) map.set(d.id, d);
-    for (const d of remoteDocs) if (d.id) map.set(d.id, d);
 
-    const merged = Array.from(map.values());
+    const merged = deduplicateMaterials([...remoteDocs, ...localDocs]);
     merged.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
     return merged;
   } catch (err) {
     console.error('[ClassRepository] Erro ao buscar materiais enriquecidos:', err);
-    return localDocs;
+    return deduplicateMaterials(localDocs);
   }
 };
 
@@ -649,22 +720,26 @@ export const subscribeEnhancedMaterials = (
   callback: (materials: any[]) => void
 ): () => void => {
   if (!db) {
-    getEnhancedMaterials(classId).then(callback);
+    getEnhancedMaterials(classId).then(mats => callback(deduplicateMaterials(mats)));
     return () => {};
   }
   const q = collection(db, COLLECTION, classId, 'enhanced_materials');
   return onSnapshot(q, (snap) => {
     const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     docs.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
-    callback(docs);
+    callback(deduplicateMaterials(docs));
   }, (err) => {
     console.error('[ClassRepository] Erro no listener de materiais enriquecidos:', err);
-    getEnhancedMaterials(classId).then(callback);
+    getEnhancedMaterials(classId).then(mats => callback(deduplicateMaterials(mats)));
   });
 };
 
 export const deleteEnhancedMaterial = async (classId: string, materialId: string): Promise<void> => {
   if (!db) return;
-  await deleteDoc(doc(db, COLLECTION, classId, 'enhanced_materials', materialId));
+  try {
+    await deleteDoc(doc(db, COLLECTION, classId, 'enhanced_materials', materialId));
+  } catch (err) {
+    console.warn('[ClassRepository] Erro ao deletar material no Firestore:', err);
+  }
 };
 

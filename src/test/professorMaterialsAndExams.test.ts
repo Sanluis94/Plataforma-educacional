@@ -1,7 +1,19 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+vi.mock('../modules/core/services/firebaseConfig', () => ({
+  db: null
+}));
+
 import { sanitizeForFirestore } from '../modules/core/services/firestoreUtils';
 import { saveExam, getExamsByProfessor, getExamsByClass } from '../modules/data/repositories/examRepository';
-import { addEnhancedMaterial, getEnhancedMaterials } from '../modules/data/repositories/classRepository';
+import {
+  addEnhancedMaterial,
+  getEnhancedMaterials,
+  createClassNotice,
+  getClassNotices,
+  deduplicateNotices,
+  deduplicateMaterials
+} from '../modules/data/repositories/classRepository';
 
 describe('Professor Materials and Exam Suite', () => {
   beforeEach(() => {
@@ -128,4 +140,44 @@ describe('Professor Materials and Exam Suite', () => {
       expect(matsClass[0].tamanhoFormatado).toBe('2.4 MB');
     });
   });
+
+  describe('Deduplicação de Avisos e Materiais (Eliminação de Duplicatas)', () => {
+    it('deve deduplicar avisos com mesmo ID ou mesmo conteúdo composto (título + texto)', () => {
+      const rawNotices = [
+        { id: 'notice_1', titulo: 'Aviso de Prova', texto: 'A prova ocorrerá na sexta-feira.', criadoEm: '2026-09-19T10:00:00Z' },
+        { id: 'notice_1', titulo: 'Aviso de Prova', texto: 'A prova ocorrerá na sexta-feira.', criadoEm: '2026-09-19T10:00:00Z' },
+        { id: 'notice_2', titulo: 'Aviso de Prova', texto: 'A prova ocorrerá na sexta-feira.', criadoEm: '2026-09-19T10:01:00Z' },
+        { id: 'notice_3', titulo: 'Novo Material', texto: 'Slides adicionados.', criadoEm: '2026-09-19T10:02:00Z' }
+      ];
+
+      const deduped = deduplicateNotices(rawNotices);
+      expect(deduped).toHaveLength(2);
+      expect(deduped.map(n => n.titulo)).toEqual(['Aviso de Prova', 'Novo Material']);
+    });
+
+    it('deve salvar aviso e não duplicar quando publicado múltiplas vezes com mesmo conteúdo', async () => {
+      const classId = 'turma_notice_test_1';
+      await createClassNotice(classId, 'prof_1', 'Prof. Carlos', 'Atenção aos Prazos', 'Entrega do relatório até domingo.');
+      await createClassNotice(classId, 'prof_1', 'Prof. Carlos', 'Atenção aos Prazos', 'Entrega do relatório até domingo.');
+
+      const notices = await getClassNotices(classId);
+      expect(notices).toHaveLength(1);
+      expect(notices[0].titulo).toBe('Atenção aos Prazos');
+    });
+
+    it('deve deduplicar materiais com mesmo ID ou mesmo título e conteúdo', () => {
+      const rawMaterials = [
+        { id: 'mat_1', title: 'Guia de Estudo', nomeArquivo: 'guia.pdf', tipo: 'pdf' },
+        { id: 'mat_1', title: 'Guia de Estudo', nomeArquivo: 'guia.pdf', tipo: 'pdf' },
+        { id: 'mat_local_123', title: 'Guia de Estudo', nomeArquivo: 'guia.pdf', tipo: 'pdf' },
+        { id: 'mat_2', title: 'Simulador Online', linkOuConteudo: 'https://sim.edu', tipo: 'link' }
+      ];
+
+      const deduped = deduplicateMaterials(rawMaterials);
+      expect(deduped).toHaveLength(2);
+      expect(deduped[0].title).toBe('Guia de Estudo');
+      expect(deduped[1].title).toBe('Simulador Online');
+    });
+  });
 });
+

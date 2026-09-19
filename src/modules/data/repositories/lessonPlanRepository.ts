@@ -30,28 +30,63 @@ function saveLocalLessonPlans(items: LessonPlanItem[]) {
 }
 
 /**
+ * Deduplica itens do plano de aula garantindo unicidade por ID e chave composta (turma, período, tópico, semana).
+ */
+export function deduplicateLessonPlans(plans: LessonPlanItem[]): LessonPlanItem[] {
+  const seenIds = new Set<string>();
+  const seenKeys = new Set<string>();
+  const result: LessonPlanItem[] = [];
+
+  for (const p of plans) {
+    if (!p) continue;
+    const id = p.id ? String(p.id).trim() : '';
+    const key = `${p.turmaId || ''}|${p.periodo || ''}|${(p.topico || '').trim().toLowerCase()}|${p.ordemSemana || 0}`;
+
+    if (id && seenIds.has(id)) continue;
+    if (key && key !== '|||0' && seenKeys.has(key)) continue;
+
+    if (id) seenIds.add(id);
+    if (key && key !== '|||0') seenKeys.add(key);
+    result.push(p);
+  }
+  return result;
+}
+
+/**
  * Salva um novo item no plano de aulas da turma.
  */
 export const saveLessonPlanItem = async (
   item: Omit<LessonPlanItem, 'id'>
 ): Promise<LessonPlanItem> => {
   const sanitized = sanitizeForFirestore(item);
+  let savedPlan: LessonPlanItem | null = null;
+
+  if (db) {
+    try {
+      const docRef = await addDoc(collection(db, COLLECTION), sanitized);
+      savedPlan = { id: docRef.id, ...sanitized } as LessonPlanItem;
+    } catch (err) {
+      console.warn('[LessonPlanRepository] Falha ao salvar no Firestore, usando fallback local:', err);
+    }
+  }
+
+  if (!savedPlan) {
+    savedPlan = { id: `lp_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`, ...sanitized } as LessonPlanItem;
+  }
+
+  // Atualiza cache local com o ID consistente
   const plans = getLocalLessonPlans();
-  const localPlan: LessonPlanItem = { id: `lp_${Date.now()}`, ...sanitized } as LessonPlanItem;
-  plans.push(localPlan);
-  saveLocalLessonPlans(plans);
+  const filtered = plans.filter(
+    p => p.id !== savedPlan!.id &&
+         !(p.turmaId === savedPlan!.turmaId &&
+           p.periodo === savedPlan!.periodo &&
+           p.topico?.trim().toLowerCase() === savedPlan!.topico?.trim().toLowerCase() &&
+           p.ordemSemana === savedPlan!.ordemSemana)
+  );
+  filtered.push(savedPlan);
+  saveLocalLessonPlans(deduplicateLessonPlans(filtered));
 
-  if (!db) {
-    return localPlan;
-  }
-
-  try {
-    const docRef = await addDoc(collection(db, COLLECTION), sanitized);
-    return { id: docRef.id, ...sanitized } as LessonPlanItem;
-  } catch (err) {
-    console.warn('[LessonPlanRepository] Falha ao salvar no Firestore, usando fallback local:', err);
-    return localPlan;
-  }
+  return savedPlan;
 };
 
 /**
@@ -97,7 +132,7 @@ export const getLessonPlansByClass = async (
   periodo?: BimesterPeriod
 ): Promise<LessonPlanItem[]> => {
   if (!db) {
-    const plans = getLocalLessonPlans().filter(p => p.turmaId === classId);
+    const plans = deduplicateLessonPlans(getLocalLessonPlans().filter(p => p.turmaId === classId));
     if (periodo) return plans.filter(p => p.periodo === periodo);
     return plans.sort((a, b) => (a.ordemSemana || 0) - (b.ordemSemana || 0));
   }
@@ -115,12 +150,15 @@ export const getLessonPlansByClass = async (
       );
     }
     const snap = await getDocs(q);
-    const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as LessonPlanItem));
-    list.sort((a, b) => (a.ordemSemana || 0) - (b.ordemSemana || 0));
-    return list;
+    const remoteList = snap.docs.map(d => ({ id: d.id, ...d.data() } as LessonPlanItem));
+    const localPlans = getLocalLessonPlans().filter(p => p.turmaId === classId);
+    const merged = deduplicateLessonPlans([...remoteList, ...localPlans]);
+    const filtered = periodo ? merged.filter(p => p.periodo === periodo) : merged;
+    filtered.sort((a, b) => (a.ordemSemana || 0) - (b.ordemSemana || 0));
+    return filtered;
   } catch (err) {
     console.error('[lessonPlanRepository] Erro ao buscar planos de aula:', err);
-    const plans = getLocalLessonPlans().filter(p => p.turmaId === classId);
+    const plans = deduplicateLessonPlans(getLocalLessonPlans().filter(p => p.turmaId === classId));
     return periodo ? plans.filter(p => p.periodo === periodo) : plans;
   }
 };
@@ -133,7 +171,7 @@ export const subscribeLessonPlansByClass = (
   callback: (items: LessonPlanItem[]) => void
 ): (() => void) => {
   if (!db) {
-    callback(getLocalLessonPlans().filter(p => p.turmaId === classId));
+    callback(deduplicateLessonPlans(getLocalLessonPlans().filter(p => p.turmaId === classId)));
     return () => {};
   }
 
@@ -145,8 +183,9 @@ export const subscribeLessonPlansByClass = (
   return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as LessonPlanItem));
     data.sort((a, b) => (a.ordemSemana || 0) - (b.ordemSemana || 0));
-    callback(data);
+    callback(deduplicateLessonPlans(data));
   }, (error) => {
     console.error('[lessonPlanRepository] Erro no listener de planos de aula:', error);
   });
 };
+
