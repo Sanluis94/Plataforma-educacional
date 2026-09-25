@@ -7,7 +7,7 @@ import {
   PlusCircle, Users, BookOpen, BarChart as BarChartIcon,
   Award, Download, MessageCircle, Send, Sparkles, Key, CheckCircle,
   AlertTriangle, Layers, RefreshCw, Plus, Trash2,
-  Calendar, FileText, Upload, ExternalLink, Bell, Copy, Check, Home as HomeIcon
+  Calendar, FileText, Upload, ExternalLink, Bell, Copy, Check, Home as HomeIcon, Printer
 } from 'lucide-react';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
@@ -122,6 +122,8 @@ export function ProfessorDashboard() {
   const [selectedExam, setSelectedExam] = useState<ExamData | null>(null);
   const [examAnalytics, setExamAnalytics] = useState<ExamReportSummary | null>(null);
   const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
+  const [printingExam, setPrintingExam] = useState<ExamData | null>(null);
+  const [printIncludeAnswers, setPrintIncludeAnswers] = useState(false);
 
   // Exam Creator Form State
   const [newExamTitle, setNewExamTitle] = useState('');
@@ -1369,16 +1371,24 @@ export function ProfessorDashboard() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <button
                       onClick={() => {
                         setSelectedExam(exam);
                         setExamMode('analytics');
                       }}
                       className="btn-gradient"
-                      style={{ flex: 1, padding: '0.55rem', fontSize: '0.82rem', fontWeight: 700 }}
+                      style={{ flex: 1, minWidth: '130px', padding: '0.55rem', fontSize: '0.82rem', fontWeight: 700 }}
                     >
-                      📊 Ver Acertos por Questão
+                      📊 Acertos
+                    </button>
+                    <button
+                      onClick={() => setPrintingExam(exam)}
+                      className="btn-outline-cyan"
+                      style={{ padding: '0.55rem 0.75rem', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                      title="Visualizar para impressão e exportação em PDF"
+                    >
+                      <Printer style={{ width: '0.9rem', height: '0.9rem' }} /> PDF / Imprimir
                     </button>
                     {exam.status === 'Aberta' ? (
                       <button
@@ -2484,6 +2494,161 @@ export function ProfessorDashboard() {
               <button onClick={handleSaveGeminiKey} className="btn-gradient" style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem', fontWeight: 700 }}>
                 Salvar Chave
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── PRINT EXAM / PDF MODAL (LAYOUT A4 PEDAGÓGICO) ── */}
+      {printingExam && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1100, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '1.5rem', overflowY: 'auto' }}>
+          {/* Action Header (Hidden in Print) */}
+          <div className="print-controls" style={{ width: '100%', maxWidth: '820px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: '#18181b', padding: '0.85rem 1.25rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <button
+                onClick={() => setPrintingExam(null)}
+                className="btn-outline-cyan"
+                style={{ padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
+              >
+                ✕ Fechar
+              </button>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-main)', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={printIncludeAnswers}
+                  onChange={e => setPrintIncludeAnswers(e.target.checked)}
+                />
+                Incluir Gabarito & Justificativas (Versão Docente)
+              </label>
+            </div>
+
+            <button
+              onClick={() => window.print()}
+              className="btn-gradient"
+              style={{ padding: '0.55rem 1.4rem', fontSize: '0.88rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Printer style={{ width: '1rem', height: '1rem' }} /> Imprimir / Salvar em PDF
+            </button>
+          </div>
+
+          {/* Printable A4 Sheet */}
+          <div
+            id="printable-exam-sheet"
+            style={{
+              width: '100%',
+              maxWidth: '820px',
+              background: '#ffffff',
+              color: '#111827',
+              padding: '2.5rem 3rem',
+              borderRadius: '4px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+              fontFamily: 'Arial, sans-serif',
+              lineHeight: 1.5,
+            }}
+          >
+            {/* School Header */}
+            <div style={{ borderBottom: '2px solid #111827', paddingBottom: '0.85rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, textTransform: 'uppercase', color: '#0f172a' }}>
+                    Plataforma Educacional Integrada
+                  </h2>
+                  <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
+                    Avaliação Formal da Aprendizagem — {printingExam.disciplina}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', fontSize: '0.8rem', color: '#475569' }}>
+                  <div><strong>Duração:</strong> {printingExam.duracaoMinutos ? `${printingExam.duracaoMinutos} min` : '50 min'}</div>
+                  <div><strong>Valor Total:</strong> {printingExam.pesoTotal || 10} pontos</div>
+                </div>
+              </div>
+
+              {/* Student identification line */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 100px', gap: '0.75rem', marginTop: '0.85rem', fontSize: '0.85rem' }}>
+                <div style={{ borderBottom: '1px solid #94a3b8', paddingBottom: '2px' }}>
+                  <strong>Estudante:</strong> _________________________________________
+                </div>
+                <div style={{ borderBottom: '1px solid #94a3b8', paddingBottom: '2px' }}>
+                  <strong>Turma:</strong> {printingExam.turmaNome || 'Geral'}
+                </div>
+                <div style={{ borderBottom: '1px solid #94a3b8', paddingBottom: '2px' }}>
+                  <strong>Nota:</strong> _______
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>
+                <span><strong>Professor(a):</strong> {printingExam.professorName || userData?.name || 'Docente'}</span>
+                <span><strong>Data de Aplicação:</strong> ____ / ____ / ________</span>
+              </div>
+            </div>
+
+            {/* Exam Title & Instructions */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.35rem', color: '#0f172a' }}>
+                {printingExam.titulo}
+              </h3>
+              {printingExam.descricao && (
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569' }}>
+                  {printingExam.descricao}
+                </p>
+              )}
+              <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', background: '#f8fafc', borderRadius: '4px', border: '1px solid #e2e8f0', fontSize: '0.78rem', color: '#475569' }}>
+                <strong>Instruções:</strong> Leia atentamente cada questão antes de assinalar. Utilize caneta azul ou preta. Questões rasuradas serão desconsideradas.
+              </div>
+            </div>
+
+            {/* Questions List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {printingExam.questoes.map((q, qIdx) => (
+                <div key={qIdx} style={{ breakInside: 'avoid', borderBottom: '1px dashed #e2e8f0', paddingBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
+                      Questão {qIdx + 1}
+                      {q.tema && <span style={{ marginLeft: '0.5rem', fontWeight: 500, fontSize: '0.78rem', color: '#64748b' }}>({q.tema})</span>}
+                    </div>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#475569' }}>
+                      ({q.valorPeso || 1.0} pt)
+                    </span>
+                  </div>
+
+                  <p style={{ margin: '0 0 0.75rem', fontSize: '0.88rem', color: '#1e293b', whiteSpace: 'pre-line' }}>
+                    {q.enunciado}
+                  </p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', paddingLeft: '0.5rem' }}>
+                    {q.opcoes.map((opt, oIdx) => {
+                      const letter = String.fromCharCode(65 + oIdx);
+                      const isCorrect = opt.isCorreta;
+                      return (
+                        <div
+                          key={oIdx}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '0.5rem',
+                            fontSize: '0.85rem',
+                            color: printIncludeAnswers && isCorrect ? '#15803d' : '#334155',
+                            fontWeight: printIncludeAnswers && isCorrect ? 700 : 400,
+                            background: printIncludeAnswers && isCorrect ? '#f0fdf4' : 'transparent',
+                            padding: '0.2rem 0.4rem',
+                            borderRadius: '4px',
+                          }}
+                        >
+                          <span style={{ fontWeight: 700, minWidth: '32px' }}>( &nbsp; ) {letter})</span>
+                          <span>{opt.texto}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {printIncludeAnswers && (
+                    <div style={{ marginTop: '0.65rem', padding: '0.5rem 0.75rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '4px', fontSize: '0.8rem', color: '#166534' }}>
+                      <div><strong>✓ Gabarito:</strong> Alternativa {String.fromCharCode(65 + q.opcoes.findIndex(o => o.isCorreta))}</div>
+                      {q.justificativa && <div style={{ marginTop: '0.25rem' }}><strong>Justificativa Pedagógica:</strong> {q.justificativa}</div>}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
