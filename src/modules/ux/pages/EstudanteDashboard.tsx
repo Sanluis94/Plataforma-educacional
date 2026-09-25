@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Beaker, Trophy, BookOpen, Clock, FileText,
   Calendar, Upload, ExternalLink, Play, Bell,
-  Award, ShieldCheck, MessageSquare, Copy, Check, Download
+  Award, ShieldCheck, MessageSquare, Copy, Check, Download, Home as HomeIcon
 } from 'lucide-react';
 import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
@@ -151,6 +152,16 @@ export function EstudanteDashboard() {
   const [activeTab, setActiveTab] = useState<
     'labs' | 'exams' | 'lesson_plans' | 'materials' | 'classes' | 'gamification' | 'gradebook' | 'forum' | 'certificates'
   >('labs');
+
+  // Sync tab with query parameters if present
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    const validTabs = ['labs', 'exams', 'lesson_plans', 'materials', 'classes', 'gamification', 'gradebook', 'forum', 'certificates'];
+    if (tabParam && validTabs.includes(tabParam)) {
+      setActiveTab(tabParam as any);
+    }
+  }, []);
 
   // Hub de Laboratórios Filter States
   const [selectedArea, setSelectedArea] = useState<string>('nature');
@@ -340,6 +351,42 @@ export function EstudanteDashboard() {
   return (
     <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '84rem', margin: '0 auto' }}>
       <ConfettiCanvas active={showConfetti} onComplete={() => setShowConfetti(false)} />
+
+      {/* Navigation Breadcrumb / Hub Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <Link
+          to="/"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.45rem 0.9rem',
+            borderRadius: '8px',
+            background: 'rgba(6,182,212,0.12)',
+            border: '1px solid rgba(6,182,212,0.3)',
+            color: '#06b6d4',
+            fontSize: '0.85rem',
+            fontWeight: 700,
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+          }}
+          className="hover:scale-102"
+        >
+          <HomeIcon style={{ width: '1rem', height: '1rem' }} />
+          ← Voltar ao Hub Inicial
+        </Link>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          <span style={{ color: 'var(--text-secondary)' }}>Acesso rápido:</span>
+          <Link to="/simulacao" style={{ color: '#8b5cf6', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            🔬 Catálogo de 72 Labs
+          </Link>
+          <span>•</span>
+          <Link to="/enem" style={{ color: '#10b981', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            📝 Simulado ENEM TRI
+          </Link>
+        </div>
+      </div>
 
       {/* Header with Student Stats Bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '1.75rem' }}>

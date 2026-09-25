@@ -85,15 +85,46 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
           justifyContent: 'space-between', height: '4rem',
         }}>
           {/* Logo */}
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
-            <div style={{
-              width: '2rem', height: '2rem', borderRadius: '0.5rem',
-              background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
-            }} />
-            <span style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-main)' }}>
-              Edu-Interact
-            </span>
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Link
+              to="/"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
+              title="Ir para o Hub Inicial de Navegação"
+            >
+              <div style={{
+                width: '2rem', height: '2rem', borderRadius: '0.5rem',
+                background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
+              }} />
+              <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                Edu-Interact
+              </span>
+            </Link>
+
+            {location.pathname !== '/' && (
+              <Link
+                to="/"
+                className="desktop-nav"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: '9999px',
+                  background: 'rgba(6, 182, 212, 0.1)',
+                  border: '1px solid rgba(6, 182, 212, 0.35)',
+                  color: '#06b6d4',
+                  textDecoration: 'none',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  transition: 'all 0.2s'
+                }}
+                title="Voltar para a Página Inicial (Hub Central)"
+              >
+                <HomeIcon style={{ width: '0.85rem', height: '0.85rem' }} />
+                <span>Hub Inicial</span>
+              </Link>
+            )}
+          </div>
 
           {/* Desktop Navigation */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} className="desktop-nav">
