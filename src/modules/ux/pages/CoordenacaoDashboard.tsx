@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Building2, TrendingUp, AlertTriangle,
-  FileSpreadsheet, Printer, CheckCircle2
+  FileSpreadsheet, Printer, CheckCircle2, Home as HomeIcon
 } from 'lucide-react';
+
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
@@ -118,6 +120,27 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
 
   return (
     <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '80rem', margin: '0 auto' }}>
+      {/* Top Hub Navigation Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <Link
+          to="/"
+          className="btn-outline-cyan"
+          style={{
+            padding: '0.45rem 0.85rem',
+            borderRadius: '0.5rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            fontSize: '0.82rem',
+            fontWeight: 700
+          }}
+          title="Retornar à página inicial da plataforma"
+        >
+          <HomeIcon style={{ width: '1rem', height: '1rem' }} />
+          <span>Voltar ao Hub Inicial</span>
+        </Link>
+      </div>
+
       {/* Header Institucional White-Label */}
       <div className="glass-card mb-4" style={{
         padding: '1.75rem',

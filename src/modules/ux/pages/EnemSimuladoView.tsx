@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import {
   Award, Clock, CheckCircle2, XCircle,
   RotateCcw, Sparkles, ChevronRight, ChevronLeft,
-  ArrowLeft
+  ArrowLeft, Home as HomeIcon
 } from 'lucide-react';
+
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../core/contexts/AuthContext';
 import {
   BANCO_ITENS_ENEM_PADRAO,
   processarSimuladoEnemTRI,
@@ -14,6 +16,7 @@ import {
 } from '../../data/services/triCalculationService';
 
 export function EnemSimuladoView() {
+  const { userData } = useAuth();
   const [itens] = useState<TriItem[]>(BANCO_ITENS_ENEM_PADRAO);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [respostas, setRespostas] = useState<Record<string, number>>({});
@@ -77,12 +80,51 @@ export function EnemSimuladoView() {
 
   return (
     <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '80rem', margin: '0 auto' }}>
+      {/* Top Hub Navigation Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Link
+            to="/"
+            className="btn-outline-cyan"
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: '0.5rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              fontSize: '0.82rem',
+              fontWeight: 700
+            }}
+            title="Retornar à página inicial da plataforma"
+          >
+            <HomeIcon style={{ width: '1rem', height: '1rem' }} />
+            <span>Voltar ao Hub Inicial</span>
+          </Link>
+
+          <Link
+            to={userData?.role === 'professor' ? '/professor' : '/estudante'}
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: '0.5rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              fontSize: '0.82rem',
+              color: 'var(--text-secondary)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              textDecoration: 'none',
+              fontWeight: 600
+            }}
+          >
+            <ArrowLeft style={{ width: '0.95rem', height: '0.95rem' }} />
+            <span>{userData?.role === 'professor' ? 'Painel do Professor' : 'Meu Aprendizado'}</span>
+          </Link>
+        </div>
+      </div>
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link to="/estudante" className="btn-outline-cyan" style={{ padding: '0.5rem', borderRadius: '0.5rem' }}>
-            <ArrowLeft style={{ width: '1.25rem', height: '1.25rem' }} />
-          </Link>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '9999px', background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}>
@@ -100,6 +142,7 @@ export function EnemSimuladoView() {
             </p>
           </div>
         </div>
+
 
         {/* Cronômetro */}
         {!simuladoFinalizado && (

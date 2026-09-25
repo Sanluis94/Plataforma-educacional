@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useAuth } from './modules/core/contexts/AuthContext';
 import { Layout } from './modules/ux/components/Layout';
 import { LoginModal } from './modules/ux/components/LoginModal';
@@ -53,7 +53,7 @@ function AuthRequirementHandler({ onOpenLogin, isAuthenticated }: { onOpenLogin:
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [loginOpen, setLoginOpen] = useState(false);
-  const { currentUser, userData } = useAuth();
+  const { currentUser } = useAuth();
 
   const toggleTheme = () => {
     setTheme(t => t === 'light' ? 'dark' : 'light');
@@ -61,27 +61,14 @@ function App() {
 
   const themeClass = theme === 'dark' ? 'dark-theme' : 'light-theme';
 
-  // Auto-redirect based on role after login
-  const RoleRedirect = () => {
-    if (!currentUser || !userData) return null;
-    if (window.location.pathname === '/') {
-      if (userData.role === 'professor') return <Navigate to="/professor" replace />;
-      if (userData.role === 'estudante') return <Navigate to="/estudante" replace />;
-    }
-    return null;
-  };
-
   return (
     <ErrorBoundary>
       <Router>
         <div className={`app-container ${themeClass}`}>
-          <a href="#main-content" className="sr-only">Pular para o conteúdo principal</a>
-
           <AuthRequirementHandler
             onOpenLogin={() => setLoginOpen(true)}
             isAuthenticated={!!currentUser}
           />
-          <RoleRedirect />
 
           {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
@@ -6,7 +7,7 @@ import {
   PlusCircle, Users, BookOpen, BarChart as BarChartIcon,
   Award, Download, MessageCircle, Send, Sparkles, Key, CheckCircle,
   AlertTriangle, Layers, RefreshCw, Plus, Trash2,
-  Calendar, FileText, Upload, ExternalLink, Bell, Copy, Check
+  Calendar, FileText, Upload, ExternalLink, Bell, Copy, Check, Home as HomeIcon
 } from 'lucide-react';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
@@ -71,6 +72,16 @@ export function ProfessorDashboard() {
   const [dashboardTab, setDashboardTab] = useState<
     'classes' | 'lesson_plans' | 'exams' | 'materials' | 'labs_overview' | 'reports' | 'messages' | 'lms_gradebook'
   >('classes');
+
+  // Sync tab with query parameters if present
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    const validTabs = ['classes', 'lesson_plans', 'exams', 'materials', 'labs_overview', 'reports', 'messages', 'lms_gradebook'];
+    if (tabParam && validTabs.includes(tabParam)) {
+      setDashboardTab(tabParam as any);
+    }
+  }, []);
 
   // State to track copied class code
   const [copiedClassCode, setCopiedClassCode] = useState<string | null>(null);
@@ -675,6 +686,46 @@ export function ProfessorDashboard() {
           </button>
         </div>
       )}
+
+      {/* Navigation Breadcrumb / Hub Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <Link
+          to="/"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.45rem 0.9rem',
+            borderRadius: '8px',
+            background: 'rgba(6,182,212,0.12)',
+            border: '1px solid rgba(6,182,212,0.3)',
+            color: '#06b6d4',
+            fontSize: '0.85rem',
+            fontWeight: 700,
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+          }}
+          className="hover:scale-102"
+        >
+          <HomeIcon style={{ width: '1rem', height: '1rem' }} />
+          ← Voltar ao Hub Inicial
+        </Link>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          <span style={{ color: 'var(--text-secondary)' }}>Acesso rápido:</span>
+          <Link to="/simulacao" style={{ color: '#8b5cf6', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            🔬 Catálogo de 72 Labs
+          </Link>
+          <span>•</span>
+          <Link to="/enem" style={{ color: '#10b981', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            📝 Simulado ENEM TRI
+          </Link>
+          <span>•</span>
+          <Link to="/coordenacao" style={{ color: '#f59e0b', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            🏛️ Coordenação
+          </Link>
+        </div>
+      </div>
 
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>

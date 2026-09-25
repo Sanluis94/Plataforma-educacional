@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, Settings2, ArrowLeft } from 'lucide-react';
+import { Play, Pause, RotateCcw, Settings2, ArrowLeft, Home as HomeIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../core/contexts/AuthContext';
 import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
 
 interface SimulacaoProps {
@@ -11,6 +12,7 @@ interface SimulacaoProps {
 }
 
 export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
+  const { userData } = useAuth();
   const [activeTab, setActiveTab] = useState<string>(mode || 'pendulum');
 
   useEffect(() => {
@@ -242,19 +244,59 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
 
   return (
     <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '80rem', margin: '0 auto' }}>
+      {/* Top Hub Navigation Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Link
+            to="/"
+            className="btn-outline-cyan"
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: '0.5rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              fontSize: '0.82rem',
+              fontWeight: 700
+            }}
+            title="Retornar à página inicial da plataforma"
+          >
+            <HomeIcon style={{ width: '1rem', height: '1rem' }} />
+            <span>Voltar ao Hub Inicial</span>
+          </Link>
+
+          <Link
+            to={userData?.role === 'professor' ? '/professor' : '/estudante'}
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: '0.5rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              fontSize: '0.82rem',
+              color: 'var(--text-secondary)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              textDecoration: 'none',
+              fontWeight: 600
+            }}
+          >
+            <ArrowLeft style={{ width: '0.95rem', height: '0.95rem' }} />
+            <span>{userData?.role === 'professor' ? 'Painel do Professor' : 'Meu Aprendizado'}</span>
+          </Link>
+        </div>
+      </div>
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        <Link to="/estudante" className="btn-outline-cyan" style={{ padding: '0.5rem', borderRadius: '0.5rem' }}>
-          <ArrowLeft style={{ width: '1.25rem', height: '1.25rem' }} />
-        </Link>
         <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)' }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)', margin: '0 0 0.25rem' }}>
             Laboratório Virtual: Mecânica Clássica
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            Explore módulos dinâmicos para dominar conceitos da Física.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0 }}>
+            Explore módulos dinâmicos para dominar conceitos da Física e Matemática.
           </p>
         </div>
+
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button
             onClick={() => setActiveTab('pendulum')}
