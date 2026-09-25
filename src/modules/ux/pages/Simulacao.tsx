@@ -1,8 +1,123 @@
 import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, Settings2, ArrowLeft, Home as HomeIcon } from 'lucide-react';
+import {
+  Play, Pause, RotateCcw, ArrowLeft, Home as HomeIcon,
+  ChevronDown, ChevronUp, HelpCircle, Settings2
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
+
+interface LabMission {
+  id: string;
+  title: string;
+  objective: string;
+  steps: string[];
+  scientificQuestion: string;
+  options: { text: string; correct: boolean }[];
+  hint: string;
+}
+
+const LAB_MISSIONS: Record<string, LabMission> = {
+  pendulum: {
+    id: 'pendulum_mission',
+    title: 'Missão 1: O Pêndulo em Gravidades Alienígenas',
+    objective: 'Investigar como a aceleração gravitacional altera o período de oscilação do pêndulo.',
+    steps: [
+      '1. Ajuste o comprimento do fio para 150 cm.',
+      '2. Defina a gravidade para 1.6 m/s² (Lua) e observe a lentidão da oscilação.',
+      '3. Depois, aumente a gravidade para 24.8 m/s² (Júpiter) e compare o novo período.',
+    ],
+    scientificQuestion: 'O que acontece com a frequência de oscilação quando a aceleração da gravidade diminui?',
+    options: [
+      { text: 'A frequência diminui (o pêndulo oscila mais devagar)', correct: true },
+      { text: 'A frequência aumenta consideravelmente', correct: false },
+      { text: 'A frequência permanece exatamente a mesma', correct: false },
+    ],
+    hint: 'Lembre-se: o período T = 2π√(L/g). Menor gravidade significa período maior e menor frequência f = 1/T.'
+  },
+  collisions: {
+    id: 'collisions_mission',
+    title: 'Missão 2: Conservação de Quantidade de Movimento',
+    objective: 'Demonstrar a conservação do momento linear em colisões com e sem atrito.',
+    steps: [
+      '1. Mantenha o coeficiente de atrito em 0.',
+      '2. Inicie a simulação e observe o choque frontal elástico.',
+      '3. Aumente o atrito gradativamente para 0.05 e analise a perda de energia mecânica.',
+    ],
+    scientificQuestion: 'Na colisão perfeitamente elástica (sem atrito), o que se conserva?',
+    options: [
+      { text: 'Apenas a energia térmica gerada', correct: false },
+      { text: 'A quantidade de movimento total e a energia cinética do sistema', correct: true },
+      { text: 'Apenas a velocidade escalar de cada corpo isoladamente', correct: false },
+    ],
+    hint: 'No sistema isolado livre de forças dissipativas externas, tanto o momento linear total quanto a energia cinética permanecem constantes.'
+  },
+  optics: {
+    id: 'optics_mission',
+    title: 'Missão 3: Lei de Snell-Descartes e Refração',
+    objective: 'Constatar o desvio do feixe luminoso na transição entre meios com densidades ópticas distintas.',
+    steps: [
+      '1. Mantenha o meio 1 como Ar (n1 = 1.0).',
+      '2. Defina o meio 2 como Vidro (n2 = 1.5).',
+      '3. Altere o ângulo de incidência para 45° e confira o ângulo refratado calculado.',
+    ],
+    scientificQuestion: 'Ao passar de um meio menos refringente para um mais refringente (Ar -> Vidro), o feixe de luz:',
+    options: [
+      { text: 'Aproxima-se da reta normal à superfície', correct: true },
+      { text: 'Afasta-se da reta normal à superfície', correct: false },
+      { text: 'Segue em linha reta sem sofrer qualquer desvio', correct: false },
+    ],
+    hint: 'De acordo com n1·sen(θ1) = n2·sen(θ2), se n2 > n1, então sen(θ2) < sen(θ1), logo o raio aproxima-se da normal.'
+  },
+  thermodynamics: {
+    id: 'thermo_mission',
+    title: 'Missão 4: Transformações Gasosas e Trabalho Mecânico',
+    objective: 'Explorar a relação entre temperatura, pressão e volume na 1ª Lei da Termodinâmica.',
+    steps: [
+      '1. Monitore a pressão ao elevar a temperatura do recipiente.',
+      '2. Observe o trabalho exercido pelo gás na expansão volumétrica.',
+    ],
+    scientificQuestion: 'Em uma transformação isobárica (pressão constante), ao dobrar a temperatura absoluta, o volume:',
+    options: [
+      { text: 'Dobra de valor proporcionalmente', correct: true },
+      { text: 'Cai pela metade', correct: false },
+      { text: 'Permanece inalterado', correct: false },
+    ],
+    hint: 'Pela Lei de Charles e Gay-Lussac (V1/T1 = V2/T2), volume e temperatura absoluta são diretamente proporcionais sob pressão constante.'
+  },
+  electromagnetism: {
+    id: 'em_mission',
+    title: 'Missão 5: Campo Magnético e Lei de Faraday',
+    objective: 'Analisar o fluxo magnético e a indução eletromagnética em espiras condutoras.',
+    steps: [
+      '1. Aproxime o ímã da bobina com velocidade variável.',
+      '2. Verifique a geração de força eletromotriz induzida.',
+    ],
+    scientificQuestion: 'O que determina a intensidade da corrente elétrica induzida em uma espira?',
+    options: [
+      { text: 'A taxa de variação do fluxo magnético no tempo (dΦ/dt)', correct: true },
+      { text: 'A cor do isolamento do fio condutor', correct: false },
+      { text: 'Apenas a temperatura ambiente do laboratório', correct: false },
+    ],
+    hint: 'A Lei de Faraday-Lenz expressa que ε = -dΦ/dt. Variações mais rápidas de fluxo magnético induzem tensões maiores.'
+  },
+  modern_physics: {
+    id: 'modern_mission',
+    title: 'Missão 6: Efeito Fotoelétrico de Einstein',
+    objective: 'Constatar a natureza corpuscular da luz através da emissão de fotoelétrons.',
+    steps: [
+      '1. Ajuste a frequência da radiação incidente para a faixa ultravioleta.',
+      '2. Observe a liberação de elétrons na placa metálica.',
+    ],
+    scientificQuestion: 'O que deve ser superior à função trabalho (φ) do metal para que ocorra emissão de elétrons?',
+    options: [
+      { text: 'A energia de cada fóton incidente (E = h·f)', correct: true },
+      { text: 'Apenas a intensidade luminosa ou brilho da lâmpada', correct: false },
+      { text: 'A área total da placa metálica', correct: false },
+    ],
+    hint: 'Einstein demonstrou que a emissão depende da frequência do fóton (E = h·f) ser maior que o limiar φ, e não da intensidade clássica da luz.'
+  }
+};
 
 interface SimulacaoProps {
   mode?: string;
@@ -20,6 +135,17 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
       setActiveTab(mode);
     }
   }, [mode]);
+  const [showMission, setShowMission] = useState(true);
+  const [selectedMissionOption, setSelectedMissionOption] = useState<number | null>(null);
+  const [missionCompleted, setMissionCompleted] = useState(false);
+  const [missionFeedback, setMissionFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedMissionOption(null);
+    setMissionCompleted(false);
+    setMissionFeedback(null);
+  }, [activeTab]);
+
   const [refractionIndex1, setRefractionIndex1] = useState(1.0); // Ar
   const [refractionIndex2, setRefractionIndex2] = useState(1.5); // Vidro
   const [incidentAngle, setIncidentAngle] = useState(45); // Graus
@@ -351,6 +477,145 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           )}
         </div>
       </div>
+
+      {/* ── PAINEL DE MISSÃO EXPERIMENTAL GUIADA ── */}
+      {LAB_MISSIONS[activeTab] && (
+        <div
+          className="glass-card"
+          style={{
+            marginBottom: '1.75rem',
+            border: missionCompleted ? '1px solid rgba(16,185,129,0.4)' : '1px solid rgba(6,182,212,0.3)',
+            background: missionCompleted ? 'rgba(16,185,129,0.04)' : 'rgba(6,182,212,0.03)',
+            padding: '1.25rem 1.5rem',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }} onClick={() => setShowMission(!showMission)}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <span style={{ fontSize: '1.3rem' }}>🎯</span>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    {LAB_MISSIONS[activeTab].title}
+                  </h3>
+                  {missionCompleted && (
+                    <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.55rem', borderRadius: '9999px', background: 'rgba(16,185,129,0.2)', color: '#10b981', fontWeight: 700, border: '1px solid rgba(16,185,129,0.3)' }}>
+                      ✓ Concluída (+50 XP)
+                    </span>
+                  )}
+                </div>
+                <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                  {LAB_MISSIONS[activeTab].objective}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="btn-outline-cyan"
+              style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+              onClick={(e) => { e.stopPropagation(); setShowMission(!showMission); }}
+            >
+              {showMission ? <><ChevronUp style={{ width: '0.9rem', height: '0.9rem' }} /> Ocultar Roteiro</> : <><ChevronDown style={{ width: '0.9rem', height: '0.9rem' }} /> Ver Roteiro Guiado</>}
+            </button>
+          </div>
+
+          {showMission && (
+            <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              {/* Steps */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <strong style={{ fontSize: '0.85rem', color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Passo a Passo Investigativo no Laboratório:
+                </strong>
+                <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.25rem', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6 }}>
+                  {LAB_MISSIONS[activeTab].steps.map((step, sIdx) => (
+                    <li key={sIdx}>{step}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Scientific Question & Quiz */}
+              <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.25)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.5rem' }}>
+                  <HelpCircle style={{ width: '1rem', height: '1rem', color: '#f59e0b' }} />
+                  <strong style={{ fontSize: '0.88rem', color: 'var(--text-main)' }}>
+                    Desafio de Conclusão: {LAB_MISSIONS[activeTab].scientificQuestion}
+                  </strong>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.75rem' }}>
+                  {LAB_MISSIONS[activeTab].options.map((opt, optIdx) => {
+                    const isSelected = selectedMissionOption === optIdx;
+                    return (
+                      <button
+                        key={optIdx}
+                        type="button"
+                        onClick={() => {
+                          setSelectedMissionOption(optIdx);
+                          setMissionFeedback(null);
+                        }}
+                        style={{
+                          textAlign: 'left',
+                          padding: '0.55rem 0.85rem',
+                          borderRadius: '6px',
+                          border: isSelected ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
+                          background: isSelected ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.02)',
+                          color: isSelected ? '#67e8f9' : 'var(--text-secondary)',
+                          fontSize: '0.83rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        <span style={{ fontWeight: 700, marginRight: '0.5rem' }}>{String.fromCharCode(65 + optIdx)})</span>
+                        {opt.text}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {missionFeedback && (
+                  <div
+                    style={{
+                      marginTop: '0.85rem',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '6px',
+                      fontSize: '0.82rem',
+                      background: missionCompleted ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.12)',
+                      border: missionCompleted ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(239,68,68,0.3)',
+                      color: missionCompleted ? '#6ee7b7' : '#fca5a5',
+                    }}
+                  >
+                    {missionFeedback}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                  <button
+                    type="button"
+                    disabled={selectedMissionOption === null || missionCompleted}
+                    onClick={() => {
+                      if (selectedMissionOption === null) return;
+                      const isCorrect = LAB_MISSIONS[activeTab].options[selectedMissionOption].correct;
+                      if (isCorrect) {
+                        setMissionCompleted(true);
+                        setMissionFeedback('🎉 Excelente dedução científica! Sua resposta está correta e comprova a relação observada no simulador.');
+                        if (onComplete) {
+                          onComplete(100);
+                        }
+                      } else {
+                        setMissionFeedback(`💡 Não exatamente. Dica: ${LAB_MISSIONS[activeTab].hint}`);
+                      }
+                    }}
+                    className="btn-gradient"
+                    style={{ padding: '0.5rem 1.25rem', fontSize: '0.82rem', fontWeight: 700 }}
+                  >
+                    {missionCompleted ? '✓ Missão Concluída' : 'Validar Conclusão'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Pendulum Tab */}
       {activeTab === 'pendulum' && (

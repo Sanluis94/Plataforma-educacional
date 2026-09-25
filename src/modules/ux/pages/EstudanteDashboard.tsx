@@ -348,6 +348,11 @@ export function EstudanteDashboard() {
   const currentAreaSubjects = KNOWLEDGE_AREAS.find(a => a.id === selectedArea)?.subjects || [];
   const currentSubjectModule = ALL_MODULES.find(m => m.id === selectedSubjectId);
 
+  // Pending exams that student has not yet submitted
+  const pendingExams = classExams.filter(
+    exam => exam.status === 'Aberta' && !studentAttempts.some(att => att.examId === exam.id)
+  );
+
   return (
     <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '84rem', margin: '0 auto' }}>
       <ConfettiCanvas active={showConfetti} onComplete={() => setShowConfetti(false)} />
@@ -416,11 +421,18 @@ export function EstudanteDashboard() {
         </div>
       </div>
 
-      {/* Reorganized Student Navigation Bar */}
+      {/* Reorganized Student Navigation Bar with Dynamic Badges */}
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         {[
           { id: 'labs', label: '🔬 Laboratórios de Ciências', icon: Beaker },
-          { id: 'exams', label: `📝 Provas & Avaliações (${classExams.length})`, icon: FileText },
+          {
+            id: 'exams',
+            label: '📝 Provas & Avaliações',
+            icon: FileText,
+            count: classExams.length,
+            badge: pendingExams.length > 0 ? `${pendingExams.length} pendente${pendingExams.length > 1 ? 's' : ''}` : undefined,
+            badgeColor: '#f59e0b'
+          },
           { id: 'gradebook', label: '📊 Boletim & Frequência', icon: Award },
           { id: 'forum', label: `💬 Fórum da Turma`, icon: MessageSquare },
           { id: 'certificates', label: '📜 Meus Certificados', icon: ShieldCheck },
@@ -453,7 +465,22 @@ export function EstudanteDashboard() {
             }}
           >
             <tab.icon style={{ width: '1rem', height: '1rem' }} />
-            {tab.label}
+            {tab.label} {tab.count !== undefined && !tab.badge && `(${tab.count})`}
+            {tab.badge && (
+              <span
+                style={{
+                  fontSize: '0.7rem',
+                  padding: '0.15rem 0.5rem',
+                  borderRadius: '9999px',
+                  background: 'rgba(245,158,11,0.2)',
+                  color: '#fbbf24',
+                  fontWeight: 700,
+                  border: '1px solid rgba(245,158,11,0.3)',
+                }}
+              >
+                ● {tab.badge}
+              </span>
+            )}
           </button>
         ))}
       </div>

@@ -804,3 +804,36 @@ body.focus-mode-active textarea:focus {
   outline-offset: 3px !important;
 }
 
+/* ═══════════════════════════════════════════════════════
+   Estilos de Impressão e Exportação em PDF A4
+   ═══════════════════════════════════════════════════════ */
+@media print {
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt !important;
+  }
+  .print-controls,
+  header,
+  nav,
+  aside,
+  footer,
+  .accessibility-toolbar {
+    display: none !important;
+  }
+  #printable-exam-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  @page {
+    margin: 1.5cm;
+    size: A4 portrait;
+  }
+}
+
