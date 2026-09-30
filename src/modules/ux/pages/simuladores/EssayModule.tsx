@@ -80,11 +80,11 @@ export function EssayModule({ mode = 'structure', labTitle, onComplete }: { mode
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', marginBottom: '1.25rem', paddingBottom: '0.25rem' }}>
         {COMPETENCIAS.map(c => (
           <div key={c.id} style={{
-            flex: '0 0 180px', padding: '0.6rem', borderRadius: '8px',
-            background: config.focusCompetencias.includes(c.id) ? 'rgba(6,182,212,0.08)' : 'rgba(255,255,255,0.03)',
-            border: config.focusCompetencias.includes(c.id) ? '1px solid rgba(6,182,212,0.3)' : '1px solid rgba(255,255,255,0.08)',
+            flex: '0 0 180px', padding: '0.6rem', borderRadius: 'var(--radius-sm, 10px)',
+            background: config.focusCompetencias.includes(c.id) ? 'var(--color-primary-light, rgba(228,104,63,0.18))' : 'var(--bg-card)',
+            border: config.focusCompetencias.includes(c.id) ? '1.5px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
           }}>
-            <div style={{ color: config.focusCompetencias.includes(c.id) ? '#06b6d4' : 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700 }}>
+            <div style={{ color: config.focusCompetencias.includes(c.id) ? 'var(--color-primary-accessible, #E4683F)' : 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700 }}>
               {config.focusCompetencias.includes(c.id) ? '⭐ ' : ''}C{c.id} — {c.name}
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', marginTop: '0.2rem' }}>{c.desc}</div>

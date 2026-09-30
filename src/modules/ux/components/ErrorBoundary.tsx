@@ -111,7 +111,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </button>
               <button
                 onClick={this.handleReset}
-                className="btn-outline-cyan"
+                className="btn-outline"
                 style={{ padding: '0.65rem 1.25rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
               >
                 <Home style={{ width: '1rem', height: '1rem' }} />

@@ -54,7 +54,7 @@ function ConfettiCanvas({ active, onComplete }: { active: boolean; onComplete: (
       rotationSpeed: number;
     }
 
-    const colors = ['#06b6d4', '#8b5cf6', '#a855f7', '#ec4899', '#10b981', '#f59e0b'];
+    const colors = ['#E4683F', '#B8441F', '#293E24', '#3D5B36', '#F59C7B', '#E2D7C3'];
     const particles: Particle[] = [];
 
     for (let i = 0; i < 100; i++) {
@@ -358,7 +358,7 @@ export function EstudanteDashboard() {
       <ConfettiCanvas active={showConfetti} onComplete={() => setShowConfetti(false)} />
 
       {/* Navigation Breadcrumb / Hub Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', padding: '0.6rem 1rem', background: 'var(--bg-glass)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)' }}>
         <Link
           to="/"
           style={{
@@ -366,10 +366,10 @@ export function EstudanteDashboard() {
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.45rem 0.9rem',
-            borderRadius: '8px',
-            background: 'rgba(6,182,212,0.12)',
-            border: '1px solid rgba(6,182,212,0.3)',
-            color: '#06b6d4',
+            borderRadius: 'var(--radius-sm, 10px)',
+            background: 'var(--color-primary-light, rgba(228, 104, 63, 0.12))',
+            border: '1px solid var(--color-primary-accessible, #B8441F)',
+            color: 'var(--color-primary-accessible, #B8441F)',
             fontSize: '0.85rem',
             fontWeight: 700,
             textDecoration: 'none',
@@ -383,11 +383,11 @@ export function EstudanteDashboard() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
           <span style={{ color: 'var(--text-secondary)' }}>Acesso rápido:</span>
-          <Link to="/simulacao" style={{ color: '#8b5cf6', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <Link to="/simulacao" style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             🔬 Catálogo de 72 Labs
           </Link>
           <span>•</span>
-          <Link to="/enem" style={{ color: '#10b981', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <Link to="/enem" style={{ color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             📝 Simulado ENEM TRI
           </Link>
         </div>
@@ -398,7 +398,7 @@ export function EstudanteDashboard() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
             <span style={{ fontSize: '1.8rem' }}>🎓</span>
-            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.5px' }}>
+            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.5px', fontFamily: 'var(--font-heading)' }}>
               Portal do Estudante
             </h1>
           </div>
@@ -408,21 +408,21 @@ export function EstudanteDashboard() {
         </div>
 
         {/* Gamification Stats Pill */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', padding: '0.65rem 1.25rem', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', padding: '0.65rem 1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-glass)', border: '1px solid var(--border-color)' }}>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>NÍVEL {level}</div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#06b6d4' }}>{xp} XP</div>
+            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>{xp} XP</div>
           </div>
-          <div style={{ width: '1px', height: '2rem', background: 'rgba(255,255,255,0.1)' }} />
+          <div style={{ width: '1px', height: '2rem', background: 'var(--border-color)' }} />
           <div>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>MOEDAS</div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f59e0b' }}>🪙 {coins}</div>
+            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>🪙 {coins}</div>
           </div>
         </div>
       </div>
 
       {/* Reorganized Student Navigation Bar with Dynamic Badges */}
-      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--border-color)' }}>
         {[
           { id: 'labs', label: '🔬 Laboratórios de Ciências', icon: Beaker },
           {
@@ -431,7 +431,7 @@ export function EstudanteDashboard() {
             icon: FileText,
             count: classExams.length,
             badge: pendingExams.length > 0 ? `${pendingExams.length} pendente${pendingExams.length > 1 ? 's' : ''}` : undefined,
-            badgeColor: '#f59e0b'
+            badgeColor: 'var(--color-primary-accessible, #B8441F)'
           },
           { id: 'gradebook', label: '📊 Boletim & Frequência', icon: Award },
           { id: 'forum', label: `💬 Fórum da Turma`, icon: MessageSquare },
@@ -449,11 +449,11 @@ export function EstudanteDashboard() {
             }}
             style={{
               padding: '0.65rem 1.25rem',
-              borderRadius: '8px 8px 0 0',
+              borderRadius: 'var(--radius-sm, 10px) var(--radius-sm, 10px) 0 0',
               border: 'none',
-              borderBottom: activeTab === tab.id ? '2px solid #06b6d4' : '2px solid transparent',
-              background: activeTab === tab.id ? 'rgba(6,182,212,0.1)' : 'transparent',
-              color: activeTab === tab.id ? '#06b6d4' : 'var(--text-secondary)',
+              borderBottom: activeTab === tab.id ? '2px solid var(--color-primary, #E4683F)' : '2px solid transparent',
+              background: activeTab === tab.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.1))' : 'transparent',
+              color: activeTab === tab.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
               fontWeight: activeTab === tab.id ? 700 : 500,
               fontSize: '0.9rem',
               cursor: 'pointer',
@@ -489,8 +489,8 @@ export function EstudanteDashboard() {
       {activeTab === 'labs' && !activeLab && (
         <div className="fade-in">
           {/* Areas Filter Banner */}
-          <div className="glass-card mb-4" style={{ padding: '1.25rem', background: 'rgba(6,182,212,0.03)', border: '1px solid rgba(6,182,212,0.2)' }}>
-            <div style={{ fontSize: '0.78rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.6rem' }}>
+          <div className="glass-card mb-4" style={{ padding: '1.25rem', background: 'var(--bg-glass)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg, 14px)' }}>
+            <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.6rem' }}>
               Selecione a Grande Área do Conhecimento:
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -503,12 +503,12 @@ export function EstudanteDashboard() {
                   }}
                   style={{
                     padding: '0.6rem 1.15rem',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-sm, 10px)',
                     fontSize: '0.85rem',
                     fontWeight: 700,
-                    border: selectedArea === area.id ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.1)',
-                    background: selectedArea === area.id ? 'rgba(6,182,212,0.2)' : 'rgba(0,0,0,0.3)',
-                    color: selectedArea === area.id ? '#06b6d4' : 'var(--text-secondary)',
+                    border: selectedArea === area.id ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
+                    background: selectedArea === area.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.15))' : 'var(--bg-glass)',
+                    color: selectedArea === area.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
                     cursor: 'pointer',
                     transition: 'all 0.2s'
                   }}
@@ -531,12 +531,12 @@ export function EstudanteDashboard() {
                     onClick={() => setSelectedSubjectId(subjId)}
                     style={{
                       padding: '0.4rem 0.85rem',
-                      borderRadius: '6px',
+                      borderRadius: 'var(--radius-sm, 10px)',
                       fontSize: '0.8rem',
-                      fontWeight: 600,
-                      border: isSelected ? '1px solid #8b5cf6' : '1px solid rgba(255,255,255,0.08)',
-                      background: isSelected ? 'rgba(139,92,246,0.2)' : 'rgba(0,0,0,0.2)',
-                      color: isSelected ? '#a78bfa' : 'var(--text-secondary)',
+                      fontWeight: 700,
+                      border: isSelected ? '1px solid var(--color-verde-700, #293E24)' : '1px solid var(--border-color)',
+                      background: isSelected ? 'var(--color-verde-light, rgba(41, 62, 36, 0.15))' : 'transparent',
+                      color: isSelected ? 'var(--color-verde-700, #293E24)' : 'var(--text-secondary)',
                       cursor: 'pointer'
                     }}
                   >
@@ -551,7 +551,7 @@ export function EstudanteDashboard() {
           {currentSubjectModule && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>
+                <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, margin: 0, fontFamily: 'var(--font-heading)' }}>
                   Laboratórios de {currentSubjectModule.label} (Simuladores com Parâmetros Interativos)
                 </h3>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -571,15 +571,16 @@ export function EstudanteDashboard() {
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        border: isCompleted ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(255,255,255,0.08)',
-                        background: isCompleted ? 'rgba(16,185,129,0.02)' : 'rgba(255,255,255,0.02)'
+                        borderRadius: 'var(--radius-lg, 14px)',
+                        border: isCompleted ? '1px solid var(--color-verde-500, #3D5B36)' : '1px solid var(--border-color)',
+                        background: isCompleted ? 'var(--color-verde-light, rgba(41, 62, 36, 0.08))' : 'var(--bg-glass)'
                       }}
                     >
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                          <span style={{ fontSize: '0.75rem', color: '#06b6d4', fontWeight: 800 }}>LAB #{index + 1}</span>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800 }}>LAB #{index + 1}</span>
                           {isCompleted ? (
-                            <span style={{ fontSize: '0.72rem', color: '#10b981', background: 'rgba(16,185,129,0.15)', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 700 }}>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)', background: 'var(--color-verde-light, rgba(41, 62, 36, 0.15))', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
                               ✓ Concluído
                             </span>
                           ) : (
@@ -631,17 +632,17 @@ export function EstudanteDashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <button
               onClick={() => setActiveLab(null)}
-              className="btn-outline-cyan"
+              className="btn-outline"
               style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
             >
               ← Voltar aos Laboratórios
             </button>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Laboratório Ativo: <strong style={{ color: '#06b6d4' }}>{activeLab.title}</strong>
+              Laboratório Ativo: <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{activeLab.title}</strong>
             </span>
           </div>
 
-          <div className="glass-card" style={{ padding: '1rem', minHeight: '520px' }}>
+          <div className="glass-card" style={{ padding: '1rem', minHeight: '520px', borderRadius: 'var(--radius-lg, 14px)' }}>
             <activeLab.component
               {...activeLab.props}
               labTitle={activeLab.title}
@@ -661,7 +662,7 @@ export function EstudanteDashboard() {
         <div className="fade-in">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <div>
-              <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, margin: '0 0 0.35rem' }}>
+              <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, margin: '0 0 0.35rem', fontFamily: 'var(--font-heading)' }}>
                 📝 Provas & Avaliações da Turma
               </h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0 }}>
@@ -675,18 +676,18 @@ export function EstudanteDashboard() {
             {classExams.map(exam => {
               const attempt = studentAttempts.find(a => a.examId === exam.id);
               return (
-                <div key={exam.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div key={exam.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderRadius: 'var(--radius-lg, 14px)' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>
                         {exam.disciplina}
                       </span>
                       {attempt ? (
-                        <span style={{ fontSize: '0.72rem', color: '#10b981', background: 'rgba(16,185,129,0.15)', padding: '0.2rem 0.55rem', borderRadius: '9999px', fontWeight: 700 }}>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)', background: 'var(--color-verde-light, rgba(41, 62, 36, 0.15))', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
                           ✓ Concluída ({attempt.porcentagemAproveitamento}%)
                         </span>
                       ) : (
-                        <span style={{ fontSize: '0.72rem', color: '#f59e0b', background: 'rgba(245,158,11,0.15)', padding: '0.2rem 0.55rem', borderRadius: '9999px', fontWeight: 700 }}>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
                           Pendente
                         </span>
                       )}
@@ -699,18 +700,18 @@ export function EstudanteDashboard() {
                       {exam.descricao || 'Avaliação formal com questões objetivas.'}
                     </p>
 
-                    <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: 'rgba(0,0,0,0.25)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
+                    <div style={{ padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-glass)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <Clock style={{ width: '0.85rem', height: '0.85rem', color: '#06b6d4' }} />
+                        <Clock style={{ width: '0.85rem', height: '0.85rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
                         <span>Duração: <strong>{exam.duracaoMinutos ? `${exam.duracaoMinutos} min` : 'Sem limite'}</strong></span>
                       </div>
-                      <div>Questões: <strong style={{ color: '#f59e0b' }}>{exam.questoes.length} (Peso Total: {exam.pesoTotal} pts)</strong></div>
+                      <div>Questões: <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{exam.questoes.length} (Peso Total: {exam.pesoTotal} pts)</strong></div>
                     </div>
                   </div>
 
                   {attempt ? (
-                    <div style={{ padding: '0.75rem', borderRadius: '8px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)', textAlign: 'center' }}>
-                      <div style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>PROVA REALIZADA</div>
+                    <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-verde-light, rgba(41, 62, 36, 0.1))', border: '1px solid var(--color-verde-500, #3D5B36)', textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--color-verde-700, #293E24)', fontWeight: 700 }}>PROVA REALIZADA</div>
                       <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.2rem 0' }}>
                         Nota: {attempt.pontuacaoObtida} / {attempt.pontuacaoMaxima} pts ({attempt.classificacao})
                       </div>
@@ -722,7 +723,7 @@ export function EstudanteDashboard() {
                     <button
                       onClick={() => handleStartExam(exam)}
                       className="btn-gradient"
-                      style={{ width: '100%', padding: '0.65rem', fontWeight: 700, fontSize: '0.85rem', background: 'linear-gradient(135deg, #10b981, #06b6d4)' }}
+                      style={{ width: '100%', padding: '0.65rem', fontWeight: 700, fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--gradient-primary)' }}
                     >
                       Realizar Prova 📝
                     </button>
@@ -743,23 +744,23 @@ export function EstudanteDashboard() {
 
       {/* ── EXAM TAKING MODAL / RUNNER VIEW ── */}
       {activeExam && (
-        <div className="fade-in glass-card" style={{ padding: '1.75rem', maxWidth: '48rem', margin: '0 auto' }}>
+        <div className="fade-in glass-card" style={{ padding: '1.75rem', maxWidth: '48rem', margin: '0 auto', borderRadius: 'var(--radius-lg, 14px)' }}>
           {/* Exam Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
             <div>
-              <span style={{ fontSize: '0.75rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>
                 {activeExam.disciplina}
               </span>
-              <h3 style={{ color: 'var(--text-main)', fontSize: '1.35rem', fontWeight: 800, margin: '0.2rem 0' }}>
+              <h3 style={{ color: 'var(--text-main)', fontSize: '1.35rem', fontWeight: 800, margin: '0.2rem 0', fontFamily: 'var(--font-heading)' }}>
                 {activeExam.titulo}
               </h3>
             </div>
 
             {/* Timer if duration set */}
             {examTimeRemaining !== null && !examResult && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', background: examTimeRemaining < 300 ? 'rgba(239,68,68,0.15)' : 'rgba(6,182,212,0.15)', border: `1px solid ${examTimeRemaining < 300 ? '#ef4444' : '#06b6d4'}` }}>
-                <Clock style={{ width: '1rem', height: '1rem', color: examTimeRemaining < 300 ? '#ef4444' : '#06b6d4' }} />
-                <span style={{ fontWeight: 800, fontSize: '1.1rem', color: examTimeRemaining < 300 ? '#ef4444' : '#06b6d4', fontFamily: 'monospace' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm, 10px)', background: examTimeRemaining < 300 ? 'rgba(188,57,31,0.15)' : 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', border: `1px solid ${examTimeRemaining < 300 ? 'var(--color-vermelho, #BC391F)' : 'var(--color-primary, #E4683F)'}` }}>
+                <Clock style={{ width: '1rem', height: '1rem', color: examTimeRemaining < 300 ? 'var(--color-vermelho, #BC391F)' : 'var(--color-primary-accessible, #B8441F)' }} />
+                <span style={{ fontWeight: 800, fontSize: '1.1rem', color: examTimeRemaining < 300 ? 'var(--color-vermelho, #BC391F)' : 'var(--color-primary-accessible, #B8441F)', fontFamily: 'monospace' }}>
                   {Math.floor(examTimeRemaining / 60)}:{(examTimeRemaining % 60).toString().padStart(2, '0')}
                 </span>
               </div>
@@ -781,10 +782,10 @@ export function EstudanteDashboard() {
                       style={{
                         width: '38px',
                         height: '38px',
-                        borderRadius: '8px',
-                        border: isCurrent ? '2px solid #06b6d4' : isAnswered ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
-                        background: isCurrent ? 'rgba(6,182,212,0.25)' : isAnswered ? 'rgba(16,185,129,0.2)' : 'rgba(0,0,0,0.3)',
-                        color: isCurrent ? '#06b6d4' : isAnswered ? '#10b981' : 'var(--text-secondary)',
+                        borderRadius: 'var(--radius-sm, 10px)',
+                        border: isCurrent ? '2px solid var(--color-primary, #E4683F)' : isAnswered ? '1px solid var(--color-verde-500, #3D5B36)' : '1px solid var(--border-color)',
+                        background: isCurrent ? 'var(--color-primary-light, rgba(228, 104, 63, 0.25))' : isAnswered ? 'var(--color-verde-light, rgba(41, 62, 36, 0.2))' : 'var(--bg-glass)',
+                        color: isCurrent ? 'var(--color-primary-accessible, #B8441F)' : isAnswered ? 'var(--color-verde-700, #293E24)' : 'var(--text-secondary)',
                         fontWeight: 700,
                         fontSize: '0.85rem',
                         cursor: 'pointer'
@@ -798,12 +799,12 @@ export function EstudanteDashboard() {
 
               {/* Current Question Body */}
               {activeExam.questoes[examCurrentQIndex] && (
-                <div style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '1.5rem' }}>
+                <div style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-glass)', border: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <span style={{ fontSize: '0.8rem', color: '#06b6d4', fontWeight: 800 }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800 }}>
                       Questão {examCurrentQIndex + 1} de {activeExam.questoes.length}
                     </span>
-                    <span style={{ fontSize: '0.75rem', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', padding: '0.15rem 0.55rem', borderRadius: '9999px', fontWeight: 600 }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', padding: '0.15rem 0.55rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
                       Peso: {activeExam.questoes[examCurrentQIndex].valorPeso} pts
                     </span>
                   </div>
@@ -822,9 +823,9 @@ export function EstudanteDashboard() {
                           onClick={() => setExamAnswers(prev => ({ ...prev, [examCurrentQIndex]: oIdx }))}
                           style={{
                             padding: '0.85rem 1rem',
-                            borderRadius: '8px',
-                            border: isSelected ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.1)',
-                            background: isSelected ? 'rgba(6,182,212,0.15)' : 'rgba(0,0,0,0.2)',
+                            borderRadius: 'var(--radius-sm, 10px)',
+                            border: isSelected ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
+                            background: isSelected ? 'var(--color-primary-light, rgba(228, 104, 63, 0.15))' : 'var(--bg-glass)',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -837,7 +838,7 @@ export function EstudanteDashboard() {
                             name={`exam_runner_q_${examCurrentQIndex}`}
                             checked={isSelected}
                             onChange={() => {}}
-                            style={{ accentColor: '#06b6d4', cursor: 'pointer' }}
+                            style={{ accentColor: 'var(--color-primary, #E4683F)', cursor: 'pointer' }}
                           />
                           <span style={{ color: isSelected ? 'var(--text-main)' : 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: isSelected ? 600 : 400 }}>
                             {opt.texto}
@@ -854,8 +855,8 @@ export function EstudanteDashboard() {
                 <button
                   onClick={() => setExamCurrentQIndex(prev => Math.max(0, prev - 1))}
                   disabled={examCurrentQIndex === 0}
-                  className="btn-outline-cyan"
-                  style={{ padding: '0.55rem 1.25rem', opacity: examCurrentQIndex === 0 ? 0.4 : 1 }}
+                  className="btn-outline"
+                  style={{ padding: '0.55rem 1.25rem', opacity: examCurrentQIndex === 0 ? 0.4 : 1, borderRadius: 'var(--radius-sm, 10px)' }}
                 >
                   ← Questão Anterior
                 </button>
@@ -863,8 +864,8 @@ export function EstudanteDashboard() {
                 {examCurrentQIndex < activeExam.questoes.length - 1 ? (
                   <button
                     onClick={() => setExamCurrentQIndex(prev => prev + 1)}
-                    className="btn-outline-cyan"
-                    style={{ padding: '0.55rem 1.25rem' }}
+                    className="btn-outline"
+                    style={{ padding: '0.55rem 1.25rem', borderRadius: 'var(--radius-sm, 10px)' }}
                   >
                     Próxima Questão →
                   </button>
@@ -873,7 +874,7 @@ export function EstudanteDashboard() {
                     onClick={handleFinishExam}
                     disabled={submittingExam}
                     className="btn-gradient"
-                    style={{ padding: '0.65rem 1.75rem', fontWeight: 800, background: 'linear-gradient(135deg, #10b981, #06b6d4)' }}
+                    style={{ padding: '0.65rem 1.75rem', fontWeight: 800, borderRadius: 'var(--radius-sm, 10px)', background: 'var(--gradient-primary)' }}
                   >
                     {submittingExam ? 'Entregando...' : '✓ Finalizar & Entregar Prova'}
                   </button>
@@ -914,8 +915,8 @@ export function EstudanteDashboard() {
                       <div style={{ color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: 600 }}>
                         {q.enunciado}
                       </div>
-                      <div style={{ padding: '0.6rem', borderRadius: '6px', background: 'rgba(0,0,0,0.25)', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                        <strong style={{ color: '#06b6d4', display: 'block', marginBottom: '0.2rem' }}>Justificativa Pedagógica:</strong>
+                      <div style={{ padding: '0.6rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-glass)', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                        <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', display: 'block', marginBottom: '0.2rem' }}>Justificativa Pedagógica:</strong>
                         {q.justificativa}
                       </div>
                     </div>
@@ -927,7 +928,7 @@ export function EstudanteDashboard() {
                 <button
                   onClick={() => setActiveExam(null)}
                   className="btn-gradient"
-                  style={{ padding: '0.65rem 2rem', fontWeight: 700 }}
+                  style={{ padding: '0.65rem 2rem', fontWeight: 700, borderRadius: 'var(--radius-sm, 10px)', background: 'var(--gradient-primary)' }}
                 >
                   Voltar às Provas
                 </button>
@@ -939,8 +940,8 @@ export function EstudanteDashboard() {
 
       {/* ── TAB 3: PLANO DE AULAS DA TURMA ── */}
       {activeTab === 'lesson_plans' && (
-        <div className="fade-in glass-card" style={{ padding: '1.75rem' }}>
-          <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+        <div className="fade-in glass-card" style={{ padding: '1.75rem', borderRadius: 'var(--radius-lg, 14px)' }}>
+          <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.5rem', fontFamily: 'var(--font-heading)' }}>
             📅 Cronograma & Plano de Aulas da Turma
           </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>
@@ -950,15 +951,15 @@ export function EstudanteDashboard() {
           {classLessonPlans.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {classLessonPlans.map((plan, idx) => (
-                <div key={plan.id} style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', display: 'grid', gridTemplateColumns: '70px 1fr auto', gap: '1rem', alignItems: 'center' }}>
-                  <div style={{ textAlign: 'center', padding: '0.45rem', background: 'rgba(6,182,212,0.1)', borderRadius: '8px', border: '1px solid rgba(6,182,212,0.2)' }}>
-                    <span style={{ fontSize: '0.7rem', color: '#06b6d4', fontWeight: 700, display: 'block' }}>AULA</span>
+                <div key={plan.id} style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-glass)', border: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: '70px 1fr auto', gap: '1rem', alignItems: 'center' }}>
+                  <div style={{ textAlign: 'center', padding: '0.45rem', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.12))', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, display: 'block' }}>AULA</span>
                     <strong style={{ fontSize: '1.15rem', color: 'var(--text-main)' }}>#{idx + 1}</strong>
                   </div>
 
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-                      <span style={{ fontSize: '0.72rem', color: '#8b5cf6', fontWeight: 700 }}>{plan.periodo}</span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)', fontWeight: 700 }}>{plan.periodo}</span>
                       <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>{plan.topico}</h4>
                     </div>
                     <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.4rem', lineHeight: 1.4 }}>
@@ -985,8 +986,8 @@ export function EstudanteDashboard() {
                             setActiveTab('labs');
                           }
                         }}
-                        className="btn-outline-cyan"
-                        style={{ padding: '0.45rem 0.85rem', fontSize: '0.78rem', whiteSpace: 'nowrap' }}
+                        className="btn-outline"
+                        style={{ padding: '0.45rem 0.85rem', fontSize: '0.78rem', whiteSpace: 'nowrap', borderRadius: 'var(--radius-sm, 10px)' }}
                       >
                         🔬 Abrir Lab da Aula
                       </button>
@@ -1016,13 +1017,13 @@ export function EstudanteDashboard() {
           {classMaterials.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
               {classMaterials.map(mat => (
-                <div key={mat.id} style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div key={mat.id} style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)', background: 'var(--bg-glass)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                      <span style={{ fontSize: '0.72rem', color: '#8b5cf6', fontWeight: 700 }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)', fontWeight: 700 }}>
                         {mat.periodo || '1º Bimestre'}
                       </span>
-                      <span style={{ fontSize: '0.72rem', color: '#06b6d4', background: 'rgba(6,182,212,0.1)', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 600 }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
                         {mat.tipo}
                       </span>
                     </div>
@@ -1066,7 +1067,7 @@ export function EstudanteDashboard() {
                           setCopiedMatId(mat.id);
                           setTimeout(() => setCopiedMatId(prev => prev === mat.id ? null : prev), 2000);
                         }}
-                        className="btn-outline-cyan"
+                        className="btn-outline"
                         style={{ width: '100%', padding: '0.5rem', fontSize: '0.82rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
                       >
                         {copiedMatId === mat.id ? (
@@ -1084,7 +1085,7 @@ export function EstudanteDashboard() {
                         href={mat.linkOuConteudo.startsWith('http') ? mat.linkOuConteudo : `https://${mat.linkOuConteudo}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn-outline-cyan"
+                        className="btn-outline"
                         style={{ width: '100%', padding: '0.55rem', fontSize: '0.82rem', textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', boxSizing: 'border-box' }}
                       >
                         <ExternalLink style={{ width: '0.85rem', height: '0.85rem' }} /> Acessar Link Externo
@@ -1172,25 +1173,25 @@ export function EstudanteDashboard() {
                       onClick={() => setSelectedClassId(turma.id)}
                       style={{
                         padding: '1rem',
-                        borderRadius: '8px',
-                        background: isSelected ? 'rgba(6,182,212,0.08)' : 'rgba(255,255,255,0.02)',
-                        border: isSelected ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: 'var(--radius-sm, 10px)',
+                        background: isSelected ? 'var(--color-primary-light, rgba(228, 104, 63, 0.12))' : 'var(--bg-glass)',
+                        border: isSelected ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
                         cursor: 'pointer',
                         transition: 'all 0.2s'
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                        <span style={{ fontSize: '0.72rem', color: isSelected ? '#06b6d4' : 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <span style={{ fontSize: '0.72rem', color: isSelected ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
                           {isSelected ? '● Turma Ativa' : 'Clique para Selecionar'}
                         </span>
                         <span style={{
                           fontSize: '0.75rem',
                           fontFamily: 'monospace',
                           fontWeight: 700,
-                          color: '#06b6d4',
-                          background: 'rgba(6,182,212,0.12)',
+                          color: 'var(--color-primary-accessible, #B8441F)',
+                          background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))',
                           padding: '0.15rem 0.45rem',
-                          borderRadius: '4px'
+                          borderRadius: 'var(--radius-sm, 10px)'
                         }}>
                           {shortCode}
                         </span>

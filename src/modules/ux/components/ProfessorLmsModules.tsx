@@ -373,16 +373,16 @@ export function ProfessorLmsModules({
             onChange={(e) => onSelectClass(e.target.value)}
             style={{
               padding: '0.55rem 1rem',
-              borderRadius: '8px',
-              border: '1px solid rgba(6,182,212,0.4)',
-              background: 'rgba(0,0,0,0.3)',
+              borderRadius: 'var(--radius-sm, 10px)',
+              border: '1px solid var(--border-color, #E2D7C3)',
+              background: 'transparent',
               color: 'var(--text-main)',
               fontSize: '0.9rem',
               fontWeight: 700
             }}
           >
             {turmas.map(t => (
-              <option key={t.id} value={t.id} style={{ background: '#18181b', color: '#fff' }}>
+              <option key={t.id} value={t.id} style={{ background: 'var(--color-neutral-500, #F1EAD9)', color: 'var(--color-secondary-dark, #172314)' }}>
                 {t.name} (Código: {(t as any).code || t.id.slice(0, 6)})
               </option>
             ))}
@@ -390,7 +390,7 @@ export function ProfessorLmsModules({
         </div>
 
         {/* Sub-tabs Moodle LMS */}
-        <div style={{ display: 'flex', gap: '0.4rem', background: 'rgba(0,0,0,0.2)', padding: '0.3rem', borderRadius: '10px' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', background: 'var(--color-neutral-300, #E2D7C3)', padding: '0.3rem', borderRadius: 'var(--radius-sm, 10px)' }}>
           {[
             { id: 'attendance', label: 'Diário & Frequência', icon: Calendar },
             { id: 'gradebook', label: 'Livro de Notas', icon: Award },
@@ -402,10 +402,10 @@ export function ProfessorLmsModules({
               onClick={() => setSubTab(tab.id as any)}
               style={{
                 padding: '0.5rem 0.9rem',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-sm, 10px)',
                 border: 'none',
-                background: subTab === tab.id ? '#06b6d4' : 'transparent',
-                color: subTab === tab.id ? '#000' : 'var(--text-secondary)',
+                background: subTab === tab.id ? 'var(--color-primary, #E4683F)' : 'transparent',
+                color: subTab === tab.id ? '#ffffff' : 'var(--text-secondary)',
                 fontWeight: subTab === tab.id ? 800 : 500,
                 fontSize: '0.82rem',
                 cursor: 'pointer',
@@ -430,8 +430,8 @@ export function ProfessorLmsModules({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Calendar style={{ color: '#06b6d4', width: '1.4rem', height: '1.4rem' }} />
-                Diário de Classe & Controle de Frequência
+                <Calendar style={{ color: 'var(--color-secondary, #293E24)', width: '1.4rem', height: '1.4rem' }} />
+                Diário de classe & controle de frequência
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
                 Registro de chamada escolar, presença em laboratórios e monitoramento de infrequência conforme a LDB (mínimo 75%).
@@ -449,7 +449,7 @@ export function ProfessorLmsModules({
 
           {/* Modal / Card para Registro de Chamada */}
           {isRecordingAttendance && (
-            <div className="glass-card" style={{ padding: '1.5rem', border: '1px solid rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.03)' }}>
+            <div className="glass-card" style={{ padding: '1.5rem', border: '1px solid var(--border-color, #E2D7C3)', background: 'transparent' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
                   📝 Realizar Chamada Escolar
@@ -576,7 +576,7 @@ export function ProfessorLmsModules({
                 <button
                   type="button"
                   onClick={() => setIsRecordingAttendance(false)}
-                  className="btn-outline-cyan"
+                  className="btn-outline"
                   style={{ padding: '0.6rem 1.25rem' }}
                 >
                   Cancelar
@@ -597,8 +597,8 @@ export function ProfessorLmsModules({
           {/* Tabela de Assiduidade Geral dos Alunos */}
           <div className="glass-card" style={{ padding: '1.5rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Users style={{ width: '1.2rem', height: '1.2rem', color: '#06b6d4' }} />
-              Taxa Geral de Assiduidade por Estudante (LDB 75%)
+              <Users style={{ width: '1.2rem', height: '1.2rem', color: 'var(--color-secondary, #293E24)' }} />
+              Taxa geral de assiduidade por estudante (LDB 75%)
             </h3>
 
             <div style={{ overflowX: 'auto' }}>
@@ -677,10 +677,10 @@ export function ProfessorLmsModules({
                   const total = rec.registros.length;
                   const perc = total > 0 ? Math.round((presentCount / total) * 100) : 0;
                   return (
-                    <div key={rec.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div key={rec.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1rem', borderRadius: '8px', background: 'transparent', border: '1px solid var(--border-color, #E2D7C3)' }}>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#06b6d4' }}>{rec.data}</span>
+                          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>{rec.data}</span>
                           <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>— {rec.conteudoResumo || 'Aula Prática'}</span>
                         </div>
                         <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -707,8 +707,8 @@ export function ProfessorLmsModules({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Award style={{ color: '#06b6d4', width: '1.4rem', height: '1.4rem' }} />
-                Livro de Notas & Boletim Ponderado (Gradebook)
+                <Award style={{ color: 'var(--color-primary-accessible, #B8441F)', width: '1.4rem', height: '1.4rem' }} />
+                Livro de notas & boletim ponderado (Gradebook)
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
                 Ponderação automática com Provas (40%), Labs (30%), Atividades (20%) e Participação (10%). Média para aprovação: 6.0.
@@ -716,18 +716,18 @@ export function ProfessorLmsModules({
             </div>
             <button
               onClick={handleExportGradebookCSV}
-              className="btn-outline-cyan"
+              className="btn-outline"
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.25rem', fontWeight: 700 }}
             >
               <Download style={{ width: '1rem', height: '1rem' }} />
-              Exportar Boletim (CSV)
+              Exportar boletim (CSV)
             </button>
           </div>
 
           {/* Configuração dos Pesos Avaliativos */}
-          <div className="glass-card" style={{ padding: '1.25rem', background: 'rgba(0,0,0,0.2)' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#06b6d4', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-              Pesos de Avaliação Bimestral (%):
+          <div className="glass-card" style={{ padding: '1.25rem', background: 'transparent' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-secondary, #293E24)', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
+              Pesos de avaliação bimestral (%):
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
               <div>
@@ -791,10 +791,10 @@ export function ProfessorLmsModules({
                       <td style={{ padding: '0.85rem 0.5rem', fontWeight: 600, color: 'var(--text-main)' }}>
                         {rep.studentName}
                       </td>
-                      <td style={{ padding: '0.85rem 0.5rem', color: '#06b6d4', fontWeight: 700 }}>
+                      <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
                         {rep.notaProvas.toFixed(1)}
                       </td>
-                      <td style={{ padding: '0.85rem 0.5rem', color: '#8b5cf6', fontWeight: 700 }}>
+                      <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700 }}>
                         {rep.notaLabs.toFixed(1)}
                       </td>
                       <td style={{ padding: '0.85rem 0.5rem', color: '#10b981', fontWeight: 700 }}>
@@ -865,8 +865,8 @@ export function ProfessorLmsModules({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <MessageSquare style={{ color: '#06b6d4', width: '1.4rem', height: '1.4rem' }} />
-                Fórum Pedagógico & Discussões Acadêmicas
+                <MessageSquare style={{ color: 'var(--color-primary-accessible, #B8441F)', width: '1.4rem', height: '1.4rem' }} />
+                Fórum pedagógico & discussões acadêmicas
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
                 Ambiente colaborativo para esclarecimento de dúvidas conceituais, debates científicos e respostas oficiais do corpo docente.
@@ -884,7 +884,7 @@ export function ProfessorLmsModules({
 
           {/* Form para Criar Tópico */}
           {isCreatingTopic && (
-            <form onSubmit={handleCreateTopic} className="glass-card" style={{ padding: '1.5rem', border: '1px solid rgba(6,182,212,0.4)' }}>
+            <form onSubmit={handleCreateTopic} className="glass-card" style={{ padding: '1.5rem', border: '1px solid var(--border-color, #E2D7C3)' }}>
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
                 💬 Abrir Novo Tópico com a Turma
               </h3>
@@ -929,7 +929,7 @@ export function ProfessorLmsModules({
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-                <button type="button" onClick={() => setIsCreatingTopic(false)} className="btn-outline-cyan" style={{ padding: '0.55rem 1.15rem' }}>
+                <button type="button" onClick={() => setIsCreatingTopic(false)} className="btn-outline" style={{ padding: '0.55rem 1.15rem' }}>
                   Cancelar
                 </button>
                 <button type="submit" className="btn-gradient" style={{ padding: '0.55rem 1.5rem', fontWeight: 700 }}>
@@ -951,9 +951,9 @@ export function ProfessorLmsModules({
                 borderRadius: '6px',
                 fontSize: '0.8rem',
                 fontWeight: forumFilter === 'all' ? 700 : 500,
-                background: forumFilter === 'all' ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.04)',
-                border: forumFilter === 'all' ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
-                color: forumFilter === 'all' ? '#06b6d4' : 'var(--text-secondary)',
+                background: forumFilter === 'all' ? 'rgba(228, 104, 63, 0.15)' : 'transparent',
+                border: forumFilter === 'all' ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color, #E2D7C3)',
+                color: forumFilter === 'all' ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
                 cursor: 'pointer'
               }}
             >
@@ -1026,15 +1026,15 @@ export function ProfessorLmsModules({
                       style={{
                         padding: '1.25rem',
                         cursor: 'pointer',
-                        border: isSelected ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
-                        background: isSelected ? 'rgba(6,182,212,0.06)' : 'rgba(255,255,255,0.02)',
+                        border: isSelected ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color, #E2D7C3)',
+                        background: isSelected ? 'rgba(228, 104, 63, 0.08)' : 'transparent',
                         transition: 'all 0.2s',
                         position: 'relative'
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#06b6d4', background: 'rgba(6,182,212,0.15)', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--color-secondary, #293E24)', background: 'var(--color-neutral-300, #E2D7C3)', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
                             {top.disciplina || 'Ciências'}
                           </span>
                           {hasProfReply ? (
@@ -1068,8 +1068,8 @@ export function ProfessorLmsModules({
                         {top.conteudo}
                       </p>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                        <span>Por: <strong style={{ color: '#fff' }}>{top.autorNome}</strong></span>
-                        <span style={{ color: '#06b6d4', fontWeight: 700 }}>
+                        <span>Por: <strong style={{ color: 'var(--text-main)' }}>{top.autorNome}</strong></span>
+                        <span style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
                           💬 {top.respostas?.length || 0} respostas
                         </span>
                       </div>
@@ -1082,9 +1082,9 @@ export function ProfessorLmsModules({
             {/* Thread de Discussão Selecionada */}
             {selectedTopic && (
               <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: 'fit-content' }}>
-                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+                <div style={{ borderBottom: '1px solid var(--border-color, #E2D7C3)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#06b6d4' }}>{selectedTopic.disciplina}</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>{selectedTopic.disciplina}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <button
                         onClick={(e) => handleDeleteTopic(selectedTopic.id, e)}
@@ -1099,9 +1099,9 @@ export function ProfessorLmsModules({
                     {selectedTopic.titulo}
                   </h3>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.85rem' }}>
-                    Criado por <strong style={{ color: '#fff' }}>{selectedTopic.autorNome}</strong> em {new Date(selectedTopic.criadoEm).toLocaleString('pt-BR')}
+                    Criado por <strong style={{ color: 'var(--text-main)' }}>{selectedTopic.autorNome}</strong> em {new Date(selectedTopic.criadoEm).toLocaleString('pt-BR')}
                   </div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.5, background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.5, background: 'var(--color-neutral-300, #E2D7C3)', padding: '1rem', borderRadius: '8px' }}>
                     {selectedTopic.conteudo}
                   </div>
                 </div>
@@ -1113,7 +1113,7 @@ export function ProfessorLmsModules({
                   </div>
 
                   {(!selectedTopic.respostas || selectedTopic.respostas.length === 0) ? (
-                    <div style={{ padding: '1.5rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                    <div style={{ padding: '1.5rem', textAlign: 'center', background: 'transparent', borderRadius: '8px' }}>
                       <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>
                         Nenhuma resposta ainda. Escreva uma orientação pedagógica abaixo para ajudar a turma!
                       </p>
@@ -1125,15 +1125,15 @@ export function ProfessorLmsModules({
                         style={{
                           padding: '0.85rem 1rem',
                           borderRadius: '8px',
-                          border: reply.isMelhorResposta ? '1px solid #f59e0b' : reply.autorRole === 'professor' ? '1px solid rgba(6,182,212,0.3)' : '1px solid rgba(255,255,255,0.06)',
-                          background: reply.isMelhorResposta ? 'rgba(245,158,11,0.08)' : reply.autorRole === 'professor' ? 'rgba(6,182,212,0.06)' : 'rgba(255,255,255,0.02)'
+                          border: reply.isMelhorResposta ? '1px solid #f59e0b' : reply.autorRole === 'professor' ? '1px solid var(--color-secondary, #293E24)' : '1px solid var(--border-color, #E2D7C3)',
+                          background: reply.isMelhorResposta ? 'rgba(245,158,11,0.08)' : reply.autorRole === 'professor' ? 'rgba(41,62,36,0.08)' : 'transparent'
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                             <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>{reply.autorNome}</strong>
                             {reply.autorRole === 'professor' && (
-                              <span style={{ fontSize: '0.68rem', padding: '0.1rem 0.45rem', borderRadius: '4px', background: '#06b6d4', color: '#000', fontWeight: 800 }}>
+                              <span style={{ fontSize: '0.68rem', padding: '0.1rem 0.45rem', borderRadius: '4px', background: 'var(--color-secondary, #293E24)', color: 'var(--color-neutral-100, #FAF7EE)', fontWeight: 800 }}>
                                 PROFESSOR
                               </span>
                             )}
@@ -1192,13 +1192,13 @@ export function ProfessorLmsModules({
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '0.6rem',
-                  background: 'rgba(0,0,0,0.25)',
+                  background: 'transparent',
                   padding: '1rem',
-                  borderRadius: '10px',
-                  border: '1px solid rgba(6,182,212,0.25)'
+                  borderRadius: 'var(--radius-sm, 10px)',
+                  border: '1px solid var(--border-color, #E2D7C3)'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <label style={{ fontSize: '0.82rem', color: '#06b6d4', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <label style={{ fontSize: '0.82rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                       <MessageSquare style={{ width: '0.9rem', height: '0.9rem' }} />
                       Responder como Professor:
                     </label>
@@ -1268,8 +1268,8 @@ export function ProfessorLmsModules({
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div>
             <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldCheck style={{ color: '#06b6d4', width: '1.4rem', height: '1.4rem' }} />
-              Certificação Digital & Validação de Autenticidade
+              <ShieldCheck style={{ color: 'var(--color-secondary, #293E24)', width: '1.4rem', height: '1.4rem' }} />
+              Certificação digital & validação de autenticidade
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
               Emissão formal de certificados de conclusão para estudantes aprovados e ferramenta de validação instantânea de códigos hash.
@@ -1333,7 +1333,7 @@ export function ProfessorLmsModules({
                     Certificado Emitido com Sucesso!
                   </div>
                   <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                    Código de Autenticidade: <strong style={{ color: '#06b6d4', fontFamily: 'monospace' }}>{issuedCert.codigoValidacao}</strong>
+                    Código de Autenticidade: <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontFamily: 'monospace' }}>{issuedCert.codigoValidacao}</strong>
                   </div>
                 </div>
               )}
@@ -1358,7 +1358,7 @@ export function ProfessorLmsModules({
                 />
                 <button
                   onClick={handleValidateCode}
-                  className="btn-outline-cyan"
+                  className="btn-outline"
                   style={{ padding: '0.65rem 1.15rem', fontWeight: 700, whiteSpace: 'nowrap' }}
                 >
                   Verificar

@@ -1,0 +1,68 @@
+/* Badges com identidade visual Edu-Interact */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 10px;
+  font-family: var(--font-body, 'Manrope', sans-serif);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid;
+}
+
+.badge-primary {
+  color: var(--color-laranja-700, #B8441F);
+  background-color: rgba(228, 104, 63, 0.1);
+  border-color: rgba(184, 68, 31, 0.3);
+}
+
+.badge-secondary {
+  color: var(--color-verde-700, #293E24);
+  background-color: rgba(41, 62, 36, 0.1);
+  border-color: rgba(41, 62, 36, 0.3);
+}
+
+.badge-success {
+  color: var(--color-verde-700, #293E24);
+  background-color: rgba(41, 62, 36, 0.1);
+  border-color: rgba(41, 62, 36, 0.3);
+}
+
+.badge-warning {
+  color: #9A3412;
+  background-color: rgba(234, 88, 12, 0.1);
+  border-color: rgba(234, 88, 12, 0.35);
+}
+
+.badge-error {
+  color: var(--color-vermelho, #BC391F);
+  background-color: rgba(188, 57, 31, 0.1);
+  border-color: rgba(188, 57, 31, 0.35);
+}
+
+/* Modos Dark de Alto Contraste */
+.dark-theme .badge-primary {
+  color: var(--color-primary-accessible, #F59C7B);
+  background-color: rgba(228, 104, 63, 0.18);
+  border-color: rgba(245, 156, 123, 0.35);
+}
+
+.dark-theme .badge-secondary,
+.dark-theme .badge-success {
+  color: var(--color-verde-700, #A8D5A2);
+  background-color: rgba(168, 213, 162, 0.15);
+  border-color: rgba(168, 213, 162, 0.35);
+}
+
+.dark-theme .badge-warning {
+  color: #F59C7B;
+  background-color: rgba(245, 156, 123, 0.18);
+  border-color: rgba(245, 156, 123, 0.4);
+}
+
+.dark-theme .badge-error {
+  color: #F87171;
+  background-color: rgba(248, 113, 113, 0.15);
+  border-color: rgba(248, 113, 113, 0.4);
+}

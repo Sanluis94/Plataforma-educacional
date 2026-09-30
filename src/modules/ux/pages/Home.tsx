@@ -8,6 +8,7 @@ import {
   LogIn, Award, BarChart3,
   BookMarked, PenTool
 } from 'lucide-react';
+import { Logo } from '../components/Logo';
 
 export function InteractivePendulum() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,7 +25,7 @@ export function InteractivePendulum() {
     let animId: number;
     const length = 95;
     const gravity = 0.35;
-    const damping = 0.994; // Resistência leve
+    const damping = 0.994;
 
     const draw = () => {
       const width = canvas.width;
@@ -43,8 +44,8 @@ export function InteractivePendulum() {
       const bobX = pivotX + length * Math.sin(angleRef.current);
       const bobY = pivotY + length * Math.cos(angleRef.current);
 
-      // Fundo em malha tecnológica
-      ctx.strokeStyle = 'rgba(6, 182, 212, 0.04)';
+      // Fundo em malha geométrica sutil (Verde 700 em baixa opacidade)
+      ctx.strokeStyle = 'rgba(41, 62, 36, 0.06)';
       ctx.lineWidth = 1;
       for (let x = 0; x < width; x += 20) {
         ctx.beginPath();
@@ -58,7 +59,7 @@ export function InteractivePendulum() {
       }
 
       // Linha do arco do pêndulo
-      ctx.strokeStyle = 'rgba(139, 92, 246, 0.15)';
+      ctx.strokeStyle = 'rgba(41, 62, 36, 0.18)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(pivotX, pivotY, length, 0.2 * Math.PI, 0.8 * Math.PI);
@@ -66,9 +67,9 @@ export function InteractivePendulum() {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Fio do pêndulo
+      // Fio do pêndulo (Verde 700 oficial #293E24)
       ctx.beginPath();
-      ctx.strokeStyle = '#06b6d4';
+      ctx.strokeStyle = '#293E24';
       ctx.lineWidth = 2;
       ctx.moveTo(pivotX, pivotY);
       ctx.lineTo(bobX, bobY);
@@ -76,24 +77,24 @@ export function InteractivePendulum() {
 
       // Ponto do pivô
       ctx.beginPath();
-      ctx.fillStyle = '#8b5cf6';
+      ctx.fillStyle = '#293E24';
       ctx.arc(pivotX, pivotY, 4, 0, Math.PI * 2);
       ctx.fill();
 
-      // Glow do Bob
+      // Glow sutil do Bob (Laranja 500 #E4683F)
       ctx.beginPath();
       const radGlow = ctx.createRadialGradient(bobX, bobY, 0, bobX, bobY, 18);
-      radGlow.addColorStop(0, 'rgba(6, 182, 212, 0.7)');
-      radGlow.addColorStop(0.3, 'rgba(6, 182, 212, 0.3)');
+      radGlow.addColorStop(0, 'rgba(228, 104, 63, 0.5)');
+      radGlow.addColorStop(0.3, 'rgba(228, 104, 63, 0.2)');
       radGlow.addColorStop(1, 'transparent');
       ctx.fillStyle = radGlow;
       ctx.arc(bobX, bobY, 18, 0, Math.PI * 2);
       ctx.fill();
 
-      // Centro do Bob
+      // Centro do Bob (Laranja Oficial #E4683F)
       ctx.beginPath();
-      ctx.fillStyle = '#8b5cf6';
-      ctx.arc(bobX, bobY, 7, 0, Math.PI * 2);
+      ctx.fillStyle = '#E4683F';
+      ctx.arc(bobX, bobY, 7.5, 0, Math.PI * 2);
       ctx.fill();
 
       animId = requestAnimationFrame(draw);
@@ -173,9 +174,9 @@ export function InteractivePendulum() {
         width: '100%',
         maxWidth: '300px',
         height: '140px',
-        background: 'rgba(0,0,0,0.15)',
-        borderRadius: '8px',
-        border: '1px solid rgba(6, 182, 212, 0.15)',
+        background: 'rgba(41, 62, 36, 0.04)',
+        borderRadius: '10px',
+        border: '1px solid var(--border-color)',
       }}
     />
   );
@@ -191,105 +192,97 @@ export function Home({ onLoginOpen }: HomeProps) {
   const isAdmin = userData?.role === 'admin';
   const userName = userData?.name || currentUser?.displayName || (isProfessor ? 'Professor(a)' : 'Estudante');
 
-  // Hub Navigation Cards for Authenticated Users
+  // Hub Navigation Cards com a paleta oficial da identidade visual (Verde, Laranja, Nude)
   const getHubCards = () => {
     if (isProfessor) {
       return [
         {
           id: 'classes',
-          title: 'Minhas Turmas & Mural',
-          category: 'Gestão Docente',
+          title: 'Minhas turmas e mural',
+          category: 'Gestão docente',
           description: 'Gerencie suas classes, compartilhe códigos de 6 dígitos para matrícula rápida e publique comunicados no mural.',
           href: '/professor?tab=classes',
           icon: Users,
-          color: '#06b6d4',
-          bgGradient: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(6,182,212,0.03) 100%)',
-          badgeText: 'Mural & Código 6 Dígitos',
-          actionText: 'Acessar Turmas'
+          color: '#293E24',
+          badgeText: 'Mural e código 6 dígitos',
+          actionText: 'Acessar turmas'
         },
         {
           id: 'lesson_plans',
-          title: 'Planos de Aula & BNCC com IA',
-          category: 'Planejamento Pedagógico',
-          description: 'Estruture o plano de estudos bimestral com alinhamento às competências da BNCC e gere sugestões com IA Gemini.',
+          title: 'Planos de aula e BNCC com IA',
+          category: 'Planejamento pedagógico',
+          description: 'Estruture o plano de estudos bimestral com alinhamento às competências da BNCC e sugestões adaptativas.',
           href: '/professor?tab=lesson_plans',
           icon: BookMarked,
-          color: '#8b5cf6',
-          bgGradient: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.03) 100%)',
+          color: '#B8441F',
           badgeText: 'Gerador IA + BNCC',
-          actionText: 'Abrir Planejamento'
+          actionText: 'Abrir planejamento'
         },
         {
           id: 'exams',
-          title: 'Criador de Provas & Avaliações',
-          category: 'Avaliação da Aprendizagem',
+          title: 'Criador de provas e avaliações',
+          category: 'Avaliação da aprendizagem',
           description: 'Elabore questionários somativos, acompanhe entregas e analise a taxa de acerto por questão para identificar lacunas.',
           href: '/professor?tab=exams',
           icon: FileText,
-          color: '#f59e0b',
-          bgGradient: 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(245,158,11,0.03) 100%)',
-          badgeText: 'Correção Automática',
-          actionText: 'Gerenciar Provas'
+          color: '#E4683F',
+          badgeText: 'Correção automática',
+          actionText: 'Gerenciar provas'
         },
         {
           id: 'labs',
-          title: 'Laboratórios Virtuais & Simuladores',
-          category: 'Ambiente Prático',
+          title: 'Laboratórios virtuais e simuladores',
+          category: 'Ambiente prático',
           description: 'Explore e ministre experimentos interativos de Física (Pêndulo, Colisões, Óptica, Termodinâmica) e Matemática.',
           href: '/simulacao',
           icon: Beaker,
-          color: '#10b981',
-          bgGradient: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.03) 100%)',
-          badgeText: '6 Laboratórios Ativos',
-          actionText: 'Abrir Simuladores'
+          color: '#293E24',
+          badgeText: '6 Laboratórios ativos',
+          actionText: 'Abrir simuladores'
         },
         {
           id: 'enem',
-          title: 'Simulado Oficial ENEM (TRI)',
-          category: 'Avaliação Oficial',
+          title: 'Simulado oficial ENEM (TRI)',
+          category: 'Avaliação oficial',
           description: 'Acesse o banco de questões calibrado do ENEM com régua de proficiência TRI oficial e cronômetro de aplicação.',
           href: '/enem',
           icon: GraduationCap,
-          color: '#3b82f6',
-          bgGradient: 'linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.03) 100%)',
+          color: '#172314',
           badgeText: 'Algoritmo TRI 3PL',
-          actionText: 'Acessar Simulado'
+          actionText: 'Acessar simulado'
         },
         {
           id: 'coordenacao',
-          title: 'Painel da Coordenação & Gestão',
-          category: 'Coordenação Institucional',
+          title: 'Painel da coordenação e gestão',
+          category: 'Coordenação institucional',
           description: 'Radar preventivo de evasão escolar, importação de turmas em massa via CSV e relatórios consolidados da escola.',
           href: '/coordenacao',
           icon: Building2,
-          color: '#ec4899',
-          bgGradient: 'linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(236,72,153,0.03) 100%)',
-          badgeText: 'Radar de Evasão + CSV',
-          actionText: 'Abrir Coordenação'
+          color: '#293E24',
+          badgeText: 'Radar de evasão + CSV',
+          actionText: 'Abrir coordenação'
         },
         {
           id: 'forum',
-          title: 'Fórum Pedagógico & Dúvidas',
-          category: 'Comunidade Escolar',
+          title: 'Fórum pedagógico e dúvidas',
+          category: 'Comunidade escolar',
           description: 'Responda dúvidas enviadas pelos estudantes, promova discussões científicas e selecione a melhor resposta da turma.',
           href: '/professor?tab=lms_gradebook',
           icon: MessageSquare,
-          color: '#a855f7',
-          bgGradient: 'linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(168,85,247,0.03) 100%)',
-          badgeText: 'Moderação Docente',
-          actionText: 'Ver Discussões'
+          color: '#B8441F',
+          badgeText: 'Moderação docente',
+          actionText: 'Ver discussões'
         },
         {
           id: 'reports',
-          title: 'Diagnósticos & Relatórios da Turma',
-          category: 'Métricas de Aprendizagem',
+          title: 'Diagnósticos e relatórios da turma',
+          category: 'Métricas de aprendizagem',
           description: 'Consulte taxas de conclusão, alunos que precisam de apoio e exporte históricos completos de desempenho.',
           href: '/professor?tab=reports',
           icon: BarChart3,
-          color: '#14b8a6',
-          bgGradient: 'linear-gradient(135deg, rgba(20,184,166,0.15) 0%, rgba(20,184,166,0.03) 100%)',
+          color: '#293E24',
           badgeText: 'Exportação CSV',
-          actionText: 'Ver Relatórios'
+          actionText: 'Ver relatórios'
         },
       ];
     }
@@ -298,39 +291,36 @@ export function Home({ onLoginOpen }: HomeProps) {
       return [
         {
           id: 'admin',
-          title: 'Painel de Administração Global',
+          title: 'Painel de administração global',
           category: 'Administração',
           description: 'Controle de acessos, logs de auditoria do sistema, parametrizações de segurança e governança.',
           href: '/admin',
           icon: LayoutDashboard,
-          color: '#ef4444',
-          bgGradient: 'linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0.03) 100%)',
-          badgeText: 'Acesso Restrito',
-          actionText: 'Abrir Admin'
+          color: '#BC391F',
+          badgeText: 'Acesso restrito',
+          actionText: 'Abrir admin'
         },
         {
           id: 'coordenacao',
-          title: 'Coordenação Escolar',
+          title: 'Coordenação escolar',
           category: 'Institucional',
           description: 'Importação de alunos, monitoramento de evasão e relatórios educacionais.',
           href: '/coordenacao',
           icon: Building2,
-          color: '#ec4899',
-          bgGradient: 'linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(236,72,153,0.03) 100%)',
-          badgeText: 'Visão Escolar',
-          actionText: 'Ver Coordenação'
+          color: '#293E24',
+          badgeText: 'Visão escolar',
+          actionText: 'Ver coordenação'
         },
         {
           id: 'labs',
-          title: 'Laboratórios Virtuais',
+          title: 'Laboratórios virtuais',
           category: 'Simulações',
           description: 'Visualizar e testar os módulos e laboratórios virtuais de Ciências e Matemática.',
           href: '/simulacao',
           icon: Beaker,
-          color: '#10b981',
-          bgGradient: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.03) 100%)',
+          color: '#E4683F',
           badgeText: 'Simuladores',
-          actionText: 'Acessar Labs'
+          actionText: 'Acessar labs'
         },
         {
           id: 'enem',
@@ -339,8 +329,7 @@ export function Home({ onLoginOpen }: HomeProps) {
           description: 'Interface de testes e calibração estatística do simulado ENEM.',
           href: '/enem',
           icon: GraduationCap,
-          color: '#3b82f6',
-          bgGradient: 'linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.03) 100%)',
+          color: '#172314',
           badgeText: 'Algoritmo TRI',
           actionText: 'Acessar ENEM'
         }
@@ -351,99 +340,91 @@ export function Home({ onLoginOpen }: HomeProps) {
     return [
       {
         id: 'classes',
-        title: 'Minha Turma & Mural de Avisos',
-        category: 'Área do Aluno',
+        title: 'Minha turma e mural de avisos',
+        category: 'Área do aluno',
         description: 'Entre na sua turma usando o código de 6 dígitos, acompanhe recados importantes e materiais anexados pelo professor.',
         href: '/estudante?tab=classes',
         icon: Users,
-        color: '#06b6d4',
-        bgGradient: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(6,182,212,0.03) 100%)',
-        badgeText: 'Matrícula & Mural',
-        actionText: 'Entrar na Turma'
+        color: '#293E24',
+        badgeText: 'Matrícula e mural',
+        actionText: 'Entrar na turma'
       },
       {
         id: 'labs',
-        title: 'Laboratórios Virtuais & Simuladores',
-        category: 'Ciências & Matemática',
+        title: 'Laboratórios virtuais e simuladores',
+        category: 'Ciências e matemática',
         description: 'Faça experimentos reais de Física (Pêndulo, Forças, Óptica, Gases) e resolva desafios práticos de Matemática.',
         href: '/simulacao',
         icon: Beaker,
-        color: '#10b981',
-        bgGradient: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.03) 100%)',
-        badgeText: 'Simulações Interativas',
-        actionText: 'Experimentar Agora'
+        color: '#E4683F',
+        badgeText: 'Simulações interativas',
+        actionText: 'Experimentar agora'
       },
       {
         id: 'enem',
-        title: 'Simulado Oficial ENEM (TRI)',
-        category: 'Preparatório Vestibular',
+        title: 'Simulado oficial ENEM (TRI)',
+        category: 'Preparatório vestibular',
         description: 'Treine com itens oficiais do ENEM com cronômetro real de 30 minutos e veja sua nota TRI calculada na hora.',
         href: '/enem',
         icon: GraduationCap,
-        color: '#3b82f6',
-        bgGradient: 'linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.03) 100%)',
-        badgeText: 'Nota TRI Oficial',
-        actionText: 'Fazer Simulado'
+        color: '#172314',
+        badgeText: 'Nota TRI oficial',
+        actionText: 'Fazer simulado'
       },
       {
         id: 'redacao',
-        title: 'Laboratório de Redação com IA',
-        category: 'Produção Textual',
+        title: 'Laboratório de redação com IA',
+        category: 'Produção textual',
         description: 'Escreva dissertações temáticas com tema gerador e receba nota e comentários imediatos nas 5 competências do ENEM.',
         href: '/estudante?tab=labs',
         icon: PenTool,
-        color: '#8b5cf6',
-        bgGradient: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.03) 100%)',
+        color: '#B8441F',
         badgeText: 'Correção IA C1-C5',
-        actionText: 'Escrever Redação'
+        actionText: 'Escrever redação'
       },
       {
         id: 'exams',
-        title: 'Minhas Provas & Avaliações',
-        category: 'Desafios & Notas',
+        title: 'Minhas provas e avaliações',
+        category: 'Desafios e notas',
         description: 'Consulte e responda as avaliações formais aplicadas pelo seu professor com justificativa pedagógica e gabarito.',
         href: '/estudante?tab=exams',
         icon: FileText,
-        color: '#f59e0b',
-        bgGradient: 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(245,158,11,0.03) 100%)',
-        badgeText: 'Avaliações Docentes',
-        actionText: 'Ver Provas'
+        color: '#E4683F',
+        badgeText: 'Avaliações docentes',
+        actionText: 'Ver provas'
       },
       {
         id: 'gamification',
-        title: 'Conquistas & Loja de Recompensas',
-        category: 'Gamificação & Recompensas',
-        description: 'Ganhe XP em cada atividade, suba de nível, desbloqueie badges científicos e troque suas moedas por avatares na loja.',
+        title: 'Conquistas e recompensas',
+        category: 'Gamificação e evolução',
+        description: 'Ganhe XP em cada atividade, suba de nível, desbloqueie badges científicos e troque suas moedas por avatares.',
         href: '/estudante?tab=gamification',
         icon: Trophy,
-        color: '#eab308',
-        bgGradient: 'linear-gradient(135deg, rgba(234,179,8,0.15) 0%, rgba(234,179,8,0.03) 100%)',
-        badgeText: 'XP & Moedas',
-        actionText: 'Acessar Loja'
+        color: '#B8441F',
+        badgeText: 'XP e conquistas',
+        actionText: 'Acessar conquistas'
       },
       {
         id: 'forum',
-        title: 'Fórum Pedagógico da Turma',
-        category: 'Debates & Dúvidas',
+        title: 'Fórum pedagógico da turma',
+        category: 'Debates e dúvidas',
         description: 'Envie suas dúvidas para o professor, ajude colegas e concorra ao destaque de melhor resposta da turma.',
         href: '/estudante?tab=forum',
         icon: MessageSquare,
-        color: '#ec4899',
-        bgGradient: 'linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(236,72,153,0.03) 100%)',
-        badgeText: 'Dúvidas & Respostas',
-        actionText: 'Ir para o Fórum'
+        color: '#293E24',
+        badgeText: 'Dúvidas e respostas',
+        actionText: 'Ir para o fórum'
       },
       {
         id: 'certificates',
-        title: 'Certificados & Histórico Escolar',
-        category: 'Progresso Acadêmico',
+        title: 'Certificados e histórico escolar',
+        category: 'Progresso acadêmico',
         description: 'Emita seu certificado formal de conclusão com carga horária e consulte o histórico de notas e experimentos realizados.',
         href: '/estudante?tab=certificates',
         icon: Award,
-        color: '#14b8a6',
-        bgGradient: 'linear-gradient(135deg, rgba(20,184,166,0.15) 0%, rgba(20,184,166,0.03) 100%)',
-        badgeText: 'Emissão de Certificado',
-        actionText: 'Ver Certificados'
+        color: '#293E24',
+        badgeText: 'Emissão de certificado',
+        actionText: 'Ver certificados'
       }
     ];
   };
@@ -455,12 +436,12 @@ export function Home({ onLoginOpen }: HomeProps) {
       {/* ─── CASO 1: USUÁRIO AUTENTICADO (HUB CENTRAL DE NAVEGAÇÃO) ─── */}
       {currentUser ? (
         <section style={{ maxWidth: '82rem', margin: '0 auto', padding: '2.5rem 1rem' }}>
-          {/* Welcome Banner */}
-          <div className="glass-card" style={{
+          {/* Welcome Banner com 1px Nude 300 e sem sombras projetadas */}
+          <div className="card" style={{
             padding: '2rem 2.25rem',
-            borderRadius: '1.25rem',
-            background: 'linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(139,92,246,0.12) 100%)',
-            border: '1px solid rgba(6,182,212,0.3)',
+            borderRadius: '14px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
             marginBottom: '2.5rem',
             display: 'flex',
             justifyContent: 'space-between',
@@ -472,36 +453,26 @@ export function Home({ onLoginOpen }: HomeProps) {
               <div style={{
                 width: '3.75rem',
                 height: '3.75rem',
-                borderRadius: '1rem',
-                background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
+                borderRadius: '12px',
+                background: 'var(--color-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#fff',
+                color: '#FFFFFF',
                 fontSize: '1.6rem',
-                fontWeight: 800,
-                boxShadow: '0 8px 24px rgba(6,182,212,0.35)'
+                fontWeight: 700,
+                fontFamily: 'var(--font-display)'
               }}>
                 {userName.charAt(0).toUpperCase()}
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
-                  <span style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 800,
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                    padding: '0.2rem 0.65rem',
-                    borderRadius: '9999px',
-                    background: isProfessor ? 'rgba(6,182,212,0.2)' : isAdmin ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)',
-                    color: isProfessor ? '#06b6d4' : isAdmin ? '#ef4444' : '#10b981',
-                    border: `1px solid ${isProfessor ? 'rgba(6,182,212,0.4)' : isAdmin ? 'rgba(239,68,68,0.4)' : 'rgba(16,185,129,0.4)'}`
-                  }}>
-                    {isProfessor ? '👨‍🏫 Painel do Professor' : isAdmin ? '🛡️ Administrador' : '🎓 Painel do Estudante'}
+                  <span className={isProfessor ? 'badge badge-secondary' : isAdmin ? 'badge badge-error' : 'badge badge-primary'}>
+                    {isProfessor ? 'Painel do professor' : isAdmin ? 'Administrador' : 'Painel do estudante'}
                   </span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>• Hub Central de Navegação</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>• Hub central de navegação</span>
                 </div>
-                <h1 style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.2rem)', fontWeight: 800, color: 'var(--text-main)', margin: '0.2rem 0' }}>
+                <h1 style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.1rem)', fontWeight: 700, color: 'var(--text-main)', margin: '0.2rem 0' }}>
                   Olá, {userName}! Para onde você deseja ir?
                 </h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: 0 }}>
@@ -510,21 +481,21 @@ export function Home({ onLoginOpen }: HomeProps) {
               </div>
             </div>
 
-            {/* Quick Action Button to primary profile */}
+            {/* Quick Action Button */}
             <Link
               to={isProfessor ? '/professor' : isAdmin ? '/admin' : '/estudante'}
-              className="btn-gradient"
+              className="btn-primary"
               style={{
                 padding: '0.75rem 1.6rem',
                 fontSize: '0.92rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                fontWeight: 700
+                fontWeight: 600
               }}
             >
               <LayoutDashboard style={{ width: '1.1rem', height: '1.1rem' }} />
-              Ir para meu Painel Principal
+              Ir para meu painel principal
               <ArrowRight style={{ width: '1.1rem', height: '1.1rem' }} />
             </Link>
           </div>
@@ -532,9 +503,9 @@ export function Home({ onLoginOpen }: HomeProps) {
           {/* Section Title */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Compass style={{ width: '1.4rem', height: '1.4rem', color: '#06b6d4' }} />
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-                Opções de Navegação da Plataforma
+              <Compass style={{ width: '1.4rem', height: '1.4rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
+                Opções de navegação da plataforma
               </h2>
             </div>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
@@ -551,55 +522,57 @@ export function Home({ onLoginOpen }: HomeProps) {
           }}>
             {hubCards.map((card) => {
               const Icon = card.icon;
+              // Mapeia cores para tokens acessíveis tanto no tema claro quanto no escuro
+              const accentColor = (() => {
+                if (card.color === '#293E24' || card.color === '#172314') {
+                  return 'var(--color-verde-700, #293E24)';
+                }
+                if (card.color === '#E4683F' || card.color === '#B8441F') {
+                  return 'var(--color-primary-accessible, #E4683F)';
+                }
+                if (card.color === '#BC391F') {
+                  return 'var(--color-danger, #BC391F)';
+                }
+                return card.color;
+              })();
+
               return (
                 <Link
                   key={card.id}
                   to={card.href}
-                  className="glass-card"
+                  className="card card-interactive"
                   style={{
                     padding: '1.5rem',
-                    borderRadius: '1rem',
-                    background: card.bgGradient,
-                    border: `1px solid ${card.color}33`,
+                    borderRadius: '14px',
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
                     textDecoration: 'none',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    transition: 'all 0.25s ease-in-out',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = `0 12px 30px ${card.color}25`;
-                    e.currentTarget.style.borderColor = `${card.color}88`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.borderColor = `${card.color}33`;
+                    transition: 'border-color 0.2s ease, background-color 0.2s ease',
                   }}
                 >
                   <div>
                     {/* Card Top: Category and Badge */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                       <span style={{
-                        fontSize: '0.72rem',
+                        fontSize: '0.75rem',
                         fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        color: card.color
+                        color: accentColor,
+                        letterSpacing: '0.3px',
+                        textTransform: 'uppercase'
                       }}>
                         {card.category}
                       </span>
                       <span style={{
                         fontSize: '0.72rem',
                         padding: '0.2rem 0.55rem',
-                        borderRadius: '9999px',
-                        fontWeight: 700,
-                        background: `${card.color}15`,
-                        color: card.color,
-                        border: `1px solid ${card.color}33`
+                        borderRadius: '8px',
+                        fontWeight: 600,
+                        background: 'var(--color-verde-light, rgba(41, 62, 36, 0.08))',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border-color)'
                       }}>
                         {card.badgeText}
                       </span>
@@ -610,23 +583,23 @@ export function Home({ onLoginOpen }: HomeProps) {
                       <div style={{
                         width: '2.8rem',
                         height: '2.8rem',
-                        borderRadius: '0.75rem',
-                        background: `${card.color}22`,
-                        border: `1px solid ${card.color}44`,
+                        borderRadius: '10px',
+                        background: 'var(--color-verde-light, rgba(41, 62, 36, 0.08))',
+                        border: '1px solid var(--border-color)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         flexShrink: 0
                       }}>
-                        <Icon style={{ width: '1.4rem', height: '1.4rem', color: card.color }} />
+                        <Icon style={{ width: '1.4rem', height: '1.4rem', color: accentColor }} />
                       </div>
-                      <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, lineHeight: 1.3 }}>
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)', margin: 0, lineHeight: 1.3 }}>
                         {card.title}
                       </h3>
                     </div>
 
                     {/* Description */}
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.5, margin: '0 0 1.25rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.55, margin: '0 0 1.25rem' }}>
                       {card.description}
                     </p>
                   </div>
@@ -637,22 +610,12 @@ export function Home({ onLoginOpen }: HomeProps) {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     paddingTop: '0.85rem',
-                    borderTop: '1px solid rgba(255,255,255,0.06)'
+                    borderTop: '1px solid var(--border-color)'
                   }}>
-                    <span style={{ color: card.color, fontSize: '0.85rem', fontWeight: 700 }}>
+                    <span style={{ color: accentColor, fontSize: '0.85rem', fontWeight: 600 }}>
                       {card.actionText}
                     </span>
-                    <div style={{
-                      width: '1.8rem',
-                      height: '1.8rem',
-                      borderRadius: '50%',
-                      background: `${card.color}15`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <ArrowRight style={{ width: '0.95rem', height: '0.95rem', color: card.color }} />
-                    </div>
+                    <ArrowRight style={{ width: '1rem', height: '1rem', color: accentColor }} />
                   </div>
                 </Link>
               );
@@ -660,26 +623,26 @@ export function Home({ onLoginOpen }: HomeProps) {
           </div>
 
           {/* Experimento Rápido Integrado */}
-          <div className="glass-card" style={{
+          <div className="card" style={{
             padding: '2rem',
-            borderRadius: '1rem',
-            background: 'linear-gradient(135deg, rgba(6,182,212,0.05) 0%, rgba(139,92,246,0.05) 100%)',
-            border: '1px solid rgba(139,92,246,0.2)'
+            borderRadius: '14px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)'
           }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', alignItems: 'center' }}>
               <div>
-                <span style={{ fontSize: '0.75rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase' }}>
-                  Simulador em Tempo Real
+                <span className="badge badge-primary" style={{ marginBottom: '0.5rem' }}>
+                  Simulador em tempo real
                 </span>
-                <h3 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.75rem' }}>
-                  Experimentação Científica Interativa
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-main)', margin: '0.35rem 0 0.75rem' }}>
+                  Experimentação científica interativa
                 </h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
                   Arraste o pêndulo ao lado com o mouse ou toque para conferir a precisão da física newtoniana na nossa plataforma.
                 </p>
-                <Link to="/simulacao" className="btn-gradient" style={{ padding: '0.65rem 1.4rem', fontSize: '0.88rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}>
+                <Link to="/simulacao" className="btn-primary" style={{ padding: '0.65rem 1.4rem', fontSize: '0.88rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
                   <Beaker style={{ width: '1rem', height: '1rem' }} />
-                  Abrir Todos os 6 Laboratórios Virtuais
+                  Abrir todos os 6 laboratórios virtuais
                   <ArrowRight style={{ width: '1rem', height: '1rem' }} />
                 </Link>
               </div>
@@ -691,123 +654,117 @@ export function Home({ onLoginOpen }: HomeProps) {
           </div>
         </section>
       ) : (
-        /* ─── CASO 2: VISITANTE (LANDING PAGE COM OPÇÕES CLARAS DE NAVEGAÇÃO) ─── */
+        /* ─── CASO 2: VISITANTE (LANDING PAGE COM IDENTIDADE VISUAL EDU-INTERACT) ─── */
         <>
           {/* Hero Section */}
-          <section style={{ position: 'relative', overflow: 'hidden', padding: '4.5rem 1rem 3rem' }}>
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(180deg, rgba(6,182,212,0.06) 0%, rgba(139,92,246,0.06) 50%, transparent 100%)',
-            }} />
-
+          <section className="bg-circuit-root" style={{ position: 'relative', overflow: 'hidden', padding: '4.5rem 1rem 3rem' }}>
             <div style={{ position: 'relative', maxWidth: '80rem', margin: '0 auto', textAlign: 'center' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem 0.85rem', borderRadius: '9999px', background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)', color: '#06b6d4', fontSize: '0.8rem', fontWeight: 700, marginBottom: '1.25rem' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.95rem', borderRadius: '10px', background: 'rgba(228,104,63,0.1)', border: '1px solid rgba(184,68,31,0.25)', color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.8rem', fontWeight: 700, marginBottom: '1.5rem' }}>
                 <Sparkles style={{ width: '0.9rem', height: '0.9rem' }} />
-                Plataforma Educacional Integrada de Ciências, Matemática & ENEM
+                Onde a raiz encontra o circuito • Educação científica inclusiva
               </div>
 
-              <h1 className="gradient-text" style={{
-                fontSize: 'clamp(2.5rem, 6vw, 4.2rem)',
-                fontWeight: 800, marginBottom: '1.25rem', lineHeight: 1.1,
-              }}>
-                Edu-Interact
-              </h1>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                <Logo symbolSize={44} showTagline={false} />
+              </div>
+
               <p style={{
-                fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+                fontSize: 'clamp(1.05rem, 2.5vw, 1.25rem)',
                 color: 'var(--text-secondary)',
-                maxWidth: '44rem', margin: '0 auto 2.25rem',
-                lineHeight: 1.7,
+                maxWidth: '46rem', margin: '0 auto 2.25rem',
+                lineHeight: 1.65,
+                fontFamily: 'var(--font-body)'
               }}>
-                Laboratórios Virtuais interativos, Simulado oficial do ENEM com correção TRI, Metodologias Ativas e Inteligência Artificial adaptativa para professores e estudantes.
+                Uma plataforma educacional que une o rigor da tecnologia à calidez do olhar humano. Laboratórios virtuais, simulador oficial do ENEM com correção TRI e metodologias ativas baseadas em Sócrates, Aristóteles e Freire.
               </p>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', marginBottom: '3.5rem' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem', justifyContent: 'center', marginBottom: '3.5rem' }}>
                 <button
                   onClick={onLoginOpen}
-                  className="btn-gradient"
-                  style={{ padding: '0.85rem 2rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}
+                  className="btn-primary"
+                  style={{ padding: '0.85rem 2rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
                   <LogIn style={{ width: '1.15rem', height: '1.15rem' }} />
-                  Entrar na Plataforma
+                  Entrar na plataforma
                   <ArrowRight style={{ width: '1.15rem', height: '1.15rem' }} />
                 </button>
                 <Link
                   to="/simulacao"
-                  className="btn-outline-cyan"
-                  style={{ padding: '0.85rem 2rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}
+                  className="btn-secondary"
+                  style={{ padding: '0.85rem 2rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
                   <Beaker style={{ width: '1.15rem', height: '1.15rem' }} />
-                  Explorar Laboratórios Virtuais
+                  Explorar laboratórios virtuais
                 </Link>
                 <Link
                   to="/enem"
-                  className="btn-outline-cyan"
-                  style={{ padding: '0.85rem 2rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, borderColor: 'rgba(59,130,246,0.4)', color: '#60a5fa' }}
+                  className="btn-outline"
+                  style={{ padding: '0.85rem 2rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
                   <GraduationCap style={{ width: '1.15rem', height: '1.15rem' }} />
-                  Testar Simulado ENEM TRI
+                  Testar simulado ENEM TRI
                 </Link>
               </div>
 
               {/* Hub Preview for Visitors */}
               <div style={{ maxWidth: '72rem', margin: '0 auto', textAlign: 'left' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1.25rem', textAlign: 'center' }}>
-                  Conheça os Ambientes da Plataforma
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1.25rem', textAlign: 'center' }}>
+                  Conheça os ambientes da plataforma
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
                   <div
                     onClick={onLoginOpen}
-                    className="glass-card"
-                    style={{ padding: '1.5rem', borderRadius: '1rem', cursor: 'pointer', border: '1px solid rgba(6,182,212,0.25)' }}
+                    className="card card-interactive"
+                    style={{ padding: '1.5rem', borderRadius: '14px', cursor: 'pointer' }}
                   >
-                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '0.5rem', background: 'rgba(6,182,212,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                      <Users style={{ width: '1.3rem', height: '1.3rem', color: '#06b6d4' }} />
+                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '10px', background: 'rgba(41, 62, 36, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                      <Users style={{ width: '1.3rem', height: '1.3rem', color: 'var(--color-verde-700)' }} />
                     </div>
-                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Área do Professor</h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.5 }}>
-                      Criação de turmas com código de 6 dígitos, planos de aula BNCC com IA Gemini e avaliações com correção automática.
+                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Área do professor</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
+                      Criação de turmas com código de 6 dígitos, planos de aula BNCC com IA e avaliações com correção automática.
                     </p>
                   </div>
 
                   <div
                     onClick={onLoginOpen}
-                    className="glass-card"
-                    style={{ padding: '1.5rem', borderRadius: '1rem', cursor: 'pointer', border: '1px solid rgba(139,92,246,0.25)' }}
+                    className="card card-interactive"
+                    style={{ padding: '1.5rem', borderRadius: '14px', cursor: 'pointer' }}
                   >
-                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '0.5rem', background: 'rgba(139,92,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                      <BookOpen style={{ width: '1.3rem', height: '1.3rem', color: '#8b5cf6' }} />
+                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '10px', background: 'rgba(228, 104, 63, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                      <BookOpen style={{ width: '1.3rem', height: '1.3rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
                     </div>
-                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Área do Estudante</h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.5 }}>
+                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Área do estudante</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
                       Mural da turma, roteiros de laboratórios práticos, simulado ENEM oficial, gamificação com XP e loja de avatares.
                     </p>
                   </div>
 
                   <Link
                     to="/simulacao"
-                    className="glass-card"
-                    style={{ padding: '1.5rem', borderRadius: '1rem', textDecoration: 'none', border: '1px solid rgba(16,185,129,0.25)' }}
+                    className="card card-interactive"
+                    style={{ padding: '1.5rem', borderRadius: '14px', textDecoration: 'none' }}
                   >
-                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '0.5rem', background: 'rgba(16,185,129,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                      <Beaker style={{ width: '1.3rem', height: '1.3rem', color: '#10b981' }} />
+                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '10px', background: 'rgba(41, 62, 36, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                      <Beaker style={{ width: '1.3rem', height: '1.3rem', color: 'var(--color-verde-700)' }} />
                     </div>
-                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Laboratórios Virtuais</h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.5 }}>
+                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Laboratórios virtuais</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
                       Experimentos interativos de mecânica, gravitação, óptica, termodinâmica, eletromagnetismo e matemática prática.
                     </p>
                   </Link>
 
                   <Link
                     to="/enem"
-                    className="glass-card"
-                    style={{ padding: '1.5rem', borderRadius: '1rem', textDecoration: 'none', border: '1px solid rgba(59,130,246,0.25)' }}
+                    className="card card-interactive"
+                    style={{ padding: '1.5rem', borderRadius: '14px', textDecoration: 'none' }}
                   >
-                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '0.5rem', background: 'rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                      <GraduationCap style={{ width: '1.3rem', height: '1.3rem', color: '#3b82f6' }} />
+                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '10px', background: 'rgba(23, 35, 20, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                      <GraduationCap style={{ width: '1.3rem', height: '1.3rem', color: 'var(--color-verde-900)' }} />
                     </div>
-                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Simulado Oficial ENEM</h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.5 }}>
+                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Simulado oficial ENEM</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
                       Algoritmo estatístico TRI oficial do INEP avaliando a coerência pedagógica das respostas em tempo real.
                     </p>
                   </Link>
@@ -819,38 +776,38 @@ export function Home({ onLoginOpen }: HomeProps) {
           {/* Preview Card with Pendulum */}
           <section style={{ padding: '2rem 1rem 4rem' }}>
             <div style={{ maxWidth: '64rem', margin: '0 auto' }}>
-              <div className="glass-card" style={{
+              <div className="card" style={{
                 padding: '2rem',
-                background: 'linear-gradient(135deg, var(--bg-card), var(--bg-card-hover))',
-                boxShadow: '0 0 50px rgba(6, 182, 212, 0.1)',
+                borderRadius: '14px',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
               }}>
                 <div style={{
                   display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
                   gap: '2rem', alignItems: 'center',
                 }}>
                   <div>
-                    <span style={{ fontSize: '0.75rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase' }}>
-                      Demonstração Interativa
+                    <span className="badge badge-primary" style={{ marginBottom: '0.5rem' }}>
+                      Demonstração interativa
                     </span>
-                    <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)', margin: '0.35rem 0 1rem' }}>
-                      Sinta a Física em Tempo Real
+                    <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-main)', margin: '0.35rem 0 1rem' }}>
+                      Sinta a física em tempo real
                     </h2>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.65 }}>
                       Puxe e solte o pêndulo para testar a conservação de energia e a física newtoniana diretamente no seu navegador.
                     </p>
                     <Link to="/simulacao" style={{
                       display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                      color: '#06b6d4', textDecoration: 'none', fontWeight: 700,
-                      transition: 'gap 0.2s',
+                      color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700,
                     }}>
                       Acessar todos os laboratórios completos
                       <ArrowRight style={{ width: '1rem', height: '1rem' }} />
                     </Link>
                   </div>
                   <div style={{
-                    height: '12rem', borderRadius: '0.75rem',
-                    background: 'linear-gradient(135deg, rgba(6,182,212,0.06), rgba(139,92,246,0.06))',
-                    border: '1px solid rgba(139,92,246,0.15)',
+                    height: '12rem', borderRadius: '10px',
+                    background: 'rgba(41, 62, 36, 0.03)',
+                    border: '1px solid var(--border-color)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     padding: '1rem',
                     boxSizing: 'border-box'
@@ -868,4 +825,3 @@ export function Home({ onLoginOpen }: HomeProps) {
 }
 
 export default Home;
-

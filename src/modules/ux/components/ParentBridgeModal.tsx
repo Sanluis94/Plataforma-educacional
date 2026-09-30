@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import {
-  Heart, Sparkles, X, Smartphone
+  Sparkles, X, Smartphone
 } from 'lucide-react';
+import { Logo } from './Logo';
 
 interface ParentBridgeModalProps {
   studentName?: string;
@@ -35,7 +36,7 @@ export function ParentBridgeModal({ studentName = 'Estudante', onClose }: Parent
         left: 0,
         right: 0,
         bottom: 0,
-        background: 'rgba(0, 0, 0, 0.75)',
+        background: 'var(--bg-overlay)',
         backdropFilter: 'blur(8px)',
         display: 'flex',
         alignItems: 'center',
@@ -43,77 +44,89 @@ export function ParentBridgeModal({ studentName = 'Estudante', onClose }: Parent
         zIndex: 1000,
         padding: '1rem'
       }}
+      onClick={onClose}
     >
       <div
-        className="glass-card slide-down"
+        className="card slide-down"
+        onClick={e => e.stopPropagation()}
         style={{
           width: '100%',
           maxWidth: '560px',
-          borderRadius: '1rem',
-          background: 'var(--bg-card, #111827)',
-          border: '1px solid rgba(6, 182, 212, 0.3)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+          borderRadius: '14px',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
           padding: '1.75rem',
           maxHeight: '90vh',
           overflowY: 'auto'
         }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-card)', paddingBottom: '0.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <div style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.5rem', background: 'rgba(236, 72, 153, 0.15)', color: '#ec4899', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Heart style={{ width: '1.2rem', height: '1.2rem' }} />
-            </div>
+            <Logo symbolSize={26} />
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                Portal da Família & Responsáveis
+              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                Portal da família e responsáveis
               </h3>
               <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                 Acompanhando o desenvolvimento científico de <strong>{studentName}</strong>
               </span>
             </div>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: '1px solid var(--border-color)',
+              borderRadius: '10px',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              padding: '0.35rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
             <X style={{ width: '1.2rem', height: '1.2rem' }} />
           </button>
         </div>
 
         {/* Resumo Rápido de Frequência & Conquistas */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          <div style={{ padding: '0.85rem', borderRadius: '0.5rem', background: 'rgba(6, 182, 212, 0.08)', border: '1px solid rgba(6, 182, 212, 0.2)', textAlign: 'center' }}>
+          <div style={{ padding: '0.85rem', borderRadius: '10px', background: 'rgba(228, 104, 63, 0.06)', border: '1px solid rgba(184, 68, 31, 0.25)', textAlign: 'center' }}>
             <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Laboratórios</span>
-            <strong style={{ fontSize: '1.3rem', color: '#06b6d4' }}>14 / 16</strong>
-            <span style={{ fontSize: '0.68rem', color: '#10b981', display: 'block' }}>87% conclusão</span>
+            <strong style={{ fontSize: '1.3rem', color: 'var(--color-primary-accessible, #B8441F)' }}>14 / 16</strong>
+            <span style={{ fontSize: '0.68rem', color: 'var(--color-verde-700)', display: 'block', fontWeight: 600 }}>87% conclusão</span>
           </div>
 
-          <div style={{ padding: '0.85rem', borderRadius: '0.5rem', background: 'rgba(139, 92, 246, 0.08)', border: '1px solid rgba(139, 92, 246, 0.2)', textAlign: 'center' }}>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Média Geral</span>
-            <strong style={{ fontSize: '1.3rem', color: '#a78bfa' }}>8.6</strong>
-            <span style={{ fontSize: '0.68rem', color: '#10b981', display: 'block' }}>Excelente</span>
+          <div style={{ padding: '0.85rem', borderRadius: '10px', background: 'rgba(41, 62, 36, 0.06)', border: '1px solid rgba(41, 62, 36, 0.2)', textAlign: 'center' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Média geral</span>
+            <strong style={{ fontSize: '1.3rem', color: 'var(--color-verde-900)' }}>8.6</strong>
+            <span style={{ fontSize: '0.68rem', color: 'var(--color-verde-700)', display: 'block', fontWeight: 600 }}>Excelente</span>
           </div>
 
-          <div style={{ padding: '0.85rem', borderRadius: '0.5rem', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)', textAlign: 'center' }}>
+          <div style={{ padding: '0.85rem', borderRadius: '10px', background: 'rgba(41, 62, 36, 0.06)', border: '1px solid rgba(41, 62, 36, 0.2)', textAlign: 'center' }}>
             <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Medalhas</span>
-            <strong style={{ fontSize: '1.3rem', color: '#34d399' }}>6</strong>
-            <span style={{ fontSize: '0.68rem', color: '#10b981', display: 'block' }}>Nível Avançado</span>
+            <strong style={{ fontSize: '1.3rem', color: 'var(--color-verde-900)' }}>6</strong>
+            <span style={{ fontSize: '0.68rem', color: 'var(--color-verde-700)', display: 'block', fontWeight: 600 }}>Nível avançado</span>
           </div>
         </div>
 
         {/* Elogio Pedagógico Recente */}
-        <div style={{ padding: '1rem', borderRadius: '0.75rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#34d399', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.25rem' }}>
-            <Sparkles style={{ width: '1rem', height: '1rem' }} /> Destaque da Semana do Professor
+        <div style={{ padding: '1rem', borderRadius: '10px', background: 'rgba(41, 62, 36, 0.06)', border: '1px solid rgba(41, 62, 36, 0.2)', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-verde-700)', fontWeight: 700, fontSize: '0.82rem', marginBottom: '0.25rem' }}>
+            <Sparkles style={{ width: '1rem', height: '1rem', color: 'var(--color-primary)' }} /> Destaque da semana do professor
           </div>
-          <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-main)', lineHeight: '1.4' }}>
+          <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-main)', lineHeight: '1.45' }}>
             "{studentName} destacou-se na resolução socrática de termodinâmica e auxiliou colegas na formulação de hipóteses experimentais. Parabéns pelo empenho!"
           </p>
         </div>
 
         {/* Notificações Semanais no WhatsApp */}
-        <div style={{ padding: '1rem', borderRadius: '0.75rem', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--border-card)', marginBottom: '1.25rem' }}>
+        <div style={{ padding: '1rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.35rem' }}>
-            <Smartphone style={{ width: '1rem', height: '1rem', color: '#10b981' }} />
-            Receber Boletim Semanal no WhatsApp
+            <Smartphone style={{ width: '1rem', height: '1rem', color: 'var(--color-verde-700)' }} />
+            Receber boletim semanal no WhatsApp
           </div>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0 0 0.75rem' }}>
             Enviamos aos domingos um resumo direto e sem burocracia das atividades entregues e dos próximos prazos.
@@ -128,23 +141,22 @@ export function ParentBridgeModal({ studentName = 'Estudante', onClose }: Parent
               style={{
                 flex: 1,
                 padding: '0.55rem 0.75rem',
-                borderRadius: '0.5rem',
-                background: 'rgba(0,0,0,0.3)',
-                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '10px',
+                border: '1px solid var(--border-color)',
                 color: 'var(--text-main)',
                 fontSize: '0.85rem'
               }}
             />
             <button
               onClick={handleSalvarWhatsapp}
-              className="btn-gradient"
+              className="btn-primary"
               style={{ padding: '0.55rem 1rem', fontSize: '0.82rem', whiteSpace: 'nowrap' }}
             >
-              {salvo ? 'Salvo!' : 'Ativar Alertas'}
+              {salvo ? 'Salvo!' : 'Ativar alertas'}
             </button>
           </div>
           {salvo && (
-            <span style={{ fontSize: '0.72rem', color: '#10b981', display: 'block', marginTop: '0.35rem' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--color-verde-700)', display: 'block', marginTop: '0.35rem', fontWeight: 600 }}>
               ✓ Notificações automáticas vinculadas com sucesso!
             </span>
           )}
@@ -153,7 +165,7 @@ export function ParentBridgeModal({ studentName = 'Estudante', onClose }: Parent
         {/* Contatar a Coordenação / Professor */}
         <div>
           <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
-            Deixar um Recado para a Coordenação Pedagógica:
+            Deixar um recado para a coordenação pedagógica:
           </label>
           <textarea
             rows={2}
@@ -163,9 +175,8 @@ export function ParentBridgeModal({ studentName = 'Estudante', onClose }: Parent
             style={{
               width: '100%',
               padding: '0.65rem',
-              borderRadius: '0.5rem',
-              background: 'rgba(0,0,0,0.3)',
-              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '10px',
+              border: '1px solid var(--border-color)',
               color: 'var(--text-main)',
               fontSize: '0.82rem',
               resize: 'vertical',
@@ -176,10 +187,10 @@ export function ParentBridgeModal({ studentName = 'Estudante', onClose }: Parent
             <button
               onClick={handleEnviarMensagem}
               disabled={!mensagemProfessor.trim()}
-              className="btn-outline-cyan"
+              className="btn-outline"
               style={{ padding: '0.45rem 1rem', fontSize: '0.8rem' }}
             >
-              {enviado ? 'Mensagem Enviada!' : 'Enviar Mensagem'}
+              {enviado ? 'Mensagem enviada!' : 'Enviar mensagem'}
             </button>
           </div>
         </div>
@@ -187,3 +198,5 @@ export function ParentBridgeModal({ studentName = 'Estudante', onClose }: Parent
     </div>
   );
 }
+
+export default ParentBridgeModal;

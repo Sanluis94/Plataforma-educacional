@@ -25,28 +25,28 @@ const DEFAULT_QUESTIONS: Record<string, SocraticStep[]> = {
   default: [
     {
       philosopher: 'Aristóteles',
-      badgeColor: '#06b6d4',
-      badgeBg: 'rgba(6,182,212,0.15)',
+      badgeColor: '#293E24',
+      badgeBg: 'rgba(41,62,36,0.1)',
       icon: Compass,
-      phaseTitle: 'Fase 1: Observação Empírica & Sensorial',
+      phaseTitle: 'Fase 1: Observação empírica e sensorial',
       guidingQuestion: 'Antes de calcular fórmulas: o que você percebe acontecendo com os objetos na tela quando altera os controles?',
       hint: 'Concentre-se nos sentidos e no comportamento visual do sistema (velocidade, trajetória, intensidade).'
     },
     {
       philosopher: 'Sócrates',
-      badgeColor: '#8b5cf6',
-      badgeBg: 'rgba(139,92,246,0.15)',
+      badgeColor: '#B8441F',
+      badgeBg: 'rgba(228,104,63,0.12)',
       icon: Lightbulb,
-      phaseTitle: 'Fase 2: Maiêutica — Causa e Efeito',
+      phaseTitle: 'Fase 2: Maiêutica — Causa e efeito',
       guidingQuestion: 'Se você dobrar uma das variáveis principais, o resultado também dobra ou algo inesperado acontece? Por que você acha que isso ocorre?',
       hint: 'Busque a contradição. O que governa essa transformação? Há alguma força invisível ou resistência atuando?'
     },
     {
       philosopher: 'Paulo Freire',
-      badgeColor: '#10b981',
-      badgeBg: 'rgba(16,185,129,0.15)',
+      badgeColor: '#172314',
+      badgeBg: 'rgba(41,62,36,0.12)',
       icon: BookOpen,
-      phaseTitle: 'Fase 3: Problematização no Mundo Real',
+      phaseTitle: 'Fase 3: Problematização no mundo real',
       guidingQuestion: 'Onde você observa esse mesmo fenômeno agindo no seu cotidiano, no transporte, na sua casa ou na tecnologia da sociedade?',
       hint: 'O conhecimento só liberta quando conectado com a realidade prática e transformadora da vida humana.'
     }
@@ -121,32 +121,32 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0.85rem 1.25rem',
-            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%)',
-            border: '1px solid rgba(139, 92, 246, 0.3)',
-            borderRadius: '0.75rem',
+            background: 'transparent',
+            border: '1px solid var(--border-color, #E2D7C3)',
+            borderRadius: 'var(--radius-lg, 14px)',
             cursor: 'pointer',
             transition: 'all 0.2s',
           }}
-          className="hover:border-cyan-400"
+          className="glass-card"
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div
               style={{
                 width: '2.25rem',
                 height: '2.25rem',
-                borderRadius: '0.5rem',
-                background: 'rgba(139, 92, 246, 0.2)',
+                borderRadius: '10px',
+                background: 'rgba(228, 104, 63, 0.12)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#a78bfa',
+                color: 'var(--color-primary-accessible, #B8441F)',
               }}
             >
               <Sparkles style={{ width: '1.25rem', height: '1.25rem' }} />
             </div>
             <div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                Tutor Socrático & Freiriano
+              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'var(--font-display)' }}>
+                Tutor Socrático e Freiriano
               </div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                 Construa sua própria descoberta através de observação ativa e questionamento reflexivo.
@@ -159,26 +159,26 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
               alignItems: 'center',
               gap: '0.35rem',
               padding: '0.4rem 0.85rem',
-              borderRadius: '9999px',
-              background: 'rgba(6, 182, 212, 0.15)',
-              border: '1px solid rgba(6, 182, 212, 0.3)',
-              color: '#06b6d4',
+              borderRadius: '10px',
+              background: 'rgba(228, 104, 63, 0.1)',
+              border: '1px solid rgba(184, 68, 31, 0.25)',
+              color: 'var(--color-primary-accessible, #B8441F)',
               fontSize: '0.8rem',
               fontWeight: 600,
             }}
           >
-            Iniciar Investigação <ChevronRight style={{ width: '0.9rem', height: '0.9rem' }} />
+            Iniciar investigação <ChevronRight style={{ width: '0.9rem', height: '0.9rem' }} />
           </div>
         </div>
       ) : (
         /* Active Dialogue Card */
         <div
-          className="fade-in glass-card"
+          className="fade-in card"
           style={{
             padding: '1.5rem',
-            borderRadius: '0.85rem',
-            border: '1px solid rgba(139, 92, 246, 0.35)',
-            background: 'var(--bg-card, #111827)',
+            borderRadius: '14px',
+            border: '1px solid var(--border-color)',
+            background: 'var(--bg-card)',
           }}
         >
           {/* Header */}
@@ -187,7 +187,7 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
               <div
                 style={{
                   padding: '0.25rem 0.65rem',
-                  borderRadius: '9999px',
+                  borderRadius: '10px',
                   fontSize: '0.75rem',
                   fontWeight: 700,
                   background: currentStep.badgeBg,
@@ -253,10 +253,10 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
                   borderRadius: '2px',
                   background:
                     idx < currentStepIndex || isCompleted
-                      ? '#10b981'
+                      ? 'var(--color-verde-700)'
                       : idx === currentStepIndex
-                      ? step.badgeColor
-                      : 'rgba(255,255,255,0.1)',
+                      ? 'var(--color-primary)'
+                      : 'rgba(41, 62, 36, 0.12)',
                   transition: 'all 0.3s ease',
                 }}
               />
@@ -278,12 +278,12 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
               <div
                 style={{
                   padding: '0.75rem 1rem',
-                  borderRadius: '0.5rem',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px dashed rgba(255,255,255,0.15)',
+                  borderRadius: '10px',
+                  background: 'rgba(41, 62, 36, 0.04)',
+                  border: '1px dashed var(--border-color)',
                   marginBottom: '1rem',
                   fontSize: '0.8rem',
-                  color: 'var(--text-muted)',
+                  color: 'var(--text-secondary)',
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: '0.5rem',
@@ -291,14 +291,14 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
               >
                 <HelpCircle style={{ width: '1rem', height: '1rem', color: currentStep.badgeColor, flexShrink: 0, marginTop: '2px' }} />
                 <span>
-                  <strong>Pistas do Professor:</strong> {currentStep.hint}
+                  <strong>Pistas do professor:</strong> {currentStep.hint}
                 </span>
               </div>
 
               {/* Student Hypothesis Input */}
               <div style={{ marginBottom: '1rem' }}>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                  Sua Hipótese / O que você descobriu:
+                  Sua hipótese / o que você descobriu:
                 </label>
                 <textarea
                   rows={3}
@@ -308,9 +308,9 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
                   style={{
                     width: '100%',
                     padding: '0.75rem',
-                    borderRadius: '0.5rem',
-                    background: 'rgba(0,0,0,0.3)',
-                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-card)',
                     color: 'var(--text-main)',
                     fontSize: '0.88rem',
                     resize: 'vertical',
@@ -320,9 +320,9 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
 
               {/* AI Feedback if generated */}
               {loadingAiFeedback && (
-                <div style={{ fontSize: '0.8rem', color: '#06b6d4', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-primary-accessible, #B8441F)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <Sparkles style={{ width: '0.9rem', height: '0.9rem', animation: 'spin 1.5s linear infinite' }} />
-                  O Tutor Socrático está analisando seu raciocínio...
+                  O tutor socrático está analisando seu raciocínio...
                 </div>
               )}
 
@@ -330,20 +330,20 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
                 <div
                   style={{
                     padding: '0.75rem 1rem',
-                    borderRadius: '0.5rem',
-                    background: 'rgba(139, 92, 246, 0.1)',
-                    border: '1px solid rgba(139, 92, 246, 0.25)',
+                    borderRadius: '10px',
+                    background: 'rgba(228, 104, 63, 0.08)',
+                    border: '1px solid rgba(184, 68, 31, 0.25)',
                     marginBottom: '1rem',
                     fontSize: '0.84rem',
-                    color: '#c4b5fd',
+                    color: 'var(--text-main)',
                     display: 'flex',
                     alignItems: 'flex-start',
                     gap: '0.5rem',
                   }}
                 >
-                  <Sparkles style={{ width: '1.1rem', height: '1.1rem', color: '#a78bfa', flexShrink: 0, marginTop: '2px' }} />
+                  <Sparkles style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-primary)', flexShrink: 0, marginTop: '2px' }} />
                   <div>
-                    <strong style={{ display: 'block', marginBottom: '0.2rem', color: '#fff' }}>Reflexão do Tutor IA:</strong>
+                    <strong style={{ display: 'block', marginBottom: '0.2rem', color: 'var(--color-primary-accessible, #B8441F)' }}>Reflexão do tutor IA:</strong>
                     {aiFeedback}
                   </div>
                 </div>
@@ -354,11 +354,12 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
                 <button
                   onClick={handleNextStep}
                   disabled={!studentHypothesis.trim() || loadingAiFeedback}
-                  className="btn-gradient"
+                  className="btn-primary"
                   style={{
                     padding: '0.6rem 1.4rem',
                     fontSize: '0.85rem',
                     fontWeight: 600,
+                    borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.4rem',
@@ -367,11 +368,11 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
                 >
                   {currentStepIndex < steps.length - 1 ? (
                     <>
-                      Confirmar Hipótese <Send style={{ width: '0.85rem', height: '0.85rem' }} />
+                      Confirmar hipótese <Send style={{ width: '0.85rem', height: '0.85rem' }} />
                     </>
                   ) : (
                     <>
-                      Concluir Investigação <CheckCircle2 style={{ width: '0.9rem', height: '0.9rem' }} />
+                      Concluir investigação <CheckCircle2 style={{ width: '0.9rem', height: '0.9rem' }} />
                     </>
                   )}
                 </button>
@@ -385,9 +386,9 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
                   width: '3.5rem',
                   height: '3.5rem',
                   borderRadius: '50%',
-                  background: 'rgba(16, 185, 129, 0.2)',
-                  border: '2px solid #10b981',
-                  color: '#10b981',
+                  background: 'rgba(41, 62, 36, 0.1)',
+                  border: '2px solid var(--color-verde-700)',
+                  color: 'var(--color-verde-700)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -396,8 +397,8 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
               >
                 <Award style={{ width: '2rem', height: '2rem' }} />
               </div>
-              <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-                Investigação Ativa Concluída!
+              <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                Investigação ativa concluída!
               </h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '500px', margin: '0 auto 1.25rem' }}>
                 Você vivenciou o ciclo empírico de Aristóteles, o questionamento socrático e a problematização de Paulo Freire. O conhecimento que você construiu agora é verdadeiramente seu.
@@ -409,25 +410,25 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
                   alignItems: 'center',
                   gap: '0.5rem',
                   padding: '0.5rem 1.25rem',
-                  borderRadius: '9999px',
-                  background: 'rgba(16, 185, 129, 0.15)',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
-                  color: '#10b981',
+                  borderRadius: '10px',
+                  background: 'rgba(41, 62, 36, 0.1)',
+                  border: '1px solid rgba(41, 62, 36, 0.25)',
+                  color: 'var(--color-verde-700)',
                   fontWeight: 700,
                   fontSize: '0.88rem',
                   marginBottom: '1.25rem',
                 }}
               >
-                <Sparkles style={{ width: '1rem', height: '1rem' }} /> +50 XP de Investigação Científica
+                <Sparkles style={{ width: '1rem', height: '1rem' }} /> +50 XP de investigação científica
               </div>
 
               <div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="btn-outline-cyan"
+                  className="btn-outline"
                   style={{ padding: '0.5rem 1.5rem', fontSize: '0.85rem' }}
                 >
-                  Continuar Explorando o Laboratório
+                  Continuar explorando o laboratório
                 </button>
               </div>
             </div>

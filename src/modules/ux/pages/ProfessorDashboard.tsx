@@ -47,8 +47,8 @@ import {
 } from '../../data/repositories/lessonPlanRepository';
 
 const SUBJECT_COLORS = [
-  '#06b6d4', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6',
-  '#14b8a6', '#f97316', '#a855f7', '#6366f1', '#84cc16', '#e11d48'
+  '#293E24', '#B8441F', '#E4683F', '#3D5B36', '#F59C7B', '#172314',
+  '#293E24', '#B8441F', '#E4683F', '#3D5B36', '#F59C7B', '#172314'
 ];
 
 export function ProfessorDashboard() {
@@ -274,10 +274,10 @@ export function ProfessorDashboard() {
   const totalClasses = turmas.length;
 
   const stats = [
-    { label: 'Total de Alunos', value: String(totalStudents), icon: Users, accent: '#06b6d4', desc: 'Em todas as turmas ativas' },
-    { label: 'Turmas Ativas', value: String(totalClasses), icon: BookOpen, accent: '#8b5cf6', desc: 'Com códigos de acesso' },
-    { label: 'Taxa de Conclusão', value: `${globalStats.completionRate}%`, icon: Award, accent: 'Média de entregas', desc: 'Média geral da turma' },
-    { label: 'Provas Aplicadas', value: String(examsList.length), icon: FileText, accent: '#10b981', desc: 'Avaliações com gabarito' },
+    { label: 'Total de Alunos', value: String(totalStudents), icon: Users, accent: '#B8441F', desc: 'Em todas as turmas ativas' },
+    { label: 'Turmas Ativas', value: String(totalClasses), icon: BookOpen, accent: '#293E24', desc: 'Com códigos de acesso' },
+    { label: 'Taxa de Conclusão', value: `${globalStats.completionRate}%`, icon: Award, accent: '#E4683F', desc: 'Média geral da turma' },
+    { label: 'Provas Aplicadas', value: String(examsList.length), icon: FileText, accent: '#3D5B36', desc: 'Avaliações com gabarito' },
   ];
 
   // Subject engagement chart data
@@ -292,10 +292,10 @@ export function ProfessorDashboard() {
   });
 
   const tooltipStyle = {
-    backgroundColor: '#18181b',
-    border: '1px solid rgba(6, 182, 212, 0.3)',
-    borderRadius: '8px',
-    color: '#f4f4f5',
+    backgroundColor: 'var(--bg-card)',
+    border: '1px solid var(--border-color)',
+    borderRadius: '10px',
+    color: 'var(--text-main)',
     padding: '0.6rem 0.8rem',
   };
 
@@ -657,10 +657,10 @@ export function ProfessorDashboard() {
             right: '1.5rem',
             zIndex: 9999,
             padding: '0.85rem 1.25rem',
-            borderRadius: '10px',
-            background: toastMessage.type === 'error' ? 'rgba(239,68,68,0.95)' : toastMessage.type === 'info' ? 'rgba(6,182,212,0.95)' : 'rgba(16,185,129,0.95)',
+            borderRadius: 'var(--radius-sm, 10px)',
+            background: toastMessage.type === 'error' ? 'rgba(188,57,31,0.95)' : toastMessage.type === 'info' ? 'rgba(41,62,36,0.95)' : 'rgba(61,91,54,0.95)',
             color: '#ffffff',
-            boxShadow: '0 10px 35px rgba(0,0,0,0.5)',
+            boxShadow: 'none',
             fontWeight: 700,
             fontSize: '0.9rem',
             display: 'flex',
@@ -668,7 +668,7 @@ export function ProfessorDashboard() {
             gap: '0.65rem',
             backdropFilter: 'blur(10px)',
             maxWidth: '440px',
-            border: '1px solid rgba(255,255,255,0.2)'
+            border: '1px solid var(--border-color, #E2D7C3)'
           }}
         >
           {toastMessage.type === 'error' ? (
@@ -698,10 +698,10 @@ export function ProfessorDashboard() {
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.45rem 0.9rem',
-            borderRadius: '8px',
-            background: 'rgba(6,182,212,0.12)',
-            border: '1px solid rgba(6,182,212,0.3)',
-            color: '#06b6d4',
+            borderRadius: 'var(--radius-sm, 10px)',
+            background: 'var(--color-primary-light, rgba(228, 104, 63, 0.12))',
+            border: '1px solid var(--color-primary-accessible, #B8441F)',
+            color: 'var(--color-primary-accessible, #B8441F)',
             fontSize: '0.85rem',
             fontWeight: 700,
             textDecoration: 'none',
@@ -715,15 +715,15 @@ export function ProfessorDashboard() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
           <span style={{ color: 'var(--text-secondary)' }}>Acesso rápido:</span>
-          <Link to="/simulacao" style={{ color: '#8b5cf6', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <Link to="/simulacao" style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             🔬 Catálogo de 72 Labs
           </Link>
           <span>•</span>
-          <Link to="/enem" style={{ color: '#10b981', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <Link to="/enem" style={{ color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             📝 Simulado ENEM TRI
           </Link>
           <span>•</span>
-          <Link to="/coordenacao" style={{ color: '#f59e0b', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <Link to="/coordenacao" style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             🏛️ Coordenação
           </Link>
         </div>
@@ -734,7 +734,7 @@ export function ProfessorDashboard() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
             <span style={{ fontSize: '1.75rem' }}>👨‍🏫</span>
-            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.5px' }}>
+            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.5px', fontFamily: 'var(--font-heading)' }}>
               Painel Docente & Gestão Escolar
             </h1>
           </div>
@@ -747,24 +747,24 @@ export function ProfessorDashboard() {
         <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setShowGeminiModal(true)}
-            className="btn-outline-cyan"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', fontSize: '0.85rem', borderRadius: '8px' }}
+            className="btn-outline"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)' }}
           >
-            <Key style={{ width: '0.9rem', height: '0.9rem', color: '#06b6d4' }} />
+            <Key style={{ width: '0.9rem', height: '0.9rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
             {localStorage.getItem('gemini_api_key') ? '🔑 Chave IA Conectada' : '⚙️ Configurar Chave IA'}
           </button>
           <button
             onClick={() => { setDashboardTab('exams'); setExamMode('create'); }}
             className="btn-gradient"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.25rem', fontSize: '0.85rem', borderRadius: '8px', fontWeight: 700, background: 'linear-gradient(135deg, #10b981, #06b6d4)' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.25rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700, background: 'var(--gradient-primary)' }}
           >
             <PlusCircle style={{ width: '1rem', height: '1rem' }} />
             Nova Prova / Avaliação
           </button>
           <button
             onClick={() => { setIsCreatingClass(true); setDashboardTab('classes'); }}
-            className="btn-outline-cyan"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.1rem', fontSize: '0.85rem', borderRadius: '8px', fontWeight: 600 }}
+            className="btn-outline"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.1rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}
           >
             <PlusCircle style={{ width: '1rem', height: '1rem' }} />
             Nova Turma
@@ -777,19 +777,19 @@ export function ProfessorDashboard() {
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={idx} className="glass-card" style={{ padding: '1.25rem', position: 'relative', overflow: 'hidden' }}>
+            <div key={idx} className="glass-card" style={{ padding: '1.25rem', position: 'relative', overflow: 'hidden', borderRadius: 'var(--radius-lg, 14px)' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: stat.accent }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     {stat.label}
                   </span>
-                  <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.2rem' }}>
+                  <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.2rem', fontFamily: 'var(--font-heading)' }}>
                     {stat.value}
                   </div>
                   <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{stat.desc}</span>
                 </div>
-                <div style={{ width: '2.75rem', height: '2.75rem', borderRadius: '10px', background: `${stat.accent}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '2.75rem', height: '2.75rem', borderRadius: 'var(--radius-sm, 10px)', background: `${stat.accent}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Icon style={{ width: '1.35rem', height: '1.35rem', color: stat.accent }} />
                 </div>
               </div>
@@ -799,7 +799,7 @@ export function ProfessorDashboard() {
       </div>
 
       {/* Reorganized Top Navigation Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--border-color)' }}>
         {[
           { id: 'classes', label: '🏫 Minhas Turmas & Mural', icon: BookOpen },
           { id: 'lms_gradebook', label: '📚 Diário, Notas & Fórum LMS', icon: Award },
@@ -815,11 +815,11 @@ export function ProfessorDashboard() {
             onClick={() => setDashboardTab(tab.id as any)}
             style={{
               padding: '0.65rem 1.25rem',
-              borderRadius: '8px 8px 0 0',
+              borderRadius: 'var(--radius-sm, 10px) var(--radius-sm, 10px) 0 0',
               border: 'none',
-              borderBottom: dashboardTab === tab.id ? '2px solid #06b6d4' : '2px solid transparent',
-              background: dashboardTab === tab.id ? 'rgba(6,182,212,0.1)' : 'transparent',
-              color: dashboardTab === tab.id ? '#06b6d4' : 'var(--text-secondary)',
+              borderBottom: dashboardTab === tab.id ? '2px solid var(--color-primary, #E4683F)' : '2px solid transparent',
+              background: dashboardTab === tab.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.1))' : 'transparent',
+              color: dashboardTab === tab.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
               fontWeight: dashboardTab === tab.id ? 700 : 500,
               fontSize: '0.9rem',
               cursor: 'pointer',
@@ -841,9 +841,9 @@ export function ProfessorDashboard() {
         <div className="fade-in">
           {/* Create Class Modal/Form */}
           {isCreatingClass && (
-            <div className="glass-card mb-4" style={{ padding: '1.5rem', border: '1px solid rgba(6,182,212,0.3)', background: 'rgba(6,182,212,0.03)' }}>
-              <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <PlusCircle style={{ width: '1.2rem', height: '1.2rem', color: '#06b6d4' }} />
+            <div className="glass-card mb-4" style={{ padding: '1.5rem', border: '1px solid var(--border-color)', background: 'var(--bg-glass)', borderRadius: 'var(--radius-lg, 14px)' }}>
+              <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-heading)' }}>
+                <PlusCircle style={{ width: '1.2rem', height: '1.2rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
                 Cadastrar Nova Turma
               </h3>
               <form onSubmit={handleCreateClass} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
@@ -855,14 +855,14 @@ export function ProfessorDashboard() {
                     onChange={(e) => setNewClassName(e.target.value)}
                     placeholder="Ex: 3º Ano Médio A - Ciências da Natureza"
                     autoFocus
-                    style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                    style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)', background: 'var(--bg-glass)', color: 'var(--text-main)', fontSize: '0.9rem' }}
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button type="button" onClick={() => setIsCreatingClass(false)} className="btn-outline-cyan" style={{ padding: '0.65rem 1.25rem' }}>
+                  <button type="button" onClick={() => setIsCreatingClass(false)} className="btn-outline" style={{ padding: '0.65rem 1.25rem', borderRadius: 'var(--radius-sm, 10px)' }}>
                     Cancelar
                   </button>
-                  <button type="submit" className="btn-gradient" style={{ padding: '0.65rem 1.5rem', fontWeight: 700 }}>
+                  <button type="submit" className="btn-gradient" style={{ padding: '0.65rem 1.5rem', fontWeight: 700, borderRadius: 'var(--radius-sm, 10px)', background: 'var(--gradient-primary)' }}>
                     Confirmar
                   </button>
                 </div>
@@ -880,24 +880,25 @@ export function ProfessorDashboard() {
                   className="glass-card"
                   style={{
                     padding: '1.5rem',
-                    border: isSelected ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
-                    boxShadow: isSelected ? '0 0 20px rgba(6,182,212,0.15)' : 'none',
+                    borderRadius: 'var(--radius-lg, 14px)',
+                    border: isSelected ? '2px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
+                    boxShadow: 'none',
                     cursor: 'pointer'
                   }}
                   onClick={() => setSelectedClassId(turma.id)}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                     <div>
-                      <span style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase' }}>
+                      <span style={{ fontSize: '0.72rem', color: isSelected ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
                         {isSelected ? '● Turma Selecionada' : 'Turma'}
                       </span>
-                      <h3 style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1.15rem', margin: '0.2rem 0 0' }}>
+                      <h3 style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1.15rem', margin: '0.2rem 0 0', fontFamily: 'var(--font-heading)' }}>
                         {turma.name}
                       </h3>
                     </div>
                     <span style={{
-                      padding: '0.25rem 0.65rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700,
-                      background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)'
+                      padding: '0.25rem 0.65rem', borderRadius: 'var(--radius-sm, 10px)', fontSize: '0.72rem', fontWeight: 700,
+                      background: 'var(--color-verde-light, rgba(41, 62, 36, 0.15))', color: 'var(--color-verde-700, #293E24)', border: '1px solid var(--color-verde-500, #3D5B36)'
                     }}>
                       {turma.studentsCount} Alunos
                     </span>
@@ -906,10 +907,10 @@ export function ProfessorDashboard() {
                   {/* Código da Turma (6 dígitos) com Cópia Rápida */}
                   <div style={{
                     padding: '0.65rem 0.85rem',
-                    background: 'rgba(6,182,212,0.06)',
-                    borderRadius: '8px',
+                    background: 'var(--color-primary-light, rgba(228, 104, 63, 0.1))',
+                    borderRadius: 'var(--radius-sm, 10px)',
                     marginBottom: '1rem',
-                    border: '1px dashed rgba(6,182,212,0.35)',
+                    border: '1px dashed var(--color-primary, #E4683F)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
@@ -918,7 +919,7 @@ export function ProfessorDashboard() {
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         Código da Turma (6 dígitos):
                       </span>
-                      <strong style={{ color: '#06b6d4', fontFamily: 'monospace', fontWeight: 800, fontSize: '1.15rem', letterSpacing: '2px' }}>
+                      <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontFamily: 'monospace', fontWeight: 800, fontSize: '1.15rem', letterSpacing: '2px' }}>
                         {turma.code || turma.id.slice(0, 6).toUpperCase()}
                       </strong>
                     </div>
@@ -966,7 +967,7 @@ export function ProfessorDashboard() {
                         handleViewClassReport(turma.id);
                         setDashboardTab('reports');
                       }}
-                      className="btn-outline-cyan"
+                      className="btn-outline"
                       style={{ flex: 1, padding: '0.45rem', fontSize: '0.8rem' }}
                     >
                       Ver Relatório
@@ -1001,9 +1002,9 @@ export function ProfessorDashboard() {
               </div>
 
               {/* Form to Post New Notice */}
-              <div style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '1.5rem' }}>
-                <h4 style={{ color: '#06b6d4', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.75rem' }}>
-                  📢 Publicar Novo Comunicado para os Alunos
+              <div style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', marginBottom: '1.5rem' }}>
+                <h4 style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.75rem' }}>
+                  📢 Publicar novo comunicado para os alunos
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <input
@@ -1072,14 +1073,14 @@ export function ProfessorDashboard() {
       {/* ── TAB 2: PLANO DE AULAS BIMESTRAL / SEMESTRAL ── */}
       {dashboardTab === 'lesson_plans' && (
         <div className="fade-in">
-          <div className="glass-card mb-4" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(6,182,212,0.08) 100%)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '12px' }}>
+          <div className="glass-card mb-4" style={{ padding: '1.5rem', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', borderRadius: 'var(--radius-lg, 14px)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#8b5cf6', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                  <Calendar style={{ width: '1.1rem', height: '1.1rem' }} /> Planejamento Curricular & BNCC
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                  <Calendar style={{ width: '1.1rem', height: '1.1rem' }} /> Planejamento curricular & BNCC
                 </div>
                 <h2 style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: 800, margin: '0.2rem 0 0.35rem' }}>
-                  Plano de Aulas do Semestre / Bimestre
+                  Plano de aulas do semestre / bimestre
                 </h2>
                 <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
                   Estruture o cronograma de conteúdos, competências da BNCC e laboratórios virtuais de cada semana.
@@ -1094,12 +1095,12 @@ export function ProfessorDashboard() {
                     onClick={() => setSelectedBimester(b)}
                     style={{
                       padding: '0.5rem 1rem',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-sm, 10px)',
                       fontSize: '0.82rem',
                       fontWeight: 700,
-                      border: selectedBimester === b ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.1)',
-                      background: selectedBimester === b ? 'rgba(6,182,212,0.2)' : 'rgba(0,0,0,0.3)',
-                      color: selectedBimester === b ? '#06b6d4' : 'var(--text-secondary)',
+                      border: selectedBimester === b ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color, #E2D7C3)',
+                      background: selectedBimester === b ? 'var(--color-primary-light, rgba(228,104,63,0.15))' : 'var(--color-bg-subtle, #FAF7EE)',
+                      color: selectedBimester === b ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
                       cursor: 'pointer'
                     }}
                   >
@@ -1131,7 +1132,7 @@ export function ProfessorDashboard() {
                   <button
                     onClick={handleGeneratePlanWithAI}
                     disabled={generatingPlanAI || !newPlanTopic.trim()}
-                    className="btn-outline-cyan"
+                    className="btn-outline"
                     style={{ padding: '0.5rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }}
                     title="Preencher BNCC e Metodologia com IA"
                   >
@@ -1205,7 +1206,7 @@ export function ProfessorDashboard() {
                   <button
                     type="button"
                     onClick={() => setNewPlanMethodology('[Metodologia Aristotélica]: 1) Observação empírica direta dos fenômenos na simulação; 2) Coleta e tabulação de dados sensoriais; 3) Análise de causalidade (material, formal, eficiente e final).')}
-                    style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.15)', color: '#67e8f9', cursor: 'pointer' }}
+                    style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-subtle, #FAF7EE)', color: 'var(--color-secondary, #293E24)', cursor: 'pointer' }}
                     title="Inserir modelo Empírico de Aristóteles"
                   >
                     🔬 Aristóteles
@@ -1258,9 +1259,9 @@ export function ProfessorDashboard() {
             {classLessonPlans.filter(p => p.periodo === selectedBimester).length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {classLessonPlans.filter(p => p.periodo === selectedBimester).map((plan, idx) => (
-                  <div key={plan.id} style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', display: 'grid', gridTemplateColumns: '80px 1fr auto', gap: '1rem', alignItems: 'center' }}>
-                    <div style={{ textAlign: 'center', padding: '0.5rem', background: 'rgba(6,182,212,0.1)', borderRadius: '8px', border: '1px solid rgba(6,182,212,0.2)' }}>
-                      <span style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, display: 'block' }}>AULA</span>
+                  <div key={plan.id} style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', display: 'grid', gridTemplateColumns: '80px 1fr auto', gap: '1rem', alignItems: 'center' }}>
+                    <div style={{ textAlign: 'center', padding: '0.5rem', background: 'var(--color-primary-light, rgba(228,104,63,0.12))', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color, #E2D7C3)' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, display: 'block' }}>AULA</span>
                       <strong style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>#{idx + 1}</strong>
                     </div>
 
@@ -1269,8 +1270,8 @@ export function ProfessorDashboard() {
                         <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>{plan.topico}</h4>
                         <span style={{
                           fontSize: '0.72rem', padding: '0.15rem 0.55rem', borderRadius: '9999px', fontWeight: 700,
-                          background: plan.status === 'concluida' ? 'rgba(16,185,129,0.15)' : plan.status === 'em_andamento' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.08)',
-                          color: plan.status === 'concluida' ? '#10b981' : plan.status === 'em_andamento' ? '#f59e0b' : 'var(--text-secondary)'
+                          background: plan.status === 'concluida' ? 'rgba(41,62,36,0.15)' : plan.status === 'em_andamento' ? 'rgba(228,104,63,0.15)' : 'rgba(0,0,0,0.06)',
+                          color: plan.status === 'concluida' ? 'var(--color-secondary, #293E24)' : plan.status === 'em_andamento' ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)'
                         }}>
                           {plan.status === 'concluida' ? '✓ Concluída' : plan.status === 'em_andamento' ? '⏳ Em Andamento' : '📅 Planejada'}
                         </span>
@@ -1280,7 +1281,7 @@ export function ProfessorDashboard() {
                       </div>
                       <div style={{ display: 'flex', gap: '1rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                         {plan.competenciasBNCC && <span>🎯 {plan.competenciasBNCC}</span>}
-                        {plan.laboratorioTitulo && <span style={{ color: '#06b6d4' }}>🔬 Lab: {plan.laboratorioTitulo}</span>}
+                        {plan.laboratorioTitulo && <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>🔬 Lab: {plan.laboratorioTitulo}</span>}
                         {plan.dataPrevista && <span>🗓️ {plan.dataPrevista}</span>}
                       </div>
                     </div>
@@ -1322,14 +1323,14 @@ export function ProfessorDashboard() {
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 onClick={() => setExamMode('list')}
-                className={examMode === 'list' ? 'btn-gradient' : 'btn-outline-cyan'}
+                className={examMode === 'list' ? 'btn-gradient' : 'btn-outline'}
                 style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600 }}
               >
                 📋 Provas Aplicadas ({examsList.length})
               </button>
               <button
                 onClick={() => setExamMode('create')}
-                className={examMode === 'create' ? 'btn-gradient' : 'btn-outline-cyan'}
+                className={examMode === 'create' ? 'btn-gradient' : 'btn-outline'}
                 style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600 }}
               >
                 ➕ Criar Nova Prova
@@ -1344,14 +1345,14 @@ export function ProfessorDashboard() {
                 <div key={exam.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>
                         {exam.disciplina}
                       </span>
                       <span style={{
                         fontSize: '0.72rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 700,
-                        background: exam.status === 'Aberta' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
-                        color: exam.status === 'Aberta' ? '#10b981' : '#f59e0b',
-                        border: `1px solid ${exam.status === 'Aberta' ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}`
+                        background: exam.status === 'Aberta' ? 'rgba(41,62,36,0.15)' : 'rgba(228,104,63,0.15)',
+                        color: exam.status === 'Aberta' ? 'var(--color-secondary, #293E24)' : 'var(--color-primary-accessible, #B8441F)',
+                        border: `1px solid ${exam.status === 'Aberta' ? 'rgba(41,62,36,0.3)' : 'rgba(228,104,63,0.3)'}`
                       }}>
                         {exam.status}
                       </span>
@@ -1364,10 +1365,10 @@ export function ProfessorDashboard() {
                       {exam.descricao || 'Avaliação formal com questões objetivas e gabarito.'}
                     </p>
 
-                    <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: 'rgba(0,0,0,0.25)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1rem' }}>
+                    <div style={{ padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-subtle, #FAF7EE)', border: '1px solid var(--border-color, #E2D7C3)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1rem' }}>
                       <div>Turma: <strong style={{ color: 'var(--text-main)' }}>{exam.turmaNome || 'Todas as turmas'}</strong></div>
-                      <div>Duração: <strong style={{ color: '#06b6d4' }}>{exam.duracaoMinutos ? `${exam.duracaoMinutos} minutos` : 'Sem limite'}</strong></div>
-                      <div>Questões: <strong style={{ color: '#f59e0b' }}>{exam.questoes.length} (Peso Total: {exam.pesoTotal})</strong></div>
+                      <div>Duração: <strong style={{ color: 'var(--color-secondary, #293E24)' }}>{exam.duracaoMinutos ? `${exam.duracaoMinutos} minutos` : 'Sem limite'}</strong></div>
+                      <div>Questões: <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{exam.questoes.length} (Peso Total: {exam.pesoTotal})</strong></div>
                     </div>
                   </div>
 
@@ -1384,7 +1385,7 @@ export function ProfessorDashboard() {
                     </button>
                     <button
                       onClick={() => setPrintingExam(exam)}
-                      className="btn-outline-cyan"
+                      className="btn-outline"
                       style={{ padding: '0.55rem 0.75rem', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                       title="Visualizar para impressão e exportação em PDF"
                     >
@@ -1396,7 +1397,7 @@ export function ProfessorDashboard() {
                           await updateExam(exam.id!, { status: 'Encerrada' });
                           setExamsList(prev => prev.map(e => e.id === exam.id ? { ...e, status: 'Encerrada' } : e));
                         }}
-                        className="btn-outline-cyan"
+                        className="btn-outline"
                         style={{ padding: '0.55rem', fontSize: '0.78rem' }}
                       >
                         Encerrar
@@ -1407,8 +1408,8 @@ export function ProfessorDashboard() {
                           await updateExam(exam.id!, { status: 'Aberta' });
                           setExamsList(prev => prev.map(e => e.id === exam.id ? { ...e, status: 'Aberta' } : e));
                         }}
-                        className="btn-outline-cyan"
-                        style={{ padding: '0.55rem', fontSize: '0.78rem', color: '#10b981' }}
+                        className="btn-outline"
+                        style={{ padding: '0.55rem', fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)' }}
                       >
                         Reabrir
                       </button>
@@ -1436,16 +1437,16 @@ export function ProfessorDashboard() {
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
                   📝 Criador de Provas & Avaliações Formais
                 </h3>
-                <button onClick={() => setExamMode('list')} className="btn-outline-cyan" style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}>
+                <button onClick={() => setExamMode('list')} className="btn-outline" style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}>
                   ← Voltar à Lista
                 </button>
               </div>
 
               {/* AI Helper Banner */}
-              <div style={{ padding: '1rem', borderRadius: '10px', background: 'linear-gradient(135deg, rgba(6,182,212,0.08) 0%, rgba(139,92,246,0.08) 100%)', border: '1px solid rgba(6,182,212,0.3)', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <Sparkles style={{ width: '1.25rem', height: '1.25rem', color: '#06b6d4' }} />
+              <div style={{ padding: '1rem', borderRadius: 'var(--radius-lg, 14px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <Sparkles style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary, #E4683F)' }} />
                 <div style={{ flex: 1, minWidth: '220px' }}>
-                  <strong style={{ color: '#06b6d4', fontSize: '0.9rem', display: 'block' }}>Gerar Questões com IA Gemini</strong>
+                  <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.9rem', display: 'block' }}>Gerar questões com IA Gemini</strong>
                   <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>Digite o assunto para formular automaticamente questões com gabarito e justificativa pedagógica.</span>
                 </div>
                 <input
@@ -1532,8 +1533,8 @@ export function ProfessorDashboard() {
               {/* Questions List Editor */}
               <div style={{ marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <h4 style={{ color: '#06b6d4', fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
-                    Questões da Avaliação ({newExamQuestions.length})
+                  <h4 style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
+                    Questões da avaliação ({newExamQuestions.length})
                   </h4>
                   <button
                     onClick={() => {
@@ -1554,7 +1555,7 @@ export function ProfessorDashboard() {
                         }
                       ]);
                     }}
-                    className="btn-outline-cyan"
+                    className="btn-outline"
                     style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                   >
                     <Plus style={{ width: '0.85rem', height: '0.85rem' }} /> Adicionar Questão
@@ -1563,10 +1564,10 @@ export function ProfessorDashboard() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   {newExamQuestions.map((q, qIndex) => (
-                    <div key={qIndex} style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div key={qIndex} style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                          <span style={{ fontSize: '0.85rem', color: '#06b6d4', fontWeight: 800 }}>Questão #{qIndex + 1}</span>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800 }}>Questão #{qIndex + 1}</span>
                           <span style={{ fontSize: '0.75rem', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 600 }}>
                             Peso: {q.valorPeso} pts
                           </span>
@@ -1704,7 +1705,7 @@ export function ProfessorDashboard() {
                   type="button"
                   onClick={() => handlePublishExam('Rascunho')}
                   disabled={savingExam}
-                  className="btn-outline-cyan"
+                  className="btn-outline"
                   style={{ padding: '0.65rem 1.5rem', opacity: savingExam ? 0.7 : 1, cursor: savingExam ? 'not-allowed' : 'pointer' }}
                 >
                   {savingExam ? 'Salvando...' : 'Salvar como Rascunho'}
@@ -1714,7 +1715,7 @@ export function ProfessorDashboard() {
                   onClick={() => handlePublishExam('Aberta')}
                   disabled={savingExam}
                   className="btn-gradient"
-                  style={{ padding: '0.65rem 2rem', fontWeight: 800, background: 'linear-gradient(135deg, #10b981, #06b6d4)', opacity: savingExam ? 0.7 : 1, cursor: savingExam ? 'not-allowed' : 'pointer' }}
+                  style={{ padding: '0.65rem 2rem', fontWeight: 800, opacity: savingExam ? 0.7 : 1, cursor: savingExam ? 'not-allowed' : 'pointer' }}
                 >
                   {savingExam ? 'Publicando Avaliação...' : '🚀 Aplicar Prova para a Turma'}
                 </button>
@@ -1727,8 +1728,8 @@ export function ProfessorDashboard() {
             <div className="glass-card" style={{ padding: '1.75rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <div>
-                  <span style={{ fontSize: '0.75rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase' }}>
-                    Relatório Analítico de Prova
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>
+                    Relatório analítico de prova
                   </span>
                   <h3 style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: 800, margin: '0.2rem 0' }}>
                     {selectedExam.titulo}
@@ -1737,7 +1738,7 @@ export function ProfessorDashboard() {
                     Turma: {selectedExam.turmaNome || 'Turma Geral'} | Total de Questões: {selectedExam.questoes.length}
                   </span>
                 </div>
-                <button onClick={() => setExamMode('list')} className="btn-outline-cyan" style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}>
+                <button onClick={() => setExamMode('list')} className="btn-outline" style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}>
                   ← Voltar às Provas
                 </button>
               </div>
@@ -1745,8 +1746,8 @@ export function ProfessorDashboard() {
               {/* Quick Summary Cards */}
               {examAnalytics && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
-                  <div style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#06b6d4', fontWeight: 600 }}>Total de Entregas</span>
+                  <div style={{ padding: '1rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-subtle, #FAF7EE)', border: '1px solid var(--border-color, #E2D7C3)' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-secondary, #293E24)', fontWeight: 600 }}>Total de Entregas</span>
                     <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.2rem' }}>
                       {examAnalytics.totalTentativas} Alunos
                     </div>
@@ -1795,15 +1796,15 @@ export function ProfessorDashboard() {
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <strong style={{ color: '#06b6d4', fontSize: '0.95rem' }}>Questão #{q.questaoIndex + 1}</strong>
+                            <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.95rem' }}>Questão #{q.questaoIndex + 1}</strong>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({q.tema})</span>
                             {q.alertaPedagogico && (
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.72rem', color: '#ef4444', background: 'rgba(239,68,68,0.15)', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 700 }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.72rem', color: 'var(--color-danger, #BC391F)', background: 'rgba(188,57,31,0.15)', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 700 }}>
                                 <AlertTriangle style={{ width: '0.75rem', height: '0.75rem' }} /> Atenção Pedagógica
                               </span>
                             )}
                           </div>
-                          <div style={{ fontWeight: 800, fontSize: '1.05rem', color: q.taxaAcertoPercentual >= 70 ? '#10b981' : q.taxaAcertoPercentual >= 50 ? '#f59e0b' : '#ef4444' }}>
+                          <div style={{ fontWeight: 800, fontSize: '1.05rem', color: q.taxaAcertoPercentual >= 70 ? 'var(--color-secondary, #293E24)' : q.taxaAcertoPercentual >= 50 ? 'var(--color-primary-accessible, #B8441F)' : 'var(--color-danger, #BC391F)' }}>
                             {q.taxaAcertoPercentual}% de Acerto
                           </div>
                         </div>
@@ -1818,7 +1819,7 @@ export function ProfessorDashboard() {
                               className="progress-bar-fill"
                               style={{
                                 width: `${q.taxaAcertoPercentual}%`,
-                                background: q.taxaAcertoPercentual >= 70 ? '#10b981' : q.taxaAcertoPercentual >= 50 ? '#f59e0b' : '#ef4444'
+                                background: q.taxaAcertoPercentual >= 70 ? 'var(--color-secondary, #293E24)' : q.taxaAcertoPercentual >= 50 ? 'var(--color-primary, #E4683F)' : 'var(--color-danger, #BC391F)'
                               }}
                             />
                           </div>
@@ -1851,14 +1852,14 @@ export function ProfessorDashboard() {
                           <tr key={att.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}>
                             <td style={{ padding: '0.75rem', fontWeight: 600, color: 'var(--text-main)' }}>{att.alunoNome}</td>
                             <td style={{ padding: '0.75rem' }}>{att.pontuacaoObtida} / {att.pontuacaoMaxima} pts</td>
-                            <td style={{ padding: '0.75rem', fontWeight: 700, color: att.porcentagemAproveitamento >= 70 ? '#10b981' : att.porcentagemAproveitamento >= 50 ? '#f59e0b' : '#ef4444' }}>
+                            <td style={{ padding: '0.75rem', fontWeight: 700, color: att.porcentagemAproveitamento >= 70 ? 'var(--color-secondary, #293E24)' : att.porcentagemAproveitamento >= 50 ? 'var(--color-primary-accessible, #B8441F)' : 'var(--color-danger, #BC391F)' }}>
                               {att.porcentagemAproveitamento}%
                             </td>
                             <td style={{ padding: '0.75rem' }}>
                               <span style={{
                                 padding: '0.2rem 0.5rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700,
-                                background: att.classificacao === 'Excelente' ? 'rgba(16,185,129,0.15)' : att.classificacao === 'Bom' ? 'rgba(6,182,212,0.15)' : 'rgba(245,158,11,0.15)',
-                                color: att.classificacao === 'Excelente' ? '#10b981' : att.classificacao === 'Bom' ? '#06b6d4' : '#f59e0b'
+                                background: att.classificacao === 'Excelente' ? 'var(--color-secondary-light, rgba(41,62,36,0.15))' : att.classificacao === 'Bom' ? 'var(--color-primary-light, rgba(228,104,63,0.15))' : 'rgba(245,158,11,0.15)',
+                                color: att.classificacao === 'Excelente' ? 'var(--color-secondary, #293E24)' : att.classificacao === 'Bom' ? 'var(--color-primary-accessible, #B8441F)' : '#B8441F'
                               }}>
                                 {att.classificacao}
                               </span>
@@ -1887,15 +1888,15 @@ export function ProfessorDashboard() {
         <div className="fade-in">
           <div className="glass-card mb-4" style={{ padding: '1.75rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Upload style={{ width: '1.25rem', height: '1.25rem', color: '#06b6d4' }} />
-              Upload & Compartilhamento de Materiais de Apoio
+              <Upload style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+              Upload & compartilhamento de materiais de apoio
             </h3>
 
             {/* Class Selector for Materials */}
             {turmas.length > 0 ? (
-              <div style={{ marginBottom: '1.25rem', padding: '0.85rem 1rem', borderRadius: '8px', background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div style={{ marginBottom: '1.25rem', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-subtle, #FAF7EE)', border: '1px solid var(--border-color, #E2D7C3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Users style={{ width: '1.1rem', height: '1.1rem', color: '#06b6d4' }} />
+                  <Users style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-secondary, #293E24)' }} />
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     Turma de Destino:{' '}
                     <strong style={{ color: 'var(--text-main)' }}>
@@ -1908,7 +1909,7 @@ export function ProfessorDashboard() {
                   <select
                     value={selectedClassId || ''}
                     onChange={(e) => setSelectedClassId(e.target.value)}
-                    style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.82rem' }}
+                    style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-card, #F1EAD9)', color: 'var(--text-main)', fontSize: '0.82rem' }}
                   >
                     {turmas.map(t => (
                       <option key={t.id} value={t.id}>{t.name}</option>
@@ -1923,7 +1924,7 @@ export function ProfessorDashboard() {
                   Você ainda não possui turmas cadastradas. Crie sua primeira turma na aba{' '}
                   <button
                     onClick={() => { setDashboardTab('classes'); setIsCreatingClass(true); }}
-                    style={{ background: 'none', border: 'none', color: '#06b6d4', textDecoration: 'underline', cursor: 'pointer', fontWeight: 700, padding: 0 }}
+                    style={{ background: 'none', border: 'none', color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'underline', cursor: 'pointer', fontWeight: 700, padding: 0 }}
                   >
                     Minhas Turmas
                   </button>
@@ -1943,7 +1944,7 @@ export function ProfessorDashboard() {
                   placeholder="Ex: Apostila de Física Térmica, Slides de Aula..."
                   value={matTitle}
                   onChange={e => setMatTitle(e.target.value)}
-                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-subtle, #FAF7EE)', color: 'var(--text-main)', fontSize: '0.88rem' }}
                 />
               </div>
 
@@ -1954,7 +1955,7 @@ export function ProfessorDashboard() {
                 <select
                   value={matType}
                   onChange={e => setMatType(e.target.value as any)}
-                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-card, #F1EAD9)', color: 'var(--text-main)', fontSize: '0.88rem' }}
                 >
                   <option value="arquivo">📄 Arquivo do Computador (PDF, Imagem, Doc)</option>
                   <option value="link">🔗 Link Externo (YouTube, Google Drive, Artigo)</option>
@@ -1969,7 +1970,7 @@ export function ProfessorDashboard() {
                 <select
                   value={matBimester}
                   onChange={e => setMatBimester(e.target.value)}
-                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-card, #F1EAD9)', color: 'var(--text-main)', fontSize: '0.88rem' }}
                 >
                   <option value="1º Bimestre">1º Bimestre</option>
                   <option value="2º Bimestre">2º Bimestre</option>
@@ -1985,7 +1986,7 @@ export function ProfessorDashboard() {
                 <select
                   value={matSubject}
                   onChange={e => setMatSubject(e.target.value)}
-                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-card, #F1EAD9)', color: 'var(--text-main)', fontSize: '0.88rem' }}
                 >
                   {ALL_MODULES.map(m => (
                     <option key={m.id} value={m.label}>{m.label}</option>
@@ -1996,7 +1997,7 @@ export function ProfessorDashboard() {
 
             {/* Input according to Type */}
             {matType === 'arquivo' && (
-              <div style={{ marginBottom: '1.25rem', padding: '1.25rem', borderRadius: '10px', background: 'rgba(0,0,0,0.25)', border: '1px dashed rgba(6,182,212,0.3)', textAlign: 'center' }}>
+              <div style={{ marginBottom: '1.25rem', padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-subtle, #FAF7EE)', border: '1px dashed var(--border-color, #E2D7C3)', textAlign: 'center' }}>
                 <input
                   type="file"
                   id="mat_file_input"
@@ -2005,7 +2006,7 @@ export function ProfessorDashboard() {
                 />
                 <label
                   htmlFor="mat_file_input"
-                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.5rem', borderRadius: '8px', background: 'rgba(6,182,212,0.15)', color: '#06b6d4', fontWeight: 700, fontSize: '0.88rem' }}
+                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.5rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-primary-light, rgba(228,104,63,0.15))', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.88rem' }}
                 >
                   <Upload style={{ width: '1rem', height: '1rem' }} /> Selecionar Arquivo do Dispositivo
                 </label>
@@ -2080,7 +2081,7 @@ export function ProfessorDashboard() {
                 Materiais Disponibilizados para a Turma ({enhancedMaterials.length})
               </h3>
               {selectedClassId && turmas.length > 0 && (
-                <span style={{ fontSize: '0.82rem', color: '#06b6d4', background: 'rgba(6,182,212,0.1)', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.82rem', color: 'var(--color-primary-accessible, #B8441F)', background: 'var(--color-primary-light, rgba(228,104,63,0.1))', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 600 }}>
                   {turmas.find(t => t.id === selectedClassId)?.name}
                 </span>
               )}
@@ -2089,17 +2090,17 @@ export function ProfessorDashboard() {
             {enhancedMaterials.length > 0 ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
                 {enhancedMaterials.map(mat => (
-                  <div key={mat.id} style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div key={mat.id} style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                        <span style={{ fontSize: '0.72rem', color: '#8b5cf6', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>
                           {mat.periodo || '1º Bimestre'}
                         </span>
                         <span style={{
                           fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 600,
-                          background: mat.tipo === 'texto' ? 'rgba(139,92,246,0.15)' : mat.tipo === 'link' ? 'rgba(6,182,212,0.15)' : 'rgba(16,185,129,0.15)',
-                          color: mat.tipo === 'texto' ? '#8b5cf6' : mat.tipo === 'link' ? '#06b6d4' : '#10b981',
-                          border: `1px solid ${mat.tipo === 'texto' ? 'rgba(139,92,246,0.3)' : mat.tipo === 'link' ? 'rgba(6,182,212,0.3)' : 'rgba(16,185,129,0.3)'}`
+                          background: mat.tipo === 'texto' ? 'var(--color-secondary-light, rgba(41,62,36,0.12))' : mat.tipo === 'link' ? 'var(--color-primary-light, rgba(228,104,63,0.12))' : 'rgba(61,91,54,0.12)',
+                          color: mat.tipo === 'texto' ? 'var(--color-secondary, #293E24)' : mat.tipo === 'link' ? 'var(--color-primary-accessible, #B8441F)' : 'var(--color-secondary, #293E24)',
+                          border: `1px solid ${mat.tipo === 'texto' ? 'var(--border-color, #E2D7C3)' : mat.tipo === 'link' ? 'var(--color-primary, #E4683F)' : 'var(--border-color, #E2D7C3)'}`
                         }}>
                           {mat.tipo === 'texto' ? '📝 Resumo Textual' : mat.tipo === 'link' ? '🔗 Link Externo' : '📄 Arquivo / PDF'}
                         </span>
@@ -2114,8 +2115,8 @@ export function ProfessorDashboard() {
                         <div style={{
                           padding: '0.75rem',
                           borderRadius: '8px',
-                          background: 'rgba(0,0,0,0.3)',
-                          border: '1px solid rgba(139,92,246,0.2)',
+                          background: 'var(--color-bg-subtle, #FAF7EE)',
+                          border: '1px solid var(--border-color, #E2D7C3)',
                           fontSize: '0.82rem',
                           color: 'var(--text-secondary)',
                           whiteSpace: 'pre-wrap',
@@ -2135,7 +2136,7 @@ export function ProfessorDashboard() {
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color, #E2D7C3)' }}>
                       <div>
                         {mat.tipo === 'texto' ? (
                           <button
@@ -2146,12 +2147,12 @@ export function ProfessorDashboard() {
                               setTimeout(() => setCopiedTextId(prev => prev === mat.id ? null : prev), 2000);
                               showFeedback('Texto copiado para a área de transferência!', 'info');
                             }}
-                            className="btn-outline-cyan"
+                            className="btn-outline"
                             style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                           >
                             {copiedTextId === mat.id ? (
                               <>
-                                <Check style={{ width: '0.8rem', height: '0.8rem', color: '#10b981' }} /> Copiado!
+                                <Check style={{ width: '0.8rem', height: '0.8rem', color: 'var(--color-secondary, #293E24)' }} /> Copiado!
                               </>
                             ) : (
                               <>
@@ -2164,7 +2165,7 @@ export function ProfessorDashboard() {
                             href={mat.linkOuConteudo.startsWith('http') ? mat.linkOuConteudo : `https://${mat.linkOuConteudo}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="btn-outline-cyan"
+                            className="btn-outline"
                             style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
                           >
                             <ExternalLink style={{ width: '0.8rem', height: '0.8rem' }} /> Acessar Link
@@ -2217,12 +2218,12 @@ export function ProfessorDashboard() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.25rem' }}>
             {ALL_MODULES.map((module) => (
-              <div key={module.id} className="glass-card" style={{ padding: '1.25rem', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div key={module.id} className="glass-card" style={{ padding: '1.25rem', border: '1px solid var(--border-color, #E2D7C3)', borderRadius: 'var(--radius-sm, 10px)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
-                  <h4 style={{ color: '#06b6d4', fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
+                  <h4 style={{ color: 'var(--color-secondary, #293E24)', fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
                     {module.label}
                   </h4>
-                  <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', borderRadius: '9999px', background: 'rgba(6,182,212,0.1)', color: '#06b6d4', fontWeight: 600 }}>
+                  <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', borderRadius: '9999px', background: 'var(--color-secondary-light, rgba(41,62,36,0.12))', color: 'var(--color-secondary, #293E24)', fontWeight: 600 }}>
                     6 Labs Práticos
                   </span>
                 </div>
@@ -2234,8 +2235,8 @@ export function ProfessorDashboard() {
                       style={{
                         padding: '0.55rem 0.75rem',
                         borderRadius: '6px',
-                        background: 'rgba(255,255,255,0.02)',
-                        border: '1px solid rgba(255,255,255,0.05)',
+                        background: 'var(--color-bg-subtle, #FAF7EE)',
+                        border: '1px solid var(--border-color, #E2D7C3)',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
@@ -2266,7 +2267,7 @@ export function ProfessorDashboard() {
               <select
                 value={selectedClassId || ''}
                 onChange={e => handleViewClassReport(e.target.value)}
-                style={{ padding: '0.5rem 1rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(6,182,212,0.3)', color: 'var(--text-main)', fontSize: '0.9rem', outline: 'none' }}
+                style={{ padding: '0.5rem 1rem', borderRadius: '8px', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', color: 'var(--text-main)', fontSize: '0.9rem', outline: 'none' }}
               >
                 {turmas.map(t => (
                   <option key={t.id} value={t.id}>{t.name} ({t.studentsCount} alunos)</option>
@@ -2277,7 +2278,7 @@ export function ProfessorDashboard() {
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 onClick={() => selectedClassId && handleViewClassReport(selectedClassId)}
-                className="btn-outline-cyan"
+                className="btn-outline"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem' }}
               >
                 <RefreshCw style={{ width: '0.85rem', height: '0.85rem' }} /> Atualizar
@@ -2294,17 +2295,17 @@ export function ProfessorDashboard() {
 
           {reportLoading ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-              <RefreshCw className="animate-spin" style={{ width: '2rem', height: '2rem', margin: '0 auto 1rem', color: '#06b6d4' }} />
+              <RefreshCw className="animate-spin" style={{ width: '2rem', height: '2rem', margin: '0 auto 1rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
               <p>Carregando analytics...</p>
             </div>
           ) : classReport ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
               {/* AI Diagnosis */}
-              <div className="glass-card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(6,182,212,0.08) 0%, rgba(139,92,246,0.08) 100%)', border: '1px solid rgba(6,182,212,0.35)', borderRadius: '12px' }}>
+              <div className="glass-card" style={{ padding: '1.5rem', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', borderRadius: 'var(--radius-lg, 14px)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                  <Sparkles style={{ width: '1.25rem', height: '1.25rem', color: '#06b6d4' }} />
-                  <h3 style={{ color: '#06b6d4', fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
-                    Diagnóstico Pedagógico Assistido por IA ({classReport.className})
+                  <Sparkles style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary, #E4683F)' }} />
+                  <h3 style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
+                    Diagnóstico pedagógico assistido por IA ({classReport.className})
                   </h3>
                   {aiLoading && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Gerando...</span>}
                 </div>
@@ -2316,8 +2317,8 @@ export function ProfessorDashboard() {
                     </p>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                      <div style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                      <div style={{ padding: '1rem', borderRadius: '8px', background: 'var(--color-secondary-light, rgba(41,62,36,0.12))', border: '1px solid var(--border-color, #E2D7C3)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
                           <CheckCircle style={{ width: '0.95rem', height: '0.95rem' }} /> Pontos Fortes da Turma
                         </div>
                         <ul style={{ margin: 0, paddingLeft: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.83rem', lineHeight: 1.5 }}>
@@ -2325,8 +2326,8 @@ export function ProfessorDashboard() {
                         </ul>
                       </div>
 
-                      <div style={{ padding: '1rem', borderRadius: '8px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#f59e0b', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                      <div style={{ padding: '1rem', borderRadius: '8px', background: 'var(--color-primary-light, rgba(228,104,63,0.12))', border: '1px solid var(--border-color, #E2D7C3)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
                           <AlertTriangle style={{ width: '0.95rem', height: '0.95rem' }} /> Recomendações & Intervenções
                         </div>
                         <ul style={{ margin: 0, paddingLeft: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.83rem', lineHeight: 1.5 }}>
@@ -2351,11 +2352,11 @@ export function ProfessorDashboard() {
                   <div style={{ width: '100%', height: '260px' }}>
                     <ResponsiveContainer>
                       <BarChart data={subjectProgressData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color, #E2D7C3)" />
                         <XAxis dataKey="subject" stroke="var(--text-muted)" fontSize={11} angle={-35} textAnchor="end" interval={0} />
                         <YAxis domain={[0, 100]} stroke="var(--text-muted)" fontSize={11} />
                         <Tooltip contentStyle={tooltipStyle} />
-                        <Bar dataKey="score" fill="#06b6d4" radius={[4, 4, 0, 0]} name="Média (%)" />
+                        <Bar dataKey="score" fill="#293E24" radius={[4, 4, 0, 0]} name="Média (%)" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -2387,21 +2388,21 @@ export function ProfessorDashboard() {
       {dashboardTab === 'messages' && (
         <div className="fade-in glass-card" style={{ padding: '1.5rem' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <MessageCircle style={{ width: '1.1rem', height: '1.1rem', color: '#06b6d4' }} />
-            Dúvidas Recebidas ({profMessages.filter(m => !m.replied).length} pendentes)
+            <MessageCircle style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+            Dúvidas recebidas ({profMessages.filter(m => !m.replied).length} pendentes)
           </h3>
           {profMessages.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               {profMessages.map(msg => (
-                <div key={msg.id} style={{ padding: '0.85rem', borderRadius: '8px', border: msg.replied ? '1px solid rgba(16,185,129,0.25)' : '1px solid rgba(245,158,11,0.3)', background: msg.replied ? 'rgba(16,185,129,0.04)' : 'rgba(245,158,11,0.04)' }}>
+                <div key={msg.id} style={{ padding: '0.85rem', borderRadius: '8px', border: msg.replied ? '1px solid rgba(41,62,36,0.25)' : '1px solid rgba(228,104,63,0.3)', background: msg.replied ? 'rgba(41,62,36,0.04)' : 'rgba(228,104,63,0.04)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
                     <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.88rem' }}>{msg.studentName}</span>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{new Date(msg.createdAt).toLocaleDateString('pt-BR')}</span>
                   </div>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.65rem' }}>{msg.message}</div>
                   {msg.replied ? (
-                    <div style={{ padding: '0.6rem', borderRadius: '6px', background: 'rgba(16,185,129,0.08)', borderLeft: '3px solid #10b981' }}>
-                      <div style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>Sua resposta enviada:</div>
+                    <div style={{ padding: '0.6rem', borderRadius: '6px', background: 'var(--color-secondary-light, rgba(41,62,36,0.08))', borderLeft: '3px solid var(--color-secondary, #293E24)' }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700 }}>Sua resposta enviada:</div>
                       <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{msg.replyText}</div>
                     </div>
                   ) : (
@@ -2411,7 +2412,7 @@ export function ProfessorDashboard() {
                         placeholder="Digite sua orientação pedagógica..."
                         value={replyTexts[msg.id!] || ''}
                         onChange={e => setReplyTexts(prev => ({ ...prev, [msg.id!]: e.target.value }))}
-                        style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(6,182,212,0.25)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                        style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-subtle, #FAF7EE)', color: 'var(--text-main)', fontSize: '0.85rem' }}
                       />
                       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                         <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Recompensa de Incentivo 🪙</label>
@@ -2421,7 +2422,7 @@ export function ProfessorDashboard() {
                           max="50"
                           value={replyBonusCoins[msg.id!] || 0}
                           onChange={e => setReplyBonusCoins(prev => ({ ...prev, [msg.id!]: parseInt(e.target.value) || 0 }))}
-                          style={{ width: '60px', padding: '0.35rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.82rem', textAlign: 'center' }}
+                          style={{ width: '60px', padding: '0.35rem', borderRadius: '4px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-subtle, #FAF7EE)', color: 'var(--text-main)', fontSize: '0.82rem', textAlign: 'center' }}
                         />
                         <button
                           className="btn-gradient"
@@ -2465,11 +2466,11 @@ export function ProfessorDashboard() {
       {/* ── GEMINI API KEY MODAL ── */}
       {showGeminiModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <div className="glass-card" style={{ maxWidth: '500px', width: '100%', padding: '1.75rem', background: '#121214', border: '1px solid rgba(6,182,212,0.3)', borderRadius: '12px' }}>
+          <div className="glass-card" style={{ maxWidth: '500px', width: '100%', padding: '1.75rem', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', borderRadius: 'var(--radius-lg, 14px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-              <Key style={{ width: '1.35rem', height: '1.35rem', color: '#06b6d4' }} />
+              <Key style={{ width: '1.35rem', height: '1.35rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
-                Configuração da Chave Google Gemini IA
+                Configuração da chave Google Gemini IA
               </h3>
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.25rem' }}>
@@ -2480,15 +2481,15 @@ export function ProfessorDashboard() {
               placeholder="Cole sua API Key do Google AI Studio (AIzaSy...)"
               value={geminiKeyInput}
               onChange={(e) => setGeminiKeyInput(e.target.value)}
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '1rem' }}
+              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-subtle, #FAF7EE)', color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '1rem' }}
             />
             {geminiSaved && (
-              <div style={{ color: '#10b981', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              <div style={{ color: 'var(--color-secondary, #293E24)', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <CheckCircle style={{ width: '1rem', height: '1rem' }} /> Chave salva com sucesso!
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-              <button onClick={() => setShowGeminiModal(false)} className="btn-outline-cyan" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+              <button onClick={() => setShowGeminiModal(false)} className="btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
                 Fechar
               </button>
               <button onClick={handleSaveGeminiKey} className="btn-gradient" style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem', fontWeight: 700 }}>
@@ -2503,11 +2504,11 @@ export function ProfessorDashboard() {
       {printingExam && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 1100, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '1.5rem', overflowY: 'auto' }}>
           {/* Action Header (Hidden in Print) */}
-          <div className="print-controls" style={{ width: '100%', maxWidth: '820px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: '#18181b', padding: '0.85rem 1.25rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="print-controls" style={{ width: '100%', maxWidth: '820px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: 'var(--color-bg-card, #F1EAD9)', padding: '0.85rem 1.25rem', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color, #E2D7C3)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <button
                 onClick={() => setPrintingExam(null)}
-                className="btn-outline-cyan"
+                className="btn-outline"
                 style={{ padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
               >
                 ✕ Fechar

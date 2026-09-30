@@ -160,8 +160,8 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 {options.map((opt, i) => (
                   <button key={i} onClick={() => handleAnswer(opt.word === current.word)}
-                    style={{ padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)',
-                      background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: 'pointer', textAlign: 'left', fontSize: '0.9rem' }}>
+                    style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)',
+                      background: 'var(--bg-card)', color: 'var(--text-main)', cursor: 'pointer', textAlign: 'left', fontSize: '0.9rem', transition: 'all 0.2s ease' }}>
                     {opt.translation}
                   </button>
                 ))}
@@ -188,8 +188,8 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
         </div>
       )}
       {/* AI Pronunciation Box */}
-      <div style={{ marginTop: '1.25rem', padding: '0.85rem', borderRadius: '10px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-        <div style={{ color: '#06b6d4', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>🤖 DICA DA IA LINGUÍSTICA</div>
+      <div style={{ marginTop: '1.25rem', padding: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-subtle, #FAF7EE)', border: '1px solid var(--border-color, #E2D7C3)' }}>
+        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>🤖 Dica da IA linguística</div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
           {lang === 'english'
             ? 'Atenção aos padrões de acentuação tônica (syllable stress) em palavras polissilábicas.'

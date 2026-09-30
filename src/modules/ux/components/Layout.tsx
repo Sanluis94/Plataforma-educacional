@@ -5,6 +5,7 @@ import { useAuth } from '../../core/contexts/AuthContext';
 import { AccessibilityToolbar } from './AccessibilityToolbar';
 import { PricingModal } from './PricingModal';
 import { ParentBridgeModal } from './ParentBridgeModal';
+import { Logo } from './Logo';
 
 interface LayoutProps {
   theme: 'dark' | 'light';
@@ -71,33 +72,27 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
 
   return (
     <div className="app-container" style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
-      {/* Header */}
+      {/* Header com borda fina de 1px Nude 300 e sem sombras projetadas */}
       <header style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-        borderBottom: '1px solid var(--border-card)',
+        borderBottom: '1px solid var(--border-color)',
         background: 'var(--bg-surface)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
       }}>
         <div style={{
           maxWidth: '80rem', margin: '0 auto',
-          padding: '0 1rem', display: 'flex', alignItems: 'center',
+          padding: '0 1.25rem', display: 'flex', alignItems: 'center',
           justifyContent: 'space-between', height: '4rem',
         }}>
-          {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {/* Logo Oficial Edu-Interact */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
             <Link
               to="/"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
-              title="Ir para o Hub Inicial de Navegação"
+              style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+              title="Edu-Interact — Onde a raiz encontra o circuito"
             >
-              <div style={{
-                width: '2rem', height: '2rem', borderRadius: '0.5rem',
-                background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
-              }} />
-              <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                Edu-Interact
-              </span>
+              <Logo colorMode={theme === 'dark' ? 'negative' : 'default'} symbolSize={28} />
             </Link>
 
             {location.pathname !== '/' && (
@@ -108,11 +103,11 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.35rem',
-                  padding: '0.35rem 0.75rem',
-                  borderRadius: '9999px',
-                  background: 'rgba(6, 182, 212, 0.1)',
-                  border: '1px solid rgba(6, 182, 212, 0.35)',
-                  color: '#06b6d4',
+                  padding: '0.3rem 0.7rem',
+                  borderRadius: '10px',
+                  background: 'rgba(228, 104, 63, 0.1)',
+                  border: '1px solid rgba(184, 68, 31, 0.3)',
+                  color: 'var(--color-primary-accessible, #B8441F)',
                   textDecoration: 'none',
                   fontSize: '0.78rem',
                   fontWeight: 700,
@@ -136,13 +131,14 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
                   to={item.href}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    padding: '0.5rem 1rem', borderRadius: '0.5rem',
+                    padding: '0.5rem 0.9rem', borderRadius: '10px',
                     fontSize: '0.875rem', textDecoration: 'none',
                     transition: 'all 0.2s',
                     ...(isActive(item.href) ? {
-                      background: 'rgba(6, 182, 212, 0.1)',
-                      color: '#06b6d4',
-                      border: '1px solid rgba(6, 182, 212, 0.3)',
+                      background: theme === 'dark' ? 'rgba(228, 104, 63, 0.16)' : 'rgba(228, 104, 63, 0.1)',
+                      color: theme === 'dark' ? '#F59C7B' : '#B8441F',
+                      border: theme === 'dark' ? '1px solid rgba(245, 156, 123, 0.4)' : '1px solid rgba(184, 68, 31, 0.3)',
+                      fontWeight: 700,
                     } : {
                       color: 'var(--text-secondary)',
                       border: '1px solid transparent',
@@ -163,10 +159,10 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
               onClick={() => setPricingModalOpen(true)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '0.35rem',
-                padding: '0.45rem 0.75rem', borderRadius: '0.5rem',
-                background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(139,92,246,0.15))',
-                border: '1px solid rgba(6,182,212,0.3)',
-                color: '#06b6d4', cursor: 'pointer',
+                padding: '0.45rem 0.75rem', borderRadius: '10px',
+                background: 'rgba(228, 104, 63, 0.08)',
+                border: '1px solid rgba(184, 68, 31, 0.25)',
+                color: 'var(--color-primary-accessible, #B8441F)', cursor: 'pointer',
                 fontSize: '0.8rem', fontWeight: 700,
                 transition: 'all 0.2s',
               }}
@@ -181,9 +177,9 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
               onClick={() => setParentBridgeOpen(true)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '0.35rem',
-                padding: '0.45rem 0.75rem', borderRadius: '0.5rem',
+                padding: '0.45rem 0.75rem', borderRadius: '10px',
                 background: 'none', border: '1px solid var(--border-color)',
-                color: '#ec4899', cursor: 'pointer',
+                color: 'var(--color-primary-accessible, #B8441F)', cursor: 'pointer',
                 fontSize: '0.8rem', fontWeight: 700,
                 transition: 'all 0.2s',
               }}
@@ -201,7 +197,7 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
               onClick={onThemeToggle}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '0.5rem', borderRadius: '0.5rem',
+                padding: '0.5rem', borderRadius: '10px',
                 background: 'none', border: '1px solid var(--border-color)',
                 color: 'var(--text-secondary)', cursor: 'pointer',
                 transition: 'all 0.2s',
@@ -228,7 +224,7 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
                     alt="avatar"
                     style={{
                       width: '2rem', height: '2rem', borderRadius: '50%',
-                      border: '2px solid #06b6d4',
+                      border: '2px solid var(--color-primary)',
                     }}
                   />
                 )}
@@ -236,7 +232,7 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
                   onClick={handleLogout}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '0.35rem',
-                    padding: '0.4rem 0.75rem', borderRadius: '0.5rem',
+                    padding: '0.4rem 0.75rem', borderRadius: '10px',
                     background: 'none', border: '1px solid var(--border-color)',
                     color: 'var(--text-secondary)', cursor: 'pointer',
                     fontSize: '0.8rem', transition: 'all 0.2s',
@@ -250,7 +246,7 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
             ) : (
               <button
                 onClick={onLoginOpen}
-                className="btn-gradient"
+                className="btn-primary"
                 style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
               >
                 Entrar
@@ -263,7 +259,7 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
               className="mobile-only"
               style={{
                 display: 'none',
-                padding: '0.5rem', borderRadius: '0.5rem',
+                padding: '0.5rem', borderRadius: '10px',
                 background: 'none', border: 'none',
                 color: 'var(--text-secondary)', cursor: 'pointer',
               }}
@@ -276,7 +272,7 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="slide-down" style={{
-            borderTop: '1px solid var(--border-card)',
+            borderTop: '1px solid var(--border-color)',
             background: 'var(--bg-surface)',
             backdropFilter: 'blur(20px)',
             padding: '1rem',
@@ -291,13 +287,14 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
                     onClick={() => setMobileMenuOpen(false)}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '0.75rem',
-                      padding: '0.75rem 1rem', borderRadius: '0.5rem',
+                      padding: '0.75rem 1rem', borderRadius: '10px',
                       fontSize: '0.9rem', textDecoration: 'none',
                       transition: 'all 0.2s',
                       ...(isActive(item.href) ? {
-                        background: 'rgba(6, 182, 212, 0.1)',
-                        color: '#06b6d4',
-                        border: '1px solid rgba(6, 182, 212, 0.3)',
+                        background: 'rgba(41, 62, 36, 0.08)',
+                        color: 'var(--color-secondary)',
+                        border: '1px solid rgba(41, 62, 36, 0.2)',
+                        fontWeight: 600,
                       } : {
                         color: 'var(--text-secondary)',
                         border: '1px solid transparent',
@@ -314,9 +311,9 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
                   onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '0.75rem',
-                    padding: '0.75rem 1rem', borderRadius: '0.5rem',
-                    background: 'none', border: '1px solid rgba(239, 68, 68, 0.3)',
-                    color: '#ef4444', cursor: 'pointer', fontSize: '0.9rem',
+                    padding: '0.75rem 1rem', borderRadius: '10px',
+                    background: 'none', border: '1px solid rgba(188, 57, 31, 0.3)',
+                    color: 'var(--color-vermelho, #BC391F)', cursor: 'pointer', fontSize: '0.9rem',
                     textAlign: 'left', width: '100%',
                   }}
                 >

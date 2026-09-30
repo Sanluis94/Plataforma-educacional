@@ -165,8 +165,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
   const collisionCanvasRef = useRef<HTMLCanvasElement>(null);
   const collisionAnimRef = useRef<number>(0);
   const [balls, setBalls] = useState([
-    { id: 1, x: 80, y: 100, vx: 5, vy: 0, radius: 20, mass: 1, color: '#06b6d4' },
-    { id: 2, x: 350, y: 100, vx: -3, vy: 0, radius: 25, mass: 1.5, color: '#8b5cf6' }
+    { id: 1, x: 80, y: 100, vx: 5, vy: 0, radius: 20, mass: 1, color: '#E4683F' },
+    { id: 2, x: 350, y: 100, vx: -3, vy: 0, radius: 25, mass: 1.5, color: '#293E24' }
   ]);
 
   // Pendulum canvas rendering
@@ -183,7 +183,20 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
     const draw = () => {
       const width = canvas.width;
       const height = canvas.height;
-      ctx.clearRect(0, 0, width, height);
+      
+      // Tela de fundo clara do laboratório com grade de alta precisão
+      ctx.fillStyle = '#FAF7EE';
+      ctx.fillRect(0, 0, width, height);
+
+      // Grade milimetrada de laboratório (suave e limpa)
+      ctx.strokeStyle = 'rgba(41, 62, 36, 0.07)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < width; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+      }
+      for (let y = 0; y < height; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+      }
 
       const pivotX = width / 2;
       const pivotY = 80;
@@ -197,9 +210,9 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
       const bobX = pivotX + length * Math.sin(currentAngle);
       const bobY = pivotY + length * Math.cos(currentAngle);
 
-      // Reference line (dashed)
-      ctx.strokeStyle = 'rgba(139, 92, 246, 0.2)';
-      ctx.lineWidth = 1;
+      // Linha de referência vertical (tracejada)
+      ctx.strokeStyle = 'rgba(41, 62, 36, 0.35)';
+      ctx.lineWidth = 1.5;
       ctx.setLineDash([5, 5]);
       ctx.beginPath();
       ctx.moveTo(pivotX, pivotY);
@@ -207,45 +220,45 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // String
-      ctx.strokeStyle = '#06b6d4';
-      ctx.lineWidth = 2;
+      // Fio do Pêndulo (Verde 700 da identidade visual)
+      ctx.strokeStyle = '#293E24';
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(pivotX, pivotY);
       ctx.lineTo(bobX, bobY);
       ctx.stroke();
 
-      // Pivot
-      ctx.fillStyle = '#1f1f2e';
-      ctx.strokeStyle = '#8b5cf6';
+      // Ponto de Pivot / Suporte Superior
+      ctx.fillStyle = '#172314';
+      ctx.strokeStyle = '#293E24';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(pivotX, pivotY, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
-      // Bob with gradient
+      // Esfera oscilante com gradiente oficial Laranja
       const bobRadius = 14 + mass * 5;
       const gradient = ctx.createRadialGradient(bobX, bobY, 0, bobX, bobY, bobRadius);
-      gradient.addColorStop(0, '#06b6d4');
-      gradient.addColorStop(1, '#8b5cf6');
+      gradient.addColorStop(0, '#E4683F');
+      gradient.addColorStop(1, '#B8441F');
       ctx.fillStyle = gradient;
       ctx.beginPath();
       ctx.arc(bobX, bobY, bobRadius, 0, Math.PI * 2);
       ctx.fill();
 
-      // Bob outline glow
-      ctx.strokeStyle = 'rgba(6, 182, 212, 0.5)';
+      // Borda nítida da esfera
+      ctx.strokeStyle = '#B8441F';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(bobX, bobY, bobRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Angle indicator text
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      ctx.font = '12px Inter, sans-serif';
+      // Indicador de ângulo (Texto nítido em Verde 900 sobre fundo claro)
+      ctx.fillStyle = '#172314';
+      ctx.font = '700 13px Space Grotesk, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`θ = ${(currentAngle * 180 / Math.PI).toFixed(1)}°`, pivotX, height - 15);
+      ctx.fillText(`θ = ${(currentAngle * 180 / Math.PI).toFixed(1)}°`, pivotX, height - 16);
 
       pendulumAnimRef.current = requestAnimationFrame(draw);
     };
@@ -267,10 +280,12 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
     let localBalls = balls.map(b => ({ ...b }));
 
     const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Fundo de bancada de laboratório claro
+      ctx.fillStyle = '#FAF7EE';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw grid
-      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+      // Grade milimetrada de física mecânica
+      ctx.strokeStyle = 'rgba(41, 62, 36, 0.08)';
       ctx.lineWidth = 1;
       for (let x = 0; x < canvas.width; x += 40) {
         ctx.beginPath();
@@ -279,31 +294,41 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
         ctx.stroke();
       }
 
-      localBalls.forEach(ball => {
-        // Ball glow
-        const glow = ctx.createRadialGradient(ball.x, ball.y, ball.radius * 0.5, ball.x, ball.y, ball.radius * 2);
-        glow.addColorStop(0, ball.color + '33');
-        glow.addColorStop(1, 'transparent');
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.radius * 2, 0, Math.PI * 2);
-        ctx.fill();
+      // Trilho de Ar / Superfície de deslizamento
+      ctx.strokeStyle = '#293E24';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, 130);
+      ctx.lineTo(canvas.width, 130);
+      ctx.stroke();
 
-        // Ball body
+      localBalls.forEach(ball => {
+        // Corpo da esfera com gradiente
         const gradient = ctx.createRadialGradient(ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, 0, ball.x, ball.y, ball.radius);
         gradient.addColorStop(0, ball.color);
-        gradient.addColorStop(1, ball.color + '88');
+        gradient.addColorStop(1, ball.color === '#E4683F' ? '#B8441F' : '#172314');
         ctx.fillStyle = gradient;
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Outline
-        ctx.strokeStyle = ball.color;
-        ctx.lineWidth = 1.5;
+        // Contorno nítido
+        ctx.strokeStyle = '#172314';
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
         ctx.stroke();
+
+        // Rótulo de Massa sobre a esfera
+        ctx.fillStyle = '#FAF7EE';
+        ctx.font = 'bold 11px Space Grotesk, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${ball.mass}kg`, ball.x, ball.y + 4);
+
+        // Vetor de Velocidade (Rótulo superior)
+        ctx.fillStyle = '#172314';
+        ctx.font = '700 11px Space Grotesk, sans-serif';
+        ctx.fillText(`v = ${ball.vx.toFixed(1)} m/s`, ball.x, ball.y - ball.radius - 8);
       });
     };
 
@@ -360,8 +385,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
   const resetCollisions = () => {
     setIsPlayingCollisions(false);
     setBalls([
-      { id: 1, x: 80, y: 100, vx: 5, vy: 0, radius: 20, mass: 1, color: '#06b6d4' },
-      { id: 2, x: 350, y: 100, vx: -3, vy: 0, radius: 25, mass: 1.5, color: '#8b5cf6' }
+      { id: 1, x: 80, y: 100, vx: 5, vy: 0, radius: 20, mass: 1, color: '#E4683F' },
+      { id: 2, x: 350, y: 100, vx: -3, vy: 0, radius: 25, mass: 1.5, color: '#293E24' }
     ]);
   };
 
@@ -375,7 +400,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Link
             to="/"
-            className="btn-outline-cyan"
+            className="btn-outline"
             style={{
               padding: '0.45rem 0.85rem',
               borderRadius: '0.5rem',
@@ -423,56 +448,56 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setActiveTab('pendulum')}
-            className={activeTab === 'pendulum' ? 'btn-gradient' : 'btn-outline-cyan'}
+            className={activeTab === 'pendulum' ? 'btn-primary' : 'btn-outline'}
             style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
           >
             Pêndulo
           </button>
           <button
             onClick={() => setActiveTab('collisions')}
-            className={activeTab === 'collisions' ? 'btn-gradient' : 'btn-outline-cyan'}
+            className={activeTab === 'collisions' ? 'btn-primary' : 'btn-outline'}
             style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
           >
             Leis de Newton
           </button>
           <button
             onClick={() => setActiveTab('optics')}
-            className={activeTab === 'optics' ? 'btn-gradient' : 'btn-outline-cyan'}
+            className={activeTab === 'optics' ? 'btn-primary' : 'btn-outline'}
             style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
           >
-            Óptica Geométrica
+            Óptica geométrica
           </button>
           <button
             onClick={() => setActiveTab('electromagnetism')}
-            className={activeTab === 'electromagnetism' ? 'btn-gradient' : 'btn-outline-cyan'}
+            className={activeTab === 'electromagnetism' ? 'btn-primary' : 'btn-outline'}
             style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
           >
             Eletromagnetismo
           </button>
           <button
             onClick={() => setActiveTab('thermodynamics')}
-            className={activeTab === 'thermodynamics' ? 'btn-gradient' : 'btn-outline-cyan'}
+            className={activeTab === 'thermodynamics' ? 'btn-primary' : 'btn-outline'}
             style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
           >
             Termodinâmica
           </button>
           <button
             onClick={() => setActiveTab('modern_physics')}
-            className={activeTab === 'modern_physics' ? 'btn-gradient' : 'btn-outline-cyan'}
+            className={activeTab === 'modern_physics' ? 'btn-primary' : 'btn-outline'}
             style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
           >
-            Física Moderna
+            Física moderna
           </button>
           {onComplete && (
             <button
               onClick={() => onComplete(100)}
-              className="btn-gradient"
-              style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', background: '#10b981', borderColor: '#10b981' }}
+              className="btn-secondary"
+              style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
             >
-              ✓ Concluir Laboratório
+              ✓ Concluir laboratório
             </button>
           )}
         </div>
@@ -484,8 +509,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           className="glass-card"
           style={{
             marginBottom: '1.75rem',
-            border: missionCompleted ? '1px solid rgba(16,185,129,0.4)' : '1px solid rgba(6,182,212,0.3)',
-            background: missionCompleted ? 'rgba(16,185,129,0.04)' : 'rgba(6,182,212,0.03)',
+            border: missionCompleted ? '1px solid rgba(16,185,129,0.4)' : '1px solid var(--border-color, #E2D7C3)',
+            background: missionCompleted ? 'rgba(16,185,129,0.04)' : 'transparent',
             padding: '1.25rem 1.5rem',
           }}
         >
@@ -511,7 +536,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
 
             <button
               type="button"
-              className="btn-outline-cyan"
+              className="btn-outline"
               style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
               onClick={(e) => { e.stopPropagation(); setShowMission(!showMission); }}
             >
@@ -523,8 +548,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
             <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
               {/* Steps */}
               <div style={{ marginBottom: '1.25rem' }}>
-                <strong style={{ fontSize: '0.85rem', color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Passo a Passo Investigativo no Laboratório:
+                <strong style={{ fontSize: '0.85rem', color: 'var(--color-primary-accessible, #B8441F)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Passo a passo investigativo no laboratório:
                 </strong>
                 <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.25rem', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6 }}>
                   {LAB_MISSIONS[activeTab].steps.map((step, sIdx) => (
@@ -534,15 +559,21 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
               </div>
 
               {/* Scientific Question & Quiz */}
-              <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.25)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.5rem' }}>
-                  <HelpCircle style={{ width: '1rem', height: '1rem', color: '#f59e0b' }} />
-                  <strong style={{ fontSize: '0.88rem', color: 'var(--text-main)' }}>
+              <div style={{
+                padding: '1.25rem',
+                background: 'var(--bg-card)',
+                borderRadius: 'var(--radius-sm, 10px)',
+                border: '1px solid var(--border-color)',
+                boxShadow: 'var(--shadow-card)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.65rem' }}>
+                  <HelpCircle style={{ width: '1.15rem', height: '1.15rem', color: 'var(--color-primary-accessible, #E4683F)' }} />
+                  <strong style={{ fontSize: '0.92rem', color: 'var(--text-main)', lineHeight: 1.4 }}>
                     Desafio de Conclusão: {LAB_MISSIONS[activeTab].scientificQuestion}
                   </strong>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.85rem' }}>
                   {LAB_MISSIONS[activeTab].options.map((opt, optIdx) => {
                     const isSelected = selectedMissionOption === optIdx;
                     return (
@@ -555,18 +586,29 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                         }}
                         style={{
                           textAlign: 'left',
-                          padding: '0.55rem 0.85rem',
-                          borderRadius: '6px',
-                          border: isSelected ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
-                          background: isSelected ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.02)',
-                          color: isSelected ? '#67e8f9' : 'var(--text-secondary)',
-                          fontSize: '0.83rem',
+                          padding: '0.75rem 1rem',
+                          borderRadius: 'var(--radius-sm, 10px)',
+                          border: isSelected ? '1.5px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
+                          background: isSelected ? 'var(--color-primary-light, rgba(228,104,63,0.18))' : 'var(--bg-base)',
+                          color: isSelected ? 'var(--color-primary-accessible, #F59C7B)' : 'var(--text-main)',
+                          fontSize: '0.875rem',
                           cursor: 'pointer',
-                          transition: 'all 0.2s',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '0.6rem'
                         }}
                       >
-                        <span style={{ fontWeight: 700, marginRight: '0.5rem' }}>{String.fromCharCode(65 + optIdx)})</span>
-                        {opt.text}
+                        <span style={{
+                          fontWeight: 700,
+                          minWidth: '1.2rem',
+                          color: isSelected ? 'var(--color-primary, #E4683F)' : 'var(--color-primary-accessible, #B8441F)'
+                        }}>
+                          {String.fromCharCode(65 + optIdx)})
+                        </span>
+                        <span style={{ color: 'var(--text-main)', flex: 1, lineHeight: 1.45 }}>
+                          {opt.text}
+                        </span>
                       </button>
                     );
                   })}
@@ -576,22 +618,34 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                   <div
                     style={{
                       marginTop: '0.85rem',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '6px',
-                      fontSize: '0.82rem',
-                      background: missionCompleted ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.12)',
-                      border: missionCompleted ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(239,68,68,0.3)',
-                      color: missionCompleted ? '#6ee7b7' : '#fca5a5',
+                      padding: '0.75rem 1rem',
+                      borderRadius: '8px',
+                      fontSize: '0.85rem',
+                      background: missionCompleted ? 'rgba(16,185,129,0.18)' : 'rgba(239,68,68,0.15)',
+                      border: missionCompleted ? '1px solid rgba(16,185,129,0.4)' : '1px solid rgba(239,68,68,0.4)',
+                      color: missionCompleted ? '#34d399' : '#f87171',
+                      fontWeight: 500,
                     }}
                   >
                     {missionFeedback}
                   </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.25rem' }}>
                   <button
                     type="button"
+                    className="btn-primary"
                     disabled={selectedMissionOption === null || missionCompleted}
+                    style={{
+                      padding: '0.65rem 1.4rem',
+                      fontSize: '0.88rem',
+                      fontWeight: 700,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      opacity: (selectedMissionOption === null || missionCompleted) ? 0.6 : 1,
+                      cursor: (selectedMissionOption === null || missionCompleted) ? 'not-allowed' : 'pointer'
+                    }}
                     onClick={() => {
                       if (selectedMissionOption === null) return;
                       const isCorrect = LAB_MISSIONS[activeTab].options[selectedMissionOption].correct;
@@ -605,8 +659,6 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                         setMissionFeedback(`💡 Não exatamente. Dica: ${LAB_MISSIONS[activeTab].hint}`);
                       }
                     }}
-                    className="btn-gradient"
-                    style={{ padding: '0.5rem 1.25rem', fontSize: '0.82rem', fontWeight: 700 }}
                   >
                     {missionCompleted ? '✓ Missão Concluída' : 'Validar Conclusão'}
                   </button>
@@ -622,12 +674,12 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
         <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
           {/* Canvas Area */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div className="glass-card" style={{ padding: '1.5rem' }}>
+            <div className="lab-canvas-container" style={{ padding: '1.25rem' }}>
               <canvas
                 ref={pendulumCanvasRef}
                 width={800}
                 height={450}
-                style={{ width: '100%', height: 'auto', borderRadius: '0.5rem', background: '#0f0f18' }}
+                style={{ width: '100%', height: 'auto', borderRadius: '0.5rem', background: '#FAF7EE' }}
               />
             </div>
 
@@ -636,7 +688,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
               <button onClick={() => setIsPlayingPendulum(!isPlayingPendulum)} className="btn-gradient" style={{ padding: '0.65rem 1.5rem' }}>
                 {isPlayingPendulum ? <><Pause style={{ width: '1.15rem', height: '1.15rem' }} /> Pausar</> : <><Play style={{ width: '1.15rem', height: '1.15rem' }} /> Iniciar</>}
               </button>
-              <button onClick={resetPendulum} className="btn-outline-violet" style={{ padding: '0.65rem 1.5rem' }}>
+              <button onClick={resetPendulum} className="btn-outline" style={{ padding: '0.65rem 1.5rem' }}>
                 <RotateCcw style={{ width: '1.15rem', height: '1.15rem' }} /> Resetar
               </button>
             </div>
@@ -646,7 +698,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="glass-card" style={{ padding: '1.5rem' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Settings2 style={{ width: '1.15rem', height: '1.15rem', color: '#06b6d4' }} />
+                <Settings2 style={{ width: '1.15rem', height: '1.15rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
                 Variáveis Físicas
               </h3>
 
@@ -654,7 +706,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                     <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Ângulo Inicial</label>
-                    <span style={{ fontSize: '0.82rem', color: '#06b6d4' }}>{angle}°</span>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--color-secondary, #293E24)', fontWeight: 600 }}>{angle}°</span>
                   </div>
                   <input type="range" min="5" max="85" value={angle} onChange={e => setAngle(Number(e.target.value))} disabled={isPlayingPendulum} />
                 </div>
@@ -662,7 +714,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                     <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Comprimento</label>
-                    <span style={{ fontSize: '0.82rem', color: '#06b6d4' }}>{length} px</span>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--color-secondary, #293E24)', fontWeight: 600 }}>{length} px</span>
                   </div>
                   <input type="range" min="50" max="250" value={length} onChange={e => setLength(Number(e.target.value))} disabled={isPlayingPendulum} />
                 </div>
@@ -670,7 +722,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                     <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Gravidade</label>
-                    <span style={{ fontSize: '0.82rem', color: '#06b6d4' }}>{gravity.toFixed(1)} m/s²</span>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--color-secondary, #293E24)', fontWeight: 600 }}>{gravity.toFixed(1)} m/s²</span>
                   </div>
                   <input type="range" min="1" max="25" step="0.1" value={gravity} onChange={e => setGravity(Number(e.target.value))} disabled={isPlayingPendulum} />
                 </div>
@@ -678,7 +730,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                     <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Massa</label>
-                    <span style={{ fontSize: '0.82rem', color: '#06b6d4' }}>{mass.toFixed(1)} kg</span>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--color-secondary, #293E24)', fontWeight: 600 }}>{mass.toFixed(1)} kg</span>
                   </div>
                   <input type="range" min="0.5" max="3" step="0.1" value={mass} onChange={e => setMass(Number(e.target.value))} disabled={isPlayingPendulum} />
                 </div>
@@ -716,12 +768,12 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
       {activeTab === 'collisions' && (
         <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div className="glass-card" style={{ padding: '1.5rem' }}>
+            <div className="lab-canvas-container" style={{ padding: '1.25rem' }}>
               <canvas
                 ref={collisionCanvasRef}
                 width={600}
                 height={200}
-                style={{ width: '100%', height: 'auto', borderRadius: '0.5rem', background: '#0f0f18' }}
+                style={{ width: '100%', height: 'auto', borderRadius: '0.5rem', background: '#FAF7EE' }}
               />
               <div style={{ marginTop: '0.75rem', textAlign: 'center' }}>
                 <span className={friction === 0 ? 'badge-green' : 'badge-yellow'}>
@@ -734,7 +786,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
               <button onClick={() => setIsPlayingCollisions(!isPlayingCollisions)} className="btn-gradient" style={{ padding: '0.65rem 1.5rem' }}>
                 {isPlayingCollisions ? <><Pause style={{ width: '1.15rem', height: '1.15rem' }} /> Pausar</> : <><Play style={{ width: '1.15rem', height: '1.15rem' }} /> Iniciar</>}
               </button>
-              <button onClick={resetCollisions} className="btn-outline-violet" style={{ padding: '0.65rem 1.5rem' }}>
+              <button onClick={resetCollisions} className="btn-outline" style={{ padding: '0.65rem 1.5rem' }}>
                 <RotateCcw style={{ width: '1.15rem', height: '1.15rem' }} /> Resetar
               </button>
             </div>
@@ -742,7 +794,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
 
           <div className="glass-card" style={{ padding: '1.5rem' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Settings2 style={{ width: '1.15rem', height: '1.15rem', color: '#06b6d4' }} />
+              <Settings2 style={{ width: '1.15rem', height: '1.15rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
               Dinâmica de Colisões
             </h3>
 
@@ -750,7 +802,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                   <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Atrito Superficial</label>
-                  <span style={{ fontSize: '0.82rem', color: '#06b6d4' }}>{friction.toFixed(1)}</span>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--color-secondary, #293E24)', fontWeight: 600 }}>{friction.toFixed(1)}</span>
                 </div>
                 <input type="range" min="0" max="2" step="0.1" value={friction} onChange={e => setFriction(Number(e.target.value))} />
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
@@ -760,8 +812,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
 
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                  <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Massa M1 (Cyan)</label>
-                  <span style={{ fontSize: '0.82rem', color: '#06b6d4' }}>{balls[0].mass.toFixed(1)}</span>
+                  <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Massa M1 (Laranja)</label>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--color-primary-accessible, #B8441F)' }}>{balls[0].mass.toFixed(1)}</span>
                 </div>
                 <input type="range" min="0.5" max="3" step="0.5"
                   value={balls[0].mass}
@@ -777,8 +829,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
 
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                  <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Massa M2 (Violet)</label>
-                  <span style={{ fontSize: '0.82rem', color: '#8b5cf6' }}>{balls[1].mass.toFixed(1)}</span>
+                  <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Massa M2 (Verde)</label>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--color-verde-700, #293E24)' }}>{balls[1].mass.toFixed(1)}</span>
                 </div>
                 <input type="range" min="0.5" max="3" step="0.5"
                   value={balls[1].mass}
@@ -812,18 +864,18 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
         return (
           <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
             <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ width: '100%', height: '300px', background: '#0b0f19', borderRadius: '0.75rem', position: 'relative', overflow: 'hidden', border: '1px solid rgba(6,182,212,0.2)' }}>
+              <div className="lab-canvas-container" style={{ width: '100%', height: '300px', background: '#FAF7EE', borderRadius: 'var(--radius-sm, 10px)', position: 'relative', overflow: 'hidden', border: '1px solid #E2D7C3' }}>
                 {/* Meio 1 (Ar / Meio Superior) */}
-                <div style={{ height: '50%', background: 'rgba(6,182,212,0.05)', borderBottom: '2px dashed #06b6d4', display: 'flex', alignItems: 'flex-start', padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                  Meio 1 (n₁ = {refractionIndex1.toFixed(2)})
+                <div style={{ height: '50%', background: 'rgba(41, 62, 36, 0.05)', borderBottom: '2px dashed #293E24', display: 'flex', alignItems: 'flex-start', padding: '0.6rem', color: '#172314', fontSize: '0.82rem', fontWeight: 600 }}>
+                  Meio 1 (n₁ = {refractionIndex1.toFixed(2)}) — Ar
                 </div>
                 {/* Meio 2 (Vidro / Meio Inferior) */}
-                <div style={{ height: '50%', background: 'rgba(139,92,246,0.1)', display: 'flex', alignItems: 'flex-end', padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                  Meio 2 (n₂ = {refractionIndex2.toFixed(2)})
+                <div style={{ height: '50%', background: 'rgba(228, 104, 63, 0.08)', display: 'flex', alignItems: 'flex-end', padding: '0.6rem', color: '#172314', fontSize: '0.82rem', fontWeight: 600 }}>
+                  Meio 2 (n₂ = {refractionIndex2.toFixed(2)}) — Vidro
                 </div>
 
-                {/* Linha Normal */}
-                <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', borderLeft: '1px dotted rgba(255,255,255,0.3)' }} />
+                {/* Linha Normal com alto contraste */}
+                <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', borderLeft: '2px dashed rgba(41, 62, 36, 0.45)' }} />
 
                 {/* SVG dos Raios Luminosos */}
                 <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
@@ -833,8 +885,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                     y1={150 - 140 * Math.cos(rad1)}
                     x2={250}
                     y2={150}
-                    stroke="#eab308"
-                    strokeWidth="3"
+                    stroke="#D95A2B"
+                    strokeWidth="3.5"
                   />
                   {/* Raio Refratado ou Refletido */}
                   {!isTotalInternalReflection ? (
@@ -843,8 +895,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                       y1={150}
                       x2={250 + 140 * Math.sin(rad2)}
                       y2={150 + 140 * Math.cos(rad2)}
-                      stroke="#06b6d4"
-                      strokeWidth="3"
+                      stroke="#293E24"
+                      strokeWidth="3.5"
                     />
                   ) : (
                     <line
@@ -852,8 +904,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                       y1={150}
                       x2={250 + 140 * Math.sin(rad1)}
                       y2={150 - 140 * Math.cos(rad1)}
-                      stroke="#ef4444"
-                      strokeWidth="3"
+                      stroke="#BC391F"
+                      strokeWidth="3.5"
                     />
                   )}
                 </svg>
@@ -861,32 +913,32 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
 
               <div style={{ marginTop: '1rem', textAlign: 'center' }}>
                 {isTotalInternalReflection ? (
-                  <span className="badge-red">⚠️ Reflexão Total Interna Ocorrida!</span>
+                  <span className="badge badge-red">⚠️ Reflexão total interna ocorrida!</span>
                 ) : (
-                  <span className="badge-cyan">Ângulo de Refração θ₂ = {refractedAngle.toFixed(1)}° (Lei de Snell-Descartes)</span>
+                  <span className="badge badge-primary">Ângulo de refração θ₂ = {refractedAngle.toFixed(1)}° (Lei de Snell-Descartes)</span>
                 )}
               </div>
             </div>
 
-            <div className="glass-card" style={{ padding: '1.5rem' }}>
+            <div className="card" style={{ padding: '1.5rem', borderRadius: '14px', border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1.25rem' }}>
-                Controles de Óptica
+                Controles de óptica
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Índice de Refração Meio 1 (n₁)</label>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Índice de refração Meio 1 (n₁)</label>
                   <input type="range" min="1.0" max="2.5" step="0.1" value={refractionIndex1} onChange={e => setRefractionIndex1(Number(e.target.value))} />
-                  <span style={{ fontSize: '0.78rem', color: '#06b6d4' }}>{refractionIndex1.toFixed(2)}</span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)' }}>{refractionIndex1.toFixed(2)}</span>
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Índice de Refração Meio 2 (n₂)</label>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Índice de refração Meio 2 (n₂)</label>
                   <input type="range" min="1.0" max="2.5" step="0.1" value={refractionIndex2} onChange={e => setRefractionIndex2(Number(e.target.value))} />
-                  <span style={{ fontSize: '0.78rem', color: '#8b5cf6' }}>{refractionIndex2.toFixed(2)}</span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--color-verde-700, #293E24)' }}>{refractionIndex2.toFixed(2)}</span>
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Ângulo Incidente (θ₁)</label>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Ângulo incidente (θ₁)</label>
                   <input type="range" min="0" max="85" value={incidentAngle} onChange={e => setIncidentAngle(Number(e.target.value))} />
-                  <span style={{ fontSize: '0.78rem', color: '#eab308' }}>{incidentAngle}°</span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)' }}>{incidentAngle}°</span>
                 </div>
               </div>
             </div>
@@ -900,23 +952,23 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           <div>
             <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🧲 Eletromagnetismo — Força de Lorentz</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Uma partícula carregada sob um campo magnético constante B descreve movimento circular uniforme com raio r = mv / qB.</p>
-            <div style={{ width: '100%', height: '280px', background: '#0b0f19', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(6,182,212,0.2)', position: 'relative' }}>
+            <div className="lab-canvas-container" style={{ width: '100%', height: '280px', background: '#FAF7EE', borderRadius: 'var(--radius-sm, 10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2D7C3', position: 'relative' }}>
               <svg width="300" height="220">
-                <circle cx="150" cy="110" r="70" fill="none" stroke="#06b6d4" strokeWidth="2" strokeDasharray="6 4" />
-                <circle cx="220" cy="110" r="10" fill="#f59e0b" />
-                <text x="220" y="114" textAnchor="middle" fill="#000" fontSize="10" fontWeight="bold">q+</text>
-                <line x1="150" y1="110" x2="220" y2="110" stroke="#8b5cf6" strokeWidth="2" />
-                <text x="185" y="102" fill="#8b5cf6" fontSize="11" fontWeight="bold">r = mv/qB</text>
+                <circle cx="150" cy="110" r="70" fill="none" stroke="var(--color-secondary, #293E24)" strokeWidth="2.5" strokeDasharray="6 4" />
+                <circle cx="220" cy="110" r="11" fill="var(--color-primary, #E4683F)" />
+                <text x="220" y="114" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">q+</text>
+                <line x1="150" y1="110" x2="220" y2="110" stroke="var(--color-secondary, #293E24)" strokeWidth="2" />
+                <text x="185" y="102" fill="#172314" fontSize="12" fontWeight="bold">r = mv/qB</text>
               </svg>
             </div>
           </div>
-          <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)' }}>
             <h4 style={{ color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>Variáveis Magnéticas</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-              <div>Campo Magnético (B): <strong style={{ color: '#06b6d4' }}>0.5 T</strong></div>
-              <div>Carga Elétrica (q): <strong style={{ color: '#f59e0b' }}>1.6 × 10⁻¹⁹ C</strong></div>
-              <div>Massa (m): <strong style={{ color: '#93c5fd' }}>9.1 × 10⁻³¹ kg</strong></div>
-              <div>Velocidade (v): <strong style={{ color: '#10b981' }}>2.0 × 10⁶ m/s</strong></div>
+              <div>Campo Magnético (B): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>0.5 T</strong></div>
+              <div>Carga Elétrica (q): <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>1.6 × 10⁻¹⁹ C</strong></div>
+              <div>Massa (m): <strong style={{ color: 'var(--text-main)' }}>9.1 × 10⁻³¹ kg</strong></div>
+              <div>Velocidade (v): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>2.0 × 10⁶ m/s</strong></div>
             </div>
           </div>
         </div>
@@ -928,25 +980,25 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           <div>
             <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🔥 Termodinâmica — Equação dos Gases Ideais</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Relação entre Pressão (P), Volume (V) e Temperatura (T) no modelo ideal P · V = n · R · T.</p>
-            <div style={{ width: '100%', height: '280px', background: '#0b0f19', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(239,68,68,0.2)' }}>
-              <div style={{ width: '140px', height: '180px', border: '3px solid #ef4444', borderTop: 'none', position: 'relative', background: 'rgba(239,68,68,0.05)' }}>
-                <div style={{ position: 'absolute', top: '40px', left: 0, right: 0, height: '14px', background: '#94a3b8', border: '1px solid #fff' }} />
+            <div className="lab-canvas-container" style={{ width: '100%', height: '280px', background: '#FAF7EE', borderRadius: 'var(--radius-sm, 10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2D7C3' }}>
+              <div style={{ width: '140px', height: '180px', border: '3px solid var(--color-danger, #BC391F)', borderTop: 'none', position: 'relative', background: 'rgba(188,57,31,0.05)' }}>
+                <div style={{ position: 'absolute', top: '40px', left: 0, right: 0, height: '14px', background: '#293E24', border: '1px solid #172314' }} />
                 <div style={{ position: 'absolute', bottom: '10px', left: '20px', right: '20px', height: '60px', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }} />
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b' }} />
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#06b6d4' }} />
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-danger, #BC391F)' }} />
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary, #E4683F)' }} />
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-verde-700, #293E24)' }} />
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary-accessible, #B8441F)' }} />
                 </div>
               </div>
             </div>
           </div>
-          <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)' }}>
             <h4 style={{ color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>Estado Termodinâmico</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-              <div>Pressão (P): <strong style={{ color: '#ef4444' }}>1.5 atm</strong></div>
-              <div>Volume (V): <strong style={{ color: '#06b6d4' }}>2.0 L</strong></div>
-              <div>Temperatura (T): <strong style={{ color: '#f59e0b' }}>300 K (27°C)</strong></div>
-              <div>Quantidade de Matéria (n): <strong style={{ color: '#a78bfa' }}>1.0 mol</strong></div>
+              <div>Pressão (P): <strong style={{ color: 'var(--color-danger, #BC391F)' }}>1.5 atm</strong></div>
+              <div>Volume (V): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>2.0 L</strong></div>
+              <div>Temperatura (T): <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>300 K (27°C)</strong></div>
+              <div>Quantidade de Matéria (n): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>1.0 mol</strong></div>
             </div>
           </div>
         </div>
@@ -958,20 +1010,20 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           <div>
             <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>⚛️ Física Moderna — Efeito Fotoelétrico</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Fótons incidentes com energia E = h · f ejetam fotoelétrons com energia cinética K_máx = hf - Φ.</p>
-            <div style={{ width: '100%', height: '280px', background: '#0b0f19', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(139,92,246,0.2)' }}>
+            <div className="lab-canvas-container" style={{ width: '100%', height: '280px', background: '#FAF7EE', borderRadius: 'var(--radius-sm, 10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2D7C3' }}>
               <svg width="320" height="200">
-                <rect x="40" y="40" width="20" height="120" fill="#94a3b8" rx="3" />
-                <text x="50" y="175" textAnchor="middle" fill="#94a3b8" fontSize="10">Placa (Catodo)</text>
-                <path d="M 120,40 L 55,90" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4 2" />
-                <path d="M 140,60 L 55,105" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4 2" />
-                <text x="135" y="45" fill="#f59e0b" fontSize="11" fontWeight="bold">h·f (Fótons)</text>
-                <circle cx="160" cy="95" r="6" fill="#06b6d4" />
-                <line x1="60" y1="95" x2="154" y2="95" stroke="#06b6d4" strokeWidth="1.5" strokeDasharray="3 2" />
-                <text x="180" y="99" fill="#06b6d4" fontSize="11" fontWeight="bold">e⁻ (Fotoelétron)</text>
+                <rect x="40" y="40" width="20" height="120" fill="#293E24" rx="3" />
+                <text x="50" y="175" textAnchor="middle" fill="#172314" fontSize="11" fontWeight="700">Placa (Catodo)</text>
+                <path d="M 120,40 L 55,90" stroke="var(--color-primary, #E4683F)" strokeWidth="2.5" strokeDasharray="4 2" />
+                <path d="M 140,60 L 55,105" stroke="var(--color-primary, #E4683F)" strokeWidth="2.5" strokeDasharray="4 2" />
+                <text x="135" y="45" fill="var(--color-primary-accessible, #B8441F)" fontSize="11" fontWeight="bold">h·f (Fótons)</text>
+                <circle cx="160" cy="95" r="7" fill="var(--color-primary, #E4683F)" />
+                <line x1="60" y1="95" x2="154" y2="95" stroke="var(--color-primary, #E4683F)" strokeWidth="2" strokeDasharray="3 2" />
+                <text x="180" y="99" fill="var(--color-primary-accessible, #B8441F)" fontSize="11" fontWeight="bold">e⁻ (Fotoelétron)</text>
               </svg>
             </div>
           </div>
-          <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)' }}>
             <h4 style={{ color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>Parâmetros Quânticos</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
               <div>Constante de Planck (h): <strong style={{ color: '#a78bfa' }}>6.63 × 10⁻³⁴ J·s</strong></div>

@@ -137,8 +137,8 @@ export function HardSkillsSimulator({ mode = 'programming', labTitle, onComplete
         </div>
       )}
 
-      <div style={{ marginTop: '1.25rem', padding: '0.85rem', borderRadius: '10px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-        <div style={{ color: '#06b6d4', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>🤖 ANALISADOR DE IA DE CÓDIGO</div>
+      <div style={{ marginTop: '1.25rem', padding: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>🤖 Analisador de IA de código</div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
           Executando laboratório técnico de {program.title}. Pratique sintaxe limpa e boas práticas de arquitetura.
         </p>
