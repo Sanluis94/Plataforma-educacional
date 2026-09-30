@@ -282,7 +282,49 @@
       .doc-container { border: none; box-shadow: none; padding: 0; }
       .actions-bar { display: none; }
       .slide-script-card { page-break-inside: avoid; }
+      .speaker-header { page-break-inside: avoid; }
     }
+
+    /* ── Speaker Header Blocks ── */
+    .speaker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-radius: 12px;
+      margin: 32px 0 14px 0;
+      border: 1.5px solid;
+    }
+    .speaker-info { display: flex; align-items: center; gap: 16px; }
+    .speaker-number {
+      font-family: var(--font-mono);
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1;
+      opacity: 0.25;
+    }
+    .speaker-name { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 700; }
+    .speaker-role { font-size: 0.83rem; margin-top: 2px; opacity: 0.75; }
+    .speaker-badge {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .speaker-1 { background: rgba(41,62,36,0.07); border-color: var(--verde-primary); color: var(--verde-dark); }
+    .speaker-1 .speaker-number { color: var(--verde-primary); }
+    .speaker-1 .speaker-badge { background: var(--verde-tint); color: var(--verde-primary); border: 1px solid rgba(41,62,36,0.25); }
+    .speaker-2 { background: rgba(228,104,63,0.07); border-color: var(--laranja-action); color: var(--laranja-dark); }
+    .speaker-2 .speaker-number { color: var(--laranja-action); }
+    .speaker-2 .speaker-badge { background: var(--laranja-tint); color: var(--laranja-dark); border: 1px solid rgba(228,104,63,0.3); }
+    .speaker-3 { background: rgba(188,57,31,0.06); border-color: var(--vermelho-accent); color: var(--vermelho-accent); }
+    .speaker-3 .speaker-number { color: var(--vermelho-accent); }
+    .speaker-3 .speaker-badge { background: var(--vermelho-tint); color: var(--vermelho-accent); border: 1px solid rgba(188,57,31,0.3); }
+    .speaker-4 { background: rgba(41,62,36,0.04); border-color: var(--verde-light); color: var(--verde-light); }
+    .speaker-4 .speaker-number { color: var(--verde-light); }
+    .speaker-4 .speaker-badge { background: rgba(61,91,54,0.1); color: var(--verde-light); border: 1px solid rgba(61,91,54,0.3); }
   </style>
 </head>
 <body>
@@ -349,41 +391,53 @@
       <thead>
         <tr>
           <th>Bloco & Intervalo</th>
+          <th>Orador</th>
           <th>Seção / Conteúdo</th>
           <th>Objetivo Pedagógico / Estratégico</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td><strong>Bloco 1 (00:00 - 02:30)</strong></td>
+          <td><strong>Bloco 1 (00:00 – 02:45)</strong></td>
+          <td><strong style="color:var(--verde-primary)">Gabriel Ramalho</strong></td>
           <td>Abertura, Identidade e O Problema (Slides 1 e 2)</td>
           <td>Cativar a banca, firmar a postura acadêmica e denunciar o abismo de laboratórios físicos no país.</td>
         </tr>
         <tr>
-          <td><strong>Bloco 2 (02:30 - 05:00)</strong></td>
+          <td><strong>Bloco 2 (02:45 – 05:30)</strong></td>
+          <td><strong style="color:var(--laranja-action)">Luis Antonio</strong></td>
           <td>Objetivos & Arquitetura do Ciclo CSFA (Slides 3 e 4)</td>
           <td>Demonstrar solidez científica, escolhas técnicas assertivas (React, Vite, Canvas 2D) e fundamentação teórica.</td>
         </tr>
         <tr>
-          <td><strong>Bloco 3 (05:00 - 11:30)</strong></td>
-          <td>Demonstrações Práticas Interativas (Slides 5, 6 e 7)</td>
-          <td>O clímax da defesa: interagir com o pêndulo ao vivo, ativar os botões de DUA e resolver o item TRI com latência 0s.</td>
+          <td><strong>Bloco 3 (05:30 – 09:30)</strong></td>
+          <td><strong style="color:var(--vermelho-accent)">Luis Filipe</strong></td>
+          <td>Demonstrações Práticas Interativas (Slides 5 e 6)</td>
+          <td>O clímax da defesa: interagir com o pêndulo ao vivo e ativar os botões de DUA para a banca ver ao vivo.</td>
         </tr>
         <tr>
-          <td><strong>Bloco 4 (11:30 - 14:00)</strong></td>
-          <td>Resultados Empíricos & Conclusão (Slides 8 e 9)</td>
-          <td>Apresentar as métricas de impacto (+42% engajamento, 72 labs, WCAG AAA) e validar a hipótese de pesquisa.</td>
-        </tr>
-        <tr>
-          <td><strong>Bloco 5 (14:00 - 15:00)</strong></td>
-          <td>Agradecimentos e Transição (Slide 10)</td>
-          <td>Encerramento elegante e formal, abrindo para as considerações e arguição da banca.</td>
+          <td><strong>Bloco 4 (09:30 – 15:00)</strong></td>
+          <td><strong style="color:var(--verde-light)">Victor Augusto</strong></td>
+          <td>TRI, Resultados, Conclusão e Encerramento (Slides 7–10)</td>
+          <td>Apresentar métricas (+42%, 72 labs, WCAG AAA), fechar a hipótese e abrir para arguição da banca.</td>
         </tr>
       </tbody>
     </table>
 
     <!-- SEÇÃO 2: ROTEIRO SLIDE A SLIDE -->
     <h2 class="section-title">2. Roteiro Slide a Slide com Falas Verbatim</h2>
+
+    <!-- ════ ORADOR 1: GABRIEL RAMALHO RESENDE ════ -->
+    <div class="speaker-header speaker-1">
+      <div class="speaker-info">
+        <div class="speaker-number">01</div>
+        <div>
+          <div class="speaker-name">Gabriel Ramalho Resende</div>
+          <div class="speaker-role">Abertura Institucional, Identidade Kortex e Diagnóstico do Problema</div>
+        </div>
+      </div>
+      <div class="speaker-badge">00:00 – 02:45 · Slides 01 e 02</div>
+    </div>
 
     <!-- SLIDE 1 -->
     <div class="slide-script-card">
@@ -423,6 +477,18 @@
           💡 <strong>Conceito-Chave:</strong> A falta de laboratórios físicos como motor de desengajamento escolar e a urgência de ferramentas ativas.
         </div>
       </div>
+    </div>
+
+    <!-- ════ ORADOR 2: LUIS ANTONIO DE ALBUQUERQUE ADAMSKI ════ -->
+    <div class="speaker-header speaker-2">
+      <div class="speaker-info">
+        <div class="speaker-number">02</div>
+        <div>
+          <div class="speaker-name">Luis Antonio de Albuquerque Adamski</div>
+          <div class="speaker-role">Objetivos da Pesquisa, Arquitetura Técnica e Ciclo CSFA</div>
+        </div>
+      </div>
+      <div class="speaker-badge">02:45 – 05:30 · Slides 03 e 04</div>
     </div>
 
     <!-- SLIDE 3 -->
@@ -465,6 +531,18 @@
       </div>
     </div>
 
+    <!-- ════ ORADOR 3: LUIS FILIPE GIGLIO FRASAO ════ -->
+    <div class="speaker-header speaker-3">
+      <div class="speaker-info">
+        <div class="speaker-number">03</div>
+        <div>
+          <div class="speaker-name">Luis Filipe Giglio Frasao</div>
+          <div class="speaker-role">Demonstrações Interativas ao Vivo: Pêndulo Físico e Acessibilidade DUA</div>
+        </div>
+      </div>
+      <div class="speaker-badge">05:30 – 09:30 · Slides 05 e 06</div>
+    </div>
+
     <!-- SLIDE 5 -->
     <div class="slide-script-card">
       <div class="slide-script-header">
@@ -503,6 +581,18 @@
           💡 <strong>Conceito-Chave:</strong> Os 3 princípios do CAST/DUA: Múltiplos meios de representação, ação/expressão e engajamento. Conformidade WCAG 2.1 AAA.
         </div>
       </div>
+    </div>
+
+    <!-- ════ ORADOR 4: VICTOR AUGUSTO PEREIRA NASCIMENTO ════ -->
+    <div class="speaker-header speaker-4">
+      <div class="speaker-info">
+        <div class="speaker-number">04</div>
+        <div>
+          <div class="speaker-name">Victor Augusto Pereira Nascimento</div>
+          <div class="speaker-role">Avaliação TRI, Telemetria Docente, Resultados Empíricos e Encerramento</div>
+        </div>
+      </div>
+      <div class="speaker-badge">09:30 – 15:00 · Slides 07 ao 10</div>
     </div>
 
     <!-- SLIDE 7 -->
