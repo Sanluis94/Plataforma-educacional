@@ -90,6 +90,13 @@ export function GeographySimulator({ mode = 'tectonics', labTitle, onComplete }:
       timeRef.current += 0.05;
       ctx.clearRect(0, 0, width, height);
 
+      // Fundo claro de atmosfera / céu (tela clara de laboratório)
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, height / 2);
+      skyGrad.addColorStop(0, '#E8F1EB');
+      skyGrad.addColorStop(1, '#FAF7EE');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, width, height / 2);
+
       // 1. Fundo do Manto (Magma / Astenosfera)
       const magmaGrad = ctx.createLinearGradient(0, height / 2, 0, height);
       magmaGrad.addColorStop(0, '#e64a19');
@@ -292,12 +299,12 @@ export function GeographySimulator({ mode = 'tectonics', labTitle, onComplete }:
 
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap-reverse' }}>
         <div style={{ flex: '1 1 350px', display: 'flex', justifyContent: 'center' }}>
-          <div style={{ background: '#121214', padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', width: '100%', maxWidth: '420px' }}>
+          <div className="lab-canvas-container" style={{ background: '#FAF7EE', padding: '12px', borderRadius: '12px', border: '1px solid #E2D7C3', width: '100%', maxWidth: '420px' }}>
             <canvas 
               ref={canvasRef} 
               width={400} 
               height={280} 
-              style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px' }}
+              style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px', background: '#FAF7EE' }}
             />
             {isQuake && (
               <div style={{ color: '#ff1744', fontSize: '0.8rem', fontWeight: 'bold', textAlign: 'center', marginTop: '8px', animation: 'pulse 0.3s infinite' }}>
@@ -312,9 +319,9 @@ export function GeographySimulator({ mode = 'tectonics', labTitle, onComplete }:
             <h4 style={{ color: 'var(--text-main)', marginBottom: '1rem', fontSize: '1rem' }}>Configuração de Limite</h4>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
-              <button onClick={() => setBoundaryType('convergent')} className={`premium-btn ${boundaryType === 'convergent' ? 'btn-primary' : 'btn-outline-cyan'}`} style={{ width: '100%', padding: '0.5rem', fontSize: '0.85rem' }}>Limites Convergentes (Colisão)</button>
-              <button onClick={() => setBoundaryType('divergent')} className={`premium-btn ${boundaryType === 'divergent' ? 'btn-primary' : 'btn-outline-cyan'}`} style={{ width: '100%', padding: '0.5rem', fontSize: '0.85rem' }}>Limites Divergentes (Afastamento)</button>
-              <button onClick={() => setBoundaryType('transform')} className={`premium-btn ${boundaryType === 'transform' ? 'btn-primary' : 'btn-outline-cyan'}`} style={{ width: '100%', padding: '0.5rem', fontSize: '0.85rem' }}>Limites Transformantes (Deslizamento)</button>
+              <button onClick={() => setBoundaryType('convergent')} className={`premium-btn ${boundaryType === 'convergent' ? 'btn-primary' : 'btn-outline'}`} style={{ width: '100%', padding: '0.5rem', fontSize: '0.85rem' }}>Limites Convergentes (Colisão)</button>
+              <button onClick={() => setBoundaryType('divergent')} className={`premium-btn ${boundaryType === 'divergent' ? 'btn-primary' : 'btn-outline'}`} style={{ width: '100%', padding: '0.5rem', fontSize: '0.85rem' }}>Limites Divergentes (Afastamento)</button>
+              <button onClick={() => setBoundaryType('transform')} className={`premium-btn ${boundaryType === 'transform' ? 'btn-primary' : 'btn-outline'}`} style={{ width: '100%', padding: '0.5rem', fontSize: '0.85rem' }}>Limites Transformantes (Deslizamento)</button>
             </div>
 
             <div className="slider-group">
@@ -330,8 +337,8 @@ export function GeographySimulator({ mode = 'tectonics', labTitle, onComplete }:
               {boundaryType === 'transform' && 'O deslizamento horizontal gera forte acúmulo de energia potencial elástica. Quando liberada, provoca tremores severos na crosta.'}
             </p>
 
-            <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: '8px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-              <div style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, marginBottom: '0.2rem' }}>🤖 ANALISADOR GEOLÓGICO DE IA</div>
+            <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, marginBottom: '0.2rem' }}>🤖 Analisador geológico de IA</div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
                 {isQuake
                   ? '⚠️ Pressão crítica atingida! A IA registrou uma ruptura sismológica de alta magnitude.'
@@ -339,7 +346,7 @@ export function GeographySimulator({ mode = 'tectonics', labTitle, onComplete }:
               </p>
             </div>
 
-            <button className="premium-btn btn-primary mt-4" style={{ width: '100%', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }} onClick={handleFinish}>
+            <button className="btn-gradient mt-4" style={{ width: '100%', borderRadius: 'var(--radius-sm, 10px)', boxShadow: 'none', fontWeight: 'bold' }} onClick={handleFinish}>
               🏆 Concluir Simulação (+50 XP & +10 Moedas)
             </button>
           </div>
@@ -396,22 +403,22 @@ function GeographyQuizMode({ mode, labTitle, onComplete }: { mode: string; labTi
             {question.options.map((opt, i) => {
               const isCorrect = i === question.answer;
               const isSelected = answered === i;
-              let bg = 'rgba(255,255,255,0.04)';
-              let border = '1px solid rgba(255,255,255,0.12)';
+              let bg = 'var(--bg-card)';
+              let border = '1px solid var(--border-color)';
               if (answered !== null) {
-                if (isCorrect) { bg = 'rgba(76,175,80,0.2)'; border = '1px solid #4caf50'; }
-                else if (isSelected) { bg = 'rgba(244,67,54,0.2)'; border = '1px solid #f44336'; }
+                if (isCorrect) { bg = 'rgba(16, 185, 129, 0.18)'; border = '1.5px solid #10b981'; }
+                else if (isSelected) { bg = 'rgba(239, 68, 68, 0.18)'; border = '1.5px solid #ef4444'; }
               }
               return (
                 <button key={i} onClick={() => handleAnswer(i)}
-                  style={{ textAlign: 'left', padding: '0.75rem', borderRadius: '8px', cursor: answered === null ? 'pointer' : 'default', background: bg, border, color: 'var(--text-main)', transition: 'all 0.25s' }}>
+                  style={{ textAlign: 'left', padding: '0.75rem 1rem', borderRadius: '8px', cursor: answered === null ? 'pointer' : 'default', background: bg, border, color: 'var(--text-main)', transition: 'all 0.2s ease', fontSize: '0.88rem' }}>
                   {opt}
                 </button>
               );
             })}
           </div>
           {answered !== null && (
-            <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(6,182,212,0.08)', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', border: '1px solid rgba(6,182,212,0.2)' }}>
+            <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(228, 104, 63, 0.08)', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', border: '1px solid rgba(228, 104, 63, 0.2)' }}>
               🤖 <strong>Análise da IA:</strong> {question.explanation}
             </div>
           )}

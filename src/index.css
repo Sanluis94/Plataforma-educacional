@@ -2,174 +2,212 @@
 @import "tw-animate-css";
 
 /* ═══════════════════════════════════════════════════════
-   Design System — Edu-Interact Platform
-   Temas: Dark (padrão) e Light
-   Paleta: Cyan (#06b6d4) + Violet (#8b5cf6)
+   Manual de Identidade Visual — Edu-Interact v1.0
+   "Onde a raiz encontra o circuito — unindo o rigor
+   da tecnologia à calidez do olhar humano."
+
+   Paleta Oficial:
+   • Nude 50%:     Fundo, respiro, papel (#F1EAD9 / #FAF7EE)
+   • Verde 30%:    Texto, estrutura, dominante (#293E24 / #172314)
+   • Laranja 15%:  Ação, destaque, gamificação (#E4683F / #B8441F)
+   • Vermelho 5%:  Atenção pontual, prazos, avisos (#BC391F)
+
+   Tipografia:
+   • Títulos / Dados / UI Técnica: Space Grotesk
+   • Texto Corrido / Leitura:      Manrope
    ═══════════════════════════════════════════════════════ */
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  /* Tipografia Oficial */
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family: var(--font-body);
 
-  /* Modo Light */
-  --bg-base: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f1f5f9;
-  --bg-surface: rgba(255, 255, 255, 0.8);
-  --bg-overlay: rgba(0, 0, 0, 0.5);
+  /* Escala Cromática Oficial Edu-Interact */
+  --color-verde-900: #172314;
+  --color-verde-700: #293E24;
+  --color-verde-500: #3D5B36;
+  
+  --color-laranja-700: #B8441F;
+  --color-laranja-500: #E4683F;
+  --color-laranja-300: #F59C7B;
+  --color-laranja-100: #FCEEE9;
 
-  --text-main: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --color-vermelho: #BC391F;
+  --color-vermelho-bg: rgba(188, 57, 31, 0.08);
+  --color-vermelho-border: rgba(188, 57, 31, 0.35);
 
-  --border-color: rgba(0, 0, 0, 0.08);
-  --border-card: rgba(0, 0, 0, 0.06);
+  --color-nude-500: #F1EAD9;
+  --color-nude-300: #E2D7C3;
+  --color-nude-100: #FAF7EE;
 
-  --color-primary: #7c3aed;
-  --color-primary-rgb: 124, 58, 237;
-  --color-cyan: #06b6d4;
-  --color-violet: #8b5cf6;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  /* Modo Padrão da Marca: Nude (Uso padrão sobre Nude) */
+  --bg-base: #F1EAD9;
+  --bg-card: #FAF7EE;
+  --bg-card-hover: #F4EEDF;
+  --bg-surface: rgba(241, 234, 217, 0.94);
+  --bg-overlay: rgba(23, 35, 20, 0.65);
 
+  --text-main: #172314;       /* Verde 900 para máxima legibilidade */
+  --text-secondary: #293E24;  /* Verde 700 para leitura corrente */
+  --text-muted: #556B51;      /* Verde atenuado (contraste AA > 4.6:1 sobre Nude) */
+
+  --border-color: #E2D7C3;   /* Linha fina de 1px em Nude 300 para separar seções */
+  --border-card: #E2D7C3;
+
+  --color-primary: #E4683F;       /* Laranja 500 para ações e destaque */
+  --color-primary-rgb: 228, 104, 63;
+  --color-primary-accessible: #B8441F; /* Laranja 700 para textos pequenos (AA > 4.5:1) */
+
+  --color-secondary: #293E24;     /* Verde 700 */
+  --color-secondary-rgb: 41, 62, 36;
+  --color-secondary-light: rgba(41, 62, 36, 0.12);
+  --color-verde-accent: #293E24;
+  --color-verde-light: rgba(41, 62, 36, 0.08);
+
+  --color-danger: #BC391F;
+
+  /* Aliases para compatibilidade mantendo a identidade visual estrita */
+  --color-cyan: #B8441F;
+  --color-violet: #293E24;
+  --color-success: #293E24;
+  --color-warning: #B8441F;
+  --color-error: #BC391F;
+
+  /* Cantos oficiais: 10px pequenos, 14-16px grandes. Nunca 0px nem pill total em cards */
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+
+  /* Divisórias & Elevação: sem sombras pesadas */
   --glass-blur: blur(12px);
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-elevated: 0 10px 25px -5px rgba(0,0,0,0.08);
+  --shadow-card: 0 1px 3px rgba(41, 62, 36, 0.05);
+  --shadow-elevated: 0 8px 24px -4px rgba(41, 62, 36, 0.08);
 
-  /* Chart colors */
-  --chart-1: #06b6d4;
-  --chart-2: #8b5cf6;
-  --chart-3: #10b981;
-  --chart-4: #f59e0b;
-  --chart-5: #ef4444;
+  /* Cores de Gráficos alinhadas à paleta de 4 cores */
+  --chart-1: #293E24; /* Verde dominante */
+  --chart-2: #E4683F; /* Laranja destaque */
+  --chart-3: #3D5B36; /* Verde médio */
+  --chart-4: #B8441F; /* Laranja 700 */
+  --chart-5: #BC391F; /* Vermelho alerta pontual */
+
+  /* Telas de Fundo Científicas / Laboratórios (Sempre claras e límpidas) */
+  --bg-lab-canvas: #FAF7EE;
+  --border-lab-canvas: #E2D7C3;
+  --text-lab-canvas: #172314;
+  --text-lab-muted: #556B51;
+  --color-bg-subtle: #FAF7EE;
+  --color-bg-card: #FAF7EE;
+  --bg-secondary: #FAF7EE;
 }
 
-/* Modo Dark (padrão da aplicação — com contraste refinado) */
-.dark-theme, :root {
-  --bg-base: #0b0f19;
-  --bg-card: rgba(23, 31, 51, 0.85);
-  --bg-card-hover: rgba(35, 47, 74, 0.85);
-  --bg-surface: rgba(15, 23, 42, 0.9);
-  --bg-overlay: rgba(0, 0, 0, 0.75);
-
-  --text-main: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-
-  --border-color: rgba(255, 255, 255, 0.12);
-  --border-card: rgba(6, 182, 212, 0.25);
-
-  --color-primary: #a78bfa;
-  --color-primary-rgb: 167, 139, 250;
-  --color-cyan: #22d3ee;
-  --color-violet: #a78bfa;
-  --color-success: #34d399;
-  --color-warning: #fbbf24;
-  --color-error: #f87171;
-
-  --shadow-card: 0 0 0 1px rgba(255,255,255,0.08);
-  --shadow-elevated: 0 0 50px rgba(6, 182, 212, 0.15);
-
-  /* Chart colors (Dark) */
-  --chart-1: #22d3ee;
-  --chart-2: #a78bfa;
-  --chart-3: #34d399;
-  --chart-4: #fbbf24;
-  --chart-5: #f87171;
-}
-
-/* Modo Light explícito (com alto contraste e excelente legibilidade WCAG AA) */
+/* Modo Light explícito (Mesmo perfil da identidade Nude da marca) */
 .light-theme {
-  --bg-base: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-card-hover: #e2e8f0;
-  --bg-surface: rgba(255, 255, 255, 0.95);
-  --bg-overlay: rgba(15, 23, 42, 0.6);
+  --bg-base: #F1EAD9;
+  --bg-card: #FAF7EE;
+  --bg-card-hover: #F4EEDF;
+  --bg-surface: rgba(241, 234, 217, 0.96);
+  --bg-overlay: rgba(23, 35, 20, 0.65);
 
-  --text-main: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
+  --text-main: #172314;
+  --text-secondary: #293E24;
+  --text-muted: #556B51;
 
-  --border-color: rgba(15, 23, 42, 0.15);
-  --border-card: rgba(15, 23, 42, 0.12);
+  --border-color: #E2D7C3;
+  --border-card: #E2D7C3;
 
-  --color-primary: #6d28d9;
-  --color-primary-rgb: 109, 40, 217;
-  --color-cyan: #0284c7;
-  --color-violet: #6d28d9;
-  --color-success: #059669;
-  --color-warning: #d97706;
-  --color-error: #dc2626;
+  --color-primary: #E4683F;
+  --color-primary-rgb: 228, 104, 63;
+  --color-primary-accessible: #B8441F;
+  --color-secondary: #293E24;
+  --color-secondary-rgb: 41, 62, 36;
+  --color-secondary-light: rgba(41, 62, 36, 0.12);
+  --color-verde-accent: #293E24;
+  --color-verde-700: #293E24;
+  --color-verde-900: #172314;
+  --color-verde-500: #3D5B36;
+  --color-verde-light: rgba(41, 62, 36, 0.08);
 
-  --shadow-card: 0 2px 8px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.05);
-  --shadow-elevated: 0 12px 32px -4px rgba(15, 23, 42, 0.12);
+  --color-danger: #BC391F;
 
-  /* Chart colors (Light) */
-  --chart-1: #0284c7;
-  --chart-2: #6d28d9;
-  --chart-3: #059669;
-  --chart-4: #d97706;
-  --chart-5: #dc2626;
-}
-
-/* Sobregravação de botões e badges para o Modo Light */
-.light-theme .btn-outline-cyan {
-  color: #0284c7;
-  border-color: rgba(2, 132, 199, 0.4);
-  background: rgba(2, 132, 199, 0.08);
-}
-.light-theme .btn-outline-cyan:hover {
-  background: rgba(2, 132, 199, 0.15);
-  border-color: #0284c7;
-  color: #0369a1;
+  --bg-lab-canvas: #FAF7EE;
+  --border-lab-canvas: #E2D7C3;
+  --text-lab-canvas: #172314;
+  --text-lab-muted: #556B51;
+  --color-bg-subtle: #FAF7EE;
+  --color-bg-card: #FAF7EE;
+  --bg-secondary: #FAF7EE;
 }
 
-.light-theme .btn-outline-violet {
-  color: #6d28d9;
-  border-color: rgba(109, 40, 217, 0.4);
-  background: rgba(109, 40, 217, 0.08);
-}
-.light-theme .btn-outline-violet:hover {
-  background: rgba(109, 40, 217, 0.15);
-  border-color: #6d28d9;
-  color: #5b21b6;
-}
+/* Modo Dark de Alto Contraste (Verde obsidiana profundo com cartões nítidos e texto 100% legível) */
+.dark-theme {
+  --bg-base: #0D150B;       /* Verde 950 obsidiana profundo */
+  --bg-card: #182616;       /* Verde 850 elevado, contraste nítido em relação ao fundo */
+  --bg-card-hover: #22351E;
+  --bg-surface: rgba(13, 21, 11, 0.97);
+  --bg-overlay: rgba(6, 10, 5, 0.85);
 
-.light-theme .badge-cyan {
-  color: #0284c7;
-  background: rgba(2, 132, 199, 0.12);
-  border-color: rgba(2, 132, 199, 0.35);
-}
-.light-theme .badge-violet {
-  color: #6d28d9;
-  background: rgba(109, 40, 217, 0.12);
-  border-color: rgba(109, 40, 217, 0.35);
-}
-.light-theme .badge-green {
-  color: #059669;
-  background: rgba(5, 150, 105, 0.12);
-  border-color: rgba(5, 150, 105, 0.35);
-}
-.light-theme .badge-yellow {
-  color: #b45309;
-  background: rgba(217, 119, 6, 0.12);
-  border-color: rgba(217, 119, 6, 0.35);
-}
-.light-theme .badge-red {
-  color: #dc2626;
-  background: rgba(220, 38, 38, 0.12);
-  border-color: rgba(220, 38, 38, 0.35);
-}
-.light-theme .badge-gray {
-  color: #475569;
-  background: rgba(71, 85, 105, 0.12);
-  border-color: rgba(71, 85, 105, 0.35);
+  --text-main: #FFFFFF;       /* Branco absoluto para máxima nitidez (18:1 WCAG AAA) */
+  --text-secondary: #ECE7DA;  /* Nude claro de alta legibilidade (14:1) */
+  --text-muted: #B6C7B3;      /* Sálvia claro de alto contraste (7.5:1 WCAG AAA) */
+
+  --border-color: rgba(241, 234, 217, 0.24); /* Linhas divisórias nítidas de 1px */
+  --border-card: rgba(241, 234, 217, 0.22);  /* Bordas de cartões perfeitamente delineadas */
+
+  --color-primary: #E4683F;   /* Laranja 500 oficial */
+  --color-primary-rgb: 228, 104, 63;
+  --color-primary-accessible: #F59C7B; /* Laranja claro vibrante em fundo escuro (> 7.5:1) */
+
+  /* Cores Verdes acessíveis no tema escuro (NUNCA CAMUFLADAS) */
+  --color-verde-900: #FFFFFF;
+  --color-verde-800: #ECE7DA;
+  --color-verde-700: #A8D5A2; /* Verde sálvia luminoso, contraste 9.4:1 sobre #182616 (WCAG AAA) */
+  --color-verde-500: #86EFAC; /* Verde menta vibrante para destaques e sucesso */
+  --color-verde-light: rgba(168, 213, 162, 0.16);
+  --color-verde-accent: #A8D5A2;
+
+  --color-secondary: #A8D5A2;
+  --color-secondary-rgb: 168, 213, 162;
+  --color-secondary-light: rgba(168, 213, 162, 0.16);
+
+  --color-danger: #F87171;
+  --color-vermelho: #F87171;
+  --color-vermelho-bg: rgba(248, 113, 113, 0.14);
+  --color-vermelho-border: rgba(248, 113, 113, 0.4);
+
+  --color-cyan: #F59C7B;
+  --color-violet: #A8D5A2;
+  --color-success: #86EFAC;
+  --color-warning: #F59C7B;
+  --color-error: #F87171;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.55);
+
+  /* A tela de fundo dos laboratórios permanece clara e nítida para máxima visualização de experimentos */
+  --bg-lab-canvas: #FAF7EE;
+  --border-lab-canvas: #E2D7C3;
+  --text-lab-canvas: #172314;
+  --text-lab-muted: #556B51;
+
+  /* Superfícies de Cartões Internos no Modo Escuro (NUNCA BRANCAS) */
+  --color-bg-card: #182616;
+  --color-bg-subtle: #121E11; /* Superfície interna escura, nunca branca */
+  --bg-secondary: #182616;
+
+  /* Gráficos em Modo Escuro de Alto Contraste */
+  --chart-1: #FAF7EE;
+  --chart-2: #E4683F;
+  --chart-3: #B6C7B3;
+  --chart-4: #F59C7B;
+  --chart-5: #F87171;
 }
 
 /* ═══════════════════════════════════════════════════════
-   Base Styles
+   Tipografia Oficial
    ═══════════════════════════════════════════════════════ */
 
 * {
@@ -179,19 +217,97 @@
 }
 
 html, body {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   background-color: var(--bg-base);
   color: var(--text-main);
-  line-height: 1.6;
+  line-height: 1.55;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Custom Scrollbar */
+/* Títulos sempre em Space Grotesk e nunca em caixa alta (exceto siglas) */
+h1, h2, h3, h4, h5, h6,
+.font-display,
+.font-heading {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+  text-transform: none !important; /* REGRA DO MANUAL: NUNCA EM CAIXA ALTA */
+}
+
+h1 {
+  font-size: 2rem;      /* 32px - H1 conforme manual */
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: 1.5rem;    /* 24px - H2 conforme manual */
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.25rem;   /* 20px */
+  line-height: 1.35;
+}
+
+p, li, span, input, select, textarea, button {
+  font-family: var(--font-body);
+}
+
+.text-caption,
+.legenda {
+  font-size: 0.8125rem; /* 13px - Legenda conforme manual */
+  color: var(--text-muted);
+}
+
+.text-body,
+.corpo {
+  font-size: 1.0625rem; /* 17px - Corpo conforme manual */
+  line-height: 1.6;
+}
+
+/* Coluna de texto máx. 640px conforme manual pág. 9 */
+.prose-container,
+.reading-column {
+  max-width: 640px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Grafismo de Circuito-Raiz (Linhas retas encontram curvas orgânicas)
+   ═══════════════════════════════════════════════════════ */
+
+.bg-circuit-root {
+  background-image: radial-gradient(circle at 10% 20%, rgba(228, 104, 63, 0.04) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 80%, rgba(41, 62, 36, 0.05) 0%, transparent 45%);
+}
+
+.circuit-divider {
+  position: relative;
+  height: 1px;
+  background-color: var(--border-color);
+  width: 100%;
+}
+
+.circuit-divider::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  border: 1.5px solid var(--bg-card);
+}
+
+/* Custom Scrollbar com as cores de terra e raiz */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-base);
@@ -201,7 +317,7 @@ html, body {
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--color-verde-700);
 }
 
 /* Accessibility */
@@ -232,15 +348,16 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: var(--bg-base);
 }
 
-/* Loading Spinner */
+/* Spinner alinhado às cores do manual */
 .premium-loader {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 3px solid rgba(6, 182, 212, 0.2);
-  border-top-color: #06b6d4;
+  border: 3px solid rgba(228, 104, 63, 0.2);
+  border-top-color: var(--color-primary);
   animation: spin 0.8s infinite linear;
 }
 
@@ -249,209 +366,417 @@ html, body {
   to { transform: rotate(360deg); }
 }
 
-/* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .fade-in {
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.35s ease-out;
 }
 
 .slide-down {
-  animation: slideDown 0.3s ease-out;
+  animation: slideDown 0.25s ease-out;
 }
 
-/* Gradient Text Utility */
+/* Gradientes sutilmente quentes e humanos (sem azul genérico) */
 .gradient-text {
-  background: linear-gradient(135deg, #06b6d4, #8b5cf6, #06b6d4);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-size: 200% auto;
+  color: var(--color-verde-900);
 }
 
-/* Glassmorphism Card */
+.gradient-text-warm {
+  color: var(--color-laranja-700);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Cartões e Superfícies (Hierarquia por espaço e linha fina de 1px)
+   ═══════════════════════════════════════════════════════ */
+
+.card,
 .glass-card {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
-  border-radius: 0.75rem;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  transition: all 0.3s ease;
+  border-radius: var(--radius-lg); /* 14px */
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  box-shadow: none !important; /* REGRA DO MANUAL: NUNCA SOMBRA PROJETADA */
 }
 
-.glass-card:hover {
-  border-color: rgba(139, 92, 246, 0.4);
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.1);
+.glass-card:hover,
+.card-interactive:hover {
+  border-color: var(--color-primary);
+  background: var(--bg-card-hover);
 }
 
-/* Gradient Button */
+.card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+.card-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Stat Cards */
+.stat-card {
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-md); /* 12px */
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: none !important;
+}
+
+.stat-card.cyan,
+.stat-card.laranja {
+  border-color: rgba(228, 104, 63, 0.35);
+  background: linear-gradient(135deg, rgba(228, 104, 63, 0.06), rgba(228, 104, 63, 0.02));
+}
+
+.stat-card.violet,
+.stat-card.verde {
+  border-color: rgba(41, 62, 36, 0.3);
+  background: linear-gradient(135deg, rgba(41, 62, 36, 0.06), rgba(41, 62, 36, 0.02));
+}
+
+/* ═══════════════════════════════════════════════════════
+   Botões Oficiais Edu-Interact
+   ═══════════════════════════════════════════════════════ */
+
+/* Botão Principal de Ação / CTA: Laranja 500 com alto contraste */
+.btn,
+.btn-primary,
 .btn-gradient {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-  color: white;
-  font-weight: 500;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm); /* 10px */
+  background: #E4683F;
+  color: #FFFFFF !important;
+  font-family: var(--font-body);
+  font-weight: 600;
   font-size: 0.875rem;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
+  transition: all 0.2s ease;
+  text-decoration: none !important;
 }
 
+.btn:hover,
+.btn-primary:hover,
 .btn-gradient:hover {
-  box-shadow: 0 0 30px rgba(6, 182, 212, 0.5);
-  transform: scale(1.02);
-  text-decoration: none;
-  color: white;
+  background: #C44C24;
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
 }
 
+/* Botão Secundário / Estrutural: Verde 700 */
+.btn-secondary,
+.btn-green {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  background: #293E24;
+  color: #FAF7EE !important;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none !important;
+}
+
+.btn-secondary:hover,
+.btn-green:hover {
+  background: #172314;
+  color: #FAF7EE !important;
+}
+
+/* Botão Outline Verde / Cyan antigo remapeado */
+.btn-outline,
 .btn-outline-cyan {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  background: rgba(6, 182, 212, 0.05);
-  color: #06b6d4;
-  font-weight: 500;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-verde-700);
+  background: rgba(41, 62, 36, 0.05);
+  color: var(--color-verde-700) !important;
+  font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
+  transition: all 0.2s ease;
+  text-decoration: none !important;
 }
 
+.btn-outline:hover,
 .btn-outline-cyan:hover {
-  background: rgba(6, 182, 212, 0.1);
-  border-color: rgba(6, 182, 212, 0.5);
-  text-decoration: none;
-  color: #06b6d4;
+  background: rgba(41, 62, 36, 0.12);
+  border-color: var(--color-verde-900);
+  color: var(--color-verde-900) !important;
 }
 
+/* Alto contraste para Botão Outline no Modo Escuro */
+.dark-theme .btn-outline,
+.dark-theme .btn-outline-cyan {
+  border-color: rgba(241, 234, 217, 0.35);
+  background: rgba(241, 234, 217, 0.08);
+  color: #FAF7EE !important;
+}
+
+.dark-theme .btn-outline:hover,
+.dark-theme .btn-outline-cyan:hover {
+  background: rgba(241, 234, 217, 0.18);
+  border-color: #FFFFFF;
+  color: #FFFFFF !important;
+}
+
+/* Botão Outline Laranja / Violet antigo remapeado */
+.btn-outline-laranja,
 .btn-outline-violet {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  background: rgba(139, 92, 246, 0.05);
-  color: #8b5cf6;
-  font-weight: 500;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-laranja-700);
+  background: rgba(228, 104, 63, 0.06);
+  color: var(--color-laranja-700) !important;
+  font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
+  transition: all 0.2s ease;
+  text-decoration: none !important;
 }
 
+.btn-outline-laranja:hover,
 .btn-outline-violet:hover {
-  background: rgba(139, 92, 246, 0.1);
-  border-color: rgba(139, 92, 246, 0.5);
-  text-decoration: none;
-  color: #8b5cf6;
+  background: rgba(228, 104, 63, 0.15);
+  border-color: var(--color-laranja-500);
+  color: var(--color-laranja-700) !important;
 }
 
-/* Stat Card */
-.stat-card {
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+.dark-theme .btn-outline-laranja,
+.dark-theme .btn-outline-violet {
+  border-color: rgba(245, 156, 123, 0.5);
+  background: rgba(228, 104, 63, 0.14);
+  color: #F59C7B !important;
 }
 
-.stat-card.cyan {
-  border: 1px solid rgba(6, 182, 212, 0.2);
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(6, 182, 212, 0.02));
+.dark-theme .btn-outline-laranja:hover,
+.dark-theme .btn-outline-violet:hover {
+  background: rgba(228, 104, 63, 0.25);
+  border-color: #F59C7B;
+  color: #FFFFFF !important;
 }
 
-.stat-card.violet {
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(139, 92, 246, 0.02));
+/* Botão Ghost */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* Progress Bar */
+.btn-ghost:hover {
+  background: rgba(41, 62, 36, 0.08);
+  color: var(--text-main);
+}
+
+.dark-theme .btn-ghost {
+  color: #ECE7DA;
+}
+
+.dark-theme .btn-ghost:hover {
+  background: rgba(241, 234, 217, 0.12);
+  color: #FFFFFF;
+}
+
+/* Card e Glass-Card no Modo Escuro */
+.dark-theme .card,
+.dark-theme .glass-card,
+.dark-theme .stat-card {
+  background: #182616;
+  border-color: rgba(241, 234, 217, 0.22);
+}
+
+.dark-theme .glass-card:hover,
+.dark-theme .card-interactive:hover {
+  border-color: var(--color-primary);
+  background: #20331D;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Laboratórios & Simuladores Científicos (Tela de Fundo Clara)
+   Garante máxima visibilidade para pêndulos, raios, circuitos e gráficos
+   ═══════════════════════════════════════════════════════ */
+
+.lab-canvas-container,
+.lab-screen,
+.lab-viewport,
+.lab-bench {
+  background-color: #FAF7EE !important;
+  color: #172314 !important;
+  border: 1px solid #E2D7C3 !important;
+  border-radius: var(--radius-sm, 10px);
+  position: relative;
+  box-shadow: 0 1px 4px rgba(23, 35, 20, 0.05);
+}
+
+.lab-canvas-container canvas,
+.lab-screen canvas,
+.lab-viewport canvas,
+.lab-bench canvas {
+  background-color: #FAF7EE !important;
+  border-radius: inherit;
+}
+
+/* Textos e anotações científicas sobre a bancada clara permanecem sempre nítidos e escuros */
+.lab-canvas-container *,
+.lab-screen *,
+.lab-viewport *,
+.lab-bench * {
+  --text-main: #172314;
+  --text-secondary: #293E24;
+  --text-muted: #556B51;
+}
+
+.btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8125rem; }
+.btn-md { padding: 0.65rem 1.25rem; font-size: 0.875rem; }
+.btn-lg { padding: 0.85rem 1.75rem; font-size: 1rem; }
+.btn-full { width: 100%; }
+
+/* ═══════════════════════════════════════════════════════
+   Badges e Rótulos (Contraste estrito WCAG AA / AAA)
+   ═══════════════════════════════════════════════════════ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid;
+  letter-spacing: 0.01em;
+}
+
+/* Laranja: Laranja 700 para garantir ratio > 4.5:1 */
+.badge-primary,
+.badge-cyan,
+.badge-laranja {
+  color: #B8441F;
+  background: rgba(228, 104, 63, 0.1);
+  border-color: rgba(184, 68, 31, 0.3);
+}
+
+/* Verde: Verde 700 para máxima clareza */
+.badge-secondary,
+.badge-violet,
+.badge-green,
+.badge-success,
+.badge-verde {
+  color: #293E24;
+  background: rgba(41, 62, 36, 0.1);
+  border-color: rgba(41, 62, 36, 0.3);
+}
+
+/* Vermelho: Atenção pontual (prazos, avisos) */
+.badge-red,
+.badge-error,
+.badge-vermelho {
+  color: #BC391F;
+  background: rgba(188, 57, 31, 0.1);
+  border-color: rgba(188, 57, 31, 0.35);
+}
+
+.badge-yellow,
+.badge-warning {
+  color: #9A3412;
+  background: rgba(234, 88, 12, 0.1);
+  border-color: rgba(234, 88, 12, 0.35);
+}
+
+.badge-gray {
+  color: #556B51;
+  background: rgba(41, 62, 36, 0.08);
+  border-color: rgba(41, 62, 36, 0.2);
+}
+
+/* Ajuste específico para Dark Mode */
+.dark-theme .badge-cyan,
+.dark-theme .badge-laranja {
+  color: #F59C7B;
+  background: rgba(245, 156, 123, 0.15);
+  border-color: rgba(245, 156, 123, 0.35);
+}
+
+.dark-theme .badge-violet,
+.dark-theme .badge-green,
+.dark-theme .badge-verde {
+  color: #FAF7EE;
+  background: rgba(250, 247, 238, 0.12);
+  border-color: rgba(250, 247, 238, 0.3);
+}
+
+.dark-theme .badge-red,
+.dark-theme .badge-vermelho {
+  color: #F87171;
+  background: rgba(248, 113, 113, 0.15);
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Barras de Progresso e Sliders
+   ═══════════════════════════════════════════════════════ */
+
 .progress-bar {
   height: 0.5rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
 .progress-bar-bg {
   height: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
+  background: rgba(41, 62, 36, 0.1);
+  border-radius: var(--radius-sm);
 }
 
-.light-theme .progress-bar-bg {
-  background: rgba(0, 0, 0, 0.08);
+.dark-theme .progress-bar-bg {
+  background: rgba(241, 234, 217, 0.12);
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #06b6d4, #8b5cf6);
-  border-radius: 9999px;
-  transition: width 0.6s ease;
-}
-
-/* Badge */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid;
-}
-
-.badge-cyan {
-  color: #06b6d4;
-  background: rgba(6, 182, 212, 0.1);
-  border-color: rgba(6, 182, 212, 0.3);
-}
-
-.badge-violet {
-  color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.1);
-  border-color: rgba(139, 92, 246, 0.3);
-}
-
-.badge-green {
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.3);
-}
-
-.badge-yellow {
-  color: #f59e0b;
-  background: rgba(245, 158, 11, 0.1);
-  border-color: rgba(245, 158, 11, 0.3);
-}
-
-.badge-red {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.3);
-}
-
-.badge-gray {
-  color: #94a3b8;
-  background: rgba(148, 163, 184, 0.1);
-  border-color: rgba(148, 163, 184, 0.3);
+  background: #E4683F;
+  border-radius: var(--radius-sm);
+  transition: width 0.4s ease;
 }
 
 /* Slider styling */
@@ -460,14 +785,14 @@ input[type="range"] {
   appearance: none;
   width: 100%;
   height: 0.5rem;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  background: rgba(41, 62, 36, 0.15);
   outline: none;
   cursor: pointer;
 }
 
-.light-theme input[type="range"] {
-  background: rgba(0, 0, 0, 0.1);
+.dark-theme input[type="range"] {
+  background: rgba(241, 234, 217, 0.18);
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -476,119 +801,56 @@ input[type="range"]::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+  background: #E4683F;
   cursor: pointer;
-  border: 2px solid var(--bg-base);
-  box-shadow: 0 0 6px rgba(6, 182, 212, 0.4);
+  border: 2px solid var(--bg-card);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 input[type="range"]::-moz-range-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+  background: #E4683F;
   cursor: pointer;
-  border: 2px solid var(--bg-base);
-  box-shadow: 0 0 6px rgba(6, 182, 212, 0.4);
-}
-
-input[type="range"]:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Select styling */
-select {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border-color);
-  background: var(--bg-card);
-  color: var(--text-main);
-  font-size: 0.875rem;
-  cursor: pointer;
-  outline: none;
-}
-
-select:focus {
-  border-color: rgba(6, 182, 212, 0.5);
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
-}
-
-/* Input styling */
-input[type="text"],
-input[type="number"],
-input[type="email"],
-textarea {
-  width: 100%;
-  padding: 0.65rem 0.9rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border-color);
-  background: var(--bg-card);
-  color: var(--text-main);
-  font-size: 0.875rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="email"]:focus,
-textarea:focus {
-  border-color: rgba(6, 182, 212, 0.5);
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
-}
-
-/* Recharts tooltip override for dark theme */
-.recharts-default-tooltip {
-  background: var(--bg-card) !important;
-  border: 1px solid var(--border-card) !important;
-  border-radius: 0.5rem !important;
-}
-
-/* Table styles */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.data-table th {
-  text-align: left;
-  padding: 0.75rem 1rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.data-table td {
-  padding: 1rem;
-  font-size: 0.875rem;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-
-.light-theme .data-table td {
-  border-bottom-color: rgba(0,0,0,0.05);
-}
-
-.data-table tbody tr {
-  transition: background-color 0.15s;
-}
-
-.data-table tbody tr:hover {
-  background: rgba(255,255,255,0.03);
-}
-
-.light-theme .data-table tbody tr:hover {
-  background: rgba(0,0,0,0.02);
+  border: 2px solid var(--bg-card);
 }
 
 /* ═══════════════════════════════════════════════════════
-   TCC-27: Responsive Design + Accessibility
+   Campos de Entrada (Inputs & Selects)
    ═══════════════════════════════════════════════════════ */
+
+select,
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+select:focus,
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(228, 104, 63, 0.18);
+}
 
 /* Focus styles for keyboard navigation */
 *:focus-visible {
-  outline: 2px solid #06b6d4;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -598,177 +860,93 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #06b6d4;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-/* Reduced motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+/* Tabelas com divisória de 1px Nude 300 */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-/* ─── Tablet (< 1024px) ─── */
-@media (max-width: 1024px) {
-  .fade-in > div[style*="gridTemplateColumns: '1fr 320px'"],
-  .fade-in > div[style*="grid-template-columns"] {
-    grid-template-columns: 1fr !important;
-  }
+.data-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* ─── Mobile (< 768px) ─── */
-@media (max-width: 768px) {
-  /* Navigation */
-  nav {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  nav > div {
-    flex-wrap: wrap;
-  }
-
-  /* Typography scaling */
-  h1 {
-    font-size: 1.5rem !important;
-  }
-
-  h2 {
-    font-size: 1.15rem !important;
-  }
-
-  /* Stats grid — 2 cols on mobile */
-  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(200px"] {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  /* Chart grid — single column */
-  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(380px"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(280px"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(260px"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(320px"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(300px"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Activity builder modal */
-  div[style*="maxWidth: '700px'"] {
-    max-width: 100% !important;
-    margin: 0.5rem !important;
-    padding: 1.25rem !important;
-  }
-
-  /* Buttons — full width on mobile */
-  .btn-gradient,
-  .btn-outline-cyan,
-  .btn-outline-violet {
-    font-size: 0.82rem;
-    padding: 0.6rem 1rem;
-  }
-
-  /* Stat cards */
-  .stat-card {
-    padding: 1rem;
-  }
-
-  /* Glass cards */
-  .glass-card {
-    border-radius: 0.5rem;
-  }
-
-  /* Activity listing grid — remove multi column */
-  div[style*="gridTemplateColumns: '1fr auto auto'"] {
-    grid-template-columns: 1fr auto !important;
-  }
-
-  /* Simulation canvas responsive */
-  canvas {
-    max-width: 100%;
-    height: auto !important;
-  }
-
-  /* Select full width */
-  select {
-    width: 100%;
-  }
+.dark-theme .data-table th {
+  color: #ECE7DA;
+  border-bottom: 1px solid rgba(241, 234, 217, 0.24);
 }
 
-/* ─── Small Mobile (< 480px) ─── */
-@media (max-width: 480px) {
-  /* Stats grid — single column */
-  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(200px"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(180px"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Module cards */
-  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(200px"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(150px"] {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  /* Padding reduction */
-  .fade-in {
-    padding: 1rem 0.5rem !important;
-  }
+.data-table td {
+  padding: 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* ─── Print Styles ─── */
-@media print {
-  nav, .btn-gradient, .btn-outline-cyan, .btn-outline-violet, button {
-    display: none !important;
-  }
+.dark-theme .data-table td {
+  color: #FAF7EE;
+  border-bottom: 1px solid rgba(241, 234, 217, 0.16);
+}
 
-  .glass-card {
-    border: 1px solid #ccc;
-    background: white !important;
-    break-inside: avoid;
-  }
+.data-table tbody tr {
+  transition: background-color 0.15s ease;
+}
 
-  body {
-    background: white !important;
-    color: black !important;
-  }
+.data-table tbody tr:hover {
+  background: rgba(41, 62, 36, 0.03);
+}
+
+.dark-theme .data-table tbody tr:hover {
+  background: rgba(241, 234, 217, 0.06);
+}
+
+.dark-theme select,
+.dark-theme input[type="text"],
+.dark-theme input[type="number"],
+.dark-theme input[type="email"],
+.dark-theme input[type="password"],
+.dark-theme textarea {
+  background: #131E11;
+  border-color: rgba(241, 234, 217, 0.24);
+  color: #FFFFFF;
+}
+
+.dark-theme select:focus,
+.dark-theme input[type="text"]:focus,
+.dark-theme input[type="number"]:focus,
+.dark-theme input[type="email"]:focus,
+.dark-theme input[type="password"]:focus,
+.dark-theme textarea:focus {
+  border-color: #E4683F;
+  background: #192716;
+  box-shadow: 0 0 0 3px rgba(228, 104, 63, 0.25);
+}
+
+/* Recharts Tooltip */
+.recharts-default-tooltip {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-card) !important;
+  border-radius: var(--radius-sm) !important;
+  color: var(--text-main) !important;
+  box-shadow: none !important;
 }
 
 /* ═══════════════════════════════════════════════════════
-   Acessibilidade e Desenho Universal para a Aprendizagem (DUA)
-   Inclusão Cognitiva: Dislexia, TDAH, TEA e Baixa Visão
+   Acessibilidade e DUA (Desenho Universal para Aprendizagem)
    ═══════════════════════════════════════════════════════ */
 
-/* Escalas de Fonte */
-html.font-scale-100 {
-  font-size: 16px;
-}
-html.font-scale-115 {
-  font-size: 18.4px;
-}
-html.font-scale-130 {
-  font-size: 20.8px;
-}
+html.font-scale-100 { font-size: 16px; }
+html.font-scale-115 { font-size: 18.4px; }
+html.font-scale-130 { font-size: 20.8px; }
 
-/* Tipografia Inclusiva para Dislexia (aumento de espaçamento e peso balanceado na base) */
 body.dyslexia-font,
 body.dyslexia-font * {
   font-family: 'OpenDyslexic', 'Comic Sans MS', 'Trebuchet MS', -apple-system, sans-serif !important;
@@ -777,9 +955,9 @@ body.dyslexia-font * {
   line-height: 1.8 !important;
 }
 
-/* Modo Foco / Redução de Estímulos Sensoriais (TDAH e TEA) */
+/* Modo Foco (TDAH e TEA) estilizado com as cores da identidade visual */
 body.focus-mode-active {
-  background: #090d16 !important;
+  background: #172314 !important;
 }
 
 body.focus-mode-active * {
@@ -787,11 +965,12 @@ body.focus-mode-active * {
   transition: background-color 0.1s ease, color 0.1s ease !important;
 }
 
-body.focus-mode-active .glass-card {
+body.focus-mode-active .glass-card,
+body.focus-mode-active .card {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  background: #111827 !important;
-  border: 1px solid #374151 !important;
+  background: #1F311B !important;
+  border: 1px solid rgba(241, 234, 217, 0.2) !important;
   box-shadow: none !important;
 }
 
@@ -800,40 +979,52 @@ body.focus-mode-active a:focus,
 body.focus-mode-active input:focus,
 body.focus-mode-active select:focus,
 body.focus-mode-active textarea:focus {
-  outline: 3px solid #38bdf8 !important;
+  outline: 3px solid #E4683F !important;
   outline-offset: 3px !important;
 }
 
 /* ═══════════════════════════════════════════════════════
-   Estilos de Impressão e Exportação em PDF A4
+   Responsividade & Mídia
    ═══════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 768px) {
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  
+  .btn, .btn-primary, .btn-gradient, .btn-outline-cyan, .btn-outline-violet {
+    font-size: 0.82rem;
+    padding: 0.55rem 1rem;
+  }
+
+  .stat-card { padding: 1rem; }
+  .glass-card, .card { border-radius: var(--radius-sm); }
+}
+
 @media print {
   body, html {
     background: #ffffff !important;
-    color: #000000 !important;
+    color: #172314 !important;
     font-size: 12pt !important;
   }
-  .print-controls,
-  header,
-  nav,
-  aside,
-  footer,
-  .accessibility-toolbar {
+  .print-controls, header, nav, aside, footer, .accessibility-toolbar {
     display: none !important;
   }
-  #printable-exam-sheet {
-    box-shadow: none !important;
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    max-width: 100% !important;
-    width: 100% !important;
+  .glass-card, .card {
+    border: 1px solid #E2D7C3 !important;
     background: #ffffff !important;
-    color: #000000 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
   }
   @page {
     margin: 1.5cm;
     size: A4 portrait;
   }
 }
-

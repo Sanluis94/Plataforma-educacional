@@ -75,7 +75,7 @@ function Forbidden({ userRole }: { userRole: string }) {
             Ir para {redirect.label}
           </a>
         )}
-        <a href="/" className="btn-outline-cyan" style={{ padding: '0.65rem 1.5rem', textDecoration: 'none' }}>
+        <a href="/" className="btn-outline" style={{ padding: '0.65rem 1.5rem', textDecoration: 'none' }}>
           Voltar ao Início
         </a>
       </div>

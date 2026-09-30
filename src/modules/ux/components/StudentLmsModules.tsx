@@ -195,11 +195,11 @@ export function StudentLmsModules({
             onClick={() => onViewChange(tab.id as any)}
             style={{
               padding: '0.6rem 1.15rem',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-sm, 10px)',
               border: 'none',
-              borderBottom: activeView === tab.id ? '2px solid #06b6d4' : '2px solid transparent',
-              background: activeView === tab.id ? 'rgba(6,182,212,0.1)' : 'transparent',
-              color: activeView === tab.id ? '#06b6d4' : 'var(--text-secondary)',
+              borderBottom: activeView === tab.id ? '2px solid var(--color-primary, #E4683F)' : '2px solid transparent',
+              background: activeView === tab.id ? 'rgba(228, 104, 63, 0.12)' : 'transparent',
+              color: activeView === tab.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
               fontWeight: activeView === tab.id ? 800 : 500,
               fontSize: '0.88rem',
               cursor: 'pointer',
@@ -224,9 +224,9 @@ export function StudentLmsModules({
           <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem', border: attStats.alertaLDB ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(16,185,129,0.3)' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
-                <Calendar style={{ color: '#06b6d4', width: '1.25rem', height: '1.25rem' }} />
+                <Calendar style={{ color: 'var(--color-secondary, #293E24)', width: '1.25rem', height: '1.25rem' }} />
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 800, margin: 0 }}>
-                  Assiduidade Escolar (Controle de Faltas LDB)
+                  Assiduidade escolar (controle de faltas LDB)
                 </h3>
               </div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
@@ -278,32 +278,32 @@ export function StudentLmsModules({
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-              <div className="glass-card" style={{ padding: '1rem', background: 'rgba(6,182,212,0.04)', border: '1px solid rgba(6,182,212,0.2)' }}>
-                <div style={{ fontSize: '0.78rem', color: '#06b6d4', fontWeight: 700, textTransform: 'uppercase' }}>📝 Provas Formais (40%)</div>
+              <div className="glass-card" style={{ padding: '1rem', background: 'rgba(184,68,31,0.05)', border: '1px solid rgba(184,68,31,0.2)' }}>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>📝 Provas formais (40%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {studentScores.notaProvas.toFixed(1)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ 10</span>
                 </div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Avaliações com gabarito e tempo limitado</span>
               </div>
 
-              <div className="glass-card" style={{ padding: '1rem', background: 'rgba(139,92,246,0.04)', border: '1px solid rgba(139,92,246,0.2)' }}>
-                <div style={{ fontSize: '0.78rem', color: '#8b5cf6', fontWeight: 700, textTransform: 'uppercase' }}>🔬 Laboratórios Interativos (30%)</div>
+              <div className="glass-card" style={{ padding: '1rem', background: 'rgba(41,62,36,0.06)', border: '1px solid var(--border-color, #E2D7C3)' }}>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>🔬 Laboratórios interativos (30%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {studentScores.notaLabs.toFixed(1)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ 10</span>
                 </div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Simulações práticas e relatórios concluídos</span>
               </div>
 
-              <div className="glass-card" style={{ padding: '1rem', background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                <div style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 700, textTransform: 'uppercase' }}>📄 Atividades Práticas (20%)</div>
+              <div className="glass-card" style={{ padding: '1rem', background: 'rgba(41,62,36,0.04)', border: '1px solid var(--border-color, #E2D7C3)' }}>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>📄 Atividades práticas (20%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {studentScores.notaAtividades.toFixed(1)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ 10</span>
                 </div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Exercícios e questionários de fixação</span>
               </div>
 
-              <div className="glass-card" style={{ padding: '1rem', background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.2)' }}>
-                <div style={{ fontSize: '0.78rem', color: '#f59e0b', fontWeight: 700, textTransform: 'uppercase' }}>💬 Participação & Fórum (10%)</div>
+              <div className="glass-card" style={{ padding: '1rem', background: 'rgba(228,104,63,0.06)', border: '1px solid rgba(228,104,63,0.25)' }}>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>💬 Participação & fórum (10%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {studentScores.notaParticipacao.toFixed(1)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ 10</span>
                 </div>
@@ -322,8 +322,8 @@ export function StudentLmsModules({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <MessageSquare style={{ color: '#06b6d4', width: '1.4rem', height: '1.4rem' }} />
-                Fórum de Dúvidas & Debates da Turma
+                <MessageSquare style={{ color: 'var(--color-primary-accessible, #B8441F)', width: '1.4rem', height: '1.4rem' }} />
+                Fórum de dúvidas & debates da turma
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
                 Tire dúvidas sobre experimentos de laboratório, converse com colegas e receba orientações do professor.
@@ -341,7 +341,7 @@ export function StudentLmsModules({
 
           {/* Form para Fazer Pergunta */}
           {isAskingQuestion && (
-            <form onSubmit={handlePostQuestion} className="glass-card" style={{ padding: '1.5rem', border: '1px solid rgba(6,182,212,0.4)' }}>
+            <form onSubmit={handlePostQuestion} className="glass-card" style={{ padding: '1.5rem', border: '1px solid var(--border-color, #E2D7C3)' }}>
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
                 ❓ Perguntar à Turma ou ao Professor
               </h3>
@@ -385,7 +385,7 @@ export function StudentLmsModules({
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-                <button type="button" onClick={() => setIsAskingQuestion(false)} className="btn-outline-cyan" style={{ padding: '0.55rem 1.15rem' }}>
+                <button type="button" onClick={() => setIsAskingQuestion(false)} className="btn-outline" style={{ padding: '0.55rem 1.15rem' }}>
                   Cancelar
                 </button>
                 <button type="submit" className="btn-gradient" style={{ padding: '0.55rem 1.5rem', fontWeight: 700 }}>
@@ -413,13 +413,13 @@ export function StudentLmsModules({
                       style={{
                         padding: '1.25rem',
                         cursor: 'pointer',
-                        border: isSelected ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
-                        background: isSelected ? 'rgba(6,182,212,0.05)' : 'rgba(255,255,255,0.02)',
+                        border: isSelected ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color, #E2D7C3)',
+                        background: isSelected ? 'rgba(228, 104, 63, 0.08)' : 'transparent',
                         transition: 'all 0.2s'
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.35rem' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#06b6d4', background: 'rgba(6,182,212,0.15)', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-secondary, #293E24)', background: 'var(--color-neutral-300, #E2D7C3)', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
                           {top.disciplina || 'Ciências'}
                         </span>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -433,8 +433,8 @@ export function StudentLmsModules({
                         {top.conteudo}
                       </p>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                        <span>Autor: <strong style={{ color: '#fff' }}>{top.autorNome}</strong></span>
-                        <span style={{ color: '#06b6d4', fontWeight: 700 }}>
+                        <span>Autor: <strong style={{ color: 'var(--text-main)' }}>{top.autorNome}</strong></span>
+                        <span style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
                           💬 {top.respostas?.length || 0} respostas
                         </span>
                       </div>
@@ -447,18 +447,18 @@ export function StudentLmsModules({
             {/* Thread de Leitura e Resposta */}
             {selectedTopic && (
               <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: 'fit-content' }}>
-                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+                <div style={{ borderBottom: '1px solid var(--border-color, #E2D7C3)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#06b6d4' }}>{selectedTopic.disciplina}</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>{selectedTopic.disciplina}</span>
                     <button onClick={() => setSelectedTopic(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.82rem' }}>Fechar</button>
                   </div>
                   <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 800, margin: '0 0 0.5rem' }}>
                     {selectedTopic.titulo}
                   </h3>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.85rem' }}>
-                    Por <strong style={{ color: '#fff' }}>{selectedTopic.autorNome}</strong> • {new Date(selectedTopic.criadoEm).toLocaleString('pt-BR')}
+                    Por <strong style={{ color: 'var(--text-main)' }}>{selectedTopic.autorNome}</strong> • {new Date(selectedTopic.criadoEm).toLocaleString('pt-BR')}
                   </div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.5, background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.5, background: 'var(--color-neutral-300, #E2D7C3)', padding: '1rem', borderRadius: '8px' }}>
                     {selectedTopic.conteudo}
                   </div>
                 </div>
@@ -474,15 +474,15 @@ export function StudentLmsModules({
                         style={{
                           padding: '0.85rem 1rem',
                           borderRadius: '8px',
-                          border: reply.isMelhorResposta ? '1px solid #f59e0b' : reply.autorRole === 'professor' ? '1px solid rgba(6,182,212,0.4)' : '1px solid rgba(255,255,255,0.06)',
-                          background: reply.isMelhorResposta ? 'rgba(245,158,11,0.08)' : reply.autorRole === 'professor' ? 'rgba(6,182,212,0.06)' : 'rgba(255,255,255,0.02)'
+                          border: reply.isMelhorResposta ? '1px solid #f59e0b' : reply.autorRole === 'professor' ? '1px solid var(--color-secondary, #293E24)' : '1px solid var(--border-color, #E2D7C3)',
+                          background: reply.isMelhorResposta ? 'rgba(245,158,11,0.08)' : reply.autorRole === 'professor' ? 'rgba(41,62,36,0.08)' : 'transparent'
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>{reply.autorNome}</strong>
                             {reply.autorRole === 'professor' && (
-                              <span style={{ fontSize: '0.68rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: '#06b6d4', color: '#000', fontWeight: 800 }}>
+                              <span style={{ fontSize: '0.68rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: 'var(--color-secondary, #293E24)', color: 'var(--color-neutral-100, #FAF7EE)', fontWeight: 800 }}>
                                 PROFESSOR
                               </span>
                             )}
@@ -537,8 +537,8 @@ export function StudentLmsModules({
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div>
             <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldCheck style={{ color: '#06b6d4', width: '1.4rem', height: '1.4rem' }} />
-              Meus Certificados Digitais Acadêmicos
+              <ShieldCheck style={{ color: 'var(--color-secondary, #293E24)', width: '1.4rem', height: '1.4rem' }} />
+              Meus certificados digitais acadêmicos
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
               Certificados autenticados com hash criptográfico, código de verificação institucional e validade curricular.
@@ -556,13 +556,13 @@ export function StudentLmsModules({
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  border: '1px solid rgba(245,158,11,0.3)',
-                  background: 'rgba(245,158,11,0.02)'
+                  border: '1px solid var(--border-color, #E2D7C3)',
+                  background: 'transparent'
                 }}
               >
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#f59e0b', fontWeight: 800, textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800, textTransform: 'uppercase' }}>
                       CERTIFICADO DE CONCLUSÃO
                     </span>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
@@ -578,9 +578,9 @@ export function StudentLmsModules({
                     Certificamos que <strong>{cert.alunoNome}</strong> concluiu com êxito todas as atividades práticas e avaliações formativas.
                   </p>
 
-                  <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', marginBottom: '1.25rem' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Código de Validação de Autenticidade:</div>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#06b6d4', fontFamily: 'monospace' }}>
+                  <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: 'var(--color-neutral-300, #E2D7C3)', marginBottom: '1.25rem' }}>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Código de validação de autenticidade:</div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--color-secondary, #293E24)', fontFamily: 'monospace' }}>
                       {cert.codigoValidacao}
                     </div>
                   </div>
@@ -592,16 +592,16 @@ export function StudentLmsModules({
                     className="btn-gradient"
                     style={{ flex: 1, padding: '0.6rem', fontSize: '0.85rem', fontWeight: 700 }}
                   >
-                    Visualizar Diploma
+                    Visualizar diploma
                   </button>
                 </div>
               </div>
             ))}
 
             {/* Card para Reivindicar Certificados de Novas Disciplinas */}
-            <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px dashed rgba(255,255,255,0.15)' }}>
+            <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px dashed var(--border-color, #E2D7C3)' }}>
               <div>
-                <span style={{ fontSize: '0.75rem', color: '#06b6d4', fontWeight: 800 }}>FORMAÇÃO CONTINUADA</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800 }}>FORMAÇÃO CONTINUADA</span>
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, margin: '0.35rem 0 0.5rem' }}>
                   Física Teórica & Prática Experimental
                 </h3>
@@ -611,10 +611,10 @@ export function StudentLmsModules({
               </div>
               <button
                 onClick={() => handleClaimNewCert('Física Teórica & Prática Experimental')}
-                className="btn-outline-cyan"
+                className="btn-outline"
                 style={{ padding: '0.6rem', fontSize: '0.85rem', fontWeight: 700 }}
               >
-                Emitir Certificado (40h)
+                Emitir certificado (40h)
               </button>
             </div>
           </div>
@@ -638,7 +638,7 @@ export function StudentLmsModules({
               />
               <button
                 onClick={handleVerifyCode}
-                className="btn-outline-cyan"
+                className="btn-outline"
                 style={{ padding: '0.65rem 1.15rem', fontWeight: 700, whiteSpace: 'nowrap' }}
               >
                 Verificar Código
@@ -708,7 +708,7 @@ export function StudentLmsModules({
                 <p style={{ color: '#cbd5e1', fontSize: '1rem', lineHeight: 1.8, margin: '0 0 1.5rem' }}>
                   Certificamos para os devidos fins legais e comprovação curricular que o(a) estudante
                   <br />
-                  <strong style={{ fontSize: '1.35rem', color: '#06b6d4', display: 'block', margin: '0.5rem 0' }}>
+                  <strong style={{ fontSize: '1.35rem', color: 'var(--color-neutral-100, #FAF7EE)', display: 'block', margin: '0.5rem 0' }}>
                     {previewCert.alunoNome}
                   </strong>
                   concluiu com louvor e aproveitamento satisfatório as atividades práticas, simulações virtuais e avaliações formais do curso de
@@ -722,7 +722,7 @@ export function StudentLmsModules({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
                   <div style={{ textAlign: 'left', fontSize: '0.78rem', color: '#94a3b8' }}>
                     <div>Data de Expedição: <strong>{previewCert.dataEmissao}</strong></div>
-                    <div>Código Hash: <strong style={{ fontFamily: 'monospace', color: '#06b6d4' }}>{previewCert.codigoValidacao}</strong></div>
+                    <div>Código Hash: <strong style={{ fontFamily: 'monospace', color: 'var(--color-primary, #E4683F)' }}>{previewCert.codigoValidacao}</strong></div>
                   </div>
 
                   <div style={{ textAlign: 'center' }}>

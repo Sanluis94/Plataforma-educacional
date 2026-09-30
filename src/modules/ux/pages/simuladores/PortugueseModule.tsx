@@ -213,15 +213,15 @@ export function PortugueseModule({ mode = 'syntax', labTitle, onComplete }: { mo
               {question.options.map((opt, i) => {
                 const isCorrect = i === question.answer;
                 const isSelected = answered === i;
-                let bg = 'rgba(255,255,255,0.04)';
-                let border = '1px solid rgba(255,255,255,0.12)';
+                let bg = 'var(--bg-card)';
+                let border = '1px solid var(--border-color)';
                 if (answered !== null) {
-                  if (isCorrect) { bg = 'rgba(76,175,80,0.2)'; border = '1px solid #4caf50'; }
-                  else if (isSelected) { bg = 'rgba(244,67,54,0.2)'; border = '1px solid #f44336'; }
+                  if (isCorrect) { bg = 'rgba(16, 185, 129, 0.18)'; border = '1.5px solid #10b981'; }
+                  else if (isSelected) { bg = 'rgba(239, 68, 68, 0.18)'; border = '1.5px solid #ef4444'; }
                 }
                 return (
                   <button key={i} onClick={() => handleAnswer(i)}
-                    style={{ textAlign: 'left', padding: '0.75rem', borderRadius: '8px', cursor: answered === null ? 'pointer' : 'default', background: bg, border, color: 'var(--text-main)', transition: 'all 0.25s' }}>
+                    style={{ textAlign: 'left', padding: '0.75rem 1rem', borderRadius: '8px', cursor: answered === null ? 'pointer' : 'default', background: bg, border, color: 'var(--text-main)', transition: 'all 0.2s ease', fontSize: '0.88rem' }}>
                     {opt}
                   </button>
                 );

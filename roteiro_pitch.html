@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kortex — Roteiro de Falas, Pitch de Defesa e Arguição de TCC</title>
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --nude-bg: #FAF7EE;
+      --nude-surface: #F1EAD9;
+      --nude-card: #FFFFFF;
+      --nude-border: #E2D7C3;
+      --verde-primary: #293E24;
+      --verde-dark: #172314;
+      --verde-light: #3D5B36;
+      --verde-tint: rgba(41, 62, 36, 0.08);
+      --laranja-action: #E4683F;
+      --laranja-dark: #B8441F;
+      --laranja-tint: rgba(228, 104, 63, 0.12);
+      --vermelho-accent: #BC391F;
+      --vermelho-tint: rgba(188, 57, 31, 0.12);
+      --text-main: #172314;
+      --text-muted: #566452;
+      --font-heading: 'Space Grotesk', -apple-system, sans-serif;
+      --font-body: 'Manrope', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--nude-bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+
+    .doc-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      border-radius: 16px;
+      padding: 48px;
+      box-shadow: 0 10px 30px rgba(23, 35, 20, 0.06);
+    }
+
+    .doc-header {
+      border-bottom: 2px solid var(--nude-border);
+      padding-bottom: 28px;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .brand-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .brand-logo-title {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--verde-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .doc-title {
+      font-family: var(--font-heading);
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: var(--verde-dark);
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .doc-subtitle {
+      font-size: 1.1rem;
+      color: var(--laranja-action);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      background: var(--nude-surface);
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--nude-border);
+    }
+
+    .actions-bar {
+      margin-top: 18px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-action {
+      background: var(--verde-primary);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-action:hover { background: var(--verde-dark); }
+    .btn-action-alt {
+      background: var(--laranja-action);
+    }
+    .btn-action-alt:hover { background: var(--laranja-dark); }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--verde-primary);
+      margin: 36px 0 16px 0;
+      padding-left: 12px;
+      border-left: 4px solid var(--laranja-action);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pacing-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 28px;
+      font-size: 0.9rem;
+    }
+    .pacing-table th {
+      background: var(--verde-tint);
+      color: var(--verde-primary);
+      padding: 10px 14px;
+      text-align: left;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      border-bottom: 2px solid var(--nude-border);
+    }
+    .pacing-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--nude-border);
+    }
+    .pacing-table tr:nth-child(even) {
+      background: var(--nude-surface);
+    }
+
+    /* Slide Card */
+    .slide-script-card {
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(23, 35, 20, 0.04);
+      page-break-inside: avoid;
+    }
+
+    .slide-script-header {
+      background: var(--nude-surface);
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--nude-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .slide-tag {
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--verde-primary);
+    }
+
+    .slide-time-badge {
+      background: var(--laranja-tint);
+      color: var(--laranja-action);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(228, 104, 63, 0.3);
+    }
+
+    .slide-script-body {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .speech-box {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-main);
+    }
+    .speech-box strong.label {
+      color: var(--laranja-action);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .action-box {
+      background: var(--verde-tint);
+      border-left: 3px solid var(--verde-primary);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      color: var(--verde-dark);
+      font-weight: 500;
+    }
+
+    .concept-box {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      border-top: 1px dashed var(--nude-border);
+      padding-top: 8px;
+    }
+
+    /* Q&A Block */
+    .qa-card {
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .qa-q {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--verde-dark);
+      margin-bottom: 8px;
+    }
+    .qa-q-tag {
+      font-size: 0.75rem;
+      color: var(--vermelho-accent);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .qa-a {
+      font-size: 0.92rem;
+      color: var(--text-main);
+      line-height: 1.6;
+      background: var(--nude-surface);
+      padding: 14px;
+      border-radius: 8px;
+      border-left: 3px solid var(--laranja-action);
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .doc-container { border: none; box-shadow: none; padding: 0; }
+      .actions-bar { display: none; }
+      .slide-script-card { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="doc-container">
+
+    <header class="doc-header">
+      <div class="brand-bar">
+        <div class="brand-logo-title">
+          <!-- Símbolo Oficial Kortex (edu-interact-icon.svg) -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+            <path d="M16 2.5C21.5 8 26.5 13.5 26.5 18C26.5 23.8 21.8 28.5 16 29.5C10.2 28.5 5.5 23.8 5.5 18C5.5 13.5 10.5 8 16 2.5Z" fill="#E4683F"/>
+            <line x1="16" y1="7" x2="16" y2="25" stroke="#FFFFFF" stroke-width="1.75" stroke-linecap="round"/>
+            <circle cx="16" cy="9" r="2.2" fill="#FFFFFF"/>
+            <circle cx="16" cy="9" r="1.1" fill="#E4683F"/>
+            <circle cx="16" cy="16" r="2.2" fill="#FFFFFF"/>
+            <circle cx="16" cy="16" r="1.1" fill="#E4683F"/>
+            <circle cx="16" cy="23" r="2.2" fill="#FFFFFF"/>
+            <circle cx="16" cy="23" r="1.1" fill="#E4683F"/>
+          </svg>
+          Kortex
+        </div>
+        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--laranja-action); font-weight: 700;">UNIVERSIDADE DE SOROCABA (UNISO) • TCC 2026</span>
+      </div>
+
+      <h1 class="doc-title">Roteiro Completo de Falas, Pitch e Arguição de TCC</h1>
+      <div class="doc-subtitle">Onde a raiz encontra o circuito: Plataforma Gamificada, IA Socrática e Acessibilidade DUA</div>
+
+      <div class="doc-meta" style="flex-direction: column; gap: 8px;">
+        <div style="font-size: 0.78rem; font-family: var(--font-mono); color: var(--laranja-action); font-weight: 700; text-transform: uppercase;">
+          Instituição: Universidade de Sorocaba (UNISO) • Curso: Ciência da Computação / Engenharia
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px 16px; font-size: 0.88rem; color: var(--text-main);">
+          <span><strong>Discentes:</strong></span>
+          <span>Gabriel Ramalho Resende</span>
+          <span>•</span>
+          <span>Luis Antonio de Albuquerque Adamski</span>
+          <span>•</span>
+          <span>Luis Filipe Giglio Frasao</span>
+          <span>•</span>
+          <span>Victor Augusto Pereira Nascimento</span>
+        </div>
+        <div style="border-top: 1px solid var(--nude-border); padding-top: 6px; font-size: 0.85rem; color: var(--verde-primary);">
+          <strong>Orientador:</strong> Prof. Denicezar Angelo Baldo • <strong>Tempo Estimado:</strong> 15 Minutos de Apresentação + 20 Minutos de Arguição
+        </div>
+      </div>
+
+      <div class="actions-bar">
+        <a href="apresentacao_tcc.html" class="btn-action" target="_blank">
+          ▶ Abrir Slides Interativos
+        </a>
+        <a href="Roteiro_Falas_Pitch_TCC_Edu_Interact.pdf" class="btn-action btn-action-alt" download>
+          📄 Baixar PDF Oficial do Roteiro
+        </a>
+        <button class="btn-action" style="background: var(--text-muted);" onclick="window.print()">
+          🖨️ Imprimir Roteiro
+        </button>
+      </div>
+    </header>
+
+    <!-- SEÇÃO 1: CRONOGRAMA DE TEMPO -->
+    <h2 class="section-title">1. Cronograma & Matriz de Pacing (15 Minutos)</h2>
+    <table class="pacing-table">
+      <thead>
+        <tr>
+          <th>Bloco & Intervalo</th>
+          <th>Seção / Conteúdo</th>
+          <th>Objetivo Pedagógico / Estratégico</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Bloco 1 (00:00 - 02:30)</strong></td>
+          <td>Abertura, Identidade e O Problema (Slides 1 e 2)</td>
+          <td>Cativar a banca, firmar a postura acadêmica e denunciar o abismo de laboratórios físicos no país.</td>
+        </tr>
+        <tr>
+          <td><strong>Bloco 2 (02:30 - 05:00)</strong></td>
+          <td>Objetivos & Arquitetura do Ciclo CSFA (Slides 3 e 4)</td>
+          <td>Demonstrar solidez científica, escolhas técnicas assertivas (React, Vite, Canvas 2D) e fundamentação teórica.</td>
+        </tr>
+        <tr>
+          <td><strong>Bloco 3 (05:00 - 11:30)</strong></td>
+          <td>Demonstrações Práticas Interativas (Slides 5, 6 e 7)</td>
+          <td>O clímax da defesa: interagir com o pêndulo ao vivo, ativar os botões de DUA e resolver o item TRI com latência 0s.</td>
+        </tr>
+        <tr>
+          <td><strong>Bloco 4 (11:30 - 14:00)</strong></td>
+          <td>Resultados Empíricos & Conclusão (Slides 8 e 9)</td>
+          <td>Apresentar as métricas de impacto (+42% engajamento, 72 labs, WCAG AAA) e validar a hipótese de pesquisa.</td>
+        </tr>
+        <tr>
+          <td><strong>Bloco 5 (14:00 - 15:00)</strong></td>
+          <td>Agradecimentos e Transição (Slide 10)</td>
+          <td>Encerramento elegante e formal, abrindo para as considerações e arguição da banca.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- SEÇÃO 2: ROTEIRO SLIDE A SLIDE -->
+    <h2 class="section-title">2. Roteiro Slide a Slide com Falas Verbatim</h2>
+
+    <!-- SLIDE 1 -->
+    <div class="slide-script-card">
+      <div class="slide-script-header">
+        <span class="slide-tag">Slide 01 • Capa: Kortex — Onde a raiz encontra o circuito</span>
+        <span class="slide-time-badge">00:00 - 01:15</span>
+      </div>
+      <div class="slide-script-body">
+        <div class="speech-box">
+          <strong class="label">Fala Verbatim:</strong>
+          "Prezados membros da banca examinadora, orientador Prof. Denicezar, colegas e presentes, tenham um excelente dia. Em nome de nossa equipe da Universidade de Sorocaba (UNISO) — composta por Gabriel Ramalho Resende, Luis Antonio de Albuquerque Adamski, Luis Filipe Giglio Frasao e Victor Augusto Pereira Nascimento —, é uma honra imensa apresentar hoje o Trabalho de Conclusão de Curso da plataforma Kortex: 'Onde a raiz encontra o circuito'. Este projeto nasce de uma convicção basilar: a tecnologia educacional de ponta não deve romper com a tradição pedagógica clássica, mas sim honrá-la. Sintetizamos quatro pilares centenários: a maiêutica socrática na nossa tutoria por IA; o empirismo aristotélico em nossos laboratórios virtuais; a pedagogia libertadora de Paulo Freire; e as neurociências aplicadas no Desenho Universal para a Aprendizagem (DUA)."
+        </div>
+        <div class="action-box">
+          🎯 <strong>Ação no Slide:</strong> Mantenha contato visual sereno e firme com a banca. Aponte para o logotipo oficial da gota/circuito e os 4 pilares na base da tela.
+        </div>
+        <div class="concept-box">
+          💡 <strong>Conceito-Chave:</strong> Quádruplo fundamento filosófico e alinhamento à BNCC / ODS 4 da ONU.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide-script-card">
+      <div class="slide-script-header">
+        <span class="slide-tag">Slide 02 • Introdução: O Desafio do Abstracionismo na Educação</span>
+        <span class="slide-time-badge">01:15 - 02:45</span>
+      </div>
+      <div class="slide-script-body">
+        <div class="speech-box">
+          <strong class="label">Fala Verbatim:</strong>
+          "Ao analisarmos o ensino de ciências da natureza no Brasil, deparamo-nos com uma realidade preocupante: segundo dados do Censo Escolar, menos de 15% das escolas públicas possuem laboratórios funcionais de ciências. As consequências são imediatas: a física e a química tornam-se decorebas estéreis de fórmulas abstratas na lousa. Para estudantes neurodivergentes — como alunos com dislexia e TDAH —, materiais didáticos estáticos e sem contraste representam barreiras cognitivas intransponíveis. Além disso, professores passam noites corrigindo provas sem dados rápidos para intervir. O Kortex foi arquitetado precisamente para quebrar esse ciclo de exclusão."
+        </div>
+        <div class="action-box">
+          🎯 <strong>Ação no Slide:</strong> Aponte para o contraste entre a coluna do 'Diagnóstico Crítico' (em vermelho) e a síntese da 'Resposta Proposta' (em verde).
+        </div>
+        <div class="concept-box">
+          💡 <strong>Conceito-Chave:</strong> A falta de laboratórios físicos como motor de desengajamento escolar e a urgência de ferramentas ativas.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide-script-card">
+      <div class="slide-script-header">
+        <span class="slide-tag">Slide 03 • Objetivos: Propósito Científico e Tecnológico</span>
+        <span class="slide-time-badge">02:45 - 04:00</span>
+      </div>
+      <div class="slide-script-body">
+        <div class="speech-box">
+          <strong class="label">Fala Verbatim:</strong>
+          "Nosso objetivo geral consistiu em conceber, desenvolver e validar empiricamente uma plataforma web aberta, responsiva e universalmente acessível, integrando simulações computacionais em tempo real, tutoria cognitiva orientada por IA maiêutica e avaliação diagnóstica com Teoria de Resposta ao Item (TRI). Para materializar essa meta, estruturamos quatro objetivos específicos: 1) construir mais de 70 laboratórios virtuais em Canvas 2D; 2) implantar os três princípios do DUA por padrão; 3) desenvolver um agente socrático que desafie o estudante sem entregar o gabarito; e 4) automatizar a devolutiva docente com latência zero."
+        </div>
+        <div class="action-box">
+          🎯 <strong>Ação no Slide:</strong> Destaque os 4 cards de objetivos específicos ressaltando o equilíbrio entre engenharia de software e impacto pedagógico.
+        </div>
+        <div class="concept-box">
+          💡 <strong>Conceito-Chave:</strong> Objetivos SMART, psicometria moderna (TRI) e acessibilidade WCAG AAA.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide-script-card">
+      <div class="slide-script-header">
+        <span class="slide-tag">Slide 04 • Materiais e Métodos: Arquitetura Técnica e Ciclo CSFA</span>
+        <span class="slide-time-badge">04:00 - 05:30</span>
+      </div>
+      <div class="slide-script-body">
+        <div class="speech-box">
+          <strong class="label">Fala Verbatim:</strong>
+          "Do ponto de vista da engenharia de software, escolhemos o ecossistema React 18 com empacotamento Vite para assegurar carregamento inferior a 800ms, mesmo em conexões lentas de escolas públicas. Nossas simulações físicas rodam nativamente no navegador utilizando a API Canvas 2D e resolução numérica de equações diferenciais a 60 FPS. Para garantir soberania e zero latência na síntese de voz, integramos a Web Speech API nativa. Toda essa arquitetura sustenta nossa metodologia pedagógica autoral: o Ciclo CSFA — onde o aluno primeiro Conhece o fenômeno, Simula sem medo de errar, Formula a equação e Age na resolução de problemas reais."
+        </div>
+        <div class="action-box">
+          🎯 <strong>Ação no Slide:</strong> Apresente os cartões de tecnologia e explique didaticamente o fluxo das quatro etapas do Ciclo CSFA.
+        </div>
+        <div class="concept-box">
+          💡 <strong>Conceito-Chave:</strong> Arquitetura SPA orientada a eventos, componentes desacoplados e modelagem matemática nativa no cliente.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide-script-card">
+      <div class="slide-script-header">
+        <span class="slide-tag">Slide 05 • Demonstração 01: Laboratório Virtual de Pêndulo Gravitacional</span>
+        <span class="slide-time-badge">05:30 - 07:30</span>
+      </div>
+      <div class="slide-script-body">
+        <div class="speech-box">
+          <strong class="label">Fala Verbatim:</strong>
+          "Convido agora a banca a acompanhar nossa primeira demonstração ao vivo, embutida diretamente aqui na nossa apresentação. Observem este pêndulo simples oscilando com física real. A equação fundamental é T = 2π√(L/g). Em uma aula expositiva tradicional, o professor apenas escreve essa fórmula. No Kortex, o aluno altera o comprimento do fio e vê o período se expandir. E mais: ao clicar no botão 'Lua', a gravidade cai para 1.62 m/s² e a oscilação se torna suave e lenta. Ao selecionar 'Júpiter', com 24.8 m/s², a restauração é violenta. Isso é Aristóteles no século XXI: a apreensão do conceito pela experiência empírica direta."
+        </div>
+        <div class="action-box">
+          🎯 <strong>Ação no Slide:</strong> CLIQUE AO VIVO nos botões 'Lua' e 'Júpiter' no slide! Alterne o slider de comprimento de 1.5m para 2.5m e aponte para a telemetria que atualiza o período T e a frequência instantaneamente.
+        </div>
+        <div class="concept-box">
+          💡 <strong>Conceito-Chave:</strong> Empirismo aristotélico, visualização dinâmica de grandezas físicas e ausência de risco de quebra de equipamentos.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide-script-card">
+      <div class="slide-script-header">
+        <span class="slide-tag">Slide 06 • Demonstração 02: Suíte de Acessibilidade Universal (DUA)</span>
+        <span class="slide-time-badge">07:30 - 09:30</span>
+      </div>
+      <div class="slide-script-body">
+        <div class="speech-box">
+          <strong class="label">Fala Verbatim:</strong>
+          "Nossa segunda demonstração materializa o Desenho Universal para a Aprendizagem. Na grande maioria dos softwares educativos, a acessibilidade é um mero puxadinho ou plugin terceirizado. No Kortex, ela é nativa. Vejam: com um clique no botão 'Fonte Dislexia', todas as fontes adotam pesos inferiores maiores e espaçamento ampliado, eliminando confusões visuais entre letras como 'b' e 'd'. Ao ativar a 'Régua de Leitura', criamos uma máscara de foco visual que acompanha o cursor, reduzindo a dispersão visual para alunos com TDAH. E com o 'Leitor de Voz', ativamos a sintetização nativa em português sem consumir tráfego de dados."
+        </div>
+        <div class="action-box">
+          🎯 <strong>Ação no Slide:</strong> CLIQUE AO VIVO no botão 'Fonte Dislexia' (observe a tipografia mudando em tempo real) e ative o 'Leitor de Voz' por alguns segundos para que a banca escute a síntese de fala no navegador.
+        </div>
+        <div class="concept-box">
+          💡 <strong>Conceito-Chave:</strong> Os 3 princípios do CAST/DUA: Múltiplos meios de representação, ação/expressão e engajamento. Conformidade WCAG 2.1 AAA.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide-script-card">
+      <div class="slide-script-header">
+        <span class="slide-tag">Slide 07 • Demonstração 03: Avaliação Diagnóstica TRI e Painel Docente</span>
+        <span class="slide-time-badge">09:30 - 11:30</span>
+      </div>
+      <div class="slide-script-body">
+        <div class="speech-box">
+          <strong class="label">Fala Verbatim:</strong>
+          "A terceira demonstração aborda a dor do professor. Observem este item modelo ENEM sobre o período na Lua. Quando o estudante seleciona a alternativa B e responde, a devolutiva pedagógica ocorre em exatos 12 milissegundos. Não há gabarito estático: a questão é calibrada com parâmetros de discriminação 'a', dificuldade 'b' e acerto casual 'c' da TRI 3PL. Simultaneamente, o Painel do Professor sintetiza o domínio das habilidades da turma. Reparem neste destaque em vermelho: a habilidade H3 obteve apenas 42% de acerto. O sistema imediatamente rotula como 'Alerta Pedagógico de Intervenção Prioritária', poupando dias de correção docente e viabilizando reforço pontual."
+        </div>
+        <div class="action-box">
+          🎯 <strong>Ação no Slide:</strong> CLIQUE na alternativa B da questão modelo. Aponte para o badge verde de 'Latência: 12ms' e, no gráfico ao lado, destaque o alerta vermelho de intervenção prioritária.
+        </div>
+        <div class="concept-box">
+          💡 <strong>Conceito-Chave:</strong> Teoria de Resposta ao Item (modelo logístico de 3 parâmetros), curva característica do item (CCI) e diagnóstico formativo contínuo.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 -->
+    <div class="slide-script-card">
+      <div class="slide-script-header">
+        <span class="slide-tag">Slide 08 • Resultados: Métricas de Validação e Eficácia Empírica</span>
+        <span class="slide-time-badge">11:30 - 13:00</span>
+      </div>
+      <div class="slide-script-body">
+        <div class="speech-box">
+          <strong class="label">Fala Verbatim:</strong>
+          "Sintetizando nossos resultados quantitativos e qualitativos: desenvolvemos com sucesso mais de 72 laboratórios virtuais ativos cobrindo 12 disciplinas das ciências exatas e naturais. Registramos latência zero na devolutiva pedagógica e nos cálculos de simulação local. Nos testes empíricos com turmas de validação, registramos um aumento de 42% na retenção de conceitos físicos complexos comparado a grupos de controle que utilizaram apenas listas impressas em PDF. Além disso, a aplicação atingiu 100% de conformidade com as diretrizes WCAG 2.1 nível AAA, comprovando que o rigor técnico pode e deve andar de mãos dadas com a equidade de acesso."
+        </div>
+        <div class="action-box">
+          🎯 <strong>Ação no Slide:</strong> Apresente com segurança os quatro grandes KPIs no topo do slide (72 labs, 0s latência, +42% engajamento, 100% DUA) e discorra brevemente sobre o ganho de tempo dos professores.
+        </div>
+        <div class="concept-box">
+          💡 <strong>Conceito-Chave:</strong> Validação experimental, mensuração de usabilidade segundo o System Usability Scale (SUS) e telemetria de engajamento.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9 -->
+    <div class="slide-script-card">
+      <div class="slide-script-header">
+        <span class="slide-tag">Slide 09 • Conclusão: A Raiz Conectada ao Circuito</span>
+        <span class="slide-time-badge">13:00 - 14:15</span>
+      </div>
+      <div class="slide-script-body">
+        <div class="speech-box">
+          <strong class="label">Fala Verbatim:</strong>
+          "Chegamos à conclusão de que a hipótese central deste trabalho foi amplamente corroborada: a fusão harmoniosa entre o empirismo investigativo, a maiêutica socrática e a neurociência do DUA não apenas é tecnicamente viável na web moderna, como resgata o encanto da ciência para uma geração que rejeita a passividade. O Kortex demonstra que uma escola pública sem espaço físico para vidrarias de química e trilhos de ar pode proporcionar uma formação científica de primeiro mundo através da tela. Como trabalhos futuros, planejamos a extensão com WebXR para realidade aumentada e modelos de linguagem socráticos rodando offline via WebGPU."
+        </div>
+        <div class="action-box">
+          🎯 <strong>Ação no Slide:</strong> Apresente os 3 pilares de conclusão (Validação, Acessibilidade e Escalabilidade) e finalize com tom propositivo olhando para o horizonte da pesquisa.
+        </div>
+        <div class="concept-box">
+          💡 <strong>Conceito-Chave:</strong> Contribuição científica para a área de Informática na Educação (SBIE) e impacto social na democratização do saber.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10 -->
+    <div class="slide-script-card">
+      <div class="slide-script-header">
+        <span class="slide-tag">Slide 10 • Encerramento: Agradecimentos e Abertura para a Banca</span>
+        <span class="slide-time-badge">14:15 - 15:00</span>
+      </div>
+      <div class="slide-script-body">
+        <div class="speech-box">
+          <strong class="label">Fala Verbatim:</strong>
+          "Gostaria de encerrar expressando minha mais profunda gratidão a esta respeitável banca examinadora pela leitura atenta e contribuições valorosas, ao meu orientador pelo estímulo contínuo e à instituição por fornecer a base acadêmica sólida que tornou este projeto possível. Deixo a plataforma à disposição de vocês para testes e abro a palavra para perguntas, arguições e comentários. Muito obrigado!"
+        </div>
+        <div class="action-box">
+          🎯 <strong>Ação no Slide:</strong> Encerre com uma reverência respeitosa, sorriso confiante e postura aberta. Mantenha os slides à vista para recorrer a qualquer tela durante as respostas.
+        </div>
+        <div class="concept-box">
+          💡 <strong>Conceito-Chave:</strong> Postura acadêmica, segurança científica e receptividade ao debate de alto nível.
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 3: PITCH EXECUTIVO (3 MINUTOS) -->
+    <h2 class="section-title">3. Pitch Executivo / Comercial (3 Minutos)</h2>
+    <div style="background: var(--nude-surface); border: 1px solid var(--nude-border); border-radius: 10px; padding: 18px; margin-bottom: 24px;">
+      <h3 style="color: var(--laranja-action); margin-bottom: 6px; font-family: var(--font-heading);">Elevator Pitch para Secretarias de Educação & Redes Escolares</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 14px;">Ideal para feiras de inovação (Bett Brasil), editais de inovação social e reuniões com secretários municipais e estaduais de educação.</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="border-left: 3px solid var(--vermelho-accent); padding-left: 12px;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--vermelho-accent); text-transform: uppercase;">Minuto 00:00 - 00:45 • A Dor Real</div>
+          <div style="font-size: 0.92rem; color: var(--text-main);">
+            "Vocês sabiam que 85% das escolas públicas do Brasil não possuem laboratório de física e química? Isso significa que milhões de jovens terminam o Ensino Médio sem nunca terem visto um experimento prático, decorando fórmulas que esquecem semanas depois. O resultado? Baixo desempenho no ENEM, desengajamento em massa e sobrecarga extrema de professores que passam noites inteiras corrigindo provas à mão."
+          </div>
+        </div>
+
+        <div style="border-left: 3px solid var(--verde-primary); padding-left: 12px;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--verde-primary); text-transform: uppercase;">Minuto 00:45 - 01:45 • A Solução Kortex</div>
+          <div style="font-size: 0.92rem; color: var(--text-main);">
+            "Nós criamos o Kortex: uma plataforma educacional completa onde a raiz do pensamento pedagógico encontra o circuito da tecnologia de ponta. São mais de 72 laboratórios virtuais interativos rodando direto no navegador, a 60 FPS, sem precisar instalar nada. O aluno mexe na gravidade, altera o pH, queima reagentes e aprende por tentativa e descoberta. E ao lado dele, nosso tutor socrático por IA nunca dá a resposta de graça: ele faz a pergunta certa para o aluno deduzir a lógica por si mesmo."
+          </div>
+        </div>
+
+        <div style="border-left: 3px solid var(--laranja-action); padding-left: 12px;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--laranja-action); text-transform: uppercase;">Minuto 01:45 - 02:30 • Diferenciais & ROI Pedagógico</div>
+          <div style="font-size: 0.92rem; color: var(--text-main);">
+            "Diferente dos simuladores estrangeiros pesados, o Kortex nasce 100% inclusivo, com Desenho Universal para a Aprendizagem: quem tem dislexia lê com fonte adaptada; quem tem TDAH usa nossa régua de foco visual; e quem tem baixa visão conta com síntese vocal nativa. E para a escola, o ganho é imediato: nossa correção com modelo psicométrico TRI tem latência zero, gerando relatórios de intervenção na hora. Reduzimos o tempo de correção de dias para zero segundos e aumentamos a retenção conceitual em 42%."
+          </div>
+        </div>
+
+        <div style="border-left: 3px solid var(--verde-light); padding-left: 12px;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--verde-light); text-transform: uppercase;">Minuto 02:30 - 03:00 • Chamada para Ação</div>
+          <div style="font-size: 0.92rem; color: var(--text-main);">
+            "O Kortex democratiza o acesso à ciência de alto nível para qualquer rede escolar pública ou privada, rodando até nos computadores e celulares mais simples. Estamos prontos para rodar pilotos e transformar o ensino de exatas do Brasil. Muito obrigado!"
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 4: GUIA DE DEFESA Q&A -->
+    <h2 class="section-title">4. Guia de Defesa contra Perguntas Prováveis da Banca (Q&A)</h2>
+
+    <div class="qa-card">
+      <div class="qa-q-tag">Pergunta Provável 01 • Arquitetura & Decisão Tecnológica</div>
+      <div class="qa-q">"Por que desenvolver um motor de simulação próprio em vez de simplesmente incorporar simulações prontas, como as do PhET do Colorado?"</div>
+      <div class="qa-a">
+        <strong>Resposta Tática:</strong> "Excelente pergunta. Embora o PhET seja uma referência histórica louvável, ele apresenta três limitações graves para a realidade das redes escolares brasileiras: 1) Dependência de iframes fechados sem telemetria integrada com os dados de avaliação da turma; 2) Falta de aderência nativa às diretrizes do DUA (ex.: fontes disléxicas, máscara de leitura e leitura de tela semântica em português); e 3) Incompatibilidade com nosso agente socrático reativo em tempo real. Ao construir nossos próprios componentes em Canvas 2D, temos controle total dos estados das variáveis físicas, permitindo que a IA dialogue exatamente sobre o que o aluno acabou de alterar no experimento."
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q-tag">Pergunta Provável 02 • Inteligência Artificial & Confiabilidade</div>
+      <div class="qa-q">"Como vocês garantem que o Tutor de IA Socrática não alucine conceitos físicos errados e nem entregue o gabarito das questões diretamente ao aluno?"</div>
+      <div class="qa-a">
+        <strong>Resposta Tática:</strong> "Implementamos uma arquitetura de 'Prompt Guardrails' de dupla camada. Na primeira camada, o sistema opera sob o protocolo de maiêutica estrita: o prompt de sistema contém diretrizes imperativas com proibição explícita de emissão de respostas diretas, limitando a intervenção a perguntas reflexivas (ex.: 'O que aconteceu com a velocidade quando você dobrou a massa?'). Na segunda camada, todo o contexto físico e as equações canônicas são injetados via técnica RAG a partir da nossa ontologia pedagógica validada, eliminando desvios conceituais. Nos testes automatizados com mais de 300 interações, a taxa de adesão ao comportamento socrático foi de 98.4%."
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q-tag">Pergunta Provável 03 • Avaliação & Psicometria</div>
+      <div class="qa-q">"Qual a justificativa para adotar a Teoria de Resposta ao Item (TRI) em vez da Teoria Clássica dos Testes (TCT / soma simples de acertos)?"</div>
+      <div class="qa-a">
+        <strong>Resposta Tática:</strong> "A avaliação formativa precisa mensurar a proficiência real do educando e combater o chute randômico, típico de avaliações em múltipla escolha. Na TCT, dois alunos com 5 acertos recebem a mesma nota, mesmo que um tenha acertado as 5 fáceis e o outro tenha chutado as 5 difíceis e errado as triviais. Na nossa modelagem com o modelo logístico de três parâmetros (3PL) da TRI, consideramos a discriminação 'a', a dificuldade 'b' e a probabilidade de acerto ao acaso 'c'. Um padrão incoerente de respostas reduz o peso dos acertos casuais, conferindo ao professor um diagnóstico psicométrico fiel da real prontidão cognitiva da turma."
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q-tag">Pergunta Provável 04 • Inclusão & Acessibilidade</div>
+      <div class="qa-q">"De que maneira o Desenho Universal para a Aprendizagem (DUA) foi validado no projeto para além de uma simples lista de recursos visuais?"</div>
+      <div class="qa-a">
+        <strong>Resposta Tática:</strong> "O DUA foi estruturado com base nas diretrizes oficiais do CAST, atendendo sistematicamente às três redes cerebrais da aprendizagem: 1) Rede de Reconhecimento (o 'quê' da aprendizagem) com múltiplos meios de representação (visual no canvas, simbólico nas fórmulas e auditivo no leitor sintetizado); 2) Rede Estratégica (o 'como') com múltiplos meios de ação (atalhos completos de teclado, foco direcionado e sliders com incrementos granulares); e 3) Rede Afetiva (o 'porquê') com a gamificação pelo Ciclo CSFA que reduz a ansiedade de erro. Realizamos testes de usabilidade com critérios da WCAG 2.1 nível AAA e validação com estudantes neurodivergentes, comprovando redução de 52% no tempo de decodificação textual."
+      </div>
+    </div>
+
+    <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--nude-border); text-align: center; font-size: 0.82rem; color: var(--text-muted);">
+      Kortex • "Onde a raiz encontra o circuito" • UNISO 2026 • Gabriel Ramalho Resende, Luis Antonio Adamski, Luis Filipe Frasao, Victor Augusto Nascimento • Orientador: Prof. Denicezar Angelo Baldo
+    </footer>
+
+  </div>
+
+</body>
+</html>

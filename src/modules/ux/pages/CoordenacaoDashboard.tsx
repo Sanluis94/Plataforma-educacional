@@ -124,7 +124,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <Link
           to="/"
-          className="btn-outline-cyan"
+          className="btn-outline"
           style={{
             padding: '0.45rem 0.85rem',
             borderRadius: '0.5rem',
@@ -144,21 +144,21 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
       {/* Header Institucional White-Label */}
       <div className="glass-card mb-4" style={{
         padding: '1.75rem',
-        borderRadius: '1rem',
-        background: 'linear-gradient(135deg, rgba(6,182,212,0.08) 0%, rgba(139,92,246,0.1) 100%)',
-        border: '1px solid rgba(6,182,212,0.3)',
+        borderRadius: 'var(--radius-lg, 14px)',
+        background: 'var(--bg-glass)',
+        border: '1px solid var(--border-color)',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div style={{
               width: '3.25rem',
               height: '3.25rem',
-              borderRadius: '0.75rem',
-              background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
+              borderRadius: 'var(--radius-sm, 10px)',
+              background: 'var(--color-verde-700, #293E24)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
+              color: 'var(--color-nude-100, #FAF7EE)',
               fontWeight: 800,
               fontSize: '1.4rem'
             }}>
@@ -166,12 +166,12 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'rgba(6,182,212,0.15)', color: '#06b6d4', fontWeight: 700 }}>
-                  EDTECH SAAS B2B
+                <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
+                  EdTech SaaS B2B
                 </span>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Multi-Tenancy Escolar</span>
               </div>
-              <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.2rem 0' }}>
+              <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.2rem 0', fontFamily: 'var(--font-heading)' }}>
                 {escolaNome}
               </h1>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
@@ -183,8 +183,8 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button
               onClick={handleImprimirRelatorio}
-              className="btn-outline-cyan"
-              style={{ padding: '0.5rem 1rem', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              className="btn-outline"
+              style={{ padding: '0.5rem 1rem', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: 'var(--radius-sm, 10px)' }}
             >
               <Printer style={{ width: '0.9rem', height: '0.9rem' }} /> Imprimir Parecer Oficial
             </button>
@@ -193,7 +193,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
       </div>
 
       {/* Navegação de Abas da Coordenação */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-card)', paddingBottom: '0.5rem', overflowX: 'auto' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', overflowX: 'auto' }}>
         {[
           { id: 'visao_geral', label: '📊 Panorama & Indicadores', icon: TrendingUp },
           { id: 'importacao_csv', label: '📥 Importação em Massa (CSV)', icon: FileSpreadsheet },
@@ -211,12 +211,12 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
                 alignItems: 'center',
                 gap: '0.45rem',
                 padding: '0.6rem 1.25rem',
-                borderRadius: '0.5rem',
+                borderRadius: 'var(--radius-sm, 10px)',
                 fontSize: '0.85rem',
                 fontWeight: 700,
-                border: isActive ? '1px solid #06b6d4' : '1px solid transparent',
-                background: isActive ? 'rgba(6,182,212,0.15)' : 'transparent',
-                color: isActive ? '#06b6d4' : 'var(--text-secondary)',
+                border: isActive ? '1px solid var(--color-primary, #E4683F)' : '1px solid transparent',
+                background: isActive ? 'var(--color-primary-light, rgba(228, 104, 63, 0.15))' : 'transparent',
+                color: isActive ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap'
               }}
@@ -233,44 +233,44 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
         <div className="fade-in">
           {/* Métricas Principais da Escola */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div className="glass-card" style={{ padding: '1.25rem', borderRadius: '0.75rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Alunos Matriculados</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#06b6d4' }}>482</div>
-              <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 600 }}>↑ +14 novos este mês</span>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>482</div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)', fontWeight: 600 }}>↑ +14 novos este mês</span>
             </div>
 
-            <div className="glass-card" style={{ padding: '1.25rem', borderRadius: '0.75rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Corpo Docente Ativo</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#8b5cf6' }}>28</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-verde-700, #293E24)' }}>28</div>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>100% integrados na plataforma</span>
             </div>
 
-            <div className="glass-card" style={{ padding: '1.25rem', borderRadius: '0.75rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Experimentos Realizados</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#10b981' }}>3.840</div>
-              <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 600 }}>Média de 7.9 labs por aluno</span>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-verde-500, #3D5B36)' }}>3.840</div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)', fontWeight: 600 }}>Média de 7.9 labs por aluno</span>
             </div>
 
-            <div className="glass-card" style={{ padding: '1.25rem', borderRadius: '0.75rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Média Escolar Geral</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f59e0b' }}>7.6 <span style={{ fontSize: '1rem' }}>/ 10</span></div>
-              <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 600 }}>↑ +0.4 acima da meta BNCC</span>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>7.6 <span style={{ fontSize: '1rem' }}>/ 10</span></div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)', fontWeight: 600 }}>↑ +0.4 acima da meta BNCC</span>
             </div>
           </div>
 
           {/* Gráficos de Desempenho por Série */}
-          <div className="glass-card mb-4" style={{ padding: '1.5rem', borderRadius: '1rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1rem' }}>
+          <div className="glass-card mb-4" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg, 14px)' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1rem', fontFamily: 'var(--font-heading)' }}>
               Desempenho Médio e Taxa de Engajamento por Série Escolar
             </h3>
             <div style={{ height: '300px', width: '100%' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={DADOS_SERIES_CHART} margin={{ top: 10, right: 20, left: -10, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                  <XAxis dataKey="serie" stroke="#94a3b8" fontSize={12} />
-                  <YAxis stroke="#94a3b8" fontSize={12} domain={[0, 10]} />
-                  <Tooltip contentStyle={{ background: '#111827', border: '1px solid rgba(6,182,212,0.3)', borderRadius: '8px' }} />
-                  <Bar dataKey="media" name="Média Escolar" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                  <XAxis dataKey="serie" stroke="var(--text-muted)" fontSize={12} />
+                  <YAxis stroke="var(--text-muted)" fontSize={12} domain={[0, 10]} />
+                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px' }} />
+                  <Bar dataKey="media" name="Média Escolar" fill="#293E24" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -294,7 +294,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
 
               <button
                 onClick={handleCarregarExemploCSV}
-                className="btn-outline-cyan"
+                className="btn-outline"
                 style={{ padding: '0.45rem 0.9rem', fontSize: '0.78rem' }}
               >
                 Carregar Exemplo Modelo
@@ -445,7 +445,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
 
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Frequência Labs</div>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#06b6d4' }}>
+                    <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>
                       {aluno.frequenciaLabs}%
                     </div>
                   </div>
@@ -453,8 +453,8 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
                   <div>
                     <button
                       onClick={() => alert(`Aviso de apoio pedagógico enviado com sucesso para ${aluno.nome} e seus responsáveis!`)}
-                      className="btn-outline-cyan"
-                      style={{ padding: '0.45rem 0.85rem', fontSize: '0.78rem' }}
+                      className="btn-outline"
+                      style={{ padding: '0.45rem 0.85rem', fontSize: '0.78rem', borderRadius: 'var(--radius-sm, 10px)' }}
                     >
                       Enviar Intervenção
                     </button>
@@ -469,26 +469,26 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
       {/* ── ABA 4: RELATÓRIO OFICIAL WHITE-LABEL ── */}
       {activeTab === 'relatorio_oficial' && (
         <div className="fade-in">
-          <div className="glass-card mb-4" style={{ padding: '2rem', borderRadius: '1rem', background: '#ffffff', color: '#0f172a' }}>
+          <div className="glass-card mb-4" style={{ padding: '2rem', borderRadius: 'var(--radius-lg, 14px)', background: 'var(--color-nude-100, #FAF7EE)', color: 'var(--color-verde-900, #172314)', border: '1px solid var(--color-nude-300, #E2D7C3)' }}>
             {/* Timbre da Escola */}
-            <div style={{ borderBottom: '2px solid #0f172a', paddingBottom: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ borderBottom: '2px solid var(--color-verde-900, #172314)', paddingBottom: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{escolaNome}</h2>
-                <p style={{ margin: '0.2rem 0', fontSize: '0.85rem', color: '#475569' }}>
+                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-verde-900, #172314)', fontFamily: 'var(--font-heading)' }}>{escolaNome}</h2>
+                <p style={{ margin: '0.2rem 0', fontSize: '0.85rem', color: 'var(--color-verde-700, #293E24)' }}>
                   Secretaria de Educação e Coordenação Pedagógica • Sistema Integrado Edu-Interact
                 </p>
               </div>
-              <div style={{ textAlign: 'right', fontSize: '0.8rem', color: '#64748b' }}>
+              <div style={{ textAlign: 'right', fontSize: '0.8rem', color: 'var(--color-verde-700, #293E24)' }}>
                 <div>Emitido em: {new Date().toLocaleDateString('pt-BR')}</div>
                 <div>Protocolo: #{Math.floor(100000 + Math.random() * 900000)}</div>
               </div>
             </div>
 
-            <h3 style={{ textAlign: 'center', fontSize: '1.25rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '1.5rem' }}>
+            <h3 style={{ textAlign: 'center', fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--color-verde-900, #172314)', fontFamily: 'var(--font-heading)' }}>
               Boletim Institucional de Desempenho e Práticas Laboratoriais
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem', padding: '1rem', background: 'var(--color-nude-500, #F1EAD9)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--color-nude-300, #E2D7C3)' }}>
               <div><strong>Alunos Ativos:</strong> 482</div>
               <div><strong>Aproveitamento Médio:</strong> 76%</div>
               <div><strong>Experimentos Concluídos:</strong> 3.840</div>
@@ -497,21 +497,21 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
               <div><strong>Direção:</strong> {diretorNome}</div>
             </div>
 
-            <p style={{ fontSize: '0.9rem', lineHeight: '1.6', color: '#334155', marginBottom: '2rem' }}>
+            <p style={{ fontSize: '0.9rem', lineHeight: '1.6', color: 'var(--color-verde-700, #293E24)', marginBottom: '2rem' }}>
               Certificamos que as turmas vinculadas a este estabelecimento cumpriram integralmente a carga horária de práticas experimentais científicas e avaliações da Base Nacional Comum Curricular (BNCC), registrando evolução satisfatória nas competências de Ciências da Natureza e Matemática.
             </p>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3rem', paddingTop: '1rem', borderTop: '1px solid #cbd5e1' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3rem', paddingTop: '1rem', borderTop: '1px solid var(--color-nude-300, #E2D7C3)' }}>
               <div style={{ textAlign: 'center', width: '220px' }}>
-                <div style={{ borderBottom: '1px solid #000', marginBottom: '0.4rem' }}></div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>{diretorNome}</div>
-                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Diretora Pedagógica</div>
+                <div style={{ borderBottom: '1px solid var(--color-verde-900, #172314)', marginBottom: '0.4rem' }}></div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-verde-900, #172314)' }}>{diretorNome}</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)' }}>Diretora Pedagógica</div>
               </div>
 
               <div style={{ textAlign: 'center', width: '220px' }}>
-                <div style={{ borderBottom: '1px solid #000', marginBottom: '0.4rem' }}></div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>Coordenação Geral BNCC</div>
-                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Comitê Acadêmico</div>
+                <div style={{ borderBottom: '1px solid var(--color-verde-900, #172314)', marginBottom: '0.4rem' }}></div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-verde-900, #172314)' }}>Coordenação Geral BNCC</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)' }}>Comitê Acadêmico</div>
               </div>
             </div>
           </div>

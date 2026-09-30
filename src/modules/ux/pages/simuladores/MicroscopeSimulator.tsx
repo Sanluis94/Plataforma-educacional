@@ -118,8 +118,8 @@ const renderCellContent = (slideId: string, zoomLevel: number) => {
               <circle cx="50" cy="-30" r="6" fill="#10b981" style={{ opacity: zoomLevel >= 40 ? 0.8 : 0 }} />
 
               <g transform="translate(0, -10)" style={{ transform: zoomLevel === 400 ? 'scale(1.35) translate(0, 5px)' : 'none', transition: 'transform 0.4s' }}>
-                <circle cx="0" cy="0" r="28" fill="url(#animal-nuc)" stroke="#06b6d4" strokeWidth="2" />
-                <circle cx="5" cy="-5" r="9" fill="#0c4a6e" />
+                <circle cx="0" cy="0" r="28" fill="url(#animal-nuc)" stroke="#3D5B36" strokeWidth="2" />
+                <circle cx="5" cy="-5" r="9" fill="#172314" />
                 {zoomLevel >= 100 && (
                   <path d="M-15,-5 Q-5,-10 0,-15 M-10,12 Q5,5 15,10 M-18,5 Q-8,0 -5,8" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
                 )}
@@ -405,10 +405,10 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
         <div style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{
             aspectRatio: '1/1', maxWidth: '400px', width: '100%', borderRadius: '50%',
-            border: '8px solid #333', overflow: 'hidden',
-            background: 'radial-gradient(circle at center, #1a1a2e 60%, #000 100%)',
+            border: '8px solid #293E24', overflow: 'hidden',
+            background: 'radial-gradient(circle at center, #FFFFFF 65%, #FAF7EE 88%, #E2D7C3 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 40px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.5)',
+            boxShadow: '0 4px 20px rgba(41, 62, 36, 0.15), inset 0 0 30px rgba(41, 62, 36, 0.08)',
             position: 'relative',
           }}>
             {/* Célula visual - blurAmount applied only to content */}
@@ -449,8 +449,8 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
             {zoom < 40 && <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontStyle: 'italic' }}>Aumente o zoom para ver mais detalhes.</p>}
 
             {/* AI Diagnostics Box */}
-            <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: '8px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-              <div style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 700, marginBottom: '0.2rem' }}>🤖 DICA DA IA BIOLÓGICA</div>
+            <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, marginBottom: '0.2rem' }}>🤖 Dica da IA biológica</div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
                 {focusOffset === 0 
                   ? `Foco micrométrico nítido! Em ${zoom}× você está observando a amostra de ${selectedSlide.name}.`

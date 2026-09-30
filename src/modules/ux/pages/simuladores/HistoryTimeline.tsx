@@ -137,8 +137,8 @@ export function HistoryTimeline({ mode = 'timeline', labTitle, onComplete }: { m
         </div>
       )}
       {/* AI Historical Insight Box */}
-      <div style={{ marginTop: '1.25rem', padding: '1rem', borderRadius: '10px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-        <div style={{ color: '#06b6d4', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.25rem' }}>🤖 CONTEXTUALIZAÇÃO DA IA HISTÓRICA</div>
+      <div style={{ marginTop: '1.25rem', padding: '1rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.25rem' }}>🤖 Contextualização da IA histórica</div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
           {selected 
             ? `Evento "${selected.label}" (${selected.year}): Note as relações de causa e efeito com o cenário geopolítico mundial.`

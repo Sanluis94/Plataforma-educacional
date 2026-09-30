@@ -151,10 +151,10 @@ export function AccessibilityToolbar() {
           alignItems: 'center',
           justifyContent: 'center',
           padding: '0.5rem',
-          borderRadius: '0.5rem',
-          background: isOpen || settings.dyslexiaFont || settings.focusMode ? 'rgba(6, 182, 212, 0.15)' : 'none',
-          border: isOpen || settings.dyslexiaFont || settings.focusMode ? '1px solid #06b6d4' : '1px solid var(--border-color)',
-          color: isOpen || settings.dyslexiaFont || settings.focusMode ? '#06b6d4' : 'var(--text-secondary)',
+          borderRadius: '10px',
+          background: isOpen || settings.dyslexiaFont || settings.focusMode ? 'rgba(228, 104, 63, 0.12)' : 'none',
+          border: isOpen || settings.dyslexiaFont || settings.focusMode ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
+          color: isOpen || settings.dyslexiaFont || settings.focusMode ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
           cursor: 'pointer',
           transition: 'all 0.2s',
         }}
@@ -175,19 +175,18 @@ export function AccessibilityToolbar() {
             right: 0,
             width: '320px',
             maxWidth: '90vw',
-            background: 'var(--bg-card, #111827)',
+            background: 'var(--bg-card)',
             backdropFilter: 'blur(20px)',
-            border: '1px solid var(--border-card, rgba(6, 182, 212, 0.3))',
-            borderRadius: '0.75rem',
+            border: '1px solid var(--border-color)',
+            borderRadius: '14px',
             padding: '1.15rem',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)',
             zIndex: 100,
           }}
         >
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid var(--border-card)', paddingBottom: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#06b6d4', fontWeight: 700, fontSize: '0.85rem' }}>
-              <Sparkles style={{ width: '1rem', height: '1rem' }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.85rem' }}>
+              <Sparkles style={{ width: '1rem', height: '1rem', color: 'var(--color-primary)' }} />
               Acessibilidade & Inclusão DUA
             </div>
             <button
@@ -202,7 +201,7 @@ export function AccessibilityToolbar() {
                 gap: '0.25rem',
                 fontSize: '0.75rem',
                 padding: '0.2rem 0.4rem',
-                borderRadius: '4px',
+                borderRadius: '6px',
               }}
               title="Restaurar padrões"
             >
@@ -214,7 +213,7 @@ export function AccessibilityToolbar() {
           {/* Section 1: Tamanho do Texto */}
           <div style={{ marginBottom: '1rem' }}>
             <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-              Tamanho do Texto
+              Tamanho do texto
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem' }}>
               {([
@@ -227,12 +226,12 @@ export function AccessibilityToolbar() {
                   onClick={() => setSettings((s) => ({ ...s, fontSizePercent: scale.val }))}
                   style={{
                     padding: '0.4rem 0.5rem',
-                    borderRadius: '0.4rem',
+                    borderRadius: '10px',
                     fontSize: '0.8rem',
                     fontWeight: 700,
-                    border: settings.fontSizePercent === scale.val ? '1px solid #06b6d4' : '1px solid var(--border-color)',
-                    background: settings.fontSizePercent === scale.val ? 'rgba(6, 182, 212, 0.2)' : 'rgba(255,255,255,0.03)',
-                    color: settings.fontSizePercent === scale.val ? '#06b6d4' : 'var(--text-secondary)',
+                    border: settings.fontSizePercent === scale.val ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
+                    background: settings.fontSizePercent === scale.val ? 'rgba(228, 104, 63, 0.15)' : 'rgba(41, 62, 36, 0.03)',
+                    color: settings.fontSizePercent === scale.val ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
                     cursor: 'pointer',
                     transition: 'all 0.15s',
                   }}
@@ -254,16 +253,16 @@ export function AccessibilityToolbar() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '0.6rem 0.75rem',
-                borderRadius: '0.5rem',
-                border: settings.dyslexiaFont ? '1px solid #8b5cf6' : '1px solid var(--border-color)',
-                background: settings.dyslexiaFont ? 'rgba(139, 92, 246, 0.15)' : 'rgba(255,255,255,0.03)',
+                borderRadius: '10px',
+                border: settings.dyslexiaFont ? '1px solid var(--color-secondary)' : '1px solid var(--border-color)',
+                background: settings.dyslexiaFont ? 'rgba(41, 62, 36, 0.08)' : 'rgba(41, 62, 36, 0.03)',
                 cursor: 'pointer',
                 textAlign: 'left',
               }}
             >
               <div>
-                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: settings.dyslexiaFont ? '#a78bfa' : 'var(--text-main)' }}>
-                  Fonte para Dislexia
+                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                  Fonte para dislexia
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                   Aumenta espaçamento e peso das letras
@@ -273,9 +272,9 @@ export function AccessibilityToolbar() {
                 style={{
                   width: '1.25rem',
                   height: '1.25rem',
-                  borderRadius: '0.25rem',
-                  border: settings.dyslexiaFont ? '1px solid #8b5cf6' : '1px solid var(--border-color)',
-                  background: settings.dyslexiaFont ? '#8b5cf6' : 'transparent',
+                  borderRadius: '6px',
+                  border: settings.dyslexiaFont ? '1px solid var(--color-secondary)' : '1px solid var(--border-color)',
+                  background: settings.dyslexiaFont ? 'var(--color-secondary)' : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -287,7 +286,7 @@ export function AccessibilityToolbar() {
             </button>
           </div>
 
-          {/* Section 3: Modo Foco (TDAH e TEA) */}
+          {/* Section 3: Modo Foco (TDAH e TEA) - Estilizado conforme pág. 11 do manual */}
           <div style={{ marginBottom: '1rem' }}>
             <button
               onClick={() => setSettings((s) => ({ ...s, focusMode: !s.focusMode }))}
@@ -297,17 +296,17 @@ export function AccessibilityToolbar() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '0.6rem 0.75rem',
-                borderRadius: '0.5rem',
-                border: settings.focusMode ? '1px solid #10b981' : '1px solid var(--border-color)',
-                background: settings.focusMode ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.03)',
+                borderRadius: '10px',
+                border: settings.focusMode ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
+                background: settings.focusMode ? 'rgba(228, 104, 63, 0.12)' : 'rgba(41, 62, 36, 0.03)',
                 cursor: 'pointer',
                 textAlign: 'left',
               }}
             >
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', fontWeight: 600, color: settings.focusMode ? '#34d399' : 'var(--text-main)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', fontWeight: 600, color: settings.focusMode ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-main)' }}>
                   <Eye style={{ width: '0.9rem', height: '0.9rem' }} />
-                  Modo Foco (TDAH & TEA)
+                  Modo foco (TDAH e TEA)
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                   Elimina animações e excesso de estímulos visuais
@@ -317,9 +316,9 @@ export function AccessibilityToolbar() {
                 style={{
                   width: '1.25rem',
                   height: '1.25rem',
-                  borderRadius: '0.25rem',
-                  border: settings.focusMode ? '1px solid #10b981' : '1px solid var(--border-color)',
-                  background: settings.focusMode ? '#10b981' : 'transparent',
+                  borderRadius: '6px',
+                  border: settings.focusMode ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
+                  background: settings.focusMode ? 'var(--color-primary)' : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -332,13 +331,13 @@ export function AccessibilityToolbar() {
           </div>
 
           {/* Section 4: Leitor em Voz Alta (Web Speech API) */}
-          <div style={{ borderTop: '1px solid var(--border-card)', paddingTop: '0.85rem' }}>
+          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.85rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
               <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Áudio-Guia / Leitor de Tela
+                Áudio-guia e leitor de tela
               </div>
               {isSpeaking && (
-                <span style={{ fontSize: '0.68rem', color: '#10b981', fontWeight: 700 }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--color-secondary)', fontWeight: 700 }}>
                   {isPaused ? 'Pausado' : 'Reproduzindo'}
                 </span>
               )}
@@ -354,22 +353,22 @@ export function AccessibilityToolbar() {
                   justifyContent: 'center',
                   gap: '0.4rem',
                   padding: '0.5rem',
-                  borderRadius: '0.4rem',
+                  borderRadius: '10px',
                   fontSize: '0.78rem',
                   fontWeight: 600,
-                  border: '1px solid #06b6d4',
-                  background: 'rgba(6, 182, 212, 0.15)',
-                  color: '#06b6d4',
+                  border: '1px solid var(--color-verde-700)',
+                  background: 'rgba(41, 62, 36, 0.08)',
+                  color: 'var(--color-verde-700)',
                   cursor: 'pointer',
                 }}
               >
                 {isSpeaking && !isPaused ? (
                   <>
-                    <Pause style={{ width: '0.85rem', height: '0.85rem' }} /> Pausar Leitura
+                    <Pause style={{ width: '0.85rem', height: '0.85rem' }} /> Pausar leitura
                   </>
                 ) : (
                   <>
-                    <Play style={{ width: '0.85rem', height: '0.85rem' }} /> {isPaused ? 'Continuar' : 'Ler Tela / Seleção'}
+                    <Play style={{ width: '0.85rem', height: '0.85rem' }} /> {isPaused ? 'Continuar' : 'Ler tela'}
                   </>
                 )}
               </button>
@@ -379,11 +378,11 @@ export function AccessibilityToolbar() {
                   onClick={handleStopSpeech}
                   style={{
                     padding: '0.5rem 0.75rem',
-                    borderRadius: '0.4rem',
+                    borderRadius: '10px',
                     fontSize: '0.78rem',
-                    border: '1px solid #ef4444',
-                    background: 'rgba(239, 68, 68, 0.15)',
-                    color: '#ef4444',
+                    border: '1px solid rgba(188, 57, 31, 0.3)',
+                    background: 'rgba(188, 57, 31, 0.08)',
+                    color: 'var(--color-vermelho, #BC391F)',
                     cursor: 'pointer',
                   }}
                   title="Parar áudio"

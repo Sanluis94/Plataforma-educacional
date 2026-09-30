@@ -330,9 +330,9 @@ export function PhilosophySimulator({ mode = 'ethics', labTitle, onComplete }: P
                 onClick={() => handleSelectOption(idx)}
                 style={{
                   padding: '1rem',
-                  borderRadius: '8px',
-                  border: selectedOptionIdx === idx ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.08)',
-                  background: selectedOptionIdx === idx ? 'rgba(6, 182, 212, 0.05)' : 'rgba(255,255,255,0.02)',
+                  borderRadius: 'var(--radius-sm, 10px)',
+                  border: selectedOptionIdx === idx ? '1.5px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
+                  background: selectedOptionIdx === idx ? 'var(--color-primary-light, rgba(228,104,63,0.18))' : 'var(--bg-card)',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   position: 'relative'
@@ -342,19 +342,19 @@ export function PhilosophySimulator({ mode = 'ethics', labTitle, onComplete }: P
                   <div style={{
                     width: '18px', height: '18px', borderRadius: '50%',
                     border: '2px solid',
-                    borderColor: selectedOptionIdx === idx ? '#06b6d4' : 'var(--text-muted)',
+                    borderColor: selectedOptionIdx === idx ? 'var(--color-primary, #E4683F)' : 'var(--text-muted)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                   }}>
-                    {selectedOptionIdx === idx && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#06b6d4' }} />}
+                    {selectedOptionIdx === idx && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--color-primary, #E4683F)' }} />}
                   </div>
-                  <span style={{ color: selectedOptionIdx === idx ? 'var(--text-main)' : 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                  <span style={{ color: selectedOptionIdx === idx ? 'var(--text-main)' : 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.45 }}>
                     {opt.text}
                   </span>
                 </div>
 
                 {selectedOptionIdx === idx && (
-                  <div style={{ marginTop: '0.8rem', paddingLeft: '1.75rem', fontSize: '0.8rem', borderTop: '1px dashed rgba(255,255,255,0.08)', paddingTop: '0.6rem' }}>
-                    <div style={{ color: '#8b5cf6', fontWeight: 'bold' }}>Escola / Filósofo: {opt.philosopher}</div>
+                  <div style={{ marginTop: '0.8rem', paddingLeft: '1.75rem', fontSize: '0.8rem', borderTop: '1px dashed var(--border-color)', paddingTop: '0.6rem' }}>
+                    <div style={{ color: 'var(--color-primary-accessible, #E4683F)', fontWeight: 'bold' }}>Escola / Filósofo: {opt.philosopher}</div>
                     <div style={{ color: 'var(--text-muted)', marginTop: '0.2rem' }}>{opt.explanation}</div>
                   </div>
                 )}
@@ -365,8 +365,8 @@ export function PhilosophySimulator({ mode = 'ethics', labTitle, onComplete }: P
           <button 
             disabled={selectedOptionIdx === null}
             onClick={handleNext}
-            className="premium-btn btn-primary"
-            style={{ width: 'fit-content', alignSelf: 'flex-end', padding: '0.6rem 2rem' }}
+            className="btn-gradient"
+            style={{ width: 'fit-content', alignSelf: 'flex-end', padding: '0.6rem 2rem', borderRadius: 'var(--radius-sm, 10px)' }}
           >
             {currentIdx < dilemmasList.length - 1 ? 'Próximo Dilema' : 'Ver Diagnóstico Filosófico'}
           </button>
@@ -385,30 +385,30 @@ export function PhilosophySimulator({ mode = 'ethics', labTitle, onComplete }: P
           </p>
 
           <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', width: '100%', maxWidth: '400px', margin: '1rem 0' }}>
-            <div style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>CONSEQUÊNCIAS</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#06b6d4' }}>{profile.utilitarian} pts</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-primary-accessible, #B8441F)' }}>{profile.utilitarian} pts</div>
             </div>
-            <div style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>DEVER / PRINCÍPIOS</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#8b5cf6' }}>{profile.deontology} pts</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-secondary, #293E24)' }}>{profile.deontology} pts</div>
             </div>
-            <div style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>VIRTUDE / RAZÃO</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#ffb300' }}>{profile.virtue} pts</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-primary, #E4683F)' }}>{profile.virtue} pts</div>
             </div>
           </div>
 
-          <div style={{ marginTop: '1rem', padding: '0.85rem', borderRadius: '10px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)', width: '100%', maxWidth: '500px' }}>
-            <div style={{ color: '#06b6d4', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>🤖 DIAGNÓSTICO FILOSÓFICO DE IA</div>
+          <div style={{ marginTop: '1rem', padding: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-subtle, #FAF7EE)', border: '1px solid var(--border-color, #E2D7C3)', width: '100%', maxWidth: '500px' }}>
+            <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>🤖 Diagnóstico filosófico de IA</div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
               Perfil reflexivo verificado para o modo {mode.toUpperCase()}: Você pondera argumentos com rigor lógico e discernimento conceitual.
             </p>
           </div>
 
           <button 
-            className="premium-btn btn-primary mt-4" 
-            style={{ width: '240px', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
+            className="btn-gradient mt-4" 
+            style={{ width: '280px', fontWeight: 'bold', borderRadius: 'var(--radius-sm, 10px)', boxShadow: 'none' }}
             onClick={handleFinish}
           >
             🏆 Concluir Laboratório (+50 XP & +10 Moedas)

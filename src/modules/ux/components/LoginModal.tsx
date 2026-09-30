@@ -3,6 +3,7 @@ import { useAuth } from '../../core/contexts/AuthContext';
 import type { GradeLevel } from '../../core/contexts/AuthContext';
 import { GRADE_LABELS } from '../../core/contexts/AuthContext';
 import { X } from 'lucide-react';
+import { Logo } from './Logo';
 
 interface LoginModalProps {
   onClose: () => void;
@@ -54,19 +55,22 @@ export function LoginModal({ onClose }: LoginModalProps) {
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="fade-in glass-card"
+        className="fade-in card"
         style={{
           padding: '2rem', width: '100%', maxWidth: '440px',
-          borderRadius: '1rem',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.5), 0 0 40px rgba(6,182,212,0.1)',
+          borderRadius: '14px',
+          border: '1px solid var(--border-color)',
           background: 'var(--bg-card)',
         }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
           <div>
+            <div style={{ marginBottom: '0.5rem' }}>
+              <Logo symbolSize={26} />
+            </div>
             <h2 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.35rem', fontWeight: 700 }}>
-              Entrar na Plataforma
+              Entrar na plataforma
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
               Selecione seu perfil para continuar
@@ -76,7 +80,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
             onClick={onClose}
             style={{
               background: 'none', border: '1px solid var(--border-color)',
-              borderRadius: '0.5rem', padding: '0.35rem',
+              borderRadius: '10px', padding: '0.35rem',
               color: 'var(--text-muted)', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.2s',
@@ -93,21 +97,21 @@ export function LoginModal({ onClose }: LoginModalProps) {
               key={role}
               onClick={() => setSelectedRole(role)}
               style={{
-                padding: '1rem', borderRadius: '0.75rem', cursor: 'pointer',
-                border: selectedRole === role ? '1px solid #06b6d4' : '1px solid var(--border-color)',
+                padding: '0.85rem 0.5rem', borderRadius: '10px', cursor: 'pointer',
+                border: selectedRole === role ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
                 background: selectedRole === role
-                  ? 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(139,92,246,0.15))'
+                  ? 'rgba(228, 104, 63, 0.08)'
                   : 'transparent',
                 color: selectedRole === role ? 'var(--text-main)' : 'var(--text-secondary)',
                 fontWeight: selectedRole === role ? 600 : 400,
                 transition: 'all 0.2s', textAlign: 'center',
               }}
             >
-              <div style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>
+              <div style={{ fontSize: '1.6rem', marginBottom: '0.25rem' }}>
                 {role === 'estudante' ? '🎓' : role === 'professor' ? '👨‍🏫' : '🛡️'}
               </div>
-              <div style={{ fontSize: '0.88rem' }}>
-                {role === 'estudante' ? 'Sou Estudante' : role === 'professor' ? 'Sou Professor' : 'Sou Admin'}
+              <div style={{ fontSize: '0.85rem' }}>
+                {role === 'estudante' ? 'Estudante' : role === 'professor' ? 'Professor' : 'Admin'}
               </div>
             </button>
           ))}
@@ -128,10 +132,10 @@ export function LoginModal({ onClose }: LoginModalProps) {
                 key={key}
                 onClick={() => setSelectedGrade(key)}
                 style={{
-                  textAlign: 'left', padding: '0.65rem 0.9rem', borderRadius: '0.5rem', cursor: 'pointer',
-                  background: selectedGrade === key ? 'rgba(6,182,212,0.1)' : 'transparent',
-                  border: selectedGrade === key ? '1px solid #06b6d4' : '1px solid var(--border-color)',
-                  color: selectedGrade === key ? '#06b6d4' : 'var(--text-main)',
+                  textAlign: 'left', padding: '0.65rem 0.9rem', borderRadius: '10px', cursor: 'pointer',
+                  background: selectedGrade === key ? 'rgba(228, 104, 63, 0.08)' : 'transparent',
+                  border: selectedGrade === key ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
+                  color: selectedGrade === key ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-main)',
                   fontSize: '0.85rem',
                   fontWeight: selectedGrade === key ? 600 : 400,
                   transition: 'all 0.2s',
@@ -148,22 +152,23 @@ export function LoginModal({ onClose }: LoginModalProps) {
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="btn-gradient"
+          className="btn-primary"
           style={{
             width: '100%', padding: '0.85rem', fontSize: '0.95rem',
+            borderRadius: '10px',
             opacity: loading ? 0.6 : 1,
             cursor: loading ? 'not-allowed' : 'pointer',
           }}
         >
-          {loading ? '⏳ Entrando...' : isLocalAuthMode ? '🚀 Entrar localmente' : '🚀 Entrar com Google'}
+          {loading ? '⏳ Entrando...' : isLocalAuthMode ? 'Entrar localmente' : 'Entrar com Google'}
         </button>
 
         {/* Error */}
         {error && (
           <div style={{
-            marginTop: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem',
-            background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-            color: '#f87171', fontSize: '0.8rem', lineHeight: 1.5,
+            marginTop: '0.75rem', padding: '0.75rem', borderRadius: '10px',
+            background: 'var(--color-vermelho-bg)', border: '1px solid var(--color-vermelho-border)',
+            color: 'var(--color-vermelho)', fontSize: '0.8rem', lineHeight: 1.5,
           }}>
             ⚠️ {error}
           </div>
@@ -176,3 +181,4 @@ export function LoginModal({ onClose }: LoginModalProps) {
     </div>
   );
 }
+

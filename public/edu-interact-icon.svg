@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <!-- Folha / Semente Orgânica em Laranja Oficial #E4683F -->
+  <path d="M16 2.5C21.5 8 26.5 13.5 26.5 18C26.5 23.8 21.8 28.5 16 29.5C10.2 28.5 5.5 23.8 5.5 18C5.5 13.5 10.5 8 16 2.5Z" fill="#E4683F"/>
+  
+  <!-- Nervura de Circuito - Ciclo CSFA (Provocação, Experimentação, Maiêutica) -->
+  <line x1="16" y1="7" x2="16" y2="25" stroke="#FFFFFF" stroke-width="1.75" stroke-linecap="round"/>
+  
+  <!-- 3 Nós do Circuito -->
+  <circle cx="16" cy="9" r="2.2" fill="#FFFFFF"/>
+  <circle cx="16" cy="9" r="1.1" fill="#E4683F"/>
+  
+  <circle cx="16" cy="16" r="2.2" fill="#FFFFFF"/>
+  <circle cx="16" cy="16" r="1.1" fill="#E4683F"/>
+  
+  <circle cx="16" cy="23" r="2.2" fill="#FFFFFF"/>
+  <circle cx="16" cy="23" r="1.1" fill="#E4683F"/>
+</svg>

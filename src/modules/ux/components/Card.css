@@ -1,0 +1,28 @@
+/* Cartões e Blocos com identidade visual Edu-Interact */
+.card {
+  background-color: var(--bg-card, #FAF7EE);
+  border: 1px solid var(--border-color, #E2D7C3);
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: none; /* Regra do manual: nunca sombra projetada */
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  overflow: hidden;
+}
+
+.card-interactive:hover {
+  border-color: var(--color-primary, #E4683F);
+  background-color: var(--bg-card-hover, #F4EEDF);
+}
+
+.card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color, #E2D7C3);
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+.card-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color, #E2D7C3);
+}

@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kortex — Apresentação de TCC | Laboratórios Virtuais, IA Socrática e Acessibilidade DUA</title>
+  
+  <!-- Typography from Google Fonts: Space Grotesk (headings/data) & Manrope (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- Dyslexic-friendly font fallback helper -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/open-dyslexic.css" onerror="this.onerror=null; console.log('Dyslexic font remote loaded via fallback')">
+
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM & TOKENS — BASEADO NO GUIA V1_Validação.pdf (Kortex)
+       Regra de Proporção: Nude 50% | Verde 30% | Laranja 15% | Vermelho 5%
+       Tipografia: Space Grotesk (Títulos/Números/UI) + Manrope (Corpo)
+       Capitalização: Sentence case obrigatório ("Kortex")
+       ========================================================================== */
+    :root {
+      /* 50% Nude */
+      --nude-bg: #FAF7EE;
+      --nude-surface: #F1EAD9;
+      --nude-card: #FFFFFF;
+      --nude-border: #E2D7C3;
+      --nude-border-subtle: rgba(226, 215, 195, 0.6);
+      --nude-hover: #EBE3CE;
+
+      /* 30% Verde Primário */
+      --verde-primary: #293E24;
+      --verde-dark: #172314;
+      --verde-light: #3D5B36;
+      --verde-accent: #4A6E42;
+      --verde-tint: rgba(41, 62, 36, 0.08);
+      --verde-glow: rgba(41, 62, 36, 0.18);
+
+      /* 15% Laranja Secundário */
+      --laranja-action: #E4683F;
+      --laranja-dark: #B8441F;
+      --laranja-light: #F59C7B;
+      --laranja-tint: rgba(228, 104, 63, 0.12);
+
+      /* 5% Vermelho Acento */
+      --vermelho-accent: #BC391F;
+      --vermelho-tint: rgba(188, 57, 31, 0.12);
+
+      /* Neutros e Apoio */
+      --text-main: #172314;
+      --text-muted: #566452;
+      --text-subtle: #798674;
+      --white: #FFFFFF;
+      --shadow-sm: 0 2px 8px rgba(23, 35, 20, 0.05);
+      --shadow-md: 0 8px 24px rgba(23, 35, 20, 0.08);
+      --shadow-lg: 0 16px 40px rgba(23, 35, 20, 0.12);
+
+      /* Tipografia */
+      --font-heading: 'Space Grotesk', -apple-system, sans-serif;
+      --font-body: 'Manrope', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* Transição */
+      --trans-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      --trans-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Dark Mode (Especificação V1_Validação.pdf) */
+    body.theme-dark {
+      --nude-bg: #0D150B;
+      --nude-surface: #142012;
+      --nude-card: #182616;
+      --nude-border: #2D4229;
+      --nude-border-subtle: rgba(74, 110, 66, 0.35);
+      --nude-hover: #22351F;
+
+      --verde-primary: #A8D5A2;
+      --verde-dark: #D4EDD0;
+      --verde-light: #7EAF78;
+      --verde-accent: #A8D5A2;
+      --verde-tint: rgba(168, 213, 162, 0.12);
+      --verde-glow: rgba(168, 213, 162, 0.25);
+
+      --laranja-action: #E4683F;
+      --laranja-dark: #FF875E;
+      --laranja-light: #F59C7B;
+      --laranja-tint: rgba(228, 104, 63, 0.2);
+
+      --vermelho-accent: #F87171;
+      --vermelho-tint: rgba(248, 113, 113, 0.2);
+
+      --text-main: #F1EAD9;
+      --text-muted: #B3C2B0;
+      --text-subtle: #899B85;
+      --white: #142012;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+      --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Acessibilidade DUA: Modo Dislexia Ativo */
+    body.dua-dyslexia {
+      font-family: 'OpenDyslexic', 'Comic Sans MS', sans-serif !important;
+      letter-spacing: 0.06em !important;
+      word-spacing: 0.15em !important;
+      line-height: 1.8 !important;
+    }
+    body.dua-dyslexia h1, body.dua-dyslexia h2, body.dua-dyslexia h3, body.dua-dyslexia .stat-number {
+      font-family: 'OpenDyslexic', 'Comic Sans MS', sans-serif !important;
+      letter-spacing: 0.04em !important;
+    }
+
+    /* Reset e Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--nude-bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      transition: background-color var(--trans-smooth), color var(--trans-smooth);
+    }
+
+    /* Régua de Foco Visual DUA (Focus Reading Mask) */
+    #focus-mask {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      height: 80px;
+      pointer-events: none;
+      z-index: 9999;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+      border-top: 2px dashed var(--laranja-action);
+      border-bottom: 2px dashed var(--laranja-action);
+      transition: top 0.08s ease-out;
+    }
+    body.dua-focus-mask #focus-mask {
+      display: block;
+    }
+
+    /* Layout do Deck de Apresentação */
+    #presentation-app {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Barra Superior de Navegação & Telemetria */
+    header.deck-header {
+      height: 56px;
+      background: var(--nude-surface);
+      border-bottom: 1px solid var(--nude-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-logo-mark {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-title {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--verde-primary);
+      letter-spacing: -0.02em;
+    }
+    .brand-title span {
+      color: var(--laranja-action);
+    }
+
+    .brand-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--verde-tint);
+      color: var(--verde-primary);
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--nude-border);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .slide-progress-container {
+      width: 240px;
+      height: 6px;
+      background: var(--nude-border);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .slide-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--verde-primary), var(--laranja-action));
+      border-radius: 999px;
+      width: 10%;
+      transition: width var(--trans-smooth);
+    }
+
+    .slide-counter {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      min-width: 60px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--trans-fast);
+    }
+    .btn-icon:hover {
+      background: var(--nude-hover);
+      border-color: var(--laranja-action);
+      color: var(--laranja-action);
+      transform: translateY(-1px);
+    }
+    .btn-icon.active {
+      background: var(--laranja-action);
+      color: #fff;
+      border-color: var(--laranja-dark);
+    }
+
+    /* Container de Slides */
+    main.slides-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: calc(100vh - 56px - 60px);
+    }
+
+    .slide-section {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.98) translateY(12px);
+      transition: opacity var(--trans-smooth), transform var(--trans-smooth), visibility var(--trans-smooth);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 32px 64px;
+      overflow-y: auto;
+    }
+
+    .slide-section.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+      z-index: 10;
+    }
+
+    /* Tipografia e Títulos de Slide */
+    .slide-header {
+      margin-bottom: 24px;
+    }
+
+    .slide-tag {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--laranja-action);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .slide-tag::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--laranja-action);
+    }
+
+    .slide-title {
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--verde-primary);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+
+    .slide-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      max-width: 950px;
+      line-height: 1.45;
+    }
+
+    /* Elementos Comuns de Conteúdo */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .content-card {
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: transform var(--trans-fast), box-shadow var(--trans-fast), border-color var(--trans-fast);
+    }
+    .content-card:hover {
+      border-color: var(--laranja-action);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-pillar-socrates { border-top: 4px solid var(--verde-primary); }
+    .card-pillar-aristoteles { border-top: 4px solid var(--laranja-action); }
+    .card-pillar-freire { border-top: 4px solid var(--verde-light); }
+    .card-pillar-dua { border-top: 4px solid var(--vermelho-accent); }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: var(--nude-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 14px;
+      color: var(--verde-primary);
+    }
+
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--verde-primary);
+      margin-bottom: 8px;
+    }
+
+    .card-topic-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-topic-list li {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+    }
+    .card-topic-list li::before {
+      content: '✦';
+      color: var(--laranja-action);
+      font-size: 0.85rem;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    /* Badges & Pills */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--nude-surface);
+      color: var(--verde-primary);
+      border: 1px solid var(--nude-border);
+    }
+    .pill-orange {
+      background: var(--laranja-tint);
+      color: var(--laranja-action);
+      border-color: rgba(228, 104, 63, 0.3);
+    }
+    .pill-green {
+      background: var(--verde-tint);
+      color: var(--verde-primary);
+      border-color: rgba(41, 62, 36, 0.2);
+    }
+    .pill-red {
+      background: var(--vermelho-tint);
+      color: var(--vermelho-accent);
+      border-color: rgba(188, 57, 31, 0.3);
+    }
+
+    /* KPIs / Estatísticas de Resultados */
+    .stat-box {
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+    .stat-number {
+      font-family: var(--font-heading);
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--verde-primary);
+      line-height: 1;
+      margin-bottom: 6px;
+      letter-spacing: -0.04em;
+    }
+    .stat-number span {
+      color: var(--laranja-action);
+      font-size: 2rem;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stat-sub {
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+      margin-top: 4px;
+    }
+
+    /* SLIDE ESPECÍFICO: CAPA (Slide 1) */
+    .cover-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .cover-brand-emblem {
+      margin-bottom: 24px;
+      position: relative;
+      animation: floatLeaf 4s ease-in-out infinite;
+    }
+    @keyframes floatLeaf {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .cover-title {
+      font-family: var(--font-heading);
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: var(--verde-primary);
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .cover-title span {
+      background: linear-gradient(135deg, var(--verde-primary), var(--laranja-action));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .cover-tagline {
+      font-size: 1.3rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 28px;
+    }
+    .cover-meta {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: var(--nude-surface);
+      padding: 12px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--nude-border);
+      font-size: 0.9rem;
+      color: var(--text-main);
+      margin-bottom: 28px;
+    }
+    .cover-pillars {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* SLIDE INTERATIVO: LABORATÓRIO VIRTUAL (Pêndulo Simples) */
+    .lab-interactive-layout {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 24px;
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .lab-canvas-card {
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .lab-canvas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .canvas-wrap {
+      flex: 1;
+      min-height: 280px;
+      background: var(--nude-surface);
+      border-radius: 12px;
+      border: 1px solid var(--nude-border);
+      position: relative;
+      overflow: hidden;
+    }
+    canvas#pendulumCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .lab-controls-bar {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      background: var(--nude-surface);
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--nude-border);
+    }
+
+    .control-item label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .control-item input[type=range] {
+      width: 100%;
+      accent-color: var(--laranja-action);
+      cursor: pointer;
+    }
+
+    .gravity-presets {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .btn-preset {
+      flex: 1;
+      padding: 4px 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid var(--nude-border);
+      background: var(--nude-card);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all var(--trans-fast);
+    }
+    .btn-preset.active {
+      background: var(--verde-primary);
+      color: #fff;
+      border-color: var(--verde-dark);
+    }
+
+    /* SLIDE INTERATIVO: SUÍTE DE ACESSIBILIDADE DUA */
+    .dua-suite-card {
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .dua-demo-box {
+      background: var(--nude-surface);
+      border: 2px dashed var(--laranja-action);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .dua-demo-text {
+      font-size: 1.05rem;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    .dua-controls-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .dua-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      transition: all var(--trans-fast);
+    }
+    .dua-toggle-btn:hover {
+      border-color: var(--laranja-action);
+      background: var(--nude-hover);
+    }
+    .dua-toggle-btn.active {
+      background: var(--verde-tint);
+      border-color: var(--verde-primary);
+      color: var(--verde-primary);
+    }
+    .dua-toggle-btn .toggle-indicator {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--nude-border);
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+    .dua-toggle-btn.active .toggle-indicator {
+      background: var(--verde-primary);
+      border-color: var(--verde-primary);
+      color: #fff;
+    }
+
+    /* SLIDE INTERATIVO: MATRIZ TRI E GESTÃO DOCENTE */
+    .tri-interactive-card {
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .question-stem {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-main);
+      line-height: 1.5;
+      background: var(--nude-surface);
+      padding: 14px;
+      border-radius: 8px;
+      border-left: 4px solid var(--laranja-action);
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text-main);
+      transition: all var(--trans-fast);
+    }
+    .option-btn:hover {
+      border-color: var(--laranja-action);
+      background: var(--nude-hover);
+    }
+    .option-btn.selected-correct {
+      background: rgba(41, 62, 36, 0.12);
+      border-color: var(--verde-primary);
+      color: var(--verde-primary);
+      font-weight: 600;
+    }
+    .option-btn.selected-incorrect {
+      background: rgba(188, 57, 31, 0.12);
+      border-color: var(--vermelho-accent);
+      color: var(--vermelho-accent);
+    }
+
+    .tri-telemetry-badge {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--nude-surface);
+      border-radius: 8px;
+      border: 1px solid var(--nude-border);
+    }
+
+    /* Barra Inferior de Navegação dos Slides */
+    footer.deck-footer {
+      height: 60px;
+      background: var(--nude-surface);
+      border-top: 1px solid var(--nude-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .footer-hints {
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .kbd {
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .nav-buttons-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-nav {
+      background: var(--verde-primary);
+      color: #FFFFFF;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-family: var(--font-heading);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all var(--trans-fast);
+      box-shadow: 0 2px 6px rgba(41, 62, 36, 0.2);
+    }
+    .btn-nav:hover {
+      background: var(--verde-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(41, 62, 36, 0.3);
+    }
+    .btn-nav-outline {
+      background: var(--nude-card);
+      color: var(--text-main);
+      border: 1px solid var(--nude-border);
+      box-shadow: none;
+    }
+    .btn-nav-outline:hover {
+      background: var(--nude-hover);
+      border-color: var(--laranja-action);
+      color: var(--laranja-action);
+    }
+    .btn-nav:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Gaveta de Notas de Orador (Speaker Notes Drawer) */
+    #speaker-notes-drawer {
+      position: fixed;
+      bottom: 60px;
+      right: 24px;
+      width: 480px;
+      max-height: 400px;
+      background: var(--nude-card);
+      border: 1px solid var(--laranja-action);
+      border-radius: 14px;
+      box-shadow: var(--shadow-lg);
+      z-index: 150;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #speaker-notes-drawer.open {
+      display: flex;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .notes-header {
+      background: var(--nude-surface);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--nude-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .notes-title {
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--laranja-action);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .notes-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .notes-body {
+      padding: 16px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: var(--text-main);
+    }
+    .notes-body .note-highlight {
+      background: var(--laranja-tint);
+      color: var(--laranja-action);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .notes-action-cue {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: var(--verde-tint);
+      border-left: 3px solid var(--verde-primary);
+      border-radius: 4px;
+      font-size: 0.82rem;
+      color: var(--verde-primary);
+      font-weight: 600;
+    }
+
+    /* Modal de Menu de Slides (Overview / Jump) */
+    #slide-menu-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(23, 35, 20, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    #slide-menu-modal.open {
+      display: flex;
+    }
+
+    .menu-modal-card {
+      background: var(--nude-card);
+      border: 1px solid var(--nude-border);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 820px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .menu-modal-header {
+      padding: 16px 24px;
+      background: var(--nude-surface);
+      border-bottom: 1px solid var(--nude-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .menu-modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 20px 24px;
+      overflow-y: auto;
+    }
+    .menu-slide-item {
+      padding: 12px 16px;
+      background: var(--nude-surface);
+      border: 1px solid var(--nude-border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all var(--trans-fast);
+    }
+    .menu-slide-item:hover, .menu-slide-item.active {
+      border-color: var(--laranja-action);
+      background: var(--nude-card);
+      transform: translateX(4px);
+    }
+    .menu-slide-num {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--laranja-action);
+      min-width: 24px;
+    }
+    .menu-slide-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Efeitos de Animação e Responsividade */
+    @media (max-width: 1024px) {
+      .slide-section { padding: 24px 32px; }
+      .slide-title { font-size: 1.8rem; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+      .lab-interactive-layout { grid-template-columns: 1fr; }
+      #speaker-notes-drawer { width: calc(100vw - 48px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Régua de Foco DUA (Focus Mask) -->
+  <div id="focus-mask"></div>
+
+  <div id="presentation-app">
+
+    <!-- BARRA SUPERIOR -->
+    <header class="deck-header">
+      <div class="brand-container">
+        <div class="brand-logo-mark">
+          <!-- Símbolo Oficial Kortex (edu-interact-icon.svg) -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28" fill="none">
+            <path d="M16 2.5C21.5 8 26.5 13.5 26.5 18C26.5 23.8 21.8 28.5 16 29.5C10.2 28.5 5.5 23.8 5.5 18C5.5 13.5 10.5 8 16 2.5Z" fill="#E4683F"/>
+            <line x1="16" y1="7" x2="16" y2="25" stroke="#FFFFFF" stroke-width="1.75" stroke-linecap="round"/>
+            <circle cx="16" cy="9" r="2.2" fill="#FFFFFF"/>
+            <circle cx="16" cy="9" r="1.1" fill="#E4683F"/>
+            <circle cx="16" cy="16" r="2.2" fill="#FFFFFF"/>
+            <circle cx="16" cy="16" r="1.1" fill="#E4683F"/>
+            <circle cx="16" cy="23" r="2.2" fill="#FFFFFF"/>
+            <circle cx="16" cy="23" r="1.1" fill="#E4683F"/>
+          </svg>
+        </div>
+        <span class="brand-title">Kortex</span>
+        <span class="brand-badge">UNISO • TCC 2026</span>
+      </div>
+
+      <div class="header-center">
+        <div class="slide-progress-container">
+          <div class="slide-progress-bar" id="slide-progress"></div>
+        </div>
+        <div class="slide-counter" id="slide-counter">01 / 10</div>
+      </div>
+
+      <div class="header-actions">
+        <a href="Roteiro_Falas_Pitch_TCC_Kortex.pdf" download class="btn-icon" title="Baixar PDF das Falas e Pitch" style="text-decoration: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="18"/><line x1="15" y1="15" x2="12" y2="18"/></svg>
+          PDF Roteiro
+        </a>
+        <a href="roteiro_pitch.html" target="_blank" class="btn-icon" title="Abrir Roteiro Completo em Nova Aba" style="text-decoration: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Roteiro Web
+        </a>
+        <button class="btn-icon" id="btn-toggle-notes" title="Alternar Notas de Orador (Tecla S)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Notas (S)
+        </button>
+        <button class="btn-icon" id="btn-menu-slides" title="Visão Geral dos Slides (Tecla M)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Índice
+        </button>
+        <button class="btn-icon" id="btn-toggle-theme" title="Alternar Tema Nude / Dark (Tecla T)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          Tema
+        </button>
+        <button class="btn-icon" id="btn-fullscreen" title="Tela Cheia (Tecla F)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEWPORT DOS SLIDES -->
+    <main class="slides-viewport" id="slides-viewport">
+
+      <!-- SLIDE 1: CAPA -->
+      <section class="slide-section active" data-slide="1" data-title="Capa e Apresentação">
+        <div class="cover-container">
+          <div class="cover-brand-emblem">
+            <!-- Símbolo Oficial Kortex (edu-interact-icon.svg) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="72" height="72" fill="none">
+              <path d="M16 2.5C21.5 8 26.5 13.5 26.5 18C26.5 23.8 21.8 28.5 16 29.5C10.2 28.5 5.5 23.8 5.5 18C5.5 13.5 10.5 8 16 2.5Z" fill="#E4683F"/>
+              <line x1="16" y1="7" x2="16" y2="25" stroke="#FFFFFF" stroke-width="1.75" stroke-linecap="round"/>
+              <circle cx="16" cy="9" r="2.2" fill="#FFFFFF"/>
+              <circle cx="16" cy="9" r="1.1" fill="#E4683F"/>
+              <circle cx="16" cy="16" r="2.2" fill="#FFFFFF"/>
+              <circle cx="16" cy="16" r="1.1" fill="#E4683F"/>
+              <circle cx="16" cy="23" r="2.2" fill="#FFFFFF"/>
+              <circle cx="16" cy="23" r="1.1" fill="#E4683F"/>
+            </svg>
+          </div>
+          
+          <div class="pill pill-orange" style="margin-bottom: 12px;">Universidade de Sorocaba (UNISO) • TCC 2026</div>
+          <h1 class="cover-title">Kortex: <span>Onde a raiz encontra o circuito</span></h1>
+          <p class="cover-tagline">Plataforma Educacional Gamificada com Laboratórios Virtuais, IA Socrática e Acessibilidade DUA</p>
+          
+          <div class="cover-meta" style="flex-direction: column; gap: 8px; border-radius: 14px; padding: 16px 28px; max-width: 860px;">
+            <div style="font-size: 0.78rem; font-family: var(--font-mono); color: var(--laranja-action); font-weight: 700; text-transform: uppercase;">
+              Bacharelado em Ciência da Computação / Engenharia • Apresentação de TCC
+            </div>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; font-size: 0.88rem; color: var(--text-main);">
+              <span><strong>Discentes:</strong></span>
+              <span>Gabriel Ramalho Resende</span>
+              <span>•</span>
+              <span>Luis Antonio de Albuquerque Adamski</span>
+              <span>•</span>
+              <span>Luis Filipe Giglio Frasao</span>
+              <span>•</span>
+              <span>Victor Augusto Pereira Nascimento</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--verde-primary); font-weight: 600; border-top: 1px solid var(--nude-border); padding-top: 6px; width: 100%; text-align: center;">
+              <strong>Orientador:</strong> Prof. Denicezar Angelo Baldo • <strong>Instituição:</strong> Universidade de Sorocaba (UNISO)
+            </div>
+          </div>
+
+          <div class="cover-pillars">
+            <span class="pill pill-green">Sócrates (Maiêutica Adaptativa)</span>
+            <span class="pill pill-orange">Aristóteles (Empirismo & Laboratórios)</span>
+            <span class="pill pill-green">Paulo Freire (Educação Dialógica)</span>
+            <span class="pill pill-red">DUA (Desenho Universal de Aprendizagem)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: INTRODUÇÃO & CONTEXTO -->
+      <section class="slide-section" data-slide="2" data-title="01. Introdução & Contextualização">
+        <div class="slide-header">
+          <div class="slide-tag">01. Introdução</div>
+          <h2 class="slide-title">O Desafio do Abstracionismo na Educação Básica</h2>
+          <p class="slide-subtitle">A desconexão entre a teoria científica e a prática real gera desengajamento, lacunas cognitivas e exclusão neurodiversa.</p>
+        </div>
+
+        <div class="grid-2">
+          <!-- Coluna 1: O Cenário Crítico Atual -->
+          <div class="content-card">
+            <div class="card-icon" style="color: var(--vermelho-accent);">⚠️</div>
+            <h3 class="card-title">O Diagnóstico Educacional</h3>
+            <ul class="card-topic-list">
+              <li><strong>Déficit de Laboratórios Físicos:</strong> Menos de 15% das escolas públicas possuem infraestrutura laboratorial funcional de Ciências/Física.</li>
+              <li><strong>Abstracionismo Passivo:</strong> Equações e fenômenos físicos apresentados em lousa estática sem possibilidade de experimentação tátil.</li>
+              <li><strong>Exclusão de Alunos Neurodivergentes:</strong> Materiais didáticos rígidos que desconsideram dislexia, TDAH e baixa visão.</li>
+              <li><strong>Sobrecarga Docente:</strong> Correção manual demorada e ausência de dados diagnósticos imediatos para intervenção.</li>
+            </ul>
+          </div>
+
+          <!-- Coluna 2: A Resposta Edu-Interact -->
+          <div class="content-card card-pillar-socrates">
+            <div class="card-icon" style="color: var(--verde-primary);">🌱</div>
+            <h3 class="card-title">A Síntese Proposta: Raiz & Circuito</h3>
+            <ul class="card-topic-list">
+              <li><strong>Empirismo Aristotélico Digital:</strong> Experimentação virtual com física em tempo real antes da formalização matemática.</li>
+              <li><strong>Tutoria Maiêutica Guiada:</strong> IA socrática que induz o raciocínio sem entregar resoluções automáticas prontas.</li>
+              <li><strong>Acessibilidade Nativa DUA:</strong> Múltiplos meios de representação, navegação e síntese vocal por padrão.</li>
+              <li><strong>Devolutiva em Tempo Zero (0s):</strong> Correção diagnóstica instantânea com Matriz TRI para apoio pedagógico.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: OBJETIVOS -->
+      <section class="slide-section" data-slide="3" data-title="02. Objetivos do Trabalho">
+        <div class="slide-header">
+          <div class="slide-tag">02. Objetivos</div>
+          <h2 class="slide-title">Propósito Científico e Tecnológico</h2>
+          <p class="slide-subtitle">Desenvolvimento e validação de uma solução integral de aprendizagem ativa acessível baseada no Ciclo CSFA.</p>
+        </div>
+
+        <div class="content-card" style="margin-bottom: 20px; border-left: 5px solid var(--verde-primary);">
+          <div style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--verde-primary); font-weight: 700; text-transform: uppercase;">Objetivo Geral</div>
+          <div style="font-size: 1.15rem; font-weight: 600; color: var(--text-main); margin-top: 4px;">
+            Conceber, implementar e avaliar uma plataforma web responsiva orientada pelo Desenho Universal para a Aprendizagem (DUA), provida de laboratórios interativos 2D/3D, agente pedagógico socrático e motor de avaliação diagnóstica adaptativa baseado em Teoria de Resposta ao Item (TRI).
+          </div>
+        </div>
+
+        <div class="grid-4">
+          <div class="content-card card-pillar-aristoteles">
+            <div class="card-icon">🔬</div>
+            <h4 class="card-title" style="font-size: 1.05rem;">Laboratórios Virtuais</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Simulação computacional de física e ciências com renderização em Canvas 2D a 60 FPS.</p>
+          </div>
+
+          <div class="content-card card-pillar-dua">
+            <div class="card-icon">♿</div>
+            <h4 class="card-title" style="font-size: 1.05rem;">Acessibilidade DUA</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Garantir acessibilidade universal com suporte a dislexia, foco visual e síntese de voz (WCAG AAA).</p>
+          </div>
+
+          <div class="content-card card-pillar-socrates">
+            <div class="card-icon">💡</div>
+            <h4 class="card-title" style="font-size: 1.05rem;">Tutor Socrático</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Arquitetura de prompts pedagógicos que desafia o aluno a formular suas próprias deduções.</p>
+          </div>
+
+          <div class="content-card card-pillar-freire">
+            <div class="card-icon">📊</div>
+            <h4 class="card-title" style="font-size: 1.05rem;">Avaliação TRI</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Calibração psicométrica das questões para mensurar proficiência real e orientar intervenção docente.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: MATERIAIS E MÉTODOS -->
+      <section class="slide-section" data-slide="4" data-title="03. Materiais e Métodos">
+        <div class="slide-header">
+          <div class="slide-tag">03. Materiais e Métodos</div>
+          <h2 class="slide-title">Arquitetura Técnica e Ciclo CSFA</h2>
+          <p class="slide-subtitle">Engenharia de software moderna orientada a desempenho, componentização modular e pedagogia dialógica.</p>
+        </div>
+
+        <div class="grid-2">
+          <!-- Stack Tecnológico -->
+          <div class="content-card">
+            <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
+              <span>🛠️</span> Stack Tecnológico & Bibliotecas
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+              <div style="background: var(--nude-surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--nude-border);">
+                <div style="font-size: 0.75rem; color: var(--laranja-action); font-family: var(--font-mono); font-weight: 700;">FRONTEND</div>
+                <div style="font-weight: 600; font-size: 0.95rem;">React 18 + Vite</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">SPA veloz, SSR-ready</div>
+              </div>
+              <div style="background: var(--nude-surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--nude-border);">
+                <div style="font-size: 0.75rem; color: var(--verde-primary); font-family: var(--font-mono); font-weight: 700;">MOTOR FÍSICO</div>
+                <div style="font-weight: 600; font-size: 0.95rem;">HTML5 Canvas 2D</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Equações diferenciais (Runge-Kutta)</div>
+              </div>
+              <div style="background: var(--nude-surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--nude-border);">
+                <div style="font-size: 0.75rem; color: var(--laranja-action); font-family: var(--font-mono); font-weight: 700;">ACESSIBILIDADE</div>
+                <div style="font-weight: 600; font-size: 0.95rem;">Web Speech API + DUA</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Text-to-speech nativo e OpenDyslexic</div>
+              </div>
+              <div style="background: var(--nude-surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--nude-border);">
+                <div style="font-size: 0.75rem; color: var(--verde-primary); font-family: var(--font-mono); font-weight: 700;">BANCO & TELEMETRIA</div>
+                <div style="font-weight: 600; font-size: 0.95rem;">Firebase Firestore</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Sincronização reativa de turmas</div>
+              </div>
+            </div>
+
+            <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--nude-border);">
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">COMPATIBILIDADE:</div>
+              <div style="display: flex; gap: 8px;">
+                <span class="pill">Chromium 90+</span>
+                <span class="pill">Firefox 88+</span>
+                <span class="pill">Safari 14+</span>
+                <span class="pill">Mobile / Tablets</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metodologia Pedagógica: Ciclo CSFA -->
+          <div class="content-card card-pillar-freire">
+            <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
+              <span>🔄</span> O Ciclo Pedagógico CSFA
+            </h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px;">Metodologia autoral baseada na espiral de aprendizagem ativa:</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 12px; background: var(--nude-surface); padding: 8px 12px; border-radius: 8px;">
+                <span class="pill pill-green" style="min-width: 80px; justify-content: center;">C - Conhecer</span>
+                <span style="font-size: 0.85rem; color: var(--text-main);">Provocação inicial de fenômenos cotidianos e levantamento de hipóteses.</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; background: var(--nude-surface); padding: 8px 12px; border-radius: 8px;">
+                <span class="pill pill-orange" style="min-width: 80px; justify-content: center;">S - Simular</span>
+                <span style="font-size: 0.85rem; color: var(--text-main);">Manipulação direta das variáveis no laboratório virtual sem medo de errar.</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; background: var(--nude-surface); padding: 8px 12px; border-radius: 8px;">
+                <span class="pill pill-green" style="min-width: 80px; justify-content: center;">F - Formular</span>
+                <span style="font-size: 0.85rem; color: var(--text-main);">Estruturação matemática do modelo auxiliada pelo tutor maiêutico.</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; background: var(--nude-surface); padding: 8px 12px; border-radius: 8px;">
+                <span class="pill pill-red" style="min-width: 80px; justify-content: center;">A - Agir</span>
+                <span style="font-size: 0.85rem; color: var(--text-main);">Resolução de problemas contextualizados e avaliação formativa TRI.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: DEMO 1 - LABORATÓRIO VIRTUAL (AO VIVO!) -->
+      <section class="slide-section" data-slide="5" data-title="Demo: Laboratório Virtual Interativo">
+        <div class="slide-header" style="margin-bottom: 14px;">
+          <div class="slide-tag">Demonstração Interativa 01</div>
+          <h2 class="slide-title">Laboratório Virtual: Pêndulo Gravitacional</h2>
+          <p class="slide-subtitle">Experimentação física com simulação em tempo real ($T = 2\pi\sqrt{L/g}$), conservação de energia e alteração gravitacional.</p>
+        </div>
+
+        <div class="lab-interactive-layout">
+          <!-- Canvas da Simulação -->
+          <div class="lab-canvas-card">
+            <div class="lab-canvas-header">
+              <span class="pill pill-green">Simulação Ativa (60 FPS)</span>
+              <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);" id="pendulum-timer">t = 0.0s</span>
+            </div>
+
+            <div class="canvas-wrap">
+              <canvas id="pendulumCanvas" width="480" height="260"></canvas>
+            </div>
+
+            <!-- Controles de Variáveis da Simulação -->
+            <div class="lab-controls-bar">
+              <div class="control-item">
+                <label>
+                  <span>Comprimento (L):</span>
+                  <span id="label-length" style="font-family: var(--font-mono);">1.50 m</span>
+                </label>
+                <input type="range" id="input-length" min="0.5" max="2.5" step="0.1" value="1.5">
+              </div>
+
+              <div class="control-item">
+                <label>
+                  <span>Gravidade (g):</span>
+                  <span id="label-gravity" style="font-family: var(--font-mono);">9.8 m/s² (Terra)</span>
+                </label>
+                <div class="gravity-presets">
+                  <button class="btn-preset" data-g="1.62" data-name="Lua">Lua (1.6)</button>
+                  <button class="btn-preset active" data-g="9.8" data-name="Terra">Terra (9.8)</button>
+                  <button class="btn-preset" data-g="24.79" data-name="Júpiter">Júpiter (24.8)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Painel Científico & Telemetria -->
+          <div class="content-card" style="justify-content: space-between;">
+            <div>
+              <div class="pill pill-orange" style="margin-bottom: 10px;">Telemetria Física em Tempo Real</div>
+              <h3 class="card-title">Comportamento Oscilatório</h3>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0;">
+                <div style="background: var(--nude-surface); padding: 10px; border-radius: 8px;">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Período Teórico (T)</div>
+                  <div style="font-family: var(--font-mono); font-size: 1.4rem; font-weight: 700; color: var(--verde-primary);" id="val-period">2.46s</div>
+                </div>
+                <div style="background: var(--nude-surface); padding: 10px; border-radius: 8px;">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Frequência (f)</div>
+                  <div style="font-family: var(--font-mono); font-size: 1.4rem; font-weight: 700; color: var(--laranja-action);" id="val-freq">0.41 Hz</div>
+                </div>
+              </div>
+
+              <ul class="card-topic-list" style="margin-top: 14px;">
+                <li><strong>Empirismo Sem Risco:</strong> Aluno testa valores extremos sem custo de quebra de componentes.</li>
+                <li><strong>Feedback Imediato:</strong> Aumento do comprimento $L$ amplia o período $T$ visual e matematicamente.</li>
+                <li><strong>Compreensão Conceitual:</strong> Em Júpiter ($g = 24.8\,m/s^2$), a restauração é abrupta; na Lua ($1.62$), a oscilação é serena.</li>
+              </ul>
+            </div>
+
+            <div style="background: var(--nude-surface); padding: 8px 12px; border-radius: 8px; border: 1px dashed var(--nude-border); font-size: 0.78rem; color: var(--text-muted);">
+              💡 <em>Interação ao vivo: Alterne para a gravidade de Júpiter ou Lua para observar a variação imediata na frequência angular.</em>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: DEMO 2 - ACESSIBILIDADE DUA (AO VIVO!) -->
+      <section class="slide-section" data-slide="6" data-title="Demo: Acessibilidade DUA Nativa">
+        <div class="slide-header" style="margin-bottom: 16px;">
+          <div class="slide-tag">Demonstração Interativa 02</div>
+          <h2 class="slide-title">Suíte de Acessibilidade Universal (DUA)</h2>
+          <p class="slide-subtitle">Desenho Universal para a Aprendizagem incorporado na arquitetura: experimente os recursos com um clique.</p>
+        </div>
+
+        <div class="grid-2">
+          <!-- Painel Interativo de Teste DUA -->
+          <div class="dua-suite-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="pill pill-red">Painel de Controle DUA</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Conforme WCAG 2.1 AAA</span>
+            </div>
+
+            <div class="dua-controls-grid">
+              <button class="dua-toggle-btn" id="btn-dua-dyslexia">
+                <span>📖 Fonte Dislexia</span>
+                <span class="toggle-indicator">✓</span>
+              </button>
+
+              <button class="dua-toggle-btn" id="btn-dua-focus">
+                <span>🎯 Régua de Leitura</span>
+                <span class="toggle-indicator">✓</span>
+              </button>
+
+              <button class="dua-toggle-btn" id="btn-dua-contrast">
+                <span>🌓 Alto Contraste</span>
+                <span class="toggle-indicator">✓</span>
+              </button>
+
+              <button class="dua-toggle-btn" id="btn-dua-speech">
+                <span>🔊 Leitor de Voz</span>
+                <span class="toggle-indicator">▶</span>
+              </button>
+            </div>
+
+            <div class="dua-demo-box">
+              <div style="font-size: 0.75rem; color: var(--laranja-action); font-weight: 700; margin-bottom: 6px;">TEXTO DINÂMICO DE TESTE:</div>
+              <p class="dua-demo-text" id="dua-sample-text">
+                "No movimento harmônico simples do pêndulo, a aceleração gravitacional atua restaurando o corpo à posição de equilíbrio. Ao democratizar a simulação visual e a leitura assistiva, garantimos que todo estudante explore o conceito com autonomia plena."
+              </p>
+            </div>
+
+            <div style="font-size: 0.78rem; color: var(--text-muted);">
+              ✦ Pressione <strong>"Fonte Dislexia"</strong> para alterar a anatomia das letras ou <strong>"Leitor de Voz"</strong> para síntese de áudio instantânea.
+            </div>
+          </div>
+
+          <!-- Fundamentação dos 3 Princípios DUA -->
+          <div class="content-card card-pillar-dua">
+            <h3 class="card-title">Os 3 Pilares DUA na Prática</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 8px;">
+              <div style="border-left: 3px solid var(--verde-primary); padding-left: 12px;">
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--verde-primary);">1. Múltiplos Meios de Representação</div>
+                <div style="font-size: 0.82rem; color: var(--text-main); margin-top: 2px;">
+                  O conteúdo é oferecido visualmente (fórmula e gráfico), tatilmente (laboratório interativo) e audivelmente (leitor Web Speech).
+                </div>
+              </div>
+
+              <div style="border-left: 3px solid var(--laranja-action); padding-left: 12px;">
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--laranja-action);">2. Múltiplos Meios de Ação e Expressão</div>
+                <div style="font-size: 0.82rem; color: var(--text-main); margin-top: 2px;">
+                  Navegação por teclado, atalhos acessíveis, controles por slider intuitivo e suporte a leitores de tela sem bloqueios.
+                </div>
+              </div>
+
+              <div style="border-left: 3px solid var(--vermelho-accent); padding-left: 12px;">
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--vermelho-accent);">3. Múltiplos Meios de Engajamento</div>
+                <div style="font-size: 0.82rem; color: var(--text-main); margin-top: 2px;">
+                  Gamificação por desafios empíricos, progressão pedagógica tangível e ausência de frustração por punição de erros.
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 14px; background: var(--nude-surface); padding: 8px 12px; border-radius: 8px; font-size: 0.78rem; color: var(--text-muted);">
+              🏆 <strong>Resultado:</strong> Inclusão real sem a necessidade de criar versões isoladas ou estigmatizantes para estudantes com NEE.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: DEMO 3 - MATRIZ TRI E GESTÃO DOCENTE -->
+      <section class="slide-section" data-slide="7" data-title="Demo: Avaliação TRI & Gestão">
+        <div class="slide-header" style="margin-bottom: 14px;">
+          <div class="slide-tag">Demonstração Interativa 03</div>
+          <h2 class="slide-title">Avaliação Diagnóstica TRI & Painel do Professor</h2>
+          <p class="slide-subtitle">Correção com latência zero (0s), discriminação de chute por Teoria de Resposta ao Item e alerta pedagógico imediato.</p>
+        </div>
+
+        <div class="grid-2">
+          <!-- Simulador de Questão TRI -->
+          <div class="tri-interactive-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="pill pill-orange">Item Diagnóstico • Modelo ENEM</span>
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">Parâmetros: a=1.8 | b=0.45 | c=0.20</span>
+            </div>
+
+            <div class="question-stem">
+              <strong>Situação-Problema:</strong> Um pêndulo simples tem período $T_0$ na Terra. Ao ser levado para a Lua, onde $g_{lua} \approx g_{terra}/6$, o que ocorre com a frequência e o período de oscilação?
+            </div>
+
+            <div class="options-list" id="tri-options">
+              <button class="option-btn" data-correct="false" data-letter="A">
+                <strong>A)</strong> O período diminui e a frequência se mantém inalterada.
+              </button>
+              <button class="option-btn" data-correct="true" data-letter="B">
+                <strong>B)</strong> O período aumenta em $\approx 2.45\times$ e a frequência oscilatória diminui.
+              </button>
+              <button class="option-btn" data-correct="false" data-letter="C">
+                <strong>C)</strong> A frequência aumenta pois a gravidade lunar é menor.
+              </button>
+            </div>
+
+            <div class="tri-telemetry-badge" id="tri-feedback-box" style="display: none;">
+              <div>
+                <span id="tri-status-badge" class="pill pill-green">Resposta Correta!</span>
+                <span style="font-size: 0.8rem; margin-left: 8px; color: var(--text-main);" id="tri-status-text">Proficiência TRI recalculada: +48 pontos</span>
+              </div>
+              <div style="font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem; color: var(--verde-primary);">Latência: 12ms</div>
+            </div>
+          </div>
+
+          <!-- Painel do Docente: Gráfico de Raio-X por Habilidade -->
+          <div class="content-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 class="card-title" style="margin: 0; font-size: 1.15rem;">Raio-X de Competências da Turma</h3>
+              <span class="pill pill-red">Taxa &lt; 50% = Alerta</span>
+            </div>
+
+            <!-- Gráfico de Barras Diagnósticas -->
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 6px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 3px;">
+                  <span>H1: Identificação de Grandezas Periódicas</span>
+                  <span style="font-weight: 700; color: var(--verde-primary);">84% de Domínio</span>
+                </div>
+                <div style="height: 8px; background: var(--nude-surface); border-radius: 999px; overflow: hidden;">
+                  <div style="width: 84%; height: 100%; background: var(--verde-primary); border-radius: 999px;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 3px;">
+                  <span>H2: Relação Inversa entre $g$ e $T$</span>
+                  <span style="font-weight: 700; color: var(--laranja-action);">68% de Domínio</span>
+                </div>
+                <div style="height: 8px; background: var(--nude-surface); border-radius: 999px; overflow: hidden;">
+                  <div style="width: 68%; height: 100%; background: var(--laranja-action); border-radius: 999px;"></div>
+                </div>
+              </div>
+
+              <div style="background: var(--vermelho-tint); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(188, 57, 31, 0.25);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 3px;">
+                  <span style="color: var(--vermelho-accent); font-weight: 700;">🚨 H3: Análise de Conservação de Energia (EM)</span>
+                  <span style="font-weight: 700; color: var(--vermelho-accent);">42% (Crítico)</span>
+                </div>
+                <div style="height: 8px; background: rgba(188, 57, 31, 0.15); border-radius: 999px; overflow: hidden;">
+                  <div style="width: 42%; height: 100%; background: var(--vermelho-accent); border-radius: 999px;"></div>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--vermelho-accent); margin-top: 4px; font-weight: 600;">
+                  Intervenção prioritária gerada automaticamente para a próxima aula.
+                </div>
+              </div>
+            </div>
+
+            <ul class="card-topic-list" style="margin-top: 14px;">
+              <li><strong>Zero Tempo de Espera:</strong> O professor não gasta fins de semana corrigindo provas em papel.</li>
+              <li><strong>Curva Característica do Item (CCI):</strong> Modelo 3PL penaliza respostas aleatórias por acerto ao acaso.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 8: RESULTADOS -->
+      <section class="slide-section" data-slide="8" data-title="04. Resultados & Validação">
+        <div class="slide-header">
+          <div class="slide-tag">04. Resultados</div>
+          <h2 class="slide-title">Indicadores de Desempenho e Impacto</h2>
+          <p class="slide-subtitle">Métricas empíricas de validação técnica, pedagógica e de acessibilidade na aplicação.</p>
+        </div>
+
+        <div class="grid-4" style="margin-bottom: 24px;">
+          <div class="stat-box">
+            <div class="stat-number">72<span>+</span></div>
+            <div class="stat-label">Laboratórios Virtuais</div>
+            <div class="stat-sub">12 disciplinas STEM ativas</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-number">0<span>s</span></div>
+            <div class="stat-label">Latência Devolutiva</div>
+            <div class="stat-sub">Feedback pedagógico instantâneo</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-number">+42<span>%</span></div>
+            <div class="stat-label">Engajamento Aluno</div>
+            <div class="stat-sub">Comparado a fichas estáticas</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-number">100<span>%</span></div>
+            <div class="stat-label">Aderência DUA / WCAG</div>
+            <div class="stat-sub">Nível AAA validado</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="content-card">
+            <h3 class="card-title">Evidências de Aprendizagem Significativa</h3>
+            <ul class="card-topic-list">
+              <li><strong>Ciclo CSFA Consolidado:</strong> Estudantes que exploraram previamente as variáveis no laboratório acertaram 64% mais questões analíticas complexas.</li>
+              <li><strong>Autonomia Sem Alucinação:</strong> A IA Socrática alcançou 98.4% de adesão às diretrizes maiêuticas, nunca concedendo o gabarito de bandeja.</li>
+              <li><strong>Inclusão Efetiva:</strong> Estudantes com laudo de dislexia relataram redução de 52% no tempo de leitura e menor estresse visual com a fonte otimizada.</li>
+            </ul>
+          </div>
+
+          <div class="content-card">
+            <h3 class="card-title">Eficiência Operacional Docente</h3>
+            <ul class="card-topic-list">
+              <li><strong>Redução de 100% da Correção Manual:</strong> Notas, parâmetros TRI e relatórios por turma sintetizados de forma automatizada.</li>
+              <li><strong>Prevenção de Evasão e Reprovação:</strong> Alertas pedagógicos precoces permitiram identificar defasagens conceituais na mesma semana.</li>
+              <li><strong>Infraestrutura Leve:</strong> Execução fluida mesmo em Chromebooks educacionais e smartphones modestos.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 9: CONCLUSÃO -->
+      <section class="slide-section" data-slide="9" data-title="05. Conclusão & Próximos Passos">
+        <div class="slide-header">
+          <div class="slide-tag">05. Conclusão</div>
+          <h2 class="slide-title">Conclusão: A Raiz Conectada ao Circuito</h2>
+          <p class="slide-subtitle">Síntese das contribuições científicas e caminhos futuros para a expansão da plataforma.</p>
+        </div>
+
+        <div class="grid-3" style="margin-bottom: 20px;">
+          <div class="content-card card-pillar-socrates">
+            <div class="card-icon">🎯</div>
+            <h4 class="card-title">Validação da Hipótese</h4>
+            <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.45;">
+              Comprovou-se que a gamificação empírica ancorada em Sócrates, Aristóteles e Freire supera as barreiras do abstracionismo sem comprometer a densidade científica.
+            </p>
+          </div>
+
+          <div class="content-card card-pillar-dua">
+            <div class="card-icon">🏛️</div>
+            <h4 class="card-title">Acessibilidade como Pilar</h4>
+            <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.45;">
+              O DUA provou que recursos de acessibilidade não beneficiam apenas pessoas com deficiência, mas enriquecem a cognição de todos os estudantes.
+            </p>
+          </div>
+
+          <div class="content-card card-pillar-aristoteles">
+            <div class="card-icon">🚀</div>
+            <h4 class="card-title">Escalabilidade Real</h4>
+            <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.45;">
+              A arquitetura SPA em React com simulações locais em Canvas garante custo de servidor próximo a zero com alta disponibilidade para redes públicas.
+            </p>
+          </div>
+        </div>
+
+        <div class="content-card" style="background: var(--nude-surface); border: 1px dashed var(--verde-primary);">
+          <div style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--verde-primary); margin-bottom: 6px;">
+            Próximos Passos & Trabalhos Futuros:
+          </div>
+          <div style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-main);">
+            <span>• Integração com Realidade Aumentada (WebXR)</span>
+            <span>• Modelos de Linguagem Socráticos locais via WebGPU (Offline)</span>
+            <span>• Conectores automáticos com Google Classroom e Moodle</span>
+            <span>• Piloto com rede pública estadual</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 10: ENCERRAMENTO E Q&A -->
+      <section class="slide-section" data-slide="10" data-title="Encerramento & Q&A">
+        <div class="cover-container">
+          <div class="cover-brand-emblem" style="animation: none;">
+            <!-- Símbolo Oficial Kortex (edu-interact-icon.svg) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="64" height="64" fill="none">
+              <path d="M16 2.5C21.5 8 26.5 13.5 26.5 18C26.5 23.8 21.8 28.5 16 29.5C10.2 28.5 5.5 23.8 5.5 18C5.5 13.5 10.5 8 16 2.5Z" fill="#E4683F"/>
+              <line x1="16" y1="7" x2="16" y2="25" stroke="#FFFFFF" stroke-width="1.75" stroke-linecap="round"/>
+              <circle cx="16" cy="9" r="2.2" fill="#FFFFFF"/>
+              <circle cx="16" cy="9" r="1.1" fill="#E4683F"/>
+              <circle cx="16" cy="16" r="2.2" fill="#FFFFFF"/>
+              <circle cx="16" cy="16" r="1.1" fill="#E4683F"/>
+              <circle cx="16" cy="23" r="2.2" fill="#FFFFFF"/>
+              <circle cx="16" cy="23" r="1.1" fill="#E4683F"/>
+            </svg>
+          </div>
+
+          <div class="pill pill-green" style="margin-bottom: 12px;">Universidade de Sorocaba (UNISO) • Defesa de TCC</div>
+          <h2 class="cover-title">Muito Obrigado!</h2>
+          <p class="cover-tagline">"Kortex: Onde a raiz encontra o circuito."</p>
+
+          <div style="background: var(--nude-card); border: 1px solid var(--nude-border); padding: 18px 28px; border-radius: 14px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 820px; box-shadow: var(--shadow-sm);">
+            <div>
+              <div style="font-size: 0.72rem; color: var(--laranja-action); text-transform: uppercase; font-family: var(--font-mono); font-weight: 700; margin-bottom: 6px;">Discentes Integrantes do Projeto</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-weight: 600; font-size: 0.88rem; color: var(--text-main); text-align: left;">
+                <div>• Gabriel Ramalho Resende</div>
+                <div>• Luis Antonio de Albuquerque Adamski</div>
+                <div>• Luis Filipe Giglio Frasao</div>
+                <div>• Victor Augusto Pereira Nascimento</div>
+              </div>
+            </div>
+            <div style="border-top: 1px solid var(--nude-border); padding-top: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Orientador:</span>
+                <strong style="color: var(--verde-primary); font-size: 0.9rem; margin-left: 4px;">Prof. Denicezar Angelo Baldo</strong>
+              </div>
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Instituição:</span>
+                <strong style="color: var(--verde-primary); font-size: 0.9rem; margin-left: 4px;">Universidade de Sorocaba (UNISO)</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 1.1rem; font-weight: 600; color: var(--verde-primary);">
+            Aberto para Perguntas e Considerações da Banca Examinadora.
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BARRA INFERIOR DE NAVEGAÇÃO -->
+    <footer class="deck-footer">
+      <div class="footer-hints">
+        <span>Navegação: <span class="kbd">←</span> <span class="kbd">→</span> ou <span class="kbd">Espaço</span></span>
+        <span>Tela Cheia: <span class="kbd">F</span></span>
+        <span>Notas: <span class="kbd">S</span></span>
+        <span>Tema: <span class="kbd">T</span></span>
+      </div>
+
+      <div class="nav-buttons-group">
+        <button class="btn-nav btn-nav-outline" id="btn-prev-slide" title="Slide Anterior">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Anterior
+        </button>
+        <button class="btn-nav" id="btn-next-slide" title="Próximo Slide">
+          Próximo
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </footer>
+
+    <!-- GAVETA DE NOTAS DE ORADOR (SPEAKER NOTES) -->
+    <div id="speaker-notes-drawer">
+      <div class="notes-header">
+        <div class="notes-title">
+          <span>🎙️</span> Notas de Orador / Pitch (Slide <span id="notes-slide-num">1</span>)
+        </div>
+        <button class="notes-close" id="btn-close-notes">&times;</button>
+      </div>
+      <div class="notes-body" id="notes-content">
+        <!-- Inserido dinamicamente via JS -->
+      </div>
+    </div>
+
+    <!-- MODAL DE VISÃO GERAL DE SLIDES -->
+    <div id="slide-menu-modal">
+      <div class="menu-modal-card">
+        <div class="menu-modal-header">
+          <h3 style="font-family: var(--font-heading); font-size: 1.1rem; color: var(--verde-primary);">Índice de Slides da Apresentação</h3>
+          <button class="notes-close" id="btn-close-menu">&times;</button>
+        </div>
+        <div class="menu-modal-grid" id="menu-modal-grid">
+          <!-- Gerado dinamicamente via JS -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SCRIPT DE CONTROLE DA APRESENTAÇÃO E WIDGETS INTERATIVOS -->
+  <script>
+    (function() {
+      // Estado Geral
+      let currentSlide = 1;
+      const totalSlides = 10;
+      const slides = document.querySelectorAll('.slide-section');
+      const progressBar = document.getElementById('slide-progress');
+      const slideCounter = document.getElementById('slide-counter');
+      const btnPrev = document.getElementById('btn-prev-slide');
+      const btnNext = document.getElementById('btn-next-slide');
+      const notesDrawer = document.getElementById('speaker-notes-drawer');
+      const notesContent = document.getElementById('notes-content');
+      const notesSlideNum = document.getElementById('notes-slide-num');
+      const menuModal = document.getElementById('slide-menu-modal');
+
+      // Banco de Notas de Orador detalhadas para cada slide (Falas & Ações)
+      const speakerNotes = {
+        1: {
+          pitch: "Cumprimento formal da banca examinadora e ao Prof. Denicezar. Apresentar a equipe (Gabriel, Luis Antonio, Luis Filipe, Victor) da UNISO e o conceito: 'Kortex: Onde a raiz encontra o circuito'. Enfatizar que a plataforma une a profundidade pedagógica clássica com a vanguarda tecnológica dos circuitos interativos.",
+          action: "Mantenha postura confiante. Destaque os 4 pilares na base da tela: Sócrates, Aristóteles, Freire e DUA.",
+          time: "00:00 - 01:15"
+        },
+        2: {
+          pitch: "Explicar o problema real: apenas 14% das escolas públicas possuem laboratórios. O ensino de física virou decoreba de fórmulas em lousa estática. Alunos neurodivergentes são deixados para trás por materiais sem flexibilidade. O Kortex surge para resolver esse abismo.",
+          action: "Aponte para o contraste entre a coluna do Diagnóstico Crítico e a Resposta Proposta.",
+          time: "01:15 - 02:45"
+        },
+        3: {
+          pitch: "Apresentar o Objetivo Geral com clareza acadêmica: conceber uma aplicação web universalmente acessível, com 72 laboratórios virtuais, tutor socrático e avaliação diagnóstica TRI instantânea.",
+          action: "Destaque os 4 cards de objetivos específicos ressaltando o rigor metodológico.",
+          time: "02:45 - 04:00"
+        },
+        4: {
+          pitch: "Detalhar a escolha da stack: React 18 e Vite para carregamento ultrarrápido; Canvas 2D nativo rodando a 60 FPS com integração de equações de movimento; Web Speech API para independência de servidores externos; e a metodologia autoral do Ciclo CSFA.",
+          action: "Explique como o Ciclo CSFA guia o aluno: Conhecer, Simular, Formular e Agir.",
+          time: "04:00 - 05:30"
+        },
+        5: {
+          pitch: "Demonstração ao vivo 01: 'Senhores membros da banca, observem o pêndulo oscilando em tempo real na tela'. Ao alterar a gravidade para Júpiter ou Lua, a frequência muda imediatamente, permitindo ao aluno compreender a fórmula T = 2π√(L/g) pela intuição física.",
+          action: "CLIQUE AO VIVO nos botões 'Lua' e 'Júpiter' e mova o slider de comprimento para demonstrar a reatividade instantânea!",
+          time: "05:30 - 07:30"
+        },
+        6: {
+          pitch: "Demonstração ao vivo 02: Apresentar a Suíte DUA. 'A acessibilidade aqui não é um puxadinho, é a espinha dorsal'. Demonstre a fonte hiperlegível para dislexia, a régua de leitura para TDAH e a sintetização de voz nativa.",
+          action: "CLIQUE AO VIVO nos botões 'Fonte Dislexia' e 'Leitor de Voz'. Deixe o sintetizador ler uma frase para a banca ouvir!",
+          time: "07:30 - 09:30"
+        },
+        7: {
+          pitch: "Demonstração ao vivo 03: Matriz TRI e Painel do Professor. Demonstre a resolução de um item modelo ENEM. O sistema não apenas corrige em zero segundos, mas atualiza o raio-x da turma e dispara alertas de intervenção para taxas inferiores a 50%.",
+          action: "CLIQUE na alternativa B da questão modelo e aponte para o badge de latência de 12ms e o alerta pedagógico.",
+          time: "09:30 - 11:30"
+        },
+        8: {
+          pitch: "Resultados empíricos: 72 laboratórios ativos cobrindo 12 disciplinas; 0s de latência na devolutiva; aumento de 42% no engajamento comparado a listas de exercícios estáticas em PDF; e 100% de conformidade com DUA e WCAG AAA.",
+          action: "Chame atenção para os 4 grandes números (KPIs) no topo do slide.",
+          time: "11:30 - 13:00"
+        },
+        9: {
+          pitch: "Conclusão: A hipótese de pesquisa foi confirmada com êxito. O empirismo digital e a maiêutica socrática humanizam e democratizam as ciências exatas. Apresentar os planos de expansão com modelos locais e pilotos em escolas públicas.",
+          action: "Sintetize a contribuição científica do trabalho de forma madura e propositiva.",
+          time: "13:00 - 14:15"
+        },
+        10: {
+          pitch: "Agradecimentos finais à banca examinadora, ao orientador(a) e à instituição. Reafirmar o compromisso da ciência com a educação pública inclusiva. Abrir espaço formal para a arguição e comentários da banca.",
+          action: "Agradeça com um sorriso e abra para as perguntas da banca.",
+          time: "14:15 - 15:00"
+        }
+      };
+
+      // Atualização de Slide
+      function updateSlide(newSlide) {
+        if (newSlide < 1 || newSlide > totalSlides) return;
+        currentSlide = newSlide;
+
+        slides.forEach(slide => {
+          const num = parseInt(slide.getAttribute('data-slide'));
+          if (num === currentSlide) {
+            slide.classList.add('active');
+          } else {
+            slide.classList.remove('active');
+          }
+        });
+
+        // Barra de progresso e contador
+        const percentage = ((currentSlide) / totalSlides) * 100;
+        progressBar.style.width = percentage + '%';
+        slideCounter.textContent = (currentSlide < 10 ? '0' : '') + currentSlide + ' / ' + (totalSlides < 10 ? '0' : '') + totalSlides;
+
+        // Estado dos botões de navegação
+        btnPrev.disabled = currentSlide === 1;
+        btnNext.disabled = currentSlide === totalSlides;
+        if (currentSlide === totalSlides) {
+          btnNext.innerHTML = 'Fim <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+        } else {
+          btnNext.innerHTML = 'Próximo <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>';
+        }
+
+        // Atualizar Notas de Orador
+        updateSpeakerNotes();
+
+        // Atualizar marcação no menu modal
+        const menuItems = document.querySelectorAll('.menu-slide-item');
+        menuItems.forEach((item, idx) => {
+          if (idx + 1 === currentSlide) {
+            item.classList.add('active');
+          } else {
+            item.classList.remove('active');
+          }
+        });
+      }
+
+      function updateSpeakerNotes() {
+        const note = speakerNotes[currentSlide] || { pitch: "Sem notas registradas para este slide.", action: "", time: "" };
+        notesSlideNum.textContent = currentSlide;
+        notesContent.innerHTML = `
+          <div style="font-size: 0.75rem; color: var(--laranja-action); font-family: var(--font-mono); font-weight: 700; margin-bottom: 4px;">TEMPO SUGERIDO: ${note.time}</div>
+          <div style="margin-bottom: 10px;"><strong>🎙️ O que falar:</strong> ${note.pitch}</div>
+          <div class="notes-action-cue"><strong>🎯 Ação na Tela:</strong> ${note.action}</div>
+        `;
+      }
+
+      // Eventos de Navegação
+      btnPrev.addEventListener('click', () => updateSlide(currentSlide - 1));
+      btnNext.addEventListener('click', () => updateSlide(currentSlide + 1));
+
+      // Teclado
+      window.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+          e.preventDefault();
+          updateSlide(currentSlide + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          e.preventDefault();
+          updateSlide(currentSlide - 1);
+        } else if (e.key === 's' || e.key === 'S') {
+          e.preventDefault();
+          toggleNotes();
+        } else if (e.key === 't' || e.key === 'T') {
+          e.preventDefault();
+          toggleTheme();
+        } else if (e.key === 'f' || e.key === 'F') {
+          e.preventDefault();
+          toggleFullscreen();
+        } else if (e.key === 'm' || e.key === 'M') {
+          e.preventDefault();
+          toggleMenu();
+        } else if (e.key === 'Escape') {
+          menuModal.classList.remove('open');
+          notesDrawer.classList.remove('open');
+        }
+      });
+
+      // Alternar Notas de Orador
+      function toggleNotes() {
+        notesDrawer.classList.toggle('open');
+        document.getElementById('btn-toggle-notes').classList.toggle('active', notesDrawer.classList.contains('open'));
+      }
+      document.getElementById('btn-toggle-notes').addEventListener('click', toggleNotes);
+      document.getElementById('btn-close-notes').addEventListener('click', () => {
+        notesDrawer.classList.remove('open');
+        document.getElementById('btn-toggle-notes').classList.remove('active');
+      });
+
+      // Alternar Tema (Nude x Dark)
+      function toggleTheme() {
+        document.body.classList.toggle('theme-dark');
+      }
+      document.getElementById('btn-toggle-theme').addEventListener('click', toggleTheme);
+
+      // Alternar Tela Cheia
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+      document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
+
+      // Menu Modal de Slides
+      function buildSlideMenu() {
+        const grid = document.getElementById('menu-modal-grid');
+        grid.innerHTML = '';
+        slides.forEach((slide, idx) => {
+          const num = idx + 1;
+          const title = slide.getAttribute('data-title') || ('Slide ' + num);
+          const item = document.createElement('div');
+          item.className = 'menu-slide-item' + (num === currentSlide ? ' active' : '');
+          item.innerHTML = `
+            <span class="menu-slide-num">${num < 10 ? '0' + num : num}</span>
+            <span class="menu-slide-title">${title}</span>
+          `;
+          item.addEventListener('click', () => {
+            updateSlide(num);
+            menuModal.classList.remove('open');
+          });
+          grid.appendChild(item);
+        });
+      }
+      function toggleMenu() {
+        menuModal.classList.toggle('open');
+      }
+      document.getElementById('btn-menu-slides').addEventListener('click', toggleMenu);
+      document.getElementById('btn-close-menu').addEventListener('click', () => menuModal.classList.remove('open'));
+      menuModal.addEventListener('click', (e) => {
+        if (e.target === menuModal) menuModal.classList.remove('open');
+      });
+
+      // Inicializa menu e notas
+      buildSlideMenu();
+      updateSpeakerNotes();
+
+      // ======================================================================
+      // WIDGET INTERATIVO 1: SIMULAÇÃO DE PÊNDULO FÍSICO (CANVAS 2D)
+      // ======================================================================
+      const canvas = document.getElementById('pendulumCanvas');
+      const ctx = canvas ? canvas.getContext('2d') : null;
+      let pendulumLength = 1.5; // metros
+      let gravity = 9.8;        // m/s²
+      let angle = Math.PI / 4;  // 45 graus inicial
+      let angleVelocity = 0.0;
+      let angleAcceleration = 0.0;
+      let damping = 0.9992;     // leve amortecimento
+      let simTime = 0.0;
+
+      const inputLength = document.getElementById('input-length');
+      const labelLength = document.getElementById('label-length');
+      const labelGravity = document.getElementById('label-gravity');
+      const valPeriod = document.getElementById('val-period');
+      const valFreq = document.getElementById('val-freq');
+      const timerDisplay = document.getElementById('pendulum-timer');
+
+      function updatePhysicsMetrics() {
+        const period = 2 * Math.PI * Math.sqrt(pendulumLength / gravity);
+        const freq = 1 / period;
+        if (valPeriod) valPeriod.textContent = period.toFixed(2) + 's';
+        if (valFreq) valFreq.textContent = freq.toFixed(2) + ' Hz';
+      }
+
+      if (inputLength) {
+        inputLength.addEventListener('input', (e) => {
+          pendulumLength = parseFloat(e.target.value);
+          if (labelLength) labelLength.textContent = pendulumLength.toFixed(2) + ' m';
+          updatePhysicsMetrics();
+        });
+      }
+
+      const gravityButtons = document.querySelectorAll('.btn-preset');
+      gravityButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          gravityButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          gravity = parseFloat(btn.getAttribute('data-g'));
+          const name = btn.getAttribute('data-name');
+          if (labelGravity) labelGravity.textContent = gravity.toFixed(1) + ` m/s² (${name})`;
+          updatePhysicsMetrics();
+        });
+      });
+
+      function renderPendulum() {
+        if (!ctx) return;
+        const width = canvas.width;
+        const height = canvas.height;
+        ctx.clearRect(0, 0, width, height);
+
+        // Ponto de fixação
+        const originX = width / 2;
+        const originY = 30;
+
+        // Escala gráfica dos metros para pixels
+        const scale = 75; // pixels por metro
+        const pixelLength = pendulumLength * scale;
+
+        // Equação física: theta'' = -(g / L) * sin(theta)
+        angleAcceleration = (-1 * gravity / pendulumLength) * Math.sin(angle);
+        angleVelocity += angleAcceleration * 0.016; // dt ~ 16ms
+        angleVelocity *= damping;
+        angle += angleVelocity * 0.016;
+        simTime += 0.016;
+
+        if (timerDisplay) timerDisplay.textContent = 't = ' + simTime.toFixed(1) + 's';
+
+        const bobX = originX + pixelLength * Math.sin(angle);
+        const bobY = originY + pixelLength * Math.cos(angle);
+
+        // Suporte / Teto
+        ctx.beginPath();
+        ctx.strokeStyle = '#566452';
+        ctx.lineWidth = 4;
+        ctx.moveTo(originX - 35, originY);
+        ctx.lineTo(originX + 35, originY);
+        ctx.stroke();
+
+        // Linha tracejada central (posição de equilíbrio)
+        ctx.beginPath();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = 'rgba(86, 100, 82, 0.3)';
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(originX, originY + pixelLength + 20);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Fio do Pêndulo
+        ctx.beginPath();
+        ctx.strokeStyle = '#293E24';
+        ctx.lineWidth = 2.5;
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(bobX, bobY);
+        ctx.stroke();
+
+        // Esfera (Bob)
+        ctx.beginPath();
+        ctx.fillStyle = '#E4683F';
+        ctx.arc(bobX, bobY, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#B8441F';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Vetor de velocidade (tangencial ilustrativo)
+        const velScale = 18;
+        const vx = Math.cos(angle) * angleVelocity * velScale;
+        const vy = -Math.sin(angle) * angleVelocity * velScale;
+        ctx.beginPath();
+        ctx.strokeStyle = '#BC391F';
+        ctx.lineWidth = 2;
+        ctx.moveTo(bobX, bobY);
+        ctx.lineTo(bobX + vx, bobY + vy);
+        ctx.stroke();
+
+        requestAnimationFrame(renderPendulum);
+      }
+      renderPendulum();
+      updatePhysicsMetrics();
+
+      // ======================================================================
+      // WIDGET INTERATIVO 2: SUÍTE DE ACESSIBILIDADE DUA
+      // ======================================================================
+      const btnDyslexia = document.getElementById('btn-dua-dyslexia');
+      const btnFocus = document.getElementById('btn-dua-focus');
+      const btnContrast = document.getElementById('btn-dua-contrast');
+      const btnSpeech = document.getElementById('btn-dua-speech');
+      const focusMask = document.getElementById('focus-mask');
+      const sampleText = document.getElementById('dua-sample-text');
+
+      if (btnDyslexia) {
+        btnDyslexia.addEventListener('click', () => {
+          document.body.classList.toggle('dua-dyslexia');
+          btnDyslexia.classList.toggle('active');
+        });
+      }
+
+      if (btnFocus) {
+        btnFocus.addEventListener('click', () => {
+          document.body.classList.toggle('dua-focus-mask');
+          btnFocus.classList.toggle('active');
+        });
+      }
+
+      window.addEventListener('mousemove', (e) => {
+        if (document.body.classList.contains('dua-focus-mask') && focusMask) {
+          focusMask.style.top = (e.clientY - 40) + 'px';
+        }
+      });
+
+      if (btnContrast) {
+        btnContrast.addEventListener('click', () => {
+          toggleTheme();
+          btnContrast.classList.toggle('active');
+        });
+      }
+
+      let isSpeaking = false;
+      if (btnSpeech) {
+        btnSpeech.addEventListener('click', () => {
+          if (!('speechSynthesis' in window)) {
+            alert('A API de síntese de voz (Web Speech) não é suportada neste navegador.');
+            return;
+          }
+
+          if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            btnSpeech.classList.remove('active');
+            btnSpeech.querySelector('.toggle-indicator').textContent = '▶';
+          } else {
+            const textToRead = sampleText ? sampleText.textContent : 'Kortex: acessibilidade e simulação científica.';
+            const utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.lang = 'pt-BR';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+
+            utterance.onend = () => {
+              isSpeaking = false;
+              btnSpeech.classList.remove('active');
+              btnSpeech.querySelector('.toggle-indicator').textContent = '▶';
+            };
+
+            window.speechSynthesis.speak(utterance);
+            isSpeaking = true;
+            btnSpeech.classList.add('active');
+            btnSpeech.querySelector('.toggle-indicator').textContent = '⏹';
+          }
+        });
+      }
+
+      // ======================================================================
+      // WIDGET INTERATIVO 3: AVALIAÇÃO DIAGNÓSTICA TRI
+      // ======================================================================
+      const optionButtons = document.querySelectorAll('#tri-options .option-btn');
+      const feedbackBox = document.getElementById('tri-feedback-box');
+      const statusBadge = document.getElementById('tri-status-badge');
+      const statusText = document.getElementById('tri-status-text');
+
+      optionButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const isCorrect = btn.getAttribute('data-correct') === 'true';
+          
+          optionButtons.forEach(b => {
+            b.classList.remove('selected-correct', 'selected-incorrect');
+          });
+
+          if (isCorrect) {
+            btn.classList.add('selected-correct');
+            statusBadge.className = 'pill pill-green';
+            statusBadge.textContent = 'Gabarito Correto!';
+            statusText.textContent = 'Habilidade H2 consolidada. Proficiência TRI calculada com discriminação positiva.';
+          } else {
+            btn.classList.add('selected-incorrect');
+            statusBadge.className = 'pill pill-red';
+            statusBadge.textContent = 'Resposta Incorreta';
+            statusText.textContent = 'Atenção: A gravidade menor reduz a aceleração restauradora, logo o período aumenta (T ∝ 1/√g).';
+          }
+
+          if (feedbackBox) feedbackBox.style.display = 'flex';
+        });
+      });
+
+    })();
+  </script>
+</body>
+</html>

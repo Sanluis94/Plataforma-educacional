@@ -29,8 +29,8 @@ export function MathSimulator({ mode, functionType = 'linear', title, labTitle, 
       {/* Header com identificação do laboratório */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
         <div>
-          <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: '#06b6d4' }}>
-            Laboratório Especializado de Matemática
+          <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--color-primary-accessible, #B8441F)' }}>
+            Laboratório especializado de matemática
           </span>
           <h2 style={{ color: 'var(--text-main)', margin: '0.25rem 0 0 0', fontSize: '1.35rem' }}>
             {displayTitle || (
@@ -45,7 +45,7 @@ export function MathSimulator({ mode, functionType = 'linear', title, labTitle, 
         </div>
 
         {/* Seletor rápido de módulo matemático */}
-        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', background: 'rgba(0,0,0,0.25)', padding: '0.35rem', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', background: 'var(--bg-card)', padding: '0.35rem', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)' }}>
           {[
             { id: 'linear', label: '1º Grau' },
             { id: 'quadratic', label: '2º Grau' },
@@ -64,7 +64,7 @@ export function MathSimulator({ mode, functionType = 'linear', title, labTitle, 
                 fontSize: '0.75rem',
                 cursor: 'pointer',
                 fontWeight: activeTab === tab.id ? 700 : 500,
-                background: activeTab === tab.id ? 'linear-gradient(135deg, #06b6d4, #3b82f6)' : 'transparent',
+                background: activeTab === tab.id ? 'var(--gradient-primary)' : 'transparent',
                 color: activeTab === tab.id ? '#ffffff' : 'var(--text-secondary)',
                 transition: 'all 0.2s ease',
               }}
@@ -108,10 +108,12 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
     const scale = 35; // px por unidade
 
     ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#FAF7EE';
+    ctx.fillRect(0, 0, width, height);
 
     // Grid cartesiano
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.strokeStyle = 'rgba(41, 62, 36, 0.1)';
     ctx.lineWidth = 1;
     for (let x = 0; x <= width; x += scale) {
       ctx.moveTo(x, 0); ctx.lineTo(x, height);
@@ -123,7 +125,7 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
 
     // Eixos X e Y
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.strokeStyle = '#293E24';
     ctx.lineWidth = 1.5;
     ctx.moveTo(width / 2, 0); ctx.lineTo(width / 2, height);
     ctx.moveTo(0, height / 2); ctx.lineTo(width, height / 2);
@@ -131,7 +133,7 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
 
     // Rótulos dos eixos
     ctx.font = '10px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.fillStyle = '#293E24';
     for (let x = scale; x < width; x += scale) {
       const val = Math.round((x - width / 2) / scale);
       if (val !== 0) ctx.fillText(val.toString(), x - 4, height / 2 + 13);
@@ -151,7 +153,7 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
     const px1 = width / 2 + x1 * scale;
     const py1 = height / 2 - y1 * scale;
 
-    ctx.fillStyle = 'rgba(6, 182, 212, 0.12)';
+    ctx.fillStyle = 'rgba(228, 104, 63, 0.12)';
     ctx.beginPath();
     ctx.moveTo(px0, py0);
     ctx.lineTo(px1, py0);
@@ -159,14 +161,14 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
     ctx.closePath();
     ctx.fill();
 
-    ctx.strokeStyle = 'rgba(6, 182, 212, 0.6)';
+    ctx.strokeStyle = 'rgba(228, 104, 63, 0.6)';
     ctx.setLineDash([3, 3]);
     ctx.stroke();
     ctx.setLineDash([]);
 
     // Reta da Função
     ctx.beginPath();
-    ctx.strokeStyle = '#06b6d4';
+    ctx.strokeStyle = '#E4683F';
     ctx.lineWidth = 3;
     const minX = (0 - width / 2) / scale;
     const maxX = (width - width / 2) / scale;
@@ -197,14 +199,14 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
     if (mousePos.current) {
       const { px, py, mx, my } = mousePos.current;
       ctx.setLineDash([3, 3]);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.strokeStyle = 'rgba(41, 62, 36, 0.35)';
       ctx.beginPath();
       ctx.moveTo(px, 0); ctx.lineTo(px, height);
       ctx.moveTo(0, py); ctx.lineTo(width, py);
       ctx.stroke();
       ctx.setLineDash([]);
 
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = '#172314';
       ctx.fillText(`P(${mx.toFixed(1)}, ${my.toFixed(1)})`, px + 8, py - 8);
     }
   };
@@ -234,7 +236,7 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Canvas */}
-      <div style={{ background: '#0e131b', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <canvas
           ref={canvasRef}
           width={420}
@@ -244,7 +246,7 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
           style={{ width: '100%', maxWidth: '420px', aspectRatio: '420/380', cursor: 'crosshair' }}
         />
         <div style={{ display: 'flex', gap: '1.25rem', marginTop: '0.75rem', fontSize: '0.75rem' }}>
-          <span style={{ color: '#06b6d4' }}>● Reta f(x) = {a}x + {b}</span>
+          <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>● Reta f(x) = {a}x + {b}</span>
           <span style={{ color: '#f59e0b' }}>● Intercepto Y (0, {b})</span>
           <span style={{ color: '#10b981' }}>● Raiz {root !== null ? `(${root.toFixed(2)}, 0)` : 'Inexistente'}</span>
         </div>
@@ -253,17 +255,17 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
       {/* Painel de Controles e Análise */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Parâmetros da Reta Afim: f(x) = ax + b</h4>
+          <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Parâmetros da reta afim: f(x) = ax + b</h4>
 
           <div style={{ marginBottom: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               <span>Coeficiente Angular (a - Inclinação):</span>
-              <strong style={{ color: '#06b6d4' }}>{a.toFixed(1)}</strong>
+              <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{a.toFixed(1)}</strong>
             </div>
             <input
               type="range" min="-4" max="4" step="0.2" value={a}
               onChange={e => setA(parseFloat(e.target.value))}
-              style={{ width: '100%', cursor: 'pointer', accentColor: '#06b6d4' }}
+              style={{ width: '100%', cursor: 'pointer', accentColor: '#E4683F' }}
             />
           </div>
 
@@ -290,13 +292,13 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
           </div>
           <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block' }}>Taxa de Variação (Δy/Δx)</span>
-            <strong style={{ color: '#06b6d4', fontSize: '0.85rem' }}>{a} por unidade de x</strong>
+            <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.85rem' }}>{a} por unidade de x</strong>
           </div>
         </div>
 
         {/* Diagnóstico de IA */}
-        <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#06b6d4', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
+        <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(228, 104, 63, 0.08)', border: '1px solid rgba(228, 104, 63, 0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
             <span>🤖 IA ADAPTATIVA (ANÁLISE AFIM)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
@@ -310,8 +312,8 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
 
         <button
           onClick={onFinish}
-          className="premium-btn btn-primary"
-          style={{ width: '100%', background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', fontWeight: 'bold', padding: '0.75rem' }}
+          className="btn-gradient"
+          style={{ width: '100%', fontWeight: 'bold', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)' }}
         >
           🏆 Concluir Laboratório de 1º Grau (+50 XP)
         </button>
@@ -352,10 +354,12 @@ function QuadraticLab({ onFinish }: { onFinish: () => void }) {
     const scale = 30;
 
     ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#FAF7EE';
+    ctx.fillRect(0, 0, width, height);
 
     // Grid
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.strokeStyle = 'rgba(41, 62, 36, 0.1)';
     ctx.lineWidth = 1;
     for (let x = 0; x <= width; x += scale) {
       ctx.moveTo(x, 0); ctx.lineTo(x, height);
@@ -367,7 +371,7 @@ function QuadraticLab({ onFinish }: { onFinish: () => void }) {
 
     // Eixos
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.strokeStyle = '#293E24';
     ctx.lineWidth = 1.5;
     ctx.moveTo(width / 2, 0); ctx.lineTo(width / 2, height);
     ctx.moveTo(0, height / 2); ctx.lineTo(width, height / 2);
@@ -438,7 +442,7 @@ function QuadraticLab({ onFinish }: { onFinish: () => void }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Canvas */}
-      <div style={{ background: '#0e131b', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <canvas ref={canvasRef} width={420} height={380} style={{ width: '100%', maxWidth: '420px', aspectRatio: '420/380' }} />
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', fontSize: '0.75rem', flexWrap: 'wrap' }}>
           <span style={{ color: '#a855f7' }}>● Parábola f(x) = {a}x² + {b}x + {c}</span>
@@ -449,7 +453,7 @@ function QuadraticLab({ onFinish }: { onFinish: () => void }) {
 
       {/* Controles e Bhaskara */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ background: 'var(--bg-card)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
           <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Coeficientes: ax² + bx + c</h4>
 
           <div style={{ marginBottom: '0.8rem' }}>
@@ -470,12 +474,12 @@ function QuadraticLab({ onFinish }: { onFinish: () => void }) {
           <div style={{ marginBottom: '0.8rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               <span>b (Deslocamento linear):</span>
-              <strong style={{ color: '#06b6d4' }}>{b.toFixed(1)}</strong>
+              <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{b.toFixed(1)}</strong>
             </div>
             <input
               type="range" min="-5" max="5" step="0.5" value={b}
               onChange={e => setB(parseFloat(e.target.value))}
-              style={{ width: '100%', cursor: 'pointer', accentColor: '#06b6d4' }}
+              style={{ width: '100%', cursor: 'pointer', accentColor: '#E4683F' }}
             />
           </div>
 
@@ -568,10 +572,12 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
     const radius = 90;
 
     ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#FAF7EE';
+    ctx.fillRect(0, 0, width, height);
 
     // Eixos
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.strokeStyle = 'rgba(41, 62, 36, 0.25)';
     ctx.lineWidth = 1;
     ctx.moveTo(cx, 15); ctx.lineTo(cx, height - 15);
     ctx.moveTo(15, cy); ctx.lineTo(width - 15, cy);
@@ -579,7 +585,7 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
 
     // Círculo Unitário R = 1
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.strokeStyle = '#293E24';
     ctx.lineWidth = 2;
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
     ctx.stroke();
@@ -590,7 +596,7 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
 
     // Projeção Cosseno (eixo X)
     ctx.beginPath();
-    ctx.strokeStyle = '#06b6d4';
+    ctx.strokeStyle = '#E4683F';
     ctx.lineWidth = 3;
     ctx.moveTo(cx, cy);
     ctx.lineTo(px, cy);
@@ -598,7 +604,7 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
 
     // Projeção Seno (eixo Y)
     ctx.beginPath();
-    ctx.strokeStyle = '#ec4899';
+    ctx.strokeStyle = '#293E24';
     ctx.lineWidth = 3;
     ctx.moveTo(px, cy);
     ctx.lineTo(px, py);
@@ -606,7 +612,7 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
 
     // Raio Vetor Hipotenusa
     ctx.beginPath();
-    ctx.strokeStyle = '#facc15';
+    ctx.strokeStyle = '#B8441F';
     ctx.lineWidth = 2;
     ctx.moveTo(cx, cy);
     ctx.lineTo(px, py);
@@ -614,21 +620,21 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
 
     // Ponto de Ângulo
     ctx.beginPath();
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#172314';
     ctx.arc(px, py, 5, 0, Math.PI * 2);
     ctx.fill();
 
     // Arco de ângulo
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(250, 204, 21, 0.6)';
+    ctx.strokeStyle = 'rgba(184, 68, 31, 0.6)';
     ctx.arc(cx, cy, 25, 0, -angleRad, true);
     ctx.stroke();
 
     // Rótulos
-    ctx.font = '10px Inter, sans-serif';
-    ctx.fillStyle = '#06b6d4';
+    ctx.font = 'bold 11px Inter, sans-serif';
+    ctx.fillStyle = '#E4683F';
     ctx.fillText(`cos = ${cosVal.toFixed(2)}`, cx + 6, cy + 18);
-    ctx.fillStyle = '#ec4899';
+    ctx.fillStyle = '#293E24';
     ctx.fillText(`sen = ${sinVal.toFixed(2)}`, px + 6, cy - (sinVal * radius) / 2);
   };
 
@@ -644,16 +650,18 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
     const cy = height / 2;
 
     ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#FAF7EE';
+    ctx.fillRect(0, 0, width, height);
 
     // Eixo central
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.strokeStyle = 'rgba(41, 62, 36, 0.25)';
     ctx.moveTo(0, cy); ctx.lineTo(width, cy);
     ctx.stroke();
 
     // Traçado da função periódica
     ctx.beginPath();
-    ctx.strokeStyle = func === 'sin' ? '#ec4899' : func === 'cos' ? '#06b6d4' : '#f59e0b';
+    ctx.strokeStyle = func === 'sin' ? '#293E24' : func === 'cos' ? '#E4683F' : '#B8441F';
     ctx.lineWidth = 2.5;
 
     const pxPerRad = 35;
@@ -678,8 +686,8 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
       const markerY = cy - curY * amplitude * 40;
 
       ctx.beginPath();
-      ctx.fillStyle = '#facc15';
-      ctx.arc(markerX, markerY, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#E4683F';
+      ctx.arc(markerX, markerY, 6, 0, Math.PI * 2);
       ctx.fill();
     }
   };
@@ -693,18 +701,18 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Canvas Duplo: Círculo Unitário & Gráfico de Onda */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ background: '#0e131b', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem' }}>
+        <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', textAlign: 'center' }}>
+          <span style={{ fontSize: '0.75rem', color: '#172314', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>
             Círculo Trigonométrico Unitário (R = 1)
           </span>
-          <canvas ref={circleCanvasRef} width={260} height={240} style={{ maxWidth: '100%' }} />
+          <canvas ref={circleCanvasRef} width={260} height={240} style={{ maxWidth: '100%', background: '#FAF7EE' }} />
         </div>
 
-        <div style={{ background: '#0e131b', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem' }}>
+        <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', textAlign: 'center' }}>
+          <span style={{ fontSize: '0.75rem', color: '#172314', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>
             Função Periódica: f(x) = {amplitude} · {func}({frequency}x)
           </span>
-          <canvas ref={waveCanvasRef} width={420} height={130} style={{ width: '100%', maxWidth: '420px' }} />
+          <canvas ref={waveCanvasRef} width={420} height={130} style={{ width: '100%', maxWidth: '420px', background: '#FAF7EE' }} />
         </div>
       </div>
 
@@ -760,12 +768,12 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               <span>Frequência Angular (B):</span>
-              <strong style={{ color: '#06b6d4' }}>{frequency.toFixed(1)}</strong>
+              <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{frequency.toFixed(1)}</strong>
             </div>
             <input
               type="range" min="0.5" max="3" step="0.5" value={frequency}
               onChange={e => setFrequency(parseFloat(e.target.value))}
-              style={{ width: '100%', cursor: 'pointer', accentColor: '#06b6d4' }}
+              style={{ width: '100%', cursor: 'pointer', accentColor: '#E4683F' }}
             />
           </div>
         </div>
@@ -778,7 +786,7 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
           </div>
           <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.6rem', borderRadius: '8px' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block' }}>cos(θ)</span>
-            <strong style={{ color: '#06b6d4', fontSize: '0.85rem' }}>{cosVal.toFixed(3)}</strong>
+            <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.85rem' }}>{cosVal.toFixed(3)}</strong>
           </div>
           <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.6rem', borderRadius: '8px' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block' }}>tg(θ)</span>
@@ -870,9 +878,11 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
     const cy = heightCanvas / 2 + 20;
 
     ctx.clearRect(0, 0, width, heightCanvas);
+    ctx.fillStyle = '#FAF7EE';
+    ctx.fillRect(0, 0, width, heightCanvas);
 
     // Eixos do espaço isométrico
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.strokeStyle = 'rgba(41, 62, 36, 0.15)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - 140); // Eixo Z (altura)
@@ -888,9 +898,9 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
       // Base inferior
       ctx.beginPath();
       ctx.ellipse(cx, cy + hScale / 2, radScale, radScale * 0.4, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(6, 182, 212, 0.15)';
+      ctx.fillStyle = 'rgba(228, 104, 63, 0.15)';
       ctx.fill();
-      ctx.strokeStyle = '#06b6d4';
+      ctx.strokeStyle = '#E4683F';
       ctx.lineWidth = 2;
       ctx.stroke();
 
@@ -905,7 +915,7 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
       // Base superior
       ctx.beginPath();
       ctx.ellipse(cx, cy - hScale / 2, radScale, radScale * 0.4, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(6, 182, 212, 0.3)';
+      ctx.fillStyle = 'rgba(228, 104, 63, 0.25)';
       ctx.fill();
       ctx.stroke();
 
@@ -1026,8 +1036,8 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Visualização 3D Isométrica */}
-      <div style={{ background: '#0e131b', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <canvas ref={canvasRef} width={400} height={320} style={{ width: '100%', maxWidth: '400px' }} />
+      <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <canvas ref={canvasRef} width={400} height={320} style={{ width: '100%', maxWidth: '400px', background: '#FAF7EE' }} />
         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
           {[
             { id: 'cylinder', label: 'Cilindro' },
@@ -1046,7 +1056,7 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
                 fontSize: '0.75rem',
                 cursor: 'pointer',
                 fontWeight: solid === s.id ? 700 : 500,
-                background: solid === s.id ? '#06b6d4' : 'rgba(255,255,255,0.08)',
+                background: solid === s.id ? 'var(--color-primary, #E4683F)' : 'rgba(255,255,255,0.08)',
                 color: solid === s.id ? '#ffffff' : 'var(--text-secondary)',
               }}
             >
@@ -1059,18 +1069,18 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
       {/* Controles e Cálculos Métricos */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Dimensões do Sólido</h4>
+          <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Dimensões do sólido</h4>
 
           {solid !== 'cuboid' && solid !== 'pyramid' && (
             <div style={{ marginBottom: '0.8rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                 <span>Raio (r):</span>
-                <strong style={{ color: '#06b6d4' }}>{radius} cm</strong>
+                <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{radius} cm</strong>
               </div>
               <input
                 type="range" min="1" max="8" step="0.5" value={radius}
                 onChange={e => setRadius(parseFloat(e.target.value))}
-                style={{ width: '100%', cursor: 'pointer', accentColor: '#06b6d4' }}
+                style={{ width: '100%', cursor: 'pointer', accentColor: '#E4683F' }}
               />
             </div>
           )}
@@ -1106,28 +1116,28 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
 
         {/* Resultados das Grandezas */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
-          <div style={{ background: 'rgba(6,182,212,0.1)', padding: '0.85rem', borderRadius: '8px', border: '1px solid rgba(6,182,212,0.25)' }}>
-            <span style={{ fontSize: '0.72rem', color: '#06b6d4', display: 'block', fontWeight: 700 }}>VOLUME (Capacidade)</span>
-            <strong style={{ color: '#ffffff', fontSize: '1.15rem' }}>{metrics.volume.toFixed(2)} cm³</strong>
+          <div style={{ background: 'rgba(228, 104, 63, 0.1)', padding: '0.85rem', borderRadius: '8px', border: '1px solid rgba(228, 104, 63, 0.25)' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', display: 'block', fontWeight: 700 }}>VOLUME (Capacidade)</span>
+            <strong style={{ color: 'var(--text-main)', fontSize: '1.15rem' }}>{metrics.volume.toFixed(2)} cm³</strong>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block' }}>≈ {(metrics.volume / 1000).toFixed(3)} Litros</span>
           </div>
 
           <div style={{ background: 'rgba(16,185,129,0.1)', padding: '0.85rem', borderRadius: '8px', border: '1px solid rgba(16,185,129,0.25)' }}>
             <span style={{ fontSize: '0.72rem', color: '#10b981', display: 'block', fontWeight: 700 }}>ÁREA TOTAL DA SUPERFÍCIE</span>
-            <strong style={{ color: '#ffffff', fontSize: '1.15rem' }}>{metrics.totalArea.toFixed(2)} cm²</strong>
+            <strong style={{ color: 'var(--text-main)', fontSize: '1.15rem' }}>{metrics.totalArea.toFixed(2)} cm²</strong>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block' }}>Base: {metrics.baseArea.toFixed(1)} cm²</span>
           </div>
         </div>
 
         {/* Fórmulas formatadas */}
         <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          <div><strong>Fórmula do Volume:</strong> <code style={{ color: '#06b6d4' }}>{metrics.formulaVol}</code></div>
+          <div><strong>Fórmula do Volume:</strong> <code style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{metrics.formulaVol}</code></div>
           <div><strong>Fórmula da Superfície:</strong> <code style={{ color: '#10b981' }}>{metrics.formulaArea}</code></div>
         </div>
 
         {/* Diagnóstico IA */}
-        <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#06b6d4', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
+        <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(228, 104, 63, 0.08)', border: '1px solid rgba(228, 104, 63, 0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
             <span>🤖 IA ADAPTATIVA (GEOMETRIA ESPACIAL)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
@@ -1141,8 +1151,8 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
 
         <button
           onClick={onFinish}
-          className="premium-btn btn-primary"
-          style={{ width: '100%', background: 'linear-gradient(135deg, #06b6d4, #10b981)', fontWeight: 'bold', padding: '0.75rem' }}
+          className="btn-gradient"
+          style={{ width: '100%', fontWeight: 'bold', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)' }}
         >
           🏆 Concluir Laboratório de Geometria Espacial (+50 XP)
         </button>
@@ -1221,6 +1231,8 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
     const width = canvas.width;
     const height = canvas.height;
     ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#FAF7EE';
+    ctx.fillRect(0, 0, width, height);
 
     const minVal = stats.min;
     const maxVal = stats.max;
@@ -1241,8 +1253,8 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
     const maxBinCount = Math.max(...bins, 1);
     const barWidth = (width - 60) / binCount;
 
-    ctx.font = '10px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = 'bold 10px Space Grotesk, sans-serif';
+    ctx.fillStyle = '#172314';
     ctx.fillText('HISTOGRAMA DE FREQUÊNCIAS', 25, 20);
 
     bins.forEach((count, i) => {
@@ -1250,34 +1262,34 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
       const bHeight = (count / maxBinCount) * (histHeight - 40);
       const by = histHeight - bHeight;
 
-      // Barra com gradiente
+      // Barra com gradiente oficial
       const grad = ctx.createLinearGradient(0, by, 0, histHeight);
-      grad.addColorStop(0, '#06b6d4');
-      grad.addColorStop(1, '#0284c7');
+      grad.addColorStop(0, '#E4683F');
+      grad.addColorStop(1, '#B8441F');
       ctx.fillStyle = grad;
       ctx.fillRect(bx + 3, by, barWidth - 6, bHeight);
 
       // Rótulo da contagem
       if (count > 0) {
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = '#172314';
         ctx.fillText(count.toString(), bx + barWidth / 2 - 3, by - 4);
       }
     });
 
     // 2. LINHA DA MÉDIA NO HISTOGRAMA
     const meanX = 30 + ((stats.mean - minVal) / range) * (width - 60);
-    ctx.strokeStyle = '#f59e0b';
+    ctx.strokeStyle = '#293E24';
     ctx.lineWidth = 2;
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
     ctx.moveTo(meanX, 25); ctx.lineTo(meanX, histHeight);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = '#f59e0b';
+    ctx.fillStyle = '#293E24';
     ctx.fillText(`Média: ${stats.mean.toFixed(1)}`, meanX - 25, 24);
 
     // Divisória sutil
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.strokeStyle = 'rgba(41, 62, 36, 0.15)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(15, histHeight + 15); ctx.lineTo(width - 15, histHeight + 15);
@@ -1285,7 +1297,7 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
 
     // 3. ÁREA INFERIOR: BOXPLOT (DIAGRAMA DE CAIXA)
     const boxY = height * 0.78;
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillStyle = '#172314';
     ctx.fillText('DIAGRAMA DE CAIXA (BOXPLOT)', 25, histHeight + 32);
 
     const getX = (val: number) => 30 + ((val - minVal) / range) * (width - 60);
@@ -1297,7 +1309,7 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
     const xMax = getX(stats.max);
 
     // Bigodes (whiskers)
-    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.strokeStyle = '#293E24';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(xMin, boxY); ctx.lineTo(xQ1, boxY);
@@ -1308,25 +1320,25 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
     ctx.stroke();
 
     // Caixa interquartil (Q1 a Q3)
-    ctx.fillStyle = 'rgba(168, 85, 247, 0.25)';
+    ctx.fillStyle = 'rgba(228, 104, 63, 0.2)';
     ctx.fillRect(xQ1, boxY - 18, Math.max(xQ3 - xQ1, 2), 36);
-    ctx.strokeStyle = '#a855f7';
+    ctx.strokeStyle = '#E4683F';
     ctx.strokeRect(xQ1, boxY - 18, Math.max(xQ3 - xQ1, 2), 36);
 
     // Linha da Mediana
-    ctx.strokeStyle = '#ec4899';
+    ctx.strokeStyle = '#B8441F';
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(xMed, boxY - 18); ctx.lineTo(xMed, boxY + 18);
     ctx.stroke();
 
     // Rótulos do Boxplot
-    ctx.font = '9px Inter, sans-serif';
-    ctx.fillStyle = '#a855f7';
+    ctx.font = 'bold 10px Inter, sans-serif';
+    ctx.fillStyle = '#293E24';
     ctx.fillText(`Q1: ${stats.q1}`, xQ1 - 10, boxY + 30);
-    ctx.fillStyle = '#ec4899';
+    ctx.fillStyle = '#B8441F';
     ctx.fillText(`Med: ${stats.median}`, xMed - 12, boxY - 22);
-    ctx.fillStyle = '#a855f7';
+    ctx.fillStyle = '#293E24';
     ctx.fillText(`Q3: ${stats.q3}`, xQ3 - 10, boxY + 30);
   };
 
@@ -1345,10 +1357,10 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Visualização de Gráficos */}
-      <div style={{ background: '#0e131b', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <canvas ref={canvasRef} width={420} height={340} style={{ width: '100%', maxWidth: '420px' }} />
+      <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <canvas ref={canvasRef} width={420} height={340} style={{ width: '100%', maxWidth: '420px', background: '#FAF7EE' }} />
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', fontSize: '0.75rem' }}>
-          <span style={{ color: '#06b6d4' }}>■ Histograma de Classes</span>
+          <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>■ Histograma de Classes</span>
           <span style={{ color: '#a855f7' }}>■ Intervalo Interquartil (IQR)</span>
           <span style={{ color: '#ec4899' }}>■ Mediana</span>
         </div>
@@ -1403,7 +1415,7 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
               style={{
                 padding: '0.4rem 0.85rem',
                 borderRadius: '6px',
-                background: '#06b6d4',
+                background: 'var(--color-primary, #E4683F)',
                 color: '#fff',
                 border: 'none',
                 fontWeight: 700,
@@ -1438,7 +1450,7 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', textAlign: 'center' }}>
           <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.6rem', borderRadius: '8px' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Média (x̄)</span>
-            <strong style={{ color: '#06b6d4', display: 'block', fontSize: '1rem' }}>{stats.mean.toFixed(2)}</strong>
+            <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', display: 'block', fontSize: '1rem' }}>{stats.mean.toFixed(2)}</strong>
           </div>
           <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.6rem', borderRadius: '8px' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Mediana (Me)</span>
@@ -1458,8 +1470,8 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
         </div>
 
         {/* Diagnóstico IA */}
-        <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#06b6d4', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
+        <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(228, 104, 63, 0.08)', border: '1px solid rgba(228, 104, 63, 0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
             <span>🤖 IA ADAPTATIVA (DIAGNÓSTICO ESTATÍSTICO)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
@@ -1473,8 +1485,8 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
 
         <button
           onClick={onFinish}
-          className="premium-btn btn-primary"
-          style={{ width: '100%', background: 'linear-gradient(135deg, #06b6d4, #10b981)', fontWeight: 'bold', padding: '0.75rem' }}
+          className="btn-gradient"
+          style={{ width: '100%', fontWeight: 'bold', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)' }}
         >
           🏆 Concluir Laboratório de Estatística (+50 XP)
         </button>
@@ -1541,10 +1553,12 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
     const scale = 25; // px por unidade
 
     ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#FAF7EE';
+    ctx.fillRect(0, 0, width, height);
 
     // Grid
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.strokeStyle = 'rgba(41, 62, 36, 0.1)';
     ctx.lineWidth = 1;
     for (let x = 0; x <= width; x += scale) {
       ctx.moveTo(x, 0); ctx.lineTo(x, height);
@@ -1556,7 +1570,7 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
 
     // Eixos
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.strokeStyle = '#293E24';
     ctx.lineWidth = 1.5;
     ctx.moveTo(width / 2, 0); ctx.lineTo(width / 2, height);
     ctx.moveTo(0, height / 2); ctx.lineTo(width, height / 2);
@@ -1565,7 +1579,7 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
     // Reta 1: a1*x + b1*y = c1 => y = (c1 - a1*x) / b1
     if (sys.b1 !== 0) {
       ctx.beginPath();
-      ctx.strokeStyle = '#06b6d4';
+      ctx.strokeStyle = '#E4683F';
       ctx.lineWidth = 2.5;
       for (let px = 0; px <= width; px += 2) {
         const x = (px - width / 2) / scale;
@@ -1580,7 +1594,7 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
     // Reta 2: a2*x + b2*y = c2 => y = (c2 - a2*x) / b2
     if (sys.b2 !== 0) {
       ctx.beginPath();
-      ctx.strokeStyle = '#a855f7';
+      ctx.strokeStyle = '#293E24';
       ctx.lineWidth = 2.5;
       for (let px = 0; px <= width; px += 2) {
         const x = (px - width / 2) / scale;
@@ -1599,18 +1613,18 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
 
       // Halo pulsante
       ctx.beginPath();
-      ctx.fillStyle = 'rgba(250, 204, 21, 0.3)';
+      ctx.fillStyle = 'rgba(228, 104, 63, 0.25)';
       ctx.arc(psx, psy, 9, 0, Math.PI * 2);
       ctx.fill();
 
       // Ponto
       ctx.beginPath();
-      ctx.fillStyle = '#facc15';
+      ctx.fillStyle = '#B8441F';
       ctx.arc(psx, psy, 5, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.font = 'bold 11px Inter, sans-serif';
-      ctx.fillStyle = '#facc15';
+      ctx.fillStyle = '#172314';
       ctx.fillText(`P(${solX.toFixed(1)}, ${solY.toFixed(1)})`, psx + 8, psy - 8);
     }
   };
@@ -1622,7 +1636,7 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Visualização: Gráfico no Sistema Linear ou Matriz Inversa */}
-      <div style={{ background: '#0e131b', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', width: '100%' }}>
           <button
             onClick={() => setTab('system')}
@@ -1634,7 +1648,7 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
               fontSize: '0.8rem',
               fontWeight: 700,
               cursor: 'pointer',
-              background: tab === 'system' ? '#06b6d4' : 'rgba(255,255,255,0.08)',
+              background: tab === 'system' ? 'var(--color-primary, #E4683F)' : 'rgba(41,62,36,0.08)',
               color: tab === 'system' ? '#ffffff' : 'var(--text-secondary)',
             }}
           >
@@ -1650,7 +1664,7 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
               fontSize: '0.8rem',
               fontWeight: 700,
               cursor: 'pointer',
-              background: tab === 'matrix' ? '#a855f7' : 'rgba(255,255,255,0.08)',
+              background: tab === 'matrix' ? 'var(--color-secondary, #293E24)' : 'rgba(41,62,36,0.08)',
               color: tab === 'matrix' ? '#ffffff' : 'var(--text-secondary)',
             }}
           >
@@ -1660,9 +1674,9 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
 
         {tab === 'system' ? (
           <>
-            <canvas ref={canvasRef} width={400} height={300} style={{ width: '100%', maxWidth: '400px' }} />
+            <canvas ref={canvasRef} width={400} height={300} style={{ width: '100%', maxWidth: '400px', background: '#FAF7EE' }} />
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', fontSize: '0.75rem' }}>
-              <span style={{ color: '#06b6d4' }}>● Reta 1: {sys.a1}x + {sys.b1}y = {sys.c1}</span>
+              <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>● Reta 1: {sys.a1}x + {sys.b1}y = {sys.c1}</span>
               <span style={{ color: '#a855f7' }}>● Reta 2: {sys.a2}x + {sys.b2}y = {sys.c2}</span>
               <span style={{ color: '#facc15' }}>● Interseção P(x, y)</span>
             </div>
@@ -1672,14 +1686,14 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
             <h4 style={{ color: 'var(--text-main)', margin: '0 0 1rem 0' }}>Matriz Inversa A⁻¹</h4>
             {invM ? (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <span style={{ fontSize: '1.5rem', color: '#a855f7' }}>[</span>
+                <span style={{ fontSize: '1.5rem', color: 'var(--color-primary, #E4683F)' }}>[</span>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 60px)', gap: '0.5rem' }}>
-                  <div style={{ color: '#06b6d4', fontWeight: 700 }}>{invM[0][0].toFixed(2)}</div>
-                  <div style={{ color: '#06b6d4', fontWeight: 700 }}>{invM[0][1].toFixed(2)}</div>
-                  <div style={{ color: '#06b6d4', fontWeight: 700 }}>{invM[1][0].toFixed(2)}</div>
-                  <div style={{ color: '#06b6d4', fontWeight: 700 }}>{invM[1][1].toFixed(2)}</div>
+                  <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>{invM[0][0].toFixed(2)}</div>
+                  <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>{invM[0][1].toFixed(2)}</div>
+                  <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>{invM[1][0].toFixed(2)}</div>
+                  <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>{invM[1][1].toFixed(2)}</div>
                 </div>
-                <span style={{ fontSize: '1.5rem', color: '#a855f7' }}>]</span>
+                <span style={{ fontSize: '1.5rem', color: 'var(--color-primary, #E4683F)' }}>]</span>
               </div>
             ) : (
               <div style={{ color: '#ef4444', padding: '1rem' }}>
@@ -1701,7 +1715,7 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
             <h4 style={{ margin: '0 0 0.8rem 0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Equações do Sistema Linear</h4>
 
             {/* Reta 1 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem', fontSize: '0.85rem', color: '#06b6d4' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem', fontSize: '0.85rem', color: 'var(--color-primary-accessible, #B8441F)' }}>
               <input
                 type="number" value={sys.a1} onChange={e => setSys({ ...sys, a1: parseFloat(e.target.value) || 0 })}
                 style={{ width: '45px', padding: '0.3rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.15)', background: '#111', color: '#fff', textAlign: 'center' }}
@@ -1802,8 +1816,8 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
 
         <button
           onClick={onFinish}
-          className="premium-btn btn-primary"
-          style={{ width: '100%', background: 'linear-gradient(135deg, #06b6d4, #a855f7)', fontWeight: 'bold', padding: '0.75rem' }}
+          className="btn-gradient"
+          style={{ width: '100%', fontWeight: 'bold', padding: '0.75rem' }}
         >
           🏆 Concluir Laboratório de Matrizes (+50 XP)
         </button>
