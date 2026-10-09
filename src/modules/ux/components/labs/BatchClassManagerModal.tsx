@@ -22,6 +22,20 @@ export const BatchClassManagerModal: React.FC<BatchClassManagerModalProps> = ({
   const [parsedRows, setParsedRows] = useState<{ name: string; email: string; enrollmentId?: string }[]>([]);
   const [statusMsg, setStatusMsg] = useState('');
 
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleParseCsv = (text: string) => {
@@ -69,7 +83,13 @@ export const BatchClassManagerModal: React.FC<BatchClassManagerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="batch-modal-title"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+    >
       <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-xl w-full p-6 shadow-2xl flex flex-col text-slate-100">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">

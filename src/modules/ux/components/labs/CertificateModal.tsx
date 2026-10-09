@@ -13,6 +13,20 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   onClose,
   certificate
 }) => {
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen || !certificate) return null;
 
   const handlePrint = () => {
@@ -20,7 +34,13 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cert-modal-title"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+    >
       <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-2xl w-full p-6 shadow-2xl text-slate-100 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
@@ -29,7 +49,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               <Award className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-white">Certificado Digital de Prática Experimental</h3>
+              <h3 id="cert-modal-title" className="font-bold text-sm text-white">Certificado Digital de Prática Experimental</h3>
               <p className="text-xs text-slate-400">Validação para Atividades Acadêmicas Complementares (AAC)</p>
             </div>
           </div>

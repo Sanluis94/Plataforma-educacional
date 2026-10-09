@@ -17,6 +17,20 @@ export const SkillTreeExplorerModal: React.FC<SkillTreeExplorerModalProps> = ({
 }) => {
   const [selectedLevel, setSelectedLevel] = useState<string>('medio');
 
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   // Filtra laboratórios do nível selecionado
@@ -28,7 +42,13 @@ export const SkillTreeExplorerModal: React.FC<SkillTreeExplorerModalProps> = ({
   const tier3 = labs.slice(Math.ceil(labs.length * 0.7));
 
   return (
-    <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="skill-tree-title"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+    >
       <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-4xl w-full h-[620px] shadow-2xl flex flex-col text-slate-100">
         {/* Header */}
         <div className="p-4 bg-slate-800/90 border-b border-slate-700 flex items-center justify-between">

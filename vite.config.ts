@@ -24,6 +24,9 @@ export default defineConfig({
               return 'vendor-icons';
             }
           }
+          if (id.includes('masterLabsCatalog') || id.includes('advancedLabsRegistry')) {
+            return 'labs-catalog';
+          }
         },
       },
     },

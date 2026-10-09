@@ -196,6 +196,19 @@ export function ProfessorDashboard() {
     }
   }, [turmas, selectedClassId, setSelectedClassId]);
 
+  // Modal Escape key listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (printingExam) setPrintingExam(null);
+        if (showGeminiModal) setShowGeminiModal(false);
+        if (isBatchManagerOpen) setIsBatchManagerOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [printingExam, showGeminiModal, isBatchManagerOpen]);
+
   // Load class data (notices, materials, lesson plans, messages)
   useEffect(() => {
     if (!selectedClassId) return;
@@ -2581,7 +2594,12 @@ export function ProfessorDashboard() {
 
       {/* ── PRINT EXAM / PDF MODAL (LAYOUT A4 PEDAGÓGICO) ── */}
       {printingExam && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1100, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '1.5rem', overflowY: 'auto' }}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => { if (e.target === e.currentTarget) setPrintingExam(null); }}
+          style={{ position: 'fixed', inset: 0, zIndex: 1100, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '1.5rem', overflowY: 'auto' }}
+        >
           {/* Action Header (Hidden in Print) */}
           <div className="print-controls" style={{ width: '100%', maxWidth: '820px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: 'var(--color-bg-card, #F1EAD9)', padding: '0.85rem 1.25rem', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color, #E2D7C3)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
