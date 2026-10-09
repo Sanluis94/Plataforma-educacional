@@ -29,6 +29,11 @@ import {
   issueCertificate,
   verifyCertificate
 } from '../../core/services/certificateService';
+import {
+  getSubmissionsByClass,
+  saveSubmissionReview
+} from '../../data/repositories/submissionRepository';
+import type { SubmissionData } from '../../data/types';
 
 interface ProfessorLmsModulesProps {
   turmas: Turma[];
@@ -53,7 +58,7 @@ export function ProfessorLmsModules({
   onSelectClass,
   professorName
 }: ProfessorLmsModulesProps) {
-  const [subTab, setSubTab] = useState<'attendance' | 'gradebook' | 'forum' | 'certificates'>('attendance');
+  const [subTab, setSubTab] = useState<'attendance' | 'gradebook' | 'speedgrader' | 'forum' | 'certificates'>('attendance');
 
   const activeClassId = selectedClassId || turmas[0]?.id || '';
   const currentTurma = turmas.find(t => t.id === activeClassId);
@@ -167,6 +172,84 @@ export function ProfessorLmsModules({
     link.click();
     document.body.removeChild(link);
   };
+
+  // ─────────────────────────────────────────────────────────────
+  // ESTADO: PONDERAÇÃO UNIVERSITÁRIA & SPEEDGRADER AVANÇADO
+  // ─────────────────────────────────────────────────────────────
+  const [isUniversityGradeMode, setIsUniversityGradeMode] = useState(false);
+  const [univWeights, setUnivWeights] = useState({
+    p1: 35,
+    p2: 35,
+    labs: 30,
+    minPassDireta: 7.0,
+    minExameFinal: 4.0
+  });
+
+  // SpeedGrader Submissões e Rubricas Interativas
+  const [realSubmissions, setRealSubmissions] = useState<SubmissionData[]>([]);
+  const [selectedSubIndex, setSelectedSubIndex] = useState(0);
+  const [rubricScores, setRubricScores] = useState<Record<string, number>>({
+    crit_1: 4.0,
+    crit_2: 2.5,
+    crit_3: 3.0
+  });
+  const [docenteFeedback, setDocenteFeedback] = useState(
+    'Excelente precisão nos cálculos e rigor científico. O laudo demonstra pleno domínio do ciclo experimental.'
+  );
+  const [speedGraderToast, setSpeedGraderToast] = useState<string | null>(null);
+  const [savingReview, setSavingReview] = useState(false);
+
+  useEffect(() => {
+    if (!activeClassId) return;
+    const loadSubmissions = async () => {
+      try {
+        const subs = await getSubmissionsByClass(activeClassId);
+        setRealSubmissions(subs);
+      } catch (e) {
+        console.warn('Erro ao carregar submissões reais:', e);
+      }
+    };
+    loadSubmissions();
+  }, [activeClassId]);
+
+  const demoSubmissionsList = realSubmissions.length > 0 ? realSubmissions.map((s, idx) => ({
+    id: s.id || `sub_real_${idx}`,
+    activityTitle: s.activityTitle || 'Atividade Prática de Laboratório',
+    studentName: s.studentName || 'Estudante',
+    score: s.score || 90,
+    submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '14:32',
+    hypothesis: 'Hipótese investigativa validada com coleta numérica de dados no motor de física Kortex.',
+    telemetry: s.answers && typeof s.answers === 'object' ? (s.answers as Record<string, any>) : { 'Status': 'Concluído', 'Pontos': s.score }
+  })) : [
+    {
+      id: 'sub_demo_01',
+      activityTitle: 'Laboratório de Oscilações Forçadas e Ressonância',
+      studentName: 'Ana Clara Silva',
+      score: 95,
+      submittedAt: 'Hoje às 14:32',
+      hypothesis: 'Ao aproximar a frequência de excitação da frequência natural de 6.3 rad/s, observou-se que a amplitude aumentou 4x devido ao acoplamento de energia mecânica mínima no amortecimento.',
+      telemetry: { 'Amplitude Máxima': '2.85 m', 'Freq. Natural': '6.32 rad/s', 'Passos Euler': '84 pontos' }
+    },
+    {
+      id: 'sub_demo_02',
+      activityTitle: 'Cinética Química & Equação de Arrhenius',
+      studentName: 'Bruno Henrique Santos',
+      score: 88,
+      submittedAt: 'Hoje às 15:10',
+      hypothesis: 'A introdução de catalisador abaixou a barreira de ativação de 60 para 35 kJ/mol, acelerando a velocidade de consumo do reagente A em 3.2x.',
+      telemetry: { 'Constante k': '1.82 s⁻¹', 'Temperatura': '315 K', 'Ea Efetiva': '35 kJ/mol' }
+    },
+    {
+      id: 'sub_demo_03',
+      activityTitle: 'Circuito RLC Transiente e Osciloscópio Digital',
+      studentName: 'Camila Duarte Souza',
+      score: 92,
+      submittedAt: 'Hoje às 16:05',
+      hypothesis: 'O regime criticamente amortecido foi atingido exatamente quando R = 2√(L/C), eliminando o overshoot e retornando de forma otimizada ao repouso.',
+      telemetry: { 'Regime': 'Crítico', 'Resistência': '89.4 Ω', 'Indutância': '100 mH' }
+    }
+  ];
+
 
   // ─────────────────────────────────────────────────────────────
   // 3. ESTADO DO FÓRUM PEDAGÓGICO DA TURMA
@@ -394,6 +477,7 @@ export function ProfessorLmsModules({
           {[
             { id: 'attendance', label: 'Diário & Frequência', icon: Calendar },
             { id: 'gradebook', label: 'Livro de Notas', icon: Award },
+            { id: 'speedgrader', label: '⚡ SpeedGrader & Rubricas', icon: CheckCircle },
             { id: 'forum', label: `Fórum da Turma (${forumTopics.length})`, icon: MessageSquare },
             { id: 'certificates', label: 'Certificação Digital', icon: ShieldCheck },
           ].map(tab => (
@@ -724,109 +808,264 @@ export function ProfessorLmsModules({
             </button>
           </div>
 
+          {/* Seletor de Modelo de Avaliação: Ensino Básico vs Universitário */}
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'var(--bg-card)', padding: '0.4rem', borderRadius: '10px', border: '1px solid var(--border-color)', width: 'fit-content' }}>
+            <button
+              onClick={() => setIsUniversityGradeMode(false)}
+              style={{
+                padding: '0.45rem 0.9rem',
+                borderRadius: '8px',
+                border: 'none',
+                background: !isUniversityGradeMode ? 'var(--color-primary, #E4683F)' : 'transparent',
+                color: !isUniversityGradeMode ? '#fff' : 'var(--text-secondary)',
+                fontWeight: !isUniversityGradeMode ? 800 : 500,
+                fontSize: '0.8rem',
+                cursor: 'pointer'
+              }}
+            >
+              🏫 Educação Básica / Médio (Média 6.0)
+            </button>
+            <button
+              onClick={() => setIsUniversityGradeMode(true)}
+              style={{
+                padding: '0.45rem 0.9rem',
+                borderRadius: '8px',
+                border: 'none',
+                background: isUniversityGradeMode ? 'var(--color-primary, #E4683F)' : 'transparent',
+                color: isUniversityGradeMode ? '#fff' : 'var(--text-secondary)',
+                fontWeight: isUniversityGradeMode ? 800 : 500,
+                fontSize: '0.8rem',
+                cursor: 'pointer'
+              }}
+            >
+              🎓 Ensino Superior / MEC (P1 + P2 + Labs · Média 7.0)
+            </button>
+          </div>
+
           {/* Configuração dos Pesos Avaliativos */}
           <div className="glass-card" style={{ padding: '1.25rem', background: 'transparent' }}>
             <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-secondary, #293E24)', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-              Pesos de avaliação bimestral (%):
+              {isUniversityGradeMode ? 'Pesos Ponderados Universitários (%):' : 'Pesos de avaliação bimestral (%):'}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📝 Provas Formais</label>
-                <input
-                  type="number"
-                  value={weights.pesoProvas}
-                  onChange={(e) => setWeights(prev => ({ ...prev, pesoProvas: Number(e.target.value) }))}
-                  style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
-                />
+            {!isUniversityGradeMode ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📝 Provas Formais</label>
+                  <input
+                    type="number"
+                    value={weights.pesoProvas}
+                    onChange={(e) => setWeights(prev => ({ ...prev, pesoProvas: Number(e.target.value) }))}
+                    style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>🔬 Laboratórios Virtuais</label>
+                  <input
+                    type="number"
+                    value={weights.pesoLabs}
+                    onChange={(e) => setWeights(prev => ({ ...prev, pesoLabs: Number(e.target.value) }))}
+                    style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📄 Atividades Práticas</label>
+                  <input
+                    type="number"
+                    value={weights.pesoAtividades}
+                    onChange={(e) => setWeights(prev => ({ ...prev, pesoAtividades: Number(e.target.value) }))}
+                    style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>💬 Participação & Fórum</label>
+                  <input
+                    type="number"
+                    value={weights.pesoParticipacao}
+                    onChange={(e) => setWeights(prev => ({ ...prev, pesoParticipacao: Number(e.target.value) }))}
+                    style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
+                  />
+                </div>
               </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>🔬 Laboratórios Virtuais</label>
-                <input
-                  type="number"
-                  value={weights.pesoLabs}
-                  onChange={(e) => setWeights(prev => ({ ...prev, pesoLabs: Number(e.target.value) }))}
-                  style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
-                />
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📚 Prova Teórica 1 (P1)</label>
+                  <input
+                    type="number"
+                    value={univWeights.p1}
+                    onChange={(e) => setUnivWeights(prev => ({ ...prev, p1: Number(e.target.value) }))}
+                    style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📚 Prova Teórica 2 (P2)</label>
+                  <input
+                    type="number"
+                    value={univWeights.p2}
+                    onChange={(e) => setUnivWeights(prev => ({ ...prev, p2: Number(e.target.value) }))}
+                    style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>🔬 Prática / Laboratórios</label>
+                  <input
+                    type="number"
+                    value={univWeights.labs}
+                    onChange={(e) => setUnivWeights(prev => ({ ...prev, labs: Number(e.target.value) }))}
+                    style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>🎯 Nota de Corte Direta</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    value={univWeights.minPassDireta}
+                    onChange={(e) => setUnivWeights(prev => ({ ...prev, minPassDireta: Number(e.target.value) }))}
+                    style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
+                  />
+                </div>
               </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📄 Atividades Práticas</label>
-                <input
-                  type="number"
-                  value={weights.pesoAtividades}
-                  onChange={(e) => setWeights(prev => ({ ...prev, pesoAtividades: Number(e.target.value) }))}
-                  style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>💬 Participação & Fórum</label>
-                <input
-                  type="number"
-                  value={weights.pesoParticipacao}
-                  onChange={(e) => setWeights(prev => ({ ...prev, pesoParticipacao: Number(e.target.value) }))}
-                  style={{ width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.85rem' }}
-                />
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* Tabela de Boletim Escolar */}
+          {/* Tabela de Boletim Escolar / Universitário */}
           <div className="glass-card" style={{ padding: '1.5rem' }}>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)' }}>
                     <th style={{ padding: '0.75rem 0.5rem' }}>Estudante</th>
-                    <th style={{ padding: '0.75rem 0.5rem' }}>Provas ({weights.pesoProvas}%)</th>
-                    <th style={{ padding: '0.75rem 0.5rem' }}>Labs ({weights.pesoLabs}%)</th>
-                    <th style={{ padding: '0.75rem 0.5rem' }}>Atividades ({weights.pesoAtividades}%)</th>
-                    <th style={{ padding: '0.75rem 0.5rem' }}>Participação ({weights.pesoParticipacao}%)</th>
-                    <th style={{ padding: '0.75rem 0.5rem' }}>Média Final</th>
-                    <th style={{ padding: '0.75rem 0.5rem' }}>Situação</th>
+                    {!isUniversityGradeMode ? (
+                      <>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>Provas ({weights.pesoProvas}%)</th>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>Labs ({weights.pesoLabs}%)</th>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>Atividades ({weights.pesoAtividades}%)</th>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>Participação ({weights.pesoParticipacao}%)</th>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>Média Final</th>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>Situação</th>
+                      </>
+                    ) : (
+                      <>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>P1 ({univWeights.p1}%)</th>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>P2 ({univWeights.p2}%)</th>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>Labs ({univWeights.labs}%)</th>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>Média Semestral</th>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>Exame Final (Mínimo)</th>
+                        <th style={{ padding: '0.75rem 0.5rem' }}>Status Universitário</th>
+                      </>
+                    )}
                     <th style={{ padding: '0.75rem 0.5rem' }}>Frequência</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {gradeReports.map(rep => (
-                    <tr key={rep.studentId} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <td style={{ padding: '0.85rem 0.5rem', fontWeight: 600, color: 'var(--text-main)' }}>
-                        {rep.studentName}
-                      </td>
-                      <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
-                        {rep.notaProvas.toFixed(1)}
-                      </td>
-                      <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700 }}>
-                        {rep.notaLabs.toFixed(1)}
-                      </td>
-                      <td style={{ padding: '0.85rem 0.5rem', color: '#10b981', fontWeight: 700 }}>
-                        {rep.notaAtividades.toFixed(1)}
-                      </td>
-                      <td style={{ padding: '0.85rem 0.5rem', color: '#f59e0b', fontWeight: 700 }}>
-                        {rep.notaParticipacao.toFixed(1)}
-                      </td>
-                      <td style={{ padding: '0.85rem 0.5rem', fontSize: '1rem', fontWeight: 900, color: rep.mediaFinal >= 6.0 ? '#10b981' : rep.mediaFinal >= 4.0 ? '#f59e0b' : '#ef4444' }}>
-                        {rep.mediaFinal.toFixed(1)}
-                      </td>
-                      <td style={{ padding: '0.85rem 0.5rem' }}>
-                        <span
-                          style={{
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '6px',
-                            fontSize: '0.78rem',
-                            fontWeight: 700,
-                            background: rep.situacao === 'Aprovado' ? 'rgba(16,185,129,0.15)' : rep.situacao === 'Recuperação' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
-                            color: rep.situacao === 'Aprovado' ? '#10b981' : rep.situacao === 'Recuperação' ? '#f59e0b' : '#ef4444'
-                          }}
-                        >
-                          {rep.situacao}
-                        </span>
-                      </td>
-                      <td style={{ padding: '0.85rem 0.5rem' }}>
-                        <span style={{ fontWeight: 700, color: rep.alertaFrequencia ? '#ef4444' : 'var(--text-secondary)' }}>
-                          {rep.frequenciaPercentual}%
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {gradeReports.map(rep => {
+                    if (!isUniversityGradeMode) {
+                      return (
+                        <tr key={rep.studentId} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                          <td style={{ padding: '0.85rem 0.5rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                            {rep.studentName}
+                          </td>
+                          <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
+                            {rep.notaProvas.toFixed(1)}
+                          </td>
+                          <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700 }}>
+                            {rep.notaLabs.toFixed(1)}
+                          </td>
+                          <td style={{ padding: '0.85rem 0.5rem', color: '#10b981', fontWeight: 700 }}>
+                            {rep.notaAtividades.toFixed(1)}
+                          </td>
+                          <td style={{ padding: '0.85rem 0.5rem', color: '#f59e0b', fontWeight: 700 }}>
+                            {rep.notaParticipacao.toFixed(1)}
+                          </td>
+                          <td style={{ padding: '0.85rem 0.5rem', fontSize: '1rem', fontWeight: 900, color: rep.mediaFinal >= 6.0 ? '#10b981' : rep.mediaFinal >= 4.0 ? '#f59e0b' : '#ef4444' }}>
+                            {rep.mediaFinal.toFixed(1)}
+                          </td>
+                          <td style={{ padding: '0.85rem 0.5rem' }}>
+                            <span
+                              style={{
+                                padding: '0.2rem 0.6rem',
+                                borderRadius: '6px',
+                                fontSize: '0.78rem',
+                                fontWeight: 700,
+                                background: rep.situacao === 'Aprovado' ? 'rgba(16,185,129,0.15)' : rep.situacao === 'Recuperação' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                                color: rep.situacao === 'Aprovado' ? '#10b981' : rep.situacao === 'Recuperação' ? '#f59e0b' : '#ef4444'
+                              }}
+                            >
+                              {rep.situacao}
+                            </span>
+                          </td>
+                          <td style={{ padding: '0.85rem 0.5rem' }}>
+                            <span style={{ fontWeight: 700, color: rep.alertaFrequencia ? '#ef4444' : 'var(--text-secondary)' }}>
+                              {rep.frequenciaPercentual}%
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    // Cálculo da Média Ponderada Universitária
+                    const p1 = rep.notaProvas;
+                    const p2 = Math.min(10, rep.notaProvas * 0.95 + rep.notaAtividades * 0.1);
+                    const labs = rep.notaLabs;
+                    const totalUnivWeight = univWeights.p1 + univWeights.p2 + univWeights.labs;
+                    const mediaSemestre = totalUnivWeight > 0
+                      ? Number(((p1 * univWeights.p1 + p2 * univWeights.p2 + labs * univWeights.labs) / totalUnivWeight).toFixed(1))
+                      : 0;
+
+                    let statusUniv = 'Reprovado Direto';
+                    let notaExameNecessaria = '-';
+
+                    if (mediaSemestre >= univWeights.minPassDireta) {
+                      statusUniv = 'Aprovado Direto';
+                    } else if (mediaSemestre >= univWeights.minExameFinal) {
+                      statusUniv = 'Exame Final';
+                      // Regra universitária clássica: (Média + Exame) / 2 >= 5.0 => Exame >= 10 - Média
+                      notaExameNecessaria = Math.max(0, Number((10 - mediaSemestre).toFixed(1))).toString();
+                    }
+
+                    return (
+                      <tr key={rep.studentId} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                        <td style={{ padding: '0.85rem 0.5rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                          {rep.studentName}
+                        </td>
+                        <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
+                          {p1.toFixed(1)}
+                        </td>
+                        <td style={{ padding: '0.85rem 0.5rem', color: '#38bdf8', fontWeight: 700 }}>
+                          {p2.toFixed(1)}
+                        </td>
+                        <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700 }}>
+                          {labs.toFixed(1)}
+                        </td>
+                        <td style={{ padding: '0.85rem 0.5rem', fontSize: '1rem', fontWeight: 900, color: mediaSemestre >= 7.0 ? '#10b981' : mediaSemestre >= 4.0 ? '#f59e0b' : '#ef4444' }}>
+                          {mediaSemestre.toFixed(1)}
+                        </td>
+                        <td style={{ padding: '0.85rem 0.5rem', fontWeight: 700, color: notaExameNecessaria === '-' ? 'var(--text-muted)' : '#f59e0b' }}>
+                          {notaExameNecessaria !== '-' ? `Nota ≥ ${notaExameNecessaria}` : 'Dispensado'}
+                        </td>
+                        <td style={{ padding: '0.85rem 0.5rem' }}>
+                          <span
+                            style={{
+                              padding: '0.2rem 0.6rem',
+                              borderRadius: '6px',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              background: statusUniv === 'Aprovado Direto' ? 'rgba(16,185,129,0.15)' : statusUniv === 'Exame Final' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                              color: statusUniv === 'Aprovado Direto' ? '#10b981' : statusUniv === 'Exame Final' ? '#f59e0b' : '#ef4444'
+                            }}
+                          >
+                            {statusUniv}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.85rem 0.5rem' }}>
+                          <span style={{ fontWeight: 700, color: rep.alertaFrequencia ? '#ef4444' : 'var(--text-secondary)' }}>
+                            {rep.frequenciaPercentual}%
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -1392,6 +1631,240 @@ export function ProfessorLmsModules({
           </div>
         </div>
       )}
+      {/* ─────────────────────────────────────────────────────────────
+          SPEEDGRADER & RUBRICAS KORTEX (TELA DIVIDIDA ESTILO CANVAS LMS)
+          ───────────────────────────────────────────────────────────── */}
+      {/* ─────────────────────────────────────────────────────────────
+          SPEEDGRADER & RUBRICAS KORTEX (TELA DIVIDIDA ESTILO CANVAS LMS)
+          ───────────────────────────────────────────────────────────── */}
+      {subTab === 'speedgrader' && (() => {
+        const currentSub = demoSubmissionsList[selectedSubIndex] || demoSubmissionsList[0];
+        const totalRubricScore = Number((
+          (rubricScores['crit_1'] || 0) +
+          (rubricScores['crit_2'] || 0) +
+          (rubricScores['crit_3'] || 0)
+        ).toFixed(1));
+
+        const handleSaveReview = async () => {
+          if (savingReview) return;
+          setSavingReview(true);
+          try {
+            await saveSubmissionReview({
+              submissionId: currentSub.id,
+              professorId: 'prof_current',
+              rubricScores,
+              totalScore: totalRubricScore,
+              generalFeedback: docenteFeedback,
+              gradedAt: new Date().toISOString()
+            });
+            setSpeedGraderToast(`✓ Nota ${totalRubricScore} e rubricas de ${currentSub.studentName} registradas no Diário de Classe!`);
+            setTimeout(() => setSpeedGraderToast(null), 4000);
+          } catch (err) {
+            console.error('Erro ao salvar review:', err);
+            setSpeedGraderToast('Erro ao persistir avaliação da rubrica.');
+            setTimeout(() => setSpeedGraderToast(null), 3000);
+          } finally {
+            setSavingReview(false);
+          }
+        };
+
+        return (
+          <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Feedback Toast */}
+            {speedGraderToast && (
+              <div style={{
+                padding: '0.75rem 1.25rem',
+                borderRadius: '8px',
+                background: 'rgba(16,185,129,0.92)',
+                color: '#fff',
+                fontWeight: 700,
+                fontSize: '0.88rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.25)'
+              }}>
+                <CheckCircle style={{ width: '1.1rem', height: '1.1rem' }} />
+                <span>{speedGraderToast}</span>
+              </div>
+            )}
+
+            {/* Barra Seletora de Entregas dos Alunos */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                  Fila de Submissões ({demoSubmissionsList.length}):
+                </span>
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                  {demoSubmissionsList.map((sub, sIdx) => (
+                    <button
+                      key={sub.id}
+                      onClick={() => setSelectedSubIndex(sIdx)}
+                      style={{
+                        padding: '0.35rem 0.75rem',
+                        borderRadius: '6px',
+                        border: selectedSubIndex === sIdx ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
+                        background: selectedSubIndex === sIdx ? 'var(--color-primary-light, rgba(228,104,63,0.18))' : 'transparent',
+                        color: selectedSubIndex === sIdx ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-main)',
+                        fontWeight: selectedSubIndex === sIdx ? 800 : 500,
+                        fontSize: '0.78rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {sub.studentName} ({sub.score} pts)
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                Submissão {selectedSubIndex + 1} de {demoSubmissionsList.length}
+              </span>
+            </div>
+
+            {/* Grade Dividida SpeedGrader */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '1.25rem' }}>
+              {/* Lado Esquerdo: Visualizador de Submissão e Telemetria do Aluno */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="glass-card" style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+                        Visualizador de Submissão Prática de Laboratório
+                      </h3>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                        Aluno: <strong>{currentSub.studentName}</strong> · Turma: <strong>{currentTurma?.name || 'Turma A'}</strong> · Entregue {currentSub.submittedAt}
+                      </span>
+                    </div>
+                    <span style={{ background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', padding: '0.25rem 0.65rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 700 }}>
+                      ✓ Concluído com Telemetria
+                    </span>
+                  </div>
+
+                  {/* Pré-visualização do Laudo do Aluno */}
+                  <div style={{ background: 'var(--bg-surface)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '0.85rem', lineHeight: '1.6', color: 'var(--text-main)' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--color-primary-accessible, #B8441F)', marginBottom: '0.4rem' }}>
+                      Atividade: {currentSub.activityTitle}
+                    </div>
+                    <p style={{ margin: '0 0 0.5rem 0' }}>
+                      <strong>Hipótese Formulada pelo Estudante:</strong> "{currentSub.hypothesis}"
+                    </p>
+                    <div style={{ background: 'var(--bg-card)', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem', fontSize: '0.78rem', fontFamily: 'monospace' }}>
+                      {Object.entries(currentSub.telemetry).map(([k, v]) => (
+                        <div key={k}>{k}: <strong>{String(v)}</strong></div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lado Direito: Rubrica de Avaliação Interativa & Feedback do Professor */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="glass-card" style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                      Rubrica de Critérios DCN / MEC
+                    </h4>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--color-primary-accessible, #B8441F)' }}>
+                      Nota: {totalRubricScore} / 10
+                    </div>
+                  </div>
+
+                  {/* Critérios da Rubrica Interativa */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                    {[
+                      {
+                        id: 'crit_1',
+                        titulo: '1. Coleta e Interpretação de Dados',
+                        peso: '4.0 pts',
+                        niveis: [
+                          { label: 'Insuficiente (1.0)', score: 1.0 },
+                          { label: 'Bom (3.0)', score: 3.0 },
+                          { label: 'Excelente (4.0)', score: 4.0 },
+                        ]
+                      },
+                      {
+                        id: 'crit_2',
+                        titulo: '2. Rigor Científico e Dedução Teórica',
+                        peso: '3.0 pts',
+                        niveis: [
+                          { label: 'Regular (1.5)', score: 1.5 },
+                          { label: 'Bom (2.5)', score: 2.5 },
+                          { label: 'Excelente (3.0)', score: 3.0 },
+                        ]
+                      },
+                      {
+                        id: 'crit_3',
+                        titulo: '3. Conclusão Metodológica & ABNT',
+                        peso: '3.0 pts',
+                        niveis: [
+                          { label: 'Regular (1.5)', score: 1.5 },
+                          { label: 'Bom (2.0)', score: 2.0 },
+                          { label: 'Excelente (3.0)', score: 3.0 },
+                        ]
+                      }
+                    ].map((crit) => {
+                      const currentVal = rubricScores[crit.id] ?? 0;
+                      return (
+                        <div key={crit.id} style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
+                            <span>{crit.titulo}</span>
+                            <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{currentVal.toFixed(1)} / {crit.peso}</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                            {crit.niveis.map((niv, nIdx) => {
+                              const isSelected = Math.abs(currentVal - niv.score) < 0.05;
+                              return (
+                                <button
+                                  key={nIdx}
+                                  onClick={() => setRubricScores(prev => ({ ...prev, [crit.id]: niv.score }))}
+                                  style={{
+                                    padding: '0.3rem 0.6rem',
+                                    borderRadius: '6px',
+                                    border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
+                                    background: isSelected ? 'var(--color-primary-light, rgba(228,104,63,0.18))' : 'transparent',
+                                    color: isSelected ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
+                                    fontSize: '0.72rem',
+                                    fontWeight: isSelected ? 700 : 500,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  {niv.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Caixa de Feedback e Envio */}
+                  <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                      Parecer Docente / Comentário Socrático:
+                    </label>
+                    <textarea
+                      value={docenteFeedback}
+                      onChange={(e) => setDocenteFeedback(e.target.value)}
+                      rows={3}
+                      style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-main)', fontSize: '0.82rem', resize: 'vertical' }}
+                    />
+
+                    <button
+                      onClick={handleSaveReview}
+                      disabled={savingReview}
+                      className="btn-primary"
+                      style={{ padding: '0.65rem 1rem', fontSize: '0.85rem', fontWeight: 700, borderRadius: '8px', cursor: 'pointer', border: 'none', background: 'var(--color-verde-700, #293E24)', color: '#fff', marginTop: '0.25rem' }}
+                    >
+                      {savingReview ? 'Salvando...' : '✓ Lançar Nota Oficial no Diário'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
