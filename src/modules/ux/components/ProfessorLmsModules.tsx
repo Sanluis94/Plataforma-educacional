@@ -250,6 +250,27 @@ export function ProfessorLmsModules({
     }
   ];
 
+  // Atalhos de teclado ergonômicos no SpeedGrader: J (próximo aluno) e K (aluno anterior)
+  useEffect(() => {
+    if (subTab !== 'speedgrader') return;
+
+    const handleKeyNavigation = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+      if (e.key.toLowerCase() === 'j') {
+        e.preventDefault();
+        setSelectedSubIndex(prev => Math.min(demoSubmissionsList.length - 1, prev + 1));
+      } else if (e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSelectedSubIndex(prev => Math.max(0, prev - 1));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyNavigation);
+    return () => window.removeEventListener('keydown', handleKeyNavigation);
+  }, [subTab, demoSubmissionsList.length]);
+
   // Replay da Caixa Preta de Telemetria
   const [replayTime, setReplayTime] = useState(6.5);
   const [isPlayingReplay, setIsPlayingReplay] = useState(false);
@@ -1721,6 +1742,32 @@ export function ProfessorLmsModules({
           }
         };
 
+        const handleExportSpeedGraderCsv = () => {
+          const headers = ['ID_Submissao', 'Estudante', 'Atividade', 'Turma', 'Data_Entrega', 'Nota', 'Status', 'Hipotese_Investigativa'];
+          const rows = demoSubmissionsList.map(s => [
+            s.id,
+            `"${s.studentName.replace(/"/g, '""')}"`,
+            `"${s.activityTitle.replace(/"/g, '""')}"`,
+            `"${(currentTurma?.name || 'Turma A').replace(/"/g, '""')}"`,
+            s.submittedAt,
+            s.score,
+            'Concluido',
+            `"${(s.hypothesis || '').replace(/"/g, '""')}"`
+          ]);
+          const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', `pauta_speedgrader_${currentTurma?.name || 'turma'}_${new Date().toISOString().slice(0, 10)}.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          setSpeedGraderToast('✓ Planilha de notas e submissões exportada com sucesso em CSV!');
+          setTimeout(() => setSpeedGraderToast(null), 3500);
+        };
+
         return (
           <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {/* Feedback Toast */}
@@ -1744,7 +1791,7 @@ export function ProfessorLmsModules({
 
             {/* Barra Seletora de Entregas dos Alunos */}
             <div className="glass-card" style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                   Fila de Submissões ({demoSubmissionsList.length}):
                 </span>
@@ -1769,9 +1816,33 @@ export function ProfessorLmsModules({
                   ))}
                 </div>
               </div>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                Submissão {selectedSubIndex + 1} de {demoSubmissionsList.length}
-              </span>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Navegar: <kbd style={{ padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(0,0,0,0.06)', border: '1px solid var(--border-color)' }}>K</kbd> anterior / <kbd style={{ padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(0,0,0,0.06)', border: '1px solid var(--border-color)' }}>J</kbd> próximo
+                </span>
+                <button
+                  onClick={handleExportSpeedGraderCsv}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '8px',
+                    background: 'rgba(41, 62, 36, 0.08)',
+                    border: '1px solid var(--border-color)',
+                    color: 'var(--color-verde-700, #293E24)',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title="Baixar pauta de notas e avaliações em CSV"
+                >
+                  <Download style={{ width: '0.85rem', height: '0.85rem' }} />
+                  <span>Exportar CSV</span>
+                </button>
+              </div>
             </div>
 
             {/* Grade Dividida SpeedGrader */}

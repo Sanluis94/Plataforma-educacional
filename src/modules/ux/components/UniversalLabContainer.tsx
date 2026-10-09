@@ -110,6 +110,8 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
   const [isExamOpen, setIsExamOpen] = useState(false);
   const [is3DMode, setIs3DMode] = useState(false);
   const [copiedFormat, setCopiedFormat] = useState<'md' | 'tex' | null>(null);
+  const [lastA11yMessage, setLastA11yMessage] = useState<string>('');
+  const [isControlsOpenOnMobile, setIsControlsOpenOnMobile] = useState<boolean>(true);
 
   // Canvas e Loop
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -121,6 +123,10 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
   // Atualizar parâmetro individual
   const handleParamChange = (id: string, value: number) => {
     setParams(prev => ({ ...prev, [id]: value }));
+    const p = config.parameters.find(param => param.id === id);
+    if (p) {
+      setLastA11yMessage(`${p.label} ajustado para ${value} ${p.unit}`);
+    }
   };
 
   const handleReset = () => {
@@ -133,6 +139,7 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
       initial[p.id] = p.defaultValue;
     });
     setParams(initial);
+    setLastA11yMessage('Todos os parâmetros foram restaurados para os valores padrão.');
   };
 
   // Captura snapshot da imagem do canvas para o caderno do aluno
@@ -670,13 +677,60 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
             </div>
           </div>
 
+          {/* Anunciador A11y Live Region para Leitores de Tela */}
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            style={{
+              position: 'absolute',
+              width: '1px',
+              height: '1px',
+              padding: 0,
+              margin: '-1px',
+              overflow: 'hidden',
+              clip: 'rect(0, 0, 0, 0)',
+              whiteSpace: 'nowrap',
+              border: 0
+            }}
+          >
+            {lastA11yMessage}
+          </div>
+
+          {/* Botão de Alternância em Telas Menores */}
+          <div className="mobile-only" style={{ width: '100%' }}>
+            <button
+              onClick={() => setIsControlsOpenOnMobile(prev => !prev)}
+              style={{
+                width: '100%',
+                padding: '0.6rem 0.85rem',
+                borderRadius: '10px',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-main)',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer'
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Sliders style={{ width: '16px', height: '16px', color: 'var(--color-primary)' }} />
+                Controles & Variáveis do Experimento ({config.parameters.length})
+              </span>
+              <span>{isControlsOpenOnMobile ? 'Recolher Painel ▲' : 'Expandir Painel ▼'}</span>
+            </button>
+          </div>
+
           {/* Painel Lateral: Parâmetros da Bancada */}
           <div style={{
             background: 'var(--bg-surface)',
             borderRadius: '12px',
             border: '1px solid var(--border-color)',
             padding: '1.1rem',
-            display: 'flex',
+            display: isControlsOpenOnMobile ? 'flex' : 'none',
             flexDirection: 'column',
             gap: '1.25rem'
           }}>
