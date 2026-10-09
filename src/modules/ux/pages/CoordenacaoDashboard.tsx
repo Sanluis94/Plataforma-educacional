@@ -46,9 +46,9 @@ const ALUNOS_RISCO_PADRAO: StudentRiskItem[] = [
 ];
 
 export function CoordenacaoDashboard() {
-  const [activeTab, setActiveTab] = useState<'visao_geral' | 'importacao_csv' | 'radar_evasao' | 'relatorio_oficial'>('visao_geral');
-  const [escolaNome] = useState('Colégio Modelo Integrado');
-  const [diretorNome] = useState('Dra. Helena Cavalcanti');
+  const [activeTab, setActiveTab] = useState<'visao_geral' | 'importacao_csv' | 'radar_evasao' | 'matriz_curricular' | 'dossie_mec' | 'relatorio_oficial'>('visao_geral');
+  const [escolaNome] = useState('Universidade Kortex de Tecnologia & Inovação');
+  const [diretorNome] = useState('Prof. Dr. Ricardo Valença');
 
   // Estado da importação CSV
   const [csvRawText, setCsvRawText] = useState('');
@@ -196,9 +196,11 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', overflowX: 'auto' }}>
         {[
           { id: 'visao_geral', label: '📊 Panorama & Indicadores', icon: TrendingUp },
-          { id: 'importacao_csv', label: '📥 Importação em Massa (CSV)', icon: FileSpreadsheet },
-          { id: 'radar_evasao', label: '⚠️ Radar de Risco Escolar', icon: AlertTriangle },
-          { id: 'relatorio_oficial', label: '📄 Relatório White-Label', icon: Building2 },
+          { id: 'matriz_curricular', label: '🏛️ Matriz Curricular & Semestres', icon: Building2 },
+          { id: 'radar_evasao', label: '⚠️ Radar de Retenção & Evasão', icon: AlertTriangle },
+          { id: 'importacao_csv', label: '📥 Importação de Alunos (CSV)', icon: FileSpreadsheet },
+          { id: 'dossie_mec', label: '📑 Dossiê MEC / SINAES', icon: CheckCircle2 },
+          { id: 'relatorio_oficial', label: '📄 Relatório Institucional', icon: Building2 },
         ].map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -512,6 +514,137 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
                 <div style={{ borderBottom: '1px solid var(--color-verde-900, #172314)', marginBottom: '0.4rem' }}></div>
                 <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-verde-900, #172314)' }}>Coordenação Geral BNCC</div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)' }}>Comitê Acadêmico</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── ABA: MATRIZ CURRICULAR & SEMESTRES UNIVERSITÁRIOS ── */}
+      {activeTab === 'matriz_curricular' && (
+        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div className="glass-card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg, 14px)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
+                  Estrutura Curricular & Créditos Acadêmicos
+                </h3>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+                  Organização modular por semestres, ementas, carga horária prática de laboratório e alocação docente
+                </p>
+              </div>
+              <span style={{ background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', color: 'var(--color-primary-accessible, #B8441F)', padding: '0.35rem 0.85rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700 }}>
+                Graduação em Engenharia & Computação (10 Semestres)
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+              {[
+                {
+                  semestre: '1º Semestre',
+                  materias: [
+                    { cod: 'MAT-101', nome: 'Cálculo Diferencial I', ch: '80h', labs: '20h práticas', prof: 'Prof. Marcos Valente' },
+                    { cod: 'FIS-101', nome: 'Física Geral: Mecânica', ch: '80h', labs: '30h práticas', prof: 'Profa. Marina Azevedo' },
+                    { cod: 'ALG-101', nome: 'Algoritmos e Lógica', ch: '60h', labs: '30h práticas', prof: 'Prof. Carlos Eduardo' },
+                  ]
+                },
+                {
+                  semestre: '2º Semestre',
+                  materias: [
+                    { cod: 'MAT-102', nome: 'Cálculo Integral II', ch: '80h', labs: '20h práticas', prof: 'Prof. Marcos Valente' },
+                    { cod: 'FIS-102', nome: 'Oscilações e Ondulatória', ch: '80h', labs: '30h práticas', prof: 'Profa. Marina Azevedo' },
+                    { cod: 'QUI-101', nome: 'Química Geral Universitária', ch: '60h', labs: '30h práticas', prof: 'Profa. Beatriz Helena' },
+                  ]
+                },
+                {
+                  semestre: '3º Semestre',
+                  materias: [
+                    { cod: 'CIR-201', nome: 'Circuitos Elétricos I', ch: '80h', labs: '40h práticas', prof: 'Prof. Roberto Silva' },
+                    { cod: 'ED-201', nome: 'Estruturas de Dados Avançadas', ch: '80h', labs: '40h práticas', prof: 'Prof. Carlos Eduardo' },
+                    { cod: 'EST-201', nome: 'Probabilidade e Estatística', ch: '60h', labs: '20h práticas', prof: 'Profa. Fernanda Lima' },
+                  ]
+                },
+                {
+                  semestre: '4º Semestre',
+                  materias: [
+                    { cod: 'RES-201', nome: 'Resistência dos Materiais', ch: '80h', labs: '30h práticas', prof: 'Prof. Thiago Ramos' },
+                    { cod: 'TER-201', nome: 'Termodinâmica Aplicada', ch: '80h', labs: '30h práticas', prof: 'Profa. Juliana Prado' },
+                    { cod: 'ARQ-201', nome: 'Arquitetura de Computadores', ch: '80h', labs: '30h práticas', prof: 'Prof. Lucas Mendes' },
+                  ]
+                }
+              ].map((s, idx) => (
+                <div key={idx} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem' }}>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.4rem', marginBottom: '0.65rem' }}>
+                    {s.semestre}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {s.materias.map((m, mIdx) => (
+                      <div key={mIdx} style={{ fontSize: '0.78rem', background: 'var(--bg-surface)', padding: '0.5rem', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, color: 'var(--text-main)' }}>
+                          <span>{m.cod} - {m.nome}</span>
+                          <span style={{ color: 'var(--color-verde-700, #293E24)' }}>{m.ch}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                          <span>🔬 {m.labs}</span>
+                          <span>👨‍🏫 {m.prof}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── ABA: DOSSIÊ MEC / SINAES DE ACREDITAÇÃO ── */}
+      {activeTab === 'dossie_mec' && (
+        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div className="glass-card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg, 14px)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
+                  Dossiê Institucional de Avaliação MEC / INEP (SINAES)
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+                  Comprovações técnicas de infraestrutura de laboratórios virtuais, acessibilidade DUA e inovação pedagógica
+                </p>
+              </div>
+
+              <button
+                onClick={() => window.print()}
+                className="btn-action"
+                style={{ background: 'var(--color-verde-700, #293E24)', color: '#fff', padding: '0.55rem 1.1rem', borderRadius: '8px', cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, fontSize: '0.85rem' }}
+              >
+                <Printer style={{ width: '16px', height: '16px' }} />
+                Imprimir Dossiê para Comissão
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div style={{ background: 'var(--bg-surface)', padding: '1rem', borderRadius: '10px', borderLeft: '4px solid #22c55e' }}>
+                <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>Dimensão 3 — Infraestrutura de Laboratórios</strong>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  500+ Estações Virtuais Ativas cobrindo 100% dos componentes curriculares práticos com telemetria contínua.
+                </span>
+                <div style={{ marginTop: '0.5rem', fontSize: '0.78rem', fontWeight: 700, color: '#22c55e' }}>Nota Indicativa: 5.0 (Conceito Máximo)</div>
+              </div>
+
+              <div style={{ background: 'var(--bg-surface)', padding: '1rem', borderRadius: '10px', borderLeft: '4px solid #38bdf8' }}>
+                <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>Acessibilidade & Inclusão (Decreto nº 9.296)</strong>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  Conformidade WCAG 2.1 AAA, fontes para dislexia, leitor de voz nativo, máscara de foco visual e alto contraste.
+                </span>
+                <div style={{ marginTop: '0.5rem', fontSize: '0.78rem', fontWeight: 700, color: '#38bdf8' }}>Certificação DUA 100% Conforme</div>
+              </div>
+
+              <div style={{ background: 'var(--bg-surface)', padding: '1rem', borderRadius: '10px', borderLeft: '4px solid #eab308' }}>
+                <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>Dimensão 2 — Metodologias Ativas de Ensino</strong>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  Ciclo CSFA (Conhecer-Simular-Formular-Agir), tutoria socrática por IA sem resposta pronta e avaliação formativa TRI.
+                </span>
+                <div style={{ marginTop: '0.5rem', fontSize: '0.78rem', fontWeight: 700, color: '#eab308' }}>Aderência às DCNs de Engenharia</div>
               </div>
             </div>
           </div>

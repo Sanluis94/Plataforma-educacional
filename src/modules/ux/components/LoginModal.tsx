@@ -11,7 +11,7 @@ interface LoginModalProps {
 
 export function LoginModal({ onClose }: LoginModalProps) {
   const { isLocalAuthMode, loginWithGoogle } = useAuth();
-  const [selectedRole, setSelectedRole] = useState<'estudante' | 'professor' | 'admin'>('estudante');
+  const [selectedRole, setSelectedRole] = useState<'estudante' | 'professor' | 'coordenador' | 'admin'>('estudante');
   const [selectedGrade, setSelectedGrade] = useState<GradeLevel>('medio');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,13 +91,13 @@ export function LoginModal({ onClose }: LoginModalProps) {
         </div>
 
         {/* Role Selector */}
-        <div style={{ display: 'grid', gridTemplateColumns: isLocalAuthMode ? 'repeat(3, 1fr)' : '1fr 1fr', gap: '0.5rem', marginBottom: '1.25rem' }}>
-          {(['estudante', 'professor', ...(isLocalAuthMode ? ['admin' as const] : [])] as const).map(role => (
+        <div style={{ display: 'grid', gridTemplateColumns: isLocalAuthMode ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1.25rem' }}>
+          {(['estudante', 'professor', 'coordenador', ...(isLocalAuthMode ? ['admin' as const] : [])] as const).map(role => (
             <button
               key={role}
               onClick={() => setSelectedRole(role)}
               style={{
-                padding: '0.85rem 0.5rem', borderRadius: '10px', cursor: 'pointer',
+                padding: '0.85rem 0.35rem', borderRadius: '10px', cursor: 'pointer',
                 border: selectedRole === role ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
                 background: selectedRole === role
                   ? 'rgba(228, 104, 63, 0.08)'
@@ -107,11 +107,11 @@ export function LoginModal({ onClose }: LoginModalProps) {
                 transition: 'all 0.2s', textAlign: 'center',
               }}
             >
-              <div style={{ fontSize: '1.6rem', marginBottom: '0.25rem' }}>
-                {role === 'estudante' ? '🎓' : role === 'professor' ? '👨‍🏫' : '🛡️'}
+              <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>
+                {role === 'estudante' ? '🎓' : role === 'professor' ? '👨‍🏫' : role === 'coordenador' ? '🏛️' : '🛡️'}
               </div>
-              <div style={{ fontSize: '0.85rem' }}>
-                {role === 'estudante' ? 'Estudante' : role === 'professor' ? 'Professor' : 'Admin'}
+              <div style={{ fontSize: '0.75rem', textTransform: 'capitalize' }}>
+                {role === 'coordenador' ? 'Coordenação' : role}
               </div>
             </button>
           ))}

@@ -4,7 +4,15 @@
  */
 
 // ─── Coleção: users ───────────────────────────────────────────
-export type UserRole = 'admin' | 'professor' | 'estudante';
+export type UserRole = 'admin' | 'coordenador' | 'professor' | 'estudante';
+
+export type AcademicLevel = 
+  | 'fundamental_1' 
+  | 'fundamental_2' 
+  | 'medio' 
+  | 'profissional' 
+  | 'graduacao' 
+  | 'pos_graduacao';
 
 export interface UserData {
   id?: string;
@@ -12,6 +20,9 @@ export interface UserData {
   email: string;
   role: UserRole;
   gradeLevel?: string;
+  academicLevel?: AcademicLevel;
+  department?: string;
+  courseId?: string;
   createdAt: string;
   updatedAt?: string;
   lastLoginAt?: string;
@@ -274,6 +285,64 @@ export interface DigitalCertificate {
   cargaHorariaHoras: number;
   dataEmissao: string;
   codigoValidacao: string;
+}
+
+// ─── Estrutura Universitária & Gestão de Ensino Superior ────────────
+export interface UniversityCourse {
+  id: string;
+  name: string;
+  code: string; // Ex: ENG-COMP, MED-01
+  department: string;
+  durationSemesters: number;
+  coordinatorId: string;
+  coordinatorName: string;
+  status: 'ativo' | 'em_revisao' | 'inativo';
+  createdAt: string;
+}
+
+export interface UniversitySubject {
+  id: string;
+  courseId: string;
+  code: string; // Ex: FIS-101
+  name: string;
+  semester: number; // 1 a 10
+  credits: number;
+  workloadHours: number;
+  practicalLabHours: number;
+  prerequisites: string[];
+  syllabus: string;
+  professorId?: string;
+  professorName?: string;
+}
+
+export interface UniversityGradeConfig {
+  weightP1: number; // Ex: 0.35
+  weightP2: number; // Ex: 0.35
+  weightLabs: number; // Ex: 0.30
+  minPassGrade: number; // Ex: 7.0
+  minExamPassGrade: number; // Ex: 5.0
+}
+
+export interface SpeedGraderRubricCriterion {
+  id: string;
+  title: string;
+  description: string;
+  maxPoints: number;
+  levels: {
+    points: number;
+    label: string;
+    description: string;
+  }[];
+}
+
+export interface SpeedGraderSubmissionReview {
+  id?: string;
+  submissionId: string;
+  professorId: string;
+  rubricScores: Record<string, number>; // criterionId -> pontos
+  generalFeedback: string;
+  audioFeedbackUrl?: string;
+  gradedAt: string;
 }
 
 // ─── Constantes padrão ────────────────────────────────────────

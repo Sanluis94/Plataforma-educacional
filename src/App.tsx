@@ -83,9 +83,9 @@ function App() {
               }>
                 <Route path="/" element={<Home onLoginOpen={() => setLoginOpen(true)} />} />
 
-                {/* Rotas protegidas por role */}
+                {/* Rotas protegidas por role com segregação estrita */}
                 <Route path="/professor" element={
-                  <ProtectedRoute allowedRoles={['professor', 'admin']}>
+                  <ProtectedRoute allowedRoles={['professor', 'coordenador', 'admin']}>
                     <ProfessorDashboard />
                   </ProtectedRoute>
                 } />
@@ -97,19 +97,19 @@ function App() {
                 } />
 
                 <Route path="/simulacao" element={
-                  <ProtectedRoute allowedRoles={['estudante', 'professor', 'admin']}>
+                  <ProtectedRoute allowedRoles={['estudante', 'professor', 'coordenador', 'admin']}>
                     <Simulacao />
                   </ProtectedRoute>
                 } />
 
                 <Route path="/enem" element={
-                  <ProtectedRoute allowedRoles={['estudante', 'professor', 'admin']}>
+                  <ProtectedRoute allowedRoles={['estudante', 'professor', 'coordenador', 'admin']}>
                     <EnemSimuladoView />
                   </ProtectedRoute>
                 } />
 
                 <Route path="/coordenacao" element={
-                  <ProtectedRoute allowedRoles={['professor', 'admin']}>
+                  <ProtectedRoute allowedRoles={['coordenador', 'admin']}>
                     <CoordenacaoDashboard />
                   </ProtectedRoute>
                 } />
