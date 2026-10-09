@@ -493,32 +493,66 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           >
             Física moderna
           </button>
+          <div style={{ width: '100%', height: '1px', background: 'var(--border-color)', margin: '0.4rem 0' }} />
+          <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              🏛️ Ensino Superior & Engenharias (Laboratórios Avançados Kortex):
+            </span>
+          </div>
           <button
             onClick={() => setActiveTab('sup_fis_01')}
             className={activeTab === 'sup_fis_01' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
           >
-            🏛️ Ressonância Mecânica
+            ⚛️ Ressonância Mecânica
           </button>
           <button
             onClick={() => setActiveTab('sup_calc_01')}
             className={activeTab === 'sup_calc_01' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
           >
-            🏛️ Somas de Riemann
+            📐 Somas de Riemann
           </button>
           <button
             onClick={() => setActiveTab('sup_comp_01')}
             className={activeTab === 'sup_comp_01' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
           >
-            🏛️ Algoritmos O(n)
+            💻 Algoritmos O(n)
+          </button>
+          <button
+            onClick={() => setActiveTab('sup_qui_01')}
+            className={activeTab === 'sup_qui_01' ? 'btn-primary' : 'btn-outline'}
+            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
+          >
+            🧪 Cinética & Arrhenius
+          </button>
+          <button
+            onClick={() => setActiveTab('sup_eletr_03')}
+            className={activeTab === 'sup_eletr_03' ? 'btn-primary' : 'btn-outline'}
+            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
+          >
+            ⚡ Osciloscópio RLC
+          </button>
+          <button
+            onClick={() => setActiveTab('sup_resmat_01')}
+            className={activeTab === 'sup_resmat_01' ? 'btn-primary' : 'btn-outline'}
+            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
+          >
+            🏗️ Ensaio de Tração
+          </button>
+          <button
+            onClick={() => setActiveTab('sup_bioq_01')}
+            className={activeTab === 'sup_bioq_01' ? 'btn-primary' : 'btn-outline'}
+            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
+          >
+            🧬 Michaelis-Menten
           </button>
           {onComplete && (
             <button
               onClick={() => onComplete(100)}
               className="btn-secondary"
-              style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+              style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
             >
               ✓ Concluir laboratório
             </button>
