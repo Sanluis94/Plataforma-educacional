@@ -1,9 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Play, Pause, RotateCcw, Download, 
-  FileText, CheckCircle2, Sliders 
+  FileText, CheckCircle2, Sliders,
+  BookOpen, Columns2, History, Terminal, 
+  Bot, ShieldAlert, Box, Copy, Check
 } from 'lucide-react';
 import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
+import { triggerPrintLabReport, generateLabReportMarkdown, generateLabReportLatex } from '../../core/services/labReportService';
+import { estimateStudentProficiency, getCalibratedTriParametersForLab, type TriProficiencyResult, type TriAnswerRecord } from '../../core/services/triEvaluationService';
+import { sonifier } from '../../core/services/webAudioSonifier';
+import { offlineSyncService } from '../../core/services/offlineSyncService';
+import { LabNotebookDrawer } from './labs/LabNotebookDrawer';
+import { LabSplitScreenComparator } from './labs/LabSplitScreenComparator';
+import { LabTimeTravelReplay } from './labs/LabTimeTravelReplay';
+import { LabAccessibilityToolbar } from './labs/LabAccessibilityToolbar';
+import { LabSocraticTutorModal } from './labs/LabSocraticTutorModal';
+import { LabPythonRunnerModal } from './labs/LabPythonRunnerModal';
+import { SecureExamModal } from './labs/SecureExamModal';
+import { Lab3DRenderer } from './labs/Lab3DRenderer';
 
 export interface UniversalLabParam {
   id: string;
@@ -15,6 +29,8 @@ export interface UniversalLabParam {
   defaultValue: number;
   description?: string;
 }
+
+export type LabParameter = UniversalLabParam;
 
 export interface UniversalLabQuestion {
   question: string;
@@ -71,19 +87,36 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
 
   const [isRunning, setIsRunning] = useState(true);
   const [telemetryHistory, setTelemetryHistory] = useState<Record<string, number>[]>([]);
+  const [rawTelemetryArray, setRawTelemetryArray] = useState<number[]>([]);
   const [currentTelemetry, setCurrentTelemetry] = useState<Record<string, number>>({});
   const [activeTab, setActiveTab] = useState<'simulacao' | 'teoria' | 'avaliacao' | 'laudo'>('simulacao');
 
-  // Questionário diagnóstico
+  // Questionário diagnóstico e TRI
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [answeredSubmitted, setAnsweredSubmitted] = useState(false);
-  const [score, setScore] = useState(0);
+  const [_score, setScore] = useState(0);
+  const [triResult, setTriResult] = useState<TriProficiencyResult | null>(null);
+
+  // Estados dos novos módulos estratégicos
+  const [isHighContrast, setIsHighContrast] = useState(false);
+  const [isDyslexicFont, setIsDyslexicFont] = useState(false);
+  const [isSoundMuted, setIsSoundMuted] = useState(true);
+  const [isNoiseActive, setIsNoiseActive] = useState(false);
+  const [isNotebookOpen, setIsNotebookOpen] = useState(false);
+  const [isSplitCompareOpen, setIsSplitCompareOpen] = useState(false);
+  const [showTimeTravel, setShowTimeTravel] = useState(false);
+  const [isPythonOpen, setIsPythonOpen] = useState(false);
+  const [isSocraticOpen, setIsSocraticOpen] = useState(false);
+  const [isExamOpen, setIsExamOpen] = useState(false);
+  const [is3DMode, setIs3DMode] = useState(false);
+  const [copiedFormat, setCopiedFormat] = useState<'md' | 'tex' | null>(null);
 
   // Canvas e Loop
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stateRef = useRef<Record<string, any>>(config.initialState || {});
   const lastTimeRef = useRef<number>(performance.now());
   const animationFrameId = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(Date.now());
 
   // Atualizar parâmetro individual
   const handleParamChange = (id: string, value: number) => {
@@ -93,12 +126,25 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
   const handleReset = () => {
     stateRef.current = config.initialState ? { ...config.initialState } : {};
     setTelemetryHistory([]);
+    setRawTelemetryArray([]);
     setCurrentTelemetry({});
     const initial: Record<string, number> = {};
     config.parameters.forEach(p => {
       initial[p.id] = p.defaultValue;
     });
     setParams(initial);
+  };
+
+  // Captura snapshot da imagem do canvas para o caderno do aluno
+  const handleCaptureSnapshot = (): string | null => {
+    if (canvasRef.current) {
+      try {
+        return canvasRef.current.toDataURL('image/png');
+      } catch (_e) {
+        return null;
+      }
+    }
+    return null;
   };
 
   // Loop de Animação e Física
@@ -115,9 +161,23 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
       lastTimeRef.current = now;
 
       if (isRunning) {
-        const result = config.physicsStep(params, stateRef.current, dt);
+        // Se o ruído experimental Monte Carlo estiver ativo, aplica perturbação gaussiana leve
+        const effectiveParams = { ...params };
+        if (isNoiseActive) {
+          Object.keys(effectiveParams).forEach(k => {
+            const noise = (Math.random() - 0.5) * 0.03 * effectiveParams[k];
+            effectiveParams[k] = Number((effectiveParams[k] + noise).toFixed(3));
+          });
+        }
+
+        const result = config.physicsStep(effectiveParams, stateRef.current, dt);
         stateRef.current = result.nextState;
         setCurrentTelemetry(result.telemetry);
+
+        const firstVal = Object.values(result.telemetry)[0] ?? 10;
+        if (!isSoundMuted) {
+          sonifier.updateContinuousPitch(firstVal, 0, 100);
+        }
 
         historyCounter++;
         if (historyCounter % 6 === 0) {
@@ -125,7 +185,10 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
             const next = [...prev, { time: Number((now / 1000).toFixed(2)), ...result.telemetry }];
             return next.slice(-100);
           });
+          setRawTelemetryArray(prev => [...prev, firstVal].slice(-100));
         }
+      } else {
+        sonifier.stopContinuousPitch();
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -141,8 +204,9 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
+      sonifier.stopContinuousPitch();
     };
-  }, [config, isRunning, params]);
+  }, [config, isRunning, params, isNoiseActive, isSoundMuted]);
 
   // Exportar dados para CSV
   const handleExportCSV = () => {
@@ -163,23 +227,109 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
     document.body.removeChild(link);
   };
 
-  // Submissão do Quiz Diagnóstico
+  // Submissão do Quiz Diagnóstico com cálculo TRI
   const handleSubmitEvaluation = () => {
     if (!config.questions || config.questions.length === 0) return;
     let correctCount = 0;
+    const answersRecord: TriAnswerRecord[] = [];
+
     config.questions.forEach((q, idx) => {
       const selectedIdx = selectedAnswers[idx];
-      if (selectedIdx !== undefined && q.options[selectedIdx]?.correct) {
-        correctCount++;
-      }
+      const isCorrect = selectedIdx !== undefined && q.options[selectedIdx]?.correct;
+      if (isCorrect) correctCount++;
+
+      answersRecord.push({
+        itemId: `${config.id}_q${idx + 1}`,
+        correct: Boolean(isCorrect),
+        itemParams: getCalibratedTriParametersForLab(config.id, config.academicLevel)
+      });
     });
 
     const finalScore = Math.round((correctCount / config.questions.length) * 10);
     setScore(finalScore);
     setAnsweredSubmitted(true);
+
+    // Avaliação Psicométrica TRI
+    const tri = estimateStudentProficiency(answersRecord);
+    setTriResult(tri);
+
+    // Chime sonoro de sucesso
+    sonifier.playSuccessChime();
+
+    // Sincronização offline outbox
+    offlineSyncService.enqueueSubmission({
+      labId: config.id,
+      studentId: 'estudante_ativo',
+      timestamp: new Date().toISOString(),
+      parameters: params,
+      telemetry: currentTelemetry,
+      diagnosticAnswer: {
+        questionText: config.questions[0]?.question || '',
+        selectedOption: config.questions[0]?.options[selectedAnswers[0] ?? 0]?.text || '',
+        correct: correctCount === config.questions.length
+      }
+    });
+
     if (onComplete) {
       onComplete({ score: finalScore, telemetryRows: telemetryHistory.length });
     }
+  };
+
+  // Geração de Relatório de Bancada Formal
+  const handlePrintReport = () => {
+    const duration = Math.round((Date.now() - startTimeRef.current) / 1000);
+    triggerPrintLabReport({
+      labId: config.id,
+      labTitle: config.title,
+      academicLevel: config.academicLevel,
+      subject: config.subject,
+      studentName: 'Estudante Kortex',
+      date: new Date().toLocaleDateString('pt-BR'),
+      durationSeconds: duration,
+      parametersUsed: params,
+      parameterDefinitions: config.parameters.map(p => ({ id: p.id, label: p.label, unit: p.unit })),
+      telemetrySnapshot: currentTelemetry,
+      diagnosticQuestionText: config.questions?.[0]?.question,
+      selectedAnswerText: config.questions?.[0]?.options[selectedAnswers[0] ?? 0]?.text,
+      isCorrect: config.questions?.[0]?.options[selectedAnswers[0] ?? 0]?.correct,
+      scorePct: triResult ? Math.round((triResult.scoreEnem / 1000) * 100) : 100
+    });
+  };
+
+  const handleCopyMarkdownReport = () => {
+    const md = generateLabReportMarkdown({
+      labId: config.id,
+      labTitle: config.title,
+      academicLevel: config.academicLevel,
+      subject: config.subject,
+      studentName: 'Estudante Kortex',
+      date: new Date().toLocaleDateString('pt-BR'),
+      durationSeconds: Math.round((Date.now() - startTimeRef.current) / 1000),
+      parametersUsed: params,
+      parameterDefinitions: config.parameters.map(p => ({ id: p.id, label: p.label, unit: p.unit })),
+      telemetrySnapshot: currentTelemetry
+    });
+    navigator.clipboard.writeText(md);
+    setCopiedFormat('md');
+    setTimeout(() => setCopiedFormat(null), 2000);
+  };
+
+  const handleCopyLatexReport = () => {
+    const tex = generateLabReportLatex({
+      labId: config.id,
+      labTitle: config.title,
+      academicLevel: config.academicLevel,
+      subject: config.subject,
+      studentName: 'Estudante Kortex',
+      date: new Date().toLocaleDateString('pt-BR'),
+      durationSeconds: Math.round((Date.now() - startTimeRef.current) / 1000),
+      parametersUsed: params,
+      parameterDefinitions: config.parameters.map(p => ({ id: p.id, label: p.label, unit: p.unit })),
+      telemetrySnapshot: currentTelemetry
+    });
+    navigator.clipboard.writeText(tex);
+    setCopiedFormat('tex');
+    setTimeout(() => setCopiedFormat(null), 2000);
   };
 
   const socraticContext = config.socraticPromptContext 
@@ -187,18 +337,22 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
     : `O estudante está no laboratório "${config.title}" com parâmetros: ${JSON.stringify(params)}. Telemetria atual: ${JSON.stringify(currentTelemetry)}.`;
 
   return (
-    <div className="fade-in" style={{
-      background: 'var(--bg-card)',
-      borderRadius: '16px',
-      border: '1px solid var(--border-color)',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '1rem',
-      padding: '1.25rem',
-      position: 'relative'
-    }}>
-      {/* Cabeçalho do Laboratório */}
+    <div 
+      className={`fade-in ${isHighContrast ? 'bg-black text-yellow-300' : ''}`} 
+      style={{
+        background: isHighContrast ? '#000' : 'var(--bg-card)',
+        borderRadius: '16px',
+        border: isHighContrast ? '2px solid #eab308' : '1px solid var(--border-color)',
+        fontFamily: isDyslexicFont ? 'OpenDyslexic, Comic Sans MS, sans-serif' : 'inherit',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        padding: '1.25rem',
+        position: 'relative'
+      }}
+    >
+      {/* Barra Superior: Cabeçalho & Acessibilidade AAA */}
       <div style={{
         display: 'flex',
         flexWrap: 'wrap',
@@ -209,7 +363,7 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
         paddingBottom: '1rem'
       }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
             <span style={{
               background: 'rgba(228, 104, 63, 0.12)',
               color: 'var(--color-primary, #E4683F)',
@@ -234,30 +388,148 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
           </p>
         </div>
 
-        {/* Abas Superiores */}
-        <div style={{ display: 'flex', gap: '0.35rem', background: 'var(--bg-surface)', padding: '0.3rem', borderRadius: '10px' }}>
-          {(['simulacao', 'teoria', 'avaliacao', 'laudo'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              style={{
-                padding: '0.4rem 0.85rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: activeTab === tab ? 'var(--color-primary)' : 'transparent',
-                color: activeTab === tab ? '#fff' : 'var(--text-secondary)',
-                fontSize: '0.8rem',
-                fontWeight: activeTab === tab ? 600 : 500,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                textTransform: 'capitalize'
-              }}
-            >
-              {tab === 'simulacao' ? '⚗️ Simulação' : tab === 'teoria' ? '📖 Teoria' : tab === 'avaliacao' ? '📝 Avaliação' : '📄 Laudo Técnico'}
-            </button>
-          ))}
+        {/* Barra de Ferramentas de Acessibilidade & Controles de Modo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <LabAccessibilityToolbar
+            isHighContrast={isHighContrast}
+            isDyslexicFont={isDyslexicFont}
+            isSoundMuted={isSoundMuted}
+            onToggleHighContrast={setIsHighContrast}
+            onToggleDyslexicFont={setIsDyslexicFont}
+            onToggleSound={() => {
+              const next = !isSoundMuted;
+              setIsSoundMuted(next);
+              sonifier.setMuted(next);
+            }}
+            onKeyboardShortcut={(act) => {
+              if (act === 'toggle_play') setIsRunning(!isRunning);
+              else if (act === 'reset') handleReset();
+              else if (act === 'open_notebook') setIsNotebookOpen(true);
+              else if (act === 'open_compare') setIsSplitCompareOpen(true);
+            }}
+          />
+
+          {/* Abas Superiores */}
+          <div style={{ display: 'flex', gap: '0.35rem', background: 'var(--bg-surface)', padding: '0.3rem', borderRadius: '10px' }}>
+            {(['simulacao', 'teoria', 'avaliacao', 'laudo'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  padding: '0.4rem 0.85rem',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: activeTab === tab ? 'var(--color-primary)' : 'transparent',
+                  color: activeTab === tab ? '#fff' : 'var(--text-secondary)',
+                  fontSize: '0.8rem',
+                  fontWeight: activeTab === tab ? 600 : 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textTransform: 'capitalize'
+                }}
+              >
+                {tab === 'simulacao' ? '⚗️ Simulação' : tab === 'teoria' ? '📖 Teoria' : tab === 'avaliacao' ? '📝 Avaliação TRI' : '📄 Laudo Técnico'}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+
+      {/* Barra de Ações Rápidas do Laboratório */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', background: 'rgba(15, 23, 42, 0.4)', padding: '0.5rem 0.75rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+        <button
+          onClick={() => setIsNotebookOpen(true)}
+          className="btn-outline"
+          style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+          title="Abrir Caderno de Laboratório Digital do Estudante"
+        >
+          <BookOpen style={{ width: '13px', height: '13px', color: '#E4683F' }} />
+          <span>Caderno de Notas</span>
+        </button>
+
+        <button
+          onClick={() => setIsSplitCompareOpen(true)}
+          className="btn-outline"
+          style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+          title="Comparar dois cenários com parâmetros distintos"
+        >
+          <Columns2 style={{ width: '13px', height: '13px', color: '#38bdf8' }} />
+          <span>Comparar A/B</span>
+        </button>
+
+        <button
+          onClick={() => setShowTimeTravel(!showTimeTravel)}
+          className="btn-outline"
+          style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem', background: showTimeTravel ? 'rgba(56, 189, 248, 0.15)' : 'transparent' }}
+          title="Ativar linha do tempo de replay"
+        >
+          <History style={{ width: '13px', height: '13px', color: '#a855f7' }} />
+          <span>Time-Travel Replay</span>
+        </button>
+
+        <button
+          onClick={() => setIsPythonOpen(true)}
+          className="btn-outline"
+          style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+          title="Abrir Terminal Python Científico com Pyodide"
+        >
+          <Terminal style={{ width: '13px', height: '13px', color: '#10b981' }} />
+          <span>Terminal Python</span>
+        </button>
+
+        <button
+          onClick={() => setIsSocraticOpen(true)}
+          className="btn-outline"
+          style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+          title="Conversar com o Tutor Socrático por Chat e Voz"
+        >
+          <Bot style={{ width: '13px', height: '13px', color: '#f59e0b' }} />
+          <span>Tutor IA por Voz</span>
+        </button>
+
+        <button
+          onClick={() => setIsExamOpen(true)}
+          className="btn-outline"
+          style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+          title="Modo Prova com Tela Cheia e Auditoria"
+        >
+          <ShieldAlert style={{ width: '13px', height: '13px', color: '#ef4444' }} />
+          <span>Modo Exame Seguro</span>
+        </button>
+
+        <button
+          onClick={() => setIs3DMode(!is3DMode)}
+          className="btn-outline"
+          style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem', background: is3DMode ? 'rgba(228, 104, 63, 0.15)' : 'transparent' }}
+          title="Alternar entre visualização 2D e 3D Espacial"
+        >
+          <Box style={{ width: '13px', height: '13px', color: '#E4683F' }} />
+          <span>{is3DMode ? 'Voltar para 2D' : 'Visão 3D WebGPU'}</span>
+        </button>
+
+        <button
+          onClick={() => setIsNoiseActive(!isNoiseActive)}
+          className="btn-outline"
+          style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem', background: isNoiseActive ? 'rgba(234, 179, 8, 0.15)' : 'transparent' }}
+          title="Injetar ruído gaussiano Monte Carlo para simular instrumentos reais"
+        >
+          <span style={{ fontSize: '11px' }}>🎲</span>
+          <span>{isNoiseActive ? 'Ruído Real Ativo' : 'Adicionar Ruído'}</span>
+        </button>
+      </div>
+
+      {/* Barra de Replay Time-Travel se ativa */}
+      {showTimeTravel && (
+        <LabTimeTravelReplay
+          history={rawTelemetryArray}
+          currentTime={telemetryHistory.length * 0.05}
+          onScrubToTime={(targetIdx) => {
+            // Retrocede estado
+            stateRef.current.val = rawTelemetryArray[targetIdx] ?? stateRef.current.val;
+          }}
+          isRunning={isRunning}
+        />
+      )}
 
       {/* Conteúdo da Aba Ativa */}
       {activeTab === 'simulacao' && (
@@ -275,12 +547,23 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <canvas
-                ref={canvasRef}
-                width={700}
-                height={420}
-                style={{ width: '100%', height: 'auto', display: 'block' }}
-              />
+              {is3DMode ? (
+                <div style={{ width: '100%', height: '100%', padding: '1rem' }}>
+                  <Lab3DRenderer
+                    telemetryVal={Object.values(currentTelemetry)[0] ?? 20}
+                    width={680}
+                    height={380}
+                    label={`Modelo 3D Tridimensional: ${config.title}`}
+                  />
+                </div>
+              ) : (
+                <canvas
+                  ref={canvasRef}
+                  width={700}
+                  height={420}
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
+              )}
 
               {/* Botões Flutuantes de Ação no Canvas */}
               <div style={{
@@ -398,20 +681,18 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
             gap: '1.25rem'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.65rem' }}>
-              <Sliders style={{ width: '16px', height: '16px', color: 'var(--color-primary)' }} />
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: 'var(--text-main)' }}>
-                Parâmetros Físicos
+              <Sliders style={{ width: '18px', height: '18px', color: 'var(--color-primary)' }} />
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                Variáveis Experimentais
               </h3>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', maxHeight: '420px', paddingRight: '0.25rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
               {config.parameters.map(param => (
                 <div key={param.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
-                    <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>
-                      {param.label}
-                    </span>
-                    <span style={{ color: 'var(--color-primary)', fontWeight: 700, fontFamily: 'monospace' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{param.label}</span>
+                    <span style={{ fontFamily: 'monospace', color: 'var(--color-primary-accessible)', fontWeight: 700 }}>
                       {params[param.id]} {param.unit}
                     </span>
                   </div>
@@ -421,16 +702,15 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
                     min={param.min}
                     max={param.max}
                     step={param.step}
-                    value={params[param.id]}
+                    value={params[param.id] ?? param.defaultValue}
                     onChange={e => handleParamChange(param.id, parseFloat(e.target.value))}
-                    style={{ accentColor: 'var(--color-primary)', cursor: 'pointer' }}
+                    style={{ width: '100%', accentColor: 'var(--color-primary)', cursor: 'pointer' }}
                   />
 
-                  {param.description && (
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      {param.description}
-                    </span>
-                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    <span>{param.min} {param.unit}</span>
+                    <span>{param.max} {param.unit}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -438,26 +718,25 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
         </div>
       )}
 
-      {/* Aba de Teoria e Fundamentos */}
+      {/* Aba de Teoria e Fundamentação Científica */}
       {activeTab === 'teoria' && (
         <div style={{
           background: 'var(--bg-surface)',
           padding: '1.5rem',
           borderRadius: '12px',
           border: '1px solid var(--border-color)',
-          lineHeight: '1.7',
-          color: 'var(--text-main)'
+          lineHeight: '1.6',
+          color: 'var(--text-main)',
+          fontSize: '0.92rem'
         }}>
-          <h3 style={{ fontSize: '1.15rem', color: 'var(--color-primary)', marginBottom: '0.75rem' }}>
-            Fundamentação Teórica & Metodologia
+          <h3 style={{ marginTop: 0, color: 'var(--color-primary)', fontSize: '1.2rem', fontWeight: 700 }}>
+            Fundamentação Teórica & Equações Constitutivas
           </h3>
-          <div style={{ fontSize: '0.92rem', whiteSpace: 'pre-line' }}>
-            {config.theoreticalBackground}
-          </div>
+          <p style={{ whiteSpace: 'pre-line' }}>{config.theoreticalBackground}</p>
         </div>
       )}
 
-      {/* Aba de Avaliação e Desafios Diagnósticos */}
+      {/* Aba de Avaliação Diagnóstica com TRI */}
       {activeTab === 'avaliacao' && (
         <div style={{
           background: 'var(--bg-surface)',
@@ -468,34 +747,29 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
           flexDirection: 'column',
           gap: '1.25rem'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-main)' }}>
-              Questões Diagnósticas & Investigação Científica
-            </h3>
-            {answeredSubmitted && (
-              <span style={{
-                background: score >= 7 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                color: score >= 7 ? '#22c55e' : '#ef4444',
-                padding: '0.35rem 0.75rem',
-                borderRadius: '8px',
-                fontWeight: 700,
-                fontSize: '0.85rem'
-              }}>
-                Nota Obtida: {score} / 10
-              </span>
+          <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-main)' }}>
+                Avaliação Diagnóstica & Psicométrica (Padrão TRI ENEM/ENADE)
+              </h3>
+              <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                Responda com base nas observações e medições da bancada virtual.
+              </p>
+            </div>
+            {triResult && (
+              <div style={{ textAlign: 'right' }}>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-primary)' }}>
+                  {triResult.scoreEnem} pts
+                </span>
+                <span style={{ display: 'block', fontSize: '0.7rem', color: '#22c55e', fontWeight: 700 }}>
+                  Classificação: {triResult.classification}
+                </span>
+              </div>
             )}
           </div>
 
-          {config.questions?.map((q, qIdx) => (
-            <div key={qIdx} style={{
-              background: 'var(--bg-card)',
-              padding: '1rem',
-              borderRadius: '10px',
-              border: '1px solid var(--border-color)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.65rem'
-            }}>
+          {(config.questions || []).map((q, qIdx) => (
+            <div key={qIdx} style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-main)' }}>
                 {qIdx + 1}. {q.question}
               </span>
@@ -574,12 +848,12 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
                 fontSize: '0.85rem'
               }}
             >
-              Enviar Respostas e Salvar Nota
+              Enviar Respostas e Calcular Proficiência TRI
             </button>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#22c55e', fontSize: '0.85rem', fontWeight: 600 }}>
               <CheckCircle2 style={{ width: '18px', height: '18px' }} />
-              Avaliação concluída com sucesso!
+              Avaliação concluída com sucesso! Sincronizado com a plataforma Kortex.
             </div>
           )}
         </div>
@@ -596,13 +870,36 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
           flexDirection: 'column',
           gap: '1rem'
         }}>
-          <div style={{ borderBottom: '2px solid var(--color-primary)', paddingBottom: '0.5rem' }}>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-main)' }}>
-              RELATÓRIO EXPERIMENTAL DE LABORATÓRIO (PADRÃO ABNT / IEEE)
-            </h3>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Plataforma Kortex · Ambiente Virtual de Aprendizagem Prática
-            </span>
+          <div style={{ borderBottom: '2px solid var(--color-primary)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-main)' }}>
+                RELATÓRIO EXPERIMENTAL DE LABORATÓRIO (PADRÃO ABNT / IEEE)
+              </h3>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                Plataforma Kortex · Ambiente Virtual de Aprendizagem Prática
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={handleCopyMarkdownReport}
+                className="btn-outline"
+                style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                title="Copiar relatório formatado em Markdown"
+              >
+                {copiedFormat === 'md' ? <Check style={{ width: '12px', height: '12px', color: '#22c55e' }} /> : <Copy style={{ width: '12px', height: '12px' }} />}
+                <span>{copiedFormat === 'md' ? 'Copiado!' : 'Copiar .md'}</span>
+              </button>
+
+              <button
+                onClick={handleCopyLatexReport}
+                className="btn-outline"
+                style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                title="Copiar código-fonte LaTeX do relatório"
+              >
+                {copiedFormat === 'tex' ? <Check style={{ width: '12px', height: '12px', color: '#22c55e' }} /> : <Copy style={{ width: '12px', height: '12px' }} />}
+                <span>{copiedFormat === 'tex' ? 'Copiado!' : 'LaTeX'}</span>
+              </button>
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', fontSize: '0.85rem' }}>
@@ -635,7 +932,7 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
           </div>
 
           <button
-            onClick={() => window.print()}
+            onClick={handlePrintReport}
             style={{
               alignSelf: 'flex-start',
               display: 'flex',
@@ -657,6 +954,51 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
           </button>
         </div>
       )}
+
+      {/* Modais das 20 Novas Ferramentas Estratégicas */}
+      <LabNotebookDrawer
+        isOpen={isNotebookOpen}
+        onClose={() => setIsNotebookOpen(false)}
+        labId={config.id}
+        labTitle={config.title}
+        onCaptureCanvasSnapshot={handleCaptureSnapshot}
+      />
+
+      <LabSplitScreenComparator
+        isOpen={isSplitCompareOpen}
+        onClose={() => setIsSplitCompareOpen(false)}
+        parameters={config.parameters}
+        primaryParams={params}
+        onApplyScenarioB={(bParams) => setParams(bParams)}
+      />
+
+      <LabPythonRunnerModal
+        isOpen={isPythonOpen}
+        onClose={() => setIsPythonOpen(false)}
+        labTitle={config.title}
+        telemetry={currentTelemetry}
+        history={rawTelemetryArray}
+      />
+
+      <LabSocraticTutorModal
+        isOpen={isSocraticOpen}
+        onClose={() => setIsSocraticOpen(false)}
+        labTitle={config.title}
+        topic={config.topic}
+        parameters={params}
+        telemetry={currentTelemetry}
+      />
+
+      <SecureExamModal
+        isOpen={isExamOpen}
+        onClose={() => setIsExamOpen(false)}
+        labTitle={config.title}
+        durationMinutes={20}
+        onFinishExam={(incidents) => {
+          alert(`Avaliação finalizada com sucesso! Registro de auditoria: ${incidents} ocorrência(s).`);
+          handleSubmitEvaluation();
+        }}
+      />
 
       {/* Widget do Tutor Socrático Integrado */}
       <SocraticTutorWidget

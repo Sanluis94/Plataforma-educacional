@@ -12,8 +12,14 @@ import { NEW_ADVANCED_LABS } from '../../core/constants/advancedLabsRegistry';
 import {
   MASTER_LABS_CATALOG,
   searchLabsCatalog,
-  resolveUniversalLab
+  resolveUniversalLab,
+  type CatalogLabItem
 } from '../../core/constants/masterLabsCatalog';
+import { SkillTreeExplorerModal } from '../components/labs/SkillTreeExplorerModal';
+import { LabStudioBuilderModal } from '../components/labs/LabStudioBuilderModal';
+import { CertificateModal } from '../components/labs/CertificateModal';
+import { issueLabCertificate, type LabCertificate } from '../../core/services/certificateService';
+import { GitBranch, PlusCircle, Award } from 'lucide-react';
 
 interface LabMission {
   id: string;
@@ -135,7 +141,7 @@ interface SimulacaoProps {
 }
 
 export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
-  const { userData } = useAuth();
+  const { currentUser, userData } = useAuth();
   const [activeTab, setActiveTab] = useState<string>(mode || 'pendulum');
 
   useEffect(() => {
@@ -151,6 +157,25 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
   const [showCatalogExplorer, setShowCatalogExplorer] = useState(false);
   const [catalogSearch, setCatalogSearch] = useState('');
   const [catalogLevel, setCatalogLevel] = useState<string>('todos');
+
+  // Novos modais estratégicos
+  const [showSkillTree, setShowSkillTree] = useState(false);
+  const [showStudio, setShowStudio] = useState(false);
+  const [showCertModal, setShowCertModal] = useState(false);
+  const [currentCertificate, setCurrentCertificate] = useState<LabCertificate | null>(null);
+  const [customLabs, setCustomLabs] = useState<CatalogLabItem[]>([]);
+
+  const handleOpenCertificate = async () => {
+    const cert = await issueLabCertificate({
+      studentId: currentUser?.uid || userData?.email || 'estudante_default',
+      studentName: userData?.name || 'Estudante Kortex',
+      academicLevelLabel: 'Ensino Superior & Prática Avançada',
+      completedLabsCount: 15,
+      totalSimulatedHours: 150
+    });
+    setCurrentCertificate(cert);
+    setShowCertModal(true);
+  };
 
   useEffect(() => {
     setSelectedMissionOption(null);
@@ -607,24 +632,83 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
             </div>
           </div>
 
-          <button
-            onClick={() => setShowCatalogExplorer(!showCatalogExplorer)}
-            className="btn-gradient"
-            style={{
-              padding: '0.55rem 1.15rem',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            <Sparkles style={{ width: '16px', height: '16px' }} />
-            <span>{showCatalogExplorer ? 'Fechar Navegador de 500 Labs' : 'Abrir Navegador de 500 Labs'}</span>
-            {showCatalogExplorer ? <ChevronUp style={{ width: '16px', height: '16px' }} /> : <ChevronDown style={{ width: '16px', height: '16px' }} />}
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <button
+              onClick={() => setShowSkillTree(true)}
+              className="btn-outline"
+              style={{
+                padding: '0.5rem 0.9rem',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem'
+              }}
+              title="Abrir Árvore de Competências e Trilhas de Aprendizagem"
+            >
+              <GitBranch style={{ width: '15px', height: '15px', color: '#E4683F' }} />
+              <span>Árvore de Competências</span>
+            </button>
+
+            <button
+              onClick={() => setShowStudio(true)}
+              className="btn-outline"
+              style={{
+                padding: '0.5rem 0.9rem',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem'
+              }}
+              title="Criar novo laboratório visual sem código"
+            >
+              <PlusCircle style={{ width: '15px', height: '15px', color: '#10b981' }} />
+              <span>Kortex Studio</span>
+            </button>
+
+            <button
+              onClick={handleOpenCertificate}
+              className="btn-outline"
+              style={{
+                padding: '0.5rem 0.9rem',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem'
+              }}
+              title="Emitir certificado de horas de extensão e prática"
+            >
+              <Award style={{ width: '15px', height: '15px', color: '#f59e0b' }} />
+              <span>Certificados</span>
+            </button>
+
+            <button
+              onClick={() => setShowCatalogExplorer(!showCatalogExplorer)}
+              className="btn-gradient"
+              style={{
+                padding: '0.55rem 1.15rem',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <Sparkles style={{ width: '16px', height: '16px' }} />
+              <span>{showCatalogExplorer ? 'Fechar Navegador de 500 Labs' : 'Abrir Navegador de 500 Labs'}</span>
+              {showCatalogExplorer ? <ChevronUp style={{ width: '16px', height: '16px' }} /> : <ChevronDown style={{ width: '16px', height: '16px' }} />}
+            </button>
+          </div>
         </div>
 
         {/* Painel Expansível de Busca e Filtro de 500+ Laboratórios */}
@@ -681,7 +765,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
 
             {/* Grade de Resultados dos Laboratórios */}
             {(() => {
-              const filtered = searchLabsCatalog(catalogSearch, catalogLevel === 'todos' ? undefined : catalogLevel);
+              const catalogResults = searchLabsCatalog(catalogSearch, catalogLevel === 'todos' ? undefined : catalogLevel);
+              const filtered = [...customLabs, ...catalogResults];
               return (
                 <div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
@@ -1314,6 +1399,33 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           subject="Ciências e Física Interativa"
         />
       )}
+
+      {/* Modais Globais: Árvore de Competências, Kortex Studio e Certificados */}
+      <SkillTreeExplorerModal
+        isOpen={showSkillTree}
+        onClose={() => setShowSkillTree(false)}
+        onSelectLab={(id) => {
+          setActiveTab(id);
+          setShowSkillTree(false);
+        }}
+        completedLabIds={['sup_fis_01', 'em_fis_01', 'fund2_mat_01']}
+      />
+
+      <LabStudioBuilderModal
+        isOpen={showStudio}
+        onClose={() => setShowStudio(false)}
+        onSaveNewLab={(newLab) => {
+          setCustomLabs(prev => [newLab, ...prev]);
+          MASTER_LABS_CATALOG.unshift(newLab);
+          setActiveTab(newLab.id);
+        }}
+      />
+
+      <CertificateModal
+        isOpen={showCertModal}
+        onClose={() => setShowCertModal(false)}
+        certificate={currentCertificate}
+      />
     </div>
   );
 };
