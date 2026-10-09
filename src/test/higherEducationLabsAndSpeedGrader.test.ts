@@ -96,6 +96,48 @@ describe('Higher Education (Ensino Superior) Laboratories & Engine', () => {
     expect(step.telemetry.inv_S_mM).toBeCloseTo(0.1, 2);
     expect(step.telemetry.inv_V0).toBeCloseTo(0.025, 3);
   });
+
+  it('pos_ia_01: deve otimizar pesos via SGD com momentum em superfície elíptica de perda', () => {
+    const lab = NEW_ADVANCED_LABS['pos_ia_01'];
+    expect(lab).toBeDefined();
+    expect(lab.academicLevel).toBe('pos_graduacao');
+
+    const params = {
+      lr: 0.1,
+      momentum: 0.8,
+      anisotropia: 4.0,
+      ruido: 0.0
+    };
+
+    let state: any = { w1: 2.0, w2: 2.0, v1: 0, v2: 0, stepCount: 0, trajectory: [] };
+    const step1 = lab.physicsStep(params, state, 0);
+
+    expect(step1.telemetry.loss_quadratico).toBeGreaterThan(0);
+    expect(step1.telemetry.peso_w1).toBeLessThan(2.0); // deve caminhar em direção a 0
+    expect(step1.telemetry.norma_gradiente).toBeGreaterThan(0);
+  });
+
+  it('pos_termo_01: deve simular o Ciclo Brayton Regenerativo e calcular rendimento térmico', () => {
+    const lab = NEW_ADVANCED_LABS['pos_termo_01'];
+    expect(lab).toBeDefined();
+    expect(lab.academicLevel).toBe('pos_graduacao');
+
+    const params = {
+      rp: 8,
+      T3: 1400,
+      eta_c: 0.85,
+      eta_t: 0.88,
+      reg_eff: 0.75
+    };
+
+    const initial = { t: 0 };
+    const step = lab.physicsStep(params, initial, 1);
+
+    expect(step.telemetry.rendimento_termico_pct).toBeGreaterThan(30);
+    expect(step.telemetry.trabalho_liquido_kJ_kg).toBeGreaterThan(100);
+    expect(step.telemetry.temperatura_preaquec_Tx_K).toBeGreaterThan(300);
+    expect(step.telemetry.exergia_destruida_kJ_kg).toBeGreaterThan(0);
+  });
 });
 
 describe('SpeedGrader Kortex Submissions & Rubric Evaluation', () => {

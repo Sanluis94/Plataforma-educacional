@@ -548,6 +548,26 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
           >
             🧬 Michaelis-Menten
           </button>
+          <div style={{ width: '100%', height: '1px', background: 'var(--border-color)', margin: '0.4rem 0' }} />
+          <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              🎓 Pós-Graduação & Mestrado/Doutorado (Pesquisa & Modelagem Avançada):
+            </span>
+          </div>
+          <button
+            onClick={() => setActiveTab('pos_ia_01')}
+            className={activeTab === 'pos_ia_01' ? 'btn-primary' : 'btn-outline'}
+            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
+          >
+            🧠 Redes Neurais & Otimização (IA)
+          </button>
+          <button
+            onClick={() => setActiveTab('pos_termo_01')}
+            className={activeTab === 'pos_termo_01' ? 'btn-primary' : 'btn-outline'}
+            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
+          >
+            🚀 Ciclo Brayton & Cogeração Exergética
+          </button>
           {onComplete && (
             <button
               onClick={() => onComplete(100)}

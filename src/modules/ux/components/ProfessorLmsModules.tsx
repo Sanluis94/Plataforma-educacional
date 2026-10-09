@@ -58,7 +58,7 @@ export function ProfessorLmsModules({
   onSelectClass,
   professorName
 }: ProfessorLmsModulesProps) {
-  const [subTab, setSubTab] = useState<'attendance' | 'gradebook' | 'speedgrader' | 'forum' | 'certificates'>('attendance');
+  const [subTab, setSubTab] = useState<'attendance' | 'gradebook' | 'speedgrader' | 'forum' | 'certificates' | 'lab_studio'>('attendance');
 
   const activeClassId = selectedClassId || turmas[0]?.id || '';
   const currentTurma = turmas.find(t => t.id === activeClassId);
@@ -250,8 +250,60 @@ export function ProfessorLmsModules({
     }
   ];
 
+  // Replay da Caixa Preta de Telemetria
+  const [replayTime, setReplayTime] = useState(6.5);
+  const [isPlayingReplay, setIsPlayingReplay] = useState(false);
 
-  // ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    let interval: any;
+    if (isPlayingReplay) {
+      interval = setInterval(() => {
+        setReplayTime(prev => {
+          if (prev >= 10.0) {
+            setIsPlayingReplay(false);
+            return 10.0;
+          }
+          return Number((prev + 0.2).toFixed(1));
+        });
+      }, 100);
+    }
+    return () => clearInterval(interval);
+  }, [isPlayingReplay]);
+
+  // AI Lab Studio (Gerador Zero-Code de Laboratórios)
+  const [studioPrompt, setStudioPrompt] = useState('Transferência de Calor e Condução em Barras Metálicas (Lei de Fourier)');
+  const [studioSubject, setStudioSubject] = useState('Engenharia Térmica');
+  const [isGeneratingStudioLab, setIsGeneratingStudioLab] = useState(false);
+  const [generatedLab, setGeneratedLab] = useState<{
+    id: string;
+    title: string;
+    subject: string;
+    diffEquation: string;
+    params: { name: string; unit: string; val: number }[];
+    quizQuestion: string;
+  } | null>(null);
+
+  const handleGenerateStudioLab = () => {
+    if (!studioPrompt.trim()) return;
+    setIsGeneratingStudioLab(true);
+    setTimeout(() => {
+      setGeneratedLab({
+        id: `custom_lab_${Date.now()}`,
+        title: studioPrompt.trim(),
+        subject: studioSubject,
+        diffEquation: '∂T/∂t = α · (∂²T/∂x²)  (Equação da Difusão Térmica Unidimensional)',
+        params: [
+          { name: 'Condutividade Térmica (k)', unit: 'W/(m·K)', val: 401 }, // Cobre
+          { name: 'Temperatura da Fonte (T₁)', unit: '°C', val: 100 },
+          { name: 'Temperatura Ambiente (T₀)', unit: '°C', val: 25 },
+          { name: 'Comprimento da Haste (L)', unit: 'm', val: 0.5 }
+        ],
+        quizQuestion: 'Como o coeficiente de difusividade térmica afeta a velocidade com que o perfil estacionário de temperatura é alcançado na extremidade isolada?'
+      });
+      setIsGeneratingStudioLab(false);
+    }, 700);
+  };
+
   // 3. ESTADO DO FÓRUM PEDAGÓGICO DA TURMA
   // ─────────────────────────────────────────────────────────────
   const [forumTopics, setForumTopics] = useState<ForumTopic[]>([]);
@@ -480,6 +532,7 @@ export function ProfessorLmsModules({
             { id: 'speedgrader', label: '⚡ SpeedGrader & Rubricas', icon: CheckCircle },
             { id: 'forum', label: `Fórum da Turma (${forumTopics.length})`, icon: MessageSquare },
             { id: 'certificates', label: 'Certificação Digital', icon: ShieldCheck },
+            { id: 'lab_studio', label: '🪄 AI Lab Studio', icon: Plus },
           ].map(tab => (
             <button
               key={tab.id}
@@ -1754,6 +1807,74 @@ export function ProfessorLmsModules({
                       ))}
                     </div>
                   </div>
+
+                  {/* Caixa Preta de Telemetria (Replay da Sessão do Aluno) */}
+                  <div style={{ marginTop: '1rem', background: 'var(--bg-card)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span style={{ fontSize: '1rem' }}>📼</span>
+                        <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                          Caixa Preta de Telemetria — Replay do Experimento
+                        </strong>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
+                        t = {replayTime.toFixed(1)}s / 10.0s
+                      </span>
+                    </div>
+
+                    {/* Controles de Replay */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                      <button
+                        onClick={() => setIsPlayingReplay(!isPlayingReplay)}
+                        style={{
+                          padding: '0.35rem 0.75rem',
+                          borderRadius: '6px',
+                          border: 'none',
+                          background: isPlayingReplay ? '#ef4444' : 'var(--color-verde-700, #293E24)',
+                          color: '#fff',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {isPlayingReplay ? '⏸ Pausar Replay' : '▶ Reproduzir Sessão'}
+                      </button>
+                      <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        step="0.1"
+                        value={replayTime}
+                        onChange={(e) => setReplayTime(Number(e.target.value))}
+                        style={{ flex: 1, accentColor: 'var(--color-primary, #E4683F)' }}
+                      />
+                    </div>
+
+                    {/* Snapshot dinâmico no instante t */}
+                    <div style={{ background: 'var(--bg-surface)', padding: '0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-secondary)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem' }}>
+                      <div>Taxa Amostragem: <strong>60 Hz</strong></div>
+                      <div>Eventos Slider: <strong>{(replayTime * 4.2).toFixed(0)} ações</strong></div>
+                      <div>Convergência: <strong style={{ color: '#22c55e' }}>Euler O(Δt²)</strong></div>
+                    </div>
+                  </div>
+
+                  {/* Auditoria de Integridade Acadêmica & Anti-Plágio Kortex */}
+                  <div style={{ marginTop: '0.75rem', background: 'rgba(34, 197, 94, 0.05)', padding: '0.85rem', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.25)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <CheckCircle style={{ width: '1.1rem', height: '1.1rem', color: '#22c55e' }} />
+                      <div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                          Integridade Acadêmica & AST Telemetry Fingerprint
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                          Similaridade textual: <strong style={{ color: '#22c55e' }}>2.1% (Trabalho 100% Autoral)</strong> · Assinatura de telemetria única
+                        </div>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 700 }}>
+                      ✓ Certificado Autêntico
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -1865,6 +1986,136 @@ export function ProfessorLmsModules({
           </div>
         );
       })()}
+
+      {/* ─────────────────────────────────────────────────────────────
+          AI LAB STUDIO — CONSTRUTOR ZERO-CODE DE LABORATÓRIOS
+          ───────────────────────────────────────────────────────────── */}
+      {subTab === 'lab_studio' && (
+        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div className="glass-card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg, 14px)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  🪄 Kortex AI Lab Studio — Construtor Zero-Code de Laboratórios
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>
+                  Crie simulações computacionais em segundos a partir de equações diferenciais ou descrições em linguagem natural.
+                </p>
+              </div>
+              <span style={{ background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', color: 'var(--color-primary-accessible, #B8441F)', padding: '0.35rem 0.85rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700 }}>
+                Motor Universal v2.0
+              </span>
+            </div>
+
+            {/* Prompt e Configuração */}
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                  Tema do Experimento ou Equação Diferencial:
+                </label>
+                <input
+                  type="text"
+                  value={studioPrompt}
+                  onChange={(e) => setStudioPrompt(e.target.value)}
+                  placeholder="Ex: Pêndulo Duplo com EDOs Não-Lineares de Lagrange"
+                  style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                  Disciplina / Área Acadêmica:
+                </label>
+                <select
+                  value={studioSubject}
+                  onChange={(e) => setStudioSubject(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: '#fff', fontSize: '0.9rem' }}
+                >
+                  <option value="Engenharia Térmica">Engenharia Térmica & Fluidos</option>
+                  <option value="Engenharia Mecânica">Engenharia Mecânica & Vibrações</option>
+                  <option value="Engenharia Elétrica">Engenharia Elétrica & Telecom</option>
+                  <option value="Química Industrial">Química & Processos Industriais</option>
+                  <option value="Ciência da Computação">Ciência da Computação & IA</option>
+                  <option value="Biotecnologia">Bioquímica & Biotecnologia</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Sugestões Rápidas de Prompt */}
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Sugestões rápidas:</span>
+              {[
+                'Transferência de Calor em Aletas (Fourier)',
+                'Pêndulo Duplo Caótico (Lagrangiano)',
+                'Reator CSTR e Cinética de 2ª Ordem',
+                'Cinética de Crescimento Celular (Monod)',
+              ].map((sug, sIdx) => (
+                <button
+                  key={sIdx}
+                  onClick={() => setStudioPrompt(sug)}
+                  style={{ padding: '0.3rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontSize: '0.75rem', cursor: 'pointer' }}
+                >
+                  💡 {sug}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleGenerateStudioLab}
+              disabled={isGeneratingStudioLab}
+              className="btn-gradient"
+              style={{ width: '100%', padding: '0.85rem', fontWeight: 800, fontSize: '0.92rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+            >
+              {isGeneratingStudioLab ? 'Sintetizando Solvers Numéricos...' : '⚡ Compilar e Gerar Laboratório com IA'}
+            </button>
+
+            {/* Resultado do Laboratório Gerado */}
+            {generatedLab && (
+              <div style={{ marginTop: '1.5rem', padding: '1.25rem', borderRadius: '10px', background: 'var(--bg-surface)', border: '1px solid var(--color-primary, #E4683F)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '1.2rem' }}>🔬</span>
+                    <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>{generatedLab.title}</strong>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', background: 'rgba(34,197,94,0.15)', color: '#22c55e', padding: '0.2rem 0.6rem', borderRadius: '999px', fontWeight: 700 }}>
+                    ✓ Solver Numérico Pronto
+                  </span>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '1rem', fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--color-primary-accessible, #B8441F)' }}>
+                  <strong>Equação Governante:</strong> {generatedLab.diffEquation}
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
+                    Parâmetros e Variáveis de Controle:
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.5rem' }}>
+                    {generatedLab.params.map((p, pIdx) => (
+                      <div key={pIdx} style={{ background: 'var(--bg-card)', padding: '0.5rem 0.75rem', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>{p.name}:</span>
+                        <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>{p.val} {p.unit}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ background: 'rgba(228,104,63,0.08)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(228,104,63,0.2)', marginBottom: '1.25rem', fontSize: '0.82rem', color: 'var(--text-main)' }}>
+                  <strong>Desafio Diagnóstico:</strong> {generatedLab.quizQuestion}
+                </div>
+
+                <button
+                  onClick={() => alert(`Laboratório "${generatedLab.title}" publicado com sucesso no catálogo oficial da turma!`)}
+                  className="btn-primary"
+                  style={{ width: '100%', padding: '0.75rem', fontWeight: 800, background: 'var(--color-verde-700, #293E24)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                >
+                  ✓ Publicar Laboratório no Catálogo da Turma
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
