@@ -8,7 +8,7 @@ import { useAuth } from '../../core/contexts/AuthContext';
 import { isAuthorizedRole } from '../../core/services/securityService';
 import type { ReactNode } from 'react';
 
-type UserRole = 'professor' | 'estudante' | 'admin';
+type UserRole = 'professor' | 'coordenador' | 'estudante' | 'admin';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -49,6 +49,7 @@ export function ProtectedRoute({ children, allowedRoles, redirectTo = '/' }: Pro
  */
 function Forbidden({ userRole }: { userRole: string }) {
   const roleRedirects: Record<string, { path: string; label: string }> = {
+    coordenador: { path: '/coordenacao', label: 'Painel da Coordenação' },
     professor: { path: '/professor', label: 'Dashboard do Professor' },
     estudante: { path: '/estudante', label: 'Dashboard do Estudante' },
     admin: { path: '/admin', label: 'Painel Administrativo' },

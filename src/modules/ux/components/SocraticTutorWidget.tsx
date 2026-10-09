@@ -8,6 +8,9 @@ import { callGeminiWithKey } from '../../core/services/geminiService';
 interface SocraticTutorWidgetProps {
   labTitle?: string;
   subject?: string;
+  customContext?: string;
+  studentName?: string;
+  currentModule?: string;
   onRewardXP?: (xp: number) => void;
 }
 

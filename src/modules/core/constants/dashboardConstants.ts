@@ -167,6 +167,8 @@ export const MODULES_BY_GRADE: Record<GradeLevel, string[]> = {
   fundamental_2: ['matematica', 'portugues', 'historia', 'biologia', 'idiomas', 'geografia'],
   medio: ['matematica', 'fisica', 'quimica', 'biologia', 'portugues', 'redacao', 'historia', 'idiomas', 'geografia', 'filosofia'],
   profissional: ['softskills', 'hardskills', 'portugues', 'redacao', 'idiomas', 'filosofia'],
+  graduacao: ['matematica', 'fisica', 'quimica', 'biologia', 'hardskills', 'softskills', 'idiomas', 'filosofia'],
+  pos_graduacao: ['matematica', 'fisica', 'quimica', 'biologia', 'hardskills', 'softskills', 'filosofia'],
 };
 
 export const SHOP_ITEMS = [

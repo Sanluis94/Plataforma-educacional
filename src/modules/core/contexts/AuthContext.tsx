@@ -13,17 +13,25 @@ import { writeLog } from '../../data/repositories/logRepository';
 import { DEFAULT_PROGRESS } from '../../data/types';
 import { getLocalEtlUserByRole } from '../../data/services/localEtlClient';
 
-export type GradeLevel = 'fundamental_1' | 'fundamental_2' | 'medio' | 'profissional';
+export type GradeLevel = 
+  | 'fundamental_1' 
+  | 'fundamental_2' 
+  | 'medio' 
+  | 'profissional'
+  | 'graduacao'
+  | 'pos_graduacao';
 
 export const GRADE_LABELS: Record<GradeLevel, string> = {
   fundamental_1: 'Ensino Fundamental I (1º ao 5º ano)',
   fundamental_2: 'Ensino Fundamental II (6º ao 9º ano)',
   medio: 'Ensino Médio (1º ao 3º ano)',
-  profissional: 'Capacitação Profissional',
+  profissional: 'Capacitação Profissional / Técnico',
+  graduacao: 'Ensino Superior (Graduação)',
+  pos_graduacao: 'Pós-Graduação & Pesquisa',
 };
 
 interface UserData {
-  role: 'professor' | 'estudante' | 'admin';
+  role: 'professor' | 'coordenador' | 'estudante' | 'admin';
   name: string;
   email: string;
   gradeLevel: GradeLevel;
@@ -66,6 +74,11 @@ const LOCAL_PROFILES: Record<AuthRole, { uid: string; name: string; email: strin
     uid: 'local-professor-001',
     name: 'Marina Azevedo',
     email: 'marina.local@edu-interact.test',
+  },
+  coordenador: {
+    uid: 'local-coordinator-001',
+    name: 'Prof. Dr. Ricardo Valença',
+    email: 'ricardo.coordenacao@kortex.edu.br',
   },
   admin: {
     uid: 'local-admin-001',

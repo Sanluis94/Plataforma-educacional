@@ -6,6 +6,8 @@ import {
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
+import { UniversalLabContainer } from '../components/UniversalLabContainer';
+import { NEW_ADVANCED_LABS } from '../../core/constants/advancedLabsRegistry';
 
 interface LabMission {
   id: string;
@@ -490,6 +492,27 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
             style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
           >
             Física moderna
+          </button>
+          <button
+            onClick={() => setActiveTab('sup_fis_01')}
+            className={activeTab === 'sup_fis_01' ? 'btn-primary' : 'btn-outline'}
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+          >
+            🏛️ Ressonância Mecânica
+          </button>
+          <button
+            onClick={() => setActiveTab('sup_calc_01')}
+            className={activeTab === 'sup_calc_01' ? 'btn-primary' : 'btn-outline'}
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+          >
+            🏛️ Somas de Riemann
+          </button>
+          <button
+            onClick={() => setActiveTab('sup_comp_01')}
+            className={activeTab === 'sup_comp_01' ? 'btn-primary' : 'btn-outline'}
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+          >
+            🏛️ Algoritmos O(n)
           </button>
           {onComplete && (
             <button
@@ -1035,11 +1058,23 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
         </div>
       )}
 
-      {/* Mediação Ativa: Tutor Socrático e Freiriano */}
-      <SocraticTutorWidget
-        labTitle={`Laboratório de ${activeTab.toUpperCase()}`}
-        subject="Ciências e Física Interativa"
-      />
+      {/* Renderização Dinâmica dos Laboratórios Avançados (UniversalLabContainer) */}
+      {NEW_ADVANCED_LABS[activeTab] && (
+        <UniversalLabContainer
+          config={NEW_ADVANCED_LABS[activeTab]}
+          onComplete={({ score }) => {
+            if (onComplete) onComplete(score * 10);
+          }}
+        />
+      )}
+
+      {/* Mediação Ativa: Tutor Socrático e Freiriano (para labs legados) */}
+      {!NEW_ADVANCED_LABS[activeTab] && (
+        <SocraticTutorWidget
+          labTitle={`Laboratório de ${activeTab.toUpperCase()}`}
+          subject="Ciências e Física Interativa"
+        />
+      )}
     </div>
   );
 };
