@@ -892,6 +892,334 @@ Efeito dos Inibidores:
         ]
       }
     ]
+  },
+
+  // ─── PÓS-GRADUAÇÃO & MESTRADO/DOUTORADO ────────────────────────────────────
+  pos_ia_01: {
+    id: 'pos_ia_01',
+    title: 'Redes Neurais Profundas & Otimização por Gradiente Descendente (IA)',
+    academicLevel: 'pos_graduacao',
+    subject: 'Inteligência Artificial Avançada',
+    topic: 'Otimização Convexa & Backpropagation',
+    objective: 'Analisar dinâmicas de convergência estocástica em superfícies não-lineares de perda, testando hiperparâmetros de learning rate, momentum e ruído em tempo real.',
+    theoreticalBackground: `Em treinamento de redes neurais profundas, a minimização da função custo L(w) orienta-se pela atualização estocástica de pesos:
+v_t = β · v_{t-1} + (1 - β) · ∇L(w_t)
+w_{t+1} = w_t - η · v_t
+
+Onde:
+- η (learning rate) controla o tamanho do passo no espaço vetorial.
+- β (fator de momentum) acelera o gradiente em direções consistentes e atenua oscilações transversais.
+- A presença de vales anisotrópicos (condicionamento ruim da matriz Hessiana) exige sintonia fina para evitar divergência exponencial.`,
+    parameters: [
+      { id: 'lr', label: 'Taxa de Aprendizado (η)', unit: '', min: 0.01, max: 0.40, step: 0.01, defaultValue: 0.08 },
+      { id: 'momentum', label: 'Momentum (β)', unit: '', min: 0.0, max: 0.95, step: 0.05, defaultValue: 0.80 },
+      { id: 'anisotropia', label: 'Curvatura do Vale (Hessiana)', unit: '', min: 1.0, max: 20.0, step: 1.0, defaultValue: 8.0 },
+      { id: 'ruido', label: 'Ruído Estocástico (Batch Noise)', unit: '', min: 0.0, max: 0.5, step: 0.05, defaultValue: 0.05 }
+    ],
+    initialState: { w1: -3.5, w2: 2.8, v1: 0, v2: 0, stepCount: 0, trajectory: [] },
+    physicsStep: (params: Record<string, number>, state: Record<string, any>, _dt: number) => {
+      const { lr, momentum, anisotropia, ruido } = params;
+      let w1 = state.w1 ?? -3.5;
+      let w2 = state.w2 ?? 2.8;
+      let v1 = state.v1 ?? 0;
+      let v2 = state.v2 ?? 0;
+      const stepCount = (state.stepCount ?? 0) + 1;
+
+      // Gradiente da superfície elíptica: L(w1, w2) = 0.5*(w1² + anisotropia*w2²)
+      const grad1 = w1 + (Math.random() - 0.5) * ruido * 2;
+      const grad2 = anisotropia * w2 + (Math.random() - 0.5) * ruido * 2;
+
+      v1 = momentum * v1 + (1 - momentum) * grad1;
+      v2 = momentum * v2 + (1 - momentum) * grad2;
+
+      w1 = w1 - lr * v1;
+      w2 = w2 - lr * v2;
+
+      // Trava valores para não escapar ao infinito se divergir
+      w1 = Math.max(-5, Math.min(5, w1));
+      w2 = Math.max(-5, Math.min(5, w2));
+
+      const loss = 0.5 * (w1 * w1 + anisotropia * w2 * w2);
+      const gradNorm = Math.sqrt(grad1 * grad1 + grad2 * grad2);
+      const trajectory = [...(state.trajectory || []), { w1, w2, loss }].slice(-100);
+
+      const convergencia = Math.max(0, Math.min(100, (1 - loss / 30) * 100));
+
+      return {
+        nextState: { w1, w2, v1, v2, stepCount, trajectory },
+        telemetry: {
+          loss_quadratico: Number(loss.toFixed(4)),
+          peso_w1: Number(w1.toFixed(3)),
+          peso_w2: Number(w2.toFixed(3)),
+          norma_gradiente: Number(gradNorm.toFixed(3)),
+          convergencia_pct: Number(convergencia.toFixed(1))
+        }
+      };
+    },
+    renderCanvas: (ctx: CanvasRenderingContext2D, state: Record<string, any>, params: Record<string, number>, width: number, height: number) => {
+      ctx.clearRect(0, 0, width, height);
+
+      // Fundo Deep Space AI
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, width, height);
+
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const scale = Math.min(width, height) / 10;
+      const aniso = params.anisotropia || 8;
+
+      // Desenhar Curvas de Nível da Função de Perda (Loss Contours)
+      ctx.lineWidth = 1;
+      const niveis = [0.5, 1.5, 3.5, 7.0, 14.0, 24.0];
+      niveis.forEach(nv => {
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+        ctx.beginPath();
+        const r1 = Math.sqrt(2 * nv) * scale;
+        const r2 = Math.sqrt((2 * nv) / aniso) * scale;
+        ctx.ellipse(centerX, centerY, r1, r2, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+
+      // Eixos do Espaço de Pesos W1 e W2
+      ctx.strokeStyle = '#334155';
+      ctx.beginPath();
+      ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height);
+      ctx.moveTo(0, centerY); ctx.lineTo(width, centerY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px monospace';
+      ctx.fillText('Eixo W1', width - 60, centerY - 8);
+      ctx.fillText('Eixo W2', centerX + 10, 20);
+
+      // Trajetória do Gradiente
+      const traj = state.trajectory || [];
+      if (traj.length > 1) {
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        for (let i = 0; i < traj.length; i++) {
+          const px = centerX + traj[i].w1 * scale;
+          const py = centerY - traj[i].w2 * scale;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+
+      // Ponto Atual dos Pesos
+      const curW1 = state.w1 ?? -3.5;
+      const curW2 = state.w2 ?? 2.8;
+      const curX = centerX + curW1 * scale;
+      const curY = centerY - curW2 * scale;
+
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(curX, curY, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Mínimo Global (0, 0)
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Painel HUD
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.fillRect(15, 15, 260, 85);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.strokeRect(15, 15, 260, 85);
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 12px monospace';
+      ctx.fillText('OTIMIZADOR: SGD + MOMENTUM', 25, 33);
+      ctx.fillStyle = '#fff';
+      ctx.font = '11px monospace';
+      ctx.fillText(`Passos de Treino: ${state.stepCount ?? 0}`, 25, 52);
+      ctx.fillText(`W = [${curW1.toFixed(2)}, ${curW2.toFixed(2)}]`, 25, 70);
+      ctx.fillStyle = '#22c55e';
+      ctx.fillText(`Loss: ${(state.trajectory?.slice(-1)[0]?.loss ?? 0).toFixed(4)}`, 25, 88);
+    },
+    questions: [
+      {
+        question: 'Por que o acréscimo do termo de Momentum (β) é essencial ao otimizar funções com vales estreitos e alta anisotropia?',
+        options: [
+          { text: 'Porque acumula velocidade ao longo da direção do vale e cancela as oscilações transversais agudas nas paredes íngremes', correct: true, explanation: 'Exato! O momentum atua como um filtro passa-baixa sobre os gradientes, acelerando o progresso na direção suave e amortecendo oscilações de alta frequência.' },
+          { text: 'Porque diminui matematicamente a quantidade de parâmetros da rede neural pela metade', correct: false, explanation: 'Momentum não reduz a dimensionalidade nem elimina neurônios, é apenas um vetor acumulador de velocidade.' },
+          { text: 'Porque garante matematicamente convergência em tempo constante O(1)', correct: false, explanation: 'A convergência de gradiente descendente continua iterativa e condicionada ao número de épocas.' }
+        ]
+      }
+    ]
+  },
+
+  pos_termo_01: {
+    id: 'pos_termo_01',
+    title: 'Termodinâmica Avançada — Ciclo Brayton Regenerativo & Cogeração',
+    academicLevel: 'pos_graduacao',
+    subject: 'Termodinâmica Aplicada Avançada',
+    topic: 'Turbomáquinas & Eficiência Exergética',
+    objective: 'Determinar o rendimento térmico de 1ª Lei e destruição de exergia de 2ª Lei em turbinas a gás aeronáuticas e industriais com regeneração de calor.',
+    theoreticalBackground: `O ciclo Brayton regenerativo aproveita o calor residual dos gases de exaustão da turbina (T4) para pré-aquecer o ar comprimido (T2) antes da câmara de combustão (T3).
+Relação isentrópica de compressão:
+T_{2s} = T_1 · (r_p)^{(γ - 1)/γ}
+T_2 = T_1 + (T_{2s} - T_1) / η_c
+
+Efetividade do regenerador:
+ε = (T_x - T_2) / (T_4 - T_2) => T_x = T_2 + ε · (T_4 - T_2)
+
+Calor fornecido: q_in = c_p · (T_3 - T_x)
+Trabalho líquido: w_net = c_p · [(T_3 - T_4) - (T_2 - T_1)]
+Rendimento térmico: η_{th} = w_net / q_in`,
+    parameters: [
+      { id: 'rp', label: 'Razão de Pressão (rp = P2/P1)', unit: '', min: 3, max: 22, step: 1, defaultValue: 8 },
+      { id: 'T3', label: 'Temperatura Admissão Turbina (TIT)', unit: 'K', min: 1100, max: 1750, step: 25, defaultValue: 1400 },
+      { id: 'eta_c', label: 'Rendimento Compressor (η_c)', unit: '', min: 0.75, max: 0.95, step: 0.02, defaultValue: 0.86 },
+      { id: 'eta_t', label: 'Rendimento Turbina (η_t)', unit: '', min: 0.75, max: 0.95, step: 0.02, defaultValue: 0.89 },
+      { id: 'reg_eff', label: 'Efetividade Regenerador (ε)', unit: '', min: 0.0, max: 0.90, step: 0.05, defaultValue: 0.75 }
+    ],
+    initialState: { t: 0 },
+    physicsStep: (params: Record<string, number>, state: Record<string, any>, dt: number) => {
+      const { rp, T3, eta_c, eta_t, reg_eff } = params;
+      const t = (state.t ?? 0) + dt;
+
+      const T1 = 298.15; // 25 ºC em Kelvin
+      const cp = 1.005;  // kJ/kg.K
+      const gamma = 1.4;
+      const exp = (gamma - 1) / gamma;
+
+      // Compressor
+      const T2s = T1 * Math.pow(rp, exp);
+      const T2 = T1 + (T2s - T1) / eta_c;
+      const Wc = cp * (T2 - T1);
+
+      // Turbina
+      const T4s = T3 / Math.pow(rp, exp);
+      const T4 = T3 - eta_t * (T3 - T4s);
+      const Wt = cp * (T3 - T4);
+
+      // Regenerador (só aquece se T4 > T2)
+      let Tx = T2;
+      let Ty = T4;
+      if (T4 > T2) {
+        Tx = T2 + reg_eff * (T4 - T2);
+        Ty = T4 - reg_eff * (T4 - T2);
+      }
+
+      const Qin = cp * Math.max(10, (T3 - Tx));
+      const Wnet = Wt - Wc;
+      const rendimento = Math.max(0, Math.min(85, (Wnet / Qin) * 100));
+
+      // 2ª Lei: Destruição aproximada de exergia por irreversibilidade térmica
+      const exergiaDestruida = cp * (T1 * Math.log(T3 / Tx) - T1 * (1 - Tx / T3)) + 0.15 * Wc;
+
+      return {
+        nextState: { t, T1, T2, Tx, T3, T4, Ty, Wc, Wt, Wnet },
+        telemetry: {
+          rendimento_termico_pct: Number(rendimento.toFixed(2)),
+          trabalho_liquido_kJ_kg: Number(Wnet.toFixed(1)),
+          temperatura_T4_K: Number(T4.toFixed(1)),
+          temperatura_preaquec_Tx_K: Number(Tx.toFixed(1)),
+          exergia_destruida_kJ_kg: Number(exergiaDestruida.toFixed(1))
+        }
+      };
+    },
+    renderCanvas: (ctx: CanvasRenderingContext2D, state: Record<string, any>, _params: Record<string, number>, width: number, height: number) => {
+      ctx.clearRect(0, 0, width, height);
+
+      // Fundo Engenharia Mecânica / Termo
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(0, 0, width, height);
+
+      // Diagrama T-s (Temperatura vs Entropia)
+      const originX = 70;
+      const originY = height - 60;
+      const diagW = width - 140;
+      const diagH = height - 120;
+
+      // Eixos T e s
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(originX, originY);
+      ctx.lineTo(originX + diagW, originY); // Eixo s
+      ctx.moveTo(originX, originY);
+      ctx.lineTo(originX, originY - diagH); // Eixo T
+      ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('Entropia específica (s) [kJ/kg·K] →', originX + diagW - 170, originY + 25);
+      ctx.fillText('↑ Temperatura (T) [K]', originX - 55, originY - diagH + 15);
+
+      const T1 = state.T1 ?? 298;
+      const T2 = state.T2 ?? 600;
+      const Tx = state.Tx ?? 850;
+      const T3 = state.T3 ?? 1400;
+      const T4 = state.T4 ?? 950;
+
+      const mapT = (tempK: number) => originY - ((tempK - 250) / 1600) * diagH;
+
+      // Coordenadas dos pontos no diagrama T-s
+      const p1 = { x: originX + 50, y: mapT(T1), label: '1 (Admissão)' };
+      const p2 = { x: originX + 110, y: mapT(T2), label: '2 (Saída Comp.)' };
+      const px = { x: originX + 190, y: mapT(Tx), label: 'x (Pré-aquecido)' };
+      const p3 = { x: originX + 280, y: mapT(T3), label: '3 (Entrada Turbina)' };
+      const p4 = { x: originX + 340, y: mapT(T4), label: '4 (Exaustão)' };
+
+      // Traçado do Ciclo Brayton
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#f97316'; // Linha de calor/trabalho
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y); // Compressão com irreversibilidade
+      ctx.lineTo(px.x, px.y); // Regeneração
+      ctx.lineTo(p3.x, p3.y); // Combustão externa
+      ctx.lineTo(p4.x, p4.y); // Expansão na turbina
+      ctx.lineTo(p1.x, p1.y); // Rejeição
+      ctx.stroke();
+
+      // Desenhar nós do ciclo
+      [p1, p2, px, p3, p4].forEach(pt => {
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = '10px monospace';
+        ctx.fillText(pt.label, pt.x + 8, pt.y - 4);
+      });
+
+      // Painel Informativo de Cogeração
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.fillRect(width - 250, 20, 230, 95);
+      ctx.strokeStyle = '#f97316';
+      ctx.strokeRect(width - 250, 20, 230, 95);
+
+      ctx.fillStyle = '#f97316';
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText('ANÁLISE DE 1ª E 2ª LEI', width - 240, 38);
+      ctx.fillStyle = '#fff';
+      ctx.font = '10px monospace';
+      ctx.fillText(`W_líquido: ${(state.Wnet ?? 0).toFixed(1)} kJ/kg`, width - 240, 56);
+      ctx.fillText(`T_admissão (TIT): ${T3.toFixed(0)} K`, width - 240, 72);
+      ctx.fillText(`T_regenerada (Tx): ${Tx.toFixed(0)} K`, width - 240, 88);
+      ctx.fillStyle = '#22c55e';
+      ctx.fillText(`Rendimento Térmico: ${(state.Wnet ? (state.Wnet / (1.005 * (T3 - Tx)) * 100).toFixed(1) : '0')}%`, width - 240, 104);
+    },
+    questions: [
+      {
+        question: 'Em que condição a instalação de um regenerador de calor deixa de aumentar a eficiência do ciclo Brayton?',
+        options: [
+          { text: 'Para razões de pressão muito elevadas onde a temperatura de saída do compressor (T2) supera a temperatura de exaustão da turbina (T4)', correct: true, explanation: 'Correto! Em altas razões de pressão, a compressão aquece tanto o ar que T2 > T4, e o regenerador passaria a resfriar o ar antes do combustor em vez de pré-aquecê-lo.' },
+          { text: 'Quando a temperatura ambiente é exatamente 25 ºC', correct: false, explanation: 'O regenerador continua funcionando normalmente a 25 ºC ambiente.' },
+          { text: 'Sempre que o gás utilizado for o ar atmosférico padrão', correct: false, explanation: 'O ar padrão é o fluido de trabalho clássico onde a regeneração é amplamente empregada.' }
+        ]
+      }
+    ]
   }
 };
+
 
