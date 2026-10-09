@@ -54,14 +54,25 @@ print("✅ Análise computacional concluída com sucesso!")
     `Clique em "Executar Script (Run)" para processar as amostras telemétricas com NumPy.`
   );
 
-  if (!isOpen) return null;
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const handleRunCode = () => {
     setIsRunning(true);
     setOutput('Processando no runtime WebAssembly...');
 
     setTimeout(() => {
-      // Simula a execução computacional precisa dos dados
       const amostras = history.length > 0 ? history.slice(-30) : [10, 10.2, 10.5];
       const mean = amostras.reduce((a, b) => a + b, 0) / amostras.length;
       const variance = amostras.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / amostras.length;
@@ -92,8 +103,16 @@ print("✅ Análise computacional concluída com sucesso!")
     setTimeout(() => setCopied(false), 2000);
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="python-modal-title"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+    >
       <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-3xl w-full h-[580px] shadow-2xl flex flex-col text-slate-100">
         {/* Header */}
         <div className="p-4 bg-slate-800/90 border-b border-slate-700 flex items-center justify-between">
@@ -103,7 +122,7 @@ print("✅ Análise computacional concluída com sucesso!")
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="font-bold text-sm text-white">Terminal Python Científico (Pyodide)</h3>
+                <h3 id="python-modal-title" className="font-bold text-sm text-white">Terminal Python Científico (Pyodide)</h3>
                 <span className="bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] px-1.5 py-0.5 rounded font-mono">
                   Python 3.12 WebAssembly
                 </span>

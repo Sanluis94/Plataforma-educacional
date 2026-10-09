@@ -533,7 +533,7 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
 
       {/* Conteúdo da Aba Ativa */}
       {activeTab === 'simulacao' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 340px', gap: '1.25rem' }}>
+        <div className="lab-workspace-grid">
           {/* Painel do Canvas e Controles */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             <div style={{
@@ -690,11 +690,37 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
               {config.parameters.map(param => (
                 <div key={param.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
                     <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{param.label}</span>
-                    <span style={{ fontFamily: 'monospace', color: 'var(--color-primary-accessible)', fontWeight: 700 }}>
-                      {params[param.id]} {param.unit}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <input
+                        type="number"
+                        min={param.min}
+                        max={param.max}
+                        step={param.step}
+                        value={params[param.id] ?? param.defaultValue}
+                        onChange={e => {
+                          const val = parseFloat(e.target.value);
+                          if (!isNaN(val)) {
+                            handleParamChange(param.id, Math.max(param.min, Math.min(param.max, val)));
+                          }
+                        }}
+                        style={{
+                          width: '62px',
+                          padding: '0.15rem 0.35rem',
+                          background: 'var(--bg-card)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '4px',
+                          color: 'var(--text-main)',
+                          fontFamily: 'monospace',
+                          fontSize: '0.78rem',
+                          textAlign: 'right'
+                        }}
+                      />
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', minWidth: '22px' }}>
+                        {param.unit}
+                      </span>
+                    </div>
                   </div>
 
                   <input
@@ -713,6 +739,29 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
                   </div>
                 </div>
               ))}
+
+              <button
+                onClick={() => {
+                  const defaults: Record<string, number> = {};
+                  config.parameters.forEach(p => { defaults[p.id] = p.defaultValue; });
+                  setParams(defaults);
+                }}
+                className="btn-outline"
+                style={{
+                  marginTop: '0.25rem',
+                  padding: '0.45rem',
+                  fontSize: '0.75rem',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem'
+                }}
+                title="Redefinir todas as variáveis para a configuração inicial recomendada"
+              >
+                <RotateCcw style={{ width: '12px', height: '12px' }} />
+                <span>Restaurar Valores Padrão</span>
+              </button>
             </div>
           </div>
         </div>

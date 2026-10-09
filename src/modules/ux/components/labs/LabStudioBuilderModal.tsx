@@ -27,16 +27,32 @@ export const LabStudioBuilderModal: React.FC<LabStudioBuilderModalProps> = ({
   const [question, setQuestion] = useState('');
   const [correctOption, setCorrectOption] = useState('');
   const [distractor, setDistractor] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !topic.trim()) {
-      alert('Preencha ao menos o título e o tópico do laboratório.');
+      setErrorMsg('Por favor, preencha ao menos o título e o tópico do laboratório.');
       return;
     }
+    setErrorMsg('');
 
     const labId = `custom_${Date.now()}`;
     const newLab: CatalogLabItem = {
@@ -94,7 +110,13 @@ export const LabStudioBuilderModal: React.FC<LabStudioBuilderModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="studio-modal-title"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+    >
       <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-2xl w-full max-h-[90vh] shadow-2xl flex flex-col text-slate-100 overflow-hidden">
         {/* Header */}
         <div className="p-4 bg-slate-800/90 border-b border-slate-700 flex items-center justify-between">
@@ -104,7 +126,7 @@ export const LabStudioBuilderModal: React.FC<LabStudioBuilderModalProps> = ({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="font-bold text-sm text-white">Kortex Studio No-Code</h3>
+                <h3 id="studio-modal-title" className="font-bold text-sm text-white">Kortex Studio No-Code</h3>
                 <span className="bg-sky-950 text-sky-400 border border-sky-800 text-[10px] px-1.5 py-0.5 rounded flex items-center space-x-1">
                   <Sparkles className="w-2.5 h-2.5" />
                   <span>Criação Visual</span>
@@ -117,6 +139,12 @@ export const LabStudioBuilderModal: React.FC<LabStudioBuilderModalProps> = ({
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {errorMsg && (
+          <div className="mx-6 mt-4 p-2.5 bg-rose-950/60 border border-rose-800/80 rounded text-rose-300 text-xs">
+            {errorMsg}
+          </div>
+        )}
 
         {/* Form Body */}
         <form onSubmit={handleSave} className="flex-1 p-6 overflow-y-auto space-y-4 text-xs">

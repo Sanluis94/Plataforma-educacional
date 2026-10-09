@@ -183,6 +183,7 @@ export function EstudanteDashboard() {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [classCodeInput, setClassCodeInput] = useState('');
   const [joinLoading, setJoinLoading] = useState(false);
+  const [joinFeedback, setJoinFeedback] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
   // Confetti State
   const [showConfetti, setShowConfetti] = useState(false);
@@ -249,12 +250,17 @@ export function EstudanteDashboard() {
     e.preventDefault();
     if (!classCodeInput.trim()) return;
     setJoinLoading(true);
+    setJoinFeedback(null);
     try {
       await joinClass(classCodeInput.trim());
       setClassCodeInput('');
       SoundEffects.playSuccess();
-    } catch (err) {
+      setJoinFeedback({ msg: '🎉 Matrícula realizada com sucesso na turma!', type: 'success' });
+      setTimeout(() => setJoinFeedback(null), 5000);
+    } catch (err: any) {
       console.error('Erro ao matricular na turma:', err);
+      setJoinFeedback({ msg: err?.message || 'Código de turma não encontrado. Verifique com seu professor.', type: 'error' });
+      setTimeout(() => setJoinFeedback(null), 6000);
     } finally {
       setJoinLoading(false);
     }
@@ -1155,6 +1161,21 @@ export function EstudanteDashboard() {
                 {joinLoading ? 'Matriculando...' : 'Entrar na Turma'}
               </button>
             </form>
+
+            {joinFeedback && (
+              <div style={{
+                marginTop: '0.85rem',
+                padding: '0.75rem 1rem',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                background: joinFeedback.type === 'success' ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                border: joinFeedback.type === 'success' ? '1px solid rgba(34, 197, 94, 0.4)' : '1px solid rgba(239, 68, 68, 0.4)',
+                color: joinFeedback.type === 'success' ? '#16a34a' : '#dc2626'
+              }}>
+                {joinFeedback.msg}
+              </div>
+            )}
           </div>
 
           {/* Lista de Turmas Matriculadas */}
