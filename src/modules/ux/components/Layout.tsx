@@ -1,11 +1,13 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Home as HomeIcon, BookOpen, Users, Settings, Beaker, LogOut, Sun, Moon, GraduationCap, Building2, Sparkles, Heart } from 'lucide-react';
-import { useState } from 'react';
+import { Menu, X, Home as HomeIcon, BookOpen, Users, Settings, Beaker, LogOut, Sun, Moon, GraduationCap, Building2, Sparkles, Heart, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { AccessibilityToolbar } from './AccessibilityToolbar';
 import { PricingModal } from './PricingModal';
 import { ParentBridgeModal } from './ParentBridgeModal';
 import { Logo } from './Logo';
+import { ConnectivityBadge } from './common/ConnectivityBadge';
+import { CommandPaletteModal } from './common/CommandPaletteModal';
 
 interface LayoutProps {
   theme: 'dark' | 'light';
@@ -17,9 +19,21 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pricingModalOpen, setPricingModalOpen] = useState(false);
   const [parentBridgeOpen, setParentBridgeOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, userData, logout } = useAuth();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Dynamic navigation based on auth state and role
   const getNavigation = () => {
@@ -154,6 +168,34 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
 
           {/* Right Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            {/* Indicador de Conexão & Sincronização Offline */}
+            <ConnectivityBadge />
+
+            {/* Botão de Busca / Command Palette (Ctrl + K) */}
+            <button
+              onClick={() => setCommandPaletteOpen(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.4rem',
+                padding: '0.45rem 0.75rem', borderRadius: '10px',
+                background: 'none', border: '1px solid var(--border-color)',
+                color: 'var(--text-secondary)', cursor: 'pointer',
+                fontSize: '0.8rem', fontWeight: 600,
+                transition: 'all 0.2s',
+              }}
+              title="Buscar laboratórios e ações rápidas (Ctrl + K)"
+            >
+              <Search style={{ width: '0.85rem', height: '0.85rem', color: 'var(--color-primary, #E4683F)' }} />
+              <span className="desktop-nav">Buscar</span>
+              <kbd className="desktop-nav" style={{
+                fontSize: '0.65rem',
+                padding: '0.1rem 0.35rem',
+                borderRadius: '4px',
+                background: 'rgba(0,0,0,0.06)',
+                border: '1px solid var(--border-color)',
+                fontFamily: 'monospace',
+                color: 'var(--text-muted)'
+              }}>Ctrl+K</kbd>
+            </button>
             {/* SaaS Pricing Button */}
             <button
               onClick={() => setPricingModalOpen(true)}
@@ -341,6 +383,15 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
             onClose={() => setParentBridgeOpen(false)}
           />
         )}
+
+        <CommandPaletteModal
+          isOpen={commandPaletteOpen}
+          onClose={() => setCommandPaletteOpen(false)}
+          theme={theme}
+          onThemeToggle={onThemeToggle}
+          onOpenPricing={() => setPricingModalOpen(true)}
+          onOpenParentBridge={() => setParentBridgeOpen(true)}
+        />
       </main>
 
       {/* Responsive styles */}
