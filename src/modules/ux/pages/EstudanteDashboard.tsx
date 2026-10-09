@@ -384,7 +384,7 @@ export function EstudanteDashboard() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
           <span style={{ color: 'var(--text-secondary)' }}>Acesso rápido:</span>
           <Link to="/simulacao" style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            🔬 Catálogo de 72 Labs
+            🔬 Catálogo Master de 500+ Labs
           </Link>
           <span>•</span>
           <Link to="/enem" style={{ color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
