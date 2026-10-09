@@ -1,13 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Play, Pause, RotateCcw, ArrowLeft, Home as HomeIcon,
-  ChevronDown, ChevronUp, HelpCircle, Settings2
+  ChevronDown, ChevronUp, HelpCircle, Settings2,
+  Search, Sparkles, Layers
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
 import { UniversalLabContainer } from '../components/UniversalLabContainer';
 import { NEW_ADVANCED_LABS } from '../../core/constants/advancedLabsRegistry';
+import {
+  MASTER_LABS_CATALOG,
+  searchLabsCatalog,
+  resolveUniversalLab
+} from '../../core/constants/masterLabsCatalog';
 
 interface LabMission {
   id: string;
@@ -141,6 +147,10 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
   const [selectedMissionOption, setSelectedMissionOption] = useState<number | null>(null);
   const [missionCompleted, setMissionCompleted] = useState(false);
   const [missionFeedback, setMissionFeedback] = useState<string | null>(null);
+
+  const [showCatalogExplorer, setShowCatalogExplorer] = useState(false);
+  const [catalogSearch, setCatalogSearch] = useState('');
+  const [catalogLevel, setCatalogLevel] = useState<string>('todos');
 
   useEffect(() => {
     setSelectedMissionOption(null);
@@ -578,6 +588,181 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
             </button>
           )}
         </div>
+      </div>
+
+      {/* ── BOTÃO E EXPANSOR DO CATÁLOGO MASTER DE 500+ LABORATÓRIOS ── */}
+      <div className="glass-card mb-4" style={{ padding: '1rem 1.25rem', borderRadius: '12px', background: 'var(--bg-glass)', border: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', color: 'var(--color-primary-accessible, #B8441F)', padding: '0.5rem', borderRadius: '8px' }}>
+              <Layers style={{ width: '1.3rem', height: '1.3rem' }} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                Catálogo Kortex de 500+ Laboratórios Virtuais
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                5 Níveis Acadêmicos • Fundamental I & II • Médio/ENEM • Graduação • Pós-Graduação & Mestrado
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowCatalogExplorer(!showCatalogExplorer)}
+            className="btn-gradient"
+            style={{
+              padding: '0.55rem 1.15rem',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <Sparkles style={{ width: '16px', height: '16px' }} />
+            <span>{showCatalogExplorer ? 'Fechar Navegador de 500 Labs' : 'Abrir Navegador de 500 Labs'}</span>
+            {showCatalogExplorer ? <ChevronUp style={{ width: '16px', height: '16px' }} /> : <ChevronDown style={{ width: '16px', height: '16px' }} />}
+          </button>
+        </div>
+
+        {/* Painel Expansível de Busca e Filtro de 500+ Laboratórios */}
+        {showCatalogExplorer && (
+          <div className="fade-in" style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }}>
+            {/* Campo de Busca em Tempo Real */}
+            <div style={{ position: 'relative', marginBottom: '1rem' }}>
+              <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                placeholder="Pesquisar entre 500+ laboratórios por título, disciplina, tópico ou código (Ex: Pitágoras, Arrhenius, RLC, PPO, Quântica...)"
+                value={catalogSearch}
+                onChange={e => setCatalogSearch(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.65rem 1rem 0.65rem 2.5rem',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.85rem'
+                }}
+              />
+            </div>
+
+            {/* Pílulas de Níveis Acadêmicos */}
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+              {[
+                { id: 'todos', label: 'Todos os Níveis (510 Labs)' },
+                { id: 'fundamental_1', label: '🎒 Fundamental I (20 Labs)' },
+                { id: 'fundamental_2', label: '🏫 Fundamental II (60 Labs)' },
+                { id: 'medio', label: '🎓 Ensino Médio / ENEM (100 Labs)' },
+                { id: 'graduacao', label: '🏛️ Graduação / Engenharias (160 Labs)' },
+                { id: 'pos_graduacao', label: '🔬 Pós-Graduação & Stricto Sensu (160 Labs)' },
+              ].map(levelItem => (
+                <button
+                  key={levelItem.id}
+                  onClick={() => setCatalogLevel(levelItem.id)}
+                  style={{
+                    padding: '0.4rem 0.85rem',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    border: catalogLevel === levelItem.id ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
+                    background: catalogLevel === levelItem.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.15))' : 'transparent',
+                    color: catalogLevel === levelItem.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {levelItem.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Grade de Resultados dos Laboratórios */}
+            {(() => {
+              const filtered = searchLabsCatalog(catalogSearch, catalogLevel === 'todos' ? undefined : catalogLevel);
+              return (
+                <div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                    Exibindo <strong>{filtered.length}</strong> laboratórios encontrados:
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                    gap: '0.85rem',
+                    maxHeight: '420px',
+                    overflowY: 'auto',
+                    paddingRight: '0.5rem'
+                  }}>
+                    {filtered.slice(0, 80).map(lab => (
+                      <div
+                        key={lab.id}
+                        style={{
+                          background: activeTab === lab.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.12))' : 'var(--bg-card)',
+                          border: activeTab === lab.id ? '1.5px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
+                          borderRadius: '10px',
+                          padding: '0.85rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800 }}>
+                              {lab.id}
+                            </span>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--color-verde-700, #293E24)', background: 'var(--color-verde-light, rgba(41, 62, 36, 0.12))', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
+                              {lab.simulatedHours}h
+                            </span>
+                          </div>
+
+                          <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.2rem' }}>
+                            {lab.icon} {lab.title}
+                          </div>
+
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                            {lab.subject} • {lab.topic}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            setActiveTab(lab.id);
+                            setShowCatalogExplorer(false);
+                          }}
+                          className="btn-outline"
+                          style={{
+                            padding: '0.35rem 0.75rem',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.3rem'
+                          }}
+                        >
+                          <Play style={{ width: '12px', height: '12px' }} />
+                          {activeTab === lab.id ? 'Em Execução' : 'Executar Simulação'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  {filtered.length > 80 && (
+                    <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.6rem' }}>
+                      Mostrando primeiros 80 resultados de {filtered.length}. Refine sua busca digitando termos específicos acima.
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        )}
       </div>
 
       {/* ── PAINEL DE MISSÃO EXPERIMENTAL GUIADA ── */}
@@ -1112,10 +1297,10 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
         </div>
       )}
 
-      {/* Renderização Dinâmica dos Laboratórios Avançados (UniversalLabContainer) */}
-      {NEW_ADVANCED_LABS[activeTab] && (
+      {/* Renderização Dinâmica dos Laboratórios Avançados e Catálogo Master (UniversalLabContainer) */}
+      {(NEW_ADVANCED_LABS[activeTab] || MASTER_LABS_CATALOG.some(l => l.id === activeTab)) && (
         <UniversalLabContainer
-          config={NEW_ADVANCED_LABS[activeTab]}
+          config={resolveUniversalLab(activeTab)}
           onComplete={({ score }) => {
             if (onComplete) onComplete(score * 10);
           }}
@@ -1123,7 +1308,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
       )}
 
       {/* Mediação Ativa: Tutor Socrático e Freiriano (para labs legados) */}
-      {!NEW_ADVANCED_LABS[activeTab] && (
+      {!NEW_ADVANCED_LABS[activeTab] && !MASTER_LABS_CATALOG.some(l => l.id === activeTab) && (
         <SocraticTutorWidget
           labTitle={`Laboratório de ${activeTab.toUpperCase()}`}
           subject="Ciências e Física Interativa"
