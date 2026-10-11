@@ -2,6 +2,7 @@
 // Organizado em 5 Níveis Acadêmicos e Todas as Disciplinas Estruturantes
 import type { UniversalLabConfig } from '../../ux/components/UniversalLabContainer';
 import { NEW_ADVANCED_LABS } from './advancedLabsRegistry';
+import { getLabLearningContent, type LabLearningContent } from '../content/labLearningContent';
 
 export interface CatalogLabItem {
   id: string;
@@ -1571,15 +1572,15 @@ export const MASTER_LABS_CATALOG: CatalogLabItem[] = [
   },
   {
     "id": "fund2_mat_05",
-    "title": "Círculo Trigonométrico Básico",
+    "title": "Triângulos Semelhantes e Razões Trigonométricas",
     "academicLevel": "fundamental_2",
     "academicLevelLabel": "Ensino Fundamental II",
     "subject": "Matemática Fundamental II",
     "subjectCategory": "Exatas & Lógica",
-    "topic": "Trigonometria Plana",
-    "objective": "Projeções de seno e cosseno para ângulos notáveis",
-    "theoreticalBackground": "O laboratório virtual \"Círculo Trigonométrico Básico\" investiga a temática de Trigonometria Plana no âmbito da disciplina de Matemática Fundamental II para o nível Ensino Fundamental II (Anos Finais). O objetivo central da experimentação é projeções de seno e cosseno para ângulos notáveis. Teoreticamente, a prática sustenta-se em consonância com a BNCC (BNCC EF09MA08), consolidando a passagem do pensamento concreto para a abstração científica, análise gráfica e relação quantitativa de grandezas. Durante a execução, o estudante manipula os parâmetros do sistema em tempo real, verificando como perturbações nas condições iniciais afetam as grandezas de estado, convergência analítica e variáveis de resposta registradas na telemetria.",
-    "curriculumCode": "BNCC EF09MA08",
+    "topic": "Razões em Triângulos Retângulos",
+    "objective": "Comparar razões entre lados em triângulos retângulos semelhantes e distinguir o ângulo de referência",
+    "theoreticalBackground": "Triângulos retângulos semelhantes mantêm as razões entre lados correspondentes. Esta introdução guiada usa proporcionalidade, identificação da hipotenusa e escolha de um ângulo agudo de referência para comparar seno e cosseno, sem exigir círculo trigonométrico, radianos ou quadrantes.",
+    "curriculumCode": "Semelhança e proporcionalidade — introdução guiada",
     "simulatedHours": 20,
     "icon": "📐",
     "solverType": "analytical",
@@ -13225,7 +13226,7 @@ export const MASTER_LABS_CATALOG: CatalogLabItem[] = [
     "subject": "Química Geral e Experimental",
     "subjectCategory": "Engenharias & Tecnologias",
     "topic": "Química Orgânica",
-    "objective": "Fase estacionária, fase móvel e fator de retenção Rf",
+    "objective": "Analisar fases estacionária e móvel, comparar eluição em coluna e distinguir o Rf definido para cromatografia planar.",
     "theoreticalBackground": "O laboratório virtual \"Cromatografia em Coluna e Separação de Pigmentos\" investiga a temática de Química Orgânica no âmbito da disciplina de Química Geral e Experimental para o nível Ensino Superior (Graduação em Engenharia e Ciências). O objetivo central da experimentação é fase estacionária, fase móvel e fator de retenção rf. Teoreticamente, a prática sustenta-se atendendo aos referenciais das Diretrizes Curriculares Nacionais (DCNs / DCN-QUI-07), fundamentando métodos experimentais quantitativos, análise de incertezas e equacionamento diferencial em regime permanente e transitório. Durante a execução, o estudante manipula os parâmetros do sistema em tempo real, verificando como perturbações nas condições iniciais afetam as grandezas de estado, convergência analítica e variáveis de resposta registradas na telemetria.",
     "curriculumCode": "DCN-QUI-07",
     "simulatedHours": 30,
@@ -13475,13 +13476,13 @@ export const MASTER_LABS_CATALOG: CatalogLabItem[] = [
   },
   {
     "id": "sup_comp_01",
-    "title": "Complexidade de Algoritmos de Ordenação O(n)",
+    "title": "Complexidade de Algoritmos de Ordenação e Limites Assintóticos",
     "academicLevel": "graduacao",
     "academicLevelLabel": "Ensino Superior (Graduação)",
     "subject": "Algoritmos e Complexidade Computacional",
     "subjectCategory": "Engenharias & Tecnologias",
     "topic": "Análise Assintótica",
-    "objective": "QuickSort, MergeSort e comparações empíricas com arrays grandes",
+    "objective": "Comparar custos de QuickSort e MergeSort e distinguir limites por comparação de métodos lineares sob hipóteses adicionais.",
     "theoreticalBackground": "O laboratório virtual \"Complexidade de Algoritmos de Ordenação O(n)\" investiga a temática de Análise Assintótica no âmbito da disciplina de Algoritmos e Complexidade Computacional para o nível Ensino Superior (Graduação em Engenharia e Ciências). O objetivo central da experimentação é quicksort, mergesort e comparações empíricas com arrays grandes. Teoreticamente, a prática sustenta-se atendendo aos referenciais das Diretrizes Curriculares Nacionais (DCNs / DCN-COMP-01), fundamentando métodos experimentais quantitativos, análise de incertezas e equacionamento diferencial em regime permanente e transitório. Durante a execução, o estudante manipula os parâmetros do sistema em tempo real, verificando como perturbações nas condições iniciais afetam as grandezas de estado, convergência analítica e variáveis de resposta registradas na telemetria.",
     "curriculumCode": "DCN-COMP-01",
     "simulatedHours": 30,
@@ -25385,7 +25386,7 @@ export const MASTER_LABS_CATALOG: CatalogLabItem[] = [
     "subject": "Sistemas Dinâmicos e Caos",
     "subjectCategory": "Pesquisa & Modelagem Avançada",
     "topic": "Controle do Caos",
-    "objective": "Comunicação criptografada mascarada por sinais caóticos contínuos",
+    "objective": "Analisar sincronização por acoplamento e contração do erro, distinguindo mascaramento de segurança criptográfica",
     "theoreticalBackground": "O laboratório virtual \"Sincronização de Sistemas Caóticos (Esquema de Pecora-Carroll)\" investiga a temática de Controle do Caos no âmbito da disciplina de Sistemas Dinâmicos e Caos para o nível Pós-Graduação e Pesquisa Avançada Stricto Sensu (Mestrado / Doutorado). O objetivo central da experimentação é comunicação criptografada mascarada por sinais caóticos contínuos. Teoreticamente, a prática sustenta-se em conformidade com os critérios de excelência CAPES (CAPES-EXATAS-14), aplicando modelos estocásticos, equações constitutivas não-lineares, dinâmica assintótica e validação numérica avançada. Durante a execução, o estudante manipula os parâmetros do sistema em tempo real, verificando como perturbações nas condições iniciais afetam as grandezas de estado, convergência analítica e variáveis de resposta registradas na telemetria.",
     "curriculumCode": "CAPES-EXATAS-14",
     "simulatedHours": 45,
@@ -27171,13 +27172,13 @@ export const MASTER_LABS_CATALOG: CatalogLabItem[] = [
   },
   {
     "id": "pos_otim_05",
-    "title": "Roteamento de Veículos (VRP) e Heurística de Clark-Wright",
+    "title": "Roteamento de Veículos (VRP) e Heurística de Clarke-Wright",
     "academicLevel": "pos_graduacao",
     "academicLevelLabel": "Pós-Graduação & Doutorado",
     "subject": "Otimização Convexa & Pesquisa Operacional",
     "subjectCategory": "Pesquisa & Modelagem Avançada",
     "topic": "Logística Avançada",
-    "objective": "Minimização de frotas e roteirização com janelas de tempo",
+    "objective": "Comparar economias de combinação de rotas e verificar capacidade e viabilidade das restrições",
     "theoreticalBackground": "O laboratório virtual \"Roteamento de Veículos (VRP) e Heurística de Clark-Wright\" investiga a temática de Logística Avançada no âmbito da disciplina de Otimização Convexa & Pesquisa Operacional para o nível Pós-Graduação e Pesquisa Avançada Stricto Sensu (Mestrado / Doutorado). O objetivo central da experimentação é minimização de frotas e roteirização com janelas de tempo. Teoreticamente, a prática sustenta-se em conformidade com os critérios de excelência CAPES (CAPES-ENG-17), aplicando modelos estocásticos, equações constitutivas não-lineares, dinâmica assintótica e validação numérica avançada. Durante a execução, o estudante manipula os parâmetros do sistema em tempo real, verificando como perturbações nas condições iniciais afetam as grandezas de estado, convergência analítica e variáveis de resposta registradas na telemetria.",
     "curriculumCode": "CAPES-ENG-17",
     "simulatedHours": 45,
@@ -30825,7 +30826,7 @@ export const MASTER_LABS_CATALOG: CatalogLabItem[] = [
     "subject": "Engenharia Biomédica e Biofotônica",
     "subjectCategory": "Pesquisa & Modelagem Avançada",
     "topic": "Sinais Biomédicos",
-    "objective": "Algoritmo de Pan-Tompkins para detecção de arritmias cardíacas",
+    "objective": "Compreender a detecção de complexos QRS e avaliar ruído e intervalos sem inferir diagnóstico automático",
     "theoreticalBackground": "O laboratório virtual \"Eletrocardiograma (ECG) e Processamento de Complexos QRS\" investiga a temática de Sinais Biomédicos no âmbito da disciplina de Engenharia Biomédica e Biofotônica para o nível Pós-Graduação e Pesquisa Avançada Stricto Sensu (Mestrado / Doutorado). O objetivo central da experimentação é algoritmo de pan-tompkins para detecção de arritmias cardíacas. Teoreticamente, a prática sustenta-se em conformidade com os critérios de excelência CAPES (CAPES-SAUDE-23), aplicando modelos estocásticos, equações constitutivas não-lineares, dinâmica assintótica e validação numérica avançada. Durante a execução, o estudante manipula os parâmetros do sistema em tempo real, verificando como perturbações nas condições iniciais afetam as grandezas de estado, convergência analítica e variáveis de resposta registradas na telemetria.",
     "curriculumCode": "CAPES-SAUDE-23",
     "simulatedHours": 45,
@@ -31017,7 +31018,7 @@ export const MASTER_LABS_CATALOG: CatalogLabItem[] = [
     "subject": "Engenharia Biomédica e Biofotônica",
     "subjectCategory": "Pesquisa & Modelagem Avançada",
     "topic": "Biomecânica",
-    "objective": "Cinemática inversa de forças no quadril durante ciclo de marcha",
+    "objective": "Diferenciar cinemática e dinâmica inversas e calcular momentos e forças em um modelo biomecânico didático",
     "theoreticalBackground": "O laboratório virtual \"Biomecânica de Próteses Articulares e Análise de Marcha\" investiga a temática de Biomecânica no âmbito da disciplina de Engenharia Biomédica e Biofotônica para o nível Pós-Graduação e Pesquisa Avançada Stricto Sensu (Mestrado / Doutorado). O objetivo central da experimentação é cinemática inversa de forças no quadril durante ciclo de marcha. Teoreticamente, a prática sustenta-se em conformidade com os critérios de excelência CAPES (CAPES-SAUDE-23), aplicando modelos estocásticos, equações constitutivas não-lineares, dinâmica assintótica e validação numérica avançada. Durante a execução, o estudante manipula os parâmetros do sistema em tempo real, verificando como perturbações nas condições iniciais afetam as grandezas de estado, convergência analítica e variáveis de resposta registradas na telemetria.",
     "curriculumCode": "CAPES-SAUDE-23",
     "simulatedHours": 45,
@@ -31785,7 +31786,7 @@ export const MASTER_LABS_CATALOG: CatalogLabItem[] = [
     "subject": "Engenharia Aeroespacial e Propulsão",
     "subjectCategory": "Pesquisa & Modelagem Avançada",
     "topic": "Propulsão Elétrica",
-    "objective": "Impulso específico superior a 3000 s com aceleração eletrostática de xenônio",
+    "objective": "Relacionar impulso específico, empuxo e potência em exemplos de propulsão elétrica, considerando eficiência",
     "theoreticalBackground": "O laboratório virtual \"Propulsão Elétrica Espacial (Motores a Íons e Efeito Hall)\" investiga a temática de Propulsão Elétrica no âmbito da disciplina de Engenharia Aeroespacial e Propulsão para o nível Pós-Graduação e Pesquisa Avançada Stricto Sensu (Mestrado / Doutorado). O objetivo central da experimentação é impulso específico superior a 3000 s com aceleração eletrostática de xenônio. Teoreticamente, a prática sustenta-se em conformidade com os critérios de excelência CAPES (CAPES-ENG-24), aplicando modelos estocásticos, equações constitutivas não-lineares, dinâmica assintótica e validação numérica avançada. Durante a execução, o estudante manipula os parâmetros do sistema em tempo real, verificando como perturbações nas condições iniciais afetam as grandezas de estado, convergência analítica e variáveis de resposta registradas na telemetria.",
     "curriculumCode": "CAPES-ENG-24",
     "simulatedHours": 45,
@@ -32675,6 +32676,16 @@ export const MASTER_LABS_CATALOG: CatalogLabItem[] = [
   }
 ];
 
+// Surface authored material in catalog consumers as well as in the lab runner.
+// Packs are the source for theory and assessment; never infer them from a title.
+for (const item of MASTER_LABS_CATALOG) {
+  const content = getLabLearningContent(item.id);
+  if (content) {
+    item.theoreticalBackground = `${content.theory}\n\nExemplo explicado\n${content.workedExample}`;
+    item.diagnosticQuestion = content.questions[0];
+  }
+}
+
 export function getAllLabsCatalog(): CatalogLabItem[] {
   return MASTER_LABS_CATALOG;
 }
@@ -32704,114 +32715,30 @@ export function searchLabsCatalog(query: string, level?: string): CatalogLabItem
 
 /**
  * Resolve e instancia uma configuração executável de UniversalLabConfig
- * para qualquer um dos 500 laboratórios do catálogo.
+ * para qualquer um dos 510 laboratórios do catálogo.
  */
-export function resolveUniversalLab(labId: string): UniversalLabConfig {
-  if (NEW_ADVANCED_LABS[labId]) {
-    return NEW_ADVANCED_LABS[labId];
-  }
-
-  const item = MASTER_LABS_CATALOG.find(l => l.id === labId);
-  if (!item) {
-    return NEW_ADVANCED_LABS['sup_fis_01'];
-  }
-
+export function createGuidedLabConfig(item: Pick<UniversalLabConfig, 'id' | 'title' | 'academicLevel' | 'subject' | 'topic' | 'objective'>, content: LabLearningContent): UniversalLabConfig {
   return {
-    id: item.id,
-    title: item.title,
-    academicLevel: item.academicLevel,
-    subject: item.subject,
-    topic: item.topic,
-    objective: item.objective,
-    theoreticalBackground: item.theoreticalBackground,
-    parameters: item.defaultParams,
-    initialState: { t: 0, val: 10, history: [] },
-    physicsStep: (params: Record<string, number>, state: Record<string, any>, dt: number) => {
-      const t = (state.t ?? 0) + (dt || 0.05);
-      const p1 = Object.values(params)[0] || 10;
-      const p2 = Object.values(params)[1] || 1;
-      
-      // Simulação paramétrica de convergência harmônica/exponencial
-      const oscilacao = Math.sin(t * p2) * Math.exp(-0.02 * t);
-      const valorPrincipal = Number((p1 * (1 + 0.3 * oscilacao)).toFixed(3));
-      const taxaVariacao = Number((p2 * Math.cos(t * p2)).toFixed(3));
-      const rendimentoOuIndice = Number((Math.min(100, Math.max(0, 50 + 35 * Math.sin(t * 0.5)))).toFixed(1));
-
-      return {
-        nextState: { t, val: valorPrincipal, history: [...(state.history || []), valorPrincipal].slice(-100) },
-        telemetry: {
-          tempo_segundos: Number(t.toFixed(2)),
-          parametro_resposta: valorPrincipal,
-          taxa_gradiente: taxaVariacao,
-          indice_desempenho_pct: rendimentoOuIndice
-        }
-      };
-    },
-    renderCanvas: (ctx: CanvasRenderingContext2D, state: Record<string, any>, _params: Record<string, number>, width: number, height: number) => {
-      ctx.clearRect(0, 0, width, height);
-
-      // Fundo estilizado com gradiente de alta tecnologia
-      const grad = ctx.createLinearGradient(0, 0, width, height);
-      grad.addColorStop(0, '#0f172a');
-      grad.addColorStop(1, '#1e293b');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, width, height);
-
-      // Grade cartesiana de fundo
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.1)';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < width; x += 40) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-      }
-      for (let y = 0; y < height; y += 40) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-      }
-
-      // Traçado da curva dinâmica de resposta
-      const hist = state.history || [];
-      if (hist.length > 1) {
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        const stepX = (width - 120) / 100;
-        const originY = height / 2;
-        for (let i = 0; i < hist.length; i++) {
-          const px = 60 + i * stepX;
-          const py = originY - (hist[i] - 10) * 4;
-          if (i === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        ctx.stroke();
-      }
-
-      // Ponto focal atual
-      const curVal = state.val ?? 10;
-      const curX = 60 + Math.min(hist.length, 100) * ((width - 120) / 100);
-      const curY = (height / 2) - (curVal - 10) * 4;
-      ctx.fillStyle = '#E4683F';
-      ctx.beginPath();
-      ctx.arc(curX, curY, 7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Painel HUD de Telemetria
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-      ctx.fillRect(20, 20, 320, 95);
-      ctx.strokeStyle = '#E4683F';
-      ctx.strokeRect(20, 20, 320, 95);
-
-      ctx.fillStyle = '#E4683F';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillText(item.title.toUpperCase().slice(0, 36), 32, 40);
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '11px monospace';
-      ctx.fillText(`Tempo: ${(state.t ?? 0).toFixed(2)}s | Amostragem: 60 Hz`, 32, 60);
-      ctx.fillText(`Métrica Principal: ${curVal.toFixed(3)}`, 32, 78);
-      ctx.fillStyle = '#22c55e';
-      ctx.fillText(`Status: Dinâmica Paramétrica Ativa`, 32, 96);
-    },
-    questions: [item.diagnosticQuestion]
+    id: item.id, title: item.title, academicLevel: item.academicLevel, subject: item.subject, topic: item.topic,
+    objective: item.objective, theoreticalBackground: `${content.theory}\n\nExemplo explicado\n${content.workedExample}`,
+    learningContent: content, presentation: 'guided_activity', questions: content.questions, parameters: [],
+    // Compatibility with older consumers; the guided runner uses no solver.
+    initialState: {}, physicsStep: () => ({ nextState: {}, telemetry: {} }), renderCanvas: () => undefined,
   };
+}
+
+export function resolveUniversalLab(labId: string): UniversalLabConfig {
+  const item = MASTER_LABS_CATALOG.find(l => l.id === labId);
+  if (!item) throw new Error(`Laboratório não encontrado: ${labId}`);
+  const content = getLabLearningContent(labId);
+  if (!content) throw new Error(`Conteúdo individual ausente: ${labId}`);
+  if (NEW_ADVANCED_LABS[labId]) {
+    const advanced = NEW_ADVANCED_LABS[labId];
+    return { ...advanced, title: item.title, academicLevel: item.academicLevel,
+      subject: item.subject, topic: item.topic, objective: item.objective,
+      learningContent: content, questions: content.questions,
+      theoreticalBackground: `${content.theory}\n\nExemplo explicado\n${content.workedExample}` };
+  }
+
+  return createGuidedLabConfig(item, content);
 }

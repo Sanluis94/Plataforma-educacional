@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Beaker, Trophy, BookOpen, Clock, FileText,
   Calendar, Upload, ExternalLink, Play, Bell,
@@ -7,6 +7,10 @@ import {
 } from 'lucide-react';
 import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
+import { getLearningLab, type LearningLab } from '../../core/constants/learningCatalog';
+import { LEARNING_LEVELS, normalizeLearningLevel, learningLevelLabel } from '../../core/constants/learningLevels';
+import { getLabLearningContent } from '../../core/content/labLearningContent';
+import { LabLearningWorkspace } from '../components/labs/LabLearningWorkspace';
 import SoundEffects from '../../core/services/soundEffects';
 import { StudentLmsModules } from '../components/StudentLmsModules';
 import { 
@@ -120,16 +124,15 @@ function ConfettiCanvas({ active, onComplete }: { active: boolean; onComplete: (
   );
 }
 
-// Science & Knowledge Area Categorization
-const KNOWLEDGE_AREAS = [
-  { id: 'nature', label: '🌿 Ciências da Natureza', subjects: ['fisica', 'quimica', 'biologia'] },
-  { id: 'exact', label: '📐 Exatas & Tecnologia', subjects: ['matematica', 'hardskills'] },
-  { id: 'human', label: '🌍 Ciências Humanas', subjects: ['geografia', 'historia', 'filosofia'] },
-  { id: 'languages', label: '📖 Linguagens & Competências', subjects: ['portugues', 'redacao', 'idiomas', 'softskills'] },
-];
+type LegacyLab = (typeof ALL_MODULES)[number]['labs'][number];
+const LEGACY_LABS = ALL_MODULES.flatMap<LegacyLab>(module => module.labs);
 
 export function EstudanteDashboard() {
-  const { currentUser } = useAuth();
+  const { currentUser, userData } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedLab = getLearningLab(searchParams.get('lab') || '');
+  const selectedLevel = linkedLab?.academicLevel || normalizeLearningLevel(searchParams.get('level'), normalizeLearningLevel(userData?.gradeLevel));
   const studentUid = currentUser?.uid || 'student-demo';
   const studentName = currentUser?.displayName || 'Estudante';
 
@@ -144,7 +147,9 @@ export function EstudanteDashboard() {
     studentClasses,
     joinClass,
     handleActivitySubmit,
-  } = useStudentDashboard();
+    modules,
+    gradeLevel,
+  } = useStudentDashboard(selectedLevel);
 
   const { level, xp, coins } = progress;
 
@@ -155,17 +160,62 @@ export function EstudanteDashboard() {
 
   // Sync tab with query parameters if present
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tabParam = params.get('tab');
+    const tabParam = searchParams.get('tab');
     const validTabs = ['labs', 'exams', 'lesson_plans', 'materials', 'classes', 'gamification', 'gradebook', 'forum', 'certificates'];
     if (tabParam && validTabs.includes(tabParam)) {
       setActiveTab(tabParam as any);
     }
-  }, []);
+  }, [searchParams]);
 
-  // Hub de Laboratórios Filter States
-  const [selectedArea, setSelectedArea] = useState<string>('nature');
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('fisica');
+  const selectedSubject = linkedLab?.subject || searchParams.get('subject');
+  const currentSubjectModule = modules.find(module => module.id === selectedSubject) || modules[0];
+
+  useEffect(() => {
+    if (!linkedLab) {
+      setActiveLab(null);
+      return;
+    }
+    if (linkedLab.source === 'catalog') {
+      navigate(`/simulacao?lab=${encodeURIComponent(linkedLab.id)}&level=${linkedLab.academicLevel}`, { replace: true });
+      return;
+    }
+    const lab = LEGACY_LABS.find(item => item.id === linkedLab.id);
+    setActiveLab(lab || null);
+    setActiveTab('labs');
+    if (searchParams.get('level') !== linkedLab.academicLevel || searchParams.get('subject') !== linkedLab.subject || searchParams.get('tab') !== 'labs') {
+      const next = new URLSearchParams(searchParams);
+      next.set('level', linkedLab.academicLevel);
+      next.set('subject', linkedLab.subject);
+      next.set('tab', 'labs');
+      setSearchParams(next, { replace: true });
+    }
+  }, [linkedLab, navigate, searchParams, setActiveLab, setSearchParams]);
+
+  const closeLab = () => {
+    setActiveLab(null);
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous);
+      next.delete('lab');
+      return next;
+    });
+  };
+
+  const openLearningLab = (lab: LearningLab) => {
+    if (lab.source === 'catalog') {
+      navigate(`/simulacao?lab=${encodeURIComponent(lab.id)}&level=${lab.academicLevel}`);
+      return;
+    }
+    setActiveTab('labs');
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous);
+      next.set('lab', lab.id);
+      next.set('level', lab.academicLevel);
+      next.set('subject', lab.subject);
+      next.set('tab', 'labs');
+      return next;
+    });
+    SoundEffects.playClick();
+  };
 
   // Class selection state
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
@@ -350,10 +400,6 @@ export function EstudanteDashboard() {
     }
   };
 
-  // Filter modules for Hub
-  const currentAreaSubjects = KNOWLEDGE_AREAS.find(a => a.id === selectedArea)?.subjects || [];
-  const currentSubjectModule = ALL_MODULES.find(m => m.id === selectedSubjectId);
-
   // Pending exams that student has not yet submitted
   const pendingExams = classExams.filter(
     exam => exam.status === 'Aberta' && !studentAttempts.some(att => att.examId === exam.id)
@@ -389,8 +435,8 @@ export function EstudanteDashboard() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
           <span style={{ color: 'var(--text-secondary)' }}>Acesso rápido:</span>
-          <Link to="/simulacao" style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            🔬 Catálogo Master de 500+ Labs
+          <Link to={`/simulacao?level=${gradeLevel}`} style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            🔬 Catálogo de Laboratórios
           </Link>
           <span>•</span>
           <Link to="/enem" style={{ color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -430,7 +476,7 @@ export function EstudanteDashboard() {
       {/* Reorganized Student Navigation Bar with Dynamic Badges */}
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--border-color)' }}>
         {[
-          { id: 'labs', label: '🔬 Laboratórios de Ciências', icon: Beaker },
+          { id: 'labs', label: '🔬 Laboratórios por Nível', icon: Beaker },
           {
             id: 'exams',
             label: '📝 Provas & Avaliações',
@@ -452,6 +498,12 @@ export function EstudanteDashboard() {
             onClick={() => {
               setActiveTab(tab.id as any);
               setActiveLab(null);
+              setSearchParams(previous => {
+                const next = new URLSearchParams(previous);
+                next.set('tab', tab.id);
+                next.delete('lab');
+                return next;
+              });
             }}
             style={{
               padding: '0.65rem 1.25rem',
@@ -491,77 +543,73 @@ export function EstudanteDashboard() {
         ))}
       </div>
 
-      {/* ── TAB 1: HUB DE LABORATÓRIOS VIRTUAIS (CIÊNCIAS & EXATAS) ── */}
+      {activeTab === 'labs' && (
+        <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+            <label style={{ display: 'grid', gap: '0.4rem', flex: '1 1 250px', fontWeight: 700, color: 'var(--text-main)' }}>
+              Nível de aprendizado
+              <select
+                aria-label="Nível de aprendizado"
+                value={gradeLevel}
+                onChange={event => {
+                  const nextLevel = normalizeLearningLevel(event.target.value);
+                  setActiveLab(null);
+                  setSearchParams(previous => {
+                    const next = new URLSearchParams(previous);
+                    next.set('level', nextLevel);
+                    next.delete('lab');
+                    next.delete('subject');
+                    return next;
+                  });
+                }}
+                style={{ padding: '0.7rem', borderRadius: '8px', background: 'var(--color-bg-card, #FAF7EE)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}
+              >
+                {LEARNING_LEVELS.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
+              </select>
+            </label>
+            <label style={{ display: 'grid', gap: '0.4rem', flex: '1 1 250px', fontWeight: 700, color: 'var(--text-main)' }}>
+              Disciplina
+              <select
+                aria-label="Disciplina"
+                value={currentSubjectModule?.id || ''}
+                onChange={event => {
+                  const nextSubject = event.target.value;
+                  setActiveLab(null);
+                  setSearchParams(previous => {
+                    const next = new URLSearchParams(previous);
+                    next.set('level', gradeLevel);
+                    next.set('subject', nextSubject);
+                    next.delete('lab');
+                    return next;
+                  });
+                }}
+                style={{ padding: '0.7rem', borderRadius: '8px', background: 'var(--color-bg-card, #FAF7EE)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}
+              >
+                {modules.map(module => <option key={module.id} value={module.id}>{module.label} ({module.labs.length} labs)</option>)}
+              </select>
+            </label>
+          </div>
+          <p role="status" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.85rem 0 0' }}>
+            {learningLevelLabel(gradeLevel)}: {modules.reduce((total, module) => total + module.labs.length, 0)} laboratórios em {modules.length} disciplinas.
+          </p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: '0.35rem 0 0' }}>
+            Escolha o nível e a disciplina para explorar os tópicos desta etapa.
+          </p>
+        </div>
+      )}
+
+      {/* ── HUB DE LABORATÓRIOS POR NÍVEL E DISCIPLINA ── */}
       {activeTab === 'labs' && !activeLab && (
         <div className="fade-in">
-          {/* Areas Filter Banner */}
-          <div className="glass-card mb-4" style={{ padding: '1.25rem', background: 'var(--bg-glass)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg, 14px)' }}>
-            <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.6rem' }}>
-              Selecione a Grande Área do Conhecimento:
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              {KNOWLEDGE_AREAS.map(area => (
-                <button
-                  key={area.id}
-                  onClick={() => {
-                    setSelectedArea(area.id);
-                    setSelectedSubjectId(area.subjects[0]);
-                  }}
-                  style={{
-                    padding: '0.6rem 1.15rem',
-                    borderRadius: 'var(--radius-sm, 10px)',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    border: selectedArea === area.id ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
-                    background: selectedArea === area.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.15))' : 'var(--bg-glass)',
-                    color: selectedArea === area.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {area.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Sub-selector for Subjects within Selected Area */}
-            <div style={{ display: 'flex', gap: '0.4rem', marginTop: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginRight: '0.25rem' }}>Disciplina:</span>
-              {currentAreaSubjects.map(subjId => {
-                const mod = ALL_MODULES.find(m => m.id === subjId);
-                if (!mod) return null;
-                const isSelected = selectedSubjectId === subjId;
-                return (
-                  <button
-                    key={subjId}
-                    onClick={() => setSelectedSubjectId(subjId)}
-                    style={{
-                      padding: '0.4rem 0.85rem',
-                      borderRadius: 'var(--radius-sm, 10px)',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      border: isSelected ? '1px solid var(--color-verde-700, #293E24)' : '1px solid var(--border-color)',
-                      background: isSelected ? 'var(--color-verde-light, rgba(41, 62, 36, 0.15))' : 'transparent',
-                      color: isSelected ? 'var(--color-verde-700, #293E24)' : 'var(--text-secondary)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {mod.label} (6 Labs)
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 6 Specialized Labs Grid for Selected Subject */}
+          {/* Laboratórios da disciplina e do nível selecionados */}
           {currentSubjectModule && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, margin: 0, fontFamily: 'var(--font-heading)' }}>
-                  Laboratórios de {currentSubjectModule.label} (Simuladores com Parâmetros Interativos)
+                  Laboratórios de {currentSubjectModule.label}
                 </h3>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  6 experiências interativas dedicadas
+                  {currentSubjectModule.labs.length} experiências desta etapa
                 </span>
               </div>
 
@@ -571,6 +619,10 @@ export function EstudanteDashboard() {
                   return (
                     <div
                       key={lab.id}
+                      role="article"
+                      aria-label={lab.title}
+                      data-lab-id={lab.id}
+                      data-academic-level={lab.academicLevel}
                       className="glass-card"
                       style={{
                         padding: '1.5rem',
@@ -600,24 +652,13 @@ export function EstudanteDashboard() {
                           {lab.title}
                         </h4>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 1rem', lineHeight: 1.4 }}>
-                          Simulação dinâmica com controle de variáveis, visualizações científicas e validação imediata de conceitos.
+                          {lab.objective}
                         </p>
-
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginBottom: '1.25rem' }}>
-                          Parâmetros: mode="{lab.props?.mode || 'padrão'}"
-                        </div>
                       </div>
 
                       <button
-                        onClick={() => {
-                          setActiveLab({
-                            id: lab.id,
-                            title: lab.title,
-                            component: lab.component,
-                            props: lab.props,
-                          });
-                          SoundEffects.playClick();
-                        }}
+                        onClick={() => openLearningLab(lab)}
+                        aria-label={`Iniciar ${lab.title}`}
                         className="btn-gradient"
                         style={{ width: '100%', padding: '0.65rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
                       >
@@ -637,7 +678,7 @@ export function EstudanteDashboard() {
         <div className="fade-in">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <button
-              onClick={() => setActiveLab(null)}
+              onClick={closeLab}
               className="btn-outline"
               style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
             >
@@ -649,6 +690,20 @@ export function EstudanteDashboard() {
           </div>
 
           <div className="glass-card" style={{ padding: '1rem', minHeight: '520px', borderRadius: 'var(--radius-lg, 14px)' }}>
+            <LabLearningWorkspace
+              key={activeLab.id}
+              labId={activeLab.id}
+              title={activeLab.title}
+              subject={getLearningLab(activeLab.id)?.subject || 'Laboratório'}
+              academicLevel={getLearningLab(activeLab.id)?.academicLevel}
+              objective="Compare os casos e use as evidências para justificar suas respostas."
+              content={getLabLearningContent(activeLab.id)}
+              onComplete={async ({ score }) => {
+                await handleActivitySubmit({ id: activeLab.id, title: activeLab.title }, score * 10);
+                setShowConfetti(true);
+                SoundEffects.playSuccess();
+              }}
+            >
             <activeLab.component
               {...activeLab.props}
               labTitle={activeLab.title}
@@ -659,6 +714,7 @@ export function EstudanteDashboard() {
                 SoundEffects.playSuccess();
               }}
             />
+            </LabLearningWorkspace>
           </div>
         </div>
       )}
@@ -981,17 +1037,10 @@ export function EstudanteDashboard() {
                     {plan.laboratorioAssociadoId && (
                       <button
                         onClick={() => {
-                          const lab = (ALL_MODULES as any[]).flatMap((m: any) => m.labs).find((l: any) => l.id === plan.laboratorioAssociadoId);
-                          if (lab) {
-                            setActiveLab({
-                              id: lab.id,
-                              title: lab.title,
-                              component: lab.component,
-                              props: lab.props,
-                            });
-                            setActiveTab('labs');
-                          }
+                          const lab = getLearningLab(plan.laboratorioAssociadoId || '');
+                          if (lab) openLearningLab(lab);
                         }}
+                        disabled={!getLearningLab(plan.laboratorioAssociadoId || '')}
                         className="btn-outline"
                         style={{ padding: '0.45rem 0.85rem', fontSize: '0.78rem', whiteSpace: 'nowrap', borderRadius: 'var(--radius-sm, 10px)' }}
                       >

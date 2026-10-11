@@ -5,7 +5,9 @@
  */
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { MODULES_BY_GRADE, ALL_MODULES, SHOP_ITEMS } from '../constants/dashboardConstants';
+import { SHOP_ITEMS } from '../constants/dashboardConstants';
+import { normalizeLearningLevel, type LearningLevel } from '../constants/learningLevels';
+import { searchLearningLabs, type LearningLab } from '../constants/learningCatalog';
 import { getAIRecommendation, processModuleCompletion, processItemPurchase } from '../services/studentService';
 import { getStudentProgress } from '../../data/repositories/studentRepository';
 import { getStudentClasses, enrollStudent } from '../../data/repositories/classRepository';
@@ -16,9 +18,9 @@ import type { Achievement } from '../services/achievementService';
 import type { ProgressData } from '../../data/types';
 import SoundEffects from '../services/soundEffects';
 
-export const useStudentDashboard = () => {
+export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
   const { currentUser, userData } = useAuth();
-  const gradeLevel = userData?.gradeLevel || 'medio';
+  const gradeLevel = normalizeLearningLevel(requestedLevel, normalizeLearningLevel(userData?.gradeLevel));
   const uid = currentUser?.uid;
 
   const [progress, setProgress] = useState({ level: 1, xp: 0, coins: 0 });
@@ -70,8 +72,13 @@ export const useStudentDashboard = () => {
 
   // Módulos filtrados por nível de ensino
   const modules = useMemo(() => {
-    const allowed = MODULES_BY_GRADE[gradeLevel] || [];
-    return ALL_MODULES.filter(m => allowed.includes(m.id));
+    const grouped = new Map<string, { id: string; label: string; labs: LearningLab[] }>();
+    for (const lab of searchLearningLabs({ academicLevel: gradeLevel })) {
+      const module = grouped.get(lab.subject) || { id: lab.subject, label: lab.subject, labs: [] };
+      module.labs.push(lab);
+      grouped.set(lab.subject, module);
+    }
+    return [...grouped.values()];
   }, [gradeLevel]);
 
   // Carrega progresso real do Firestore

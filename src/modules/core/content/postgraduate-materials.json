@@ -1,0 +1,832 @@
+{
+  "pos_mat_01": {
+    "context": "Uma liga ternária fictícia possui duas fases em equilíbrio. Composições e frações serão determinadas por conservação de componentes.",
+    "theory": "Num diagrama ternário, frações de A, B e C somam um. Uma linha de amarração liga composições coexistentes na mesma temperatura e pressão. A composição global é média ponderada das fases; não basta ler uma coordenada sem verificar as outras. Diagramas de equilíbrio não fornecem velocidade de transformação.",
+    "workedExample": "As fases fictícias α=(0,6;0,3;0,1) e β=(0,2;0,3;0,5) misturadas em partes iguais dão composição (0,4;0,3;0,3). Todas as coordenadas são frações mássicas e somam um.",
+    "investigation": [
+      "Confira a soma de cada composição.",
+      "Aplique balanço de A para obter frações.",
+      "Valide a solução nos componentes B e C."
+    ],
+    "expectedEvidence": "Espera-se 50% de cada fase e fechamento dos três balanços na mesma base mássica.",
+    "reflection": "Por que uma composição fora da amarração não admite essas duas fases?",
+    "scenarios": [
+      {
+        "id": "pos_mat_01_s0",
+        "label": "Mais alfa",
+        "situation": "Use 75% de α e 25% de β.",
+        "observation": "A composição torna-se (0,5;0,3;0,2).",
+        "explanation": "A média ponderada preserva a soma e desloca o ponto para α."
+      },
+      {
+        "id": "pos_mat_01_s1",
+        "label": "Fora da linha",
+        "situation": "Proponha global (0,4;0,4;0,2).",
+        "observation": "O balanço de B não pode fechar.",
+        "explanation": "Ambas as fases têm B=0,3; nenhuma combinação produz B=0,4."
+      },
+      {
+        "id": "pos_mat_01_s2",
+        "label": "Extremo",
+        "situation": "A composição global coincide com α.",
+        "observation": "A fração de β é zero.",
+        "explanation": "O balanço no extremo da amarração dispensa a segunda fase."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual fração de α produz A global igual a 0,4?",
+        "options": [
+          {
+            "text": "0,4",
+            "correct": false,
+            "explanation": "Essa é a composição de A, não a fração da fase."
+          },
+          {
+            "text": "0,75",
+            "correct": false,
+            "explanation": "Esse peso produziria A=0,5."
+          },
+          {
+            "text": "0,5",
+            "correct": true,
+            "explanation": "Resolver 0,6f+0,2(1−f)=0,4 fornece f=0,5."
+          }
+        ]
+      },
+      {
+        "question": "O que a amarração de equilíbrio determina?",
+        "options": [
+          {
+            "text": "Composições de fases coexistentes",
+            "correct": true,
+            "explanation": "Seus extremos especificam as fases sob a mesma condição termodinâmica."
+          },
+          {
+            "text": "Tempo para equilíbrio",
+            "correct": false,
+            "explanation": "Cinética não é fornecida pelo diagrama de fases."
+          },
+          {
+            "text": "Resistência mecânica garantida",
+            "correct": false,
+            "explanation": "Composição e fase não definem sozinhas todas as propriedades mecânicas."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT: ternary phase diagrams",
+        "url": "https://ocw.mit.edu/courses/3-020-thermodynamics-of-materials-spring-2021/resources/mit3_020s21_lightboard_02_1080p_v2_mp4/"
+      }
+    ]
+  },
+  "pos_mat_02": {
+    "context": "Uma transformação isotérmica fictícia é descrita por Johnson-Mehl-Avrami. A atividade distingue ajuste cinético de prova do mecanismo.",
+    "theory": "A fração transformada é X=1−exp(−kt^n), com k em tempo⁻n. A linearização ln[−ln(1−X)]=ln k+n ln t pode estimar parâmetros no intervalo adequado. Expoente aparente depende de nucleação, crescimento e hipóteses de impingement; ajuste linear não identifica sozinho o mecanismo.",
+    "workedExample": "Para n=2 e k=0,01 s⁻², em t=10 s: X=1−e⁻¹≈0,632. A meia transformação ocorre em t=√(ln2/0,01)≈8,33 s. Os parâmetros são fictícios e válidos apenas à temperatura assumida.",
+    "investigation": [
+      "Calcule X em dez segundos.",
+      "Resolva o tempo de meia transformação.",
+      "Analise limites t=0 e t muito grande."
+    ],
+    "expectedEvidence": "Devem aparecer 63,2% e 8,33 s, com a unidade s⁻² de k explicitada.",
+    "reflection": "Por que comparar k sem comparar n pode ser enganoso?",
+    "scenarios": [
+      {
+        "id": "pos_mat_02_s0",
+        "label": "Tempo zero",
+        "situation": "Avalie o modelo no início t=0.",
+        "observation": "A fração transformada X é zero.",
+        "explanation": "O expoente n positivo torna kt^n nulo na origem."
+      },
+      {
+        "id": "pos_mat_02_s1",
+        "label": "Tempo dobrado",
+        "situation": "Avalie t=20 s com os mesmos parâmetros.",
+        "observation": "A fração transformada X é aproximadamente 0,982.",
+        "explanation": "O expoente cresce para quatro e a transformação aproxima-se do fim."
+      },
+      {
+        "id": "pos_mat_02_s2",
+        "label": "Incubação",
+        "situation": "Os dados mostram atraso antes do início detectável.",
+        "observation": "Pode ser necessário deslocamento temporal.",
+        "explanation": "Um tempo de incubação exige hipótese adicional em vez de ajuste indiscriminado da origem."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual fração é prevista em t=10 s?",
+        "options": [
+          {
+            "text": "Um exatamente",
+            "correct": false,
+            "explanation": "A aproximação exponencial não chega exatamente a um em tempo finito."
+          },
+          {
+            "text": "0,01",
+            "correct": false,
+            "explanation": "Esse é o parâmetro k, com unidade diferente de fração."
+          },
+          {
+            "text": "Aproximadamente 0,632",
+            "correct": true,
+            "explanation": "O produto kt² vale um e 1−e⁻¹≈0,632."
+          }
+        ]
+      },
+      {
+        "question": "Qual é a unidade de k quando n=2 e t está em segundos?",
+        "options": [
+          {
+            "text": "s⁻²",
+            "correct": true,
+            "explanation": "O argumento da exponencial kt² deve ser adimensional."
+          },
+          {
+            "text": "s⁻¹",
+            "correct": false,
+            "explanation": "Essa unidade só serve para n=1 com o mesmo tempo."
+          },
+          {
+            "text": "Segundos",
+            "correct": false,
+            "explanation": "Multiplicar s por s² não gera argumento adimensional."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Bhadeshia: Avrami kinetics comments",
+        "url": "https://www.phase-trans.msm.cam.ac.uk/2008/comments.pdf"
+      }
+    ]
+  },
+  "pos_mat_03": {
+    "context": "Um aço fictício é resfriado até um patamar isotérmico. O diagrama TTT fornecido será interpretado sem tratá-lo como curva de resfriamento contínuo.",
+    "theory": "TTT registra tempos de início e fim de transformação em temperaturas constantes para uma composição e estado inicial específicos. O nariz reflete competição entre força motriz e mobilidade. Martensita é principalmente descrita por temperaturas características, enquanto perlita e bainita dependem do histórico. CCT é necessário para resfriamento contínuo apropriado.",
+    "workedExample": "No diagrama didático a 600 °C, transformação começa em 5 s e termina em 50 s. Uma espera de 2 s está antes do início e 60 s está além do fim. Em 20 s não se infere 50% sem curva de fração transformada.",
+    "investigation": [
+      "Marque o percurso até o patamar.",
+      "Classifique esperas antes e após os limites.",
+      "Explique por que 20 s não fixa a fração."
+    ],
+    "expectedEvidence": "A leitura deve respeitar temperatura constante e evitar interpolação linear de fração entre início e fim.",
+    "reflection": "Por que o mesmo tratamento não pode ser copiado entre aços diferentes?",
+    "scenarios": [
+      {
+        "id": "pos_mat_03_s0",
+        "label": "Espera curta",
+        "situation": "Mantenha 600 °C durante somente 2 s.",
+        "observation": "A transformação indicada ainda não começou.",
+        "explanation": "O tempo é inferior aos cinco segundos de início na curva fornecida."
+      },
+      {
+        "id": "pos_mat_03_s1",
+        "label": "Espera longa",
+        "situation": "Mantenha o patamar por 60 s.",
+        "observation": "A transformação do diagrama está completa.",
+        "explanation": "A espera supera o fim de 50 s para o estado e composição dados."
+      },
+      {
+        "id": "pos_mat_03_s2",
+        "label": "Resfriamento contínuo",
+        "situation": "A temperatura cai sem patamar isotérmico.",
+        "observation": "A leitura TTT direta fica inadequada.",
+        "explanation": "O histórico variável exige CCT ou modelo cinético compatível."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual conclusão cabe para uma espera de 20 s a 600 °C?",
+        "options": [
+          {
+            "text": "Exatamente 50% transformado",
+            "correct": false,
+            "explanation": "Tempo intermediário não implica fração linear intermediária."
+          },
+          {
+            "text": "Nenhuma transformação",
+            "correct": false,
+            "explanation": "O tempo já ultrapassou a linha de início."
+          },
+          {
+            "text": "A transformação está entre início e fim",
+            "correct": true,
+            "explanation": "Vinte situa-se entre cinco e cinquenta, mas a fração não foi fornecida."
+          }
+        ]
+      },
+      {
+        "question": "Qual variável deve permanecer constante durante uma leitura TTT?",
+        "options": [
+          {
+            "text": "Temperatura do patamar",
+            "correct": true,
+            "explanation": "TTT é construído para transformações isotérmicas em condições definidas."
+          },
+          {
+            "text": "Fração transformada",
+            "correct": false,
+            "explanation": "A fração evolui ao longo do tempo no patamar."
+          },
+          {
+            "text": "Tempo",
+            "correct": false,
+            "explanation": "O eixo temporal registra a evolução e não é fixado."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Cambridge MAP: steel transformation modelling",
+        "url": "https://www.phase-trans.msm.cam.ac.uk/map/steel/programs/mucg46-b.html"
+      }
+    ]
+  },
+  "pos_mat_04": {
+    "context": "Uma liga fictícia sofre fluência em alta temperatura. Larson-Miller correlaciona ruptura em ensaios sem garantir extrapolação ilimitada.",
+    "theory": "O parâmetro P=T(C+log10 tr) usa temperatura absoluta e tempo de ruptura em unidade fixada, geralmente horas. C é empírico e depende da correlação. Comparações devem manter tensão e mecanismo compatíveis; mudanças microestruturais e extrapolações extensas podem invalidar a equivalência.",
+    "workedExample": "Com T=800 K, C=20 e tr=1000 h, P=800×23=18400 K na convenção sem fator de escala. Para P igual e T=850 K, log10 tr=18400/850−20≈1,6471, então tr≈44,37 h.",
+    "investigation": [
+      "Declare unidade de tempo e convenção de P.",
+      "Calcule o parâmetro no ensaio de referência.",
+      "Estime o novo tempo e discuta extrapolação."
+    ],
+    "expectedEvidence": "Espera-se P=18400 e tr≈44,37 h, sem usar Celsius nem misturar horas e segundos.",
+    "reflection": "Que mudança de mecanismo pode invalidar o parâmetro único?",
+    "scenarios": [
+      {
+        "id": "pos_mat_04_s0",
+        "label": "Unidade alterada",
+        "situation": "Converta tr para segundos sem ajustar C.",
+        "observation": "O parâmetro muda artificialmente.",
+        "explanation": "O logaritmo requer uma convenção consistente de unidade e constante."
+      },
+      {
+        "id": "pos_mat_04_s1",
+        "label": "Tensão diferente",
+        "situation": "Compare ensaio em tensão muito maior.",
+        "observation": "P não é diretamente equivalente.",
+        "explanation": "A relação de ruptura também depende do nível de tensão aplicado."
+      },
+      {
+        "id": "pos_mat_04_s2",
+        "label": "Temperatura Celsius",
+        "situation": "Insira 527 °C no lugar de 800 K.",
+        "observation": "O cálculo termicamente perde sentido.",
+        "explanation": "A correlação usa temperatura absoluta, não escala com origem arbitrária."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual valor de P resulta do ensaio em 800 K?",
+        "options": [
+          {
+            "text": "16000",
+            "correct": false,
+            "explanation": "Esse valor ignora o termo de tempo na correlação."
+          },
+          {
+            "text": "800000",
+            "correct": false,
+            "explanation": "Multiplicar diretamente temperatura por horas não define Larson-Miller."
+          },
+          {
+            "text": "18400",
+            "correct": true,
+            "explanation": "log10(1000)=3 e 800×(20+3)=18400."
+          }
+        ]
+      },
+      {
+        "question": "Qual cuidado é necessário ao comparar tempos?",
+        "options": [
+          {
+            "text": "Usar a mesma unidade de tempo e C correspondente",
+            "correct": true,
+            "explanation": "A constante empírica está ligada à convenção usada no logaritmo."
+          },
+          {
+            "text": "Misturar horas e segundos livremente",
+            "correct": false,
+            "explanation": "A mudança de unidade altera log10 tr e o valor de P."
+          },
+          {
+            "text": "Usar qualquer tensão sem ajuste",
+            "correct": false,
+            "explanation": "O comportamento de ruptura depende fortemente da tensão."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "DOE NETL: physically based creep modelling",
+        "url": "https://netl.doe.gov/sites/default/files/netl-file/20180410_0930A_FE0027822_MTU.pdf"
+      }
+    ]
+  },
+  "pos_mat_05": {
+    "context": "Uma amostra fictícia de YBCO é comparada acima e abaixo de sua transição. O caso separa resistência nula, Meissner e aprisionamento de fluxo.",
+    "theory": "Supercondutividade envolve condução DC sem resistência ideal e resposta magnética característica. YBCO é tipo II: entre campos críticos pode conter vórtices, cujo pinning sustenta comportamento magnético irreversível. Temperatura, campo e corrente limitam o estado; resistência baixa isolada não prova expulsão de fluxo.",
+    "workedExample": "Adote Tc fictício de 90 K. Em 77 K, T/Tc≈0,856; em 100 K, T/Tc≈1,111. Estar abaixo de Tc é condição necessária, mas campo e corrente ainda podem impedir o regime desejado. Não houve medida magnética.",
+    "investigation": [
+      "Compare temperaturas por T/Tc.",
+      "Distinga resistência e magnetização como evidências.",
+      "Discuta limites de campo e corrente."
+    ],
+    "expectedEvidence": "A resposta deve reconhecer 77 K abaixo de Tc e evitar concluir supercondutividade só por temperatura.",
+    "reflection": "Por que levitação pode depender de pinning e histórico magnético?",
+    "scenarios": [
+      {
+        "id": "pos_mat_05_s0",
+        "label": "Acima da transição",
+        "situation": "Aqueça a amostra fictícia a 100 K.",
+        "observation": "O regime assumido abaixo de Tc se perde.",
+        "explanation": "A temperatura excede a transição de 90 K escolhida para o exercício."
+      },
+      {
+        "id": "pos_mat_05_s1",
+        "label": "Campo alto",
+        "situation": "Aplique campo acima do limite superior crítico.",
+        "observation": "O estado supercondutor pode ser suprimido.",
+        "explanation": "Tc não descreve sozinho a superfície de limites de operação."
+      },
+      {
+        "id": "pos_mat_05_s2",
+        "label": "Vórtices",
+        "situation": "A amostra tipo II encontra campo entre seus críticos.",
+        "observation": "Pode haver penetração quantizada de fluxo.",
+        "explanation": "O estado misto diferencia tipo II de uma expulsão completa universal."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual afirmação é correta sobre 77 K e Tc=90 K?",
+        "options": [
+          {
+            "text": "Garante resistência nula em qualquer campo",
+            "correct": false,
+            "explanation": "Campos e correntes críticos impõem limites adicionais."
+          },
+          {
+            "text": "Está acima da transição",
+            "correct": false,
+            "explanation": "Setenta e sete é menor que noventa na mesma escala absoluta."
+          },
+          {
+            "text": "Está abaixo de Tc, mas faltam condições de campo e corrente",
+            "correct": true,
+            "explanation": "A razão térmica é menor que um sem garantir todo o estado operacional."
+          }
+        ]
+      },
+      {
+        "question": "Que fenômeno distingue o estado misto de tipo II?",
+        "options": [
+          {
+            "text": "Penetração de fluxo em vórtices",
+            "correct": true,
+            "explanation": "O campo pode penetrar quantizadamente entre limites críticos."
+          },
+          {
+            "text": "Ausência de todo campo em qualquer condição",
+            "correct": false,
+            "explanation": "Expulsão total não descreve todo o regime de tipo II."
+          },
+          {
+            "text": "Resistência sempre igual à do cobre",
+            "correct": false,
+            "explanation": "A resposta supercondutora não é simplesmente condutividade metálica alta."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "DOE: superconductivity",
+        "url": "https://www.energy.gov/science/doe-explainssuperconductivity"
+      }
+    ]
+  },
+  "pos_mat_06": {
+    "context": "Uma célula de perovskita fictícia é caracterizada por parâmetros fotovoltaicos. O estudo distingue eficiência inicial de estabilidade.",
+    "theory": "Eficiência é η=Pmax/(GA), onde G é irradiância e A a área definida. Pmax=VocIscFF. Histerese de varredura, área ativa, espectro e estabilização afetam comparação. Uma célula eficiente em curto ensaio não demonstra durabilidade de módulo; degradação e encapsulamento são requisitos separados.",
+    "workedExample": "Use Voc=1 V, Isc=25 mA, FF=0,8, área=1 cm² e G=1000 W/m². Pmax=20 mW e potência incidente=100 mW: η=20%. Os valores são fictícios e não representam recorde certificado.",
+    "investigation": [
+      "Converta área de cm² para m².",
+      "Calcule Pmax e eficiência.",
+      "Compare varredura com potência estabilizada."
+    ],
+    "expectedEvidence": "Obtenha 20% e explicite área e irradiância, sem confundir eficiência instantânea com vida útil.",
+    "reflection": "Como uma área subestimada inflaria a eficiência relatada?",
+    "scenarios": [
+      {
+        "id": "pos_mat_06_s0",
+        "label": "Área dupla",
+        "situation": "Dobre área sem alterar potência medida no exemplo.",
+        "observation": "A eficiência calculada cai a 10%.",
+        "explanation": "A potência incidente dobra e o denominador precisa acompanhar."
+      },
+      {
+        "id": "pos_mat_06_s1",
+        "label": "FF menor",
+        "situation": "Reduza FF para 0,6 com Voc e Isc fixos.",
+        "observation": "Pmax cai a 15 mW.",
+        "explanation": "O fator de forma resume a perda em relação ao retângulo VocIsc."
+      },
+      {
+        "id": "pos_mat_06_s2",
+        "label": "Degradação",
+        "situation": "A potência estabilizada cai durante exposição prolongada.",
+        "observation": "Eficiência inicial não representa toda a operação.",
+        "explanation": "A estabilidade temporal deve ser avaliada independentemente do valor inicial."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a potência incidente sobre 1 cm² a 1000 W/m²?",
+        "options": [
+          {
+            "text": "1000 W",
+            "correct": false,
+            "explanation": "A irradiância ainda precisa multiplicar a área."
+          },
+          {
+            "text": "1 mW",
+            "correct": false,
+            "explanation": "Esse valor usa conversão incorreta de centímetros quadrados."
+          },
+          {
+            "text": "100 mW",
+            "correct": true,
+            "explanation": "Um cm² é 10⁻⁴ m²; o produto é 0,1 W."
+          }
+        ]
+      },
+      {
+        "question": "Qual grandeza é Pmax/(VocIsc)?",
+        "options": [
+          {
+            "text": "Fator de forma",
+            "correct": true,
+            "explanation": "FF compara potência máxima com o produto dos interceptos."
+          },
+          {
+            "text": "Eficiência sem área",
+            "correct": false,
+            "explanation": "Eficiência também requer a potência luminosa incidente."
+          },
+          {
+            "text": "Tempo de vida",
+            "correct": false,
+            "explanation": "Essa razão elétrica não mede duração do dispositivo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "DOE: perovskite solar cells",
+        "url": "https://www.energy.gov/cmei/systems/perovskite-solar-cells"
+      }
+    ]
+  },
+  "pos_mat_07": {
+    "context": "Uma lâmina compósita fictícia é avaliada por Tsai-Wu. O exercício usa índice de falha sem identificar automaticamente seu mecanismo.",
+    "theory": "Tsai-Wu combina termos lineares e quadráticos das tensões materiais: F1σ1+F2σ2+F11σ1²+F22σ2²+2F12σ1σ2+F66τ12². Índice unitário é o limiar convencional. Resistências de tração e compressão diferem; interação F12 precisa de hipótese ou ensaio. O critério não separa sozinho modos de dano.",
+    "workedExample": "No caso uniaxial didático, Xt=1000 MPa e Xc=500 MPa: F1=1/Xt−1/Xc=−0,001 MPa⁻¹ e F11=1/(XtXc)=2×10⁻⁶ MPa⁻². Em σ1=500 MPa, índice=−0,5+0,5=0. Esse zero não significa ausência de tensão.",
+    "investigation": [
+      "Adote tração positiva e resistências em módulo.",
+      "Calcule os dois coeficientes uniaxiais.",
+      "Teste os limites de tração e compressão."
+    ],
+    "expectedEvidence": "Espera-se índice um em +1000 e −500 MPa, reconhecendo assimetria e limites do índice isolado.",
+    "reflection": "Por que um índice pequeno não identifica qual dano ocorre primeiro?",
+    "scenarios": [
+      {
+        "id": "pos_mat_07_s0",
+        "label": "Tração limite",
+        "situation": "Use σ1=1000 MPa com as outras tensões nulas.",
+        "observation": "O índice vale um.",
+        "explanation": "−1+2=1 recupera a resistência de tração fornecida."
+      },
+      {
+        "id": "pos_mat_07_s1",
+        "label": "Compressão limite",
+        "situation": "Use σ1=−500 MPa no mesmo modelo.",
+        "observation": "O índice também vale um.",
+        "explanation": "O termo linear muda de sinal e produz 0,5+0,5=1."
+      },
+      {
+        "id": "pos_mat_07_s2",
+        "label": "Biaxial",
+        "situation": "Aplique σ1 e σ2 simultaneamente.",
+        "observation": "O termo de interação passa a importar.",
+        "explanation": "Sem F12 justificado, a previsão multiaxial fica incompleta."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual F11 corresponde às resistências fornecidas?",
+        "options": [
+          {
+            "text": "−0,001 MPa⁻¹",
+            "correct": false,
+            "explanation": "Esse é F1, o termo linear assimétrico."
+          },
+          {
+            "text": "500 MPa",
+            "correct": false,
+            "explanation": "Uma resistência não é coeficiente quadrático do critério."
+          },
+          {
+            "text": "2×10⁻⁶ MPa⁻²",
+            "correct": true,
+            "explanation": "O inverso de 1000×500 fornece o coeficiente quadrático."
+          }
+        ]
+      },
+      {
+        "question": "O índice Tsai-Wu igual a um informa o quê?",
+        "options": [
+          {
+            "text": "Limiar de falha segundo o critério adotado",
+            "correct": true,
+            "explanation": "O resultado é condicionado às resistências e coeficientes calibrados."
+          },
+          {
+            "text": "Modo específico de delaminação",
+            "correct": false,
+            "explanation": "O critério global não identifica sozinho o mecanismo de dano."
+          },
+          {
+            "text": "Vida em fadiga infinita",
+            "correct": false,
+            "explanation": "O cálculo estático não estabelece resistência à fadiga."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Autodesk: Tsai-Wu criterion",
+        "url": "https://help.autodesk.com/cloudhelp/2019/ENU/ACMPAN/files/GUID-ECF667DF-FEC4-424F-B502-297E772A99F1.htm"
+      }
+    ]
+  },
+  "pos_mat_08": {
+    "context": "Uma imagem TEM fictícia mostra contraste de discordâncias. O exercício diferencia defeito cristalino de sua visibilidade na condição de difração.",
+    "theory": "TEM transmite elétrons através de amostra fina e combina contraste de massa, espessura e difração. Discordâncias alteram o campo cristalino e podem aparecer conforme vetor de difração g e Burgers b. g·b=0 é uma condição importante de invisibilidade, mas contraste de borda e geometria podem exigir critérios adicionais.",
+    "workedExample": "Considere b=a/2[110]. Para g=(1/a)[1 −1 0], g·b=(1−1)/2=0; para g=(1/a)[110], o produto vale 1. Isso sugere contraste distinto entre condições sem provar ausência física do defeito.",
+    "investigation": [
+      "Calcule produtos escalares das direções.",
+      "Compare visibilidade sob duas condições de difração.",
+      "Discuta espessura e limites da imagem projetada."
+    ],
+    "expectedEvidence": "A resposta deve obter zero e um e não confundir linha invisível com discordância eliminada.",
+    "reflection": "Como uma projeção bidimensional pode esconder a geometria tridimensional?",
+    "scenarios": [
+      {
+        "id": "pos_mat_08_s0",
+        "label": "Condição invisível",
+        "situation": "Use g proporcional a [1 −1 0] com b dado.",
+        "observation": "O produto g·b se anula.",
+        "explanation": "A condição pode reduzir contraste sem remover o defeito do cristal."
+      },
+      {
+        "id": "pos_mat_08_s1",
+        "label": "Inclinação",
+        "situation": "Incline a amostra para outra reflexão.",
+        "observation": "O contraste pode mudar.",
+        "explanation": "A condição de difração altera a sensibilidade ao campo da discordância."
+      },
+      {
+        "id": "pos_mat_08_s2",
+        "label": "Amostra grossa",
+        "situation": "A espessura excede a condição apropriada ao método.",
+        "observation": "Sobreposição e espalhamento dificultam interpretação.",
+        "explanation": "Preparação da lâmina influencia o contraste e a leitura de defeitos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual produto ocorre para [1 −1 0] e [110]?",
+        "options": [
+          {
+            "text": "Dois",
+            "correct": false,
+            "explanation": "Esse seria o produto de [110] consigo mesmo antes dos fatores."
+          },
+          {
+            "text": "−Um",
+            "correct": false,
+            "explanation": "A contribuição positiva cancela a negativa nesse caso."
+          },
+          {
+            "text": "Zero",
+            "correct": true,
+            "explanation": "As componentes dão 1×1+(−1)×1+0=0."
+          }
+        ]
+      },
+      {
+        "question": "Uma discordância invisível em uma reflexão foi removida?",
+        "options": [
+          {
+            "text": "Não, pode apenas perder contraste",
+            "correct": true,
+            "explanation": "Visibilidade depende da condição de difração e geometria da amostra."
+          },
+          {
+            "text": "Sim, o feixe sempre a elimina",
+            "correct": false,
+            "explanation": "A imagem não demonstra aniquilação física do defeito."
+          },
+          {
+            "text": "Sim, se g·b=0",
+            "correct": false,
+            "explanation": "Produto nulo é critério de contraste e não processo de remoção."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "JEOL: dislocation and electron microscopy",
+        "url": "https://www.jeol.com/words/emterms/20121023.064858.php"
+      }
+    ]
+  },
+  "pos_mat_09": {
+    "context": "Uma cerâmica fictícia é sinterizada para reduzir porosidade. O caso separa densificação, crescimento de pescoço e crescimento de grão.",
+    "theory": "Sinterização reduz energia superficial por transporte de matéria. Nem todo mecanismo que aumenta o pescoço reduz distância entre centros e densifica. Crescimento de grão pode competir com remoção de poros. A lei ideal D^n−D0^n=Kt descreve cinética ajustada e não vale universalmente para todas as cerâmicas.",
+    "workedExample": "No modelo fictício n=2, D0=2 µm, K=0,1 µm²/min e t=50 min, D=√(4+5)=3 µm. Se a massa é 9,5 g e volume 2 cm³, densidade aparente=4,75 g/cm³; comparada a teórica 5, é 95%.",
+    "investigation": [
+      "Calcule tamanho pelo modelo de crescimento.",
+      "Obtenha densidade aparente e relativa.",
+      "Diferencie aumento de grão de remoção de poros."
+    ],
+    "expectedEvidence": "Espera-se D=3 µm e densidade relativa de 95%, sem usar crescimento de grão como prova de densificação.",
+    "reflection": "Por que grãos grandes podem dificultar a remoção de poros remanescentes?",
+    "scenarios": [
+      {
+        "id": "pos_mat_09_s0",
+        "label": "Tempo menor",
+        "situation": "Avalie crescimento em t=0 no modelo.",
+        "observation": "D recupera 2 µm.",
+        "explanation": "O termo cinético se anula e preserva a condição inicial."
+      },
+      {
+        "id": "pos_mat_09_s1",
+        "label": "Pescoço sem retração",
+        "situation": "O transporte aumenta o contato sem aproximar centros.",
+        "observation": "Há coalescimento sem densificação equivalente.",
+        "explanation": "Mecanismos de difusão distintos mudam geometria e volume de forma diferente."
+      },
+      {
+        "id": "pos_mat_09_s2",
+        "label": "Poro isolado",
+        "situation": "Um poro fica aprisionado dentro de um grão.",
+        "observation": "Sua eliminação pode tornar-se mais lenta.",
+        "explanation": "A mudança de caminho difusivo limita o transporte necessário à remoção."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual D resulta de D0²+Kt=9 µm²?",
+        "options": [
+          {
+            "text": "9 µm",
+            "correct": false,
+            "explanation": "Nove é o quadrado do comprimento na lei adotada."
+          },
+          {
+            "text": "7 µm",
+            "correct": false,
+            "explanation": "Somar D0 a Kt mistura unidades incompatíveis."
+          },
+          {
+            "text": "3 µm",
+            "correct": true,
+            "explanation": "A raiz quadrada de nove fornece o tamanho de grão."
+          }
+        ]
+      },
+      {
+        "question": "Qual densidade relativa resulta de 4,75 e 5 g/cm³?",
+        "options": [
+          {
+            "text": "95%",
+            "correct": true,
+            "explanation": "A razão 4,75/5 vale 0,95."
+          },
+          {
+            "text": "5%",
+            "correct": false,
+            "explanation": "Cinco por cento é a diferença relativa para a densidade teórica."
+          },
+          {
+            "text": "105%",
+            "correct": false,
+            "explanation": "A densidade aparente fornecida é inferior à teórica."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Sintering dilatometry based grain growth assessment",
+        "url": "https://arxiv.org/abs/2012.03722"
+      }
+    ]
+  },
+  "pos_mat_10": {
+    "context": "Pontos quânticos fictícios de tamanhos diferentes são comparados por confinamento. O caso usa modelo de caixa sem atribuir espectro real a um material.",
+    "theory": "Confinamento altera níveis eletrônicos quando dimensões se aproximam de escalas quânticas relevantes. Na caixa ideal, a contribuição de energia varia como 1/L². Em semicondutores reais entram massas efetivas, interação elétron-buraco, barreiras e superfície. Menor tamanho costuma ampliar gap, mas o modelo simples não prevê sozinho um espectro completo.",
+    "workedExample": "Adote contribuição fictícia ΔE=A/L² com A=4 eV·nm². Para L=2 nm, ΔE=1 eV; para L=4 nm, ΔE=0,25 eV. O gap total ainda incluiria o valor de volume e correções, não fornecidos.",
+    "investigation": [
+      "Calcule os dois incrementos de energia.",
+      "Compare razão de tamanho e energia.",
+      "Liste efeitos ausentes no modelo de caixa."
+    ],
+    "expectedEvidence": "A comparação deve obter razão quatro entre incrementos e evitar confundir incremento de confinamento com gap total.",
+    "reflection": "Como dispersão de tamanhos pode alargar a emissão óptica?",
+    "scenarios": [
+      {
+        "id": "pos_mat_10_s0",
+        "label": "Tamanho metade",
+        "situation": "Reduza L de 4 para 2 nm.",
+        "observation": "O incremento quadruplica.",
+        "explanation": "A dependência inversa quadrática amplifica a redução de tamanho."
+      },
+      {
+        "id": "pos_mat_10_s1",
+        "label": "Superfície",
+        "situation": "Estados de superfície aparecem dentro do gap.",
+        "observation": "A emissão pode mudar ou ser suprimida.",
+        "explanation": "Confinamento de volume não descreve sozinho defeitos e passivação."
+      },
+      {
+        "id": "pos_mat_10_s2",
+        "label": "Distribuição",
+        "situation": "A amostra contém vários tamanhos de pontos.",
+        "observation": "O espectro pode ficar mais largo.",
+        "explanation": "Cada tamanho contribui com transições diferentes no conjunto."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual incremento resulta de L=4 nm?",
+        "options": [
+          {
+            "text": "1 eV",
+            "correct": false,
+            "explanation": "Esse incremento corresponde ao tamanho de 2 nm."
+          },
+          {
+            "text": "16 eV",
+            "correct": false,
+            "explanation": "Multiplicar A por L² inverte a dependência física do modelo."
+          },
+          {
+            "text": "0,25 eV",
+            "correct": true,
+            "explanation": "A razão 4/16 fornece 0,25 eV."
+          }
+        ]
+      },
+      {
+        "question": "Dobrar L altera A/L² por qual fator?",
+        "options": [
+          {
+            "text": "Um quarto",
+            "correct": true,
+            "explanation": "O denominador cresce quatro vezes ao dobrar o comprimento."
+          },
+          {
+            "text": "Duas vezes",
+            "correct": false,
+            "explanation": "A dependência não é linear crescente com o tamanho."
+          },
+          {
+            "text": "Nenhum",
+            "correct": false,
+            "explanation": "L controla explicitamente o incremento de confinamento."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Nobel Chemistry 2023: quantum dots",
+        "url": "https://www.nobelprize.org/uploads/2023/10/advanced-chemistryprize2023-2.pdf"
+      }
+    ]
+  }
+}

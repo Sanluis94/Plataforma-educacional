@@ -1,6 +1,10 @@
 # Edu-Interact — Plataforma Educacional de Ciências, Laboratórios Virtuais & LMS Inclusivo
 
-> Plataforma educacional moderna com **72 laboratórios virtuais interativos**, módulos avançados de **LMS (estilo Moodle)**, arquitetura de **segurança RBAC** e fundamentação em **Metodologia Ativa de Aprendizagem & Desenho Universal para a Aprendizagem (DUA)**.
+> Plataforma educacional com **582 laboratórios com roteiros próprios**, organizados por nível de aprendizado e disciplina, módulos de LMS e fundamentação em metodologias ativas e Desenho Universal para a Aprendizagem (DUA). Consulte os [critérios e a verificação dos laboratórios](./docs/LABORATORIOS_CONTEUDO.md).
+
+Aplicação publicada: [plataforma-educacional-73df6.web.app](https://plataforma-educacional-73df6.web.app).
+
+O catálogo reúne 21 atividades do Fundamental I, 85 do Fundamental II, 134 do Ensino Médio, 160 da graduação e 170 da pós-graduação, além de uma trilha complementar de formação profissional com 12 atividades. O perfil sugere o nível inicial; os filtros permitem explorar outros níveis. Os 72 laboratórios da biblioteca inicial estão incluídos nessa distribuição.
 
 ---
 
@@ -76,30 +80,33 @@ No topo da aplicação (acessível por teclado e leitor de tela), a **Barra de A
 ## 💻 Como Executar o Projeto
 
 ### Pré-requisitos
-- Node.js 18+ instalado
+- Node.js 22.12 ou superior da linha 22 e npm
 - Git
+- JDK 21 ou superior para os emuladores Firebase
+
+O guia de [desenvolvimento local, GitHub, Firebase e MCPs](./docs/DESENVOLVIMENTO.md) descreve os modos de execução e a configuração das integrações. No PowerShell, use `npm.cmd` se a política de execução bloquear `npm.ps1`.
 
 ### Instalação
 
 ```bash
 # 1. Clone o repositório
 git clone https://github.com/Sanluis94/Plataforma-educacional.git
-cd Plataforma-educacional/plataforma-educacional
+cd Plataforma-educacional
 
 # 2. Instale as dependências
-npm install
+npm ci
 
 # 3. Inicie o servidor de desenvolvimento
-npm run dev
+npm run dev:local
 ```
 
-A aplicação estará disponível em `http://localhost:5173`.
+A aplicação estará disponível em `http://localhost:5173`, com Firebase e IA externa desativados. Para desenvolver com Auth e Firestore locais, execute `npm run emulators:start` e `npm run dev:emulator` em terminais separados.
 
 ### Execução de Testes
 
 ```bash
 # Executar a suíte de testes unitários e de integração
-npm run test:run
+npm run test:local
 
 # Checagem estrita de tipos TypeScript
 npx tsc -b
@@ -108,8 +115,10 @@ npx tsc -b
 ### Build de Produção
 
 ```bash
-npm run build
+npm run build:production
 ```
+
+Esse comando usa o `.env` privado, exige a configuração do Firebase de produção e exclui a chave Gemini do JavaScript público. O fluxo de testes, revisão e publicação está no [guia de desenvolvimento](./docs/DESENVOLVIMENTO.md).
 
 ---
 

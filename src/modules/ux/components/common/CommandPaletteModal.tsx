@@ -15,7 +15,8 @@ import {
   CornerDownLeft,
   X
 } from 'lucide-react';
-import { searchLabsCatalog } from '../../../core/constants/masterLabsCatalog';
+import { LEARNING_LABS_CATALOG, searchLearningLabs } from '../../../core/constants/learningCatalog';
+import { learningLevelLabel } from '../../../core/constants/learningLevels';
 
 interface CommandPaletteModalProps {
   isOpen: boolean;
@@ -89,10 +90,10 @@ export function CommandPaletteModal({
     {
       id: 'nav-simulacao',
       title: 'Bancada Virtual de Laboratórios',
-      subtitle: 'Explorar mais de 500 simulações interativas STEM e Humanas',
+      subtitle: 'Atividades organizadas por nível e disciplina',
       category: 'Navegação',
       icon: Beaker,
-      badge: '500+ Labs',
+      badge: `${LEARNING_LABS_CATALOG.length} atividades`,
       onSelect: () => { navigate('/simulacao'); onClose(); }
     },
     {
@@ -171,15 +172,15 @@ export function CommandPaletteModal({
     );
 
     // Search labs using searchLabsCatalog (limit to top 15 matches for speed)
-    const matchedLabs: PaletteAction[] = searchLabsCatalog(q).slice(0, 15).map(lab => ({
+    const matchedLabs: PaletteAction[] = searchLearningLabs({ query: q }).slice(0, 15).map(lab => ({
       id: `lab-${lab.id}`,
       title: lab.title,
-      subtitle: `${lab.subject} · ${lab.academicLevelLabel || lab.academicLevel}`,
+      subtitle: `${lab.subject} · ${learningLevelLabel(lab.academicLevel)}`,
       category: 'Laboratórios' as const,
       icon: Beaker,
-      badge: lab.academicLevel === 'graduacao' || lab.academicLevel === 'pos_graduacao' ? 'Superior' : 'Básico/Médio',
+      badge: learningLevelLabel(lab.academicLevel),
       onSelect: () => {
-        navigate(`/simulacao?lab=${lab.id}`);
+        navigate(`/simulacao?lab=${encodeURIComponent(lab.id)}&level=${lab.academicLevel}`);
         onClose();
       }
     }));

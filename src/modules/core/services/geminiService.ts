@@ -4,6 +4,7 @@
  */
 
 export const getEffectiveGeminiApiKey = (): string | null => {
+  if (import.meta.env.VITE_DISABLE_AI === 'true') return null;
   const localKey = typeof window !== 'undefined' ? localStorage.getItem('gemini_api_key') : null;
   if (localKey && localKey.trim().length > 0) {
     return localKey.trim();
@@ -355,6 +356,9 @@ Forneça um JSON estrito no seguinte formato:
  * Chamada direta ao modelo Google Gemini para prompts textuais abertos (como mediação socrática).
  */
 export const callGeminiWithKey = async (apiKey: string, prompt: string): Promise<string> => {
+  if (import.meta.env.VITE_DISABLE_AI === 'true') {
+    throw new Error('IA externa desativada neste ambiente de desenvolvimento.');
+  }
   if (!apiKey || !apiKey.trim()) {
     throw new Error('Chave de API do Gemini não informada.');
   }
@@ -378,4 +382,3 @@ export const callGeminiWithKey = async (apiKey: string, prompt: string): Promise
   const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   return answer || 'Não foi possível obter resposta do tutor no momento.';
 };
-

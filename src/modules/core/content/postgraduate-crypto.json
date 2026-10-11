@@ -1,0 +1,832 @@
+{
+  "pos_cripto_01": {
+    "context": "Uma equação modular minúscula ilustra a diferença entre um sistema linear exato e amostras perturbadas, sem implementar um esquema seguro.",
+    "theory": "LWE envolve amostras b=⟨a,s⟩+e mod q com segredo s e erro pequeno segundo uma distribuição. O erro torna a recuperação distinta da eliminação linear exata; sua escolha e as dimensões são essenciais à segurança. ML-KEM, padronizado pelo NIST a partir de Kyber, é um mecanismo de encapsulamento baseado em reticulados modulares, não um algoritmo genérico de cifrar arquivos nem uma prova absoluta contra todo computador quântico.",
+    "workedExample": "Com q=17, a=(2,3), s=(4,1) e e=−1, o produto interno é 11 e b=10 mod 17. Sem erro seria 11. Esses parâmetros pequenos servem só à ilustração e não reproduzem a segurança de ML-KEM.",
+    "investigation": [
+      "Calcule o produto interno e aplique o erro modular.",
+      "Compare várias amostras com e sem perturbação.",
+      "Distinga encapsular uma chave de cifrar uma mensagem longa."
+    ],
+    "expectedEvidence": "Mostre b=10 e declare distribuição de erro e limite didático; o módulo pequeno não é uma configuração pós-quântica utilizável.",
+    "reflection": "Por que aumentar o erro sem critério também pode prejudicar a correção do esquema?",
+    "scenarios": [
+      {
+        "id": "sem-erro",
+        "label": "Relação exata",
+        "situation": "O mesmo vetor usa e=0 no módulo dezessete.",
+        "observation": "A saída é onze.",
+        "explanation": "Eliminar o erro altera o problema matemático e suas hipóteses de dificuldade."
+      },
+      {
+        "id": "erro-negativo",
+        "label": "Perturbação pequena",
+        "situation": "O produto onze recebe erro menos um.",
+        "observation": "O resíduo final é dez.",
+        "explanation": "O sinal do erro participa da soma antes da redução modular."
+      },
+      {
+        "id": "encapsulamento",
+        "label": "Chave compartilhada",
+        "situation": "Dois participantes usam um KEM para obter um segredo de sessão.",
+        "observation": "O resultado não é o arquivo cifrado.",
+        "explanation": "Um mecanismo simétrico apropriado pode usar a chave derivada para proteger dados."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual b resulta da amostra fornecida?",
+        "options": [
+          {
+            "text": "10",
+            "correct": true,
+            "explanation": "Dois vezes quatro mais três vezes um menos um vale dez."
+          },
+          {
+            "text": "11",
+            "correct": false,
+            "explanation": "Onze omite o erro menos um do exemplo."
+          },
+          {
+            "text": "17",
+            "correct": false,
+            "explanation": "O módulo limita resíduos e não é o resultado da soma."
+          }
+        ]
+      },
+      {
+        "question": "Qual descrição corresponde a ML-KEM?",
+        "options": [
+          {
+            "text": "Mecanismo de encapsulamento de chave",
+            "correct": true,
+            "explanation": "O padrão define criação de segredo compartilhado e encapsulamento."
+          },
+          {
+            "text": "Garantia absoluta contra toda falha",
+            "correct": false,
+            "explanation": "Segurança depende de hipóteses, parâmetros e implementação."
+          },
+          {
+            "text": "Cifragem direta de qualquer arquivo por LWE minúsculo",
+            "correct": false,
+            "explanation": "A amostra didática não implementa o esquema padronizado."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST FIPS 203 — ML-KEM",
+        "url": "https://csrc.nist.gov/pubs/fips/203/final"
+      }
+    ]
+  },
+  "pos_cripto_02": {
+    "context": "Um verificador fictício confere uma relação sem receber o segredo. O exercício separa identidade polinomial de prova completa de conhecimento zero.",
+    "theory": "Uma zk-SNARK combina propriedades de conhecimento, sucintez, não interação e privacidade conforme um modelo de segurança. Verificações polinomiais são componentes: para polinômio não nulo de grau d sobre campo finito, avaliar num ponto uniforme tem probabilidade de raiz no máximo d/|F|. Esse limite não cria sozinho conhecimento zero, extração de testemunha ou segurança de setup. Há sistemas com requisitos diferentes de parâmetros públicos.",
+    "workedExample": "Em F17, P(x)=x²−1 tem raízes 1 e 16. Um ponto uniforme dos dezessete elementos aceita P(r)=0 com probabilidade 2/17≈11,8%. Isso ilustra um limite probabilístico, não uma zk-SNARK implementada.",
+    "investigation": [
+      "Verifique as duas raízes no campo módulo dezessete.",
+      "Calcule o limite grau dividido pelo tamanho do campo.",
+      "Liste quais propriedades ainda faltam para uma prova completa."
+    ],
+    "expectedEvidence": "Apresente 2/17 e as hipóteses de polinômio não nulo e ponto uniforme, distinguindo esse teste de uma prova criptográfica utilizável.",
+    "reflection": "Por que permitir escolher o desafio depois de conhecer o polinômio pode destruir a garantia?",
+    "scenarios": [
+      {
+        "id": "raizes",
+        "label": "Dois zeros",
+        "situation": "P(x)=x²−1 é avaliado em um e dezesseis no campo F17.",
+        "observation": "Ambas as avaliações são zero.",
+        "explanation": "Dezesseis representa menos um, que também resolve x²=1."
+      },
+      {
+        "id": "uniforme",
+        "label": "Desafio aleatório",
+        "situation": "O desafio é sorteado uniformemente antes de uma tentativa adaptativa.",
+        "observation": "A chance de acertar uma raiz é limitada.",
+        "explanation": "A hipótese de aleatoriedade e compromisso adequado importa à análise de erro."
+      },
+      {
+        "id": "privacidade",
+        "label": "Testemunha exposta",
+        "situation": "Um protocolo envia o segredo junto de uma verificação válida.",
+        "observation": "A verificação pode estar correta sem privacidade.",
+        "explanation": "Conhecimento zero é uma propriedade adicional, não consequência automática da validade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual probabilidade exata de raiz para P em F17?",
+        "options": [
+          {
+            "text": "2/17",
+            "correct": true,
+            "explanation": "Existem duas raízes entre os dezessete desafios possíveis."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "O polinômio não nulo não se anula em todo o campo."
+          },
+          {
+            "text": "1/2",
+            "correct": false,
+            "explanation": "O espaço de desafios tem dezessete elementos, não quatro."
+          }
+        ]
+      },
+      {
+        "question": "O teste polinomial isolado garante qual afirmação?",
+        "options": [
+          {
+            "text": "Um limite de erro sob hipóteses declaradas",
+            "correct": true,
+            "explanation": "Ele não fornece sozinho todas as propriedades de uma zk-SNARK."
+          },
+          {
+            "text": "Conhecimento zero automaticamente",
+            "correct": false,
+            "explanation": "Ocultar testemunha exige construção e análise adicionais."
+          },
+          {
+            "text": "Segurança de todo setup",
+            "correct": false,
+            "explanation": "Parâmetros públicos e sua geração têm requisitos próprios."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Groth — Non-interactive Arguments",
+        "url": "https://discovery.ucl.ac.uk/id/eprint/1501201/"
+      }
+    ]
+  },
+  "pos_cripto_03": {
+    "context": "Um serviço fictício deve somar valores privados sem receber suas versões abertas. Operações possíveis dependem do esquema homomórfico escolhido.",
+    "theory": "Criptografia homomórfica permite avaliar operações sobre cifrados para obter, após decifrar, uma função das entradas. BFV/BGV tratam aritmética exata em anéis modulares; CKKS representa aproximações numéricas. Ruído e profundidade multiplicativa limitam cálculos, com técnicas como relinearização, reescala ou bootstrapping conforme o esquema. Homomorfismo não garante integridade do cálculo nem esconde automaticamente a função ou padrões de acesso.",
+    "workedExample": "Em um modelo de texto claro módulo 17, entradas 8 e 12 somam 20≡3. Um avaliador homomórfico correto desse domínio devolve um cifrado que decifra para 3, não 20. Isso é uma conta do domínio, sem gerar chaves ou cifrados reais.",
+    "investigation": [
+      "Defina se o cálculo precisa de inteiros exatos ou aproximações.",
+      "Calcule a soma módulo dezessete e identifique o wraparound.",
+      "Conte profundidade multiplicativa de uma expressão proposta."
+    ],
+    "expectedEvidence": "Declare domínio e erro numérico esperado, sem prometer aritmética ilimitada ou interpretar uma conta modular como implementação de FHE.",
+    "reflection": "Que erro de modelagem surge ao ignorar o módulo em uma soma de valores de negócio?",
+    "scenarios": [
+      {
+        "id": "modulo",
+        "label": "Soma com redução",
+        "situation": "O domínio é módulo dezessete e as entradas são oito e doze.",
+        "observation": "A saída representada é três.",
+        "explanation": "A aritmética modular precisa ser considerada ao codificar intervalos dos dados."
+      },
+      {
+        "id": "profundidade",
+        "label": "Multiplicações encadeadas",
+        "situation": "Uma expressão multiplica resultados já multiplicados.",
+        "observation": "A profundidade cresce.",
+        "explanation": "O orçamento do esquema precisa suportar a sequência, não apenas a quantidade de entradas."
+      },
+      {
+        "id": "aproximacao",
+        "label": "CKKS numérico",
+        "situation": "Uma tarefa aceita pequenos erros de números reais.",
+        "observation": "Representação aproximada pode ser adequada.",
+        "explanation": "Precisão e escalas devem ser avaliadas, em vez de assumir igualdade inteira exata."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual soma é representada em módulo 17 para 8+12?",
+        "options": [
+          {
+            "text": "3",
+            "correct": true,
+            "explanation": "Vinte menos dezessete deixa resto três."
+          },
+          {
+            "text": "20",
+            "correct": false,
+            "explanation": "Vinte é a soma inteira antes da redução no domínio escolhido."
+          },
+          {
+            "text": "4",
+            "correct": false,
+            "explanation": "Esse valor não é congruente à soma no módulo declarado."
+          }
+        ]
+      },
+      {
+        "question": "Qual limite deve orientar uma avaliação homomórfica?",
+        "options": [
+          {
+            "text": "Domínio, ruído e profundidade do cálculo",
+            "correct": true,
+            "explanation": "Esses elementos determinam correção e precisão das operações permitidas."
+          },
+          {
+            "text": "Apenas a quantidade de usuários",
+            "correct": false,
+            "explanation": "A viabilidade depende também da expressão e dos parâmetros criptográficos."
+          },
+          {
+            "text": "Garantia automática de resultado honesto",
+            "correct": false,
+            "explanation": "Confidencialidade homomórfica não prova por si integridade da computação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Microsoft SEAL",
+        "url": "https://www.microsoft.com/en-us/research/project/microsoft-seal/"
+      }
+    ]
+  },
+  "pos_cripto_04": {
+    "context": "Dois protocolos fictícios de registro distribuído usam recursos diferentes para escolher participantes e resistir a comportamento adversarial.",
+    "theory": "PoW vincula participação à realização de trabalho; PoS usa participação econômica e regras de consenso específicas. Finalidade probabilística por confirmações difere de finalidade explícita sob quóruns. Ameaças de maioria dependem do recurso e do protocolo: cinquenta e um por cento não é um limiar universal para todos os ataques. Slashing penaliza violações demonstráveis definidas, não qualquer erro ou indisponibilidade automaticamente.",
+    "workedExample": "Num protocolo fictício que exige dois terços de 100 unidades de voto, 66 não chegam a 2/3; são necessárias ao menos 67. Esse cálculo não descreve todo PoS nem substitui regras de arredondamento, quórum e falhas do protocolo concreto.",
+    "investigation": [
+      "Compare o recurso escasso usado por PoW e PoS.",
+      "Calcule o quórum inteiro do cenário explicitamente definido.",
+      "Separe reorganização, censura e violação passível de penalidade."
+    ],
+    "expectedEvidence": "Indique o modelo de consenso e seus limiares próprios, evitando aplicar “51%” ou “finalidade imediata” indiscriminadamente a toda blockchain.",
+    "reflection": "Por que um alto custo econômico não elimina a necessidade de regras de segurança do consenso?",
+    "scenarios": [
+      {
+        "id": "quorum",
+        "label": "Dois terços",
+        "situation": "O modelo exige ao menos dois terços de cem votos.",
+        "observation": "Sessenta e sete votos atingem o requisito.",
+        "explanation": "A unidade inteira obriga arredondar o limiar fracionário para cima."
+      },
+      {
+        "id": "pow",
+        "label": "Confirmações",
+        "situation": "Uma cadeia PoW recebe blocos posteriores ao bloco observado.",
+        "observation": "A confiança probabilística pode aumentar.",
+        "explanation": "Confirmações não significam finalidade absoluta em todo modelo de adversário."
+      },
+      {
+        "id": "slashing",
+        "label": "Violação comprovável",
+        "situation": "Um validador assina mensagens incompatíveis puníveis pelo protocolo.",
+        "observation": "Pode haver penalidade de participação.",
+        "explanation": "Slashing depende de evidência e regras específicas, não de uma avaliação subjetiva."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quantos votos inteiros atendem a dois terços de cem?",
+        "options": [
+          {
+            "text": "67",
+            "correct": true,
+            "explanation": "Sessenta e seis fica abaixo de 66,666… e sessenta e sete supera o limiar."
+          },
+          {
+            "text": "51",
+            "correct": false,
+            "explanation": "Maioria simples não corresponde ao requisito de dois terços."
+          },
+          {
+            "text": "66",
+            "correct": false,
+            "explanation": "Esse número é menor que dois terços exatos de cem."
+          }
+        ]
+      },
+      {
+        "question": "Qual distinção é necessária entre protocolos?",
+        "options": [
+          {
+            "text": "Finalidade probabilística e finalidade por quórum",
+            "correct": true,
+            "explanation": "As garantias e condições de reversão dependem do mecanismo adotado."
+          },
+          {
+            "text": "Todo PoS possui o mesmo limiar de ataque",
+            "correct": false,
+            "explanation": "Protocolos e ameaças diferentes têm condições de segurança distintas."
+          },
+          {
+            "text": "Slashing pune qualquer mensagem atrasada",
+            "correct": false,
+            "explanation": "Penalidades seguem regras precisas de conduta e evidência."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Ethereum — Proof of Stake",
+        "url": "https://ethereum.org/developers/docs/consensus-mechanisms/pos/"
+      }
+    ]
+  },
+  "pos_cripto_05": {
+    "context": "Um contrato fictício de exercício paga créditos internos. A análise defensiva procura preservar invariantes antes de qualquer chamada externa.",
+    "theory": "Reentrância ocorre quando uma chamada externa permite retornar ao contrato antes de terminar uma operação, observando estado ainda não atualizado. Checks-Effects-Interactions recomenda validar condições, atualizar estado e só depois interagir. Guardas de reentrância e desenho de retiradas ajudam, mas precisam considerar funções relacionadas e invariantes. O exercício usa apenas um fluxo abstrato e não interage com blockchain, carteira ou contrato real.",
+    "workedExample": "Um saldo interno fictício é 10. O fluxo inseguro envia 10 antes de zerar o saldo; uma reentrada pode observar ainda 10. No fluxo corrigido, a verificação precede saldo=0 e só então a interação ocorre, impedindo reutilizar aquele crédito lógico.",
+    "investigation": [
+      "Trace o saldo visível antes e durante uma chamada externa.",
+      "Reordene validação, efeito de estado e interação.",
+      "Verifique o invariante entre funções que compartilham o saldo."
+    ],
+    "expectedEvidence": "Mostre a atualização anterior à interação e o tratamento de falha de pagamento, sem produzir um ataque ou instrução contra um alvo real.",
+    "reflection": "Por que proteger uma única função pode ser insuficiente quando outras compartilham o mesmo estado?",
+    "scenarios": [
+      {
+        "id": "estado-antigo",
+        "label": "Interação prematura",
+        "situation": "O pagamento externo ocorre antes de zerar o crédito fictício.",
+        "observation": "O saldo antigo permanece visível.",
+        "explanation": "Uma execução aninhada pode violar a regra de uso único do crédito."
+      },
+      {
+        "id": "efeito-primeiro",
+        "label": "Estado reservado",
+        "situation": "O saldo é zerado antes da chamada externa.",
+        "observation": "Uma nova entrada observa zero.",
+        "explanation": "O efeito prévio preserva o invariante, com tratamento transacional adequado da falha."
+      },
+      {
+        "id": "outra-funcao",
+        "label": "Estado compartilhado",
+        "situation": "Outra função acessa o mesmo crédito durante a interação.",
+        "observation": "O risco pode cruzar funções.",
+        "explanation": "A revisão deve acompanhar invariantes e todas as entradas relevantes, não só um método."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual ordem corresponde a Checks-Effects-Interactions?",
+        "options": [
+          {
+            "text": "Validar, atualizar estado, interagir",
+            "correct": true,
+            "explanation": "O estado coerente deve estar estabelecido antes de ceder controle externo."
+          },
+          {
+            "text": "Interagir, depois verificar saldo",
+            "correct": false,
+            "explanation": "Essa ordem expõe estado ainda não validado nem atualizado."
+          },
+          {
+            "text": "Enviar crédito e nunca registrar efeito",
+            "correct": false,
+            "explanation": "Sem efeito persistido, o crédito pode ser reutilizado."
+          }
+        ]
+      },
+      {
+        "question": "Qual evidência mostra o defeito abstrato descrito?",
+        "options": [
+          {
+            "text": "Saldo dez ainda visível durante a interação",
+            "correct": true,
+            "explanation": "O mesmo crédito permanece disponível antes da atualização tardia."
+          },
+          {
+            "text": "Uso de uma soma inteira por si só",
+            "correct": false,
+            "explanation": "A soma não caracteriza reentrância sem o fluxo de controle e estado."
+          },
+          {
+            "text": "Existência de uma função pública sempre",
+            "correct": false,
+            "explanation": "A vulnerabilidade depende das interações e invariantes do desenho."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Solidity — Security Considerations",
+        "url": "https://docs.soliditylang.org/en/latest/security-considerations.html"
+      }
+    ]
+  },
+  "pos_cripto_06": {
+    "context": "Um grupo elíptico minúsculo permite verificar pontos e operações. Assinaturas reais exigem parâmetros, codificação e algoritmos completos.",
+    "theory": "Curvas de Weierstrass e Edwards usam equações e fórmulas diferentes. A multiplicação escalar produz um ponto público a partir de um escalar secreto; a segurança depende da dificuldade do logaritmo discreto e da validação adequada. ECDSA exige nonce seguro e sua reutilização pode expor a chave. Ed25519 é uma instanciação de EdDSA, com derivação determinística interna, e não apenas ECDSA sobre outra curva.",
+    "workedExample": "Na curva y²=x³+2x+2 mod 17, o ponto (5,1) pertence à curva: y²=1 e 125+10+2=137≡1. Conferir essa igualdade é só uma condição didática de pertencimento, não uma assinatura nem validação completa de chave.",
+    "investigation": [
+      "Confira o ponto substituindo coordenadas na equação.",
+      "Distinga ponto público de escalar privado.",
+      "Compare requisitos de nonce e codificação dos esquemas citados."
+    ],
+    "expectedEvidence": "Apresente os dois lados congruentes e explique os limites da curva minúscula, sem usar parâmetros didáticos para proteger mensagens reais.",
+    "reflection": "Por que uma implementação precisa validar mais do que a sintaxe das coordenadas?",
+    "scenarios": [
+      {
+        "id": "pertence",
+        "label": "Ponto válido",
+        "situation": "As coordenadas cinco e um são testadas na curva F17.",
+        "observation": "Os dois lados deixam resto um.",
+        "explanation": "O ponto satisfaz a equação escolhida nesse campo finito."
+      },
+      {
+        "id": "nao-pertence",
+        "label": "Coordenada alterada",
+        "situation": "Troca-se o ponto para (5,2) na mesma curva.",
+        "observation": "O lado esquerdo vale quatro e o direito um.",
+        "explanation": "A nova coordenada não satisfaz a equação, logo não define esse ponto da curva."
+      },
+      {
+        "id": "nonce",
+        "label": "Aleatoriedade crítica",
+        "situation": "Duas assinaturas ECDSA hipotéticas reutilizam o mesmo nonce.",
+        "observation": "A chave pode ficar comprometida.",
+        "explanation": "A segurança do nonce é parte essencial da assinatura, além da dificuldade do grupo."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual resto resulta de 5³+2×5+2 módulo 17?",
+        "options": [
+          {
+            "text": "1",
+            "correct": true,
+            "explanation": "Cento e trinta e sete é oito vezes dezessete mais um."
+          },
+          {
+            "text": "4",
+            "correct": false,
+            "explanation": "Quatro é o quadrado da coordenada dois do ponto inválido."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "O valor não é múltiplo exato de dezessete."
+          }
+        ]
+      },
+      {
+        "question": "Qual afirmação distingue Ed25519 de ECDSA?",
+        "options": [
+          {
+            "text": "Ed25519 instancia EdDSA com regras próprias",
+            "correct": true,
+            "explanation": "O esquema e sua derivação interna não são mera troca de curva do ECDSA."
+          },
+          {
+            "text": "São nomes idênticos do mesmo algoritmo",
+            "correct": false,
+            "explanation": "Eles têm construções e procedimentos de assinatura diferentes."
+          },
+          {
+            "text": "Ed25519 dispensa toda validação",
+            "correct": false,
+            "explanation": "Codificação, parâmetros e verificação continuam definidos pelo esquema."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "RFC 8032 — EdDSA",
+        "url": "https://www.rfc-editor.org/rfc/rfc8032"
+      }
+    ]
+  },
+  "pos_cripto_07": {
+    "context": "Um segredo fictício é dividido entre custodiantes. Reconstrução requer um limiar, sem confiar o segredo inteiro a uma única parte.",
+    "theory": "Shamir escolhe um polinômio aleatório de grau k−1 sobre um campo finito com segredo no termo constante. Cada parte recebe (x,f(x)) para x distinto e não nulo. k pontos determinam o polinômio; menos de k não informam o segredo quando coeficientes são uniformes e independentes. A confidencialidade não autentica partes: fraudes ou corrupção exigem mecanismos adicionais.",
+    "workedExample": "Em F17, escolha f(x)=5+3x para limiar dois. As partes (1,8) e (2,11) dão inclinação (11−8)/(2−1)=3 e segredo 8−3=5. Uma única parte (1,8) também seria compatível com outros termos constantes e coeficientes.",
+    "investigation": [
+      "Calcule três partes do polinômio e evite x zero.",
+      "Reconstrua com dois pontos por aritmética no campo.",
+      "Explique o que uma parte isolada permite ou não concluir."
+    ],
+    "expectedEvidence": "Mostre segredo cinco e o limiar dois, declarando coeficientes aleatórios na construção segura e a necessidade de autenticar partes.",
+    "reflection": "Por que distribuir f(0) como uma parte comum revelaria o segredo?",
+    "scenarios": [
+      {
+        "id": "duas-partes",
+        "label": "Reconstrução linear",
+        "situation": "As partes recebidas são (1,8) e (2,11).",
+        "observation": "A inclinação modular vale três.",
+        "explanation": "Dois pontos distintos determinam a reta e seu termo constante cinco."
+      },
+      {
+        "id": "uma-parte",
+        "label": "Limiar não alcançado",
+        "situation": "Só a parte (1,8) está disponível.",
+        "observation": "Há várias retas compatíveis.",
+        "explanation": "Com coeficiente uniforme, diferentes segredos permanecem indistinguíveis pela parte isolada."
+      },
+      {
+        "id": "parte-falsa",
+        "label": "Integridade das partes",
+        "situation": "Um custodiante entrega uma coordenada y incorreta.",
+        "observation": "A reconstrução pode produzir outro valor.",
+        "explanation": "Shamir básico não garante autenticidade; verificação e redundância exigem protocolo adicional."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual segredo resulta das duas partes fornecidas?",
+        "options": [
+          {
+            "text": "5",
+            "correct": true,
+            "explanation": "Subtrair a inclinação três de f(1)=8 recupera f(0)."
+          },
+          {
+            "text": "3",
+            "correct": false,
+            "explanation": "Três é o coeficiente angular, não o termo secreto constante."
+          },
+          {
+            "text": "8",
+            "correct": false,
+            "explanation": "Oito é uma avaliação pública para um custodiante, não o segredo."
+          }
+        ]
+      },
+      {
+        "question": "Qual escolha deve ser evitada para as abscissas das partes?",
+        "options": [
+          {
+            "text": "x=0",
+            "correct": true,
+            "explanation": "Essa avaliação é o próprio termo constante que contém o segredo."
+          },
+          {
+            "text": "Valores distintos não nulos",
+            "correct": false,
+            "explanation": "Essa é a condição adequada para avaliações que possam reconstruir."
+          },
+          {
+            "text": "Elementos do campo finito",
+            "correct": false,
+            "explanation": "A interpolação definida usa justamente operações no campo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Shamir — How to Share a Secret",
+        "url": "https://dspace.mit.edu/entities/publication/91c51bfc-5678-409c-80c5-44ce8fcdbadf"
+      }
+    ]
+  },
+  "pos_cripto_08": {
+    "context": "Duas organizações fictícias querem saber se uma condição conjunta é atendida sem revelar seus dados individuais além do resultado permitido.",
+    "theory": "Computação multipartidária segura avalia funções sobre entradas privadas sob um modelo de adversário e hipótese de conluio. Circuitos garbled de Yao são uma abordagem de duas partes, combinada com transferência alheia para entradas. Segurança semihonesta não cobre automaticamente desvios maliciosos. O resultado autorizado pode revelar informação por inferência; proteger o protocolo não remove essa divulgação inerente à função.",
+    "workedExample": "Considere a função booleana a AND b. Se uma parte sabe a=1 e recebe saída 0, ela deduz b=0; se a=0, a saída 0 não distingue b. Essa informação vem da função, não necessariamente de falha criptográfica.",
+    "investigation": [
+      "Escreva a tabela verdade completa da função AND.",
+      "Determine o que cada entrada e saída permitem inferir.",
+      "Declare modelo semihonesto ou malicioso antes de avaliar garantias."
+    ],
+    "expectedEvidence": "A entrega deve distinguir entrada privada, resultado permitido e inferência inevitável, sem afirmar execução de circuito criptográfico real.",
+    "reflection": "Como consultas repetidas podem ampliar informação revelada mesmo por um protocolo correto?",
+    "scenarios": [
+      {
+        "id": "a-um",
+        "label": "Inferência pela saída",
+        "situation": "Uma parte conhece a=1 e observa AND igual a zero.",
+        "observation": "Ela deduz que b é zero.",
+        "explanation": "A função autoriza uma saída que, junto da entrada conhecida, determina o outro bit."
+      },
+      {
+        "id": "a-zero",
+        "label": "Resultado pouco informativo",
+        "situation": "A parte conhece a=0 e observa saída zero.",
+        "observation": "b pode ser zero ou um.",
+        "explanation": "Nessa condição a saída não distingue os dois valores da entrada alheia."
+      },
+      {
+        "id": "adversario",
+        "label": "Modelo de ameaça",
+        "situation": "Um participante envia mensagens diferentes do protocolo especificado.",
+        "observation": "A hipótese semihonesta foi ultrapassada.",
+        "explanation": "Proteção contra comportamento malicioso exige construção e análise próprias."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que se deduz de a=1 e saída AND=0?",
+        "options": [
+          {
+            "text": "b=0",
+            "correct": true,
+            "explanation": "Com a verdadeiro, a conjunção só é falsa se b for falso."
+          },
+          {
+            "text": "b=1",
+            "correct": false,
+            "explanation": "Dois bits verdadeiros produziriam saída um."
+          },
+          {
+            "text": "Nada em qualquer situação",
+            "correct": false,
+            "explanation": "A saída e a entrada conhecida podem permitir inferência legítima."
+          }
+        ]
+      },
+      {
+        "question": "O que deve ser declarado ao avaliar segurança de SMPC?",
+        "options": [
+          {
+            "text": "Modelo de adversário e conluio tolerado",
+            "correct": true,
+            "explanation": "As garantias dependem de comportamento e coalizões cobertos pelo protocolo."
+          },
+          {
+            "text": "Que a saída não revela nada nunca",
+            "correct": false,
+            "explanation": "A própria função pode divulgar informação sobre entradas."
+          },
+          {
+            "text": "Que duas partes equivalem a qualquer número",
+            "correct": false,
+            "explanation": "Protocolos e hipóteses podem mudar ao ampliar participantes."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Efficient Secure Computation with Garbled Circuits",
+        "url": "https://www.cs.virginia.edu/~evans/pubs/iciss2011/"
+      }
+    ]
+  },
+  "pos_cripto_09": {
+    "context": "Traços de consumo sintéticos de um dispositivo fictício ajudam a avaliar vazamento de implementação sem extrair chaves ou medir alvos reais.",
+    "theory": "Canal lateral usa observações físicas ou temporais correlacionadas a operações secretas, em vez de quebrar diretamente a matemática da cifra. DPA analisa diferenças estatísticas entre grupos de traços; correlação não implica recuperação garantida. Execução de tempo constante reduz certas fontes temporais, mas não elimina por si consumo dependente de dados. Mascaramento e avaliação estatística exigem desenho e hipótese de vazamento adequados.",
+    "workedExample": "Dois grupos sintéticos têm médias de consumo 10,2 e 10,0 unidades. A diferença é 0,2. Sem variância, tamanho amostral e controle de alinhamento, não se pode concluir significância nem identificar um segredo. A conta demonstra uma pergunta defensiva de avaliação.",
+    "investigation": [
+      "Calcule a diferença entre médias dos dois grupos fornecidos.",
+      "Liste controles de ruído, alinhamento e quantidade de traços.",
+      "Associe tempo constante e mascaramento aos canais que tratam."
+    ],
+    "expectedEvidence": "Informe diferença 0,2 e informações faltantes para inferência, sem fornecer procedimento de extração de chave ou ensaio contra dispositivo externo.",
+    "reflection": "Por que ausência de diferença numa amostra pequena não comprova ausência de vazamento?",
+    "scenarios": [
+      {
+        "id": "media",
+        "label": "Diferença observada",
+        "situation": "As médias sintéticas são dez vírgula dois e dez.",
+        "observation": "A diferença é dois décimos.",
+        "explanation": "O valor isolado precisa de incerteza e desenho experimental para interpretação."
+      },
+      {
+        "id": "ruido",
+        "label": "Variância desconhecida",
+        "situation": "Os traços têm médias dadas, mas nenhuma dispersão informada.",
+        "observation": "A significância não pode ser avaliada.",
+        "explanation": "A mesma diferença pode ser clara ou irrelevante conforme ruído e tamanho amostral."
+      },
+      {
+        "id": "constante",
+        "label": "Defesa parcial",
+        "situation": "O código evita branches dependentes de segredo.",
+        "observation": "Certos vazamentos temporais podem diminuir.",
+        "explanation": "Consumo físico pode continuar dependente de dados, exigindo avaliação de outros canais."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual diferença entre as médias fornecidas?",
+        "options": [
+          {
+            "text": "0,2 unidade",
+            "correct": true,
+            "explanation": "Subtrair dez de dez vírgula dois produz dois décimos."
+          },
+          {
+            "text": "2 unidades",
+            "correct": false,
+            "explanation": "Esse resultado desloca uma casa decimal da diferença."
+          },
+          {
+            "text": "20%",
+            "correct": false,
+            "explanation": "A diferença absoluta não é a porcentagem indicada."
+          }
+        ]
+      },
+      {
+        "question": "Qual conclusão é permitida só pelas duas médias?",
+        "options": [
+          {
+            "text": "Existe uma diferença numérica a investigar",
+            "correct": true,
+            "explanation": "Faltam variância e amostragem para julgar evidência de vazamento."
+          },
+          {
+            "text": "A chave foi recuperada",
+            "correct": false,
+            "explanation": "Nenhuma análise ou extração de chave ocorreu nesse exercício."
+          },
+          {
+            "text": "Tempo constante elimina todo canal físico",
+            "correct": false,
+            "explanation": "Tempo e consumo são observações distintas com contramedidas próprias."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Kocher, Jaffe e Jun — Differential Power Analysis",
+        "url": "https://paulkocher.com/doc/DifferentialPowerAnalysis.pdf"
+      }
+    ]
+  },
+  "pos_cripto_10": {
+    "context": "Um registro fictício agrupa quatro documentos numa raiz hash. Um leitor quer conferir inclusão sem receber todos os documentos.",
+    "theory": "Uma árvore de Merkle combina hashes de folhas até uma raiz. Provas de inclusão fornecem hashes irmãos e posições para recomputar a raiz, com tamanho logarítmico numa árvore binária balanceada. Ordem e separação de domínio entre folhas e nós importam. A prova confirma inclusão relativa a uma raiz conhecida, não a verdade do documento, sua autoria ou a legitimidade da própria raiz.",
+    "workedExample": "Para folhas A,B,C,D, defina hAB=H(hA||hB), hCD=H(hC||hD) e raiz=H(hAB||hCD). Provar B exige hA à esquerda e hCD à direita. São dois hashes irmãos para quatro folhas, sem inventar valores numéricos de hash.",
+    "investigation": [
+      "Desenhe folhas, nós internos e raiz ordenada.",
+      "Liste irmãos e posições necessários para provar B.",
+      "Explique como obter uma raiz de referência autenticada."
+    ],
+    "expectedEvidence": "Reconstrua simbolicamente a raiz com dois irmãos e declare a confiança na raiz, sem chamar inclusão de prova de veracidade do conteúdo.",
+    "reflection": "Por que uma raiz fornecida pelo mesmo remetente não basta para confiar em todo o registro?",
+    "scenarios": [
+      {
+        "id": "inclusao",
+        "label": "Caminho de B",
+        "situation": "A folha B recebe hA como irmão à esquerda.",
+        "observation": "O primeiro nó é H(hA||hB).",
+        "explanation": "Trocar a ordem da concatenação altera a construção definida."
+      },
+      {
+        "id": "nivel-dois",
+        "label": "Irmão agregado",
+        "situation": "O nó hAB tem hCD à direita no próximo nível.",
+        "observation": "A recomputação alcança a raiz.",
+        "explanation": "A prova usa um irmão por nível, em vez de todos os documentos."
+      },
+      {
+        "id": "raiz-falsa",
+        "label": "Referência não confiável",
+        "situation": "Um remetente altera documento e também fornece uma raiz nova.",
+        "observation": "A inclusão pode verificar contra sua própria raiz.",
+        "explanation": "É preciso autenticar a referência para detectar alteração de um registro previamente conhecido."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quantos hashes irmãos compõem a prova de B nessa árvore?",
+        "options": [
+          {
+            "text": "2",
+            "correct": true,
+            "explanation": "Um irmão corresponde ao nível das folhas e outro ao nível seguinte."
+          },
+          {
+            "text": "4",
+            "correct": false,
+            "explanation": "Não é necessário transmitir todos os hashes de folhas."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "Só a folha não permite recomputar a raiz do conjunto."
+          }
+        ]
+      },
+      {
+        "question": "O que uma prova de Merkle válida estabelece?",
+        "options": [
+          {
+            "text": "Inclusão em relação à raiz usada",
+            "correct": true,
+            "explanation": "A recomputação liga a folha àquela referência, sob as hipóteses do hash."
+          },
+          {
+            "text": "Verdade factual do documento",
+            "correct": false,
+            "explanation": "Hashes verificam vínculo e integridade, não conteúdo verdadeiro."
+          },
+          {
+            "text": "Autoria automática do remetente",
+            "correct": false,
+            "explanation": "Autenticar identidade exige mecanismo adicional à árvore."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "RFC 6962 — Merkle Trees",
+        "url": "https://www.rfc-editor.org/rfc/rfc6962"
+      }
+    ]
+  }
+}

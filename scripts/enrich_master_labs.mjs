@@ -416,5 +416,8 @@ export function resolveUniversalLab(labId: string): UniversalLabConfig {
 }
 `;
 
-fs.writeFileSync(catalogPath, tsContent, 'utf-8');
-console.log(`Catálogo 100% atualizado e gravado em: ${catalogPath}`);
+const previewDirectory = path.resolve('.local/catalog-preview');
+fs.mkdirSync(previewDirectory, { recursive: true });
+const previewPath = path.join(previewDirectory, 'legacy-enriched-catalog.ts');
+fs.writeFileSync(previewPath, tsContent, 'utf-8');
+console.log(`Rascunho legado gravado em: ${previewPath}. Este gerador não produz conteúdo pedagógico individual nem altera o catálogo do app.`);

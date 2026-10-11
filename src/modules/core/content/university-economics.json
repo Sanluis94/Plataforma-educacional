@@ -1,0 +1,832 @@
+{
+  "sup_econ_01": {
+    "context": "Uma oficina fictícia avalia um equipamento por fluxos de caixa didáticos. VPL, TIR e retorno descontado respondem a perguntas diferentes sobre o investimento.",
+    "theory": "VPL=−I0+ΣFt/(1+i)^t usa taxa e períodos compatíveis. TIR zera o VPL e pode ser múltipla com fluxos de sinais alternados. Payback descontado localiza recuperação acumulada, ignorando fluxos posteriores. A taxa deve refletir hipótese coerente de risco e moeda; valores nominais não devem ser descontados por taxa real.",
+    "workedExample": "Invista R$1.000 agora e receba R$600 ao final de cada um dos dois anos. A 10% a.a., VPL=−1000+600/1,1+600/1,21=R$41,32. A TIR é aproximadamente 13,07% a.a. O acumulado descontado só supera R$1.000 no fim do segundo ano.",
+    "investigation": [
+      "Desenhe os fluxos nos instantes zero, um e dois.",
+      "Calcule o VPL com taxa anual e fluxos de fim de ano.",
+      "Compare a decisão a 10% com a taxa que torna VPL nulo."
+    ],
+    "expectedEvidence": "A resposta deve obter VPL positivo de R$41,32 e distinguir rentabilidade percentual, valor criado e prazo de recuperação.",
+    "reflection": "Por que payback pode preferir um projeto com menor valor total?",
+    "scenarios": [
+      {
+        "id": "sup_econ_01_s0",
+        "label": "Taxa elevada",
+        "situation": "Eleve a taxa de desconto fictícia para 20% a.a.",
+        "observation": "VPL torna-se aproximadamente −R$83,33.",
+        "explanation": "Os mesmos recebimentos têm menor valor presente quando a taxa exigida aumenta."
+      },
+      {
+        "id": "sup_econ_01_s1",
+        "label": "Fluxo final tardio",
+        "situation": "Adicione um recebimento grande após o prazo de recuperação.",
+        "observation": "O VPL cresce, mas o payback pode ficar igual.",
+        "explanation": "O indicador de prazo não capta todo o valor dos fluxos posteriores à recuperação."
+      },
+      {
+        "id": "sup_econ_01_s2",
+        "label": "Sinais alternados",
+        "situation": "Um projeto exige manutenção grande após recebimentos positivos.",
+        "observation": "Pode haver mais de uma TIR.",
+        "explanation": "Mudanças de sinal no fluxo permitem raízes múltiplas; VPL na taxa escolhida mantém uma leitura direta."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é o VPL a 10% no caso fornecido?",
+        "options": [
+          {
+            "text": "R$200",
+            "correct": false,
+            "explanation": "Essa é a soma nominal líquida e omite o valor temporal do dinheiro."
+          },
+          {
+            "text": "R$120",
+            "correct": false,
+            "explanation": "Esse valor não resulta do desconto dos dois recebimentos anuais."
+          },
+          {
+            "text": "R$41,32",
+            "correct": true,
+            "explanation": "A soma presente 545,45+495,87 supera o investimento em 41,32."
+          }
+        ]
+      },
+      {
+        "question": "Qual limitação pertence ao payback descontado?",
+        "options": [
+          {
+            "text": "Ignora fluxos após a recuperação",
+            "correct": true,
+            "explanation": "A medida localiza um prazo, sem agregar todo o valor futuro restante."
+          },
+          {
+            "text": "Sempre equivale à TIR",
+            "correct": false,
+            "explanation": "Prazo em anos e taxa percentual são grandezas e critérios distintos."
+          },
+          {
+            "text": "Dispensa definir taxa",
+            "correct": false,
+            "explanation": "O desconto de cada fluxo exige uma taxa coerente com seu período."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "SEC Investor.gov: compound interest",
+        "url": "https://www.investor.gov/financial-tools-calculators/calculators/compound-interest-calculator"
+      }
+    ]
+  },
+  "sup_econ_02": {
+    "context": "Um mercado fictício de cadernos permite calcular equilíbrio e elasticidade. O exercício separa deslocamento de demanda de movimento ao longo da mesma curva.",
+    "theory": "O equilíbrio competitivo iguala Qd e Qs sob as condições do modelo. Elasticidade-preço pontual é ε=(dQ/dP)(P/Q); usa variação relativa e não apenas inclinação. Em curva linear, elasticidade varia ao longo dos pontos. Alterar renda pode deslocar demanda, enquanto variar o preço próprio move sobre a curva, mantendo os demais fatores.",
+    "workedExample": "Use Qd=100−2P e Qs=20+2P, com P em reais e Q em cadernos/dia. Igualar fornece P=20 e Q=60. A elasticidade pontual da demanda nesse ponto é −2×20/60=−2/3, inelástica em módulo. As equações são hipotéticas.",
+    "investigation": [
+      "Trace demanda e oferta e marque interceptos válidos.",
+      "Resolva a igualdade e calcule elasticidade no equilíbrio.",
+      "Desloque o intercepto da demanda e compare o novo ponto."
+    ],
+    "expectedEvidence": "Devem aparecer P=R$20, Q=60 por dia e elasticidade −0,667, sem confundir a unidade da inclinação com a razão adimensional.",
+    "reflection": "Por que uma curva linear não tem elasticidade constante?",
+    "scenarios": [
+      {
+        "id": "sup_econ_02_s0",
+        "label": "Renda maior",
+        "situation": "A demanda muda para Qd=120−2P com oferta original.",
+        "observation": "O equilíbrio passa a P=25 e Q=70.",
+        "explanation": "O intercepto maior representa deslocamento, elevando preço e quantidade no modelo."
+      },
+      {
+        "id": "sup_econ_02_s1",
+        "label": "Preço fixado",
+        "situation": "Imponha P=10 nas curvas originais.",
+        "observation": "Demanda 80 e oferta 40 geram falta de 40.",
+        "explanation": "O preço abaixo do equilíbrio induz excesso de demanda sob as hipóteses dadas."
+      },
+      {
+        "id": "sup_econ_02_s2",
+        "label": "Ponto superior",
+        "situation": "Avalie a demanda original em P=40 e Q=20.",
+        "observation": "A elasticidade é −4.",
+        "explanation": "A mesma inclinação −2 combina-se com uma razão P/Q maior e torna a demanda elástica."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é o equilíbrio das curvas originais?",
+        "options": [
+          {
+            "text": "P=40 e Q=20",
+            "correct": false,
+            "explanation": "Esse ponto está na demanda, mas a oferta seria 100."
+          },
+          {
+            "text": "P=10 e Q=80",
+            "correct": false,
+            "explanation": "A oferta nesse preço seria 40, gerando desequilíbrio."
+          },
+          {
+            "text": "P=20 e Q=60",
+            "correct": true,
+            "explanation": "Resolver 100−2P=20+2P dá preço 20 e quantidade 60."
+          }
+        ]
+      },
+      {
+        "question": "Qual unidade tem elasticidade-preço?",
+        "options": [
+          {
+            "text": "Nenhuma, é adimensional",
+            "correct": true,
+            "explanation": "A razão de variações percentuais cancela unidades de preço e quantidade."
+          },
+          {
+            "text": "Cadernos por real",
+            "correct": false,
+            "explanation": "Essa é a unidade da inclinação, não da elasticidade."
+          },
+          {
+            "text": "Reais por dia",
+            "correct": false,
+            "explanation": "Essa unidade descreve fluxo monetário e não resposta relativa."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CORE Econ: supply and demand",
+        "url": "https://books.core-econ.org/the-economy-v1/book/text/08.html"
+      }
+    ]
+  },
+  "sup_econ_03": {
+    "context": "Uma empresa monopolista fictícia enfrenta demanda linear. A atividade compara receita marginal, custo marginal e o preço obtido pela demanda.",
+    "theory": "Com P=a−bQ, receita total é aQ−bQ² e receita marginal a−2bQ. Um máximo interior de lucro exige RM=CM e condição de segunda ordem, além de considerar a opção de não produzir. O preço é lido na demanda após escolher Q; preço não coincide com RM quando vender mais exige reduzir o preço de todas as unidades.",
+    "workedExample": "Considere P=100−2Q e C=100+20Q em reais. RM=100−4Q e CM=20: Q*=20, P*=60. Receita=1.200, custo=500 e lucro=700. A derivada segunda é −4, confirmando máximo no domínio com demanda não negativa.",
+    "investigation": [
+      "Derive receita total e receita marginal a partir da demanda.",
+      "Iguale RM e CM e confira a condição de máximo.",
+      "Calcule preço, receita e lucro com unidades coerentes."
+    ],
+    "expectedEvidence": "O resultado deve indicar Q=20, P=R$60 e lucro de R$700, sem igualar preço a receita marginal no monopólio.",
+    "reflection": "Como custos fixos afetam lucro e decisão de operar em horizontes distintos?",
+    "scenarios": [
+      {
+        "id": "sup_econ_03_s0",
+        "label": "Custo variável maior",
+        "situation": "Eleve CM constante de 20 para 40.",
+        "observation": "Q cai a 15 e preço sobe a 70.",
+        "explanation": "O cruzamento de RM com o custo marginal mais alto reduz a quantidade ótima."
+      },
+      {
+        "id": "sup_econ_03_s1",
+        "label": "Fixo maior",
+        "situation": "Eleve apenas o custo fixo de 100 para 300.",
+        "observation": "Q e P interiores permanecem, lucro cai 200.",
+        "explanation": "O custo fixo não entra na derivada marginal, mas altera a viabilidade total."
+      },
+      {
+        "id": "sup_econ_03_s2",
+        "label": "Competição idealizada",
+        "situation": "Imponha preço igual a CM=20 na mesma demanda.",
+        "observation": "A quantidade seria 40.",
+        "explanation": "Esse contraste pedagógico mostra quantidade menor e preço maior no resultado monopolista."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a receita marginal neste modelo?",
+        "options": [
+          {
+            "text": "100−2Q",
+            "correct": false,
+            "explanation": "Essa é a demanda inversa, que excede RM para Q positivo."
+          },
+          {
+            "text": "20",
+            "correct": false,
+            "explanation": "Vinte é o custo marginal e só iguala RM na solução."
+          },
+          {
+            "text": "100−4Q",
+            "correct": true,
+            "explanation": "Derivar 100Q−2Q² produz 100−4Q."
+          }
+        ]
+      },
+      {
+        "question": "Qual lucro resulta na quantidade ótima Q=20?",
+        "options": [
+          {
+            "text": "R$700",
+            "correct": true,
+            "explanation": "Receita 1.200 menos custo 100+400 resulta em 700."
+          },
+          {
+            "text": "R$1.200",
+            "correct": false,
+            "explanation": "Esse valor é receita antes de descontar custos."
+          },
+          {
+            "text": "R$800",
+            "correct": false,
+            "explanation": "Esse cálculo esquece o custo fixo de 100."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CORE Econ: market power and demand",
+        "url": "https://books.core-econ.org/the-economy-v1/book/text/08.html"
+      }
+    ]
+  },
+  "sup_econ_04": {
+    "context": "Uma máquina fictícia de R$10.000 é depreciada em cinco anos. O exercício diferencia alocação contábil de custo, fluxo de caixa e valor de mercado.",
+    "theory": "Depreciação linear é (custo−residual)/vida útil. Saldos decrescentes aplicam uma taxa ao valor contábil de abertura e exigem regra para não ultrapassar o residual. Depreciação não é pagamento periódico nem avaliação automática de mercado. Vida, residual e método são hipóteses contábeis que precisam ser consistentes com o consumo dos benefícios.",
+    "workedExample": "Com custo R$10.000, residual R$2.000 e cinco anos, a linear é R$1.600/ano e o valor após dois anos é R$6.800. No exemplo de taxa decrescente de 40%, anos um e dois depreciam R$4.000 e R$2.400, deixando R$3.600. A regra de piso residual deve ser aplicada adiante.",
+    "investigation": [
+      "Calcule a base depreciável e a quota linear.",
+      "Monte os dois primeiros saldos com taxa de 40%.",
+      "Separe valor contábil de uma eventual venda em mercado."
+    ],
+    "expectedEvidence": "É necessário obter R$6.800 e R$3.600 após dois anos, explicitando que os métodos redistribuem despesa e não pagamentos.",
+    "reflection": "Como mudar a vida estimada afeta o reconhecimento futuro de despesa?",
+    "scenarios": [
+      {
+        "id": "sup_econ_04_s0",
+        "label": "Residual alto",
+        "situation": "Eleve residual a R$5.000 com vida de cinco anos.",
+        "observation": "A quota linear cai a R$1.000/ano.",
+        "explanation": "Menor parcela depreciável reduz a alocação anual sob as demais premissas."
+      },
+      {
+        "id": "sup_econ_04_s1",
+        "label": "Piso residual",
+        "situation": "Um saldo de R$2.160 receberia quota de 40%.",
+        "observation": "A quota precisa ser limitada para respeitar R$2.000.",
+        "explanation": "O método didático não pode reduzir o saldo abaixo do residual especificado."
+      },
+      {
+        "id": "sup_econ_04_s2",
+        "label": "Venda de mercado",
+        "situation": "Uma proposta fictícia de compra oferece R$7.000 após dois anos.",
+        "observation": "Preço difere dos saldos contábeis.",
+        "explanation": "Mercado considera condições próprias e não é determinado apenas pelo método contábil."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual quota linear corresponde às hipóteses da máquina?",
+        "options": [
+          {
+            "text": "R$2.000 por ano",
+            "correct": false,
+            "explanation": "Esse cálculo ignora o residual a preservar."
+          },
+          {
+            "text": "R$4.000 por ano",
+            "correct": false,
+            "explanation": "Quatro mil é a primeira quota do método de 40%, não da linear."
+          },
+          {
+            "text": "R$1.600 por ano",
+            "correct": true,
+            "explanation": "A base 10.000−2.000 é dividida pelos cinco anos de vida."
+          }
+        ]
+      },
+      {
+        "question": "Depreciação de R$4.000 significa qual evento?",
+        "options": [
+          {
+            "text": "Despesa contábil alocada ao período",
+            "correct": true,
+            "explanation": "O reconhecimento reduz valor contábil, sem implicar pagamento igual naquele ano."
+          },
+          {
+            "text": "Pagamento obrigatório de R$4.000",
+            "correct": false,
+            "explanation": "O desembolso de aquisição não é repetido pela contabilização da depreciação."
+          },
+          {
+            "text": "Preço de mercado garantido",
+            "correct": false,
+            "explanation": "Despesa contábil não estabelece o preço de venda do ativo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "IFRS Foundation: IAS 16",
+        "url": "https://www.ifrs.org/issued-standards/list-of-standards/ias-16-property-plant-and-equipment/"
+      }
+    ]
+  },
+  "sup_econ_05": {
+    "context": "Duas firmas fictícias escolhem quantidade alta ou baixa simultaneamente. Uma matriz de lucros mostra por que equilíbrio individual pode diferir do resultado conjunto.",
+    "theory": "Equilíbrio de Nash é um perfil em que nenhum agente melhora seu pagamento por desvio unilateral, mantendo a estratégia do outro. Dominância compara ações contra todas as respostas possíveis do rival. Nash não exige maximizar soma dos lucros nem coordenação; modelos repetidos e sequenciais mudam o conjunto de estratégias e incentivos.",
+    "workedExample": "Na matriz fictícia, (baixa,baixa) paga (40,40), (alta,baixa)=(50,10), (baixa,alta)=(10,50) e (alta,alta)=(20,20). Alta domina baixa para ambas: 50>40 e 20>10. Assim (alta,alta) é Nash, embora a soma 40 seja inferior à soma 80 de ambas baixas.",
+    "investigation": [
+      "Escreva os pagamentos de cada firma em cada célula.",
+      "Marque melhores respostas com a rival fixa em cada ação.",
+      "Compare o equilíbrio com o maior lucro conjunto e discuta incentivos."
+    ],
+    "expectedEvidence": "A resposta deve demonstrar os dois desvios relevantes e identificar (alta,alta), sem confundir cooperação lucrativa com equilíbrio.",
+    "reflection": "Como repetição e punição crível poderiam alterar os incentivos?",
+    "scenarios": [
+      {
+        "id": "sup_econ_05_s0",
+        "label": "Rival baixa",
+        "situation": "A firma B escolhe quantidade baixa.",
+        "observation": "A prefere alta, recebendo 50 em vez de 40.",
+        "explanation": "O desvio aumenta o lucro individual apesar de reduzir o resultado de B."
+      },
+      {
+        "id": "sup_econ_05_s1",
+        "label": "Rival alta",
+        "situation": "A firma B escolhe quantidade alta.",
+        "observation": "A ainda prefere alta: 20 em vez de 10.",
+        "explanation": "A melhor resposta permanece a mesma nos dois estados do rival."
+      },
+      {
+        "id": "sup_econ_05_s2",
+        "label": "Coordenação frágil",
+        "situation": "As duas firmas combinam a célula baixa no jogo de uma rodada.",
+        "observation": "Cada uma tem incentivo unilateral a desviar.",
+        "explanation": "Um resultado conjunto melhor não se sustenta como Nash nessa matriz."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual perfil é Nash na matriz apresentada?",
+        "options": [
+          {
+            "text": "Baixa para ambas",
+            "correct": false,
+            "explanation": "Cada firma pode elevar lucro de 40 para 50 por desvio unilateral."
+          },
+          {
+            "text": "Alta para A e baixa para B",
+            "correct": false,
+            "explanation": "B elevaria lucro de 10 para 20 escolhendo alta."
+          },
+          {
+            "text": "Alta para ambas",
+            "correct": true,
+            "explanation": "Nenhuma firma ganha desviando sozinha para baixa quando a rival está alta."
+          }
+        ]
+      },
+      {
+        "question": "Por que baixa domina alta não é uma conclusão válida aqui?",
+        "options": [
+          {
+            "text": "Alta rende mais contra as duas escolhas rivais",
+            "correct": true,
+            "explanation": "As comparações 50>40 e 20>10 mostram a dominância oposta."
+          },
+          {
+            "text": "Nash sempre maximiza lucro total",
+            "correct": false,
+            "explanation": "A condição de melhor resposta é individual e não maximiza necessariamente a soma."
+          },
+          {
+            "text": "A matriz precisa conter preços",
+            "correct": false,
+            "explanation": "Pagamentos e estratégias especificados bastam para analisar este jogo abstrato."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CORE Econ: social interactions",
+        "url": "https://books.core-econ.org/the-economy-v1/book/text/04.html"
+      }
+    ]
+  },
+  "sup_econ_06": {
+    "context": "Duas classes de ativos fictícios ilustram média e variância de uma carteira. O exercício é uma comparação matemática e não recomenda investimento real.",
+    "theory": "Na análise média-variância, μp=wμA+(1−w)μB e σp²=w²σA²+(1−w)²σB²+2w(1−w)ρσAσB. A fronteira eficiente exclui carteiras dominadas em retorno e risco previstos. Estimativas históricas são incertas e variância não capta todo risco; custos, liquidez e restrições mudam a solução.",
+    "workedExample": "Use retornos esperados 8% e 4%, desvios 20% e 10%, correlação zero e pesos 50/50. Retorno esperado=6%; variância=0,25×0,04+0,25×0,01=0,0125 e desvio≈11,18%. Sem restrições adicionais, o peso de mínima variância em A é 0,01/0,05=20%.",
+    "investigation": [
+      "Calcule retorno e variância com as taxas em fração decimal.",
+      "Compare pesos de 20% e 50% em A.",
+      "Altere a correlação e discuta o efeito sobre diversificação."
+    ],
+    "expectedEvidence": "O relatório deve obter 6% e 11,18% para 50/50, distinguindo previsão estatística de garantia de retorno.",
+    "reflection": "Como erro na correlação estimada pode deslocar a fronteira eficiente?",
+    "scenarios": [
+      {
+        "id": "sup_econ_06_s0",
+        "label": "Correlação perfeita",
+        "situation": "Use ρ=1 e pesos 50/50 nos mesmos ativos.",
+        "observation": "O desvio sobe para 15%.",
+        "explanation": "Com movimentos perfeitamente conjuntos, a diversificação perde o benefício de correlação baixa."
+      },
+      {
+        "id": "sup_econ_06_s1",
+        "label": "Mínima variância",
+        "situation": "Use 20% em A e 80% em B com ρ=0.",
+        "observation": "O desvio é √0,008≈8,94%.",
+        "explanation": "O peso reflete as variâncias distintas e não a simples divisão igual do capital."
+      },
+      {
+        "id": "sup_econ_06_s2",
+        "label": "Cenário de crise",
+        "situation": "As correlações mudam em uma crise fictícia.",
+        "observation": "O risco realizado pode superar a previsão.",
+        "explanation": "Parâmetros não são constantes garantidas; o resultado depende do regime e das estimativas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual desvio da carteira 50/50 com correlação zero?",
+        "options": [
+          {
+            "text": "15%",
+            "correct": false,
+            "explanation": "Esse resultado vale para correlação positiva perfeita neste exemplo."
+          },
+          {
+            "text": "6%",
+            "correct": false,
+            "explanation": "Seis por cento é retorno esperado, não desvio padrão."
+          },
+          {
+            "text": "Aproximadamente 11,18%",
+            "correct": true,
+            "explanation": "A raiz da variância 0,0125 é 0,1118 em fração decimal."
+          }
+        ]
+      },
+      {
+        "question": "O que significa estar na fronteira eficiente estimada?",
+        "options": [
+          {
+            "text": "Não ser dominado em média e variância no conjunto modelado",
+            "correct": true,
+            "explanation": "A eficiência depende das previsões, restrições e critérios adotados."
+          },
+          {
+            "text": "Ter retorno garantido",
+            "correct": false,
+            "explanation": "Média prevista não assegura resultado futuro de uma carteira."
+          },
+          {
+            "text": "Eliminar todos os riscos",
+            "correct": false,
+            "explanation": "Diversificação pode reduzir componentes de risco, sem eliminar incerteza geral."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "SEC Investor.gov: asset allocation and diversification",
+        "url": "https://www.investor.gov/introduction-investing/getting-started/asset-allocation"
+      }
+    ]
+  },
+  "sup_econ_07": {
+    "context": "Uma opção europeia fictícia é precificada para estudar Black-Scholes. O modelo serve para explorar hipóteses e sensibilidade, sem orientar negociação real.",
+    "theory": "Sem dividendos, C=S N(d1)−K e^(−rT)N(d2), d1=[ln(S/K)+(r+σ²/2)T]/(σ√T), d2=d1−σ√T. O modelo assume volatilidade e taxa constantes, negociação contínua idealizada e ausência de arbitragem. Saltos, fricções, dividendos e exercício antecipado podem invalidar sua aplicação direta.",
+    "workedExample": "Adote S=K=R$100, r=0, T=1 ano e σ=0,20 ano⁻¹/². Então d1=0,1 e d2=−0,1. Com N(0,1)=0,53983 e N(−0,1)=0,46017, C=100×0,07966≈R$7,97. Esses valores são hipotéticos, não cotações.",
+    "investigation": [
+      "Identifique ativo, strike, prazo e volatilidade anualizada.",
+      "Calcule d1 e d2 e use a normal acumulada fornecida.",
+      "Compare limites no vencimento com o preço antes do vencimento."
+    ],
+    "expectedEvidence": "A resposta deve obter aproximadamente R$7,97 e listar hipóteses relevantes, sem confundir prêmio e valor intrínseco.",
+    "reflection": "Por que volatilidade constante pode ser inadequada para opções reais?",
+    "scenarios": [
+      {
+        "id": "sup_econ_07_s0",
+        "label": "Vencimento imediato",
+        "situation": "Faça T tender a zero com S e K fixos.",
+        "observation": "O valor tende a max(S−K,0).",
+        "explanation": "Sem tempo restante, o pagamento final determina o valor da opção europeia."
+      },
+      {
+        "id": "sup_econ_07_s1",
+        "label": "Volatilidade maior",
+        "situation": "Eleve σ mantendo S, K, r e T do exemplo.",
+        "observation": "O prêmio da call europeia tende a aumentar.",
+        "explanation": "Maior dispersão amplia potencial favorável com perda limitada ao não exercício."
+      },
+      {
+        "id": "sup_econ_07_s2",
+        "label": "Exercício antecipado",
+        "situation": "Considere uma opção americana com dividendos.",
+        "observation": "A fórmula básica pode não representar o contrato.",
+        "explanation": "Direito de exercício anterior e pagamentos do ativo exigem tratamento adicional."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual preço aproximado decorre dos valores normais fornecidos?",
+        "options": [
+          {
+            "text": "R$0",
+            "correct": false,
+            "explanation": "O valor intrínseco é zero, mas existe valor temporal antes do vencimento."
+          },
+          {
+            "text": "R$53,98",
+            "correct": false,
+            "explanation": "Esse é apenas o primeiro termo, sem descontar o termo do strike."
+          },
+          {
+            "text": "R$7,97",
+            "correct": true,
+            "explanation": "A diferença 0,07966 multiplicada por 100 resulta em cerca de 7,97."
+          }
+        ]
+      },
+      {
+        "question": "Qual hipótese pertence ao modelo básico usado?",
+        "options": [
+          {
+            "text": "Volatilidade constante e exercício europeu",
+            "correct": true,
+            "explanation": "O exemplo assume parâmetros constantes e pagamento apenas no vencimento."
+          },
+          {
+            "text": "Retorno futuro do ativo conhecido",
+            "correct": false,
+            "explanation": "A incerteza de preço é central ao modelo e não desaparece."
+          },
+          {
+            "text": "Ausência de qualquer risco de mercado",
+            "correct": false,
+            "explanation": "A precificação não elimina riscos reais ou erros dos parâmetros."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Scholes: Nobel Lecture on derivatives",
+        "url": "https://www.nobelprize.org/uploads/2018/06/scholes-lecture.pdf"
+      }
+    ]
+  },
+  "sup_econ_08": {
+    "context": "Uma fábrica fictícia vende um único produto e investiga seu ponto de equilíbrio operacional. O modelo separa custo fixo, custo variável e margem de contribuição.",
+    "theory": "Com preço p, custo variável unitário v e custo fixo F, lucro operacional é (p−v)Q−F. O equilíbrio é Q*=F/(p−v), se p>v. A margem de contribuição paga o fixo antes de gerar lucro. O modelo presume linearidade, preço constante e produção vendida; capacidade e mistura de produtos impõem limites.",
+    "workedExample": "Para p=R$50, v=R$30 e F=R$10.000/mês, a margem é R$20 por unidade e Q*=500 unidades/mês. Em Q=600, lucro=20×600−10.000=R$2.000. A margem de segurança é 100 unidades, ou 100/600≈16,67% das vendas.",
+    "investigation": [
+      "Separe custos fixos mensais de custos por unidade.",
+      "Calcule equilíbrio em unidades e receita.",
+      "Avalie lucro e margem de segurança para 600 vendas."
+    ],
+    "expectedEvidence": "Devem constar equilíbrio de 500 unidades, receita de R$25.000 e lucro de R$2.000 em 600 unidades.",
+    "reflection": "Como um desconto de preço altera a quantidade necessária para equilíbrio?",
+    "scenarios": [
+      {
+        "id": "sup_econ_08_s0",
+        "label": "Preço menor",
+        "situation": "Reduza o preço para R$45 sem alterar custos.",
+        "observation": "O equilíbrio sobe a 666,67 unidades.",
+        "explanation": "A contribuição cai a 15; unidades inteiras exigem ao menos 667 vendas para lucro não negativo."
+      },
+      {
+        "id": "sup_econ_08_s1",
+        "label": "Capacidade insuficiente",
+        "situation": "A capacidade máxima fictícia é 400 unidades por mês.",
+        "observation": "O equilíbrio original não é alcançável.",
+        "explanation": "Mesmo vender tudo gera contribuição de 8.000 abaixo do custo fixo de 10.000."
+      },
+      {
+        "id": "sup_econ_08_s2",
+        "label": "Contribuição nula",
+        "situation": "O preço passa a coincidir com custo variável de R$30.",
+        "observation": "Não há ponto finito que cubra o fixo.",
+        "explanation": "Cada unidade acrescenta receita igual ao custo variável e não contribui para F."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a margem de contribuição por unidade original?",
+        "options": [
+          {
+            "text": "R$50",
+            "correct": false,
+            "explanation": "Preço total inclui a parcela necessária para cobrir o custo variável."
+          },
+          {
+            "text": "R$30",
+            "correct": false,
+            "explanation": "Esse é o custo variável, não a contribuição por venda."
+          },
+          {
+            "text": "R$20",
+            "correct": true,
+            "explanation": "Preço de 50 menos variável de 30 deixa 20 para fixo e lucro."
+          }
+        ]
+      },
+      {
+        "question": "Em 600 unidades, qual é o lucro operacional?",
+        "options": [
+          {
+            "text": "R$2.000",
+            "correct": true,
+            "explanation": "A contribuição de 12.000 menos o fixo de 10.000 resulta em 2.000."
+          },
+          {
+            "text": "R$12.000",
+            "correct": false,
+            "explanation": "Esse total ainda precisa cobrir o custo fixo mensal."
+          },
+          {
+            "text": "R$30.000",
+            "correct": false,
+            "explanation": "Esse valor é receita bruta antes de todos os custos."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CORE Econ: firms and production costs",
+        "url": "https://books.core-econ.org/the-economy-v1/book/text/08.html"
+      }
+    ]
+  },
+  "sup_econ_09": {
+    "context": "Uma economia fictícia de preços fixos é resumida por IS e LM lineares. A atividade estuda deslocamentos locais sem tratar o modelo como previsão macroeconômica completa.",
+    "theory": "IS representa equilíbrio no mercado de bens e LM no mercado monetário, com investimento e demanda de moeda sensíveis à taxa de juros. A interseção determina Y e i no modelo estático. Preços fixos, economia fechada e comportamento linear restringem a interpretação; reação do banco central e inflação podem alterar o resultado.",
+    "workedExample": "Use IS: Y=1000−50i e LM: Y=200+50i, com Y em unidades de produto e i em pontos percentuais. Igualando, 800=100i, então i=8 e Y=600. Uma expansão fiscal fictícia muda IS para 1100−50i, resultando i=9 e Y=650.",
+    "investigation": [
+      "Resolva a interseção original preservando a unidade de i.",
+      "Desloque a IS pela expansão fiscal especificada.",
+      "Compare a variação de produto e juros com a LM original."
+    ],
+    "expectedEvidence": "A resposta deve obter (Y=600,i=8) e (Y=650,i=9), reconhecendo o caráter estático e as hipóteses de preços fixos.",
+    "reflection": "Como a resposta mudaria se a política monetária acomodasse a expansão?",
+    "scenarios": [
+      {
+        "id": "sup_econ_09_s0",
+        "label": "Expansão monetária",
+        "situation": "Mude LM para Y=300+50i e preserve IS original.",
+        "observation": "A interseção vira Y=650 e i=7.",
+        "explanation": "Maior disponibilidade de moeda reduz juros e aumenta produto neste sistema linear."
+      },
+      {
+        "id": "sup_econ_09_s1",
+        "label": "LM muito inclinada",
+        "situation": "A demanda monetária é pouco sensível à taxa de juros.",
+        "observation": "O aumento fiscal pode elevar mais os juros.",
+        "explanation": "A inclinação determina a parcela da expansão absorvida por mudança de juros."
+      },
+      {
+        "id": "sup_econ_09_s2",
+        "label": "Preços flexíveis",
+        "situation": "O nível de preços reage ao crescimento da demanda.",
+        "observation": "O modelo original deixa de bastar.",
+        "explanation": "Mudanças de saldos reais e oferta precisam ser incorporadas para analisar a nova dinâmica."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual interseção resolve as equações originais?",
+        "options": [
+          {
+            "text": "Y=1000 e i=0",
+            "correct": false,
+            "explanation": "Esse ponto satisfaz IS, mas LM forneceria Y=200."
+          },
+          {
+            "text": "Y=200 e i=0",
+            "correct": false,
+            "explanation": "Esse ponto satisfaz LM, mas não o mercado de bens."
+          },
+          {
+            "text": "Y=600 e i=8",
+            "correct": true,
+            "explanation": "Substituir i=8 em ambas fornece o mesmo produto 600."
+          }
+        ]
+      },
+      {
+        "question": "A expansão fiscal especificada muda o produto em quanto?",
+        "options": [
+          {
+            "text": "+50 unidades",
+            "correct": true,
+            "explanation": "A nova interseção 650 comparada a 600 representa aumento de cinquenta."
+          },
+          {
+            "text": "+100 unidades",
+            "correct": false,
+            "explanation": "O deslocamento da IS não se transmite integralmente com juros endógenos."
+          },
+          {
+            "text": "−50 unidades",
+            "correct": false,
+            "explanation": "Neste sistema o produto cresce e os juros aumentam."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CORE Econ: aggregate demand and multiplier",
+        "url": "https://books.core-econ.org/the-economy-v1/book/text/14.html"
+      }
+    ]
+  },
+  "sup_econ_10": {
+    "context": "Uma dívida fictícia de R$1.200 é amortizada em três meses. SAC e Price serão comparados sob a mesma taxa, sem tarifas, seguros ou correção monetária.",
+    "theory": "No SAC, amortização A=P/n é constante e juros incidem sobre o saldo de abertura, gerando prestações decrescentes. No Price, prestação PMT=P i/[1−(1+i)^−n] é constante com taxa fixa; juros diminuem e amortização aumenta. Comparação real exige custo efetivo e regras contratuais, que não são representadas neste caso ideal.",
+    "workedExample": "Para P=R$1.200, i=1% ao mês e n=3, SAC amortiza R$400/mês: parcelas 412, 408 e 404, juros totais R$24. Price fornece PMT≈R$408,03 e total≈R$1.224,08, com ajuste de centavos na última parcela conforme arredondamento.",
+    "investigation": [
+      "Monte saldos de abertura e fechamento no SAC.",
+      "Calcule a prestação Price com taxa mensal de 0,01.",
+      "Separe juros e amortização na primeira parcela de cada sistema."
+    ],
+    "expectedEvidence": "Espera-se reconhecer SAC com principal constante e Price com prestação constante, comparando totais sob as mesmas hipóteses.",
+    "reflection": "Por que o custo efetivo de um contrato pode diferir dessa taxa nominal?",
+    "scenarios": [
+      {
+        "id": "sup_econ_10_s0",
+        "label": "Primeiro mês",
+        "situation": "Calcule juros sobre R$1.200 a 1% em ambos.",
+        "observation": "Os juros iniciais são R$12.",
+        "explanation": "A base de abertura é igual; muda a parcela de amortização incluída no pagamento."
+      },
+      {
+        "id": "sup_econ_10_s1",
+        "label": "Saldo SAC",
+        "situation": "Após a primeira amortização SAC de R$400, examine o mês dois.",
+        "observation": "O saldo inicial é R$800 e juros são R$8.",
+        "explanation": "A queda do principal reduz diretamente o encargo de juros do mês seguinte."
+      },
+      {
+        "id": "sup_econ_10_s2",
+        "label": "Encargos adicionais",
+        "situation": "Inclua tarifa fictícia na contratação mantendo a taxa anunciada.",
+        "observation": "O custo efetivo aumenta.",
+        "explanation": "Fluxo líquido recebido menor altera a taxa implícita de todos os pagamentos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual componente permanece constante no SAC ideal?",
+        "options": [
+          {
+            "text": "Parcela total",
+            "correct": false,
+            "explanation": "A parcela cai porque os juros incidem sobre saldos menores."
+          },
+          {
+            "text": "Valor mensal dos juros",
+            "correct": false,
+            "explanation": "Os juros diminuem conforme o saldo devedor é amortizado."
+          },
+          {
+            "text": "Amortização de principal",
+            "correct": true,
+            "explanation": "O principal inicial é dividido igualmente pelo número de períodos."
+          }
+        ]
+      },
+      {
+        "question": "Qual é a primeira amortização Price aproximada?",
+        "options": [
+          {
+            "text": "R$396,03",
+            "correct": true,
+            "explanation": "Da prestação de 408,03 subtraem-se os juros iniciais de 12."
+          },
+          {
+            "text": "R$400",
+            "correct": false,
+            "explanation": "Esse é o valor de amortização constante do SAC."
+          },
+          {
+            "text": "R$408,03",
+            "correct": false,
+            "explanation": "A prestação inclui juros e não corresponde integralmente ao principal."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Banco Central: financing with fixed payments",
+        "url": "https://www.bcb.gov.br/meubc/faqs/p/qual-o-objetivo-do-calculo-do-financiamento-com-prestacoes-fixas"
+      }
+    ]
+  }
+}

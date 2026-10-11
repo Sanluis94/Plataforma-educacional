@@ -1,0 +1,840 @@
+{
+  "pos_rob_01": {
+    "context": "Um braço planar fictício de dois elos permite calcular pose a partir de juntas, sem comandar manipuladores físicos.",
+    "theory": "Cinemática direta compõe transformações dos elos para obter posição e orientação do efetuador. Uma matriz homogênea reúne rotação e translação e sua multiplicação depende da ordem e dos referenciais. A convenção DH padrão usa parâmetros a,α,d,θ e não deve ser misturada à DH modificada. No braço planar de dois giros, x=l1 cosθ1+l2 cos(θ1+θ2) e y=l1 sinθ1+l2 sin(θ1+θ2).",
+    "workedExample": "Para l1=l2=1 m, θ1=π/2 e θ2=−π/2, o primeiro elo aponta para cima e o segundo para a direita. A ponta fica em (1,1) m e sua orientação final é θ1+θ2=0. Somar posições sem considerar rotação daria resultado errado.",
+    "investigation": [
+      "Defina base, referenciais de elos e convenção DH usada.",
+      "Calcule posição e orientação com os ângulos fornecidos.",
+      "Compare a composição das transformações em ordens trocadas."
+    ],
+    "expectedEvidence": "Apresente ponta (1,1) m e orientação zero, distinguindo cinemática direta de resolver juntas para uma pose desejada e sem alegar movimento real.",
+    "reflection": "Por que a translação de um elo precisa ser expressa no referencial correto antes de compor a cadeia?",
+    "scenarios": [
+      {
+        "id": "reto",
+        "label": "Elos alinhados",
+        "situation": "Os dois ângulos articulares são zero e os elos medem um metro.",
+        "observation": "A ponta está em (2,0) metros.",
+        "explanation": "Ambos os deslocamentos apontam para o eixo horizontal positivo."
+      },
+      {
+        "id": "dobrado",
+        "label": "Configuração em L",
+        "situation": "Os ângulos são π/2 e −π/2 no braço descrito.",
+        "observation": "A ponta é (1,1) e a orientação é zero.",
+        "explanation": "O ângulo do segundo elo no mundo é a soma dos dois ângulos articulares."
+      },
+      {
+        "id": "convencao",
+        "label": "DH incompatível",
+        "situation": "Uma tabela DH padrão é multiplicada como se fosse DH modificada.",
+        "observation": "Os referenciais deixam de corresponder.",
+        "explanation": "A ordem de operações e a definição dos parâmetros precisam usar a mesma convenção."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual posição resulta do braço de um metro por elo com os ângulos dados?",
+        "options": [
+          {
+            "text": "(1,1) m",
+            "correct": true,
+            "explanation": "O primeiro elo contribui (0,1) e o segundo contribui (1,0)."
+          },
+          {
+            "text": "(0,2) m",
+            "correct": false,
+            "explanation": "Esse resultado trataria o segundo elo como se também apontasse para cima."
+          },
+          {
+            "text": "(2,0) m",
+            "correct": false,
+            "explanation": "Essa posição ocorre com os dois ângulos iguais a zero."
+          }
+        ]
+      },
+      {
+        "question": "O que a cinemática direta recebe e calcula neste caso?",
+        "options": [
+          {
+            "text": "Recebe juntas e calcula pose",
+            "correct": true,
+            "explanation": "Os ângulos e comprimentos determinam posição e orientação do efetuador."
+          },
+          {
+            "text": "Recebe pose e encontra todas as juntas",
+            "correct": false,
+            "explanation": "Essa é a formulação inversa, que pode ter várias soluções."
+          },
+          {
+            "text": "Recebe torque e calcula força sempre",
+            "correct": false,
+            "explanation": "Essa relação exige análise de estática ou dinâmica além da pose."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MathWorks — Denavit-Hartenberg Transform",
+        "url": "https://www.mathworks.com/help/robotics/ref/rigidbodyjoint.setfixedtransform.html"
+      }
+    ]
+  },
+  "pos_rob_02": {
+    "context": "Um braço fictício pode estar numa pose válida e ainda perder uma direção de velocidade instantânea da ponta.",
+    "theory": "O Jacobiano relaciona velocidades articulares à velocidade de tarefa por v=J(q)q̇. Singularidade ocorre quando seu posto cai em relação ao máximo alcançável para a tarefa escolhida; não basta a matriz ser retangular. Para braço planar 2R, o determinante do Jacobiano de posição é l1l2 sinθ2. Perto de singularidades, inversão pode exigir velocidades articulares grandes; amortecimento regulariza com erro de tarefa.",
+    "workedExample": "Para elos de um metro, θ1=0 e θ2=0, J=[[0,0],[2,1]], de posto um. Qualquer velocidade articular produz vx=0 naquele instante. Com θ2=π/2, o determinante é um e a tarefa de posição planar tem posto dois.",
+    "investigation": [
+      "Derive as colunas do Jacobiano de posição do braço.",
+      "Calcule determinante e posto nas duas configurações.",
+      "Explique o limite instantâneo sem confundi-lo com alcance finito."
+    ],
+    "expectedEvidence": "Mostre posto um na configuração esticada e a direção sem velocidade, declarando a tarefa de posição planar e sem afirmar que o robô perdeu juntas físicas.",
+    "reflection": "Por que uma ponta pode alcançar outra posição por manobra, mesmo sem uma direção instantânea disponível?",
+    "scenarios": [
+      {
+        "id": "esticado",
+        "label": "Posto reduzido",
+        "situation": "O braço está horizontal com os dois ângulos iguais a zero.",
+        "observation": "A primeira linha do Jacobiano é nula.",
+        "explanation": "Rotações infinitesimais produzem apenas velocidade vertical da ponta nessa pose."
+      },
+      {
+        "id": "cotovelo",
+        "label": "Configuração regular",
+        "situation": "O segundo ângulo vale π/2 e os elos medem um metro.",
+        "observation": "O determinante é um.",
+        "explanation": "As duas colunas são independentes para a tarefa de posição em duas dimensões."
+      },
+      {
+        "id": "amortecido",
+        "label": "Perto da singularidade",
+        "situation": "O menor valor singular aproxima-se de zero.",
+        "observation": "A inversão pode ampliar velocidades articulares.",
+        "explanation": "Uma pseudoinversa amortecida troca erro de tarefa por comandos menos extremos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é o posto do Jacobiano [[0,0],[2,1]] na configuração esticada?",
+        "options": [
+          {
+            "text": "1",
+            "correct": true,
+            "explanation": "Existe uma linha não nula e as colunas são dependentes."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "A linha zero impede duas direções independentes de saída."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "A linha com dois e um é não nula."
+          }
+        ]
+      },
+      {
+        "question": "O que caracteriza singularidade para a tarefa definida?",
+        "options": [
+          {
+            "text": "Queda de posto em relação ao máximo alcançável",
+            "correct": true,
+            "explanation": "A condição depende do Jacobiano e da configuração para aquela tarefa."
+          },
+          {
+            "text": "Qualquer Jacobiano retangular",
+            "correct": false,
+            "explanation": "Matrizes retangulares podem ter posto máximo e representar redundância ou tarefa limitada."
+          },
+          {
+            "text": "Ausência de posição geométrica do braço",
+            "correct": false,
+            "explanation": "O braço continua em uma pose definida, embora perca direções instantâneas."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Lynch e Park — Singularities",
+        "url": "https://modernrobotics.northwestern.edu/nu-gm-book-resource/5-3-singularities/"
+      }
+    ]
+  },
+  "pos_rob_03": {
+    "context": "Um veículo fictício de duas rodas independentes segue um modelo sem escorregamento para relacionar velocidades de roda e de corpo.",
+    "theory": "Para raio r e distância b entre rodas, v=r(ωR+ωL)/2 e Ω=r(ωR−ωL)/b. O modelo de uniciclo usa ẋ=v cosθ, ẏ=v sinθ e θ̇=Ω. A restrição não holonômica impede velocidade lateral direta no referencial do corpo, mas manobras permitem deslocamentos laterais líquidos. Escorregamento e geometria incorreta produzem erro de odometria; o cálculo ideal não constitui controle de um robô real.",
+    "workedExample": "Com r=0,1 m, b=0,4 m, ωR=6 e ωL=2 rad/s, v=0,4 m/s e Ω=1 rad/s. O raio instantâneo é v/Ω=0,4 m. Rodas iguais produziriam Ω=0 e deslocamento reto no modelo.",
+    "investigation": [
+      "Calcule velocidade linear e angular a partir das rodas.",
+      "Converta-as para ẋ e ẏ com orientação declarada.",
+      "Compare giro no lugar, linha reta e movimento em arco."
+    ],
+    "expectedEvidence": "Apresente 0,4 m/s e 1 rad/s com convenção direita menos esquerda, distinguindo restrição lateral instantânea de impossibilidade de manobrar.",
+    "reflection": "Como erro no diâmetro de uma roda pode causar deriva mesmo com velocidades comandadas iguais?",
+    "scenarios": [
+      {
+        "id": "iguais",
+        "label": "Movimento reto",
+        "situation": "As rodas têm velocidades angulares iguais e raios iguais.",
+        "observation": "A velocidade angular do corpo é zero.",
+        "explanation": "A diferença entre velocidades de roda se anula no modelo ideal."
+      },
+      {
+        "id": "opostas",
+        "label": "Giro no centro",
+        "situation": "As rodas giram com velocidades de mesma magnitude e sinais opostos.",
+        "observation": "A velocidade linear do centro é zero.",
+        "explanation": "A soma se cancela, enquanto a diferença produz rotação."
+      },
+      {
+        "id": "arco",
+        "label": "Rodas desiguais",
+        "situation": "A roda direita gira seis e a esquerda dois radianos por segundo.",
+        "observation": "O corpo segue arco de raio 0,4 metro.",
+        "explanation": "Soma e diferença geram simultaneamente avanço e rotação positivos na convenção definida."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual velocidade angular resulta do exemplo?",
+        "options": [
+          {
+            "text": "1 rad/s",
+            "correct": true,
+            "explanation": "0,1 vezes a diferença quatro, dividida por 0,4, resulta em um."
+          },
+          {
+            "text": "0,4 rad/s",
+            "correct": false,
+            "explanation": "0,4 é a velocidade linear em metros por segundo neste exemplo."
+          },
+          {
+            "text": "4 rad/s",
+            "correct": false,
+            "explanation": "Esse valor omite o raio da roda e a separação entre rodas."
+          }
+        ]
+      },
+      {
+        "question": "O que a restrição não holonômica impede diretamente?",
+        "options": [
+          {
+            "text": "Velocidade lateral instantânea do corpo",
+            "correct": true,
+            "explanation": "O veículo ideal rola para frente e gira, sem deslizar lateralmente."
+          },
+          {
+            "text": "Qualquer manobra entre duas poses",
+            "correct": false,
+            "explanation": "Sequências de avanço e rotação permitem manobras que mudam a posição lateral."
+          },
+          {
+            "text": "Girar no próprio lugar",
+            "correct": false,
+            "explanation": "Velocidades opostas das rodas permitem giro ideal com centro parado."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Introduction to Robotics and Perception — Differential Drive",
+        "url": "https://www.roboticsbook.org/S50_diffdrive_intro.html"
+      }
+    ]
+  },
+  "pos_rob_04": {
+    "context": "Um robô e marcos fictícios têm posições incertas. Reobservar um marco pode corrigir simultaneamente a pose e o mapa estimados.",
+    "theory": "EKF-SLAM clássico estima conjuntamente pose e marcos com média e covariância, incluindo correlações cruzadas. Predição usa movimento; correção usa inovação e Jacobianos do modelo de sensor. É uma aproximação gaussiana local sujeita a linearização e associação incorreta. Um mapa de ocupação por células é uma representação diferente, podendo ser produzido por outro componente; não deve ser confundido automaticamente com o estado de marcos do EKF.",
+    "workedExample": "Como subproblema escalar ilustrativo, x previsto=2 m, P=1 m², medição z=3 m e R=1 m², com H=1. K=P/(P+R)=0,5; x corrigido=2+0,5×(3−2)=2,5 m e P corrigido=0,5 m². Isso não implementa um SLAM completo.",
+    "investigation": [
+      "Separe pose, marcos e covariâncias cruzadas no estado.",
+      "Calcule inovação e ganho no subproblema escalar fornecido.",
+      "Examine o risco de associar uma observação ao marco errado."
+    ],
+    "expectedEvidence": "Mostre ganho meio, estimativa 2,5 m e variância 0,5 m², explicitando a simplificação escalar e a diferença entre marcos e ocupação.",
+    "reflection": "Por que ignorar correlações entre pose e mapa pode tornar a incerteza excessivamente otimista?",
+    "scenarios": [
+      {
+        "id": "inovacao",
+        "label": "Medição acima",
+        "situation": "A posição prevista é dois e a medição direta é três metros.",
+        "observation": "A inovação vale um metro.",
+        "explanation": "O resíduo compara observação com sua previsão no modelo do sensor."
+      },
+      {
+        "id": "ganho",
+        "label": "Confianças iguais",
+        "situation": "Variâncias de previsão e medição são ambas um no caso escalar.",
+        "observation": "O ganho é meio.",
+        "explanation": "A correção fica a meio caminho sob as hipóteses lineares fornecidas."
+      },
+      {
+        "id": "associacao",
+        "label": "Marco equivocado",
+        "situation": "Uma medida é atribuída a um marco diferente do observado.",
+        "observation": "A inovação passa a representar uma associação falsa.",
+        "explanation": "O filtro pode corrigir pose e mapa na direção errada apesar de contas algébricas corretas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual posição corrigida resulta do exemplo escalar?",
+        "options": [
+          {
+            "text": "2,5 m",
+            "correct": true,
+            "explanation": "A estimativa soma metade da inovação um ao valor previsto dois."
+          },
+          {
+            "text": "3 m",
+            "correct": false,
+            "explanation": "Esse resultado confiaria integralmente na medição, ignorando a incerteza dada."
+          },
+          {
+            "text": "2 m",
+            "correct": false,
+            "explanation": "Esse valor ignoraria uma medição informativa no modelo apresentado."
+          }
+        ]
+      },
+      {
+        "question": "Qual representação é típica do estado no EKF-SLAM clássico citado?",
+        "options": [
+          {
+            "text": "Pose e marcos com correlações",
+            "correct": true,
+            "explanation": "O estado conjunto acompanha incerteza e dependência entre essas variáveis."
+          },
+          {
+            "text": "Toda célula de ocupação automaticamente",
+            "correct": false,
+            "explanation": "O mapa por células é uma representação distinta da formulação de marcos estudada."
+          },
+          {
+            "text": "Apenas um ponto sem incerteza",
+            "correct": false,
+            "explanation": "A covariância é componente essencial da estimativa probabilística."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CMU — SLAM and EKF Course",
+        "url": "https://web2.qatar.cmu.edu/~gdicaro/16311/"
+      }
+    ]
+  },
+  "pos_rob_05": {
+    "context": "Um planejador fictício amostra configurações livres e reconsidera conexões. O custo de uma rota válida pode melhorar conforme surgem amostras.",
+    "theory": "RRT* expande uma árvore e usa seleção de pai e religação de vizinhos para melhorar custos. Sua otimalidade é assintótica sob condições de amostragem, conectividade, espaço livre e função de custo; uma execução finita não garante o ótimo. Colisão deve ser verificada ao longo de cada conexão, não só nos extremos. Espaço de configurações inclui a geometria completa do robô e pode diferir de um desenho de pontos no plano.",
+    "workedExample": "Um nó v custa 8 desde a raiz. Um novo nó u custa 3 e uma conexão válida u→v custa 2; religar v por u reduz seu custo a 5. Custos de descendentes precisam ser atualizados. Se a conexão cruza um obstáculo, essa melhoria é inválida.",
+    "investigation": [
+      "Calcule custo de v com o pai antigo e com o candidato u.",
+      "Verifique o segmento inteiro contra obstáculos fictícios.",
+      "Propague a mudança de custo aos descendentes de v."
+    ],
+    "expectedEvidence": "Mostre redução de oito para cinco apenas para aresta livre, separando melhora finita de garantia assintótica e sem alegar execução de planejador.",
+    "reflection": "Por que diminuir custo de um nó sem atualizar seus descendentes torna os registros inconsistentes?",
+    "scenarios": [
+      {
+        "id": "religacao",
+        "label": "Pai melhor",
+        "situation": "u custa três e a aresta livre até v custa dois.",
+        "observation": "O novo custo de v é cinco.",
+        "explanation": "A religação aceita um caminho mais barato e preserva a estrutura sem ciclo."
+      },
+      {
+        "id": "colisao",
+        "label": "Segmento bloqueado",
+        "situation": "Os extremos estão livres, mas a ligação atravessa um obstáculo.",
+        "observation": "A aresta deve ser rejeitada.",
+        "explanation": "Testar só os nós não garante uma trajetória livre entre eles."
+      },
+      {
+        "id": "finito",
+        "label": "Amostras limitadas",
+        "situation": "O algoritmo dispõe de poucas amostras de configurações.",
+        "observation": "A melhor rota encontrada pode ser subótima.",
+        "explanation": "Otimalidade assintótica não é um certificado de ótimo para uma rodada finita."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual custo de v pelo novo pai no exemplo?",
+        "options": [
+          {
+            "text": "5",
+            "correct": true,
+            "explanation": "O custo três de u soma a conexão de custo dois."
+          },
+          {
+            "text": "8",
+            "correct": false,
+            "explanation": "Oito é o caminho antigo antes de aceitar a melhoria."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Dois conta só a aresta e omite chegar da raiz até u."
+          }
+        ]
+      },
+      {
+        "question": "Qual condição invalida a religação de menor custo?",
+        "options": [
+          {
+            "text": "A aresta atravessar obstáculo",
+            "correct": true,
+            "explanation": "Uma conexão precisa ser factível antes de ser comparada pelo custo."
+          },
+          {
+            "text": "Ter custo menor que o caminho antigo",
+            "correct": false,
+            "explanation": "Essa é precisamente a motivação da melhoria de caminho."
+          },
+          {
+            "text": "O nó possuir descendentes",
+            "correct": false,
+            "explanation": "Descendentes exigem atualização dos custos, mas não proíbem a religação válida."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Karaman e Frazzoli — Optimal Motion Planning",
+        "url": "https://arxiv.org/abs/1105.1186"
+      }
+    ]
+  },
+  "pos_rob_06": {
+    "context": "Uma junta fictícia move uma massa sob gravidade. Energias fornecem um caminho consistente para obter o torque exigido.",
+    "theory": "Euler-Lagrange usa L=T−V e τ=d/dt(∂L/∂q̇)−∂L/∂q, com forças não conservativas tratadas explicitamente. Manipuladores podem ser escritos M(q)q̈+C(q,q̇)q̇+g(q)=τ. M é simétrica e positiva definida para coordenadas independentes e massas físicas adequadas. Termos de Coriolis dependem da parametrização; gravidade depende da convenção do ângulo. Cinemática sozinha não determina torques.",
+    "workedExample": "Considere massa pontual m=2 kg a l=0,5 m, ângulo q medido da vertical para baixo. T=ml²q̇²/2 e V=mgl(1−cosq). Então τ=0,5q̈+9,81sinq. Para q=π/2 e q̈=2 rad/s², τ=1+9,81=10,81 N·m, sem atrito.",
+    "investigation": [
+      "Declare origem angular e escreva energia cinética e potencial.",
+      "Derive a equação da junta pelo formalismo de Lagrange.",
+      "Calcule torque e separe contribuições inercial e gravitacional."
+    ],
+    "expectedEvidence": "Apresente 10,81 N·m sob massa pontual e ausência de atrito, sem transferir esse valor a um manipulador real de distribuição de massa diferente.",
+    "reflection": "Como mudar a origem do ângulo altera a expressão do termo gravitacional sem alterar a física?",
+    "scenarios": [
+      {
+        "id": "vertical-baixo",
+        "label": "Equilíbrio inferior",
+        "situation": "O ângulo é zero na vertical para baixo.",
+        "observation": "O torque gravitacional modelado é zero.",
+        "explanation": "Seno de zero anula a contribuição da gravidade nessa configuração."
+      },
+      {
+        "id": "horizontal",
+        "label": "Torque estático",
+        "situation": "A massa está horizontal, com q=π/2 e aceleração zero.",
+        "observation": "O torque de sustentação é 9,81 N·m.",
+        "explanation": "O braço de alavanca é meio metro para a massa de dois quilogramas."
+      },
+      {
+        "id": "aceleracao",
+        "label": "Termo inercial",
+        "situation": "A aceleração angular aumenta para dois radianos por segundo ao quadrado.",
+        "observation": "A parcela inercial é um N·m.",
+        "explanation": "A inércia ml² vale 0,5 kg·m² e multiplica a aceleração."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual inércia tem a massa pontual fornecida em torno da junta?",
+        "options": [
+          {
+            "text": "0,5 kg·m²",
+            "correct": true,
+            "explanation": "Dois vezes meio metro ao quadrado resulta em meio."
+          },
+          {
+            "text": "1 kg·m²",
+            "correct": false,
+            "explanation": "Esse resultado esquece elevar o comprimento ao quadrado."
+          },
+          {
+            "text": "2 kg·m²",
+            "correct": false,
+            "explanation": "A massa não é por si o momento de inércia."
+          }
+        ]
+      },
+      {
+        "question": "Qual torque total no caso horizontal com aceleração dois?",
+        "options": [
+          {
+            "text": "10,81 N·m",
+            "correct": true,
+            "explanation": "Somam-se um de inércia e 9,81 de gravidade na convenção adotada."
+          },
+          {
+            "text": "9,81 N·m",
+            "correct": false,
+            "explanation": "Esse é o caso estático, que omite a aceleração proposta."
+          },
+          {
+            "text": "1 N·m",
+            "correct": false,
+            "explanation": "Esse valor ignora a gravidade na posição horizontal."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Lynch e Park — Lagrangian Dynamics",
+        "url": "https://modernrobotics.northwestern.edu/nu-gm-book-resource/chapter-8-1-lagrangian-formulation-of-dynamics-part-1-of-2/"
+      }
+    ]
+  },
+  "pos_rob_07": {
+    "context": "Uma interação unidimensional fictícia usa rigidez e amortecimento virtuais para relacionar deslocamento e força, sem contato físico com pessoas.",
+    "theory": "Controle de impedância procura moldar a relação entre força e movimento como massa, mola e amortecedor. Em um modelo ideal, M ë+B ė+Ke=Fext com parâmetros positivos pode representar comportamento passivo sob convenções de potência consistentes. A implementação real inclui discretização, atrasos, saturação e laços internos que alteram estabilidade. Rigidez baixa pode favorecer conformidade, mas não comprova segurança para contato humano.",
+    "workedExample": "No modelo estático Fext=Ke, K=100 N/m e Fext=5 N dão e=0,05 m. Ao dobrar K para 200 N/m com a mesma força, e cai a 0,025 m. Amortecimento não muda esse equilíbrio estático ideal, mas altera transientes.",
+    "investigation": [
+      "Declare sinal de força e deslocamento no modelo de impedância.",
+      "Calcule os dois equilíbrios estáticos com rigidez diferente.",
+      "Liste efeitos de atraso e saturação excluídos da conta ideal."
+    ],
+    "expectedEvidence": "Mostre cinco e dois vírgula cinco centímetros, distinguindo conformidade estática de estabilidade implementada e de validação de segurança.",
+    "reflection": "Por que um amortecimento positivo na equação ideal pode ser insuficiente diante de atraso digital?",
+    "scenarios": [
+      {
+        "id": "mola-suave",
+        "label": "Rigidez cem",
+        "situation": "A força externa é cinco newtons e a rigidez cem N/m.",
+        "observation": "O deslocamento estático é cinco centímetros.",
+        "explanation": "Dividir força por rigidez fornece a deformação ideal da mola virtual."
+      },
+      {
+        "id": "mola-rigida",
+        "label": "Rigidez dobrada",
+        "situation": "A rigidez passa a duzentos com força mantida.",
+        "observation": "A deformação cai pela metade.",
+        "explanation": "Maior rigidez resiste mais ao mesmo deslocamento no regime estático."
+      },
+      {
+        "id": "atraso",
+        "label": "Laço amostrado",
+        "situation": "A força é aplicada por controle digital com atraso significativo.",
+        "observation": "A estabilidade ideal precisa ser reavaliada.",
+        "explanation": "Atraso e limitações dos laços internos podem alterar passividade e margem de estabilidade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual deslocamento estático corresponde a 5 N e 100 N/m?",
+        "options": [
+          {
+            "text": "0,05 m",
+            "correct": true,
+            "explanation": "Cinco dividido por cem resulta em cinco centésimos de metro."
+          },
+          {
+            "text": "20 m",
+            "correct": false,
+            "explanation": "Esse resultado inverte a razão força sobre rigidez."
+          },
+          {
+            "text": "0,5 m",
+            "correct": false,
+            "explanation": "Esse valor é dez vezes maior que a divisão indicada."
+          }
+        ]
+      },
+      {
+        "question": "O que a conta estática de impedância deixa de provar?",
+        "options": [
+          {
+            "text": "Segurança e estabilidade de um contato real",
+            "correct": true,
+            "explanation": "A implementação requer considerar dinâmica, atrasos e limites além do equilíbrio ideal."
+          },
+          {
+            "text": "Que dobrar rigidez reduz a deformação ideal",
+            "correct": false,
+            "explanation": "Essa relação foi calculada diretamente para força constante."
+          },
+          {
+            "text": "Que força e rigidez precisam de unidades compatíveis",
+            "correct": false,
+            "explanation": "A divisão N por N/m fornece justamente metros."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Impedance Control and Passivity Analysis",
+        "url": "https://arxiv.org/abs/1406.4047"
+      }
+    ]
+  },
+  "pos_rob_08": {
+    "context": "Um corredor fictício tem lugares visualmente parecidos. A estimativa de pose precisa manter hipóteses separadas até que sensores as distingam.",
+    "theory": "Monte Carlo Localization representa uma distribuição de pose por partículas ponderadas. Predição amostra movimento; atualização pondera por verossimilhança das medições; reamostragem concentra recursos, mas pode perder diversidade. Múltiplos modos são úteis em ambientes ambíguos. Tamanho efetivo Neff=1/Σwᵢ², para pesos normalizados, indica degeneração de pesos, não erro de localização nem quantidade literal de poses corretas.",
+    "workedExample": "Para pesos [0,5;0,25;0,25], a soma dos quadrados é 0,375 e Neff=1/0,375=8/3≈2,67. Se uma partícula recebe peso um e as outras zero, Neff=1. A média de dois modos separados pode cair numa parede.",
+    "investigation": [
+      "Normalize pesos antes de calcular a soma dos quadrados.",
+      "Calcule Neff e compare com o caso concentrado.",
+      "Desenhe dois modos e avalie se a média representa uma pose plausível."
+    ],
+    "expectedEvidence": "Apresente 2,67 e um nos dois casos, explicando diversidade e limites de uma média multimodal sem afirmar localizar um robô real.",
+    "reflection": "Como reamostrar cedo demais pode eliminar a hipótese correta de localização?",
+    "scenarios": [
+      {
+        "id": "equilibrio",
+        "label": "Pesos uniformes",
+        "situation": "Três partículas têm peso um terço cada.",
+        "observation": "O tamanho efetivo é três.",
+        "explanation": "A soma dos quadrados vale um terço quando a massa é igualmente distribuída."
+      },
+      {
+        "id": "concentrado",
+        "label": "Uma dominante",
+        "situation": "Uma partícula recebe todo o peso normalizado.",
+        "observation": "O tamanho efetivo cai para um.",
+        "explanation": "A degeneração indica concentração, sem provar que essa pose é verdadeira."
+      },
+      {
+        "id": "dois-modos",
+        "label": "Corredores parecidos",
+        "situation": "Dois grupos de partículas permanecem em corredores distintos.",
+        "observation": "A média pode cair entre os corredores.",
+        "explanation": "Representar modos separadamente evita resumir ambiguidade por uma pose impossível."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual Neff resulta de pesos 0,5;0,25;0,25?",
+        "options": [
+          {
+            "text": "8/3≈2,67",
+            "correct": true,
+            "explanation": "O inverso de 0,25+0,0625+0,0625 é oito terços."
+          },
+          {
+            "text": "3",
+            "correct": false,
+            "explanation": "Três seria o caso de pesos iguais, diferente do proposto."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "Um exigiria concentração total de peso numa única partícula."
+          }
+        ]
+      },
+      {
+        "question": "O que um Neff baixo indica diretamente?",
+        "options": [
+          {
+            "text": "Concentração dos pesos",
+            "correct": true,
+            "explanation": "A medida resume degeneração, não confirma erro ou acerto da pose."
+          },
+          {
+            "text": "Que a localização está certamente errada",
+            "correct": false,
+            "explanation": "Pesos concentrados podem ocorrer numa hipótese correta ou incorreta."
+          },
+          {
+            "text": "Que todas as partículas têm o mesmo peso",
+            "correct": false,
+            "explanation": "Pesos uniformes maximizam o tamanho efetivo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Thrun et al. — Robust Monte Carlo Localization",
+        "url": "https://robots.stanford.edu/papers/thrun.robust-mcl.html"
+      }
+    ]
+  },
+  "pos_rob_09": {
+    "context": "Uma câmera estéreo fictícia observa pontos em imagens retificadas. Calibração e correspondências permitem estimar profundidade e movimento.",
+    "theory": "Para estéreo retificado ideal, Z=fB/d, com focal f em pixels, base B em metros e disparidade d em pixels. Pequena disparidade aumenta incerteza de profundidade. A matriz essencial expressa restrição entre vistas calibradas e permite recuperar movimento com ambiguidades; só correspondências monoculares deixam escala indeterminada. Estéreo com base conhecida pode fornecer escala métrica, exigindo calibração e correspondências válidas. ORB combina detector e descritor (oFAST/rBRIEF), sem garantir associações corretas.",
+    "workedExample": "Com f=800 pixels, B=0,1 m e d=40 pixels, Z=800×0,1/40=2 m. Se a disparidade estimada for 39, Z≈2,051 m; um pixel de erro altera cerca de cinco centímetros nesse ponto, sem incluir outros erros.",
+    "investigation": [
+      "Confira unidades de focal, base e disparidade retificada.",
+      "Calcule profundidades para quarenta e trinta e nove pixels.",
+      "Distinga estimação de movimento por E de triangulação estéreo métrica."
+    ],
+    "expectedEvidence": "Mostre dois metros e sensibilidade ao pixel de disparidade, separando a base conhecida da ambiguidade de escala monocular e sem alegar odometria executada.",
+    "reflection": "Por que pontos muito distantes tendem a ter profundidade estéreo mais incerta?",
+    "scenarios": [
+      {
+        "id": "disparidade",
+        "label": "Ponto a dois metros",
+        "situation": "A disparidade é quarenta pixels com os parâmetros fornecidos.",
+        "observation": "A profundidade calculada é dois metros.",
+        "explanation": "O produto focal-base dividido pela disparidade fornece a distância axial ideal."
+      },
+      {
+        "id": "erro-pixel",
+        "label": "Disparidade trinta e nove",
+        "situation": "A correspondência desloca a disparidade em menos um pixel.",
+        "observation": "A profundidade sobe para cerca de 2,051 metros.",
+        "explanation": "A relação inversa transforma erro de correspondência em erro de distância."
+      },
+      {
+        "id": "falsa-associacao",
+        "label": "Textura repetida",
+        "situation": "Duas janelas parecidas são associadas ao ponto errado.",
+        "observation": "A disparidade pode ser incompatível com a cena.",
+        "explanation": "Filtragem geométrica e robustez são necessárias além da semelhança de descritores."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual profundidade resulta de f=800,B=0,1 e d=40?",
+        "options": [
+          {
+            "text": "2 m",
+            "correct": true,
+            "explanation": "Oitenta dividido por quarenta resulta em dois metros."
+          },
+          {
+            "text": "320 m",
+            "correct": false,
+            "explanation": "Esse valor multiplica a disparidade em vez de dividir."
+          },
+          {
+            "text": "0,5 m",
+            "correct": false,
+            "explanation": "Esse resultado inverte a razão focal-base sobre disparidade."
+          }
+        ]
+      },
+      {
+        "question": "Qual recurso permite escala métrica no estéreo ideal descrito?",
+        "options": [
+          {
+            "text": "Base calibrada conhecida em metros",
+            "correct": true,
+            "explanation": "A distância física entre câmeras fixa a escala da triangulação."
+          },
+          {
+            "text": "A matriz essencial monocular isolada sempre",
+            "correct": false,
+            "explanation": "Movimento entre duas vistas monoculares possui ambiguidade de escala."
+          },
+          {
+            "text": "Apenas usar o descritor ORB",
+            "correct": false,
+            "explanation": "Descritores ajudam correspondências e não definem uma unidade física de distância."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "OpenCV — Stereo Depth",
+        "url": "https://docs.opencv.org/4.x/dd/d53/tutorial_py_depthmap.html"
+      },
+      {
+        "title": "OpenCV — Epipolar Geometry",
+        "url": "https://docs.opencv.org/4.x/da/de9/tutorial_py_epipolar_geometry.html"
+      },
+      {
+        "title": "OpenCV — ORB Detector and Descriptor",
+        "url": "https://docs.opencv.org/4.x/d1/d89/tutorial_py_orb.html"
+      }
+    ]
+  },
+  "pos_rob_10": {
+    "context": "Dois agentes pontuais fictícios mantêm separação desejada por um potencial. Aumentar o grupo exige considerar conectividade, obstáculos e comunicação.",
+    "theory": "Controle por potencial define movimento como gradiente negativo de uma energia que penaliza distâncias ou posições indesejadas. Atração e repulsão locais podem produzir equilíbrios indesejados ou colisões sob atraso e saturação; não garantem convergência global. Formações baseadas só em distâncias podem admitir rotações, translações e reflexões equivalentes. Conectividade e rigidez do grafo condicionam quais formas são determinadas.",
+    "workedExample": "Em uma dimensão, x1=0,x2=3 e distância desejada d=2. Para U=((x2−x1)−d)²/2, o erro é um; gradientes são −1 e +1. A regra ẋ=−∇U manda o agente 1 para a direita a 1 unidade/s e o 2 para a esquerda a 1 unidade/s no instante inicial.",
+    "investigation": [
+      "Derive os dois gradientes do potencial escalar.",
+      "Confira que os comandos iniciais reduzem o erro de separação.",
+      "Acrescente obstáculo fictício e discuta equilíbrio local e conectividade."
+    ],
+    "expectedEvidence": "Mostre velocidades +1 e −1 sob agentes pontuais e ausência de limites, sem chamar essa regra ideal de enxame físico seguro ou convergência garantida.",
+    "reflection": "Como obstáculos podem equilibrar atração e repulsão fora da formação desejada?",
+    "scenarios": [
+      {
+        "id": "aproximacao",
+        "label": "Separação excessiva",
+        "situation": "Os agentes estão separados por três e desejam dois.",
+        "observation": "Os comandos iniciais apontam um para o outro.",
+        "explanation": "O gradiente negativo reduz o erro positivo da distância no modelo escalar."
+      },
+      {
+        "id": "equilibrio",
+        "label": "Distância desejada",
+        "situation": "A separação orientada já vale dois.",
+        "observation": "O gradiente do potencial de formação é zero.",
+        "explanation": "A energia local não pede movimento relativo quando esse único requisito está atendido."
+      },
+      {
+        "id": "minimo-local",
+        "label": "Forças canceladas",
+        "situation": "A repulsão de um obstáculo equilibra a atração da formação.",
+        "observation": "Pode surgir parada fora do objetivo.",
+        "explanation": "Campos locais podem ter equilíbrios espúrios e precisam de planejamento ou estratégia complementar."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quais comandos iniciais resultam do potencial definido?",
+        "options": [
+          {
+            "text": "ẋ1=+1 e ẋ2=−1",
+            "correct": true,
+            "explanation": "Negar os gradientes menos um e mais um aproxima os dois agentes."
+          },
+          {
+            "text": "ẋ1=−1 e ẋ2=+1",
+            "correct": false,
+            "explanation": "Esses comandos aumentariam a separação que já está excessiva."
+          },
+          {
+            "text": "Ambos zero",
+            "correct": false,
+            "explanation": "O erro de separação vale um e produz gradientes não nulos."
+          }
+        ]
+      },
+      {
+        "question": "Qual limite deve ser reconhecido em campos potenciais locais?",
+        "options": [
+          {
+            "text": "Podem existir mínimos locais fora do objetivo",
+            "correct": true,
+            "explanation": "A soma de influências pode zerar o movimento em configurações indesejadas."
+          },
+          {
+            "text": "Sempre convergem globalmente sem hipóteses",
+            "correct": false,
+            "explanation": "Obstáculos, grafo e dinâmica podem impedir essa conclusão."
+          },
+          {
+            "text": "Distâncias determinam sempre uma orientação absoluta",
+            "correct": false,
+            "explanation": "Rotacionar ou transladar uma formação pode preservar todas as distâncias."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CMU — Robot Motion Planning",
+        "url": "https://www.cs.cmu.edu/afs/cs/Web/People/awm/tutorials/motion.html"
+      }
+    ]
+  }
+}

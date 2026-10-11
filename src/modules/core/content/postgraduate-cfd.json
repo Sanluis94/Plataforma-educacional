@@ -1,0 +1,832 @@
+{
+  "pos_cfd_01": {
+    "context": "Uma célula fictícia de volume finito transporta um escalar. O balanço local será relacionado à conservação global.",
+    "theory": "Volumes finitos integram a equação de transporte em cada célula e somam fluxos pelas faces. Fluxos compartilhados devem ter sinais opostos em células vizinhas. Discretização upwind é robusta, mas introduz difusão numérica; refinamento não substitui condições de contorno consistentes.",
+    "workedExample": "Em regime estacionário, uma célula recebe 6 unidades/s pela esquerda, perde 8 pela direita e possui fonte de 2 unidades/s: 6−8+2=0. Esses fluxos fornecidos fecham o balanço sem executar um solver.",
+    "investigation": [
+      "Adote sinais de entrada e saída.",
+      "Some fluxos e fonte na célula.",
+      "Cancele fluxos internos de duas células."
+    ],
+    "expectedEvidence": "Espera-se resíduo zero e cancelamento de fluxos internos com unidades de quantidade por segundo.",
+    "reflection": "Por que dois fluxos independentes na mesma face violam conservação?",
+    "scenarios": [
+      {
+        "id": "pos_cfd_01_s0",
+        "label": "Fonte ausente",
+        "situation": "Retire a fonte mantendo os fluxos 6 e 8.",
+        "observation": "Há déficit de 2 unidades/s.",
+        "explanation": "O estado estacionário proposto não fecha sem acumulação ou mudança de fluxo."
+      },
+      {
+        "id": "pos_cfd_01_s1",
+        "label": "Faces internas",
+        "situation": "Duas células compartilham fluxo de 5 unidades/s.",
+        "observation": "A contribuição global interna se anula.",
+        "explanation": "A saída de uma é a entrada da outra com sinal oposto."
+      },
+      {
+        "id": "pos_cfd_01_s2",
+        "label": "Upwind",
+        "situation": "Transporte um degrau escalar em malha grossa.",
+        "observation": "O perfil pode ficar artificialmente suave.",
+        "explanation": "A difusão numérica espalha gradientes além da difusão física."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual fonte fecha entradas 6 e saídas 8?",
+        "options": [
+          {
+            "text": "14 unidades/s",
+            "correct": false,
+            "explanation": "A soma dos módulos não representa déficit do balanço."
+          },
+          {
+            "text": "−2 unidades/s",
+            "correct": false,
+            "explanation": "Essa fonte agravaria o déficit nas convenções escolhidas."
+          },
+          {
+            "text": "2 unidades/s",
+            "correct": true,
+            "explanation": "A fonte compensa a diferença de saída menos entrada."
+          }
+        ]
+      },
+      {
+        "question": "Qual propriedade assegura conservação entre células?",
+        "options": [
+          {
+            "text": "Fluxo único compartilhado com sinais opostos",
+            "correct": true,
+            "explanation": "A mesma transferência deve sair de uma célula e entrar na vizinha."
+          },
+          {
+            "text": "Fluxos arbitrários em cada lado",
+            "correct": false,
+            "explanation": "Valores distintos criariam ou destruiriam escalar na interface."
+          },
+          {
+            "text": "Eliminar todas as fontes",
+            "correct": false,
+            "explanation": "Fontes físicas podem existir e devem entrar no balanço."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CFD Direct: Notes on Computational Fluid Dynamics",
+        "url": "https://doc.cfd.direct/notes/cfd-general-principles/"
+      }
+    ]
+  },
+  "pos_cfd_02": {
+    "context": "Um canal incompressível fictício usa SIMPLE para ajustar pressão e velocidade. O foco é satisfazer continuidade após a previsão de momento.",
+    "theory": "SIMPLE resolve momento com pressão estimada, obtém correção de pressão pela continuidade e corrige fluxos e velocidades. Sub-relaxação ajuda estabilidade iterativa, mas não altera a equação física convergida. Resíduo baixo deve acompanhar balanço de massa e grandezas estáveis; pressão precisa de referência em problemas adequados.",
+    "workedExample": "Uma face fictícia possui fluxo previsto 0,12 kg/s e correção −0,02 kg/s: fluxo corrigido=0,10 kg/s. Se entrada e saída corrigidas são 0,10, o defeito global é zero. Isso ilustra uma etapa, sem alegar solução convergida.",
+    "investigation": [
+      "Identifique a previsão de momento.",
+      "Aplique correção ao fluxo de face.",
+      "Confira continuidade e referência de pressão."
+    ],
+    "expectedEvidence": "Devem aparecer fluxo de 0,10 kg/s e distinção entre uma correção local e convergência completa.",
+    "reflection": "Sub-relaxação menor garante uma solução fisicamente correta?",
+    "scenarios": [
+      {
+        "id": "pos_cfd_02_s0",
+        "label": "Correção insuficiente",
+        "situation": "A saída permanece 0,11 contra entrada 0,10 kg/s.",
+        "observation": "O defeito global é 0,01 kg/s.",
+        "explanation": "A continuidade ainda não foi satisfeita nessa iteração."
+      },
+      {
+        "id": "pos_cfd_02_s1",
+        "label": "Relaxação forte",
+        "situation": "Aplique fator 0,2 à correção de uma variável.",
+        "observation": "O avanço iterativo fica menor.",
+        "explanation": "A redução pode estabilizar a sequência ao custo de mais iterações."
+      },
+      {
+        "id": "pos_cfd_02_s2",
+        "label": "Referência",
+        "situation": "Todas as pressões incompressíveis recebem uma constante.",
+        "observation": "Gradientes e velocidades ficam iguais.",
+        "explanation": "O nível absoluto precisa ser fixado quando o problema determina apenas diferenças."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Que equação gera a correção de pressão do SIMPLE?",
+        "options": [
+          {
+            "text": "Somente equação de energia",
+            "correct": false,
+            "explanation": "O acoplamento pressão-velocidade exige informação de massa e momento."
+          },
+          {
+            "text": "Uma curva de ajuste arbitrária",
+            "correct": false,
+            "explanation": "A correção decorre das equações discretizadas do escoamento."
+          },
+          {
+            "text": "Continuidade combinada à previsão de momento",
+            "correct": true,
+            "explanation": "A correção reduz defeitos de massa nos fluxos previstos."
+          }
+        ]
+      },
+      {
+        "question": "Qual fluxo resulta de 0,12 mais correção −0,02 kg/s?",
+        "options": [
+          {
+            "text": "0,10 kg/s",
+            "correct": true,
+            "explanation": "O sinal da correção reduz o fluxo previsto em 0,02."
+          },
+          {
+            "text": "0,14 kg/s",
+            "correct": false,
+            "explanation": "Somar os módulos ignora o sinal negativo da correção."
+          },
+          {
+            "text": "0,02 kg/s",
+            "correct": false,
+            "explanation": "Esse é o módulo da correção, não o fluxo final."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CFD Direct: Notes on Computational Fluid Dynamics",
+        "url": "https://doc.cfd.direct/notes/cfd-general-principles/"
+      }
+    ]
+  },
+  "pos_cfd_03": {
+    "context": "Um escoamento fictício compara fechamentos RANS k-ε e k-ω. A atividade distingue grandezas médias de flutuações resolvidas.",
+    "theory": "RANS introduz tensões de Reynolds que exigem fechamento. k representa energia cinética turbulenta; ε sua taxa de dissipação e ω uma frequência específica. Modelos de viscosidade turbulenta aproximam essas tensões e não reproduzem automaticamente anisotropia ou separação. Condições de entrada e parede devem corresponder à formulação usada.",
+    "workedExample": "No k-ε didático, νt=Cμk²/ε. Com Cμ=0,09, k=0,5 m²/s² e ε=0,05 m²/s³, νt=0,45 m²/s. É um cálculo constitutivo com dados fornecidos, não resultado de simulação.",
+    "investigation": [
+      "Confira unidades de k e ε.",
+      "Calcule viscosidade turbulenta.",
+      "Compare exigências de parede dos fechamentos."
+    ],
+    "expectedEvidence": "A análise deve obter 0,45 m²/s e reconhecer νt como modelo de transporte turbulento, não viscosidade molecular.",
+    "reflection": "Por que concordância entre dois RANS não constitui validação?",
+    "scenarios": [
+      {
+        "id": "pos_cfd_03_s0",
+        "label": "Dissipação maior",
+        "situation": "Dobre a dissipação ε mantendo k constante.",
+        "observation": "νt cai para 0,225 m²/s.",
+        "explanation": "A escala de tempo turbulenta diminui no fechamento fornecido."
+      },
+      {
+        "id": "pos_cfd_03_s1",
+        "label": "Entrada incerta",
+        "situation": "Mude a intensidade turbulenta de entrada.",
+        "observation": "O campo previsto pode mudar.",
+        "explanation": "Condições de contorno introduzem incerteza além da escolha de modelo."
+      },
+      {
+        "id": "pos_cfd_03_s2",
+        "label": "Anisotropia",
+        "situation": "Considere forte rotação com tensões direcionais.",
+        "observation": "O fechamento escalar pode falhar.",
+        "explanation": "Uma única viscosidade turbulenta limita a representação da anisotropia."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a unidade física da energia turbulenta k?",
+        "options": [
+          {
+            "text": "m²/s",
+            "correct": false,
+            "explanation": "Essa é a unidade de viscosidade cinemática."
+          },
+          {
+            "text": "1/s",
+            "correct": false,
+            "explanation": "Essa unidade é típica de ω, não de k."
+          },
+          {
+            "text": "m²/s²",
+            "correct": true,
+            "explanation": "k é energia cinética turbulenta por unidade de massa."
+          }
+        ]
+      },
+      {
+        "question": "Qual νt resulta dos parâmetros dados?",
+        "options": [
+          {
+            "text": "0,45 m²/s",
+            "correct": true,
+            "explanation": "0,09×0,25/0,05 fornece 0,45."
+          },
+          {
+            "text": "0,045 m²/s",
+            "correct": false,
+            "explanation": "Esse valor perde um fator dez na divisão."
+          },
+          {
+            "text": "0,5 m²/s",
+            "correct": false,
+            "explanation": "k isolado não tem unidade de viscosidade e precisa da escala temporal."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NASA: Turbulence Modeling Resource",
+        "url": "https://www.nasa.gov/nasa-turbulence-modeling-resource/"
+      }
+    ]
+  },
+  "pos_cfd_04": {
+    "context": "Uma LES fictícia separa turbilhões resolvidos e escalas submalha. O exercício examina filtro, passo temporal e estatísticas.",
+    "theory": "LES filtra as equações e modela tensões de escalas menores que o filtro. No modelo de Smagorinsky, νsgs=(CsΔ)²|S|. Malha, esquema e filtro afetam resolução; médias exigem período suficiente após transiente. Uma LES em malha inadequada não se torna confiável apenas por usar modelo submalha.",
+    "workedExample": "Com Cs=0,1, Δ=0,01 m e |S|=100 s⁻¹, νsgs=10⁻⁴ m²/s. Dobrar Δ com |S| fixo quadruplica essa viscosidade. A conta ilustra o fechamento, sem gerar série temporal.",
+    "investigation": [
+      "Calcule νsgs e suas unidades.",
+      "Compare dois tamanhos de filtro.",
+      "Planeje médias após descarte do transiente."
+    ],
+    "expectedEvidence": "Espera-se 10⁻⁴ m²/s e reconhecimento da dependência quadrática em Δ sob deformação fixa.",
+    "reflection": "Como distinguir variabilidade física de erro de amostragem temporal?",
+    "scenarios": [
+      {
+        "id": "pos_cfd_04_s0",
+        "label": "Filtro maior",
+        "situation": "Dobre Δ mantendo Cs e |S|.",
+        "observation": "νsgs passa a 4×10⁻⁴ m²/s.",
+        "explanation": "A escala de comprimento aparece ao quadrado no modelo."
+      },
+      {
+        "id": "pos_cfd_04_s1",
+        "label": "Poucas amostras",
+        "situation": "Calcule média sobre um único tempo de passagem.",
+        "observation": "A estatística pode ter grande incerteza.",
+        "explanation": "A correlação temporal reduz o número efetivo de observações."
+      },
+      {
+        "id": "pos_cfd_04_s2",
+        "label": "Perto da parede",
+        "situation": "Use malha grossa junto à parede sem modelo apropriado.",
+        "observation": "Estruturas relevantes ficam não resolvidas.",
+        "explanation": "A exigência de resolução de parede pode dominar o custo da LES."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quais escalas a LES modela diretamente como submalha?",
+        "options": [
+          {
+            "text": "Todas as escalas turbulentas",
+            "correct": false,
+            "explanation": "Esse enunciado se aproxima de uma descrição média e não de LES."
+          },
+          {
+            "text": "Apenas o escoamento médio",
+            "correct": false,
+            "explanation": "LES resolve variações temporais de estruturas maiores."
+          },
+          {
+            "text": "As menores que o filtro adotado",
+            "correct": true,
+            "explanation": "O filtro separa movimento resolvido de contribuições não resolvidas."
+          }
+        ]
+      },
+      {
+        "question": "Dobrar Δ com deformação fixa muda νsgs por qual fator?",
+        "options": [
+          {
+            "text": "Quatro",
+            "correct": true,
+            "explanation": "A dependência (CsΔ)² quadruplica o valor."
+          },
+          {
+            "text": "Dois",
+            "correct": false,
+            "explanation": "A dependência não é linear no comprimento do filtro."
+          },
+          {
+            "text": "Nenhum",
+            "correct": false,
+            "explanation": "A escala de filtro integra explicitamente o fechamento."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CFD Direct: Notes on Computational Fluid Dynamics",
+        "url": "https://doc.cfd.direct/notes/cfd-general-principles/"
+      }
+    ]
+  },
+  "pos_cfd_05": {
+    "context": "Uma interface água-ar fictícia é transportada por VOF. A fração volumétrica permite distinguir transporte da interface de mistura molecular.",
+    "theory": "VOF usa fração α de uma fase em cada célula, limitada a 0≤α≤1. Propriedades podem ser interpoladas por α e a interface requer transporte conservativo e controle de difusão. Tensão superficial e curvatura discretizada podem gerar correntes espúrias. α=0,5 não significa necessariamente solução molecular homogênea.",
+    "workedExample": "Uma célula de 2 cm³ com αágua=0,25 contém 0,5 cm³ de água e 1,5 cm³ de ar. Com densidades didáticas 1000 e 1 kg/m³, a densidade volumétrica interpolada é 250,75 kg/m³.",
+    "investigation": [
+      "Calcule volumes de cada fase.",
+      "Interpole densidade pela fração.",
+      "Confira conservação global e limites de α."
+    ],
+    "expectedEvidence": "A solução deve obter 0,5 cm³ de água e 250,75 kg/m³, reconhecendo a interface representada numericamente.",
+    "reflection": "Por que limitar α sem conservar massa pode mascarar erro?",
+    "scenarios": [
+      {
+        "id": "pos_cfd_05_s0",
+        "label": "Célula cheia",
+        "situation": "Use αágua=1 no mesmo volume.",
+        "observation": "A densidade passa a 1000 kg/m³.",
+        "explanation": "Toda a célula pertence à água na representação de frações."
+      },
+      {
+        "id": "pos_cfd_05_s1",
+        "label": "Fração inválida",
+        "situation": "Uma atualização produz α=1,1.",
+        "observation": "O transporte perdeu a limitação física.",
+        "explanation": "É preciso corrigir o esquema preservando conservação, não apenas aceitar o valor."
+      },
+      {
+        "id": "pos_cfd_05_s2",
+        "label": "Interface parada",
+        "situation": "Há velocidade calculada sem forçamento em uma gota estática.",
+        "observation": "Podem existir correntes espúrias.",
+        "explanation": "Desequilíbrio discreto entre pressão e tensão superficial pode criar movimento artificial."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quanto de água há na célula de 2 cm³ e α=0,25?",
+        "options": [
+          {
+            "text": "1,5 cm³",
+            "correct": false,
+            "explanation": "Esse é o volume complementar de ar."
+          },
+          {
+            "text": "0,25 cm³",
+            "correct": false,
+            "explanation": "A fração é adimensional e precisa multiplicar o volume."
+          },
+          {
+            "text": "0,5 cm³",
+            "correct": true,
+            "explanation": "Multiplicar volume por fração fornece 2×0,25."
+          }
+        ]
+      },
+      {
+        "question": "Qual intervalo é admissível para α?",
+        "options": [
+          {
+            "text": "De zero a um",
+            "correct": true,
+            "explanation": "A fração representa parte do volume total de uma célula."
+          },
+          {
+            "text": "Qualquer número real",
+            "correct": false,
+            "explanation": "Valores negativos ou maiores que um não são frações físicas."
+          },
+          {
+            "text": "Somente zero ou um",
+            "correct": false,
+            "explanation": "Células cortadas pela interface podem ter frações intermediárias."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CFD Direct: Notes on Computational Fluid Dynamics",
+        "url": "https://doc.cfd.direct/notes/cfd-general-principles/"
+      }
+    ]
+  },
+  "pos_cfd_06": {
+    "context": "Uma malha fictícia de células desestruturadas é auditada antes da solução. Qualidade geométrica será separada de independência de malha.",
+    "theory": "Skewness mede desalinhamento entre posição geométrica e interpolação de face; não ortogonalidade envolve normal da face e linha entre centros. Métricas dependem da definição do software. Células ruins prejudicam precisão e estabilidade, mas uma malha geometricamente boa ainda pode ser insuficientemente refinada.",
+    "workedExample": "Duas malhas fornecidas têm 10.000 e 40.000 células. Arrasto calculado didático de 1,20 e 1,15 N difere em 4,17% sobre a primeira. Duas malhas não bastam para estimar ordem e extrapolação confiáveis.",
+    "investigation": [
+      "Identifique a definição de skewness adotada.",
+      "Localize células ruins junto a gradientes fortes.",
+      "Compare uma grandeza integral em malhas sucessivas."
+    ],
+    "expectedEvidence": "A evidência deve separar erro geométrico de erro de resolução e evitar declarar independência com dois números próximos.",
+    "reflection": "Uma média boa de qualidade pode esconder uma célula crítica?",
+    "scenarios": [
+      {
+        "id": "pos_cfd_06_s0",
+        "label": "Célula invertida",
+        "situation": "Um elemento possui volume assinado negativo.",
+        "observation": "A malha precisa de reparo.",
+        "explanation": "Orientação ou conectividade inválida compromete a discretização física."
+      },
+      {
+        "id": "pos_cfd_06_s1",
+        "label": "Refino local",
+        "situation": "Refine somente a camada de cisalhamento.",
+        "observation": "O número de células pode crescer pouco.",
+        "explanation": "Resolução direcionada ao gradiente pode ser mais informativa que refino uniforme."
+      },
+      {
+        "id": "pos_cfd_06_s2",
+        "label": "Média enganosa",
+        "situation": "Uma célula muito distorcida fica perto do choque.",
+        "observation": "A qualidade média oculta um ponto crítico.",
+        "explanation": "Extremos e posição das células ruins importam além do valor agregado."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que skewness baixo assegura sozinho?",
+        "options": [
+          {
+            "text": "Solução exata",
+            "correct": false,
+            "explanation": "Todo esquema finito ainda tem erros de discretização."
+          },
+          {
+            "text": "Convergência física garantida",
+            "correct": false,
+            "explanation": "Condições de contorno e modelos também podem estar inadequados."
+          },
+          {
+            "text": "Apenas boa geometria nessa métrica",
+            "correct": true,
+            "explanation": "A métrica não garante resolução suficiente ou validação física."
+          }
+        ]
+      },
+      {
+        "question": "Qual redução relativa ocorreu de 1,20 para 1,15 N?",
+        "options": [
+          {
+            "text": "4,17%",
+            "correct": true,
+            "explanation": "A diferença 0,05 dividida por 1,20 é aproximadamente 0,0417."
+          },
+          {
+            "text": "5% exatamente",
+            "correct": false,
+            "explanation": "A diferença absoluta de 0,05 N não é uma fração de 5% da base."
+          },
+          {
+            "text": "0,05%",
+            "correct": false,
+            "explanation": "Esse resultado confunde diferença dimensional com porcentagem."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CFD Direct: Notes on Computational Fluid Dynamics",
+        "url": "https://doc.cfd.direct/notes/cfd-general-principles/"
+      }
+    ]
+  },
+  "pos_cfd_07": {
+    "context": "Uma parede fictícia exige escolher a altura da primeira célula. O parâmetro y+ conecta distância física ao tratamento turbulento adotado.",
+    "theory": "Define-se y+=uτy/ν, com uτ=√(τw/ρ). y é a distância do centro da primeira célula à parede. Resolver a subcamada e usar funções de parede são estratégias distintas; faixas admissíveis dependem do modelo e implementação. Não existe um y+ universal que garanta qualidade para qualquer escoamento.",
+    "workedExample": "Com uτ=0,5 m/s, ν=10⁻⁵ m²/s e y=2×10⁻⁵ m, y+=1. Para y+=30 no mesmo fluxo, y=6×10⁻⁴ m. São estimativas dadas, não resultados de um campo convergido.",
+    "investigation": [
+      "Calcule y+ da primeira célula.",
+      "Estime y para um alvo explícito.",
+      "Confira compatibilidade com o tratamento de parede."
+    ],
+    "expectedEvidence": "É preciso obter y+=1 e altura 0,6 mm para alvo 30, distinguindo centro da célula de sua espessura total.",
+    "reflection": "Por que y+ deve ser reavaliado após a solução?",
+    "scenarios": [
+      {
+        "id": "pos_cfd_07_s0",
+        "label": "Viscosidade menor",
+        "situation": "Reduza ν pela metade com y e uτ fixos.",
+        "observation": "y+ dobra para 2.",
+        "explanation": "A distância adimensional cresce quando a escala viscosa diminui."
+      },
+      {
+        "id": "pos_cfd_07_s1",
+        "label": "Tensão maior",
+        "situation": "Quadruplique τw com densidade fixa.",
+        "observation": "uτ e y+ dobram.",
+        "explanation": "A velocidade de atrito depende da raiz quadrada da tensão de parede."
+      },
+      {
+        "id": "pos_cfd_07_s2",
+        "label": "Faixa intermediária",
+        "situation": "A primeira célula cai em região incompatível com a função escolhida.",
+        "observation": "A tensão prevista pode perder precisão.",
+        "explanation": "O tratamento precisa corresponder à resolução real junto à parede."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a unidade do parâmetro de parede y+?",
+        "options": [
+          {
+            "text": "Metros",
+            "correct": false,
+            "explanation": "A distância física y é normalizada pela escala viscosa."
+          },
+          {
+            "text": "Pascals",
+            "correct": false,
+            "explanation": "A tensão participa via uτ, mas não determina a unidade final."
+          },
+          {
+            "text": "Adimensional",
+            "correct": true,
+            "explanation": "uτy e ν têm ambos unidade m²/s e se cancelam."
+          }
+        ]
+      },
+      {
+        "question": "Qual y produz y+=30 com os parâmetros dados?",
+        "options": [
+          {
+            "text": "0,6 mm",
+            "correct": true,
+            "explanation": "y=30×10⁻⁵/0,5=0,0006 m."
+          },
+          {
+            "text": "0,02 mm",
+            "correct": false,
+            "explanation": "Esse y fornece y+=1 no exemplo inicial."
+          },
+          {
+            "text": "30 m",
+            "correct": false,
+            "explanation": "Trinta é o alvo adimensional e não a altura física."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NASA: wall turbulence verification",
+        "url": "https://www.nasa.gov/nasa-turbulence-modeling-resource/"
+      }
+    ]
+  },
+  "pos_cfd_08": {
+    "context": "Um perfil supercrítico fictício opera próximo ao regime transônico. O caso interpreta choque e pressão sem apresentar um solver executado.",
+    "theory": "Mesmo com Mach livre abaixo de um, o escoamento pode acelerar localmente a supersônico e terminar em choque. Perfis supercríticos reduzem certas acelerações e enfraquecem o choque em condições de projeto. Compressibilidade, interação choque-camada limite e separação exigem modelos e malha adequados.",
+    "workedExample": "Com V∞=240 m/s e a∞=300 m/s, M∞=0,8. Uma região fornecida com V=360 m/s e a=300 m/s tem M=1,2. As velocidades ilustrativas não constituem uma solução compressível autoconsistente de todo o perfil.",
+    "investigation": [
+      "Calcule Mach livre e local.",
+      "Marque salto de pressão e possível separação.",
+      "Planeje refinamento e comparação com dados de referência."
+    ],
+    "expectedEvidence": "A interpretação deve distinguir Mach livre 0,8 de bolsa local supersônica 1,2 e reconhecer a natureza fornecida do caso.",
+    "reflection": "Como deslocamento do choque pode afetar sustentação e buffet?",
+    "scenarios": [
+      {
+        "id": "pos_cfd_08_s0",
+        "label": "Mach menor",
+        "situation": "Reduza velocidade livre a 180 m/s com a=300.",
+        "observation": "M∞ cai a 0,6.",
+        "explanation": "A razão velocidade/velocidade do som define o regime de referência."
+      },
+      {
+        "id": "pos_cfd_08_s1",
+        "label": "Choque forte",
+        "situation": "O salto de pressão adverso aumenta.",
+        "observation": "A camada limite pode separar.",
+        "explanation": "A desaceleração abrupta interage com o escoamento viscoso da parede."
+      },
+      {
+        "id": "pos_cfd_08_s2",
+        "label": "Fora do projeto",
+        "situation": "Mude incidência e Mach em relação ao projeto do perfil.",
+        "observation": "O ganho de arrasto pode diminuir.",
+        "explanation": "A forma supercrítica não garante desempenho superior em toda condição."
+      }
+    ],
+    "questions": [
+      {
+        "question": "É possível M∞=0,8 com região local M>1?",
+        "options": [
+          {
+            "text": "Não, todo ponto tem Mach livre",
+            "correct": false,
+            "explanation": "Mach livre descreve o estado distante e não fixa o campo inteiro."
+          },
+          {
+            "text": "Somente sem viscosidade e sem pressão",
+            "correct": false,
+            "explanation": "A aceleração decorre do campo aerodinâmico e não exige ausência de pressão."
+          },
+          {
+            "text": "Sim, a aceleração local pode criar bolsa supersônica",
+            "correct": true,
+            "explanation": "A velocidade e a velocidade do som variam ao redor do perfil."
+          }
+        ]
+      },
+      {
+        "question": "Qual é M para V=360 e a=300 m/s?",
+        "options": [
+          {
+            "text": "1,2",
+            "correct": true,
+            "explanation": "A razão 360/300 resulta em 1,2."
+          },
+          {
+            "text": "0,833",
+            "correct": false,
+            "explanation": "Esse é o inverso da definição de Mach."
+          },
+          {
+            "text": "60",
+            "correct": false,
+            "explanation": "A diferença de velocidades não define o número de Mach."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NASA: supercritical airfoil research",
+        "url": "https://ntrs.nasa.gov/api/citations/19830002758/downloads/19830002758.pdf"
+      }
+    ]
+  },
+  "pos_cfd_09": {
+    "context": "Um canyon urbano fictício contém emissão de um traçador passivo. A atividade relaciona ventilação e concentração sem produzir previsão de saúde pública.",
+    "theory": "O transporte do traçador combina advecção, difusão e fonte. Geometria, direção do vento e condições de entrada influenciam recirculação e troca com o ar acima. Um modelo estacionário mistura bem todo o volume apenas por hipótese; deposição e química podem exigir termos adicionais.",
+    "workedExample": "Na aproximação de caixa bem misturada, emissão=10 mg/s e vazão de renovação=5 m³/s dão excesso de concentração 2 mg/m³ sobre o fundo. O resultado não resolve vórtices nem máximos locais no canyon.",
+    "investigation": [
+      "Defina emissão e fronteira da caixa.",
+      "Calcule excesso sobre concentração de fundo.",
+      "Compare a hipótese de mistura com recirculação local."
+    ],
+    "expectedEvidence": "Obtenha 2 mg/m³ e identifique que concentração média de caixa não equivale à exposição em cada calçada.",
+    "reflection": "Como direção do vento muda ventilação sem alterar emissão?",
+    "scenarios": [
+      {
+        "id": "pos_cfd_09_s0",
+        "label": "Vento maior",
+        "situation": "Dobre a renovação para 10 m³/s com emissão fixa.",
+        "observation": "O excesso cai para 1 mg/m³.",
+        "explanation": "A caixa dilui a mesma massa em maior fluxo de ar."
+      },
+      {
+        "id": "pos_cfd_09_s1",
+        "label": "Fundo poluído",
+        "situation": "Adicione fundo de 0,5 mg/m³ ao caso inicial.",
+        "observation": "A concentração total é 2,5 mg/m³.",
+        "explanation": "O balanço de emissão define excesso, que deve ser somado ao fundo."
+      },
+      {
+        "id": "pos_cfd_09_s2",
+        "label": "Reação",
+        "situation": "O traçador sofre transformação química rápida.",
+        "observation": "A hipótese passiva deixa de bastar.",
+        "explanation": "Produção e consumo químicos precisam integrar a equação de transporte."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual excesso resulta de 10 mg/s e 5 m³/s?",
+        "options": [
+          {
+            "text": "50 mg/m³",
+            "correct": false,
+            "explanation": "Multiplicar emissão e vazão não tem a dimensão necessária."
+          },
+          {
+            "text": "0,5 mg/m³",
+            "correct": false,
+            "explanation": "Esse é o inverso numérico sem a unidade correta."
+          },
+          {
+            "text": "2 mg/m³",
+            "correct": true,
+            "explanation": "A razão emissão/vazão fornece a concentração adicional."
+          }
+        ]
+      },
+      {
+        "question": "Qual limitação pertence à caixa bem misturada?",
+        "options": [
+          {
+            "text": "Não descreve máximos espaciais e vórtices",
+            "correct": true,
+            "explanation": "A concentração uniforme substitui toda a estrutura interna do canyon."
+          },
+          {
+            "text": "Não conserva massa por definição",
+            "correct": false,
+            "explanation": "O balanço da caixa pode conservar massa sob suas hipóteses."
+          },
+          {
+            "text": "Determina risco clínico individual",
+            "correct": false,
+            "explanation": "Concentração média isolada não define dose ou resposta clínica."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CFD Direct: Notes on Computational Fluid Dynamics",
+        "url": "https://doc.cfd.direct/notes/cfd-general-principles/"
+      }
+    ]
+  },
+  "pos_cfd_10": {
+    "context": "Uma parede flexível fictícia interage com fluido em malha ALE. O exercício separa velocidade do material, da malha e do fluido.",
+    "theory": "Na descrição ALE, transporte convectivo depende da velocidade relativa u−um, onde um é velocidade da malha. A interface FSI exige compatibilidade cinemática e equilíbrio de tração. Movimento de células deve respeitar conservação geométrica; deformação excessiva pode requerer remalhamento e transferência conservativa.",
+    "workedExample": "Em uma face, u=2 m/s e um=0,5 m/s no mesmo sentido, então velocidade convectiva relativa=1,5 m/s. Uma força fluida de 100 N deve corresponder a reação estrutural oposta na interface ideal, conforme convenções de normal.",
+    "investigation": [
+      "Calcule velocidade relativa na face.",
+      "Verifique continuidade de movimento e tração na interface.",
+      "Avalie distorção da malha e conservação de volume."
+    ],
+    "expectedEvidence": "Espera-se 1,5 m/s e forças opostas de interface, sem confundir deslocamento de malha com deformação material do fluido.",
+    "reflection": "Por que acoplamento frouxo pode falhar com forte massa adicionada?",
+    "scenarios": [
+      {
+        "id": "pos_cfd_10_s0",
+        "label": "Lagrangiana",
+        "situation": "Faça um=u localmente.",
+        "observation": "O transporte convectivo relativo se anula.",
+        "explanation": "A malha acompanha o movimento naquele ponto da descrição."
+      },
+      {
+        "id": "pos_cfd_10_s1",
+        "label": "Euleriana",
+        "situation": "Fixe um=0 no domínio.",
+        "observation": "A convecção relativa coincide com u.",
+        "explanation": "A malha imóvel recupera a descrição espacial usual."
+      },
+      {
+        "id": "pos_cfd_10_s2",
+        "label": "Malha distorcida",
+        "situation": "A parede desloca-se até degradar as células.",
+        "observation": "Remalhamento pode ser necessário.",
+        "explanation": "A transferência de campos entre malhas precisa preservar as grandezas relevantes."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual velocidade entra na convecção ALE?",
+        "options": [
+          {
+            "text": "u+um sempre",
+            "correct": false,
+            "explanation": "Somar as velocidades não representa o fluxo através da face móvel."
+          },
+          {
+            "text": "Somente um",
+            "correct": false,
+            "explanation": "A velocidade da malha não descreve o movimento relativo do fluido."
+          },
+          {
+            "text": "u−um",
+            "correct": true,
+            "explanation": "O transporte é medido relativamente ao movimento da malha."
+          }
+        ]
+      },
+      {
+        "question": "Qual condição mecânica é exigida na interface ideal?",
+        "options": [
+          {
+            "text": "Equilíbrio de trações com normais opostas",
+            "correct": true,
+            "explanation": "A interação deve transmitir forças iguais e opostas entre os domínios."
+          },
+          {
+            "text": "Tração zero nos dois lados sempre",
+            "correct": false,
+            "explanation": "A interface pode transmitir carregamento não nulo."
+          },
+          {
+            "text": "Pressões independentes sem reação",
+            "correct": false,
+            "explanation": "Ignorar reação estrutural quebra o balanço do acoplamento."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CFD Direct: Notes on Computational Fluid Dynamics",
+        "url": "https://doc.cfd.direct/notes/cfd-general-principles/"
+      }
+    ]
+  }
+}

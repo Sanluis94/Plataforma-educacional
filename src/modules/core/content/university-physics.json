@@ -1,0 +1,174 @@
+{
+  "sup_fis_01": {
+    "context": "Uma máquina vibratória pode atingir amplitudes perigosas perto de sua frequência natural. Compare aqui previsões de um oscilador linear amortecido.",
+    "theory": "O modelo m x''+c x'+k x=F₀ cos(ωt) distingue transiente e regime permanente. A amplitude é F₀/√[(k−mω²)²+(cω)²]. ω₀=√(k/m) e Q=mω₀/c; o pico de deslocamento fica abaixo de ω₀ quando há amortecimento. Euler-Cromer atualiza velocidade antes da posição e exige estudo de passo.",
+    "workedExample": "Caso didático: m=1 kg, k=100 N/m e c=2 N·s/m dão ω₀=10 rad/s e Q=5. Em ω=10 rad/s e F₀=1 N, a amplitude permanente é 0,05 m.",
+    "investigation": ["Calcule a frequência natural antes de comparar frequências de excitação.", "Separe os primeiros ciclos da amplitude depois do transiente.", "Reduza o passo temporal e verifique se amplitude e fase convergem."],
+    "expectedEvidence": "Uma curva amplitude-frequência deve apresentar pico finito e mais largo com maior c, mantendo as unidades de deslocamento.",
+    "reflection": "Por que amplitude elevada em poucos ciclos ainda não prova ressonância permanente?",
+    "scenarios": [
+      {"id":"lenta","label":"Excitação lenta","situation":"Considere ω muito menor que √(k/m).","observation":"A amplitude aproxima-se de F₀/k.","explanation":"A força elástica domina o balanço quase estático."},
+      {"id":"dissipacao","label":"Mais dissipação","situation":"Compare c=2 e c=4 com mesma massa e mola.","observation":"O pico fica menor e mais largo.","explanation":"A dissipação por ciclo impede acumulação tão intensa de energia."},
+      {"id":"passo","label":"Passo inadequado","situation":"Integre com poucos passos por período de oscilação.","observation":"A fase calculada pode se deslocar.","explanation":"Erro numérico precisa ser separado da mudança física de parâmetros."}
+    ],
+    "questions": [
+      {"question":"Qual é Q para m=1 kg, ω₀=10 rad/s e c=2 N·s/m?","options":[{"text":"5","correct":true,"explanation":"A razão mω₀/c vale 10/2, portanto Q=5."},{"text":"20","correct":false,"explanation":"Multiplicar por c inverte o efeito dissipativo sobre Q."},{"text":"0,2","correct":false,"explanation":"Esse valor corresponde ao inverso do fator de mérito."}]},
+      {"question":"Como verificar se um pico calculado depende do passo de integração?","options":[{"text":"Repetir com passo menor","correct":true,"explanation":"Convergência temporal testa a robustez do pico numérico."},{"text":"Mudar só a cor do gráfico","correct":false,"explanation":"A apresentação não altera o erro da integração temporal."},{"text":"Ignorar os ciclos finais","correct":false,"explanation":"Os ciclos finais são necessários para avaliar o regime permanente."}]}
+    ]
+  },
+  "sup_fis_02": {
+    "context": "Um pêndulo de torção permite inferir como a massa se distribui em torno de um eixo, mesmo quando a massa total permanece constante.",
+    "theory": "Para torque restaurador −κθ e pequenas deformações elásticas, Iθ''+κθ=0 e T=2π√(I/κ). I tem unidade kg·m² e κ, N·m/rad. Para eixos paralelos, I=Icm+Md². Deslocar o eixo aumenta I; atrito e torção não linear limitam a inferência pelo período.",
+    "workedExample": "Em um caso ideal, Icm=0,020 kg·m², M=2 kg e d=0,10 m dão I=0,040 kg·m². Com κ=0,10 N·m/rad, T≈3,97 s, contra 2,81 s no eixo central.",
+    "investigation": ["Desenhe o eixo central e um eixo paralelo deslocado.", "Calcule I para três distâncias usando o mesmo corpo rígido.", "Compare T² com d² e interprete a inclinação prevista."],
+    "expectedEvidence": "O gráfico T² versus d² deve ser linear no modelo, com intercepto relacionado a Icm e inclinação positiva proporcional à massa.",
+    "reflection": "Como a massa do suporte alteraria a estimativa do momento de inércia?",
+    "scenarios": [
+      {"id":"central","label":"Eixo central","situation":"Adote d=0 para o mesmo corpo rígido.","observation":"Obtém-se o menor I entre eixos paralelos.","explanation":"O termo Md² desaparece, restando o momento central."},
+      {"id":"deslocado","label":"Eixo deslocado","situation":"Dobre d mantendo massa e constante torsional.","observation":"A contribuição adicional quadruplica.","explanation":"Steiner depende do quadrado da distância entre os eixos."},
+      {"id":"rigidez","label":"Fio mais rígido","situation":"Duplique κ sem redistribuir a massa.","observation":"O período é dividido por √2.","explanation":"A força restauradora maior acelera a oscilação torsional."}
+    ],
+    "questions": [
+      {"question":"Que parcela deve ser somada a Icm ao deslocar o eixo paralelo?","options":[{"text":"Md²","correct":true,"explanation":"O teorema dos eixos paralelos acrescenta massa vezes distância ao quadrado."},{"text":"Md","correct":false,"explanation":"Md não possui a unidade kg·m² de momento de inércia."},{"text":"κd²","correct":false,"explanation":"A constante torsional pertence à suspensão, não à distribuição de massa."}]},
+      {"question":"Mantendo κ, qual mudança duplica T no modelo torsional?","options":[{"text":"Quadruplicar I","correct":true,"explanation":"O período varia com a raiz quadrada do momento de inércia."},{"text":"Duplicar I","correct":false,"explanation":"Duplicar I aumenta o período apenas pelo fator √2."},{"text":"Reduzir I à metade","correct":false,"explanation":"A redução de inércia torna a oscilação mais rápida."}]}
+    ]
+  },
+  "sup_fis_03": {
+    "context": "O interferômetro de Michelson converte deslocamentos de um espelho em contagem de franjas, permitindo discutir resolução e incerteza óptica.",
+    "theory": "A diferença de fase é Δφ=2πΔL/λ. No braço de ida e volta, deslocar o espelho por Δx muda o caminho óptico em 2Δx. Assim N=2Δx/λ franjas passam por um ponto. Coerência, alinhamento e índice de refração importam; contar franjas não garante por si só precisão nanométrica.",
+    "workedExample": "Para um laser ideal de λ=600 nm, deslocar o espelho 3,0 μm altera o caminho em 6,0 μm. Passam N=6000/600=10 franjas; uma franja corresponde a 300 nm de espelho.",
+    "investigation": ["Converta deslocamento e comprimento de onda para a mesma unidade.", "Preveja a contagem para três deslocamentos conhecidos.", "Discuta a incerteza de perder uma franja na contagem total."],
+    "expectedEvidence": "A relação entre deslocamento e contagem deve ter inclinação λ/2, distinguindo caminho óptico de deslocamento mecânico.",
+    "reflection": "Por que resolver uma fração de franja exige mais informação que contar máximos?",
+    "scenarios": [
+      {"id":"uma","label":"Uma franja","situation":"Desloque conceitualmente o espelho por λ/2.","observation":"A fase varia em 2π.","explanation":"A ida e a volta dobram a mudança do caminho óptico."},
+      {"id":"indice","label":"Meio óptico","situation":"Insira um meio transparente em um dos braços.","observation":"As franjas podem mudar de posição.","explanation":"O caminho óptico depende também do índice de refração."},
+      {"id":"coerencia","label":"Baixa coerência","situation":"Considere braços com diferença maior que o comprimento de coerência.","observation":"O contraste das franjas diminui.","explanation":"A relação de fase deixa de permanecer definida na média temporal."}
+    ],
+    "questions": [
+      {"question":"Quantas franjas correspondem a 3 μm de espelho para λ=600 nm?","options":[{"text":"10","correct":true,"explanation":"O caminho muda 6 μm, equivalente a dez comprimentos de onda."},{"text":"5","correct":false,"explanation":"Cinco ignora o percurso de retorno no braço óptico."},{"text":"20","correct":false,"explanation":"Vinte duplica novamente um fator de ida e volta já incluído."}]},
+      {"question":"Qual fator limita a qualidade de uma inferência por franjas?","options":[{"text":"Incerteza da contagem","correct":true,"explanation":"Uma franja perdida altera diretamente o deslocamento inferido."},{"text":"Só a cor da moldura","correct":false,"explanation":"A moldura não determina diferença de caminho nem coerência."},{"text":"Massa total do laser","correct":false,"explanation":"A massa não entra na relação ideal N=2Δx/λ."}]}
+    ]
+  },
+  "sup_fis_04": {
+    "context": "Um rotor apoiado fora do centro pode precessionar sob gravidade. O objetivo é relacionar torque e mudança de direção do momento angular.",
+    "theory": "O torque externo satisfaz dL/dt=τ. Para giro rápido e precessão regular lenta, L≈Iω e Ω≈Mgr/(Iω). Essa aproximação despreza a contribuição transversal ao momento angular. A gravidade muda a direção de L; o momento angular do rotor isolado não se conserva quando o torque gravitacional é não nulo.",
+    "workedExample": "Caso ideal: M=1 kg, r=0,10 m, g=9,8 m/s², I=0,020 kg·m² e ω=100 rad/s. τ=0,98 N·m e Ω≈0,49 rad/s; o período de precessão é cerca de 12,8 s.",
+    "investigation": ["Represente vetorialmente peso, braço de alavanca e torque.", "Compare a precessão prevista para duas velocidades de giro.", "Explique quando nutação e giro lento invalidariam a aproximação."],
+    "expectedEvidence": "A previsão deve mostrar Ω inversamente proporcional a ω e direção compatível com τ=r×Mg, com hipóteses de giro rápido explícitas.",
+    "reflection": "Como pode L mudar de direção sem variar muito seu módulo?",
+    "scenarios": [
+      {"id":"rapido","label":"Giro duplicado","situation":"Aumente ω de 100 para 200 rad/s com mesmo torque.","observation":"Ω cai aproximadamente à metade.","explanation":"Um momento angular maior muda mais lentamente de direção."},
+      {"id":"braco","label":"Braço menor","situation":"Reduza a distância entre apoio e centro de massa.","observation":"A precessão regular prevista diminui.","explanation":"O torque gravitacional é proporcional ao braço perpendicular."},
+      {"id":"nutacao","label":"Liberação abrupta","situation":"Considere o rotor inicialmente sem precessão regular.","observation":"A orientação pode apresentar nutação.","explanation":"Condições iniciais excitam movimentos além da solução estacionária lenta."}
+    ],
+    "questions": [
+      {"question":"Ao dobrar ω no regime de giro rápido, como varia Ω?","options":[{"text":"Diminui à metade","correct":true,"explanation":"Mantido o torque, Ω≈τ/(Iω) é inversamente proporcional ao giro."},{"text":"Dobra","correct":false,"explanation":"Dobrar o momento angular dificulta a mudança de direção."},{"text":"Fica sempre nula","correct":false,"explanation":"Ainda existe torque gravitacional quando o braço é não nulo."}]},
+      {"question":"Qual afirmação descreve o rotor submetido a torque gravitacional?","options":[{"text":"L varia vetorialmente","correct":true,"explanation":"A derivada vetorial de L é igual ao torque externo aplicado."},{"text":"L é necessariamente constante","correct":false,"explanation":"Conservação vetorial exige torque externo resultante nulo."},{"text":"Torque mede energia","correct":false,"explanation":"Torque mede tendência de rotação, embora compartilhe dimensão com energia."}]}
+    ]
+  },
+  "sup_fis_05": {
+    "context": "A frequência de ecos ultrassônicos pode indicar a velocidade de partículas que acompanham um escoamento, desde que a geometria seja conhecida.",
+    "theory": "Para retroespalhamento e v muito menor que a velocidade acústica c, Δf≈2f₀v cosθ/c. O fator dois decorre da emissão e recepção por um espalhador móvel. Mede-se a componente na direção do feixe; obter vazão requer área e perfil de velocidades. c depende do meio e da temperatura.",
+    "workedExample": "Caso didático: f₀=2 MHz, c=1500 m/s, v=0,30 m/s e θ=60° fornecem Δf≈400 Hz. Usar cosθ=1 indevidamente produziria uma velocidade inferida de 0,15 m/s.",
+    "investigation": ["Calcule o desvio previsto para θ=0°, 60° e 90°.", "Compare velocidade axial e componente medida pelo feixe.", "Indique informações adicionais para converter velocidade em vazão."],
+    "expectedEvidence": "Os cálculos devem explicitar o ângulo, o fator dois do eco e a distinção entre velocidade local e vazão volumétrica.",
+    "reflection": "Por que um pequeno erro angular pode ser grave perto de 90°?",
+    "scenarios": [
+      {"id":"paralelo","label":"Feixe paralelo","situation":"Adote θ=0° para o mesmo escoamento.","observation":"O módulo do desvio é máximo.","explanation":"Toda a velocidade projeta-se sobre a direção acústica."},
+      {"id":"transversal","label":"Feixe transversal","situation":"Considere θ=90° na aproximação de primeira ordem.","observation":"O desvio axial previsto é zero.","explanation":"Uma velocidade transversal tem projeção nula no feixe."},
+      {"id":"perfil","label":"Perfil não uniforme","situation":"Compare centro e parede de um tubo com perfil laminar.","observation":"Os ecos representam velocidades diferentes.","explanation":"A vazão é uma integral de velocidade na seção, não só seu valor máximo."}
+    ],
+    "questions": [
+      {"question":"Qual é Δf para 2 MHz, v=0,30 m/s, c=1500 m/s e θ=60°?","options":[{"text":"400 Hz","correct":true,"explanation":"2×2×10⁶×0,30×0,5/1500 resulta em 400 Hz."},{"text":"800 Hz","correct":false,"explanation":"Esse resultado omite a projeção cos60°=0,5."},{"text":"200 Hz","correct":false,"explanation":"Esse valor perde o fator dois característico do eco."}]},
+      {"question":"O que falta para transformar uma velocidade local em vazão?","options":[{"text":"Área e perfil de velocidades","correct":true,"explanation":"A vazão integra a componente normal da velocidade sobre a seção."},{"text":"Apenas a frequência de emissão","correct":false,"explanation":"A frequência acústica não informa a distribuição espacial do fluxo."},{"text":"A cor das partículas","correct":false,"explanation":"A cor não determina a integral de velocidade na seção."}]}
+    ]
+  },
+  "sup_fis_06": {
+    "context": "Uma barra metálica entre duas temperaturas permite estudar condução e separar taxa de calor, fluxo superficial e energia transferida.",
+    "theory": "A lei de Fourier unidimensional é q''=−k dT/dx, com k em W/(m·K). Para barra uniforme, k constante, regime estacionário e perdas laterais desprezíveis, Q̇=kA(Th−Tc)/L. Temperatura linear exige ausência de geração interna. Diferenças em °C e K têm o mesmo valor numérico.",
+    "workedExample": "Para k=200 W/(m·K), A=1,0×10⁻⁴ m², L=0,20 m e ΔT=50 K, Q̇=5 W. Em 60 s com regime mantido, transferem-se 300 J, não 5 J.",
+    "investigation": ["Desenhe o perfil linear de temperatura ao longo da barra ideal.", "Calcule taxa e fluxo térmico usando a área transversal.", "Discuta como perdas laterais desviariam o perfil previsto."],
+    "expectedEvidence": "A análise deve manter Q̇ em watts, q'' em W/m² e associar o sinal negativo ao fluxo em direção a temperaturas menores.",
+    "reflection": "Por que medir apenas as temperaturas extremas pode ocultar perdas laterais?",
+    "scenarios": [
+      {"id":"comprimento","label":"Barra longa","situation":"Duplique L mantendo área, k e temperaturas extremas.","observation":"A taxa de calor cai à metade.","explanation":"A resistência condutiva L/(kA) dobra com o comprimento."},
+      {"id":"area","label":"Seção ampliada","situation":"Duplique a área transversal da barra ideal.","observation":"Q̇ dobra e q'' permanece igual.","explanation":"A mesma densidade de fluxo atravessa uma seção duas vezes maior."},
+      {"id":"geracao","label":"Aquecimento interno","situation":"Considere geração volumétrica uniforme na barra.","observation":"O perfil pode deixar de ser linear.","explanation":"O balanço inclui calor produzido internamente além da condução axial."}
+    ],
+    "questions": [
+      {"question":"Quanto calor uma taxa constante de 5 W transfere em 60 s?","options":[{"text":"300 J","correct":true,"explanation":"Energia é taxa multiplicada pelo intervalo: 5×60=300 J."},{"text":"5 J","correct":false,"explanation":"Cinco watts são cinco joules a cada segundo, não no minuto inteiro."},{"text":"0,083 J","correct":false,"explanation":"Dividir taxa por tempo não fornece energia transferida."}]},
+      {"question":"Qual hipótese permite perfil linear na barra homogênea?","options":[{"text":"Sem geração e sem perda lateral","correct":true,"explanation":"Com k constante e regime estacionário, o gradiente axial fica constante."},{"text":"Temperatura aumentando no tempo","correct":false,"explanation":"Um estado transiente inclui armazenamento de energia e pode ser curvo."},{"text":"Qualquer fonte interna intensa","correct":false,"explanation":"A geração interna modifica o balanço espacial de calor."}]}
+    ]
+  },
+  "sup_fis_07": {
+    "context": "Picos de difração permitem inferir distâncias entre planos cristalinos. O estudo usa ângulos e comprimentos de onda didáticos, sem exposição a raios X.",
+    "theory": "Interferência construtiva entre planos separados por d satisfaz nλ=2d senθ, em que θ é o ângulo do feixe com o plano; instrumentos frequentemente mostram 2θ. Em cristal cúbico, dₕₖₗ=a/√(h²+k²+l²). A rede e a base atômica determinam reflexões permitidas, portanto nem todo índice gera pico.",
+    "workedExample": "Para λ=0,154 nm, n=1 e pico em 2θ=60°, θ=30° e d=0,154 nm. Se o pico for identificado como (200) cúbico, a=2d=0,308 nm.",
+    "investigation": ["Converta o ângulo registrado 2θ para o ângulo de Bragg θ.", "Calcule d para três posições de pico hipotéticas.", "Teste se a indexação cúbica proposta produz um único parâmetro a."],
+    "expectedEvidence": "As distâncias devem ter unidade de comprimento e a indexação deve ser consistente entre picos, sem confundir θ e 2θ.",
+    "reflection": "Por que uma distância interplanar isolada não identifica toda a estrutura cristalina?",
+    "scenarios": [
+      {"id":"angulo","label":"Pico mais alto","situation":"Compare dois picos de primeira ordem com mesmo λ.","observation":"Maior θ corresponde a menor d.","explanation":"Na lei de Bragg, d é inversamente proporcional a senθ."},
+      {"id":"dobro","label":"Eixo angular","situation":"Leia 60° em um gráfico marcado explicitamente 2θ.","observation":"O seno necessário é sen30°.","explanation":"O desvio total entre feixes difratados é duas vezes θ."},
+      {"id":"indexacao","label":"Índices diferentes","situation":"Compare planos (100) e (200) em uma rede cúbica.","observation":"d₂₀₀ é metade de d₁₀₀.","explanation":"O denominador √(h²+k²+l²) dobra nesses índices."}
+    ],
+    "questions": [
+      {"question":"Para λ=0,154 nm e 2θ=60°, qual é d de primeira ordem?","options":[{"text":"0,154 nm","correct":true,"explanation":"2sen30°=1, portanto d coincide numericamente com λ."},{"text":"0,089 nm","correct":false,"explanation":"Esse valor usa incorretamente 60° como ângulo de Bragg."},{"text":"0,308 nm","correct":false,"explanation":"Esse é o parâmetro a se o plano for (200), não o espaçamento d."}]},
+      {"question":"O que é necessário além de uma posição de pico para indexação confiável?","options":[{"text":"Consistência de vários picos","correct":true,"explanation":"Vários espaçamentos restringem a rede e a atribuição de índices."},{"text":"Apenas intensidade arbitrária","correct":false,"explanation":"Uma intensidade sem modelo estrutural não determina todos os índices."},{"text":"Ignorar o comprimento de onda","correct":false,"explanation":"O comprimento de onda é indispensável para converter ângulo em distância."}]}
+    ]
+  },
+  "sup_fis_08": {
+    "context": "A tensão transversal em uma lâmina com corrente e campo magnético informa o sinal predominante dos portadores e sua densidade aproximada.",
+    "theory": "No modelo de um único tipo de portador, RH=1/(nq) e VH=RH IB/t, segundo uma convenção fixa de terminais, corrente e campo. q é assinado e t é a espessura na direção do campo. O sinal distingue elétrons e lacunas nesse modelo; condução por múltiplas bandas exige tratamento adicional.",
+    "workedExample": "Com |I|=0,010 A, B=0,50 T, t=1,0 mm e |VH|=5,0 mV, n=IB/(e t |VH|)≈6,24×10²¹ m⁻³, usando e=1,602×10⁻¹⁹ C. A densidade é sempre positiva.",
+    "investigation": ["Defina a orientação dos terminais antes de interpretar o sinal.", "Calcule n com espessura em metros e tensão em volts.", "Compare a inversão de B com a inversão do tipo de portador."],
+    "expectedEvidence": "A interpretação deve indicar a convenção de sinal, distinguir carga assinada de densidade positiva e citar a aproximação de portador único.",
+    "reflection": "Como uma tensão parasita independente de B afetaria a estimativa Hall?",
+    "scenarios": [
+      {"id":"campo","label":"Campo invertido","situation":"Inverta B preservando corrente e contatos.","observation":"A componente Hall muda de sinal.","explanation":"A força magnética transversal e VH são ímpares em B."},
+      {"id":"espessura","label":"Lâmina fina","situation":"Reduza t à metade sem alterar n, I ou B.","observation":"O módulo de VH dobra.","explanation":"A mesma corrente em menor seção aumenta a velocidade de deriva."},
+      {"id":"multibanda","label":"Dois portadores","situation":"Considere elétrons e lacunas contribuindo simultaneamente.","observation":"1/(e|RH|) pode não ser a densidade total.","explanation":"Mobilidades e densidades de ambos entram na resposta Hall."}
+    ],
+    "questions": [
+      {"question":"No modelo de portador único, o que ocorre ao inverter apenas B?","options":[{"text":"VH inverte o sinal","correct":true,"explanation":"O produto IB muda de sinal com campo invertido."},{"text":"n torna-se negativo","correct":false,"explanation":"Densidade é contagem por volume; o sinal pertence à carga."},{"text":"VH necessariamente desaparece","correct":false,"explanation":"Inverter um campo não nulo preserva seu módulo na relação Hall."}]},
+      {"question":"Qual hipótese é essencial para interpretar RH=1/(nq) diretamente?","options":[{"text":"Um tipo dominante de portador","correct":true,"explanation":"A expressão simples desconsidera contribuição simultânea de outras bandas."},{"text":"Espessura sem unidade","correct":false,"explanation":"A espessura precisa de unidade consistente no cálculo de VH."},{"text":"Corrente sempre nula","correct":false,"explanation":"Sem corrente não há a tensão Hall convencional do experimento."}]}
+    ],
+    "sources":[{"title":"OpenStax: The Hall Effect","url":"https://openstax.org/books/university-physics-volume-2/pages/11-6-the-hall-effect"}]
+  },
+  "sup_fis_09": {
+    "context": "O método do anel relaciona força de tração e tensão superficial, mas a geometria do menisco impede tratar a força máxima como medida direta sem correção.",
+    "theory": "Tensão superficial γ tem unidade N/m. No limite de anel fino com molhamento completo, a estimativa ideal é γ≈F/(4πR), pois há contornos interno e externo. A força líquida desconta a tara. O método Du Noüy real requer correção de menisco e líquido levantado; temperatura e contaminação alteram o resultado.",
+    "workedExample": "Caso idealizado: R=10 mm e força líquida F=9,0 mN dão γ≈0,009/(4π×0,010)=0,0716 N/m. Esse valor é uma estimativa sem correção, não uma certificação da tensão do líquido.",
+    "investigation": ["Converta raio para metros e desconte a tara da força.", "Calcule a estimativa ideal para três forças líquidas.", "Identifique por que a correção depende da forma do menisco."],
+    "expectedEvidence": "O relatório deve separar força bruta e líquida, usar os dois perímetros do anel e declarar a ausência de correção no exemplo ideal.",
+    "reflection": "Como resíduos de surfactante poderiam alterar a comparação entre líquidos?",
+    "scenarios": [
+      {"id":"tara","label":"Tara esquecida","situation":"Inclua o peso do anel na força atribuída à interface.","observation":"A estimativa de γ fica excessiva.","explanation":"Parte da força medida sustenta o instrumento, não a interface."},
+      {"id":"perimetro","label":"Dois contornos","situation":"Use apenas 2πR em vez de 4πR no limite fino.","observation":"A estimativa ideal dobra indevidamente.","explanation":"O líquido traciona ao longo dos contornos interno e externo."},
+      {"id":"dinamico","label":"Interface recente","situation":"Considere solução cuja interface ainda recebe surfactante.","observation":"O valor depende do tempo de formação.","explanation":"Adsorção pode produzir tensão dinâmica diferente da de equilíbrio."}
+    ],
+    "questions": [
+      {"question":"Qual é a unidade SI da tensão superficial γ?","options":[{"text":"N/m","correct":true,"explanation":"A tensão superficial relaciona força e comprimento de contato."},{"text":"N/m²","correct":false,"explanation":"N/m² mede pressão, uma força distribuída por área."},{"text":"kg/m³","correct":false,"explanation":"kg/m³ representa densidade volumétrica de massa."}]},
+      {"question":"Por que F/(4πR) não basta para uma medida Du Noüy rigorosa?","options":[{"text":"É preciso corrigir o menisco","correct":true,"explanation":"A forma do líquido levantado modifica a relação entre força máxima e γ."},{"text":"O anel só tem um contorno","correct":false,"explanation":"O anel possui contornos interno e externo em contato com o filme."},{"text":"A força é irrelevante","correct":false,"explanation":"A força é a observação central, mas precisa de interpretação geométrica."}]}
+    ],
+    "sources":[{"title":"KRÜSS: Du Noüy ring method","url":"https://www.kruss-scientific.com/en/know-how/glossary/du-nouey-ring-method"}]
+  },
+  "sup_fis_10": {
+    "context": "Campos elétricos e magnéticos permitem inferir a razão entre módulo da carga e massa do elétron em um estudo conceitual de feixes não relativísticos.",
+    "theory": "Campos E e B perpendiculares podem selecionar velocidade v=E/B quando as forças se anulam. Em região apenas magnética, |q|vB=mv²/r, portanto |q|/m=v/(Br). A razão e/m é positiva por convenção de módulo; a carga eletrônica é negativa. As relações clássicas exigem v bem menor que c.",
+    "workedExample": "Caso didático: E=2,0×10⁴ V/m e B=1,0×10⁻³ T selecionam v=2,0×10⁷ m/s. Para raio 0,114 m no mesmo módulo B, e/m≈1,75×10¹¹ C/kg.",
+    "investigation": ["Desenhe forças opostas no seletor para a carga negativa.", "Determine v antes de usar o raio da região magnética.", "Compare a velocidade estimada com c para avaliar a hipótese clássica."],
+    "expectedEvidence": "A solução deve distinguir os campos do seletor e da curva, conservar unidades C/kg e interpretar corretamente o sinal da carga.",
+    "reflection": "Por que o sentido da curvatura não é suficiente para determinar a massa?",
+    "scenarios": [
+      {"id":"equilibrio","label":"Feixe selecionado","situation":"Escolha v de modo que |q|E=|q|vB.","observation":"O feixe atravessa sem deflexão ideal.","explanation":"Forças elétrica e magnética cancelam-se para essa velocidade."},
+      {"id":"raio","label":"Campo maior","situation":"Duplique o campo na região curva mantendo v.","observation":"O raio da trajetória cai à metade.","explanation":"r=mv/(|q|B) diminui quando a força centrípeta cresce."},
+      {"id":"relatividade","label":"Feixe muito rápido","situation":"Considere velocidade próxima à da luz.","observation":"A fórmula clássica deixa de ser adequada.","explanation":"O momento relativístico substitui mv na dinâmica da curvatura."}
+    ],
+    "questions": [
+      {"question":"Qual velocidade atravessa idealmente o seletor de campos cruzados?","options":[{"text":"E/B","correct":true,"explanation":"Igualar os módulos das forças cancela a carga e fornece v=E/B."},{"text":"B/E","correct":false,"explanation":"Essa razão tem dimensão inversa à de velocidade."},{"text":"EB","correct":false,"explanation":"O produto de campos não resulta da condição de equilíbrio transversal."}]},
+      {"question":"Mantida a velocidade, como o raio varia ao dobrar B na região curva?","options":[{"text":"Fica dividido por dois","correct":true,"explanation":"O raio magnético é inversamente proporcional ao módulo do campo."},{"text":"Fica multiplicado por dois","correct":false,"explanation":"Campo maior produz curvatura maior e raio menor."},{"text":"Não pode variar","correct":false,"explanation":"A força magnética depende de B mesmo sem realizar trabalho."}]}
+    ]
+  }
+}

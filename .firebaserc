@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "plataforma-educacional-73df6",
+    "production": "plataforma-educacional-73df6",
+    "emulator": "demo-kortex"
+  }
+}

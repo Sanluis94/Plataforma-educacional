@@ -1,0 +1,790 @@
+{
+  "sup_ia_01": {
+    "context": "Uma regressão fictícia prevê um valor numérico por uma reta. Uma atualização manual revela como o erro altera os pesos.",
+    "theory": "Para previsão ŷ=wx e perda L=(ŷ−y)²/2 de uma amostra, o gradiente é (wx−y)x. SGD usa amostras ou minibatches para estimar a direção média e atualiza w←w−ηg. Uma superfície convexa não elimina oscilações com taxa excessiva. Escalas das entradas afetam condicionamento; regularização L2 e decaimento desacoplado de pesos não devem ser confundidos em todo otimizador.",
+    "workedExample": "Com w=1, x=2 e y=6, a previsão é 2 e g=(2−6)×2=−8. Para η=0,1, w novo=1−0,1×(−8)=1,8. A nova previsão é 3,6 e a perda cai de 8 para 2,88 nesse passo.",
+    "investigation": [
+      "Calcule previsão, resíduo e gradiente da amostra.",
+      "Atualize o peso com taxa 0,1 e recalcule a perda.",
+      "Compare a atualização com uma taxa dez vezes maior."
+    ],
+    "expectedEvidence": "Apresente sinal e magnitude do gradiente e as duas perdas, sem chamar uma atualização analítica de treinamento de um modelo real.",
+    "reflection": "Por que minimizar a perda de uma única amostra não comprova generalização?",
+    "scenarios": [
+      {
+        "id": "passo-correto",
+        "label": "Passo moderado",
+        "situation": "O gradiente vale −8 e a taxa é 0,1.",
+        "observation": "O peso aumenta para 1,8.",
+        "explanation": "Subtrair um gradiente negativo aumenta o parâmetro nessa direção."
+      },
+      {
+        "id": "passo-grande",
+        "label": "Passo excessivo",
+        "situation": "A mesma amostra usa taxa um e peso inicial um.",
+        "observation": "O novo peso é nove e a previsão dezoito.",
+        "explanation": "A perda cresce para setenta e dois; convexidade não torna toda taxa segura."
+      },
+      {
+        "id": "escala",
+        "label": "Entrada reescalada",
+        "situation": "A unidade de x muda sem normalização nem ajuste de taxa.",
+        "observation": "O tamanho do gradiente também muda.",
+        "explanation": "A escolha de unidade afeta o condicionamento e a estabilidade dos passos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual peso resulta do passo com taxa 0,1?",
+        "options": [
+          {
+            "text": "1,8",
+            "correct": true,
+            "explanation": "A atualização soma 0,8 ao peso inicial igual a um."
+          },
+          {
+            "text": "0,2",
+            "correct": false,
+            "explanation": "Esse resultado usa o sinal errado para o gradiente negativo."
+          },
+          {
+            "text": "9",
+            "correct": false,
+            "explanation": "Nove resultaria da taxa um, não da taxa 0,1."
+          }
+        ]
+      },
+      {
+        "question": "Qual perda quadrática metade resulta da previsão 3,6 para alvo 6?",
+        "options": [
+          {
+            "text": "2,88",
+            "correct": true,
+            "explanation": "O resíduo −2,4 ao quadrado e dividido por dois vale 2,88."
+          },
+          {
+            "text": "5,76",
+            "correct": false,
+            "explanation": "Esse é o quadrado do resíduo antes da divisão por dois."
+          },
+          {
+            "text": "8",
+            "correct": false,
+            "explanation": "Oito é a perda inicial, calculada com previsão dois."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_ia_02": {
+    "context": "Um perceptron multicamadas fictício separa classes que uma fronteira linear simples não representa, como o padrão XOR.",
+    "theory": "Camadas afins sem ativação não linear se reduzem a uma única transformação afim. ReLU aplica max(0,z); sigmoid comprime para (0,1), podendo saturar. Backpropagation aplica a regra da cadeia para derivar a perda em relação aos parâmetros. Matriz de confusão contabiliza resultados por classe e limiar; acurácia isolada pode ocultar erros de uma classe rara. Derivar gradientes não equivale a executar treinamento.",
+    "workedExample": "Para um neurônio ReLU, x=2, w=−1 e b=3 dão z=1 e saída 1. Se a derivada da perda na saída é 4, então ∂L/∂w=4×1×2=8. Com taxa 0,1, o peso passa de −1 para −1,8.",
+    "investigation": [
+      "Calcule pré-ativação e saída do neurônio proposto.",
+      "Propague a derivada pela ativação e pela multiplicação.",
+      "Construa uma matriz de confusão de um classificador hipotético."
+    ],
+    "expectedEvidence": "A evidência deve mostrar a regra da cadeia e distinguir contagens de verdadeiros positivos e falsos negativos sob um limiar explícito.",
+    "reflection": "Por que empilhar apenas camadas lineares não resolve a estrutura de XOR?",
+    "scenarios": [
+      {
+        "id": "relu-ativa",
+        "label": "Região positiva",
+        "situation": "A pré-ativação do neurônio é um.",
+        "observation": "A derivada local de ReLU é um.",
+        "explanation": "A derivada da camada seguinte atravessa esse ramo positivo sem ser anulada."
+      },
+      {
+        "id": "relu-inativa",
+        "label": "Região negativa",
+        "situation": "Outro neurônio recebe pré-ativação menos dois.",
+        "observation": "A saída ReLU vale zero.",
+        "explanation": "Longe do ponto zero, a derivada local nesse ramo é zero."
+      },
+      {
+        "id": "classe-rara",
+        "label": "Acurácia enganosa",
+        "situation": "Noventa e nove de cem exemplos pertencem à classe negativa.",
+        "observation": "Prever sempre negativo alcança noventa e nove por cento.",
+        "explanation": "A alta acurácia ainda perde todo exemplo positivo, exigindo métricas por classe."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual gradiente de w foi obtido no exemplo ativo?",
+        "options": [
+          {
+            "text": "8",
+            "correct": true,
+            "explanation": "A regra da cadeia multiplica quatro, um e a entrada dois."
+          },
+          {
+            "text": "4",
+            "correct": false,
+            "explanation": "Esse número omite a derivada da pré-ativação em relação ao peso."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "O neurônio está no ramo positivo, onde ReLU não anula a derivada."
+          }
+        ]
+      },
+      {
+        "question": "Por que inserir não linearidades entre camadas?",
+        "options": [
+          {
+            "text": "Para representar funções além de uma transformação afim",
+            "correct": true,
+            "explanation": "Sem elas, a composição afim continua afim, mesmo com muitas camadas."
+          },
+          {
+            "text": "Para garantir acurácia perfeita",
+            "correct": false,
+            "explanation": "Capacidade de representação não garante otimização nem generalização."
+          },
+          {
+            "text": "Para dispensar dados de validação",
+            "correct": false,
+            "explanation": "O desempenho fora do treino continua precisando ser avaliado."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "scikit-learn — Neural Networks",
+        "url": "https://scikit-learn.org/stable/modules/neural_networks_supervised.html"
+      }
+    ]
+  },
+  "sup_ia_03": {
+    "context": "Uma imagem sintética contém contraste local. Um filtro pequeno permite entender como uma CNN produz mapas de características.",
+    "theory": "Uma camada convolucional aplica pesos compartilhados em posições espaciais, explorando padrões locais. Muitas bibliotecas chamam de convolução a correlação cruzada sem inverter o filtro; a convenção deve ser declarada. Stride, padding e tamanho do kernel determinam a dimensão de saída. Pooling resume regiões e pode reduzir resolução, sem assegurar invariância perfeita ou eliminar a necessidade de aprender características.",
+    "workedExample": "Usando correlação cruzada sem padding, aplique o kernel [[1,0],[0,−1]] ao bloco [[3,1],[2,1]]. O resultado é 3−1=2. Uma entrada 4×4 com kernel 2×2 e stride um produz mapa 3×3, pois 4−2+1=3.",
+    "investigation": [
+      "Multiplique cada posição do bloco pelo kernel e some.",
+      "Calcule o tamanho do mapa com e sem padding.",
+      "Compare máximo e média em uma janela de pooling."
+    ],
+    "expectedEvidence": "Declare a convenção do filtro, a forma da saída e a informação perdida no pooling, evitando interpretar o mapa como classificação completa.",
+    "reflection": "Como aumentar stride altera resolução e custo de um mapa de características?",
+    "scenarios": [
+      {
+        "id": "contraste",
+        "label": "Resposta local",
+        "situation": "O bloco tem valor três no canto superior esquerdo e um no inferior direito.",
+        "observation": "O filtro responde com dois.",
+        "explanation": "Os pesos opostos medem o contraste entre essas posições."
+      },
+      {
+        "id": "forma",
+        "label": "Mapa menor",
+        "situation": "Uma entrada quatro por quatro usa kernel dois e stride um sem padding.",
+        "observation": "A saída tem nove posições.",
+        "explanation": "Há três posições válidas em cada eixo, produzindo um mapa três por três."
+      },
+      {
+        "id": "pool",
+        "label": "Máximo regional",
+        "situation": "A janela de pooling contém valores 1,4,2,3.",
+        "observation": "Max-pooling devolve quatro.",
+        "explanation": "O resumo preserva o máximo, mas não informa qual era toda a configuração local."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual resposta o kernel do exemplo produz?",
+        "options": [
+          {
+            "text": "2",
+            "correct": true,
+            "explanation": "A soma ponderada é três menos um, com os outros pesos nulos."
+          },
+          {
+            "text": "7",
+            "correct": false,
+            "explanation": "Sete soma pixels sem respeitar os pesos do filtro."
+          },
+          {
+            "text": "−2",
+            "correct": false,
+            "explanation": "Esse sinal corresponderia a inverter os pesos utilizados."
+          }
+        ]
+      },
+      {
+        "question": "Qual forma resulta de 4×4, kernel 2×2, stride 1 e padding zero?",
+        "options": [
+          {
+            "text": "3×3",
+            "correct": true,
+            "explanation": "A fórmula por eixo fornece quatro menos dois mais um."
+          },
+          {
+            "text": "4×4",
+            "correct": false,
+            "explanation": "Manter a forma exigiria uma política de padding diferente."
+          },
+          {
+            "text": "2×2",
+            "correct": false,
+            "explanation": "Esse tamanho não corresponde ao stride unitário declarado."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_ia_04": {
+    "context": "Uma árvore fictícia decide entre classes a partir de atributos. Uma divisão útil deve reduzir mistura, sem memorizar peculiaridades da amostra.",
+    "theory": "Gini é 1−Σpₖ² e mede impureza; entropia é −Σpₖlog₂pₖ. O ganho subtrai da impureza do pai a média ponderada das impurezas dos filhos. Uma floresta combina árvores treinadas com diversidade de amostras e atributos, reduzindo variância em muitos contextos. Profundidade irrestrita pode sobreajustar; importância por impureza não estabelece causalidade.",
+    "workedExample": "Um nó com quatro positivos e quatro negativos tem Gini 0,5. Uma divisão cria dois filhos puros de quatro exemplos cada, com Gini zero. O ganho é 0,5−(4/8×0+4/8×0)=0,5. Isso descreve a amostra, não desempenho futuro.",
+    "investigation": [
+      "Calcule proporções e Gini do nó misto.",
+      "Compare uma divisão pura com outra de filhos ainda mistos.",
+      "Explique como validação e limitação de profundidade ajudam."
+    ],
+    "expectedEvidence": "Mostre o ganho ponderado e as contagens dos filhos, distinguindo pureza de treino de capacidade de generalizar e de causalidade.",
+    "reflection": "Por que um identificador único pode produzir uma divisão enganosa?",
+    "scenarios": [
+      {
+        "id": "puro",
+        "label": "Filhos separados",
+        "situation": "Cada filho contém quatro registros de uma única classe.",
+        "observation": "A impureza dos filhos é zero.",
+        "explanation": "A divisão remove mistura de classes naquela amostra específica."
+      },
+      {
+        "id": "sem-ganho",
+        "label": "Mistura mantida",
+        "situation": "Cada filho recebe dois positivos e dois negativos.",
+        "observation": "O Gini ponderado continua 0,5.",
+        "explanation": "A divisão não melhora a impureza, apesar de aumentar a árvore."
+      },
+      {
+        "id": "floresta",
+        "label": "Árvores diversas",
+        "situation": "As árvores veem amostras bootstrap e subconjuntos de atributos.",
+        "observation": "Suas previsões podem discordar.",
+        "explanation": "A agregação se beneficia de diversidade, mas erros correlacionados limitam a melhora."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual Gini tem o nó com quatro exemplos de cada classe?",
+        "options": [
+          {
+            "text": "0,5",
+            "correct": true,
+            "explanation": "Um menos dois termos de 0,5 ao quadrado resulta em 0,5."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "Zero corresponderia a um nó totalmente puro."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "Com duas classes igualmente frequentes, o máximo de Gini é 0,5."
+          }
+        ]
+      },
+      {
+        "question": "O que a divisão em filhos igualmente mistos produz?",
+        "options": [
+          {
+            "text": "Ganho zero",
+            "correct": true,
+            "explanation": "A impureza média permanece igual à impureza do pai."
+          },
+          {
+            "text": "Causalidade comprovada",
+            "correct": false,
+            "explanation": "Impureza e divisão de dados não demonstram relações causais."
+          },
+          {
+            "text": "Generalização perfeita",
+            "correct": false,
+            "explanation": "Nem pureza de treino, muito menos mistura mantida, prova desempenho futuro."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_ia_05": {
+    "context": "Uma população sintética de soluções binárias procura maximizar uma função simples, revelando seleção, cruzamento e diversidade.",
+    "theory": "Algoritmos genéticos mantêm candidatos, avaliam aptidão e produzem descendentes por seleção e operadores de variação. Na roleta com aptidões não negativas, a probabilidade de seleção é fᵢ/Σf; aptidões negativas precisam de outro tratamento. Cruzamento recombina partes, enquanto mutação introduz mudanças locais. Melhorar em algumas gerações não assegura ótimo global, e elitismo pode preservar bons candidatos ao custo de diversidade.",
+    "workedExample": "Candidatos A,B,C têm aptidões 2,3,5. A roleta dá probabilidades 0,2;0,3;0,5. Cruzar 1100 e 0011 após o segundo bit produz 1111 e 0000; a qualidade depende da função objetivo, não do cruzamento sozinho.",
+    "investigation": [
+      "Normalize as três aptidões em probabilidades de seleção.",
+      "Realize o cruzamento de um ponto e uma mutação de bit.",
+      "Compare diversidade antes e depois de preservar somente o melhor."
+    ],
+    "expectedEvidence": "Registre função objetivo, probabilidades e descendentes, sem apresentar uma população pequena como prova de convergência global.",
+    "reflection": "Qual risco existe ao selecionar sempre apenas o candidato atualmente melhor?",
+    "scenarios": [
+      {
+        "id": "roleta",
+        "label": "Seleção ponderada",
+        "situation": "Aptidões dois, três e cinco totalizam dez.",
+        "observation": "C tem metade da probabilidade de seleção.",
+        "explanation": "A roleta favorece maior aptidão, mas não elimina os candidatos inferiores."
+      },
+      {
+        "id": "mutacao",
+        "label": "Bit alterado",
+        "situation": "O descendente 1111 sofre mutação somente no último bit.",
+        "observation": "A sequência resultante é 1110.",
+        "explanation": "Mutação muda uma posição e pode melhorar ou piorar a aptidão."
+      },
+      {
+        "id": "diversidade",
+        "label": "População uniforme",
+        "situation": "Todos os indivíduos passam a representar a mesma solução.",
+        "observation": "O cruzamento pouco acrescenta variação.",
+        "explanation": "Sem diversidade, a exploração depende mais da mutação e pode estagnar."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual probabilidade de C na roleta do exemplo?",
+        "options": [
+          {
+            "text": "50%",
+            "correct": true,
+            "explanation": "A aptidão cinco é metade da soma dez."
+          },
+          {
+            "text": "33,3%",
+            "correct": false,
+            "explanation": "Seleção uniforme não corresponde às aptidões ponderadas."
+          },
+          {
+            "text": "100%",
+            "correct": false,
+            "explanation": "A roleta ainda atribui probabilidade positiva aos outros candidatos."
+          }
+        ]
+      },
+      {
+        "question": "O que resulta do cruzamento indicado de 1100 com 0011?",
+        "options": [
+          {
+            "text": "1111 e 0000",
+            "correct": true,
+            "explanation": "Cada filho combina o prefixo de um pai com o sufixo do outro."
+          },
+          {
+            "text": "1100 e 0011 obrigatoriamente",
+            "correct": false,
+            "explanation": "Esse resultado manteria os pais sem a troca descrita."
+          },
+          {
+            "text": "Somente soluções ótimas",
+            "correct": false,
+            "explanation": "Recombinar bits não garante aptidão máxima na função objetivo."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_ia_06": {
+    "context": "Quatro pontos sintéticos em uma dimensão permitem observar agrupamento por distância e avaliar separação entre grupos.",
+    "theory": "K-Means alterna atribuir cada ponto ao centro mais próximo e atualizar centros pela média. Minimiza a soma de distâncias euclidianas quadradas, chamada inércia, e pode convergir a mínimos locais. Escala, inicialização e grupos não esféricos afetam o resultado. A silhueta compara distância média interna a com a menor média a outro grupo b: (b−a)/max(a,b), quando definida.",
+    "workedExample": "Para pontos 0,2,8,10 e grupos {0,2},{8,10}, centros são 1 e 9; inércia=1+1+1+1=4. Para o ponto 0, a=2 e b=(8+10)/2=9, logo silhueta=(9−2)/9=7/9≈0,778.",
+    "investigation": [
+      "Atribua os quatro pontos aos centros iniciais um e nove.",
+      "Recalcule centros e some distâncias quadradas.",
+      "Calcule a silhueta de zero e discuta mudar a escala."
+    ],
+    "expectedEvidence": "Apresente centros, inércia quatro e o cálculo de silhueta, sem confundir distância quadrática do objetivo com distância média da avaliação.",
+    "reflection": "Por que o cotovelo não identifica necessariamente um único número correto de grupos?",
+    "scenarios": [
+      {
+        "id": "centros",
+        "label": "Média por grupo",
+        "situation": "Os pontos zero e dois pertencem ao primeiro grupo.",
+        "observation": "Seu centro é um.",
+        "explanation": "A média minimiza a soma de distâncias quadradas nessa dimensão."
+      },
+      {
+        "id": "outlier",
+        "label": "Ponto distante",
+        "situation": "Um ponto cem é adicionado ao grupo de oito e dez.",
+        "observation": "A média desloca-se fortemente.",
+        "explanation": "K-Means é sensível a valores extremos porque penaliza distâncias ao quadrado."
+      },
+      {
+        "id": "silhueta",
+        "label": "Separação positiva",
+        "situation": "O ponto zero tem distância interna dois e externa média nove.",
+        "observation": "A silhueta é aproximadamente 0,778.",
+        "explanation": "O valor positivo indica maior proximidade ao próprio grupo segundo essa medida."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual inércia tem a partição proposta?",
+        "options": [
+          {
+            "text": "4",
+            "correct": true,
+            "explanation": "Cada um dos quatro pontos está a distância um de seu centro."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "A soma precisa incluir os quatro resíduos quadráticos."
+          },
+          {
+            "text": "16",
+            "correct": false,
+            "explanation": "Esse número não corresponde às distâncias aos centros um e nove."
+          }
+        ]
+      },
+      {
+        "question": "O que pode limitar o resultado de K-Means?",
+        "options": [
+          {
+            "text": "Inicialização e formato dos grupos",
+            "correct": true,
+            "explanation": "O objetivo não convexo e a geometria dos dados afetam a partição final."
+          },
+          {
+            "text": "Obrigação de grupos de tamanho igual",
+            "correct": false,
+            "explanation": "K-Means não impõe a mesma quantidade de pontos em cada grupo."
+          },
+          {
+            "text": "Garantia de ótimo global em uma passagem",
+            "correct": false,
+            "explanation": "O procedimento alternado pode parar em um mínimo local."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "scikit-learn — Silhouette Analysis",
+        "url": "https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis"
+      }
+    ]
+  },
+  "sup_ia_07": {
+    "context": "Um agente analítico em um tabuleiro fictício atualiza valores de ações a partir de uma transição, sem executar treinamento externo.",
+    "theory": "Q-Learning atualiza Q(s,a)←Q(s,a)+α[r+γmax Q(s′,a′)−Q(s,a)]. O alvo usa a melhor ação estimada no próximo estado, mesmo quando a política exploratória escolhe outra. Em estado terminal, a contribuição futura é zero. Epsilon-greedy explora com probabilidade ε e, no restante, escolhe ações gulosas; convergência tabular exige condições de exploração e taxas, não apenas repetir passos.",
+    "workedExample": "Com Q=2, recompensa 1, γ=0,9, máximo futuro 4 e α=0,5, o alvo é 1+3,6=4,6. O erro temporal é 2,6 e o novo Q=2+0,5×2,6=3,3. Se a transição fosse terminal, o alvo seria somente 1.",
+    "investigation": [
+      "Calcule alvo e erro temporal na transição fornecida.",
+      "Atualize a entrada Q e compare com um estado terminal.",
+      "Separe a ação exploratória do máximo usado no alvo."
+    ],
+    "expectedEvidence": "Mostre os valores antes e depois e declare quando o episódio termina; não deduza aprendizado ótimo de uma única atualização correta.",
+    "reflection": "Por que explorar pode reduzir recompensa imediata e ainda ajudar a aprendizagem?",
+    "scenarios": [
+      {
+        "id": "nao-terminal",
+        "label": "Continuidade",
+        "situation": "O próximo estado permite ações com maior Q igual a quatro.",
+        "observation": "O alvo vale quatro vírgula seis.",
+        "explanation": "A recompensa presente soma a estimativa futura descontada."
+      },
+      {
+        "id": "terminal",
+        "label": "Fim de episódio",
+        "situation": "A transição chega ao objetivo terminal do tabuleiro.",
+        "observation": "O termo futuro deve ser zero.",
+        "explanation": "Não há novas recompensas do episódio a incorporar após seu término."
+      },
+      {
+        "id": "epsilon",
+        "label": "Exploração controlada",
+        "situation": "Epsilon é definido como 0,2 na política descrita.",
+        "observation": "Há vinte por cento de chance de escolher o ramo exploratório.",
+        "explanation": "O ramo pode sortear também uma ação gulosa; exploração não significa necessariamente uma ação ruim."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual novo Q resulta do exemplo não terminal?",
+        "options": [
+          {
+            "text": "3,3",
+            "correct": true,
+            "explanation": "Metade do erro 2,6 é somada ao valor anterior dois."
+          },
+          {
+            "text": "4,6",
+            "correct": false,
+            "explanation": "Esse é o alvo completo, que só seria adotado diretamente com taxa um."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "Esse é o alvo terminal, não a atualização não terminal pedida."
+          }
+        ]
+      },
+      {
+        "question": "Qual contribuição futura deve entrar ao alcançar estado terminal?",
+        "options": [
+          {
+            "text": "Zero",
+            "correct": true,
+            "explanation": "O episódio não continua com ações e recompensas futuras."
+          },
+          {
+            "text": "Sempre o maior Q da tabela inteira",
+            "correct": false,
+            "explanation": "O alvo se refere ao próximo estado e respeita a terminalidade."
+          },
+          {
+            "text": "A recompensa multiplicada por epsilon",
+            "correct": false,
+            "explanation": "Epsilon controla exploração, não redefine a recompensa terminal."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Sutton e Barto — Reinforcement Learning",
+        "url": "https://www.incompleteideas.net/book/bookdraft2018mar21.pdf"
+      }
+    ]
+  },
+  "sup_ia_08": {
+    "context": "Um acervo fictício representa documentos como vetores. Similaridade lexical e representação aprendida de palavras capturam informações diferentes.",
+    "theory": "TF-IDF pondera frequência local por raridade na coleção; sua fórmula precisa explicitar suavização e logaritmo. Word2Vec aprende vetores a partir de contextos, sem ser equivalente à contagem TF-IDF. Similaridade de cosseno é u·v/(||u||||v||) para vetores não nulos e ignora a magnitude. Proximidade vetorial pode refletir coocorrência, ambiguidades e vieses; não prova sinonímia ou verdade de uma frase.",
+    "workedExample": "Adote IDF=ln(N/df), sem suavização. Em N=4 documentos, um termo em df=2 recebe ln2≈0,693; se tf=3, seu peso é 2,079. Para vetores (1,0) e (1,1), o cosseno é 1/√2≈0,707.",
+    "investigation": [
+      "Declare a fórmula de TF e IDF antes de calcular pesos.",
+      "Calcule produto interno e normas dos dois vetores.",
+      "Compare palavra rara com palavra presente em toda a coleção."
+    ],
+    "expectedEvidence": "Informe a convenção de ponderação e o tratamento de vetores nulos, distinguindo similaridade da representação de uma confirmação semântica absoluta.",
+    "reflection": "Por que palavras de sentidos opostos podem aparecer em contextos parecidos?",
+    "scenarios": [
+      {
+        "id": "raro",
+        "label": "Termo em metade",
+        "situation": "Um termo ocorre em dois dos quatro documentos.",
+        "observation": "Seu IDF sem suavização é ln dois.",
+        "explanation": "A raridade é relativa à coleção usada, não uma propriedade universal da palavra."
+      },
+      {
+        "id": "comum",
+        "label": "Termo universal",
+        "situation": "Outra palavra aparece nos quatro documentos.",
+        "observation": "Seu IDF nessa fórmula é zero.",
+        "explanation": "O peso destaca poder de discriminação e não frequência bruta isolada."
+      },
+      {
+        "id": "nulo",
+        "label": "Vetor sem termos",
+        "situation": "Um documento perde todos os termos após filtragem.",
+        "observation": "A norma de seu vetor vale zero.",
+        "explanation": "O cosseno matemático fica indefinido e requer uma política explícita de tratamento."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual peso TF-IDF resulta de tf=3, N=4 e df=2?",
+        "options": [
+          {
+            "text": "3 ln2≈2,079",
+            "correct": true,
+            "explanation": "Multiplica-se a frequência três pelo logaritmo da razão dois."
+          },
+          {
+            "text": "ln(4/3)",
+            "correct": false,
+            "explanation": "A frequência local não substitui df no denominador do IDF."
+          },
+          {
+            "text": "Zero obrigatoriamente",
+            "correct": false,
+            "explanation": "Zero ocorreria com df=N na fórmula sem suavização."
+          }
+        ]
+      },
+      {
+        "question": "Qual valor tem o cosseno de (1,0) e (1,1)?",
+        "options": [
+          {
+            "text": "1/√2",
+            "correct": true,
+            "explanation": "O produto interno é um e as normas são um e raiz de dois."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Cossenos ficam entre menos um e um para vetores reais não nulos."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "Os vetores compartilham uma componente e não são ortogonais."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_ia_09": {
+    "context": "Um autoencoder fictício reconstrói dois valores a partir de um único número latente. O exercício separa compressão de perda de informação.",
+    "theory": "O codificador mapeia entrada x para z e o decodificador reconstrói x̂. Minimizar erro de reconstrução incentiva preservar informações relevantes ao objetivo, mas não assegura representação útil para qualquer tarefa. Gargalo, regularização e dados evitam uma simples cópia; um autoencoder linear sob condições adequadas se relaciona à PCA. Reconstrução com erro baixo no treino não prova detecção confiável de anomalias.",
+    "workedExample": "Considere codificador z=(x₁+x₂)/2 e decodificador (z,z). Para x=(2,4), z=3 e x̂=(3,3). O erro quadrático médio é [(2−3)²+(4−3)²]/2=1. Entradas (1,5) e (2,4) compartilham z=3, revelando informação perdida.",
+    "investigation": [
+      "Calcule código latente e reconstrução de dois vetores.",
+      "Determine o erro médio por componente explicitamente.",
+      "Encontre entradas distintas que produzam o mesmo código."
+    ],
+    "expectedEvidence": "Mostre a perda de distinção no gargalo e a convenção de erro, sem confundir reconstrução analítica com um autoencoder treinado na plataforma.",
+    "reflection": "Qual informação não pode ser recuperada quando entradas diferentes recebem o mesmo código?",
+    "scenarios": [
+      {
+        "id": "media",
+        "label": "Código único",
+        "situation": "A entrada dois,quatro é codificada pela média.",
+        "observation": "O latente vale três.",
+        "explanation": "Um único escalar registra a média, mas não a diferença entre componentes."
+      },
+      {
+        "id": "colisao",
+        "label": "Mesma representação",
+        "situation": "As entradas (1,5) e (2,4) passam pelo mesmo codificador.",
+        "observation": "Ambas geram z igual a três.",
+        "explanation": "O decodificador determinístico recebe a mesma informação e não distingue as entradas."
+      },
+      {
+        "id": "reconstrucao-exata",
+        "label": "Entrada na diagonal",
+        "situation": "A entrada é (3,3) no modelo descrito.",
+        "observation": "A reconstrução tem erro zero.",
+        "explanation": "Acertar esse vetor não demonstra recuperação exata fora da diagonal."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual erro quadrático médio da reconstrução de (2,4)?",
+        "options": [
+          {
+            "text": "1",
+            "correct": true,
+            "explanation": "Os dois resíduos quadráticos valem um e sua média também é um."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Dois é a soma dos erros, antes de dividir pelas duas componentes."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "A reconstrução (3,3) difere da entrada original."
+          }
+        ]
+      },
+      {
+        "question": "O que a colisão latente das duas entradas demonstra?",
+        "options": [
+          {
+            "text": "Informação foi perdida na codificação",
+            "correct": true,
+            "explanation": "O mesmo código não permite distinguir entradas diferentes no decodificador dado."
+          },
+          {
+            "text": "Toda compressão é sem perda",
+            "correct": false,
+            "explanation": "A colisão mostra justamente uma impossibilidade de reconstrução única."
+          },
+          {
+            "text": "O código precisa ter duas componentes",
+            "correct": false,
+            "explanation": "O modelo usa uma componente; o problema é seu limite de representação."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_ia_10": {
+    "context": "Um mapa fictício contém obstáculos e custos de deslocamento. A* combina custo já percorrido com uma estimativa do restante.",
+    "theory": "A* prioriza f=g+h. Uma heurística admissível não superestima o custo ótimo restante; consistência exige h(u)≤c(u,v)+h(v). Com custos não negativos e tratamento adequado de reaberturas, essas condições sustentam resultados de otimalidade conforme a versão do algoritmo. Distância euclidiana é admissível quando o custo de movimento não é menor que o deslocamento geométrico; movimentos baratos especiais podem quebrar essa hipótese.",
+    "workedExample": "No ponto (0,0) com objetivo (3,4), a distância euclidiana é cinco. Se g=2 e h=5, f=7. Essa soma prioriza candidatos e não afirma que o custo final será sete, pois obstáculos podem exigir desvio.",
+    "investigation": [
+      "Calcule distâncias geométricas até o objetivo declarado.",
+      "Compare dois nós pela soma g+h, não apenas pela proximidade.",
+      "Introduza um atalho de custo baixo e reavalie admissibilidade."
+    ],
+    "expectedEvidence": "Apresente g,h,f e as hipóteses do custo de movimento; um desenho de rota plausível não substitui conferir obstáculos e otimalidade.",
+    "reflection": "Quando a distância geométrica pode superestimar o custo real restante?",
+    "scenarios": [
+      {
+        "id": "triangulo",
+        "label": "Distância cinco",
+        "situation": "A posição é (0,0) e o objetivo está em (3,4).",
+        "observation": "A distância euclidiana vale cinco.",
+        "explanation": "O teorema de Pitágoras calcula raiz de nove mais dezesseis."
+      },
+      {
+        "id": "prioridade",
+        "label": "Soma de custos",
+        "situation": "O nó A tem g=2,h=5 e B tem g=5,h=1.",
+        "observation": "B tem prioridade menor, seis contra sete.",
+        "explanation": "A* usa a soma; menor heurística isolada não descreve toda a decisão."
+      },
+      {
+        "id": "atalho-barato",
+        "label": "Teleporte fictício",
+        "situation": "Um movimento especial cobre grande distância por custo um.",
+        "observation": "A distância euclidiana pode superestimar.",
+        "explanation": "A heurística deve respeitar o custo mínimo real do conjunto de movimentos disponíveis."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual prioridade f resulta de um nó com g=2 e h=5?",
+        "options": [
+          {
+            "text": "7",
+            "correct": true,
+            "explanation": "A função de prioridade soma custo percorrido e estimativa restante."
+          },
+          {
+            "text": "3",
+            "correct": false,
+            "explanation": "Subtrair os termos não corresponde à definição de A*."
+          },
+          {
+            "text": "5",
+            "correct": false,
+            "explanation": "Esse valor considera só a estimativa heurística."
+          }
+        ]
+      },
+      {
+        "question": "O que significa uma heurística admissível?",
+        "options": [
+          {
+            "text": "Nunca superestimar o custo ótimo restante",
+            "correct": true,
+            "explanation": "Ela fornece um limite inferior para o caminho que ainda falta."
+          },
+          {
+            "text": "Sempre acertar exatamente o custo",
+            "correct": false,
+            "explanation": "Uma estimativa inferior pode ser admissível sem ser exata."
+          },
+          {
+            "text": "Ignorar os custos dos movimentos",
+            "correct": false,
+            "explanation": "A validade da estimativa depende do modelo de custo adotado."
+          }
+        ]
+      }
+    ]
+  }
+}

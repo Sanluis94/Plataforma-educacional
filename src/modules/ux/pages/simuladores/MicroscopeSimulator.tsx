@@ -13,28 +13,28 @@ const SLIDES: Slide[] = [
     id: 'celula_animal',
     name: 'Célula Animal',
     emoji: '🔴',
-    description: 'Célula eucariota sem parede celular e com centríolos.',
+    description: 'Modelo de célula animal nucleada, sem parede celular. Células animais especializadas podem perder estruturas representadas aqui, como o núcleo nas hemácias humanas maduras.',
     details: ['Membrana plasmática', 'Núcleo com nucléolo', 'Mitocôndrias', 'Centríolos', 'Retículo endoplasmático'],
   },
   {
     id: 'celula_vegetal',
     name: 'Célula Vegetal',
     emoji: '🟢',
-    description: 'Célula eucariota com parede celulósica e cloroplastos.',
+    description: 'Modelo de célula vegetal fotossintética, com parede celulósica e cloroplastos. Outras células da planta, como muitas células da raiz, não possuem cloroplastos.',
     details: ['Parede celular (celulose)', 'Cloroplastos', 'Vacúolo central', 'Plasmodesmos', 'Membrana plasmática'],
   },
   {
     id: 'bacteria',
     name: 'Bactéria (Procarionte)',
     emoji: '🟡',
-    description: 'Organismo unicelular procariótico sem núcleo definido.',
-    details: ['Nucleoide (DNA circular)', 'Ribossomos 70S', 'Parede de peptidoglicano', 'Cápsula', 'Flagelos'],
+    description: 'Modelo de bactéria sem núcleo delimitado por membrana. Cápsula, flagelos e parede representados variam entre espécies; o desenho não reúne características obrigatórias de toda bactéria.',
+    details: ['Nucleoide (DNA, circular neste modelo)', 'Ribossomos 70S', 'Parede de peptidoglicano neste modelo', 'Cápsula neste modelo', 'Flagelos neste modelo'],
   },
   {
     id: 'sangue',
     name: 'Sangue Humano',
     emoji: '🔵',
-    description: 'Esfregaço do sangue: eritrócitos, leucócitos e plaquetas.',
+    description: 'Esquema de componentes do sangue humano: eritrócitos, leucócitos e plaquetas. Plaquetas são fragmentos celulares; o desenho não é uma micrografia nem um exame clínico.',
     details: ['Eritrócitos (glóbulos vermelhos)', 'Leucócitos (neutrófilos)', 'Linfócitos', 'Plaquetas (trombócitos)', 'Plasma'],
   },
 ];
@@ -323,9 +323,9 @@ const renderCellContent = (slideId: string, zoomLevel: number) => {
 
 export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
   const initialSlide =
-    mode === 'genetics' ? SLIDES.find(s => s.id === 'blood') || SLIDES[0] :
-    mode === 'anatomy' ? SLIDES.find(s => s.id === 'muscle') || SLIDES[0] :
-    mode === 'ecosystems' ? SLIDES.find(s => s.id === 'protozoa') || SLIDES[0] :
+    mode === 'genetics' ? SLIDES.find(s => s.id === 'sangue') || SLIDES[0] :
+    mode === 'anatomy' ? SLIDES.find(s => s.id === 'sangue') || SLIDES[0] :
+    mode === 'ecosystems' ? SLIDES.find(s => s.id === 'bacteria') || SLIDES[0] :
     mode === 'evolution' ? SLIDES.find(s => s.id === 'bacteria') || SLIDES[0] : SLIDES[0];
 
   const [selectedSlide, setSelectedSlide] = useState<Slide>(initialSlide);
@@ -341,12 +341,12 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
     <div style={{ padding: '1.5rem' }}>
       <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🔬 {labTitle || 'Laboratório de Biologia Virtual'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-        {mode === 'microscopy' ? 'Análise Microscópica Celular de Estruturas Eucariotas e Procariontes.' :
-         mode === 'genetics' ? 'Observação de Material Genético e Núcleos Cromossômicos.' :
-         mode === 'anatomy' ? 'Análise Histológica de Tecidos Humanos e Sistema Muscular.' :
-         mode === 'ecosystems' ? 'Micro-organismos em Ecossistemas Aquáticos e Cadeias Alimentares.' :
-         mode === 'evolution' ? 'Evolução e Análise de Paredes Celulares Bacterianas.' :
-         'Bioquímica Celular, Reações Enzimáticas e Membranas Plasmáticas.'}
+        {mode === 'microscopy' ? 'Compare esquemas de células eucarióticas e procarióticas. As ilustrações não são micrografias nem estão em escala.' :
+         mode === 'genetics' ? 'Esquema de células do sangue como apoio. A aparência das células não revela, sozinha, genótipos ou probabilidades de herança; investigue esses dados no roteiro.' :
+         mode === 'anatomy' ? 'Observe o tecido sanguíneo como apoio ao estudo de organização do corpo. Este esquema não representa músculos nem um mapa completo dos sistemas humanos.' :
+         mode === 'ecosystems' ? 'O esquema de bactéria apoia a comparação de organismos. Relações alimentares e funções ecológicas dependem de outros dados, apresentados nos casos do roteiro.' :
+         mode === 'evolution' ? 'Compare a organização celular bacteriana como referência. Inferências sobre seleção e evolução exigem dados de populações e gerações, como os dos cenários do roteiro.' :
+         'Use os esquemas celulares como referência de estruturas. Reações e velocidades enzimáticas são discutidas com dados próprios no roteiro.'}
       </p>
 
       <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
@@ -355,9 +355,9 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
 
           {/* Seletor de Lâminas */}
           <div style={{ background: 'var(--bg-secondary)', borderRadius: '10px', padding: '1rem', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <h4 style={{ color: 'var(--text-main)', marginBottom: '0.75rem', fontSize: '0.9rem' }}>Selecionar Lâmina</h4>
+            <h4 style={{ color: 'var(--text-main)', marginBottom: '0.75rem', fontSize: '0.9rem' }}>Selecionar esquema</h4>
             {SLIDES.map(s => (
-              <button key={s.id} onClick={() => setSelectedSlide(s)}
+              <button key={s.id} aria-pressed={selectedSlide.id === s.id} onClick={() => setSelectedSlide(s)}
                 style={{
                   width: '100%', textAlign: 'left', padding: '0.5rem 0.75rem', borderRadius: '6px',
                   background: selectedSlide.id === s.id ? 'var(--color-primary)22' : 'transparent',
@@ -372,7 +372,7 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
 
           {/* Zoom */}
           <div style={{ background: 'var(--bg-secondary)', borderRadius: '10px', padding: '1rem', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <h4 style={{ color: 'var(--text-main)', marginBottom: '0.75rem', fontSize: '0.9rem' }}>Objetiva (Zoom)</h4>
+            <h4 style={{ color: 'var(--text-main)', marginBottom: '0.75rem', fontSize: '0.9rem' }}>Ampliação gráfica do esquema</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
               {ZOOM_LEVELS.map(z => (
                 <button key={z} onClick={() => setZoom(z)}
@@ -393,7 +393,7 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
             <h4 style={{ color: 'var(--text-main)', marginBottom: '0.75rem', fontSize: '0.9rem' }}>
               Parafuso Micrométrico: {focusOffset > 0 ? `+${focusOffset}` : focusOffset}
             </h4>
-            <input type="range" min="-10" max="10" value={focusOffset} onChange={e => setFocusOffset(Number(e.target.value))}
+            <input type="range" aria-label="Foco gráfico do esquema" min="-10" max="10" value={focusOffset} onChange={e => setFocusOffset(Number(e.target.value))}
               style={{ width: '100%', accentColor: 'var(--color-primary)', cursor: 'pointer' }} />
             <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
               {Math.abs(focusOffset) < 2 ? '✅ Foco Nítido' : Math.abs(focusOffset) < 5 ? '⚠️ Levemente desfocado' : '❌ Desfocado'}
@@ -440,7 +440,8 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
               <h4 style={{ color: 'var(--text-main)', margin: 0 }}>{selectedSlide.name}</h4>
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>{selectedSlide.description}</p>
-            <h5 style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.4rem' }}>Estruturas identificáveis em {zoom}×:</h5>
+            <h5 style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.4rem' }}>Estruturas representadas nesta ampliação:</h5>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>A ampliação muda o desenho; ela não demonstra que todas essas estruturas sejam resolvidas por microscopia óptica.</p>
             <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: '1.7' }}>
               {selectedSlide.details.slice(0, zoom >= 400 ? 5 : zoom >= 100 ? 4 : zoom >= 40 ? 3 : 1).map((d, i) => (
                 <li key={i}>{d}</li>
@@ -450,10 +451,10 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
 
             {/* AI Diagnostics Box */}
             <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-              <div style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, marginBottom: '0.2rem' }}>🤖 Dica da IA biológica</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, marginBottom: '0.2rem' }}>Orientação de observação</div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
                 {focusOffset === 0 
-                  ? `Foco micrométrico nítido! Em ${zoom}× você está observando a amostra de ${selectedSlide.name}.`
+                  ? `O desenho de ${selectedSlide.name} está nítido nesta ampliação gráfica de ${zoom}×.`
                   : 'Ajuste o controle de foco micrométrico para remover a distorção da imagem.'}
               </p>
             </div>

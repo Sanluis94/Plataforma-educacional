@@ -1,320 +1,80 @@
-import React, { useState } from 'react';
-import { PlusCircle, Sliders, HelpCircle, Save, X, Sparkles, Check } from 'lucide-react';
-import type { CatalogLabItem } from '../../../core/constants/masterLabsCatalog';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { createStudioLab, emptyLearningContent, type StudioLab, type StudioLabDraft } from '../../../core/services/labStudioService';
+import { LearningContentEditor } from './LearningContentEditor';
+import { LEARNING_LEVELS, type LearningLevel } from '../../../core/constants/learningLevels';
+import './LabStudioBuilderModal.css';
 
 interface LabStudioBuilderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSaveNewLab: (newLab: CatalogLabItem) => void;
+  onSaveNewLab: (lab: StudioLab) => void;
+  existingLabs?: StudioLab[];
+  initialAcademicLevel?: LearningLevel;
 }
 
-export const LabStudioBuilderModal: React.FC<LabStudioBuilderModalProps> = ({
-  isOpen,
-  onClose,
-  onSaveNewLab
-}) => {
-  const [title, setTitle] = useState('');
-  const [subject, setSubject] = useState('Física Experimental');
-  const [level, setLevel] = useState<CatalogLabItem['academicLevel']>('graduacao');
-  const [topic, setTopic] = useState('');
-  const [objective, setObjective] = useState('');
-  const [theory, setTheory] = useState('');
-  const [paramLabel, setParamLabel] = useState('Tensão Aplicada');
-  const [paramUnit, setParamUnit] = useState('V');
-  const [paramMin, setParamMin] = useState(0);
-  const [paramMax, setParamMax] = useState(100);
-  const [paramDefault, setParamDefault] = useState(25);
-  const [question, setQuestion] = useState('');
-  const [correctOption, setCorrectOption] = useState('');
-  const [distractor, setDistractor] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [isSaved, setIsSaved] = useState(false);
+const initialDraft = (academicLevel: LearningLevel): StudioLabDraft => ({ title: '', subject: '', academicLevel, topic: '', objective: '', estimatedHours: 1, content: emptyLearningContent() });
 
-  React.useEffect(() => {
+export function LabStudioBuilderModal({ isOpen, onClose, onSaveNewLab, existingLabs = [], initialAcademicLevel = 'medio' }: LabStudioBuilderModalProps) {
+  const [draft, setDraft] = useState(() => initialDraft(initialAcademicLevel));
+  const [error, setError] = useState('');
+  const dialog = useRef<HTMLDivElement>(null);
+  useEffect(() => {
     if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    const prevOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
+    dialog.current?.focus();
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+      if (event.key !== 'Tab') return;
+      const controls = [...(dialog.current?.querySelectorAll<HTMLElement>('button, input, textarea, select') || [])].filter(element => !element.hasAttribute('disabled'));
+      const first = controls[0];
+      const last = controls.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog.current)) { event.preventDefault(); last.focus(); }
+      if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialog.current)) { event.preventDefault(); first.focus(); }
     };
+    window.addEventListener('keydown', handleKey);
+    return () => { document.body.style.overflow = previousOverflow; window.removeEventListener('keydown', handleKey); previousFocus?.focus(); };
   }, [isOpen, onClose]);
-
   if (!isOpen) return null;
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !topic.trim()) {
-      setErrorMsg('Por favor, preencha ao menos o título e o tópico do laboratório.');
-      return;
-    }
-    setErrorMsg('');
-
-    const labId = `custom_${Date.now()}`;
-    const newLab: CatalogLabItem = {
-      id: labId,
-      title: title.trim(),
-      academicLevel: level,
-      academicLevelLabel:
-        level === 'fundamental_1' ? 'Ensino Fundamental I' :
-        level === 'fundamental_2' ? 'Ensino Fundamental II' :
-        level === 'medio' ? 'Ensino Médio' :
-        level === 'graduacao' ? 'Ensino Superior' : 'Pós-Graduação',
-      subject: subject.trim(),
-      subjectCategory: 'Personalizados',
-      topic: topic.trim(),
-      objective: objective.trim() || `Investigação experimental de ${topic}.`,
-      theoreticalBackground: theory.trim() || `Fundamentação teórica experimental aplicada ao tema ${topic}.`,
-      curriculumCode: 'CUSTOM-LAB',
-      simulatedHours: 20,
-      icon: '🛠️',
-      solverType: 'custom_analytical',
-      defaultParams: [
-        {
-          id: `${labId}_p1`,
-          label: paramLabel,
-          unit: paramUnit,
-          min: Number(paramMin),
-          max: Number(paramMax),
-          step: 1,
-          defaultValue: Number(paramDefault)
-        }
-      ],
-      diagnosticQuestion: {
-        question: question.trim() || `Qual é o principal efeito observado ao alterar ${paramLabel}?`,
-        options: [
-          {
-            text: correctOption.trim() || 'Resposta proporcional direta segundo o modelo teórico.',
-            correct: true,
-            explanation: 'Correto! A resposta é governada pela equação constitutiva do sistema.'
-          },
-          {
-            text: distractor.trim() || 'O sistema permanece completamente invariante.',
-            correct: false,
-            explanation: 'Incorreto. A alteração das variáveis modifica ativamente o estado dinâmico.'
-          }
-        ]
-      }
-    };
-
-    onSaveNewLab(newLab);
-    setIsSaved(true);
-    setTimeout(() => {
-      setIsSaved(false);
+  function save(event: FormEvent) {
+    event.preventDefault();
+    try {
+      const lab = createStudioLab(draft, existingLabs);
+      onSaveNewLab(lab);
+      setDraft(initialDraft(initialAcademicLevel));
+      setError('');
       onClose();
-    }, 1000);
-  };
+    } catch (failure) { setError(failure instanceof Error ? failure.message : 'Confira o conteúdo antes de adicionar a atividade.'); }
+  }
 
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="studio-modal-title"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
-    >
-      <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-2xl w-full max-h-[90vh] shadow-2xl flex flex-col text-slate-100 overflow-hidden">
-        {/* Header */}
-        <div className="p-4 bg-slate-800/90 border-b border-slate-700 flex items-center justify-between">
-          <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-[#E4683F]/20 text-[#E4683F] rounded-lg">
-              <PlusCircle className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <h3 id="studio-modal-title" className="font-bold text-sm text-white">Kortex Studio No-Code</h3>
-                <span className="bg-sky-950 text-sky-400 border border-sky-800 text-[10px] px-1.5 py-0.5 rounded flex items-center space-x-1">
-                  <Sparkles className="w-2.5 h-2.5" />
-                  <span>Criação Visual</span>
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">Crie e publique novos laboratórios virtuais sem precisar programar</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="p-1 rounded text-slate-400 hover:text-white">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+  const metadata = (label: string, field: 'title' | 'subject' | 'topic' | 'objective', minimum: number) => <label className="studio-field">
+    <span>{label}</span><input value={draft[field]} required minLength={minimum} onChange={event => setDraft(previous => ({ ...previous, [field]: event.target.value }))} />
+  </label>;
 
-        {errorMsg && (
-          <div className="mx-6 mt-4 p-2.5 bg-rose-950/60 border border-rose-800/80 rounded text-rose-300 text-xs">
-            {errorMsg}
-          </div>
-        )}
-
-        {/* Form Body */}
-        <form onSubmit={handleSave} className="flex-1 p-6 overflow-y-auto space-y-4 text-xs">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="font-semibold text-slate-300 block mb-1">Título do Laboratório:</label>
-              <input
-                type="text"
-                required
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="Ex: Pêndulo Eletrostático de Coulomb"
-                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:border-[#E4683F] focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="font-semibold text-slate-300 block mb-1">Nível Acadêmico:</label>
-              <select
-                value={level}
-                onChange={e => setLevel(e.target.value as any)}
-                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:border-[#E4683F] focus:outline-none"
-              >
-                <option value="fundamental_1">Fundamental I</option>
-                <option value="fundamental_2">Fundamental II</option>
-                <option value="medio">Ensino Médio</option>
-                <option value="graduacao">Ensino Superior (Graduação)</option>
-                <option value="pos_graduacao">Pós-Graduação & Pesquisa</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="font-semibold text-slate-300 block mb-1">Disciplina:</label>
-              <input
-                type="text"
-                required
-                value={subject}
-                onChange={e => setSubject(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:border-[#E4683F] focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="font-semibold text-slate-300 block mb-1">Tópico / Fenômeno:</label>
-              <input
-                type="text"
-                required
-                value={topic}
-                onChange={e => setTopic(e.target.value)}
-                placeholder="Ex: Força Eletrostática"
-                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:border-[#E4683F] focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="font-semibold text-slate-300 block mb-1">Objetivo Pedagógico da Prática:</label>
-            <textarea
-              rows={2}
-              value={objective}
-              onChange={e => setObjective(e.target.value)}
-              placeholder="Descreva o que o aluno deve investigar e comprovar empiricamente..."
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:border-[#E4683F] focus:outline-none resize-none"
-            />
-          </div>
-
-          <div>
-            <label className="font-semibold text-slate-300 block mb-1">Fundamentação Teórica (Opcional):</label>
-            <textarea
-              rows={2}
-              value={theory}
-              onChange={e => setTheory(e.target.value)}
-              placeholder="Descreva as leis fundamentais e equações governantes do fenômeno..."
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:border-[#E4683F] focus:outline-none resize-none"
-            />
-          </div>
-
-          {/* Parâmetros */}
-          <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-2">
-            <span className="font-bold text-slate-300 flex items-center space-x-1">
-              <Sliders className="w-3.5 h-3.5 text-[#E4683F]" />
-              <span>Configuração do Controle Deslizante Principal (Slider):</span>
-            </span>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-              <input
-                type="text"
-                placeholder="Nome do Parâmetro"
-                value={paramLabel}
-                onChange={e => setParamLabel(e.target.value)}
-                className="bg-slate-900 border border-slate-700 p-1.5 rounded text-slate-200 col-span-2"
-              />
-              <input
-                type="text"
-                placeholder="Unidade (ex: V, kg, m/s)"
-                value={paramUnit}
-                onChange={e => setParamUnit(e.target.value)}
-                className="bg-slate-900 border border-slate-700 p-1.5 rounded text-slate-200"
-              />
-              <input
-                type="number"
-                placeholder="Mínimo"
-                value={paramMin}
-                onChange={e => setParamMin(Number(e.target.value))}
-                className="bg-slate-900 border border-slate-700 p-1.5 rounded text-slate-200"
-              />
-              <input
-                type="number"
-                placeholder="Máximo"
-                value={paramMax}
-                onChange={e => setParamMax(Number(e.target.value))}
-                className="bg-slate-900 border border-slate-700 p-1.5 rounded text-slate-200"
-              />
-              <input
-                type="number"
-                placeholder="Padrão"
-                value={paramDefault}
-                onChange={e => setParamDefault(Number(e.target.value))}
-                className="bg-slate-900 border border-slate-700 p-1.5 rounded text-slate-200"
-              />
-            </div>
-          </div>
-
-          {/* Questão */}
-          <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-2">
-            <span className="font-bold text-slate-300 flex items-center space-x-1">
-              <HelpCircle className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Questão Diagnóstica de Verificação Conceitual:</span>
-            </span>
-            <input
-              type="text"
-              placeholder="Pergunta conceitual para o aluno..."
-              value={question}
-              onChange={e => setQuestion(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 p-1.5 rounded text-slate-200"
-            />
-            <input
-              type="text"
-              placeholder="Alternativa Correta (Gabarito)"
-              value={correctOption}
-              onChange={e => setCorrectOption(e.target.value)}
-              className="w-full bg-slate-900 border border-emerald-900 p-1.5 rounded text-emerald-300"
-            />
-            <input
-              type="text"
-              placeholder="Alternativa Incorreta (Distrator)"
-              value={distractor}
-              onChange={e => setDistractor(e.target.value)}
-              className="w-full bg-slate-900 border border-rose-900 p-1.5 rounded text-rose-300"
-            />
-          </div>
-
-          {/* Footer Save */}
-          <div className="pt-2 flex justify-end space-x-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-2 bg-[#E4683F] hover:bg-[#E4683F]/90 font-bold text-white rounded flex items-center space-x-1.5 shadow"
-            >
-              {isSaved ? <Check className="w-4 h-4 text-white" /> : <Save className="w-4 h-4" />}
-              <span>{isSaved ? 'Publicado!' : 'Publicar Laboratório'}</span>
-            </button>
-          </div>
-        </form>
-      </div>
+  return <div className="lab-studio-backdrop" onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
+    <div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="studio-title" className="lab-studio">
+      <header><h2 id="studio-title">Criar atividade no Kortex Studio</h2><button type="button" onClick={onClose} aria-label="Fechar Studio">×</button></header>
+      <p>Prepare um roteiro com explicação, exemplo, três cenários e duas questões com feedback. A atividade ficará disponível nesta sessão. Revise a correção do conteúdo antes de compartilhar com alunos.</p>
+      {error && <p role="alert" className="studio-errors">{error}</p>}
+      <form onSubmit={save}>
+        <fieldset><legend>Identificação</legend>
+          {metadata('Título do laboratório', 'title', 5)}
+          {metadata('Disciplina', 'subject', 3)}
+          {metadata('Tópico', 'topic', 3)}
+          {metadata('Objetivo de aprendizagem', 'objective', 30)}
+          <label className="studio-field"><span>Nível acadêmico</span>
+            <select aria-label="Nível acadêmico" value={draft.academicLevel} onChange={event => setDraft(previous => ({ ...previous, academicLevel: event.target.value as StudioLabDraft['academicLevel'] }))}>
+              {LEARNING_LEVELS.map(level => <option key={level.id} value={level.id}>{level.label}</option>)}
+            </select>
+          </label>
+          <label className="studio-field"><span>Tempo de estudo estimado (horas)</span><input type="number" min="0.25" max="40" step="0.25" required value={draft.estimatedHours} onChange={event => setDraft(previous => ({ ...previous, estimatedHours: Number(event.target.value) }))} /></label>
+        </fieldset>
+        <LearningContentEditor content={draft.content} onChange={content => setDraft(previous => ({ ...previous, content }))} />
+        <footer><button type="button" onClick={onClose}>Cancelar</button><button type="submit">Adicionar à sessão</button></footer>
+      </form>
     </div>
-  );
-};
+  </div>;
+}

@@ -1,0 +1,820 @@
+{
+  "sup_redes_01": {
+    "context": "Um traço TCP fictício permite estudar abertura de conexão e limites de envio sem capturar tráfego de terceiros.",
+    "theory": "O handshake comum troca SYN, SYN-ACK e ACK para sincronizar números de sequência. SYN consome uma posição nesse espaço. A janela anunciada pelo receptor, rwnd, protege seu buffer; a janela de congestionamento, cwnd, limita carga sobre a rede. O emissor respeita ambas, com dados em voo limitados aproximadamente por min(rwnd,cwnd). Perda pode disparar redução de cwnd, conforme o algoritmo adotado.",
+    "workedExample": "Cliente envia SYN com seq=100; servidor responde SYN-ACK com seq=500 e ack=101; cliente confirma ack=501. Com rwnd=12 kB e cwnd=8 kB, o limite didático de dados em voo é 8 kB, não a soma das janelas.",
+    "investigation": [
+      "Preencha seq e ack nas três mensagens do traço.",
+      "Calcule o mínimo entre janelas de receptor e congestionamento.",
+      "Explique o efeito de uma perda sem confundir rede e buffer."
+    ],
+    "expectedEvidence": "A resposta deve justificar o incremento causado pelo SYN e distinguir controle de fluxo de controle de congestionamento no limite calculado.",
+    "reflection": "Por que um receptor com buffer livre não garante que a rede suporte mais tráfego?",
+    "scenarios": [
+      {
+        "id": "ack-syn",
+        "label": "SYN confirmado",
+        "situation": "O cliente iniciou com número de sequência cem.",
+        "observation": "O ACK de resposta confirma cento e um.",
+        "explanation": "O SYN ocupa uma posição, mesmo sem carregar um byte de aplicação."
+      },
+      {
+        "id": "buffer",
+        "label": "Receptor limitado",
+        "situation": "rwnd cai para 4 kB enquanto cwnd permanece 8 kB.",
+        "observation": "O limite passa a quatro quilobytes.",
+        "explanation": "O receptor restringe o envio para evitar transbordamento de seu buffer."
+      },
+      {
+        "id": "perda",
+        "label": "Congestionamento",
+        "situation": "O cenário estipula perda interpretada pelo emissor como congestão.",
+        "observation": "A política pode reduzir cwnd.",
+        "explanation": "A recuperação depende do algoritmo TCP; uma perda não mede diretamente o buffer remoto."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual ACK confirma um SYN com seq=100?",
+        "options": [
+          {
+            "text": "101",
+            "correct": true,
+            "explanation": "O número de confirmação aponta a próxima posição esperada após o SYN."
+          },
+          {
+            "text": "100",
+            "correct": false,
+            "explanation": "Esse valor não avança a posição consumida pelo SYN."
+          },
+          {
+            "text": "500",
+            "correct": false,
+            "explanation": "O número inicial do servidor não confirma o SYN do cliente."
+          }
+        ]
+      },
+      {
+        "question": "Qual limite resulta de rwnd=12 kB e cwnd=8 kB?",
+        "options": [
+          {
+            "text": "8 kB",
+            "correct": true,
+            "explanation": "O emissor precisa respeitar a menor das duas restrições."
+          },
+          {
+            "text": "20 kB",
+            "correct": false,
+            "explanation": "Somar as janelas permitiria exceder ambas as restrições."
+          },
+          {
+            "text": "12 kB",
+            "correct": false,
+            "explanation": "Esse valor ignoraria a janela de congestionamento menor."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "RFC 9293 — TCP",
+        "url": "https://www.rfc-editor.org/rfc/rfc9293"
+      }
+    ]
+  },
+  "sup_redes_02": {
+    "context": "Uma organização fictícia divide o bloco de documentação 192.0.2.0/24 entre setores com necessidades diferentes.",
+    "theory": "CIDR indica quantos bits identificam o prefixo. Em uma sub-rede IPv4 convencional /p, existem 2^(32−p) endereços, normalmente com rede e broadcast reservados; /31 tem uso especial ponto a ponto. VLSM distribui blocos de potências de dois alinhados ao próprio tamanho. Ordenar pedidos do maior para o menor ajuda a evitar fragmentação e sobreposição.",
+    "workedExample": "Para cinquenta hosts, /26 oferece 64 endereços e 62 utilizáveis. O bloco 192.0.2.0/26 vai de .0 a .63; hosts .1 a .62 e broadcast .63. O próximo bloco /26 alinhado inicia em .64.",
+    "investigation": [
+      "Dimensione um setor de cinquenta e outro de vinte hosts.",
+      "Marque rede, hosts e broadcast de cada bloco escolhido.",
+      "Verifique alinhamento e ausência de sobreposição no /24."
+    ],
+    "expectedEvidence": "Apresente prefixo, máscara e intervalos; diferencie total de endereços de quantidade utilizável sob as reservas convencionais declaradas.",
+    "reflection": "Por que uma fronteira de bloco não pode começar em qualquer endereço?",
+    "scenarios": [
+      {
+        "id": "cinquenta",
+        "label": "Setor maior",
+        "situation": "O setor precisa acomodar cinquenta hosts convencionais.",
+        "observation": "/26 fornece sessenta e dois endereços utilizáveis.",
+        "explanation": "/27 teria apenas trinta hosts e seria insuficiente."
+      },
+      {
+        "id": "vinte",
+        "label": "Setor menor",
+        "situation": "Após reservar .0/26, o segundo setor precisa de vinte hosts.",
+        "observation": "192.0.2.64/27 atende até trinta hosts.",
+        "explanation": "O bloco de trinta e dois endereços está alinhado e não invade o primeiro."
+      },
+      {
+        "id": "sobreposicao",
+        "label": "Bloco sobreposto",
+        "situation": "Propõe-se 192.0.2.32/27 depois de reservar .0/26.",
+        "observation": "O intervalo .32 a .63 já está reservado.",
+        "explanation": "Prefixos distintos ainda podem se sobrepor quando um contém o outro."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual broadcast pertence a 192.0.2.0/26?",
+        "options": [
+          {
+            "text": "192.0.2.63",
+            "correct": true,
+            "explanation": "O bloco contém sessenta e quatro endereços iniciando em zero."
+          },
+          {
+            "text": "192.0.2.64",
+            "correct": false,
+            "explanation": "Esse endereço inicia o próximo bloco de mesmo tamanho."
+          },
+          {
+            "text": "192.0.2.255",
+            "correct": false,
+            "explanation": "Esse é o broadcast do /24 inteiro, não do /26 pedido."
+          }
+        ]
+      },
+      {
+        "question": "Qual menor prefixo convencional atende cinquenta hosts?",
+        "options": [
+          {
+            "text": "/26",
+            "correct": true,
+            "explanation": "Sessenta e dois hosts utilizáveis atendem a demanda."
+          },
+          {
+            "text": "/27",
+            "correct": false,
+            "explanation": "Trinta hosts utilizáveis não comportam cinquenta."
+          },
+          {
+            "text": "/28",
+            "correct": false,
+            "explanation": "Quatorze hosts utilizáveis ficam ainda mais abaixo da demanda."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_redes_03": {
+    "context": "Roteadores fictícios de uma única área OSPF precisam recalcular caminhos após mudança de custo de um enlace.",
+    "theory": "OSPF é um protocolo de estado de enlace: roteadores disseminam informações e constroem uma base da topologia por área. O cálculo SPF aplica Dijkstra com custos não negativos. Convergência envolve detectar mudança, propagar anúncios e recalcular, portanto não é instantânea. Custo representa uma métrica configurada, não necessariamente latência em milissegundos; caminhos de mesmo custo podem ser elegíveis a ECMP.",
+    "workedExample": "R1–R2 custa 5, R1–R3 custa 2 e R3–R2 custa 1. R1 chega a R2 via R3 por custo 3. Se R3–R2 muda para 10, esse caminho passa a 12, e o direto de custo 5 torna-se preferível após convergência.",
+    "investigation": [
+      "Monte a base de enlaces do cenário de área única.",
+      "Calcule a árvore SPF antes e depois da alteração.",
+      "Distinga o custo final dos estados transitórios de convergência."
+    ],
+    "expectedEvidence": "Mostre a rota escolhida e a soma dos custos nas duas topologias, sem converter custos arbitrários em uma medida física de atraso.",
+    "reflection": "Qual risco surge enquanto roteadores ainda possuem versões diferentes da topologia?",
+    "scenarios": [
+      {
+        "id": "via-r3",
+        "label": "Rota indireta",
+        "situation": "Os custos são R1–R2=5, R1–R3=2 e R3–R2=1.",
+        "observation": "O caminho por R3 custa três.",
+        "explanation": "A menor soma de custos supera a preferência por uma ligação direta."
+      },
+      {
+        "id": "custo-mudou",
+        "label": "Enlace degradado",
+        "situation": "O custo R3–R2 aumenta para dez.",
+        "observation": "A rota direta de custo cinco vence.",
+        "explanation": "O recálculo usa a nova topologia depois da propagação das informações."
+      },
+      {
+        "id": "empate-ospf",
+        "label": "Custos iguais",
+        "situation": "Dois caminhos distintos somam o mesmo menor custo.",
+        "observation": "Pode haver múltiplos próximos saltos elegíveis.",
+        "explanation": "ECMP depende da implementação e configuração, sem tornar um caminho mais curto."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual rota inicial de R1 para R2 tem menor custo?",
+        "options": [
+          {
+            "text": "R1–R3–R2",
+            "correct": true,
+            "explanation": "Sua soma dois mais um é inferior ao custo direto cinco."
+          },
+          {
+            "text": "R1–R2 sempre",
+            "correct": false,
+            "explanation": "OSPF considera custo acumulado, não apenas quantidade de enlaces."
+          },
+          {
+            "text": "Nenhuma rota existe",
+            "correct": false,
+            "explanation": "A topologia apresentada conecta os três roteadores."
+          }
+        ]
+      },
+      {
+        "question": "O que o custo OSPF significa neste exercício?",
+        "options": [
+          {
+            "text": "Uma métrica de roteamento configurada",
+            "correct": true,
+            "explanation": "Os números permitem comparar caminhos sem afirmar uma unidade física."
+          },
+          {
+            "text": "Obrigatoriamente milissegundos medidos",
+            "correct": false,
+            "explanation": "O custo não foi definido como medida de latência."
+          },
+          {
+            "text": "Quantidade de pacotes perdidos",
+            "correct": false,
+            "explanation": "Não há essa correspondência no modelo de custos adotado."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "RFC 2328 — OSPFv2",
+        "url": "https://www.rfc-editor.org/rfc/rfc2328"
+      }
+    ]
+  },
+  "sup_redes_04": {
+    "context": "Chaves RSA minúsculas ajudam a conferir aritmética modular em papel; elas não protegem comunicações reais.",
+    "theory": "RSA usa módulo n=pq e expoentes e,d relacionados pelo inverso modular apropriado. A primitiva opera sobre representantes inteiros, mas segurança requer esquemas de codificação: OAEP para cifragem e PSS para assinatura são exemplos padronizados. Assinar não se resume a cifrar uma mensagem com a chave privada. Autenticidade também exige confiar na associação entre identidade e chave pública.",
+    "workedExample": "Com p=3, q=11, n=33 e φ(n)=20, escolha e=3 e d=7, pois 3×7≡1 mod 20. Para m=4, c=4³ mod 33=31; 31⁷ mod 33=4. O exemplo sem codificação serve apenas à conta didática.",
+    "investigation": [
+      "Confira primalidade, módulo e o inverso de três módulo vinte.",
+      "Calcule cifragem e recuperação por quadrados sucessivos.",
+      "Separe a primitiva aritmética de um esquema seguro de assinatura."
+    ],
+    "expectedEvidence": "Registre as congruências e a recuperação de quatro, declarando que tamanho de chave e ausência de codificação tornam o exemplo inseguro.",
+    "reflection": "Por que verificar uma assinatura não basta se a chave pública foi substituída?",
+    "scenarios": [
+      {
+        "id": "inverso",
+        "label": "Expoente privado",
+        "situation": "e=3 e φ(n)=20 no exemplo minúsculo.",
+        "observation": "d=7 satisfaz a congruência.",
+        "explanation": "Vinte e um deixa resto um na divisão por vinte."
+      },
+      {
+        "id": "sem-padding",
+        "label": "Primitiva isolada",
+        "situation": "A mensagem inteira é elevada diretamente ao expoente público.",
+        "observation": "A transformação é determinística.",
+        "explanation": "RSA sem esquema de codificação não oferece a segurança de RSA-OAEP ou RSA-PSS."
+      },
+      {
+        "id": "identidade",
+        "label": "Chave não autenticada",
+        "situation": "Uma chave é recebida junto da assinatura, sem vínculo confiável.",
+        "observation": "A identidade do signatário permanece incerta.",
+        "explanation": "Validade matemática com uma chave não prova a quem essa chave pertence."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Por que sete é o expoente inverso de três no exemplo?",
+        "options": [
+          {
+            "text": "3×7 deixa resto 1 módulo 20",
+            "correct": true,
+            "explanation": "Essa é a condição de inverso modular utilizada na escolha."
+          },
+          {
+            "text": "7 é igual a φ(n)",
+            "correct": false,
+            "explanation": "O totiente calculado é vinte, não sete."
+          },
+          {
+            "text": "3+7 é igual a n",
+            "correct": false,
+            "explanation": "A soma é dez, enquanto o módulo RSA é trinta e três."
+          }
+        ]
+      },
+      {
+        "question": "Qual conclusão cabe ao RSA minúsculo sem codificação?",
+        "options": [
+          {
+            "text": "É uma demonstração aritmética insegura",
+            "correct": true,
+            "explanation": "A conta ilustra congruências, mas não constitui proteção prática."
+          },
+          {
+            "text": "Pode proteger arquivos pessoais",
+            "correct": false,
+            "explanation": "O módulo é trivialmente fatorável e o esquema está incompleto."
+          },
+          {
+            "text": "Assinatura equivale sempre a cifragem privada",
+            "correct": false,
+            "explanation": "Assinaturas exigem definição própria de codificação e verificação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "RFC 8017 — RSA",
+        "url": "https://www.rfc-editor.org/rfc/rfc8017"
+      }
+    ]
+  },
+  "sup_redes_05": {
+    "context": "Um cliente fictício valida um servidor de exemplo. Confidencialidade e identidade dependem de etapas distintas do handshake.",
+    "theory": "No TLS 1.3 com certificados e troca (EC)DHE, ClientHello e ServerHello negociam parâmetros e estabelecem material efêmero. Certificate apresenta a cadeia; CertificateVerify demonstra posse da chave de assinatura; Finished vincula a transcrição aos segredos derivados. A validação inclui confiança, validade e nome esperado. A sessão pode ter sigilo futuro se as chaves efêmeras forem descartadas; 0-RTT possui limites de replay.",
+    "workedExample": "Um certificado válido para portal.example não autentica api.example quando esse nome não consta dos identificadores aceitos. Mesmo que a cadeia termine numa raiz confiável, a comparação do nome esperado falha. O cliente deve rejeitar essa autenticação.",
+    "investigation": [
+      "Ordene ClientHello, ServerHello e autenticação do servidor.",
+      "Confira raiz confiável, prazo e nome do certificado fictício.",
+      "Explique o papel da assinatura e do segredo efêmero separadamente."
+    ],
+    "expectedEvidence": "Diferencie troca de chaves de autenticação e registre o motivo específico da rejeição por nome, sem afirmar que houve uma conexão real.",
+    "reflection": "Por que uma cadeia confiável ainda pode pertencer ao servidor errado?",
+    "scenarios": [
+      {
+        "id": "nome",
+        "label": "Nome divergente",
+        "situation": "O cliente espera api.example e o certificado cobre só portal.example.",
+        "observation": "A verificação de identidade falha.",
+        "explanation": "A confiança na autoridade não dispensa conferir o identificador esperado."
+      },
+      {
+        "id": "posse",
+        "label": "Prova de posse",
+        "situation": "O servidor envia a cadeia e assina a transcrição em CertificateVerify.",
+        "observation": "A assinatura liga sua chave à negociação.",
+        "explanation": "Apenas copiar um certificado público não fornece a chave necessária à prova."
+      },
+      {
+        "id": "zerortt",
+        "label": "Dados antecipados",
+        "situation": "Uma operação com efeito financeiro é proposta em 0-RTT.",
+        "observation": "O replay precisa ser considerado.",
+        "explanation": "Dados antecipados não têm todas as garantias antirrepetição de uma troca concluída."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual falha existe no certificado do exemplo?",
+        "options": [
+          {
+            "text": "O nome esperado não é coberto",
+            "correct": true,
+            "explanation": "api.example difere do único identificador portal.example apresentado."
+          },
+          {
+            "text": "Toda cadeia confiável está proibida",
+            "correct": false,
+            "explanation": "Uma cadeia confiável é parte da validação, mas não é suficiente."
+          },
+          {
+            "text": "TLS 1.3 exige cifragem RSA da sessão",
+            "correct": false,
+            "explanation": "A troca efêmera e a autenticação não seguem essa exigência."
+          }
+        ]
+      },
+      {
+        "question": "Qual mensagem demonstra posse da chave de assinatura do servidor?",
+        "options": [
+          {
+            "text": "CertificateVerify",
+            "correct": true,
+            "explanation": "Ela assina elementos da transcrição com a chave do certificado."
+          },
+          {
+            "text": "DNS query",
+            "correct": false,
+            "explanation": "Uma consulta de nomes não prova posse da chave TLS."
+          },
+          {
+            "text": "ClientHello isolado",
+            "correct": false,
+            "explanation": "Essa mensagem inicia a negociação e não autentica por si o servidor."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "RFC 8446 — TLS 1.3",
+        "url": "https://www.rfc-editor.org/rfc/rfc8446"
+      }
+    ]
+  },
+  "sup_redes_06": {
+    "context": "Um administrador analisa registros sintéticos de uma rede isolada para escolher defesas contra inconsistência ARP e excesso de conexões incompletas.",
+    "theory": "ARP associa endereços IPv4 a endereços de enlace na rede local e não autentica sozinho os anúncios. Inspeção dinâmica pode comparar mensagens com vínculos confiáveis; entradas estáticas têm custo operacional. SYN flood pressiona o estado de conexões incompletas; limites, SYN cookies e capacidade de filtragem ajudam, mas têm condições e limites. Firewall stateful rastreia conexões e também pode esgotar sua própria tabela.",
+    "workedExample": "Uma tabela fictícia vincula 192.0.2.10 a MAC A. Surge um anúncio dizendo que o mesmo IP pertence a MAC B, sem mudança autorizada. O registro é uma inconsistência a investigar e filtrar segundo vínculos confiáveis, não prova isolada de autoria maliciosa.",
+    "investigation": [
+      "Compare anúncios sintéticos com o inventário autorizado.",
+      "Separe ocupação de conexões incompletas de conexões estabelecidas.",
+      "Avalie defesa, falso positivo e custo operacional de cada opção."
+    ],
+    "expectedEvidence": "Associe cada defesa ao recurso protegido e às evidências disponíveis, mantendo o cenário fictício e sem gerar tráfego ofensivo.",
+    "reflection": "Como uma regra rígida de associação pode afetar uma troca legítima de equipamento?",
+    "scenarios": [
+      {
+        "id": "arp",
+        "label": "Vínculo divergente",
+        "situation": "O inventário registra MAC A e um anúncio informa MAC B para o mesmo IP.",
+        "observation": "Há divergência de associação.",
+        "explanation": "A decisão depende de autorização e de uma fonte confiável de vínculos."
+      },
+      {
+        "id": "syn",
+        "label": "Conexões pendentes",
+        "situation": "Os registros mostram muitas solicitações sem conclusão do handshake.",
+        "observation": "O estado pendente cresce.",
+        "explanation": "Mecanismos como SYN cookies reduzem reserva antecipada, mas não eliminam todo custo da sobrecarga."
+      },
+      {
+        "id": "troca",
+        "label": "Manutenção legítima",
+        "situation": "Uma placa é substituída e a regra ARP estática não é atualizada.",
+        "observation": "O tráfego autorizado pode ser bloqueado.",
+        "explanation": "Defesas precisam de procedimento de manutenção para evitar interrupções por inventário desatualizado."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual evidência orienta uma inspeção de anúncios ARP?",
+        "options": [
+          {
+            "text": "Vínculos IP–MAC autorizados",
+            "correct": true,
+            "explanation": "A comparação requer uma referência confiável para identificar divergências."
+          },
+          {
+            "text": "Somente o volume de consultas DNS",
+            "correct": false,
+            "explanation": "Volume de DNS não determina a associação de enlace permitida."
+          },
+          {
+            "text": "Qualquer anúncio mais recente",
+            "correct": false,
+            "explanation": "Recência não autentica o conteúdo de uma associação ARP."
+          }
+        ]
+      },
+      {
+        "question": "Qual recurso pode ser pressionado por handshakes incompletos?",
+        "options": [
+          {
+            "text": "A tabela de conexões pendentes",
+            "correct": true,
+            "explanation": "O servidor pode reservar estado enquanto espera o ACK final."
+          },
+          {
+            "text": "A árvore de certificados por definição",
+            "correct": false,
+            "explanation": "O cenário trata abertura TCP antes da autenticação TLS."
+          },
+          {
+            "text": "A máscara CIDR automaticamente",
+            "correct": false,
+            "explanation": "O prefixo de endereçamento não cresce com a quantidade de SYNs."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "RFC 4987 — SYN Flood Mitigations",
+        "url": "https://www.rfc-editor.org/rfc/rfc4987"
+      }
+    ]
+  },
+  "sup_redes_07": {
+    "context": "Cinco servidores fictícios replicam um registro de decisões. Uma divisão de rede exige distinguir maioria disponível de líder apenas aparente.",
+    "theory": "Raft divide consenso em eleição, replicação e regras de segurança. Termos ordenam eleições; cada servidor concede no máximo um voto por termo. Em cinco membros, maioria é três. O líder pode confirmar entradas de seu termo ao replicá-las numa maioria, respeitando as regras do protocolo; entradas de termos antigos não se confirmam apenas por contagem direta. Sem maioria, novas decisões não devem ser reconhecidas como confirmadas.",
+    "workedExample": "Com cinco membros, dois falham e restam três: ainda há maioria para progresso se a comunicação e as condições do protocolo permitirem. Em partição 2+3, o grupo de dois não deve confirmar entradas novas; ter um antigo líder nesse grupo não muda a conta.",
+    "investigation": [
+      "Calcule maiorias para três e cinco membros.",
+      "Trace votos e termos numa eleição com candidatos simultâneos.",
+      "Analise a partição 2+3 e separe recebido de confirmado."
+    ],
+    "expectedEvidence": "Indique termo, votos e confirmação por maioria, sem assumir que replicar qualquer entrada antiga em três nós basta para confirmar diretamente.",
+    "reflection": "Por que um antigo líder isolado deve parar de reconhecer gravações como confirmadas?",
+    "scenarios": [
+      {
+        "id": "maioria",
+        "label": "Três disponíveis",
+        "situation": "Dois dos cinco servidores falham e três continuam conectados.",
+        "observation": "A maioria ainda é alcançável.",
+        "explanation": "O protocolo tolera duas falhas de parada nesse tamanho de cluster."
+      },
+      {
+        "id": "minoria",
+        "label": "Líder isolado",
+        "situation": "O líder anterior permanece numa partição de dois membros.",
+        "observation": "Ele não possui quórum de três.",
+        "explanation": "Não pode confirmar novas entradas apenas com apoio da minoria."
+      },
+      {
+        "id": "termo",
+        "label": "Mensagem antiga",
+        "situation": "Um servidor recebe uma solicitação com termo menor que o seu.",
+        "observation": "O remetente está desatualizado.",
+        "explanation": "Os termos impedem aceitar a autoridade de um líder obsoleto."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual quórum majoritário é necessário em cinco membros?",
+        "options": [
+          {
+            "text": "3",
+            "correct": true,
+            "explanation": "Três é a menor quantidade estritamente superior à metade de cinco."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Dois membros formam uma minoria do conjunto."
+          },
+          {
+            "text": "5 sempre",
+            "correct": false,
+            "explanation": "Exigir todos perderia a tolerância a duas falhas prevista."
+          }
+        ]
+      },
+      {
+        "question": "O que acontece com novas confirmações na partição de dois membros?",
+        "options": [
+          {
+            "text": "Ficam impedidas por falta de maioria",
+            "correct": true,
+            "explanation": "A presença do líder anterior não substitui o quórum."
+          },
+          {
+            "text": "São válidas se o líder estiver ali",
+            "correct": false,
+            "explanation": "Autoridade antiga sem maioria não satisfaz as regras de confirmação."
+          },
+          {
+            "text": "Todo dado antigo deve ser apagado",
+            "correct": false,
+            "explanation": "A perda de quórum não exige apagar o registro já confirmado."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Ongaro e Ousterhout — Raft",
+        "url": "https://raft.github.io/raft.pdf"
+      }
+    ]
+  },
+  "sup_redes_08": {
+    "context": "Um resolvedor fictício procura www.escola.example e pode reutilizar respostas por um tempo definido, sem consultar servidores reais.",
+    "theory": "DNS organiza nomes hierarquicamente em zonas. O cliente pode pedir recursão ao resolvedor, que consulta outros servidores de forma iterativa, seguindo referências da raiz ao domínio autoritativo. A raiz não guarda os endereços de todos os hosts. Cache respeita TTL e pode reduzir consultas; uma resposta em cache ainda válida pode refletir um valor anterior a uma alteração recente. DNSSEC trata autenticidade de dados, não sua confidencialidade.",
+    "workedExample": "Um registro recebe TTL=300 s às 12:00. Às 12:02 restam 180 s de validade no cache, assumindo contagem contínua. Uma consulta nessa hora pode ser respondida sem novo acesso ao autoritativo; após 12:05, a entrada precisa expirar ou ser revalidada conforme o resolvedor.",
+    "investigation": [
+      "Desenhe cliente, resolvedor e delegações hierárquicas.",
+      "Calcule o TTL restante após cento e vinte segundos.",
+      "Compare resposta autoritativa e resposta válida do cache."
+    ],
+    "expectedEvidence": "Explique quem faz recursão, quem envia referências e por que o TTL limita a reutilização, sem tratar cache como atualização instantânea.",
+    "reflection": "Como um registro antigo pode continuar válido depois de uma mudança na zona?",
+    "scenarios": [
+      {
+        "id": "cache",
+        "label": "Resposta reutilizada",
+        "situation": "O registro tem TTL de trezentos segundos e foi obtido há cento e vinte.",
+        "observation": "Restam cento e oitenta segundos.",
+        "explanation": "Reutilizar antes da expiração evita repetir a cadeia de consultas."
+      },
+      {
+        "id": "delegacao",
+        "label": "Referência hierárquica",
+        "situation": "Um servidor superior indica servidores de uma zona subordinada.",
+        "observation": "A resposta é uma delegação, não o IP final.",
+        "explanation": "O resolvedor prossegue a consulta até alcançar informação autoritativa adequada."
+      },
+      {
+        "id": "expirado",
+        "label": "TTL encerrado",
+        "situation": "A consulta ocorre após os trezentos segundos de validade.",
+        "observation": "A entrada antiga não é um cache fresco.",
+        "explanation": "O resolvedor precisa buscar atualização segundo sua política e condições de serviço."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quanto resta de um TTL de 300 s após 120 s?",
+        "options": [
+          {
+            "text": "180 s",
+            "correct": true,
+            "explanation": "Subtrair o tempo decorrido produz a validade restante."
+          },
+          {
+            "text": "420 s",
+            "correct": false,
+            "explanation": "O tempo decorrido reduz a validade em vez de aumentá-la."
+          },
+          {
+            "text": "300 s sempre",
+            "correct": false,
+            "explanation": "O TTL não reinicia a cada resposta obtida do mesmo cache."
+          }
+        ]
+      },
+      {
+        "question": "Qual papel típico da raiz durante a resolução?",
+        "options": [
+          {
+            "text": "Orientar a delegação a zonas superiores",
+            "correct": true,
+            "explanation": "Ela ajuda a localizar a hierarquia, sem armazenar todos os hosts."
+          },
+          {
+            "text": "Responder obrigatoriamente o IP de qualquer host",
+            "correct": false,
+            "explanation": "A autoridade sobre hosts pertence às zonas responsáveis."
+          },
+          {
+            "text": "Cifrar toda consulta DNS automaticamente",
+            "correct": false,
+            "explanation": "A hierarquia não fornece confidencialidade por si mesma."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "RFC 1034 — DNS Concepts",
+        "url": "https://www.rfc-editor.org/rfc/rfc1034"
+      }
+    ]
+  },
+  "sup_redes_09": {
+    "context": "Um proxy fictício distribui seis solicitações entre três servidores. Equilíbrio de contagem pode diferir de equilíbrio de trabalho.",
+    "theory": "Round Robin percorre destinos elegíveis em ciclo. Com servidores homogêneos e requisições semelhantes, tende a equilibrar contagens; não considera sozinho duração ou carga atual. Health checks retiram destinos indisponíveis. Persistência de sessão mantém afinidade, mas pode desequilibrar tráfego e não substitui armazenamento compartilhado ou recuperação. Proxy reverso recebe pelo serviço e encaminha aos backends, influenciando limites e tempos de espera.",
+    "workedExample": "Para destinos A,B,C e seis requisições sem falhas nem afinidade, a sequência A,B,C,A,B,C produz duas por servidor. Se uma solicitação a A dura cem vezes mais, a igualdade de contagem não demonstra igualdade de ocupação.",
+    "investigation": [
+      "Distribua seis requisições pelo ciclo de três destinos.",
+      "Refaça a sequência retirando B por falha de saúde.",
+      "Compare contagem, duração e efeito de afinidade por sessão."
+    ],
+    "expectedEvidence": "Registre a elegibilidade dos destinos e a sequência, separando distribuição de solicitações de carga e disponibilidade observadas.",
+    "reflection": "Quando uma política de menor número de conexões seria uma alternativa relevante?",
+    "scenarios": [
+      {
+        "id": "homogeneo",
+        "label": "Ciclo completo",
+        "situation": "Seis solicitações equivalentes usam três destinos saudáveis.",
+        "observation": "Cada destino recebe duas solicitações.",
+        "explanation": "Dois ciclos completos equilibram a contagem sob essas hipóteses."
+      },
+      {
+        "id": "lento",
+        "label": "Destino ocupado",
+        "situation": "A processa uma requisição muito mais demorada.",
+        "observation": "A pode acumular trabalho apesar da contagem igual.",
+        "explanation": "Round Robin simples não mede o tempo de serviço de cada solicitação."
+      },
+      {
+        "id": "afinidade",
+        "label": "Sessão persistente",
+        "situation": "Um cliente frequente fica preso ao servidor C por afinidade.",
+        "observation": "C pode receber uma fração maior do tráfego.",
+        "explanation": "Persistência atende um requisito de sessão e altera o equilíbrio do ciclo puro."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual sequência resulta de seis requisições Round Robin em A,B,C?",
+        "options": [
+          {
+            "text": "A,B,C,A,B,C",
+            "correct": true,
+            "explanation": "O ponteiro percorre repetidamente a lista de destinos elegíveis."
+          },
+          {
+            "text": "A,A,A,A,A,A",
+            "correct": false,
+            "explanation": "Essa sequência fixa um destino e não executa o ciclo."
+          },
+          {
+            "text": "A,B,A,B,A,B",
+            "correct": false,
+            "explanation": "Ela ignora C, que foi declarado saudável e elegível."
+          }
+        ]
+      },
+      {
+        "question": "O que igualdade de contagem deixa de demonstrar?",
+        "options": [
+          {
+            "text": "Igualdade de trabalho computacional",
+            "correct": true,
+            "explanation": "Requisições podem exigir durações e recursos diferentes."
+          },
+          {
+            "text": "Que houve seis solicitações",
+            "correct": false,
+            "explanation": "A própria contagem soma as seis solicitações descritas."
+          },
+          {
+            "text": "Que cada destino recebeu duas no exemplo",
+            "correct": false,
+            "explanation": "Esse resultado decorre diretamente dos dois ciclos completos."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_redes_10": {
+    "context": "Um controlador fictício instala regras em um switch. Pacotes posteriores podem ser encaminhados localmente sem consultar o controlador a cada vez.",
+    "theory": "SDN separa decisões de controle e encaminhamento. Em OpenFlow, entradas de fluxo combinam campos, prioridade, instruções e contadores. Quando várias regras casam, a prioridade orienta a seleção dentro da tabela. Table-miss tem comportamento configurável, como descarte ou envio ao controlador; não significa necessariamente inundação. O controlador é logicamente centralizado, mas pode ser implementado de forma distribuída.",
+    "workedExample": "Duas regras casam com um pacote: prioridade 10 encaminha à porta 2; prioridade 100 descarta o destino de documentação 192.0.2.7. Para esse destino, vence a regra 100 e o pacote é descartado. A ordem de criação das regras não substitui sua prioridade.",
+    "investigation": [
+      "Liste campos e prioridades das duas regras fictícias.",
+      "Determine a ação para um pacote que casa com ambas.",
+      "Defina table-miss e efeito da indisponibilidade do controlador."
+    ],
+    "expectedEvidence": "A evidência deve relacionar correspondência, prioridade e ação, distinguindo decisão do controlador de execução local das regras no switch.",
+    "reflection": "Que comportamento de encaminhamento pode continuar quando o controlador fica indisponível?",
+    "scenarios": [
+      {
+        "id": "prioridade",
+        "label": "Regra específica",
+        "situation": "Um pacote corresponde às prioridades dez e cem.",
+        "observation": "A regra de prioridade cem prevalece.",
+        "explanation": "A especificidade textual não basta; a prioridade configurada resolve essa seleção."
+      },
+      {
+        "id": "miss",
+        "label": "Ausência de regra",
+        "situation": "Nenhuma entrada comum corresponde ao pacote recebido.",
+        "observation": "Aplica-se o comportamento de table-miss.",
+        "explanation": "Esse comportamento deve ser explicitado; pode descartar ou encaminhar para controle."
+      },
+      {
+        "id": "contador",
+        "label": "Contagem local",
+        "situation": "Uma regra encaminha dez pacotes sem expirar.",
+        "observation": "Seu contador de pacotes aumenta em dez.",
+        "explanation": "Contadores dão evidência de aplicação da entrada, não prova completa de entrega fim a fim."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual ação vence no exemplo das prioridades 10 e 100?",
+        "options": [
+          {
+            "text": "Descarte da regra 100",
+            "correct": true,
+            "explanation": "Ela tem maior prioridade entre as duas correspondências."
+          },
+          {
+            "text": "Encaminhamento da regra 10",
+            "correct": false,
+            "explanation": "A prioridade menor não prevalece nesse confronto."
+          },
+          {
+            "text": "Sempre as duas simultaneamente",
+            "correct": false,
+            "explanation": "A seleção descrita escolhe a entrada de maior prioridade na tabela."
+          }
+        ]
+      },
+      {
+        "question": "O que significa separar plano de controle e plano de dados?",
+        "options": [
+          {
+            "text": "Decidir políticas e executar encaminhamento são funções distintas",
+            "correct": true,
+            "explanation": "O controlador pode instalar regras executadas localmente pelo switch."
+          },
+          {
+            "text": "Cada pacote exige aprovação humana",
+            "correct": false,
+            "explanation": "Regras instaladas automatizam o encaminhamento dos fluxos correspondentes."
+          },
+          {
+            "text": "O switch deixa de ter tabelas",
+            "correct": false,
+            "explanation": "As tabelas de fluxo são parte central do plano de dados."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "ONF — OpenFlow Switch Specification",
+        "url": "https://opennetworking.org/sdn-resources/openflow-switch-specification/"
+      }
+    ]
+  }
+}

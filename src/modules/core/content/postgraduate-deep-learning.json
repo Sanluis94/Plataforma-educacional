@@ -1,0 +1,840 @@
+{
+  "pos_deep_01": {
+    "context": "Uma distribuição fictícia de próximos tokens permite estudar decodificação sem chamar um modelo de linguagem.",
+    "theory": "Top-k mantém os k tokens mais prováveis; top-p mantém o menor prefixo ordenado cuja massa acumulada atinge p, depois renormaliza. Temperatura positiva reescala logits antes da distribuição; menor temperatura concentra probabilidades. A ordem das operações deve ser explicitada, especialmente se filtros são combinados. Amostragem muda diversidade, mas não verifica fatos ou corrige conhecimento do modelo.",
+    "workedExample": "Considere probabilidades A=0,5, B=0,3, C=0,15, D=0,05. Com p=0,8, o núcleo é {A,B}; após normalizar, A=0,625 e B=0,375. Top-k com k=3 também conserva C, produzindo um conjunto diferente.",
+    "investigation": [
+      "Ordene os tokens e calcule massas acumuladas.",
+      "Aplique top-p 0,8 e renormalize os dois pesos.",
+      "Compare o conjunto com top-k três e discuta temperatura."
+    ],
+    "expectedEvidence": "Registre a distribuição filtrada e a ordem do procedimento, sem apresentar tokens de uma tabela fictícia como saída de inferência real.",
+    "reflection": "Por que reduzir a temperatura não transforma uma resposta provável em fato verificado?",
+    "scenarios": [
+      {
+        "id": "nucleo",
+        "label": "Massa acumulada",
+        "situation": "As duas primeiras probabilidades somam 0,8.",
+        "observation": "Dois tokens satisfazem o limiar.",
+        "explanation": "O núcleo para nesse prefixo mínimo segundo a convenção declarada."
+      },
+      {
+        "id": "topk",
+        "label": "Quantidade fixa",
+        "situation": "O filtro top-k mantém três dos quatro tokens.",
+        "observation": "C permanece elegível.",
+        "explanation": "Top-k fixa quantidade, enquanto top-p adapta o tamanho à massa."
+      },
+      {
+        "id": "renormalizacao",
+        "label": "Novo peso",
+        "situation": "A massa mantida é 0,8 e A tinha probabilidade 0,5.",
+        "observation": "A passa a 0,625.",
+        "explanation": "Dividir pela massa preservada restaura soma total igual a um."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual probabilidade de A após o top-p proposto?",
+        "options": [
+          {
+            "text": "0,625",
+            "correct": true,
+            "explanation": "A conta é 0,5 dividido pela massa conservada 0,8."
+          },
+          {
+            "text": "0,5",
+            "correct": false,
+            "explanation": "Esse é o peso anterior à renormalização do conjunto filtrado."
+          },
+          {
+            "text": "0,8",
+            "correct": false,
+            "explanation": "Esse valor é a massa do núcleo, não a probabilidade de A."
+          }
+        ]
+      },
+      {
+        "question": "Qual característica distingue top-k de top-p?",
+        "options": [
+          {
+            "text": "Top-k fixa quantidade de candidatos",
+            "correct": true,
+            "explanation": "O núcleo top-p varia de tamanho conforme a distribuição de massa."
+          },
+          {
+            "text": "Top-p sempre mantém exatamente p tokens",
+            "correct": false,
+            "explanation": "p é uma probabilidade acumulada, não uma contagem de tokens."
+          },
+          {
+            "text": "Ambos garantem veracidade",
+            "correct": false,
+            "explanation": "Regras de amostragem não validam o conteúdo factual gerado."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Nucleus Sampling",
+        "url": "https://arxiv.org/abs/1904.09751"
+      }
+    ]
+  },
+  "pos_deep_02": {
+    "context": "Pesos fictícios são comprimidos para poucos níveis. A conta de armazenamento deve ser separada do impacto sobre qualidade.",
+    "theory": "Quantização mapeia valores para um conjunto discreto com escala e, possivelmente, ponto zero. GPTQ usa informação aproximada de segunda ordem para reduzir erro de saída na calibração; AWQ considera sensibilidade ligada a ativações para escolher escalas. Arredondamento uniforme simples não reproduz esses métodos. Quatro bits representam dezesseis códigos, mas metadados, ativações e outros pesos afetam a memória total.",
+    "workedExample": "Com escala 0,25 e arredondamento ao inteiro mais próximo, w=0,62 vira código 2 e peso reconstruído 0,5, erro −0,12. Um milhão de pesos de quatro bits ocupa 500.000 bytes antes dos metadados, contra 2.000.000 bytes em dezesseis bits.",
+    "investigation": [
+      "Quantize três valores pela escala explicitamente fornecida.",
+      "Calcule erro por peso e custo ideal de armazenamento.",
+      "Explique por que calibração e avaliação precisam representar a tarefa."
+    ],
+    "expectedEvidence": "Mostre código, reconstrução e erro; a redução ideal de quatro vezes nos pesos não deve ser confundida com aceleração ou qualidade garantida.",
+    "reflection": "Como dados de calibração inadequados podem ocultar um erro importante da quantização?",
+    "scenarios": [
+      {
+        "id": "arredondamento",
+        "label": "Código discreto",
+        "situation": "O valor 0,62 é dividido pela escala 0,25.",
+        "observation": "O quociente 2,48 arredonda para dois.",
+        "explanation": "A reconstrução usa o código inteiro multiplicado pela mesma escala."
+      },
+      {
+        "id": "armazenamento",
+        "label": "Bits por peso",
+        "situation": "Um milhão de pesos usa quatro bits cada.",
+        "observation": "O custo ideal é meio milhão de bytes.",
+        "explanation": "Oito bits por byte convertem quatro milhões de bits para quinhentos mil bytes."
+      },
+      {
+        "id": "calibracao",
+        "label": "Ativação rara",
+        "situation": "A calibração não contém entradas que ativam um canal sensível.",
+        "observation": "O erro nessa região pode passar despercebido.",
+        "explanation": "Qualidade da compressão depende do domínio avaliado, além da largura em bits."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual peso reconstruído corresponde ao código dois e escala 0,25?",
+        "options": [
+          {
+            "text": "0,5",
+            "correct": true,
+            "explanation": "A multiplicação dois vezes 0,25 fornece o valor dequantizado."
+          },
+          {
+            "text": "0,62",
+            "correct": false,
+            "explanation": "Esse é o peso original, que não coincide com o nível quantizado."
+          },
+          {
+            "text": "2,48",
+            "correct": false,
+            "explanation": "Esse é o quociente anterior ao arredondamento."
+          }
+        ]
+      },
+      {
+        "question": "O que dezesseis códigos indicam numa quantização de quatro bits?",
+        "options": [
+          {
+            "text": "Quantidade de representações discretas",
+            "correct": true,
+            "explanation": "Dois elevado a quatro fornece dezesseis combinações de bits."
+          },
+          {
+            "text": "Memória total idêntica em todos os modelos",
+            "correct": false,
+            "explanation": "Metadados, ativações e partes não quantizadas também ocupam memória."
+          },
+          {
+            "text": "Perplexidade necessariamente inalterada",
+            "correct": false,
+            "explanation": "O efeito nos resultados precisa de avaliação após a compressão."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "GPTQ",
+        "url": "https://arxiv.org/abs/2210.17323"
+      },
+      {
+        "title": "AWQ",
+        "url": "https://arxiv.org/abs/2306.00978"
+      }
+    ]
+  },
+  "pos_deep_03": {
+    "context": "Duas respostas fictícias recebem preferências humanas. O exercício distingue imitar demonstrações de otimizar uma recompensa aprendida.",
+    "theory": "Um fluxo típico de RLHF usa ajuste supervisionado, preferências para treinar recompensa e otimização da política com regularização em relação a uma referência. Preferências são observações sujeitas a ruído e critérios dos avaliadores. Maximizar um modelo de recompensa pode explorar falhas desse modelo; pontuação maior não garante verdade, segurança ou satisfação fora da distribuição. PPO é uma opção de otimização, não sinônimo de todo RLHF.",
+    "workedExample": "Para respostas A e B, o modelo hipotético atribui recompensas 2 e 0. A probabilidade logística de preferir A é σ(2−0)≈0,881. Se avaliadores escolhem B repetidamente, essa previsão precisa ser corrigida; a diferença de recompensa não valida os fatos de A.",
+    "investigation": [
+      "Separe demonstrações supervisionadas de pares preferidos.",
+      "Calcule a probabilidade prevista a partir da diferença de recompensas.",
+      "Identifique possível exploração da métrica no caso fictício."
+    ],
+    "expectedEvidence": "Declare como as preferências são coletadas e os limites do objetivo, sem afirmar treinamento ou alinhamento real de um LLM.",
+    "reflection": "Que divergência pode existir entre uma preferência humana e correção factual?",
+    "scenarios": [
+      {
+        "id": "par",
+        "label": "Comparação relativa",
+        "situation": "A recompensa fornecida de A supera a de B por dois.",
+        "observation": "A probabilidade logística favorece A.",
+        "explanation": "O modelo converte uma diferença relativa em probabilidade, não em verdade absoluta."
+      },
+      {
+        "id": "ruido",
+        "label": "Desacordo humano",
+        "situation": "Metade dos avaliadores prefere cada resposta sob critérios distintos.",
+        "observation": "O rótulo de preferência é incerto.",
+        "explanation": "Agregação e definição de critérios afetam o sinal usado para treinar recompensa."
+      },
+      {
+        "id": "hack",
+        "label": "Métrica explorada",
+        "situation": "Uma resposta prolixa obtém recompensa alta apesar de fatos errados.",
+        "observation": "O objetivo aprendido pode estar desalinhado.",
+        "explanation": "Otimizar a pontuação pode amplificar atalhos que a avaliação não penalizou."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual probabilidade aproximada resulta de σ(2)?",
+        "options": [
+          {
+            "text": "0,881",
+            "correct": true,
+            "explanation": "A logística é um dividido por um mais e elevado a menos dois."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Uma diferença de recompensa pode exceder um, mas a probabilidade não."
+          },
+          {
+            "text": "0,5",
+            "correct": false,
+            "explanation": "Meio corresponderia a recompensas iguais."
+          }
+        ]
+      },
+      {
+        "question": "Qual risco acompanha otimizar uma recompensa aprendida?",
+        "options": [
+          {
+            "text": "Explorar falhas do modelo de recompensa",
+            "correct": true,
+            "explanation": "A política pode melhorar a pontuação sem satisfazer a intenção humana."
+          },
+          {
+            "text": "Eliminar todo desacordo entre pessoas",
+            "correct": false,
+            "explanation": "O objetivo aprendido não resolve automaticamente preferências divergentes."
+          },
+          {
+            "text": "Tornar fatos verdadeiros por pontuação",
+            "correct": false,
+            "explanation": "Preferência e factualidade exigem critérios e verificações próprios."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Training Language Models with Human Feedback",
+        "url": "https://arxiv.org/abs/2203.02155"
+      }
+    ]
+  },
+  "pos_deep_04": {
+    "context": "Pares fictícios de respostas escolhidas e rejeitadas permitem calcular uma perda de preferência diretamente sobre probabilidades.",
+    "theory": "DPO usa razões entre política ajustada e referência para a resposta escolhida e a rejeitada. Um logit típico é β[log(πθ(yw)/πref(yw))−log(πθ(yl)/πref(yl))], com perda −log σ(logit). Dispensa treinar explicitamente um modelo separado de recompensa nessa formulação, mas ainda depende de referência, pares e hipóteses. Preferência otimizada não equivale a factualidade garantida.",
+    "workedExample": "Suponha razão escolhida=2 e razão rejeitada=0,5, com β=1. O logit é ln2−ln0,5=ln4. A logística vale 4/5=0,8 e a perda −ln0,8≈0,223. São razões de probabilidades, não probabilidades absolutas.",
+    "investigation": [
+      "Identifique escolhida, rejeitada e política de referência.",
+      "Calcule o logit com as duas razões dadas.",
+      "Compare o resultado quando as razões são iguais."
+    ],
+    "expectedEvidence": "Mostre logit, logística e perda com logaritmo natural, sem atribuir ao cálculo uma etapa de treinamento executada.",
+    "reflection": "Por que a política de referência faz parte da comparação em DPO?",
+    "scenarios": [
+      {
+        "id": "favorecida",
+        "label": "Razões opostas",
+        "situation": "A razão da escolhida é dois e a da rejeitada é meio.",
+        "observation": "O logit vale ln quatro.",
+        "explanation": "A diferença dos logaritmos mede a vantagem relativa da escolhida."
+      },
+      {
+        "id": "empate-dpo",
+        "label": "Razões iguais",
+        "situation": "Ambas as respostas têm a mesma razão em relação à referência.",
+        "observation": "O logit é zero.",
+        "explanation": "A probabilidade logística é meio e a perda vale ln dois."
+      },
+      {
+        "id": "beta",
+        "label": "Escala da preferência",
+        "situation": "Beta multiplica a diferença dos logaritmos.",
+        "observation": "A escala do logit muda.",
+        "explanation": "Beta influencia a intensidade do objetivo e não é apenas um limiar de aceitação."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual perda resulta da probabilidade logística 0,8?",
+        "options": [
+          {
+            "text": "Aproximadamente 0,223",
+            "correct": true,
+            "explanation": "O negativo do logaritmo natural de 0,8 fornece essa perda."
+          },
+          {
+            "text": "0,8",
+            "correct": false,
+            "explanation": "Esse é o valor da logística antes da transformação em perda."
+          },
+          {
+            "text": "4",
+            "correct": false,
+            "explanation": "Quatro é a razão exponenciada do logit neste exemplo."
+          }
+        ]
+      },
+      {
+        "question": "Qual afirmação descreve a formulação DPO estudada?",
+        "options": [
+          {
+            "text": "Não treina um modelo explícito separado de recompensa",
+            "correct": true,
+            "explanation": "A preferência entra diretamente numa perda sobre política e referência."
+          },
+          {
+            "text": "Dispensa pares de preferência",
+            "correct": false,
+            "explanation": "As respostas escolhida e rejeitada fornecem o sinal do objetivo."
+          },
+          {
+            "text": "Dispensa qualquer referência",
+            "correct": false,
+            "explanation": "As razões declaradas usam a política de referência."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Direct Preference Optimization",
+        "url": "https://arxiv.org/abs/2305.18290"
+      }
+    ]
+  },
+  "pos_deep_05": {
+    "context": "Uma atenção fictícia com sequência longa exige armazenar muitos escores. Organizar os acessos à memória pode reduzir esse custo.",
+    "theory": "FlashAttention calcula atenção exata em blocos, mantendo estatísticas de softmax para evitar materializar toda a matriz de atenção em memória de alta largura de banda. O foco é reduzir tráfego de memória por organização de I/O. A atenção densa continua com trabalho aritmético quadrático no comprimento; os ganhos dependem da arquitetura e dos tamanhos. Não é simplesmente uma aproximação que descarta pares de tokens.",
+    "workedExample": "Uma matriz de escores para n=1.024 tem 1.048.576 posições por cabeça. Em dois bytes por posição, seriam 2.097.152 bytes, cerca de 2 MiB, só para essa matriz. Evitar materializá-la não elimina as operações que relacionam os pares.",
+    "investigation": [
+      "Conte elementos de uma matriz quadrada de atenção.",
+      "Converta a contagem em bytes por cabeça e por lote.",
+      "Separe memória intermediária de trabalho aritmético."
+    ],
+    "expectedEvidence": "A explicação deve reconhecer atenção exata e custo denso quadrático, evitando repetir a ideia de I/O linear como garantia universal de tempo.",
+    "reflection": "Por que menos transferência de memória pode acelerar um cálculo sem mudar sua ordem aritmética?",
+    "scenarios": [
+      {
+        "id": "matriz",
+        "label": "Escores densos",
+        "situation": "A sequência tem mil e vinte e quatro tokens.",
+        "observation": "A matriz contém 2²⁰ posições.",
+        "explanation": "Cada consulta se relaciona a todas as chaves na atenção densa."
+      },
+      {
+        "id": "blocos",
+        "label": "Softmax em blocos",
+        "situation": "Os escores são processados em partes com estatísticas acumuladas.",
+        "observation": "A matriz completa não precisa ser armazenada.",
+        "explanation": "A normalização é combinada de forma numericamente estável para preservar a atenção exata."
+      },
+      {
+        "id": "limite",
+        "label": "Tamanho dobrado",
+        "situation": "O comprimento da sequência dobra mantendo atenção densa.",
+        "observation": "A quantidade de pares quadruplica.",
+        "explanation": "Blocos reduzem pressão de memória, mas não removem essa contagem quadrática de pares."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quantas posições tem uma matriz 1.024×1.024?",
+        "options": [
+          {
+            "text": "1.048.576",
+            "correct": true,
+            "explanation": "O produto de mil e vinte e quatro por si mesmo é dois elevado a vinte."
+          },
+          {
+            "text": "2.048",
+            "correct": false,
+            "explanation": "Esse valor soma dimensões em vez de multiplicá-las."
+          },
+          {
+            "text": "1.024",
+            "correct": false,
+            "explanation": "Essa é apenas a quantidade de posições em uma linha."
+          }
+        ]
+      },
+      {
+        "question": "Qual afirmação caracteriza FlashAttention?",
+        "options": [
+          {
+            "text": "Atenção exata com organização eficiente de memória",
+            "correct": true,
+            "explanation": "O método evita intermediários grandes usando cálculo em blocos."
+          },
+          {
+            "text": "Elimina todo trabalho quadrático da atenção densa",
+            "correct": false,
+            "explanation": "As interações aritméticas entre pares ainda existem."
+          },
+          {
+            "text": "Retém somente um token por consulta",
+            "correct": false,
+            "explanation": "Isso descreveria outra forma de atenção, não o método exato estudado."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "FlashAttention",
+        "url": "https://arxiv.org/abs/2205.14135"
+      }
+    ]
+  },
+  "pos_deep_06": {
+    "context": "Pares de coordenadas fictícios recebem rotações dependentes da posição. O objetivo é compreender posições relativas e limites de extrapolação.",
+    "theory": "RoPE aplica rotações em pares de dimensões de queries e keys, com ângulos proporcionais à posição e frequências do par. Produtos internos passam a depender de diferenças de posição sob essa construção. Estender contexto requer política de escala ou interpolação e avaliação; aceitar índices maiores não garante recuperar informações distantes. A rotação preserva norma de cada par antes de outros efeitos do modelo.",
+    "workedExample": "O vetor (1,0) rotacionado por π/2 vira (0,1), mantendo norma um. Dois vetores unitários rotacionados por ângulos θ e φ têm produto interno cos(θ−φ). Para diferença π/2, o produto é zero, embora cada vetor ainda tenha norma um.",
+    "investigation": [
+      "Aplique a matriz de rotação a um par de coordenadas.",
+      "Calcule o produto interno em duas posições distintas.",
+      "Discuta interpolação de posições sem afirmar desempenho medido."
+    ],
+    "expectedEvidence": "Demonstre preservação de norma e dependência relativa, distinguindo janela configurada de capacidade verificada em tarefas de contexto longo.",
+    "reflection": "Que avaliação mostraria se a informação no começo de uma sequência longa continua acessível?",
+    "scenarios": [
+      {
+        "id": "rotacao",
+        "label": "Quarto de volta",
+        "situation": "O par (1,0) recebe ângulo π/2.",
+        "observation": "A saída é (0,1).",
+        "explanation": "A rotação troca a direção sem alterar a norma euclidiana."
+      },
+      {
+        "id": "relativo",
+        "label": "Diferença angular",
+        "situation": "Dois pares unitários diferem por π/2.",
+        "observation": "Seu produto interno é zero.",
+        "explanation": "O produto reflete a diferença de ângulos e não apenas um índice absoluto."
+      },
+      {
+        "id": "interpolacao",
+        "label": "Posições escaladas",
+        "situation": "Uma janela estendida mapeia posições para um intervalo menor.",
+        "observation": "As separações angulares são alteradas.",
+        "explanation": "Interpolação precisa ser escolhida e avaliada; não cria compreensão longa automaticamente."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual norma tem (1,0) após uma rotação ideal?",
+        "options": [
+          {
+            "text": "1",
+            "correct": true,
+            "explanation": "Rotações ortogonais preservam o comprimento do vetor."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "Mudar a direção não remove a magnitude do vetor."
+          },
+          {
+            "text": "π/2",
+            "correct": false,
+            "explanation": "O ângulo de rotação não é a norma do resultado."
+          }
+        ]
+      },
+      {
+        "question": "O que configurar uma janela maior deixa de demonstrar?",
+        "options": [
+          {
+            "text": "Recuperação confiável de informação distante",
+            "correct": true,
+            "explanation": "A capacidade efetiva exige avaliação da tarefa e das posições relevantes."
+          },
+          {
+            "text": "Existência de índices maiores permitidos",
+            "correct": false,
+            "explanation": "Essa é justamente uma propriedade da configuração ampliada."
+          },
+          {
+            "text": "Que uma política posicional foi escolhida",
+            "correct": false,
+            "explanation": "A expansão descrita utiliza uma política explícita de posições."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "RoFormer",
+        "url": "https://arxiv.org/abs/2104.09864"
+      },
+      {
+        "title": "Positional Interpolation",
+        "url": "https://arxiv.org/abs/2306.15595"
+      }
+    ]
+  },
+  "pos_deep_07": {
+    "context": "Um roteador fictício escolhe poucos especialistas para cada token. Parâmetros totais e cálculo ativo precisam ser contados separadamente.",
+    "theory": "MoE esparsa usa um roteador para selecionar especialistas, muitas vezes top-k, e combina suas saídas ponderadas. Ter muitos parâmetros não implica ativar todos por token. Desbalanceamento pode saturar especialistas, exigir capacidade e causar descarte ou roteamento alternativo; comunicação entre dispositivos também custa. Seleção esparsa não garante divisão semântica interpretável entre especialistas.",
+    "workedExample": "Quatro especialistas recebem escores 0,5;0,3;0,15;0,05. Top-2 escolhe os dois primeiros; normalizando a massa 0,8, pesos viram 0,625 e 0,375. Se suas saídas escalares são 2 e 10, a combinação é 1,25+3,75=5.",
+    "investigation": [
+      "Escolha os especialistas top-2 pelos escores dados.",
+      "Renormalize pesos e calcule a combinação de saídas.",
+      "Compare carga por especialista com o total de tokens."
+    ],
+    "expectedEvidence": "Mostre seleção e saída cinco, distinguindo número de parâmetros, especialistas ativos e custo de comunicação ou capacidade.",
+    "reflection": "Por que um especialista escolhido por quase todos os tokens pode limitar a eficiência?",
+    "scenarios": [
+      {
+        "id": "roteamento",
+        "label": "Dois ativos",
+        "situation": "Os escores maiores são 0,5 e 0,3.",
+        "observation": "Dois dos quatro especialistas são selecionados.",
+        "explanation": "Os demais parâmetros existem, mas não contribuem a esse token na regra top-2."
+      },
+      {
+        "id": "combinacao",
+        "label": "Saídas ponderadas",
+        "situation": "As saídas dos escolhidos são dois e dez.",
+        "observation": "A média ponderada resulta em cinco.",
+        "explanation": "Os pesos renormalizados somam um e definem a mistura proposta."
+      },
+      {
+        "id": "sobrecarga",
+        "label": "Capacidade insuficiente",
+        "situation": "Quase todos os tokens escolhem o mesmo especialista.",
+        "observation": "A distribuição de trabalho fica desigual.",
+        "explanation": "Balanceamento de carga e política de capacidade são necessários para avaliar o ganho."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual saída da combinação proposta?",
+        "options": [
+          {
+            "text": "5",
+            "correct": true,
+            "explanation": "0,625 vezes dois mais 0,375 vezes dez resulta em cinco."
+          },
+          {
+            "text": "12",
+            "correct": false,
+            "explanation": "Esse valor soma as saídas sem aplicar os pesos."
+          },
+          {
+            "text": "6",
+            "correct": false,
+            "explanation": "Seis seria a média uniforme, diferente dos pesos roteados."
+          }
+        ]
+      },
+      {
+        "question": "Qual diferença precisa ser preservada ao avaliar uma MoE?",
+        "options": [
+          {
+            "text": "Parâmetros totais e parâmetros ativos por token",
+            "correct": true,
+            "explanation": "Uma camada esparsa pode armazenar muitos pesos e usar apenas parte em cada passo."
+          },
+          {
+            "text": "Especialistas e máquinas são sempre a mesma coisa",
+            "correct": false,
+            "explanation": "A distribuição física depende de como o sistema é implementado."
+          },
+          {
+            "text": "Todo token usa obrigatoriamente todos os especialistas",
+            "correct": false,
+            "explanation": "A seleção top-k definida é justamente esparsa."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Sparsely-Gated Mixture-of-Experts",
+        "url": "https://arxiv.org/abs/1701.06538"
+      }
+    ]
+  },
+  "pos_deep_08": {
+    "context": "Imagens e descrições fictícias são representadas no mesmo espaço. A comparação é entre vetores, sem gerar imagens nem legendas.",
+    "theory": "CLIP aprende codificadores de visão e texto por um objetivo contrastivo que aproxima pares correspondentes e contrasta outros do lote. Comparar embeddings normalizados usa cosseno; um fator de escala pode reescalar logits. Classificação com descrições depende da formulação dos textos e da distribuição de dados. Similaridade alta não é probabilidade calibrada nem garante que todos os atributos da descrição estejam presentes.",
+    "workedExample": "Um vetor de imagem normalizado é (1,0). Descrição A=(1,0) tem cosseno 1; descrição B=(0,1) tem cosseno 0. O modelo vetorial prefere A, mas esses dois escores sozinhos não demonstram confiança probabilística de cem por cento.",
+    "investigation": [
+      "Normalize os vetores e confira suas normas.",
+      "Calcule similaridade para duas descrições candidatas.",
+      "Analise como descrições ambíguas poderiam mudar a comparação."
+    ],
+    "expectedEvidence": "Mostre produtos internos e a escolha relativa entre descrições, sem converter cosseno diretamente em probabilidade de uma classe verdadeira.",
+    "reflection": "Como palavras adicionais na descrição podem alterar um vetor e a decisão relativa?",
+    "scenarios": [
+      {
+        "id": "par-correto",
+        "label": "Vetores alinhados",
+        "situation": "Imagem e descrição A apontam para (1,0).",
+        "observation": "O cosseno é um.",
+        "explanation": "O alinhamento máximo desse exemplo mede proximidade na representação fornecida."
+      },
+      {
+        "id": "ortogonal",
+        "label": "Descrição B",
+        "situation": "O vetor textual B é (0,1).",
+        "observation": "O produto interno com a imagem é zero.",
+        "explanation": "Ortogonalidade indica ausência de alinhamento segundo essas coordenadas sintéticas."
+      },
+      {
+        "id": "formulacao",
+        "label": "Texto alternativo",
+        "situation": "A descrição de uma classe muda para uma frase com outro contexto.",
+        "observation": "Seu embedding pode mudar.",
+        "explanation": "Avaliação de classificação deve considerar a formulação dos textos e o domínio de uso."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual cosseno existe entre (1,0) e (0,1)?",
+        "options": [
+          {
+            "text": "0",
+            "correct": true,
+            "explanation": "O produto interno dos dois vetores unitários ortogonais é zero."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "Um indicaria alinhamento na mesma direção."
+          },
+          {
+            "text": "−1",
+            "correct": false,
+            "explanation": "Menos um indicaria direções opostas, não ortogonais."
+          }
+        ]
+      },
+      {
+        "question": "Como interpretar cosseno um neste exercício?",
+        "options": [
+          {
+            "text": "Alinhamento vetorial máximo para o par dado",
+            "correct": true,
+            "explanation": "A métrica descreve os vetores fornecidos, sem calibrar certeza factual."
+          },
+          {
+            "text": "Probabilidade de verdade igual a cem por cento",
+            "correct": false,
+            "explanation": "Cosseno não é por si uma probabilidade calibrada."
+          },
+          {
+            "text": "Geração automática de uma nova imagem",
+            "correct": false,
+            "explanation": "Comparar embeddings não executa um modelo gerador de imagens."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "CLIP",
+        "url": "https://arxiv.org/abs/2103.00020"
+      }
+    ]
+  },
+  "pos_deep_09": {
+    "context": "Exemplos fictícios de instrução e resposta precisam de limites de mensagem claros. A serialização deve combinar com o modelo escolhido.",
+    "theory": "Ajuste supervisionado de instruções otimiza a probabilidade de respostas desejadas em exemplos formatados. Papéis, delimitadores e tokens de término distinguem partes da conversa; formatos como ChatML são convenções específicas, não um padrão universal de todo modelo. Máscaras de perda podem selecionar apenas tokens da resposta. Treinar formato não garante raciocínio correto nem torna seguro um texto não confiável inserido no contexto.",
+    "workedExample": "Uma sequência contém dez tokens de instrução e quatro de resposta. Se a máscara de perda seleciona só a resposta, quatro tokens contribuem ao objetivo, não quatorze. Um marcador de término ensina onde a resposta acaba, conforme o tokenizador e o formato definidos.",
+    "investigation": [
+      "Separe papéis e limites no exemplo de conversa.",
+      "Marque os quatro tokens que entram na perda supervisionada.",
+      "Verifique compatibilidade conceitual de formato e tokenizador."
+    ],
+    "expectedEvidence": "Conte os tokens supervisionados e explique o papel dos delimitadores, sem alegar ajuste de um modelo ou suporte universal a ChatML.",
+    "reflection": "Por que o mesmo texto serializado de forma diferente pode alterar o comportamento do modelo?",
+    "scenarios": [
+      {
+        "id": "mascara",
+        "label": "Somente resposta",
+        "situation": "De quatorze tokens, apenas os quatro finais são alvo da perda.",
+        "observation": "Quatro posições são supervisionadas.",
+        "explanation": "A máscara exclui instruções do objetivo, embora elas ainda forneçam contexto."
+      },
+      {
+        "id": "formato",
+        "label": "Delimitador incompatível",
+        "situation": "Um formato de mensagens é usado num modelo treinado com outros limites.",
+        "observation": "A estrutura pode ser interpretada de modo inadequado.",
+        "explanation": "A convenção precisa corresponder ao tokenizador e ao treinamento do modelo."
+      },
+      {
+        "id": "termino",
+        "label": "Fim da resposta",
+        "situation": "O alvo inclui o token de encerramento esperado.",
+        "observation": "O limite de geração é parte do exemplo.",
+        "explanation": "O token de término ajuda a modelar quando parar, sem verificar a correção do conteúdo."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quantos tokens contribuem à perda na máscara descrita?",
+        "options": [
+          {
+            "text": "4",
+            "correct": true,
+            "explanation": "Somente os quatro tokens da resposta foram marcados para supervisão."
+          },
+          {
+            "text": "14",
+            "correct": false,
+            "explanation": "Essa contagem incluiria também a instrução excluída pela máscara."
+          },
+          {
+            "text": "10",
+            "correct": false,
+            "explanation": "Dez é a quantidade de tokens de instrução, não de resposta."
+          }
+        ]
+      },
+      {
+        "question": "Qual cuidado deve orientar o formato de chat?",
+        "options": [
+          {
+            "text": "Compatibilidade com modelo e tokenizador",
+            "correct": true,
+            "explanation": "Papéis e limites usam convenções que precisam corresponder ao treinamento."
+          },
+          {
+            "text": "Assumir ChatML universal",
+            "correct": false,
+            "explanation": "Modelos podem usar outras convenções de serialização."
+          },
+          {
+            "text": "Remover todos os limites de mensagem",
+            "correct": false,
+            "explanation": "Sem limites, partes distintas da conversa podem perder sua identificação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Hugging Face — Chat Templates",
+        "url": "https://huggingface.co/docs/transformers/chat_templating"
+      }
+    ]
+  },
+  "pos_deep_10": {
+    "context": "Uma resposta fictícia é dividida em afirmações verificáveis. A avaliação precisa separar suporte documental, contradição e falta de evidência.",
+    "theory": "Avaliação factual pode decompor textos em fatos atômicos e comparar cada um com fontes confiáveis. Precisão de suporte é a fração de afirmações apoiadas sob um protocolo declarado; ela não mede completude sozinha. Juízes automáticos podem errar, herdar vieses ou aceitar uma fonte inadequada, exigindo calibração humana e casos difíceis. A ausência de suporte não prova necessariamente falsidade.",
+    "workedExample": "Uma resposta contém cinco afirmações: três apoiadas, uma contradita e uma sem evidência. A precisão de suporte é 3/5=60%. Chamar as duas restantes de falsas confundiria contradição com insuficiência de evidência. O conjunto é sintético e não resultado de um benchmark executado.",
+    "investigation": [
+      "Divida a resposta em cinco afirmações independentes.",
+      "Classifique suporte, contradição e ausência de evidência.",
+      "Calcule a métrica e discuta erros possíveis do avaliador."
+    ],
+    "expectedEvidence": "Informe denominador, classes e fonte de cada decisão; sessenta por cento de suporte não equivale a probabilidade de resposta inteira correta.",
+    "reflection": "Como uma resposta vazia pode aparentar boa precisão e ainda ser inútil para a pergunta?",
+    "scenarios": [
+      {
+        "id": "suportada",
+        "label": "Evidência explícita",
+        "situation": "Uma afirmação coincide com o fato registrado na fonte autorizada do exercício.",
+        "observation": "Ela é classificada como apoiada.",
+        "explanation": "A decisão requer correspondência de significado e escopo, não apenas palavras iguais."
+      },
+      {
+        "id": "contradita",
+        "label": "Incompatibilidade",
+        "situation": "A resposta diz três unidades e a fonte declara exatamente duas.",
+        "observation": "Existe contradição no mesmo escopo.",
+        "explanation": "Os valores incompatíveis distinguem esse caso de simples ausência de informação."
+      },
+      {
+        "id": "sem-evidencia",
+        "label": "Lacuna documental",
+        "situation": "A fonte nada informa sobre a afirmação adicional.",
+        "observation": "A classificação é sem suporte.",
+        "explanation": "Não encontrar evidência na base escolhida não demonstra falsidade universal."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual precisão de suporte resulta de três apoiadas em cinco?",
+        "options": [
+          {
+            "text": "60%",
+            "correct": true,
+            "explanation": "Três dividido por cinco corresponde a seis décimos."
+          },
+          {
+            "text": "80%",
+            "correct": false,
+            "explanation": "Esse valor exigiria quatro afirmações apoiadas."
+          },
+          {
+            "text": "100%",
+            "correct": false,
+            "explanation": "Duas afirmações não receberam suporte no protocolo definido."
+          }
+        ]
+      },
+      {
+        "question": "Qual distinção é necessária na avaliação proposta?",
+        "options": [
+          {
+            "text": "Contradição e ausência de evidência",
+            "correct": true,
+            "explanation": "Uma fonte incompatível e uma fonte silenciosa sustentam diagnósticos diferentes."
+          },
+          {
+            "text": "Toda afirmação sem suporte é falsa",
+            "correct": false,
+            "explanation": "O protocolo não permite inferir falsidade só pela lacuna documental."
+          },
+          {
+            "text": "Similaridade textual sempre prova apoio",
+            "correct": false,
+            "explanation": "Palavras semelhantes podem expressar valores ou relações incompatíveis."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "FActScore",
+        "url": "https://arxiv.org/abs/2305.14251"
+      }
+    ]
+  }
+}

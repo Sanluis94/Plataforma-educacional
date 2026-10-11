@@ -1,0 +1,512 @@
+{
+  "hard_1": {
+    "context": "Uma biblioteca escolar permite retirar um equipamento quando a pessoa tem pelo menos 12 anos e possui autorização. Um programa usa OU entre essas condições e libera casos indevidos. Faça o rastreamento lógico da decisão com dados fictícios, sem executar código nem coletar dados de estudantes reais.",
+    "theory": "Um algoritmo descreve uma sequência de passos para transformar entradas em um resultado. Uma condição booleana pode ser verdadeira ou falsa. Na regra deste exercício, idade >= 12 E autorização é verdadeira somente quando os dois requisitos são atendidos. Trocar E por OU muda o conjunto aceito: basta um requisito verdadeiro. Testar um caso comum não basta para encontrar essa diferença; casos de fronteira e combinações de condições ajudam. A idade de 12 anos pertence ao conjunto permitido pela comparação >=. O programa também precisa tratar entradas ausentes ou inválidas antes de aplicar a regra, em vez de supor que todo valor recebido é uma idade válida.",
+    "workedExample": "Pseudocódigo: se idade for válida E idade >= 12 E autorização = verdadeiro, liberar; caso contrário, não liberar e informar o requisito pendente. Para idade 11 com autorização, 11 >= 12 é falso, então o resultado é não liberar. Para idade 12 com autorização, os requisitos são verdadeiros e o resultado é liberar. Para idade 14 sem autorização, a idade atende, mas o resultado continua sendo não liberar. Esses testes exercitam regras, não decisões reais de empréstimo.",
+    "investigation": [
+      "Escreva separadamente o valor lógico do requisito de idade e o da autorização em cada caso.",
+      "Compare os resultados de E e OU e identifique qual combinação revela a falha do programa.",
+      "Inclua a idade exata de 12 anos e uma entrada ausente em seu conjunto de testes."
+    ],
+    "expectedEvidence": "O rastreamento deve negar 11 anos com autorização e 14 anos sem autorização, e aceitar 12 anos com autorização. Precisa explicar a diferença entre E e OU e prever tratamento de entrada inválida antes da decisão.",
+    "reflection": "Que teste você acrescentaria se alguém substituísse idade >= 12 por idade > 12, e por que esse teste distingue as regras?",
+    "scenarios": [
+      {
+        "id": "idade",
+        "label": "Só a autorização atende",
+        "situation": "Entrada fictícia: idade 11 e autorização verdadeira. Compare idade >= 12 E autorização com idade >= 12 OU autorização.",
+        "observation": "A regra com E resulta falsa; a regra com OU resulta verdadeira.",
+        "explanation": "A idade não atende ao limite. Com OU, a autorização isolada basta, contrariando a exigência de cumprir ambos os requisitos."
+      },
+      {
+        "id": "limite",
+        "label": "Exatamente no limite",
+        "situation": "Entrada fictícia: idade 12 e autorização verdadeira. Um colega propõe usar idade > 12 no lugar de idade >= 12.",
+        "observation": "A comparação >= aceita a idade 12; a comparação > a rejeita, embora a autorização seja verdadeira.",
+        "explanation": "O sinal de igualdade inclui a fronteira especificada pela expressão 'pelo menos'. Um teste com idade 13 não revelaria essa alteração."
+      },
+      {
+        "id": "ausencia",
+        "label": "Idade não informada",
+        "situation": "O campo idade está vazio e a autorização foi marcada. O programa ainda não definiu como tratar o campo vazio.",
+        "observation": "Não há idade válida para aplicar a regra; a entrada precisa ser solicitada ou rejeitada de forma explícita.",
+        "explanation": "Validar o formato e a presença da entrada precede a regra de negócio. Converter o vazio silenciosamente em um número poderia produzir uma decisão sem representar o dado solicitado."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual operador representa a exigência de idade mínima e autorização simultâneas?",
+        "options": [
+          {
+            "text": "OU, pois basta satisfazer um requisito.",
+            "correct": false,
+            "explanation": "Bastar um requisito altera a regra, que pede o cumprimento dos dois ao mesmo tempo."
+          },
+          {
+            "text": "E, pois os dois requisitos precisam ser verdadeiros.",
+            "correct": true,
+            "explanation": "A conjunção é verdadeira somente quando idade e autorização satisfazem as condições estabelecidas."
+          },
+          {
+            "text": "Negação apenas da idade, ignorando autorização.",
+            "correct": false,
+            "explanation": "Negar a condição de idade não expressa a combinação exigida e ainda abandona o segundo requisito."
+          }
+        ]
+      },
+      {
+        "question": "Que entrada evidencia a diferença entre os testes idade >= 12 e idade > 12?",
+        "options": [
+          {
+            "text": "Idade 12 com autorização verdadeira.",
+            "correct": true,
+            "explanation": "A idade na fronteira é aceita por >= e rejeitada por >, mantendo o outro requisito atendido."
+          },
+          {
+            "text": "Idade 20 com autorização verdadeira.",
+            "correct": false,
+            "explanation": "As duas comparações são verdadeiras para 20, por isso esse caso não distingue os operadores."
+          },
+          {
+            "text": "Idade ausente, sem qualquer validação.",
+            "correct": false,
+            "explanation": "Esse caso testa tratamento de entrada inválida, mas não isola a inclusão ou exclusão da fronteira numérica."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MDN — Visão geral da linguagem JavaScript",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Language_overview"
+      }
+    ]
+  },
+  "hard_2": {
+    "context": "Uma oficina recebe pedidos A, B e C nessa ordem. Precisa atender por chegada, desfazer a última edição de um desenho e localizar pedidos pelo código. Compare fila, pilha e mapa para esses três usos, acompanhando operações com dados fictícios em vez de confundir a estrutura com a aparência da interface.",
+    "theory": "Uma estrutura de dados organiza informações e operações. Na fila FIFO, o primeiro elemento inserido é o primeiro removido, adequando-se a uma ordem de chegada sem prioridades. Na pilha LIFO, o último inserido é o primeiro removido, permitindo representar uma sequência de desfazer ações. Um mapa associa chaves a valores; atualizar uma chave existente modifica seu valor, em vez de criar necessariamente outra chave igual. Um array é uma coleção indexada que pode ser usado para implementar certas operações, mas não impõe por si só a disciplina de fila ou pilha. A escolha deve considerar o comportamento exigido, sem concluir que uma estrutura é sempre a melhor para qualquer problema.",
+    "workedExample": "Fila: inserir A, B, C e remover o próximo atendimento produz A, restando B e C. Pilha de edições: inserir 'desenhar círculo', depois 'mudar cor'; desfazer remove 'mudar cor' primeiro. Mapa: pedido A -> pendente; ao atualizar A -> concluído, a consulta por A retorna concluído. São três regras de operação distintas, mesmo que todas possam aparecer como cartões na tela.",
+    "investigation": [
+      "Anote o conteúdo da coleção depois de cada inserção e remoção, sem pular etapas do rastreamento.",
+      "Associe ordem de chegada, desfazer e consulta por código à operação que cada tarefa exige.",
+      "Explique o que mudaria se a oficina passasse a atender pedidos por prioridade em vez de chegada."
+    ],
+    "expectedEvidence": "A análise deve retirar A primeiro da fila, desfazer primeiro a mudança de cor e recuperar o estado atualizado pela chave A. Deve reconhecer que uma regra de prioridade exigiria outra disciplina, sem afirmar que um mapa ordena automaticamente por urgência.",
+    "reflection": "Por que mostrar os pedidos como uma lista visual não é suficiente para saber qual deles será removido primeiro?",
+    "scenarios": [
+      {
+        "id": "fifo",
+        "label": "Atendimento por chegada",
+        "situation": "São inseridos A, B e C numa fila FIFO. O atendente remove um pedido e, depois, insere D.",
+        "observation": "A sai primeiro; a fila restante fica B, C, D, nessa ordem de atendimento.",
+        "explanation": "A remoção ocorre pela entrada mais antiga. Inserir D ao final não permite que ele ultrapasse B e C na disciplina FIFO estabelecida."
+      },
+      {
+        "id": "lifo",
+        "label": "Desfazer edições",
+        "situation": "A pilha registra primeiro desenhar um círculo, depois mudar sua cor e por último aumentar seu tamanho. Há um comando desfazer.",
+        "observation": "A primeira ação desfeita é aumentar o tamanho, que foi a última registrada.",
+        "explanation": "A pilha remove pelo topo. Desfazer a primeira ação registrada ignoraria a ordem LIFO e poderia romper dependências entre as edições posteriores."
+      },
+      {
+        "id": "mapa",
+        "label": "Atualização por chave",
+        "situation": "Um mapa tem A associado a pendente e B a em execução. Uma operação define A como concluído.",
+        "observation": "A consulta pela chave A retorna concluído; a chave B continua associada a em execução.",
+        "explanation": "O mapa permite acessar e atualizar o valor associado a uma chave. Essa operação não equivale a retirar o primeiro elemento de uma fila nem a desfazer a última edição."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Na fila FIFO com A, B e C inseridos nessa ordem, qual pedido sai primeiro?",
+        "options": [
+          {
+            "text": "C, por ter sido inserido mais recentemente.",
+            "correct": false,
+            "explanation": "Retirar a inserção mais recente corresponde à disciplina de pilha, não à fila FIFO descrita."
+          },
+          {
+            "text": "Qualquer um, pois FIFO não define remoção.",
+            "correct": false,
+            "explanation": "FIFO define precisamente que a primeira entrada deve ser a primeira saída neste modelo."
+          },
+          {
+            "text": "A, por ser a primeira entrada ainda presente.",
+            "correct": true,
+            "explanation": "A ordem de chegada mantém A à frente de B e C enquanto ele não tiver sido atendido."
+          }
+        ]
+      },
+      {
+        "question": "Qual estrutura expressa diretamente a consulta do estado de um pedido por código único?",
+        "options": [
+          {
+            "text": "Um mapa de código para estado do pedido.",
+            "correct": true,
+            "explanation": "A chave identifica o pedido e seu valor associado informa o estado, permitindo a atualização por código."
+          },
+          {
+            "text": "Uma pilha que obriga retirar todos os pedidos para achar um código.",
+            "correct": false,
+            "explanation": "A remoção pelo topo atende a outro comportamento; a tarefa pede uma associação consultável pela chave."
+          },
+          {
+            "text": "Uma fila que automaticamente ordena por urgência.",
+            "correct": false,
+            "explanation": "A fila FIFO estabelecida ordena por chegada e não calcula urgência sem uma regra adicional."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MDN — Coleções, arrays, Map e Set",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Language_overview"
+      }
+    ]
+  },
+  "hard_3": {
+    "context": "Uma biblioteca fictícia separou livros e empréstimos em duas tabelas. Livros contém o código 7, título 'Marés', e o código 8, título 'Pátio'. Empréstimos registra código 101 ligado ao livro 7. Investigue como chaves, relações e consultas ajudam a evitar registros órfãos sem duplicar o título em cada empréstimo.",
+    "theory": "Em uma tabela relacional, uma chave primária identifica cada linha de modo único e não nulo. Uma chave estrangeira estabelece que um valor não nulo deve corresponder a uma chave referenciada, segundo a restrição definida. Ela pode impedir que um empréstimo cite um livro inexistente, mas não define sozinha todas as regras da biblioteca. Uma junção relaciona linhas por uma condição; usar livro_id = livros.id recupera o título do livro emprestado. A ausência da condição pode produzir combinações indevidas. Separar entidades evita repetir informações que pertencem ao livro em cada empréstimo, embora a modelagem completa dependa das necessidades e restrições do sistema.",
+    "workedExample": "Consulta didática: SELECT e.id, l.titulo FROM emprestimos e JOIN livros l ON e.livro_id = l.id; Com os dados fornecidos, o resultado é uma linha: 101, Marés. Inserir um empréstimo com livro_id 99 viola a chave estrangeira se não existe livro 99. Inserir um segundo empréstimo para o livro 7 não é proibido apenas por essa chave: a regra sobre empréstimos simultâneos exigiria outra decisão de modelagem e validação.",
+    "investigation": [
+      "Identifique a chave que distingue cada livro e a coluna que liga um empréstimo ao livro correspondente.",
+      "Faça a junção manual dos registros fornecidos e compare-a com o produto de todas as combinações.",
+      "Separe a regra de existência do livro de uma eventual regra sobre dois empréstimos ativos do mesmo exemplar."
+    ],
+    "expectedEvidence": "A resposta deve produzir 101, Marés na junção, rejeitar a referência inexistente 99 quando a restrição estiver ativa e explicar por que essa chave estrangeira não limita, sozinha, a quantidade de empréstimos do livro 7.",
+    "reflection": "Se o título de Marés for corrigido, por que manter o título na tabela Livros ajuda a evitar alterações inconsistentes em vários empréstimos?",
+    "scenarios": [
+      {
+        "id": "join",
+        "label": "Junção pela chave",
+        "situation": "Livros tem 7=Marés e 8=Pátio; Empréstimos tem 101 com livro_id=7. A condição da junção compara livro_id com o id do livro.",
+        "observation": "O empréstimo 101 é associado a Marés; Pátio não entra nessa linha do resultado.",
+        "explanation": "A igualdade entre as chaves seleciona a relação indicada pelo registro. O título não é escolhido pela posição visual nem por semelhança entre nomes."
+      },
+      {
+        "id": "orfao",
+        "label": "Referência inexistente",
+        "situation": "Uma tentativa de inserir empréstimo 102 usa livro_id=99, mas a tabela Livros contém apenas os códigos 7 e 8. A chave estrangeira está ativa.",
+        "observation": "A inserção não satisfaz a referência exigida e deve ser rejeitada pelo banco.",
+        "explanation": "A restrição verifica a existência da chave referenciada. Ignorá-la permitiria um empréstimo que não pode ser ligado a um livro cadastrado."
+      },
+      {
+        "id": "regra",
+        "label": "Limite da restrição",
+        "situation": "Outro empréstimo usa livro_id=7, já existente. O esquema não tem restrição adicional para empréstimos simultâneos.",
+        "observation": "A chave estrangeira é atendida; ela não prova que o novo empréstimo respeita a disponibilidade do exemplar.",
+        "explanation": "Integridade referencial e regras de circulação são exigências diferentes. A existência de um livro não informa se ele está disponível para nova retirada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual resultado a junção correta produz com o empréstimo 101 ligado ao livro 7?",
+        "options": [
+          {
+            "text": "101, Pátio, porque é o último livro da lista.",
+            "correct": false,
+            "explanation": "A associação depende da igualdade da chave 7, não da posição do livro na lista apresentada."
+          },
+          {
+            "text": "101, Marés, porque o identificador do livro coincide.",
+            "correct": true,
+            "explanation": "O livro_id 7 referencia a linha cujo id é 7, recuperando o título Marés."
+          },
+          {
+            "text": "Nenhuma linha, pois tabelas diferentes não podem ser relacionadas.",
+            "correct": false,
+            "explanation": "A junção foi criada justamente para combinar linhas que satisfazem a condição entre as tabelas."
+          }
+        ]
+      },
+      {
+        "question": "O que a chave estrangeira de livro_id verifica no esquema descrito?",
+        "options": [
+          {
+            "text": "Que o livro referenciado existe na tabela indicada.",
+            "correct": true,
+            "explanation": "A referência não nula deve corresponder a uma chave existente, conforme a restrição configurada."
+          },
+          {
+            "text": "Que cada empréstimo será devolvido no prazo.",
+            "correct": false,
+            "explanation": "O prazo envolve outros dados e comportamento; a referência ao livro não garante uma devolução."
+          },
+          {
+            "text": "Que nunca haverá dois empréstimos ativos do mesmo livro.",
+            "correct": false,
+            "explanation": "A chave estrangeira permite várias linhas referindo o mesmo livro; disponibilidade exige regras adicionais."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "PostgreSQL — Tutorial de SQL e bancos relacionais",
+        "url": "https://www.postgresql.org/docs/current/tutorial.html"
+      }
+    ]
+  },
+  "hard_4": {
+    "context": "Uma página de inscrição tem um campo sem rótulo e uma caixa colorida que só responde ao clique do mouse. Uma estudante tenta preencher e enviar o formulário usando apenas o teclado. Compare mudanças na estrutura HTML, no estilo e no comportamento para tornar a tarefa compreensível e operável.",
+    "theory": "HTML define a estrutura e o significado dos elementos; CSS controla sua apresentação; JavaScript pode acrescentar comportamento. Dar aparência de botão a uma caixa não oferece automaticamente a semântica e a interação de um botão nativo. Um label associado ao input informa o propósito do campo e amplia a área acionável. O foco visível ajuda a localizar o controle alcançado pelo teclado. Validação no navegador pode oferecer retorno rápido, mas o servidor ainda precisa validar os dados recebidos. Acessibilidade não se resume a uma tecnologia: envolve significado, contraste, navegação, mensagens e verificação com diferentes formas de uso.",
+    "workedExample": "Estrutura didática: <label for='nome'>Nome para inscrição</label><input id='nome' name='nome' required><button type='submit'>Enviar inscrição</button>. O valor de for coincide com o id do campo, e o botão tem função de envio no formulário. Uma regra CSS pode destacar :focus-visible sem remover o contorno indiscriminadamente. A página ainda precisa apresentar confirmação ou explicar o erro e validar a inscrição no servidor quando houver um serviço real.",
+    "investigation": [
+      "Identifique qual informação o rótulo deve fornecer e confira a associação entre for e id no exemplo.",
+      "Percorra mentalmente a ordem de foco dos controles e compare uma caixa com clique a um botão nativo.",
+      "Separe as responsabilidades de estrutura, apresentação, comportamento e validação no servidor."
+    ],
+    "expectedEvidence": "A proposta deve associar um rótulo ao campo, usar um botão apropriado e preservar o foco visível. Deve distinguir CSS de semântica HTML e reconhecer que a validação no navegador não impede um envio direto de dados inválidos ao servidor.",
+    "reflection": "Que teste com teclado você realizaria antes de afirmar que a pessoa consegue preencher, corrigir e enviar a inscrição?",
+    "scenarios": [
+      {
+        "id": "rotulo",
+        "label": "Campo identificado",
+        "situation": "O campo tem id='nome' e o texto visível usa label for='nome'. A pessoa seleciona o rótulo.",
+        "observation": "O rótulo está associado ao controle pelo mesmo identificador e ajuda a indicar sua finalidade.",
+        "explanation": "A relação é programática, além de visual. Colocar um texto perto de um campo sem associação não oferece necessariamente a mesma informação às tecnologias assistivas."
+      },
+      {
+        "id": "teclado",
+        "label": "Controle de envio",
+        "situation": "Uma caixa div possui somente um evento de clique e não recebe foco. Ela é substituída por button type='submit' dentro do formulário.",
+        "observation": "O botão nativo oferece semântica de controle e interação padrão por teclado sem reproduzir tudo manualmente.",
+        "explanation": "A aparência de uma caixa não a transforma em botão. Elementos apropriados fornecem comportamentos que precisariam ser implementados e verificados em um controle personalizado."
+      },
+      {
+        "id": "validacao",
+        "label": "Dados enviados diretamente",
+        "situation": "O navegador marca nome como obrigatório, mas uma requisição direta ao serviço envia o campo vazio. O servidor confia apenas na validação da página.",
+        "observation": "A validação do navegador foi contornada; o servidor precisa conferir a entrada antes de aceitá-la.",
+        "explanation": "O cliente está sob controle de quem envia a requisição. A experiência de validação na tela ajuda o uso, mas não substitui uma regra aplicada no serviço que recebe os dados."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual associação identifica corretamente o campo cujo id é nome?",
+        "options": [
+          {
+            "text": "label com for='nome', indicando o propósito do campo.",
+            "correct": true,
+            "explanation": "A coincidência entre for e id liga o rótulo ao controle, tornando a finalidade identificável."
+          },
+          {
+            "text": "Um texto distante sem relação com qualquer controle.",
+            "correct": false,
+            "explanation": "A proximidade visual já não está presente e tampouco existe uma associação programática ao campo."
+          },
+          {
+            "text": "Somente uma borda colorida ao redor do input.",
+            "correct": false,
+            "explanation": "A borda pode ajudar a apresentação, mas não informa sozinha qual dado deve ser fornecido."
+          }
+        ]
+      },
+      {
+        "question": "Por que o serviço deve validar o nome mesmo quando o input usa required?",
+        "options": [
+          {
+            "text": "Porque required criptografa o formulário.",
+            "correct": false,
+            "explanation": "A obrigatoriedade do campo não é um mecanismo de criptografia nem verifica dados no serviço."
+          },
+          {
+            "text": "Porque é possível enviar uma requisição sem usar a página.",
+            "correct": true,
+            "explanation": "Uma entrada direta pode contornar a validação do cliente; a regra precisa existir também no recebimento."
+          },
+          {
+            "text": "Porque CSS transforma automaticamente entradas vazias em nomes válidos.",
+            "correct": false,
+            "explanation": "Estilos alteram apresentação e não inventam nem validam um nome adequado à inscrição."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MDN — Formulários e botões em HTML",
+        "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_forms"
+      }
+    ]
+  },
+  "hard_5": {
+    "context": "Um catálogo fictício armazena os códigos ordenados [3, 7, 12, 18, 25, 31, 44]. Compare procurar o código 31 um a um com uma busca que divide o intervalo. A atividade conta comparações nesse exemplo; não mede tempo de execução real nem afirma que um algoritmo vence em qualquer tamanho de entrada.",
+    "theory": "Um algoritmo de busca precisa de uma regra de comparação e de condições sobre a entrada. A busca linear examina elementos em sequência e pode funcionar sem ordenação. A busca binária usa a ordem para eliminar metade do intervalo depois de comparar com seu elemento central. Sem a entrada ordenada pelo mesmo critério, esse descarte pode eliminar o valor procurado. Em arrays com acesso direto, o pior número de comparações da busca linear cresce como O(n), enquanto o da binária cresce como O(log n). A notação descreve crescimento, não segundos exatos; organizar os dados também tem custo e deve entrar na escolha da estratégia.",
+    "workedExample": "Para buscar 31 linearmente, compare 3, 7, 12, 18, 25 e 31: seis comparações. Na busca binária, com o centro de índices 0 a 6 em 3, compare 18. Como 31 > 18, mantenha índices 4 a 6; o centro é 5, cujo valor é 31. São duas comparações de valor neste rastreamento. Se a lista fosse [3, 31, 12, 18, 25, 7, 44], descartar a metade à esquerda de 18 perderia o 31, mostrando por que a ordem é uma condição necessária dessa versão.",
+    "investigation": [
+      "Registre cada valor comparado com 31 e conte somente as comparações de valor nos dois métodos.",
+      "Atualize os limites do intervalo após cada comparação da busca binária, indicando por que uma metade é descartada.",
+      "Repita o raciocínio com a lista desordenada e localize a etapa em que o valor procurado seria perdido."
+    ],
+    "expectedEvidence": "O rastreamento deve obter seis comparações lineares e duas binárias no exemplo ordenado, com 18 seguido de 31. Deve apontar a ordenação como condição e distinguir essas contagens de uma medição real de desempenho.",
+    "reflection": "Se o catálogo recebesse uma única consulta e estivesse desordenado, que custo adicional você consideraria antes de escolher ordená-lo para fazer busca binária?",
+    "scenarios": [
+      {
+        "id": "linear",
+        "label": "Procura sequencial",
+        "situation": "A busca visita [3, 7, 12, 18, 25, 31, 44] da esquerda para a direita, encerrando quando encontra 31.",
+        "observation": "O código 31 é encontrado na sexta comparação de valor.",
+        "explanation": "A contagem inclui os cinco valores anteriores e o próprio valor encontrado. Não é necessário examinar 44 depois que a busca termina com sucesso."
+      },
+      {
+        "id": "binaria",
+        "label": "Intervalo dividido",
+        "situation": "Na lista ordenada de sete elementos, a busca binária compara primeiro o centro 18 e depois o centro da metade superior, 31.",
+        "observation": "O alvo é encontrado após duas comparações de valor neste percurso específico.",
+        "explanation": "A ordem crescente garante que um alvo maior que 18 não esteja na metade descartada. A segunda comparação encerra a busca porque coincide com o alvo."
+      },
+      {
+        "id": "desordenada",
+        "label": "Condição violada",
+        "situation": "A lista é [3, 31, 12, 18, 25, 7, 44], mas o programa usa o mesmo descarte por ordem após comparar com 18.",
+        "observation": "A metade que contém 31 é descartada indevidamente, e o método pode informar ausência apesar da presença do alvo.",
+        "explanation": "A desigualdade com o elemento central só permite descartar uma metade quando a ordenação assegura onde podem estar os valores. A pré-condição do algoritmo foi violada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual condição permite à busca binária descrita descartar metade do array com segurança?",
+        "options": [
+          {
+            "text": "O array estar ordenado pelo mesmo critério usado nas comparações.",
+            "correct": true,
+            "explanation": "A ordenação sustenta a conclusão de que valores menores ou maiores estão em uma metade específica."
+          },
+          {
+            "text": "O alvo sempre ser o último número da lista.",
+            "correct": false,
+            "explanation": "A busca binária não depende dessa posição; ela precisa da relação de ordem entre todos os elementos."
+          },
+          {
+            "text": "Os valores terem sido exibidos com cores diferentes.",
+            "correct": false,
+            "explanation": "A aparência da apresentação não estabelece a propriedade de ordenação exigida pelo descarte."
+          }
+        ]
+      },
+      {
+        "question": "O que as seis comparações lineares e duas binárias demonstram neste exercício?",
+        "options": [
+          {
+            "text": "Que a binária demora exatamente um terço dos segundos em qualquer computador.",
+            "correct": false,
+            "explanation": "Contar comparações no exemplo não mede duração e não inclui todos os custos de uma implementação real."
+          },
+          {
+            "text": "Que a busca linear deixou de funcionar em listas ordenadas.",
+            "correct": false,
+            "explanation": "A busca linear encontrou o alvo; o rastreamento apenas mostra quantas comparações foram feitas."
+          },
+          {
+            "text": "Que os percursos têm contagens diferentes para essa entrada e essas regras.",
+            "correct": true,
+            "explanation": "A evidência se refere ao rastreamento especificado, sem generalizar uma proporção fixa de tempo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST — Definição de busca binária",
+        "url": "https://xlinux.nist.gov/dads/HTML/binarySearch.html"
+      }
+    ]
+  },
+  "hard_6": {
+    "context": "Num diagnóstico fictício de rede, um computador consegue alcançar um serviço pelo endereço IP, mas falha ao usar seu nome. Em outro teste, o nome é resolvido, porém a conexão ao serviço é recusada. Compare resolução de nomes, transporte e serviço de aplicação sem executar varreduras ou acessar sistemas externos.",
+    "theory": "Redes envolvem funções diferentes que precisam ser distinguidas durante um diagnóstico. Um endereço IP participa do endereçamento dos dispositivos na rede; uma porta ajuda a identificar o ponto de comunicação de transporte de um serviço. DNS permite consultar informações associadas a nomes, incluindo registros de endereços, mas não carrega por si só a página solicitada. TCP oferece às aplicações um fluxo de bytes confiável e ordenado enquanto a conexão pode ser mantida, com mecanismos de detecção e retransmissão; ele não garante que uma aplicação aceitará o pedido ou que toda falha será recuperável. Resolver um nome com sucesso não prova que o servidor está ouvindo na porta esperada.",
+    "workedExample": "Cenário estipulado: biblioteca.example resolve para 192.0.2.10, um endereço reservado para documentação. O serviço usa TCP na porta 443. Se a resolução falha mas o mesmo serviço pode ser alcançado por um teste controlado pelo IP, há evidência para investigar resolução de nomes; isso não determina uma causa única. Se a resolução funciona e a conexão é recusada, é preciso verificar serviço, porta e políticas de rede. Esses resultados foram fornecidos como casos didáticos, não coletados nesta atividade.",
+    "investigation": [
+      "Separe, em cada caso, o resultado da resolução de nome do resultado da tentativa de conexão ao serviço.",
+      "Indique qual hipótese os resultados sustentam e qual informação ainda seria necessária para confirmar uma causa.",
+      "Explique por que transportar bytes em ordem e fornecer uma resposta correta da aplicação são responsabilidades diferentes."
+    ],
+    "expectedEvidence": "O diagnóstico deve relacionar nome não resolvido a uma investigação de DNS, e nome resolvido com conexão recusada a verificações de porta e serviço. Precisa evitar uma causa única sem dados adicionais e distinguir garantia de transporte da resposta da aplicação.",
+    "reflection": "Que evidência faltaria para distinguir um serviço desligado de uma política que recusa conexões à porta esperada?",
+    "scenarios": [
+      {
+        "id": "dns",
+        "label": "Nome não resolvido",
+        "situation": "Um teste controlado alcança o serviço pelo IP informado, mas a consulta do nome biblioteca.example não retorna um endereço utilizável.",
+        "observation": "Há uma diferença entre alcançar o serviço por IP e obter seu endereço pelo nome.",
+        "explanation": "O resultado sugere investigar registros, resolvedor ou configuração de nomes. Ele não prova sozinho qual componente de DNS falhou nem exclui todas as diferenças entre os testes."
+      },
+      {
+        "id": "porta",
+        "label": "Conexão recusada",
+        "situation": "A consulta DNS retorna 192.0.2.10, mas a tentativa controlada de conexão TCP à porta 443 recebe recusa.",
+        "observation": "O nome foi resolvido, enquanto a conexão ao ponto de serviço esperado não foi estabelecida.",
+        "explanation": "Sucesso no DNS não confirma que um processo escuta nessa porta. Configuração do serviço e políticas de rede são hipóteses a verificar com informações adicionais."
+      },
+      {
+        "id": "aplicacao",
+        "label": "Transporte e resposta",
+        "situation": "Uma conexão TCP é estabelecida e os bytes chegam em ordem, mas a aplicação responde que o recurso solicitado não existe.",
+        "observation": "O transporte conseguiu levar a resposta; isso não transforma o recurso inexistente em um recurso disponível.",
+        "explanation": "A confiabilidade do fluxo de bytes não valida o significado da resposta da aplicação. O diagnóstico deve avançar para o endereço do recurso e o funcionamento do serviço."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual função do DNS é relevante para o primeiro caso apresentado?",
+        "options": [
+          {
+            "text": "Corrigir automaticamente todo erro da aplicação.",
+            "correct": false,
+            "explanation": "A resolução de nomes não repara a lógica nem o conteúdo do serviço que responde a uma requisição."
+          },
+          {
+            "text": "Consultar informações associadas ao nome, como registros de endereço.",
+            "correct": true,
+            "explanation": "O problema observado é obter um endereço utilizável a partir do nome informado."
+          },
+          {
+            "text": "Garantir que a porta 443 sempre estará aberta.",
+            "correct": false,
+            "explanation": "Um registro de endereço não garante a existência de um processo ouvindo nem a permissão de conexão."
+          }
+        ]
+      },
+      {
+        "question": "O que uma conexão TCP funcional garante em relação à resposta da aplicação?",
+        "options": [
+          {
+            "text": "Que o recurso solicitado necessariamente existe.",
+            "correct": false,
+            "explanation": "O serviço pode responder com uma ausência de recurso mesmo usando um transporte funcional."
+          },
+          {
+            "text": "Que qualquer mensagem recebida será uma resposta de sucesso.",
+            "correct": false,
+            "explanation": "TCP transporta bytes e não determina se a semântica da resposta representa sucesso para o usuário."
+          },
+          {
+            "text": "Um fluxo confiável e ordenado, sem garantir o significado de sucesso da resposta.",
+            "correct": true,
+            "explanation": "As propriedades de transporte são diferentes das regras e resultados produzidos pela aplicação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "RFC 1034 — Nomes de domínio e suas funções",
+        "url": "https://www.rfc-editor.org/rfc/rfc1034.html"
+      },
+      {
+        "title": "RFC 9293 — Protocolo TCP",
+        "url": "https://www.rfc-editor.org/rfc/rfc9293.html"
+      },
+      {
+        "title": "RFC 5737 — Endereços IPv4 para documentação",
+        "url": "https://www.rfc-editor.org/rfc/rfc5737.html"
+      },
+      {
+        "title": "RFC 2606 — Domínios reservados para exemplos",
+        "url": "https://www.rfc-editor.org/rfc/rfc2606.html"
+      }
+    ]
+  }
+}

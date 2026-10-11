@@ -1,0 +1,929 @@
+{
+  "fund2_mat_01": {
+    "context": "Uma equipe construiu três caixas quadradas, com a mesma profundidade, sobre os lados de um triângulo retângulo. Investigue quando o líquido das duas caixas menores preenche exatamente a maior.",
+    "theory": "Em um triângulo retângulo, o lado oposto ao ângulo de 90° é a hipotenusa c; os outros dois são os catetos a e b. O teorema de Pitágoras afirma a² + b² = c². Os termos representam áreas de quadrados, não comprimentos somados. Em caixas de profundidade constante h, os volumes são a²h, b²h e c²h, então a igualdade de áreas também produz igualdade de volumes. Essa demonstração por líquido exige caixas de mesma profundidade e desconsidera perdas. A relação não vale para qualquer triângulo: o ângulo reto é uma condição essencial.",
+    "workedExample": "Para catetos de 3 cm e 4 cm, as áreas são 9 cm² e 16 cm². A soma é 25 cm², portanto c = √25 = 5 cm. Com profundidade de 2 cm, as caixas menores contêm 18 mL e 32 mL, que somam os 50 mL da caixa de lado 5 cm.",
+    "investigation": [
+      "Desenhe o triângulo de lados 3, 4 e 5 cm, marque o ângulo reto e identifique qual quadrado representa cada área.",
+      "Calcule as áreas para os casos 5–12–13 e 6–8–10. Registre separadamente comprimentos, áreas e volumes para profundidade de 1 cm.",
+      "Teste os lados 4–5–6: compare 4² + 5² com 6² e explique por que a caixa maior não receberia exatamente o mesmo volume.",
+      "Duplique todos os lados do caso 3–4–5 e mantenha a profundidade. Preveja o fator de aumento do volume antes de calcular."
+    ],
+    "expectedEvidence": "Uma tabela deve mostrar 9 + 16 = 25, 25 + 144 = 169 e 36 + 64 = 100, com cm² nas áreas. Para 4–5–6 aparece 41 ≠ 36. Dobrar os lados quadruplica a área e o volume quando a profundidade fica constante.",
+    "reflection": "Um recipiente com o dobro da profundidade ainda serviria à comparação visual? Explique como um fator diferente de profundidade poderia criar uma falsa conclusão sobre o triângulo.",
+    "scenarios": [
+      { "id": "caixas-3-4-5", "label": "Encaixe exato", "situation": "Catetos 3 e 4 cm; hipotenusa 5 cm; todas as caixas têm profundidade de 1 cm.", "observation": "Os volumes de 9 e 16 mL somam os 25 mL da caixa maior.", "explanation": "A mesma profundidade permite comparar diretamente as áreas a² + b² e c²." },
+      { "id": "caixas-6-8-10", "label": "Triângulo ampliado", "situation": "Todos os lados do primeiro triângulo são duplicados; a profundidade continua em 1 cm.", "observation": "36 + 64 = 100 mL: o volume total ficou quatro vezes maior, e a igualdade permaneceu.", "explanation": "O quadrado do fator de escala é 2² = 4. Comprimentos e áreas não crescem na mesma proporção." },
+      { "id": "nao-retangulo", "label": "Limite da relação", "situation": "Três lados medem 4, 5 e 6 cm, com caixas de mesma profundidade de 1 cm.", "observation": "Os dois quadrados menores oferecem 41 mL para uma caixa de 36 mL; sobram 5 mL.", "explanation": "O maior lado não satisfaz c² = a² + b². Esse triângulo não é retângulo." }
+    ],
+    "questions": [
+      { "question": "Uma escada forma um triângulo retângulo com o chão: base de 6 m e altura de 8 m. Qual é o comprimento da escada?", "options": [
+        { "text": "14 m", "correct": false, "explanation": "6 + 8 soma os catetos, mas a escada é a hipotenusa e exige a soma dos quadrados." },
+        { "text": "10 m", "correct": true, "explanation": "6² + 8² = 36 + 64 = 100; a raiz quadrada de 100 é 10 m." },
+        { "text": "100 m", "correct": false, "explanation": "100 é o valor de c² em m². É preciso tirar a raiz para obter o comprimento." }
+      ] },
+      { "question": "Por que as três caixas da demonstração precisam ter a mesma profundidade?", "options": [
+        { "text": "Para que os volumes sejam proporcionais às áreas dos quadrados pelo mesmo fator.", "correct": true, "explanation": "Cada volume é área × profundidade. Um único fator h preserva a igualdade a² + b² = c²." },
+        { "text": "Porque o teorema exige que todos os lados tenham o mesmo comprimento.", "correct": false, "explanation": "Um triângulo retângulo pode ter catetos diferentes; a profundidade pertence às caixas, não ao triângulo." },
+        { "text": "Para que 3 cm + 4 cm seja igual a 5 cm.", "correct": false, "explanation": "A igualdade relevante é 3² + 4² = 5²; mudar profundidades não altera a soma dos comprimentos." }
+      ] }
+    ]
+  },
+  "fund2_mat_02": {
+    "context": "Um extrato bancário e um termômetro usam valores positivos e negativos. Represente ganhos, gastos, aquecimentos e resfriamentos como deslocamentos numa reta para distinguir posição e variação.",
+    "theory": "A reta dos inteiros possui uma origem, o zero, e uma orientação: os números aumentam para a direita. O sinal de um saldo ou temperatura indica a posição em relação ao zero; o sinal da variação indica o sentido do deslocamento. Somar um negativo significa mover-se para valores menores. Subtrair um negativo equivale a adicionar seu oposto: a − (−b) = a + b. Dois números simétricos, como −7 e 7, têm a mesma distância até o zero e soma zero. Uma temperatura de −5 °C é menor que −2 °C, embora o módulo de −5 seja maior.",
+    "workedExample": "Uma conta está em −R$ 12 e recebe R$ 20: −12 + 20 = R$ 8. Se um débito de R$ 5 lançado por engano é retirado, o cálculo é 8 − (−5) = R$ 13. Retirar uma dívida produz aumento, enquanto fazer um novo gasto de R$ 5 produziria 8 − 5 = R$ 3.",
+    "investigation": [
+      "Marque −12 e zero numa reta. Trace o deslocamento de +20 unidades e escreva o saldo final com unidade monetária.",
+      "Partindo de −3 °C, compare um aquecimento de 7 °C com um resfriamento de 7 °C; desenhe duas setas a partir da mesma posição.",
+      "Modele o cancelamento de um débito de R$ 5 como subtração de um lançamento negativo. Compare com um novo gasto.",
+      "Escolha dois inteiros simétricos e explique a diferença entre distância ao zero e ordem numérica."
+    ],
+    "expectedEvidence": "Os registros devem separar estado inicial, variação e estado final. De −3 °C, o aquecimento leva a 4 °C e o resfriamento a −10 °C. A retirada de −5 aumenta o saldo em 5, e números simétricos aparecem à mesma distância do zero.",
+    "reflection": "Por que dizer apenas 'mudou cinco unidades' não informa o novo saldo? Explique quais informações de posição e sentido ainda faltam.",
+    "scenarios": [
+      { "id": "saldo-negativo", "label": "Depósito após dívida", "situation": "Saldo inicial de −R$ 12 e depósito de R$ 20.", "observation": "A seta cruza o zero e termina em R$ 8.", "explanation": "Os primeiros 12 reais compensam a dívida; restam 8 reais de saldo positivo." },
+      { "id": "frente-fria", "label": "Resfriamento", "situation": "Um termômetro marca 2 °C e a temperatura cai 6 °C.", "observation": "O valor final é −4 °C, à esquerda do zero.", "explanation": "A variação é −6; portanto 2 + (−6) = −4. O resultado não é a distância total percorrida." },
+      { "id": "estorno", "label": "Retirada de débito", "situation": "Saldo de R$ 8; um lançamento de −R$ 5 é cancelado.", "observation": "O saldo passa a R$ 13, pois 8 − (−5) = 13.", "explanation": "Retirar uma contribuição negativa tem o mesmo efeito que adicionar seu oposto positivo." }
+    ],
+    "questions": [
+      { "question": "De −4 °C, a temperatura sobe 9 °C. Qual será a nova leitura?", "options": [
+        { "text": "−13 °C", "correct": false, "explanation": "Esse seria o resultado de cair 9 °C. Subir desloca a leitura para a direita." },
+        { "text": "13 °C", "correct": false, "explanation": "Somar os módulos 4 e 9 ignora que o ponto inicial está abaixo de zero." },
+        { "text": "5 °C", "correct": true, "explanation": "−4 + 9 = 5: quatro graus chegam ao zero e mais cinco ficam acima dele." }
+      ] },
+      { "question": "Qual comparação entre −8 e −3 está correta?", "options": [
+        { "text": "−8 é maior porque 8 é maior que 3.", "correct": false, "explanation": "Na região negativa, estar mais longe do zero à esquerda significa um número menor." },
+        { "text": "−8 é menor, mas tem maior distância ao zero.", "correct": true, "explanation": "−8 está à esquerda de −3; seu módulo é 8, enquanto o de −3 é 3." },
+        { "text": "São iguais porque ambos têm sinal negativo.", "correct": false, "explanation": "O sinal indica o lado da origem, mas não determina uma única posição." }
+      ] }
+    ]
+  },
+  "fund2_mat_03": {
+    "context": "Numa balança equilibrada, caixas idênticas escondem a mesma massa. Descubra a massa de cada caixa removendo ou dividindo cargas de maneira que os dois pratos continuem equivalentes.",
+    "theory": "Uma equação afirma que duas expressões têm o mesmo valor. Na metáfora da balança, realizar a mesma adição, subtração, multiplicação ou divisão por número não nulo nos dois membros preserva a igualdade. A incógnita x representa um valor ainda desconhecido, não uma unidade física. Resolver 3x + 6 = 21 exige desfazer a soma e depois o produto: 3x = 15, então x = 5. A expressão 'passar para o outro lado trocando o sinal' resume uma operação feita nos dois membros, mas não explica sozinha por que ela é válida. A substituição do resultado na equação inicial confirma a solução.",
+    "workedExample": "Três caixas e seis pesos de 1 kg equilibram 21 kg. Retirando 6 kg de cada prato: 3x + 6 − 6 = 21 − 6, logo 3x = 15. Dividindo os dois lados por 3, x = 5 kg. A conferência é 3 × 5 + 6 = 21; retirar 6 apenas à esquerda destruiria o equilíbrio.",
+    "investigation": [
+      "Represente 3x + 6 = 21 com três caixas e pesos. Registre o conteúdo dos dois pratos antes de cada alteração.",
+      "Retire a mesma carga dos dois lados e divida o restante em três grupos iguais. Explique o significado de cada operação.",
+      "Resolva 2x + 4 = x + 11 retirando primeiro uma caixa de cada prato; compare com a estratégia usada no primeiro caso.",
+      "Substitua a solução nas duas expressões originais e descreva um erro que uma alteração em apenas um prato provocaria."
+    ],
+    "expectedEvidence": "O caderno deve conter cadeias de igualdades válidas e verificações por substituição: x = 5 para 3x + 6 = 21 e x = 7 para 2x + 4 = x + 11. Cada transformação deve indicar a mesma operação nos dois membros.",
+    "reflection": "Como explicar o atalho 'trocar o sinal' a alguém que nunca viu uma equação? Use a retirada de uma mesma carga em ambos os pratos em sua explicação.",
+    "scenarios": [
+      { "id": "tres-caixas", "label": "Retirar e repartir", "situation": "A balança representa 3x + 6 = 21.", "observation": "Após retirar 6 de cada lado, 3x = 15; após dividir por 3, x = 5.", "explanation": "A remoção cancela a parcela conhecida e a divisão identifica a massa de uma caixa." },
+      { "id": "caixas-nos-dois-pratos", "label": "Incógnita nos dois lados", "situation": "A balança representa 2x + 4 = x + 11.", "observation": "Retirar x de cada lado produz x + 4 = 11; retirar 4 resulta em x = 7.", "explanation": "As caixas idênticas podem ser canceladas em pares sem alterar a igualdade." },
+      { "id": "operacao-assimetrica", "label": "Quebra do equilíbrio", "situation": "Partindo de x + 3 = 8, alguém retira 3 apenas do prato esquerdo e escreve x = 8.", "observation": "A suposta solução falha: 8 + 3 = 11, que não é 8.", "explanation": "É necessário retirar 3 dos dois lados; a solução correta é x = 5." }
+    ],
+    "questions": [
+      { "question": "Qual primeira transformação preserva 4x + 2 = 18 e ajuda a isolar x?", "options": [
+        { "text": "4x = 16, retirando 2 dos dois lados.", "correct": true, "explanation": "Subtrair 2 em ambos os membros mantém a igualdade e cancela a parcela +2." },
+        { "text": "4x = 18, retirando 2 somente à esquerda.", "correct": false, "explanation": "A retirada unilateral muda apenas um valor e não preserva a equação original." },
+        { "text": "x + 2 = 18, apagando o coeficiente 4.", "correct": false, "explanation": "Dividir exigiria dividir toda a expressão e também o outro membro por 4." }
+      ] },
+      { "question": "Qual valor satisfaz 2x + 5 = 17 quando conferido na expressão original?", "options": [
+        { "text": "x = 11", "correct": false, "explanation": "2 × 11 + 5 = 27. Subtrair e dividir precisam respeitar a ordem das operações inversas." },
+        { "text": "x = 12", "correct": false, "explanation": "12 é o valor de 2x após retirar 5, e ainda precisa ser dividido por 2." },
+        { "text": "x = 6", "correct": true, "explanation": "2 × 6 + 5 = 17, confirmando a solução obtida por 2x = 12." }
+      ] }
+    ]
+  },
+  "fund2_mat_04": {
+    "context": "Duas ruas paralelas são cortadas por uma avenida transversal. Use um único ângulo medido para prever os demais e descubra quais relações dependem do paralelismo das ruas.",
+    "theory": "Em cada cruzamento de duas retas, ângulos opostos pelo vértice têm a mesma medida e ângulos adjacentes que formam uma linha reta somam 180°. Quando uma transversal cruza duas retas paralelas, surgem relações entre os cruzamentos: correspondentes ocupam posições equivalentes; alternos internos ficam entre as paralelas e em lados opostos da transversal. Esses dois tipos de pares têm medidas iguais. Colaterais internos ficam no mesmo lado da transversal e somam 180°. A posição do par precisa ser identificada antes de aplicar a regra. Sem paralelismo, as igualdades entre cruzamentos não são garantidas.",
+    "workedExample": "Um ângulo interno de um cruzamento mede 65°. Seu alterno interno no outro cruzamento mede também 65°. O colateral interno mede 180° − 65° = 115°. No mesmo cruzamento, o oposto pelo vértice continua em 65°, mesmo se a segunda rua deixar de ser paralela.",
+    "investigation": [
+      "Desenhe duas horizontais paralelas e uma transversal inclinada. Numere os oito ângulos e marque a região interna.",
+      "Escolha um ângulo de 65° e identifique seu correspondente, seu alterno interno e um adjacente, explicando a posição de cada par.",
+      "Repita com um ângulo de 110°; anote quais medidas aparecem e quantas vezes cada uma se repete.",
+      "Incline apenas uma das horizontais para retirar o paralelismo. Separe as relações que permanecem no mesmo vértice das que deixam de ser garantidas."
+    ],
+    "expectedEvidence": "O desenho deve apresentar quatro ângulos de 65° e quatro de 115° no primeiro caso, com pares classificados pela posição. A conclusão deve limitar correspondência e alternância iguais ao caso paralelo, preservando opostos pelo vértice em qualquer cruzamento.",
+    "reflection": "Se dois ângulos têm a mesma medida, isso basta para chamá-los de alternos internos? Explique por que a localização no desenho faz parte da definição.",
+    "scenarios": [
+      { "id": "alternos-agudos", "label": "Travessia de 65°", "situation": "Retas paralelas; um ângulo interno mede 65°.", "observation": "O alterno interno mede 65° e o colateral interno mede 115°.", "explanation": "Alternos internos são congruentes; colaterais internos são suplementares nesse arranjo." },
+      { "id": "correspondentes-obtusos", "label": "Ângulo obtuso", "situation": "Um ângulo de 110° ocupa a posição superior direita no primeiro cruzamento de retas paralelas.", "observation": "O ângulo superior direito no segundo cruzamento mede 110°; o adjacente mede 70°.", "explanation": "A posição equivalente identifica os correspondentes; a linha reta fornece a soma de 180°." },
+      { "id": "ruas-nao-paralelas", "label": "Hipótese retirada", "situation": "A segunda rua é inclinada e as duas ruas deixam de ser paralelas.", "observation": "Opostos pelo vértice continuam iguais em cada cruzamento, mas correspondentes podem diferir.", "explanation": "A primeira relação é local; a igualdade entre cruzamentos dependia do paralelismo." }
+    ],
+    "questions": [
+      { "question": "Entre duas paralelas, dois ângulos internos estão no mesmo lado da transversal. Um mede 72°. Quanto mede o outro?", "options": [
+        { "text": "72°", "correct": false, "explanation": "Isso corresponderia à igualdade dos alternos internos, que ficam em lados opostos da transversal." },
+        { "text": "108°", "correct": true, "explanation": "São colaterais internos e somam 180°; portanto 180° − 72° = 108°." },
+        { "text": "18°", "correct": false, "explanation": "A soma aplicável é 180°, não 90°. Não foi indicado um ângulo reto." }
+      ] },
+      { "question": "Qual relação continua garantida quando as duas retas cortadas deixam de ser paralelas?", "options": [
+        { "text": "Correspondentes nos dois cruzamentos têm a mesma medida.", "correct": false, "explanation": "Essa igualdade exige a hipótese de paralelismo entre as retas cortadas." },
+        { "text": "Todos os ângulos internos medem 90°.", "correct": false, "explanation": "A transversal pode ter qualquer inclinação; não foi indicada perpendicularidade." },
+        { "text": "Opostos pelo vértice são iguais em cada cruzamento.", "correct": true, "explanation": "A relação nasce do cruzamento de duas retas e independe de uma terceira reta paralela." }
+      ] }
+    ]
+  },
+  "fund2_mat_05": {
+    "context": "Uma maquete de rampa forma um triângulo retângulo. Ao ampliar o desenho sem mudar sua inclinação, os comprimentos mudam, mas certas razões entre os lados permanecem iguais. Esta introdução parte de proporcionalidade e semelhança nos anos finais do Fundamental.",
+    "theory": "Em um triângulo retângulo, a hipotenusa fica em frente ao ângulo reto. Escolhido um ângulo agudo de referência, o cateto oposto não toca esse ângulo e o cateto adjacente toca-o. As razões seno = oposto/hipotenusa e cosseno = adjacente/hipotenusa comparam comprimentos medidos na mesma unidade. Triângulos semelhantes mantêm essas razões porque todos os lados são multiplicados pelo mesmo fator. Trocar o ângulo agudo de referência troca os papéis dos catetos. A atividade usa apenas triângulos retângulos e razões positivas; círculo trigonométrico, radianos e quadrantes ficam para aprofundamento posterior.",
+    "workedExample": "A maquete tem base horizontal de 12 cm, altura de 5 cm e rampa de 13 cm. Para o ângulo da rampa com a base, seno = 5/13 e cosseno = 12/13. Uma ampliação por dois tem lados 24 cm, 10 cm e 26 cm: 10/26 = 5/13 e 24/26 = 12/13. As razões não têm unidade e a inclinação foi preservada.",
+    "investigation": [
+      "Desenhe a maquete com lados 5, 12 e 13 cm e identifique o ângulo reto e a hipotenusa.",
+      "Marque o ângulo entre a base e a rampa. Identifique seus catetos oposto e adjacente antes de escrever as razões.",
+      "Amplie todos os lados por dois e compare as razões 5/13 e 10/26, assim como 12/13 e 24/26.",
+      "Escolha o outro ângulo agudo como referência. Explique o que muda nos nomes dos catetos e o que continua sendo a hipotenusa."
+    ],
+    "expectedEvidence": "O registro deve identificar 13 cm como hipotenusa e, para o ângulo da base, obter seno 5/13 e cosseno 12/13. A ampliação por dois preserva ambas as razões; ao usar o outro ângulo agudo, os valores de seno e cosseno trocam de papel.",
+    "reflection": "Por que aumentar todos os lados da maquete pelo mesmo fator mantém a inclinação, enquanto aumentar somente a altura não preserva a semelhança?",
+    "scenarios": [
+      { "id": "rampa-original", "label": "Maquete original", "situation": "Base de 12 cm, altura de 5 cm e rampa de 13 cm; use o ângulo junto à base.", "observation": "A razão oposto/hipotenusa vale 5/13 e adjacente/hipotenusa vale 12/13.", "explanation": "A altura fica em frente ao ângulo escolhido; a base toca esse ângulo e a rampa é a hipotenusa." },
+      { "id": "rampa-ampliada", "label": "Ampliação uniforme", "situation": "Multiplique todos os lados da maquete por três: base 36 cm, altura 15 cm e rampa 39 cm.", "observation": "As razões 15/39 e 36/39 simplificam para 5/13 e 12/13.", "explanation": "O fator três aparece no numerador e no denominador; a semelhança conserva os ângulos e as razões." },
+      { "id": "outro-angulo", "label": "Outro ângulo agudo", "situation": "Na maquete original, use o ângulo entre a altura e a rampa como referência.", "observation": "O seno passa a 12/13 e o cosseno a 5/13; a hipotenusa continua medindo 13 cm.", "explanation": "Os catetos trocam de papel em relação ao novo ângulo, enquanto o lado oposto ao ângulo reto não muda." }
+    ],
+    "questions": [
+      { "question": "Qual é o seno do ângulo entre a base e a rampa na maquete de lados 5, 12 e 13 cm?", "options": [
+        { "text": "5/13", "correct": true, "explanation": "O cateto oposto mede 5 cm e a hipotenusa mede 13 cm; o quociente não tem unidade." },
+        { "text": "12/13", "correct": false, "explanation": "Esse é o cosseno do ângulo escolhido, pois a base é o cateto adjacente." },
+        { "text": "13/5", "correct": false, "explanation": "A divisão está invertida: o seno usa cateto oposto dividido pela hipotenusa." }
+      ] },
+      { "question": "O que acontece com as razões entre lados quando todos os comprimentos do triângulo são duplicados?", "options": [
+        { "text": "Todas as razões dobram.", "correct": false, "explanation": "Numerador e denominador dobram juntos; o fator dois se cancela." },
+        { "text": "A hipotenusa deixa de ficar em frente ao ângulo reto.", "correct": false, "explanation": "A ampliação mantém os ângulos e a posição relativa dos lados." },
+        { "text": "As razões permanecem iguais às do triângulo original.", "correct": true, "explanation": "10/26 = 5/13 e 24/26 = 12/13: a escala muda os comprimentos, não a inclinação." }
+      ] }
+    ]
+  },
+  "fund2_mat_06": {
+    "context": "Uma gráfica precisa planejar materiais e tempo de produção. Investigue quando aumentar uma grandeza aumenta a outra e quando reduzirá a outra, identificando o que permanece constante.",
+    "theory": "Duas grandezas são diretamente proporcionais quando a razão entre valores correspondentes é constante: dobrar uma dobra a outra. São inversamente proporcionais quando o produto é constante: dobrar uma reduz a outra à metade. O contexto determina a relação. A quantidade de papel cresce diretamente com o número de cópias iguais; o tempo para percorrer uma distância fixa varia inversamente com a velocidade constante. Em equipes, a relação trabalhadores × dias pressupõe produtividade igual, tarefa divisível e ausência de atrasos de coordenação. Não basta observar que duas grandezas crescem para concluir proporcionalidade direta: a razão precisa permanecer constante.",
+    "workedExample": "Se 4 cadernos iguais custam R$ 28 sem descontos, cada um custa R$ 7, e 10 custam R$ 70. Para uma tarefa de 24 trabalhador-dias, 4 trabalhadores levariam 6 dias e 8 levariam 3 dias. A primeira conta preserva preço/quantidade; a segunda preserva trabalhadores × dias.",
+    "investigation": [
+      "Monte uma tabela de custo para 1, 4 e 10 cadernos a R$ 7 cada; calcule a razão custo/quantidade em cada linha.",
+      "Para uma viagem de 120 km, calcule tempos a 40, 60 e 80 km/h constantes e confira o produto velocidade × tempo.",
+      "Compare 4 e 8 trabalhadores numa tarefa de 24 trabalhador-dias, explicitando as hipóteses sobre produtividade e divisão do trabalho.",
+      "Acrescente taxa fixa de entrega de R$ 10 à compra de cadernos. Teste se dobrar a quantidade continua dobrando o custo total."
+    ],
+    "expectedEvidence": "As tabelas devem mostrar preço unitário constante de R$ 7, produtos velocidade × tempo iguais a 120 km e produtos trabalhadores × dias iguais a 24. Com taxa fixa, a razão custo/quantidade varia, mostrando que a compra deixou de ser diretamente proporcional.",
+    "reflection": "Por que dobrar uma equipe real nem sempre reduz o prazo à metade? Identifique uma hipótese do modelo proporcional que pode falhar sem invalidar a conta idealizada.",
+    "scenarios": [
+      { "id": "preco-unitario", "label": "Compra sem taxa", "situation": "4 cadernos custam R$ 28; todos têm o mesmo preço e não há desconto.", "observation": "10 cadernos custam R$ 70, mantendo R$ 7 por caderno.", "explanation": "Custo e quantidade são diretamente proporcionais porque seu quociente fica constante." },
+      { "id": "viagem-fixa", "label": "Velocidade e tempo", "situation": "Uma viagem tem 120 km; compare velocidades constantes de 40 e 60 km/h.", "observation": "Os tempos são 3 h e 2 h, respectivamente.", "explanation": "A distância fixa é o produto v × t; aumentar a velocidade em 1,5 reduz o tempo pelo mesmo fator." },
+      { "id": "custo-com-entrega", "label": "Taxa fixa", "situation": "Cada caderno custa R$ 7, mas toda compra paga R$ 10 de entrega.", "observation": "2 cadernos custam R$ 24 e 4 custam R$ 38; o total não dobra.", "explanation": "A parcela fixa gera C = 7q + 10. Crescimento conjunto não é suficiente para proporcionalidade direta." }
+    ],
+    "questions": [
+      { "question": "Uma máquina produz 60 peças por hora a ritmo constante. Quantas fará em 3 horas, sem paradas?", "options": [
+        { "text": "20 peças", "correct": false, "explanation": "Dividir por 3 usaria uma relação inversa; mais tempo, no mesmo ritmo, produz mais peças." },
+        { "text": "180 peças", "correct": true, "explanation": "A razão peças/tempo é 60 por hora; em 3 horas a produção é 60 × 3." },
+        { "text": "63 peças", "correct": false, "explanation": "Somar 3 mistura unidades de peças e horas e não mantém a taxa de produção." }
+      ] },
+      { "question": "Para uma distância fixa, dobrar a velocidade constante produz qual mudança no tempo?", "options": [
+        { "text": "O tempo cai à metade.", "correct": true, "explanation": "Como distância = velocidade × tempo, o produto precisa permanecer constante." },
+        { "text": "O tempo dobra.", "correct": false, "explanation": "Dobrar ambos quadruplicaria a distância; a viagem proposta tem distância fixa." },
+        { "text": "O tempo permanece igual.", "correct": false, "explanation": "Na mesma distância, percorrer mais quilômetros por hora reduz a duração." }
+      ] }
+    ]
+  },
+  "fund2_mat_07": {
+    "context": "Uma turma compara a previsão de uma roleta com os resultados de várias jogadas. Descubra por que uma sequência curta pode parecer injusta mesmo quando cada resultado tem a chance esperada.",
+    "theory": "Probabilidade teórica descreve a chance de um evento segundo um modelo. Em um dado honesto de seis faces, cada face tem probabilidade 1/6; o evento 'número par' reúne três faces e tem probabilidade 3/6 = 1/2. Frequência relativa é a quantidade observada de sucessos dividida pelo total de tentativas. Ela pode diferir da probabilidade, especialmente em amostras pequenas. Em repetições independentes e sob condições estáveis, tende a se aproximar do valor teórico, sem exigir igualdade exata. Em roletas com setores desiguais e giro ideal, contam os ângulos dos setores, não apenas a quantidade de cores.",
+    "workedExample": "Uma roleta tem um setor azul de 180°, um vermelho de 90° e um amarelo de 90°. A chance de azul é 180/360 = 1/2. Se em 20 giros houve 13 azuis, a frequência foi 13/20 = 65%. Esse resultado não transforma a chance teórica em 65% nem prova, sozinho, que a roleta seja viciada.",
+    "investigation": [
+      "Liste as seis faces do dado e destaque o evento 'maior que 4'. Calcule sua probabilidade antes de qualquer lançamento.",
+      "Use os resultados didáticos 13 azuis em 20 giros e 104 azuis em 200 giros. Compare as frequências de 65% e 52% com a previsão de 50%.",
+      "Desenhe os setores da roleta de 180°, 90° e 90°. Explique por que três cores não significam três chances iguais.",
+      "Avalie a afirmação 'depois de cinco vermelhos, azul é obrigatório'. Indique a hipótese de independência e a chance do próximo giro."
+    ],
+    "expectedEvidence": "A análise deve distinguir a chance teórica de 50% das frequências de 65% e 52%, calcular P(maior que 4) = 2/6 e justificar a roleta por ângulos. A conclusão não deve prometer compensação obrigatória após uma sequência de resultados.",
+    "reflection": "Qual evidência seria mais convincente para suspeitar de uma roleta defeituosa: três giros ou muitas repetições com o mesmo desvio? Explique sem afirmar que uma amostra grande garante equilíbrio exato.",
+    "scenarios": [
+      { "id": "dado-par", "label": "Evento composto", "situation": "Dado honesto com faces de 1 a 6; o evento é obter número par.", "observation": "As faces favoráveis são 2, 4 e 6, portanto a chance é 3/6 = 50%.", "explanation": "São três resultados equiprováveis dentro de um espaço amostral com seis elementos." },
+      { "id": "amostras-roleta", "label": "Curto e longo prazo", "situation": "A roleta tem metade do círculo azul; aparecem 13 azuis em 20 giros e 104 em 200.", "observation": "As frequências de 65% e 52% são diferentes; a segunda está mais perto de 50%.", "explanation": "O exemplo ilustra oscilação amostral e aproximação, sem garantir que toda ampliação de amostra reduza o desvio." },
+      { "id": "sequencia-independente", "label": "Depois de cinco vermelhos", "situation": "Cinco giros independentes terminaram no vermelho; a área azul continua sendo metade do círculo.", "observation": "No próximo giro, a chance de azul ainda é 1/2.", "explanation": "A roleta não guarda uma dívida de resultados; a sequência passada não altera os setores." }
+    ],
+    "questions": [
+      { "question": "Uma roleta ideal possui um setor verde de 270° e um branco de 90°. Qual é a probabilidade de verde?", "options": [
+        { "text": "1/2, porque existem duas cores.", "correct": false, "explanation": "As cores ocupam áreas diferentes. Em uma roleta ideal, é o ângulo que determina a chance." },
+        { "text": "1/4", "correct": false, "explanation": "90/360 = 1/4 é a probabilidade do setor branco, não do verde." },
+        { "text": "3/4", "correct": true, "explanation": "O setor verde cobre 270/360 = 3/4 da volta completa." }
+      ] },
+      { "question": "Uma moeda honesta apresentou 7 caras em 10 lançamentos. Qual interpretação é adequada?", "options": [
+        { "text": "A probabilidade teórica de cara passou a 70%.", "correct": false, "explanation": "70% é a frequência observada nessa amostra; a hipótese de moeda honesta continua prevendo 50%." },
+        { "text": "A frequência de caras foi 70%, sem provar sozinha que a moeda seja desonesta.", "correct": true, "explanation": "Amostras pequenas podem apresentar desvios. A conclusão precisa distinguir observação e modelo." },
+        { "text": "Os próximos quatro lançamentos serão obrigatoriamente coroas.", "correct": false, "explanation": "Resultados independentes não precisam compensar a sequência anterior em um prazo fixo." }
+      ] }
+    ]
+  },
+  "fund2_mat_08": {
+    "context": "Um painel de escalas precisa mostrar desde uma partícula microscópica até uma distância espacial sem encher a tela de zeros. Use potências de dez para representar e comparar medidas.",
+    "theory": "A notação científica escreve um número positivo como a × 10ⁿ, com 1 ≤ a < 10 e n inteiro. Um expoente positivo indica multiplicação por dez repetida; um negativo indica divisão por dez. Assim, 10³ = 1000 e 10⁻³ = 0,001. Ao mover a vírgula no coeficiente, o expoente precisa compensar a mudança para preservar o valor. Para comparar medidas, primeiro use a mesma unidade; depois compare os expoentes e, se forem iguais, os coeficientes. Em multiplicações, os expoentes se somam; em divisões, se subtraem. Um expoente negativo não significa que a medida seja negativa.",
+    "workedExample": "Uma distância didática de 150.000.000 km fica 1,5 × 10⁸ km. Uma estrutura de 0,000002 m fica 2 × 10⁻⁶ m. Comparando 6 × 10⁸ m com 2 × 10⁶ m, a razão é (6/2) × 10² = 300: a primeira distância é 300 vezes maior.",
+    "investigation": [
+      "Converta 42.000, 0,00042 e 4,2 para notação científica, anotando como o expoente compensa o deslocamento da vírgula.",
+      "Ordene 7 × 10⁻⁴ m, 3 × 10⁻³ m e 9 × 10⁻⁵ m, convertendo-os a decimais para conferir.",
+      "Compare 2 × 10³ m e 3 km depois de igualar as unidades; explique por que apenas olhar os coeficientes é insuficiente.",
+      "Calcule a razão entre 6 × 10⁸ m e 2 × 10⁶ m e descreva a diferença entre '300 vezes maior' e '300 metros a mais'."
+    ],
+    "expectedEvidence": "Devem aparecer 4,2 × 10⁴, 4,2 × 10⁻⁴ e 4,2 × 10⁰. A ordenação crescente é 9 × 10⁻⁵, 7 × 10⁻⁴, 3 × 10⁻³ m. As comparações devem preservar unidades e distinguir razão de diferença.",
+    "reflection": "Um objeto com comprimento 10⁻⁶ m tem comprimento negativo? Explique a função do sinal no expoente e compare com o número −10⁶ m.",
+    "scenarios": [
+      { "id": "medida-microscopica", "label": "Zeros depois da vírgula", "situation": "Um comprimento didático mede 0,000002 m.", "observation": "A escrita normalizada é 2 × 10⁻⁶ m, um valor positivo menor que um metro.", "explanation": "O expoente −6 expressa seis divisões por dez e não um sinal negativo na medida." },
+      { "id": "mesmo-expoente", "label": "Distâncias grandes", "situation": "Duas medidas são 1,5 × 10⁸ km e 2,4 × 10⁸ km.", "observation": "A segunda é maior; a diferença é 0,9 × 10⁸ = 9 × 10⁷ km.", "explanation": "Com expoentes iguais, a comparação e a subtração podem começar pelos coeficientes." },
+      { "id": "unidades-diferentes", "label": "Metros e quilômetros", "situation": "Compare 2 × 10³ m com 3 km.", "observation": "2 × 10³ m = 2 km, portanto 3 km é a medida maior.", "explanation": "As unidades precisam ser igualadas antes de comparar números escritos de formas distintas." }
+    ],
+    "questions": [
+      { "question": "Qual escrita é a notação científica normalizada de 0,00056?", "options": [
+        { "text": "5,6 × 10⁻⁴", "correct": true, "explanation": "Mover a vírgula quatro casas para a direita exige multiplicar o coeficiente por 10⁻⁴." },
+        { "text": "5,6 × 10⁴", "correct": false, "explanation": "Essa expressão é 56.000, muito maior que o número inicial." },
+        { "text": "56 × 10⁻⁵", "correct": false, "explanation": "O valor é equivalente, mas o coeficiente 56 não está no intervalo de 1 a menos de 10 exigido pela forma normalizada." }
+      ] },
+      { "question": "Quanto vale (8 × 10⁵) ÷ (2 × 10²)?", "options": [
+        { "text": "4 × 10⁷", "correct": false, "explanation": "Somar expoentes seria a regra de multiplicação; na divisão deve-se subtrair 2 de 5." },
+        { "text": "4 × 10³", "correct": true, "explanation": "8/2 = 4 e 10⁵/10² = 10³." },
+        { "text": "6 × 10³", "correct": false, "explanation": "Os coeficientes também são divididos, não subtraídos: 8/2 é 4." }
+      ] }
+    ]
+  },
+  "fund2_mat_09": {
+    "context": "Uma oficina prepara modelos de sólidos com faces de papel e arestas de palitos. Conte faces, arestas e vértices para testar a relação de Euler e identificar os cinco poliedros de Platão.",
+    "theory": "Um poliedro é delimitado por faces poligonais; as arestas são os encontros de duas faces e os vértices são os encontros de arestas. Nos poliedros convexos, V − A + F = 2. Cada aresta pertence a duas faces, então contar os lados de todas as faces conta cada aresta duas vezes. Os cinco poliedros de Platão são convexos, têm faces formadas por polígonos regulares congruentes e a mesma quantidade de faces em cada vértice: tetraedro, cubo, octaedro, dodecaedro e icosaedro. A relação de Euler é mais abrangente: um prisma não regular também pode satisfazê-la sem ser um sólido de Platão.",
+    "workedExample": "O cubo tem 6 faces quadradas. Contar quatro lados em cada face dá 24 incidências; dividindo por 2, obtemos 12 arestas. Com 8 vértices, 8 − 12 + 6 = 2. O octaedro tem 8 triângulos, logo A = 8 × 3/2 = 12, e seus 6 vértices também produzem 6 − 12 + 8 = 2.",
+    "investigation": [
+      "Monte ou desenhe um cubo e marque cada vértice e aresta para evitar contagens duplicadas. Registre V, A e F.",
+      "Calcule as arestas do tetraedro a partir de quatro faces triangulares e confira Euler com seus quatro vértices.",
+      "Compare cubo e octaedro: observe a troca entre as quantidades de faces e vértices, mantendo 12 arestas.",
+      "Examine um prisma triangular com 5 faces, 9 arestas e 6 vértices. Teste Euler e explique por que ele não é um poliedro de Platão."
+    ],
+    "expectedEvidence": "A tabela deve incluir tetraedro (4,6,4), cubo (8,12,6), octaedro (6,12,8) e prisma triangular (6,9,5), na ordem V,A,F. Todos resultam em 2, mas o prisma apresenta tipos diferentes de faces e não atende à regularidade de Platão.",
+    "reflection": "Satisfazer uma relação numérica garante que um sólido seja regular? Use o prisma triangular como contraexemplo e acrescente os critérios geométricos que faltam.",
+    "scenarios": [
+      { "id": "cubo-seis-quadrados", "label": "Cubo", "situation": "Seis faces quadradas, com três faces encontrando-se em cada vértice.", "observation": "V = 8, A = 12 e F = 6; a expressão de Euler vale 2.", "explanation": "Os 24 lados de faces contam cada aresta duas vezes. As faces regulares congruentes qualificam o cubo como sólido de Platão." },
+      { "id": "tetraedro-quatro-triangulos", "label": "Tetraedro regular", "situation": "Quatro triângulos equiláteros fecham uma superfície convexa.", "observation": "V = 4, A = 6 e F = 4, com 4 − 6 + 4 = 2.", "explanation": "Cada vértice reúne três faces e cada aresta liga duas faces triangulares." },
+      { "id": "prisma-contraexemplo", "label": "Euler sem Platão", "situation": "Um prisma triangular possui duas faces triangulares e três retangulares.", "observation": "6 − 9 + 5 = 2, embora o sólido não tenha todas as faces congruentes.", "explanation": "Euler vale para esse poliedro convexo; ser de Platão exige condições adicionais de regularidade." }
+    ],
+    "questions": [
+      { "question": "Um poliedro convexo tem 12 vértices e 20 faces. Quantas arestas tem segundo Euler?", "options": [
+        { "text": "34", "correct": false, "explanation": "Somar 2 em vez de subtrair dá 34; de 12 − A + 20 = 2 obtemos A = 30." },
+        { "text": "8", "correct": false, "explanation": "A diferença entre faces e vértices não é a quantidade de arestas." },
+        { "text": "30", "correct": true, "explanation": "A = V + F − 2 = 12 + 20 − 2 = 30." }
+      ] },
+      { "question": "Por que dividir por 2 ao contar as arestas a partir dos lados de todas as faces?", "options": [
+        { "text": "Porque cada aresta pertence a duas faces e foi contada duas vezes.", "correct": true, "explanation": "A soma dos lados registra incidências de faces; duas incidências correspondem a uma aresta do poliedro fechado." },
+        { "text": "Porque todo poliedro tem exatamente duas faces.", "correct": false, "explanation": "O cubo, por exemplo, tem seis faces. O número dois se refere às faces que compartilham cada aresta." },
+        { "text": "Porque só metade das arestas é visível no desenho.", "correct": false, "explanation": "A regra independe do ponto de vista. Arestas ocultas também entram na contagem geométrica." }
+      ] }
+    ]
+  },
+  "fund2_mat_10": {
+    "context": "Uma batalha naval usa coordenadas para comunicar alvos sem mostrar o tabuleiro. Posicione os pontos corretamente e transforme uma sequência de posições numa descrição de reta.",
+    "theory": "O plano cartesiano possui dois eixos perpendiculares que se cruzam na origem (0,0). Em um par ordenado (x,y), a primeira coordenada indica o deslocamento horizontal e a segunda, o vertical. Trocar a ordem pode mudar a posição. Os eixos dividem o plano em quadrantes: sinais (+,+), (−,+), (−,−) e (+,−), respectivamente. Pontos com x = 0 pertencem ao eixo vertical e pontos com y = 0 pertencem ao horizontal, sem integrar quadrantes. Uma reta como y = 2x + 1 reúne todos os pares que satisfazem essa igualdade; aumentar x em 1 aumenta y em 2.",
+    "workedExample": "Para acertar (−3,2), parta da origem, ande três unidades à esquerda e duas para cima. O ponto fica no segundo quadrante. Na reta y = 2x + 1, x = 0 produz (0,1), x = 1 produz (1,3), e x = 2 produz (2,5). Já (2,4) não pertence à reta porque 4 ≠ 2 × 2 + 1.",
+    "investigation": [
+      "Construa um tabuleiro com eixos de −5 a 5 e marque (−3,2), (2,−3), (0,4) e (4,0), explicando cada deslocamento.",
+      "Troque as coordenadas de (−3,2) e compare os quadrantes ocupados antes e depois da troca.",
+      "Monte uma tabela para y = 2x + 1 usando x igual a −1, 0, 1 e 2; marque os pontos e trace a reta.",
+      "Teste o ponto (2,4) por substituição. Crie um novo ponto da reta sem usar os valores anteriores de x."
+    ],
+    "expectedEvidence": "O tabuleiro deve distinguir (−3,2), no segundo quadrante, de (2,−3), no quarto. Os pontos dos eixos devem ser identificados como tais. A tabela da reta deve conter (−1,−1), (0,1), (1,3) e (2,5), com rejeição justificada de (2,4).",
+    "reflection": "Como você explicaria por mensagem a diferença entre 'andar para o ponto' e 'dar um deslocamento'? Compare o alvo (2,3) com a instrução de mover duas unidades para a direita e três para cima a partir de outro lugar.",
+    "scenarios": [
+      { "id": "alvo-segundo-quadrante", "label": "Esquerda e acima", "situation": "O alvo é indicado pelo par ordenado (−3,2).", "observation": "A posição está no segundo quadrante, três unidades à esquerda e duas acima da origem.", "explanation": "O sinal negativo pertence a x; a primeira coordenada controla a direção horizontal." },
+      { "id": "alvo-eixo", "label": "Ponto sobre o eixo", "situation": "Um navio está no ponto (0,4).", "observation": "Ele está no eixo y, quatro unidades acima da origem, e não em um quadrante.", "explanation": "A coordenada x igual a zero elimina o deslocamento horizontal." },
+      { "id": "rota-linear", "label": "Rota y = 2x + 1", "situation": "A rota exige que cada posição satisfaça y = 2x + 1; o navegador propõe (2,4).", "observation": "O ponto proposto fica fora da rota; para x = 2, a posição correta é (2,5).", "explanation": "Pertencer à reta exige a igualdade numérica, e não apenas estar perto de seu desenho." }
+    ],
+    "questions": [
+      { "question": "Em qual região do plano fica o ponto (−2,−5)?", "options": [
+        { "text": "Segundo quadrante", "correct": false, "explanation": "No segundo quadrante, x é negativo e y é positivo; aqui ambas as coordenadas são negativas." },
+        { "text": "Terceiro quadrante", "correct": true, "explanation": "O ponto fica à esquerda e abaixo da origem, correspondendo aos sinais (−,−)." },
+        { "text": "Eixo y", "correct": false, "explanation": "Para pertencer ao eixo y, a primeira coordenada precisaria ser zero." }
+      ] },
+      { "question": "Qual ponto pertence à reta y = 3x − 2?", "options": [
+        { "text": "(2,4)", "correct": true, "explanation": "Substituindo x = 2, obtemos y = 3 × 2 − 2 = 4." },
+        { "text": "(2,6)", "correct": false, "explanation": "6 seria o valor de 3x sem subtrair a parcela 2 da expressão." },
+        { "text": "(4,2)", "correct": false, "explanation": "A ordem foi trocada; para x = 4 a equação exige y = 10." }
+      ] }
+    ]
+  },
+  "fund2_bio_01": {
+    "context": "Uma turma recebeu imagens de células de folha, epiderme de cebola e mucosa animal. Use as estruturas observáveis para comparar as amostras sem supor que toda célula vegetal seja verde.",
+    "theory": "Células animais e vegetais são eucarióticas: possuem núcleo delimitado e organelas no citoplasma. Ambas apresentam membrana plasmática, que regula trocas com o meio, e mitocôndrias, relacionadas à respiração celular. Células vegetais apresentam parede celular externa à membrana e frequentemente um grande vacúolo central. Cloroplastos realizam fotossíntese em tecidos verdes, mas não estão presentes em todas as células de uma planta, como muitas células de raízes e da epiderme de cebola. Células animais não possuem parede celular nem cloroplastos. Uma imagem depende da preparação e do microscópio: não observar uma organela não prova que ela esteja ausente.",
+    "workedExample": "Na imagem didática de uma folha, aparecem contornos rígidos e pequenos corpos verdes: há evidências de parede e cloroplastos. Na epiderme de cebola aparecem contornos rígidos, mas nenhum corpo verde; isso continua compatível com tecido vegetal. Uma célula de mucosa apresenta membrana e núcleo, sem parede rígida.",
+    "investigation": [
+      "Construa uma tabela com membrana, parede, núcleo, vacúolo e cloroplastos para as três imagens descritas; diferencie 'observado' de 'não visível'.",
+      "Compare folha e cebola para testar a afirmação 'toda célula vegetal tem cloroplastos'. Indique o contraexemplo.",
+      "Explique por que a parede vegetal não substitui a membrana plasmática: identifique qual estrutura participa diretamente da regulação de trocas.",
+      "Registre duas características compartilhadas por células animais e vegetais e uma diferença que possa ser usada como evidência na identificação."
+    ],
+    "expectedEvidence": "A tabela deve manter membrana e núcleo nos dois grupos e identificar parede como característica vegetal. Deve reconhecer cebola sem cloroplastos visíveis como contraexemplo à generalização, sem confundir ausência na imagem com ausência biológica de qualquer organela.",
+    "reflection": "Se uma imagem não mostra o núcleo, é possível concluir imediatamente que a célula não o possui? Explique como corte, foco, contraste e preparação limitam uma observação.",
+    "scenarios": [
+      { "id": "folha-verde", "label": "Tecido fotossintético", "situation": "A imagem de uma folha exibe parede ao redor da célula e numerosos cloroplastos verdes.", "observation": "As estruturas são compatíveis com célula vegetal de tecido fotossintético.", "explanation": "A parede fornece suporte; cloroplastos transformam energia luminosa em energia química na fotossíntese." },
+      { "id": "cebola-sem-verde", "label": "Vegetal sem cloroplastos", "situation": "Na epiderme do bulbo de cebola há parede e vacúolo, mas não aparecem cloroplastos.", "observation": "A amostra continua vegetal mesmo sem estruturas verdes.", "explanation": "Partes de uma planta podem exercer funções de reserva e revestimento sem realizar fotossíntese." },
+      { "id": "mucosa-animal", "label": "Limite flexível", "situation": "Uma imagem didática de mucosa animal mostra núcleo e membrana, sem parede celular.", "observation": "O conjunto é compatível com célula animal; seu formato não precisa ser sempre circular.", "explanation": "A ausência de parede diferencia o grupo vegetal, enquanto membrana e núcleo são compartilhados." }
+    ],
+    "questions": [
+      { "question": "Uma célula de cebola tem parede celular, mas não apresenta cloroplastos. Qual conclusão é adequada?", "options": [
+        { "text": "Ela é animal, porque toda célula vegetal é verde.", "correct": false, "explanation": "Muitas células vegetais não possuem cloroplastos; a parede é uma evidência incompatível com uma célula animal típica." },
+        { "text": "Ela pode ser vegetal de tecido não fotossintético.", "correct": true, "explanation": "A presença de parede e a ausência de cloroplastos são compatíveis com a epiderme do bulbo de cebola." },
+        { "text": "Ela não possui membrana, pois a parede a substitui.", "correct": false, "explanation": "Células vegetais possuem membrana plasmática por dentro da parede; ambas exercem funções diferentes." }
+      ] },
+      { "question": "Qual estrutura está presente tanto em células animais quanto vegetais?", "options": [
+        { "text": "Parede celular", "correct": false, "explanation": "Células animais não apresentam parede celular; sua delimitação é feita pela membrana." },
+        { "text": "Cloroplasto", "correct": false, "explanation": "Cloroplastos não fazem parte das células animais e tampouco aparecem em todos os tecidos vegetais." },
+        { "text": "Membrana plasmática", "correct": true, "explanation": "A membrana delimita a célula e regula trocas nos dois grupos." }
+      ] }
+    ]
+  },
+  "fund2_bio_02": {
+    "context": "Uma reserva possui capim, gafanhotos, sapos e serpentes. Investigue como energia e matéria percorrem essa cadeia e por que retirar um predador pode afetar organismos de outros níveis.",
+    "theory": "Produtores incorporam energia ao sistema, geralmente pela fotossíntese. Consumidores obtêm matéria e energia ao se alimentar de outros seres. As setas de uma cadeia apontam do alimento para quem o consome. A energia disponível tende a diminuir a cada transferência, pois parte é usada no metabolismo e dissipada como calor; por isso a pirâmide de energia tem base maior que os níveis superiores. Uma transferência fixa de 10% é uma simplificação didática, não uma lei universal. A matéria pode retornar ao ambiente pela decomposição, enquanto a energia flui. Retirar um predador pode provocar cascatas tróficas, mas redes reais possuem rotas alimentares e condições ambientais adicionais.",
+    "workedExample": "No modelo capim → gafanhoto → sapo → serpente, suponha 10.000 kJ disponíveis no capim e eficiência de 10% em cada transferência. Os níveis seguintes recebem 1.000, 100 e 10 kJ. Isso não significa que existam exatamente dez vezes menos indivíduos: tamanho corporal e consumo também influenciam as populações.",
+    "investigation": [
+      "Desenhe a cadeia capim → gafanhoto → sapo → serpente e escreva 'transferência de alimento e energia' sobre as setas.",
+      "Calcule os quatro níveis com eficiência didática de 10% e construa a pirâmide em kJ, distinguindo energia de número de indivíduos.",
+      "Retire sapos do modelo e formule uma previsão para gafanhotos e capim, explicitando que é uma hipótese de cadeia simples.",
+      "Acrescente uma ave que também coma gafanhotos. Explique como essa nova ligação pode modificar a previsão anterior."
+    ],
+    "expectedEvidence": "O registro deve mostrar a sequência energética 10.000 → 1.000 → 100 → 10 kJ e justificar a redução por uso metabólico e dissipação. A retirada de sapos deve aparecer como possível aumento de gafanhotos e redução de capim, com limites de uma rede mais complexa.",
+    "reflection": "Por que adicionar um predador não garante automaticamente a recuperação de um ambiente? Considere alimentos alternativos, disponibilidade de água e outras relações ecológicas.",
+    "scenarios": [
+      { "id": "energia-dez-por-cento", "label": "Pirâmide didática", "situation": "Produtores disponibilizam 10.000 kJ; cada nível recebe 10% da energia do anterior.", "observation": "Consumidores primários, secundários e terciários recebem 1.000, 100 e 10 kJ.", "explanation": "O cálculo ilustra a redução energética entre níveis; a porcentagem foi escolhida para o modelo e não vale para toda cadeia real." },
+      { "id": "sem-sapos", "label": "Retirada de consumidor", "situation": "No modelo com apenas quatro espécies, os sapos deixam de consumir os gafanhotos.", "observation": "Prevê-se maior pressão dos gafanhotos sobre o capim, se as demais condições ficarem iguais.", "explanation": "A redução da predação pode aumentar herbívoros, conectando uma mudança no terceiro nível à vegetação." },
+      { "id": "decompositores", "label": "Matéria que retorna", "situation": "Folhas e organismos mortos são decompostos por fungos e bactérias.", "observation": "Nutrientes retornam ao ambiente, mas a energia dissipada não volta integralmente aos produtores.", "explanation": "Ciclagem da matéria e fluxo de energia são processos diferentes." }
+    ],
+    "questions": [
+      { "question": "Em uma cadeia, o que significa a seta capim → gafanhoto?", "options": [
+        { "text": "O gafanhoto recebe matéria e energia ao consumir o capim.", "correct": true, "explanation": "A seta parte do alimento e aponta para o consumidor que incorpora parte dessa matéria e energia." },
+        { "text": "O capim caça o gafanhoto.", "correct": false, "explanation": "A direção da seta não representa perseguição; indica transferência do recurso alimentar." },
+        { "text": "Os dois organismos pertencem ao mesmo nível trófico.", "correct": false, "explanation": "Capim é produtor; gafanhoto herbívoro é consumidor primário." }
+      ] },
+      { "question": "Com 2.000 kJ no produtor e transferência didática de 10% por nível, quanta energia chega ao consumidor secundário?", "options": [
+        { "text": "200 kJ", "correct": false, "explanation": "Esse é o valor do consumidor primário após a primeira transferência." },
+        { "text": "20 kJ", "correct": true, "explanation": "Primeiro 2.000 × 0,1 = 200; depois 200 × 0,1 = 20 kJ." },
+        { "text": "2.000 kJ", "correct": false, "explanation": "A energia não é transferida integralmente; parte é usada e dissipada em cada nível." }
+      ] }
+    ]
+  },
+  "fund2_bio_03": {
+    "context": "Ao acompanhar um pedaço de pão pelo sistema digestório, diferencie movimentação do alimento, quebra de moléculas e entrada de nutrientes no organismo. Cada etapa envolve estruturas e processos próprios.",
+    "theory": "A digestão transforma componentes dos alimentos em moléculas menores que podem ser absorvidas. A mastigação realiza fragmentação mecânica; enzimas catalisam reações químicas específicas. A amilase salivar inicia a quebra do amido na boca. No estômago, o meio ácido favorece a ação de enzimas como a pepsina sobre proteínas. No intestino delgado, secreções pancreáticas e enzimas intestinais continuam a digestão, e a bile emulsifica gorduras: ela facilita a ação das lipases, mas não é uma enzima. A maior parte da absorção de nutrientes acontece no intestino delgado, cuja superfície possui vilosidades. O intestino grosso absorve parte da água e participa da formação das fezes.",
+    "workedExample": "No percurso didático de uma refeição com pão, ovo e óleo, o amido começa a ser digerido na boca; proteínas têm digestão no estômago e no intestino; lipídios são emulsificados pela bile e quebrados por lipases no intestino delgado. Triturar o pão aumenta a superfície, mas não transforma sozinho amido em glicose.",
+    "investigation": [
+      "Ordene boca, esôfago, estômago, intestino delgado e intestino grosso. Marque quais estruturas apenas conduzem e quais participam de digestão ou absorção.",
+      "Classifique mastigação, ação da amilase e absorção pelas vilosidades como processos mecânico, químico ou de transporte de nutrientes.",
+      "Compare bile e lipase, indicando qual dispersa gotas de gordura e qual catalisa sua quebra molecular.",
+      "Explique por que aumentar a superfície interna do intestino favorece a absorção, sem afirmar que digestão e absorção sejam a mesma etapa."
+    ],
+    "expectedEvidence": "Um mapa deve separar fragmentação mecânica, ação enzimática e absorção. Deve localizar a maior parte da absorção no intestino delgado e distinguir bile, que emulsifica, de lipase, que quebra lipídios. O estômago não deve aparecer como local de toda a digestão.",
+    "reflection": "Por que uma pessoa não absorve diretamente um pedaço inteiro de pão pela parede intestinal? Relacione tamanho molecular, ação enzimática e superfície de absorção.",
+    "scenarios": [
+      { "id": "mastigacao", "label": "Fragmentar não é absorver", "situation": "Um pedaço de pão é mastigado em fragmentos menores e misturado à saliva.", "observation": "A área exposta aumenta e a amilase pode iniciar a digestão do amido.", "explanation": "A mastigação é mecânica; a ação da enzima é química. A absorção principal ainda ocorrerá depois." },
+      { "id": "bile-e-lipase", "label": "Duas ações sobre gorduras", "situation": "No intestino delgado, a bile dispersa uma grande gota de gordura em gotas menores.", "observation": "A superfície disponível para a lipase aumenta, sem que a bile seja a enzima que rompe as moléculas.", "explanation": "Emulsificação facilita a digestão enzimática, mas não é equivalente à hidrólise dos lipídios." },
+      { "id": "vilosidades", "label": "Superfície intestinal", "situation": "Compare uma parede lisa com outra dobrada em numerosas vilosidades, no mesmo comprimento de intestino.", "observation": "A parede com vilosidades oferece maior superfície de contato com nutrientes digeridos.", "explanation": "A ampliação da superfície favorece a absorção e a passagem de nutrientes para os sistemas de transporte do corpo." }
+    ],
+    "questions": [
+      { "question": "Qual descrição da bile está correta?", "options": [
+        { "text": "É uma enzima que quebra amido na boca.", "correct": false, "explanation": "A enzima salivar que inicia a digestão do amido é a amilase, não a bile." },
+        { "text": "Absorve proteínas no estômago.", "correct": false, "explanation": "Bile não absorve nutrientes, e a absorção principal ocorre no intestino delgado." },
+        { "text": "Emulsifica gorduras, facilitando a ação das lipases.", "correct": true, "explanation": "Gotas menores oferecem mais superfície para as enzimas, mas a bile não é uma enzima digestiva." }
+      ] },
+      { "question": "Qual processo é absorção, e não digestão?", "options": [
+        { "text": "A mastigação parte o alimento em pedaços menores.", "correct": false, "explanation": "Trata-se de digestão mecânica: aumenta a superfície sem indicar entrada de nutrientes pela parede intestinal." },
+        { "text": "Moléculas de nutrientes atravessam a parede do intestino delgado.", "correct": true, "explanation": "Absorver significa transportar produtos da digestão do tubo digestório para o organismo." },
+        { "text": "Uma enzima rompe moléculas de amido.", "correct": false, "explanation": "Isso corresponde à digestão química, etapa que prepara moléculas para posterior absorção." }
+      ] }
+    ]
+  },
+  "fund2_bio_04": {
+    "context": "Um modelo de caixa torácica ajuda a explicar como o ar entra nos pulmões. Depois de acompanhar esse movimento, investigue uma etapa diferente: a troca de gases entre alvéolos e sangue.",
+    "theory": "Na inspiração tranquila, o diafragma contrai e desce, contribuindo para aumentar o volume da caixa torácica. A pressão do ar nos pulmões diminui em relação à atmosférica e o ar entra. Na expiração tranquila, o relaxamento e o retorno elástico reduzem o volume e favorecem a saída do ar. Pulmões não são músculos que bombeiam o ar por conta própria. A ventilação movimenta o ar; a hematose é a troca gasosa nos alvéolos. O oxigênio difunde-se do ar alveolar para o sangue e o dióxido de carbono faz o percurso oposto, segundo diferenças de pressão parcial. Paredes finas e grande superfície favorecem essas trocas.",
+    "workedExample": "Em uma garrafa-modelo, balões representam pulmões e uma membrana inferior representa o diafragma. Ao puxar a membrana para baixo, o volume da garrafa aumenta e os balões recebem ar. O modelo ilustra ventilação, mas não possui capilares e, portanto, não demonstra diretamente a passagem de O₂ para o sangue.",
+    "investigation": [
+      "Desenhe a posição do diafragma na inspiração e na expiração tranquilas; associe a cada uma aumento ou redução do volume torácico.",
+      "Ordene a sequência contração do diafragma → aumento de volume → queda relativa de pressão → entrada de ar.",
+      "No desenho de um alvéolo com capilar, trace O₂ em direção ao sangue e CO₂ em direção ao ar alveolar.",
+      "Liste o que a garrafa com balões representa e duas limitações: ausência de circulação sanguínea e simplificação da estrutura dos pulmões."
+    ],
+    "expectedEvidence": "Os diagramas devem ligar entrada de ar a volume maior e pressão pulmonar relativamente menor. Um segundo esquema deve separar ventilação de hematose, indicando O₂ para o sangue e CO₂ para o alvéolo, sem atribuir esse intercâmbio ao balão do modelo.",
+    "reflection": "É possível explicar todo o sistema respiratório com uma garrafa e dois balões? Indique uma conclusão válida do modelo e uma conclusão que exigiria outra evidência.",
+    "scenarios": [
+      { "id": "inspiracao", "label": "Diafragma contrai", "situation": "Na respiração tranquila, o diafragma desce e aumenta o volume torácico.", "observation": "A pressão pulmonar fica menor que a externa por um intervalo e o ar entra.", "explanation": "O ar se desloca pela diferença de pressão criada pela mudança de volume." },
+      { "id": "expiracao", "label": "Retorno elástico", "situation": "O diafragma relaxa e o sistema retorna em direção ao volume de repouso.", "observation": "A redução de volume favorece uma pressão interna maior e a saída do ar.", "explanation": "Na expiração tranquila, o retorno elástico contribui para o movimento; a expiração forçada envolve outros músculos." },
+      { "id": "hematose", "label": "Do alvéolo ao sangue", "situation": "Um alvéolo ventilado está junto a um capilar que recebe sangue com menor pressão parcial de O₂.", "observation": "O₂ difunde-se para o sangue e CO₂ pode difundir-se para o alvéolo.", "explanation": "A hematose depende de gradientes gasosos, paredes finas e contato com a circulação; é distinta da entrada de ar." }
+    ],
+    "questions": [
+      { "question": "Qual sequência descreve a inspiração tranquila?", "options": [
+        { "text": "Diafragma contrai, volume torácico aumenta e o ar entra.", "correct": true, "explanation": "O aumento do volume reduz a pressão pulmonar em relação à externa e favorece a entrada de ar." },
+        { "text": "Diafragma relaxa, volume torácico diminui e o ar entra.", "correct": false, "explanation": "Essa redução de volume está associada à expiração tranquila, com saída de ar." },
+        { "text": "Pulmões contraem como músculos para puxar o ar.", "correct": false, "explanation": "Os movimentos da caixa torácica e do diafragma alteram as pressões; pulmões não são músculos de bombeamento." }
+      ] },
+      { "question": "Qual evento corresponde à hematose?", "options": [
+        { "text": "Ar passando pela traqueia durante a inspiração.", "correct": false, "explanation": "Isso é parte da ventilação; ainda não descreve troca entre ar e sangue." },
+        { "text": "O₂ passando do alvéolo para o sangue e CO₂ no sentido oposto.", "correct": true, "explanation": "A troca gasosa alveolar ocorre por difusão entre o ar e os capilares." },
+        { "text": "Alimentos sendo fragmentados na boca.", "correct": false, "explanation": "Esse é um processo digestório e não uma troca de gases respiratórios." }
+      ] }
+    ]
+  },
+  "fund2_bio_05": {
+    "context": "Uma comunidade depende de poços e de um riacho. Acompanhe a chuva em áreas vegetadas e impermeabilizadas para compreender como parte dela pode alcançar os reservatórios subterrâneos.",
+    "theory": "O ciclo da água inclui evaporação, transpiração das plantas, condensação, precipitação, infiltração e escoamento. Esses percursos ocorrem simultaneamente, sem uma única ordem obrigatória para toda gota. A água infiltrada pode permanecer no solo, ser absorvida por raízes ou percolar até a zona saturada, contribuindo para a recarga de um aquífero. Aquíferos armazenam e transmitem água em poros ou fraturas de materiais geológicos; não são necessariamente cavernas com rios. O lençol freático marca o topo da zona saturada em um aquífero livre. Nem toda chuva vira recarga, e contaminações superficiais podem alcançar a água subterrânea conforme as condições do local.",
+    "workedExample": "Num balanço didático sobre uma área e um intervalo definidos, 100 mm de chuva se distribuem em 35 mm de escoamento, 40 mm de evapotranspiração e 25 mm de infiltração. Desses 25 mm, apenas 10 mm alcançam a zona saturada; os outros 15 mm ficam temporariamente no solo. Infiltração e recarga não são, portanto, sinônimos.",
+    "investigation": [
+      "Desenhe uma seção de terreno com solo, zona não saturada, lençol freático e zona saturada. Indique poros e fraturas como espaços de armazenamento.",
+      "Confira o balanço de 100 mm de chuva e separe os 25 mm infiltrados dos 10 mm que efetivamente recarregam o aquífero no exemplo.",
+      "Compare o terreno vegetado com um cenário impermeabilizado de 65 mm de escoamento, 25 mm de evapotranspiração e 10 mm de infiltração.",
+      "Trace um possível caminho de um contaminante desde a superfície até o aquífero e explique por que água subterrânea não é automaticamente potável."
+    ],
+    "expectedEvidence": "O corte deve representar água em poros ou fraturas e o topo da zona saturada. O balanço deve fechar em 100 mm nos dois cenários e distinguir infiltração de recarga. A impermeabilização aparece associada a maior escoamento no exemplo, sem porcentagens universais.",
+    "reflection": "Se um poço perde água durante uma seca, basta chover uma vez para o nível se recuperar? Explique o papel de armazenamento, tempo de percolação e retirada de água.",
+    "scenarios": [
+      { "id": "balanco-vegetado", "label": "Parte da chuva infiltra", "situation": "De 100 mm de chuva, 35 escoam, 40 retornam por evapotranspiração e 25 infiltram no exemplo.", "observation": "A soma é 100 mm, mas apenas 10 dos 25 mm infiltrados alcançam a zona saturada no intervalo.", "explanation": "Parte da água infiltrada pode ficar armazenada no solo; recarga é a parcela que chega ao aquífero." },
+      { "id": "superficie-impermeavel", "label": "Chuva sobre pavimento", "situation": "Um cenário alternativo distribui os mesmos 100 mm em 65 de escoamento, 25 de evapotranspiração e 10 de infiltração.", "observation": "Há maior escoamento e menor infiltração que no primeiro cenário.", "explanation": "Os valores são didáticos; a comparação isola o efeito de reduzir o acesso da água ao solo." },
+      { "id": "aquifero-poroso", "label": "Reservatório sem caverna", "situation": "Um aquífero é formado por arenito com poros conectados abaixo do lençol freático.", "observation": "A água ocupa espaços entre grãos e pode se movimentar por eles.", "explanation": "Reservatórios subterrâneos podem existir sem um grande vazio ou rio subterrâneo visível." }
+    ],
+    "questions": [
+      { "question": "Qual diferença entre infiltração e recarga está correta?", "options": [
+        { "text": "Toda água infiltrada chega imediatamente ao aquífero.", "correct": false, "explanation": "A água pode ficar no solo, ser absorvida por raízes ou demorar a alcançar a zona saturada." },
+        { "text": "Recarga é a parcela que alcança a zona saturada; infiltração é a entrada da água no solo.", "correct": true, "explanation": "São etapas relacionadas, mas a quantidade e o tempo de ocorrência podem ser diferentes." },
+        { "text": "Recarga significa a água que escorre sobre o asfalto.", "correct": false, "explanation": "Água sobre a superfície integra o escoamento; só contribui para recarga se alcançar o meio subterrâneo apropriado." }
+      ] },
+      { "question": "Como um aquífero pode armazenar água sem uma caverna?", "options": [
+        { "text": "A água transforma rochas em vapor e fica suspensa.", "correct": false, "explanation": "O armazenamento descrito é de água líquida em espaços existentes no material geológico." },
+        { "text": "A água fica apenas nas folhas das árvores.", "correct": false, "explanation": "Folhas fazem parte da vegetação superficial; um aquífero está no subsolo." },
+        { "text": "A água ocupa poros conectados ou fraturas de rochas e sedimentos.", "correct": true, "explanation": "Esses espaços podem armazenar e transmitir água abaixo da zona não saturada." }
+      ] }
+    ]
+  },
+  "fund2_bio_06": {
+    "context": "Três amostras de solo recebem a mesma quantidade de água. Compare o tempo de passagem, a retenção e o escoamento para explicar por que um terreno pode encharcar mesmo contendo muitos poros.",
+    "theory": "Porosidade é a proporção de espaços vazios de um material. Permeabilidade expressa a facilidade com que um fluido atravessa espaços conectados; ter muitos poros não significa necessariamente conduzir água rapidamente. Solos arenosos costumam ter poros maiores, que favorecem drenagem, enquanto solos argilosos podem ter muitos poros pequenos e maior retenção. A estrutura, a compactação, a matéria orgânica e as fissuras também influenciam o comportamento, então o tamanho dos grãos não explica tudo. Quando a intensidade da chuva supera a capacidade de infiltração, ocorre escoamento superficial. Um experimento comparativo exige igualar volume inicial, altura da amostra e condições de umidade.",
+    "workedExample": "Em um ensaio didático, 100 mL são aplicados a colunas iguais. Após 5 minutos, saem 70 mL da areia, 25 mL do solo argiloso e 50 mL do solo agregado com matéria orgânica. Esses dados mostram diferenças naquele ensaio; os volumes restantes não são automaticamente 'absorvidos para sempre' e podem continuar drenando depois.",
+    "investigation": [
+      "Organize os dados de 100 mL aplicados e 70, 25 e 50 mL coletados após 5 minutos. Calcule quanto ainda não foi coletado em cada coluna.",
+      "Liste três condições que precisam ficar iguais para comparar amostras: altura de solo, volume aplicado e umidade inicial, por exemplo.",
+      "Compare o mesmo solo antes e depois de compactado e formule uma hipótese sobre a conectividade dos poros e o escoamento.",
+      "Explique por que uma medida após 5 minutos não informa sozinha a capacidade máxima de retenção nem a quantidade total que drenará."
+    ],
+    "expectedEvidence": "A tabela deve mostrar 30, 75 e 50 mL ainda não coletados após 5 minutos e limitar a conclusão à duração do ensaio. A explicação deve distinguir porosidade de permeabilidade e reconhecer compactação e conectividade como fatores relevantes.",
+    "reflection": "Por que comparar um copo raso de areia seca com uma coluna alta de argila já molhada pode produzir uma conclusão injusta? Identifique variáveis que confundem o resultado.",
+    "scenarios": [
+      { "id": "areia-drenante", "label": "Passagem rápida", "situation": "Uma coluna de areia recebe 100 mL e libera 70 mL em 5 minutos no ensaio.", "observation": "A maior parte da água aplicada já foi coletada, mas 30 mL ainda não saíram.", "explanation": "Poros maiores e conectados podem facilitar o fluxo; o resultado vale para as condições controladas da amostra." },
+      { "id": "argila-retencao", "label": "Poros pequenos", "situation": "Uma coluna argilosa equivalente libera 25 dos 100 mL no mesmo intervalo.", "observation": "O fluxo inicial é menor e 75 mL ainda não foram coletados.", "explanation": "Poros pequenos podem reter água e limitar o fluxo, mesmo em material com porosidade considerável." },
+      { "id": "compactacao", "label": "Mesmo solo, outra estrutura", "situation": "Duas amostras do mesmo solo recebem a mesma chuva; uma foi fortemente compactada.", "observation": "A hipótese de trabalho é menor infiltração e maior escoamento na amostra compactada.", "explanation": "A compactação pode reduzir macroporos e conexões; a previsão precisa ser confrontada com medições." }
+    ],
+    "questions": [
+      { "question": "Por que um material com muitos poros pode deixar a água passar lentamente?", "options": [
+        { "text": "Os poros podem ser pequenos ou pouco conectados.", "correct": true, "explanation": "O fluxo depende da geometria e das conexões dos espaços, não apenas de seu volume total." },
+        { "text": "Porosidade e permeabilidade sempre significam exatamente a mesma coisa.", "correct": false, "explanation": "Porosidade mede espaços vazios; permeabilidade trata da facilidade de passagem pelo material." },
+        { "text": "Só o nome da rocha determina o fluxo, sem influência da estrutura.", "correct": false, "explanation": "Compactação, fissuras e organização dos agregados também alteram a circulação de água." }
+      ] },
+      { "question": "No ensaio com 100 mL aplicados, foram coletados 25 mL após 5 minutos. O que se pode afirmar?", "options": [
+        { "text": "75 mL ficarão presos para sempre.", "correct": false, "explanation": "Uma observação em 5 minutos não determina o destino final da água; a drenagem pode continuar." },
+        { "text": "A amostra não tem nenhum poro.", "correct": false, "explanation": "Houve passagem de água e o restante pode estar nos poros; o volume coletado não mede ausência de poros." },
+        { "text": "75 mL ainda não foram coletados nesse intervalo.", "correct": true, "explanation": "É a diferença 100 − 25. Essa conclusão respeita o tempo efetivamente observado." }
+      ] }
+    ]
+  },
+  "fund2_bio_07": {
+    "context": "Um balão meteorológico sobe enquanto registra pressão. Relacione a variação do ar com as camadas da atmosfera e investigue por que o ozônio estratosférico modifica a radiação que chega ao solo.",
+    "theory": "A atmosfera é organizada em camadas com diferentes comportamentos de temperatura. A troposfera é a camada mais baixa, onde ocorre a maior parte dos fenômenos do tempo. Acima dela está a estratosfera, que concentra grande parte do ozônio atmosférico. O ozônio absorve radiação ultravioleta, especialmente UV-B e UV-C, contribuindo para reduzir a exposição da superfície; não bloqueia toda a luz solar nem todo o UV. A pressão diminui com a altitude porque há menos massa de ar acima do ponto observado. Ozônio próximo ao solo pode ser um poluente, enquanto sua presença estratosférica exerce função protetora. A camada de ozônio não é uma película sólida.",
+    "workedExample": "Num registro didático, a pressão é cerca de 1.000 hPa perto do nível do mar e cerca de 500 hPa em uma altitude maior. O segundo ponto não possui 'metade do oxigênio em porcentagem': a proporção dos principais gases permanece aproximadamente semelhante nessa faixa, mas há menos moléculas de ar por volume. Os valores ilustram a queda de pressão, sem fixar uma altitude exata.",
+    "investigation": [
+      "Desenhe uma coluna com troposfera e estratosfera, localizando nuvens de tempo e a região de maior concentração de ozônio.",
+      "Compare os registros didáticos de 1.000 e 500 hPa e explique a pressão usando a quantidade de ar acima de cada ponto.",
+      "Classifique as afirmações 'ozônio bloqueia toda a luz' e 'ozônio absorve parte do ultravioleta', justificando a diferença.",
+      "Explique por que a mesma substância pode ter função protetora na estratosfera e ser um problema de qualidade do ar perto do solo."
+    ],
+    "expectedEvidence": "O desenho deve separar troposfera e estratosfera, sem tratar ozônio como cobertura sólida. A análise deve relacionar menor pressão a menor massa de ar sobre o ponto e reconhecer absorção seletiva de UV, distinguindo-a do bloqueio de toda radiação solar.",
+    "reflection": "Se o céu está nublado, isso prova que nenhum ultravioleta chega ao solo? Explique por que luz visível, nuvens e absorção pelo ozônio não são medidas equivalentes.",
+    "scenarios": [
+      { "id": "balanco-pressao", "label": "Subida do balão", "situation": "O sensor didático passa de uma leitura de 1.000 hPa para 500 hPa durante a subida.", "observation": "A pressão diminui; o sensor passa a ter menos massa de ar acima dele.", "explanation": "O valor de pressão não deve ser confundido com a porcentagem de oxigênio no ar." },
+      { "id": "ozonio-estratosferico", "label": "Absorção seletiva", "situation": "Compare uma atmosfera com maior e outra com menor quantidade de ozônio estratosférico, mantendo outras condições iguais.", "observation": "Menos ozônio tende a permitir que mais UV-B alcance a superfície.", "explanation": "A absorção pelo ozônio reduz parte do ultravioleta; a atmosfera não funciona como um bloqueio completo de luz." },
+      { "id": "ozonio-superficial", "label": "A altitude importa", "situation": "Um sensor mede ozônio perto do tráfego urbano, na baixa atmosfera.", "observation": "Esse ozônio não deve ser interpretado como recuperação direta da proteção estratosférica.", "explanation": "A função ambiental depende do local: na superfície o ozônio integra problemas de poluição do ar." }
+    ],
+    "questions": [
+      { "question": "Qual camada concentra grande parte do ozônio associado à proteção contra ultravioleta?", "options": [
+        { "text": "A crosta terrestre", "correct": false, "explanation": "A crosta é rochosa e não é uma camada da atmosfera." },
+        { "text": "A estratosfera", "correct": true, "explanation": "Acima da troposfera, ela concentra grande parte do ozônio que absorve radiação UV." },
+        { "text": "A água dos oceanos", "correct": false, "explanation": "O reservatório descrito é atmosférico; oceanos não correspondem à camada de ozônio." }
+      ] },
+      { "question": "Por que a pressão atmosférica tende a diminuir com a altitude?", "options": [
+        { "text": "Há menos massa de ar acima do ponto de medição.", "correct": true, "explanation": "A pressão está ligada ao peso da coluna de ar; subir reduz a quantidade de ar acima." },
+        { "text": "A gravidade desaparece logo acima das nuvens.", "correct": false, "explanation": "A gravidade continua atuando; a mudança observada não exige seu desaparecimento." },
+        { "text": "Todo o nitrogênio se transforma em ozônio durante a subida.", "correct": false, "explanation": "A queda de pressão não representa essa transformação química dos gases." }
+      ] }
+    ],
+    "sources": [
+      { "title": "NOAA — Twenty Questions and Answers About the Ozone Layer", "url": "https://csl.noaa.gov/assessments/ozone/2022/twentyquestions/" },
+      { "title": "NOAA — Effects of Clouds, Elevation and Ozone on UV", "url": "https://www.cpc.ncep.noaa.gov/products/stratosphere/uv_index/uv_clouds.shtml" },
+      { "title": "NOAA — Unlocking the Secrets of the Stratosphere", "url": "https://www.nesdis.noaa.gov/news/unlocking-the-secrets-of-the-stratosphere-the-jpss-ozone-mapping-and-profiler-suite-omps" }
+    ]
+  },
+  "fund2_bio_08": {
+    "context": "Cartões representam antígenos e células de defesa num modelo de sala de aula. Compare um primeiro encontro com um reencontro para entender a memória imunológica, sem usar o modelo para decisões clínicas.",
+    "theory": "Antígenos são estruturas reconhecidas pelo sistema imunológico. Linfócitos B podem originar células que produzem anticorpos; anticorpos reconhecem alvos específicos, e outras células também participam da defesa. Após uma resposta adaptativa, podem permanecer células de memória. Num reencontro com o mesmo alvo, a resposta pode ocorrer mais rapidamente. Vacinas apresentam antígenos, ou instruções para produzi-los, de modo a preparar a defesa. Elas não funcionam como uma barreira física nem oferecem proteção idêntica contra qualquer microrganismo. O esquema deste laboratório simplifica processos celulares e não prevê a resposta de uma pessoa.",
+    "workedExample": "No jogo didático, o grupo leva 6 rodadas para reconhecer o cartão A pela primeira vez. Após guardar um cartão de memória, reconhece A em 2 rodadas. Ao receber B, precisa de novo reconhecimento. Os tempos foram inventados para mostrar comparação; não representam dias reais nem eficácia de uma vacina.",
+    "investigation": [
+      "Associe cartões de anticorpo aos antígenos de formato compatível e descreva a ideia de especificidade.",
+      "Compare 6 e 2 rodadas no encontro e reencontro com A, mantendo explícito que são tempos do jogo.",
+      "Introduza B e explique por que memória de A não garante a mesma resposta ao novo alvo."
+    ],
+    "expectedEvidence": "O registro deve distinguir antígeno, anticorpo e célula de memória, reconhecer a especificidade e limitar os tempos ao jogo. Deve explicar preparação da defesa sem prometer ausência de infecção ou proteção universal.",
+    "reflection": "Que parte da resposta biológica o jogo representa e que informação ele não fornece sobre uma pessoa?",
+    "scenarios": [
+      { "id": "primeiro-alvo", "label": "Primeiro encontro", "situation": "O grupo recebe A sem cartão de memória.", "observation": "O reconhecimento leva 6 rodadas no jogo.", "explanation": "O tempo didático representa a construção de uma resposta inicial, não um prazo biológico." },
+      { "id": "memoria-a", "label": "Reencontro", "situation": "A reaparece e há um cartão de memória compatível.", "observation": "O grupo responde em 2 rodadas.", "explanation": "A comparação ilustra como memória pode favorecer resposta mais rápida ao mesmo alvo." },
+      { "id": "antigeno-b", "label": "Novo alvo", "situation": "B é apresentado ao grupo que guardou memória de A.", "observation": "A regra exige novo reconhecimento de B.", "explanation": "A memória é específica; reconhecer um alvo não equivale a reconhecer todos." }
+    ],
+    "questions": [
+      { "question": "O que o reconhecimento mais rápido de A no segundo encontro ilustra?", "options": [
+        { "text": "Memória imunológica específica.", "correct": true, "explanation": "O alvo conhecido pode provocar resposta mais rápida." },
+        { "text": "Anticorpos servem igualmente para qualquer alvo.", "correct": false, "explanation": "O jogo exige compatibilidade com o antígeno." },
+        { "text": "As 2 rodadas são exatamente 2 dias.", "correct": false, "explanation": "Rodadas são unidades fictícias do modelo." }
+      ] },
+      { "question": "Qual afirmação sobre vacinas é compatível com o laboratório?", "options": [
+        { "text": "Criam uma parede física em torno do corpo.", "correct": false, "explanation": "A preparação envolve reconhecimento e resposta celular." },
+        { "text": "Ajudam a preparar a defesa para alvos específicos.", "correct": true, "explanation": "Antígenos ou instruções de produção favorecem reconhecimento e memória." },
+        { "text": "Impedem toda infecção por qualquer agente.", "correct": false, "explanation": "A proteção não é universal nem perfeita." }
+      ] }
+    ],
+    "sources": [
+      { "title": "OMS — How do vaccines work?", "url": "https://www.who.int/en/emergencies/diseases/novel-coronavirus-2019/covid-19-vaccines/how-do-vaccines-work" },
+      { "title": "CDC — Explaining How Vaccines Work", "url": "https://www.cdc.gov/vaccines/basics/explaining-how-vaccines-work.html" },
+      { "title": "Ministério da Saúde — Manual dos Centros de Referência para Imunobiológicos Especiais", "url": "https://www.gov.br/saude/pt-br/vacinacao/manuais/manual_centro_referencia_imunobiologicos-1.pdf" }
+    ]
+  },
+  "fund2_bio_09": {
+    "context": "Uma flor recebeu visitas de insetos, mas uma visita não garante a formação de sementes. Acompanhe o trajeto do pólen e distinga transporte, fecundação e desenvolvimento de frutos.",
+    "theory": "Em uma flor típica de angiosperma, estames possuem anteras que produzem pólen, e o carpelo inclui estigma, estilete e ovário com óvulos. Polinização é a chegada de pólen ao estigma; pode ocorrer por animais, vento ou outros agentes. Na polinização cruzada, o pólen vem de outra planta da mesma espécie compatível. O grão compatível pode germinar e formar um tubo polínico, pelo qual células reprodutivas masculinas chegam ao óvulo. A fecundação é posterior à polinização. Após esse processo, óvulos podem originar sementes e o ovário participa da formação do fruto. Nem toda visita deposita pólen compatível, e nem toda flor polinizada completará o desenvolvimento.",
+    "workedExample": "No modelo, uma abelha transporta pólen da antera da planta A ao estigma da planta B, da mesma espécie. Isso representa polinização cruzada. Se o pólen germina e permite a fecundação de um óvulo, poderá formar-se uma semente. Apenas pousar numa pétala, sem alcançar o estigma, não demonstra que a polinização ocorreu.",
+    "investigation": [
+      "Desenhe antera, estigma, estilete, ovário e óvulos, com uma seta indicando o trajeto do pólen até o estigma.",
+      "Ordene visita do agente → deposição de pólen compatível → tubo polínico → fecundação → possível desenvolvimento da semente.",
+      "Compare uma visita apenas à pétala com outra que deposita pólen no estigma. Indique a evidência necessária para chamar o evento de polinização.",
+      "Compare transporte por vento e por insetos, sem concluir que todas as flores precisam dos mesmos agentes ou têm a mesma forma."
+    ],
+    "expectedEvidence": "O esquema deve localizar pólen nas anteras e óvulos no ovário, separar deposição de pólen de fecundação e associar óvulos a sementes. A polinização cruzada deve envolver plantas distintas e compatíveis, sem tratar toda visita de inseto como sucesso reprodutivo.",
+    "reflection": "Por que contar insetos que pousaram em uma flor é uma evidência mais fraca que observar pólen compatível no estigma? Explique o que cada medida permite concluir.",
+    "scenarios": [
+      { "id": "cruzamento-compativel", "label": "Entre duas plantas", "situation": "Pólen de A é depositado no estigma de B, plantas distintas da mesma espécie compatível.", "observation": "Ocorreu polinização cruzada; a fecundação ainda exige etapas posteriores.", "explanation": "Transporte de pólen e encontro das células reprodutivas são eventos distintos." },
+      { "id": "pouso-na-petala", "label": "Visita sem prova", "situation": "Um inseto pousa numa pétala, mas não se observa contato com estigma nem deposição de pólen.", "observation": "A visita foi registrada, porém a polinização não está demonstrada.", "explanation": "A presença do visitante não substitui a evidência de chegada de pólen ao órgão receptor." },
+      { "id": "do-ovulo-a-semente", "label": "Depois da fecundação", "situation": "Um óvulo fecundado completa seu desenvolvimento no modelo floral.", "observation": "Forma-se uma semente; o ovário participa da formação do fruto.", "explanation": "Óvulo e ovário são estruturas diferentes, com destinos diferentes no desenvolvimento reprodutivo." }
+    ],
+    "questions": [
+      { "question": "Qual evento define polinização?", "options": [
+        { "text": "A transformação imediata de toda pétala em semente.", "correct": false, "explanation": "Sementes se desenvolvem a partir de óvulos; pétalas não são óvulos." },
+        { "text": "A chegada de pólen ao estigma.", "correct": true, "explanation": "Esse transporte precede a formação do tubo polínico e a fecundação." },
+        { "text": "Qualquer pouso de inseto em qualquer parte da planta.", "correct": false, "explanation": "É necessário que o pólen alcance a estrutura receptora; pousar não garante esse evento." }
+      ] },
+      { "question": "De qual estrutura floral se desenvolve a semente após a fecundação e o desenvolvimento apropriados?", "options": [
+        { "text": "Do óvulo", "correct": true, "explanation": "O óvulo fecundado pode desenvolver-se em semente, que contém o embrião." },
+        { "text": "Da antera", "correct": false, "explanation": "A antera produz pólen; não é a estrutura que se transforma em semente." },
+        { "text": "Do estigma", "correct": false, "explanation": "O estigma recebe pólen; a formação da semente ocorre a partir do óvulo no ovário." }
+      ] }
+    ]
+  },
+  "fund2_bio_10": {
+    "context": "Um corte de rochas sedimentares contém fósseis em camadas diferentes. Reconstrua a ordem dos acontecimentos sem confundir idade relativa com uma data exata em milhões de anos.",
+    "theory": "Fósseis são vestígios ou restos de organismos preservados, incluindo ossos, conchas, pegadas e impressões. A fossilização depende de condições de preservação e é incomum; o registro não contém todos os seres que já existiram. Em uma sequência sedimentar não invertida, camadas inferiores geralmente foram depositadas antes das superiores: é o princípio da superposição. Uma estrutura que corta outras, como uma falha ou intrusão, é posterior às estruturas cortadas. Erosão pode remover parte do registro e formar lacunas. Esses princípios permitem datação relativa; uma idade numérica requer outras evidências e métodos apropriados. O mesmo tipo de fóssil em dois locais pode ajudar na correlação, mas não basta qualquer semelhança visual.",
+    "workedExample": "Num corte didático, A está embaixo, B no meio e C em cima, sem inversão. A é mais antiga que B, e B mais antiga que C. Uma falha corta A e B, mas não C: ela ocorreu depois de B e antes da deposição de C. Não é possível concluir 'a falha tem 20 milhões de anos' só com esse desenho.",
+    "investigation": [
+      "Desenhe A, B e C em sequência não invertida e ordene sua deposição do evento mais antigo ao mais recente.",
+      "Acrescente uma falha que corte A e B e seja recoberta por C; posicione o evento da falha na linha do tempo relativa.",
+      "Represente uma superfície de erosão entre B e C e explique por que ela pode indicar tempo sem registro preservado.",
+      "Classifique uma concha preservada, uma pegada e uma pedra sem marca biológica como evidências fósseis ou não, justificando os critérios."
+    ],
+    "expectedEvidence": "A reconstrução deve ordenar A → B → falha → C, sob a condição de sequência não invertida. Deve reconhecer pegadas como vestígios possíveis e distinguir lacuna erosiva de ausência de tempo. Nenhuma idade numérica deve ser atribuída apenas pela posição das camadas.",
+    "reflection": "Se não há fósseis de um organismo numa camada, isso prova que ele não existia naquele período? Discuta preservação, amostragem e lacunas do registro.",
+    "scenarios": [
+      { "id": "superposicao", "label": "Três camadas", "situation": "A está abaixo de B e C está acima de B; não houve inversão das camadas.", "observation": "A deposição relativa foi A, depois B e depois C.", "explanation": "A superposição organiza a sequência, mas não atribui idades em anos." },
+      { "id": "falha-recoberta", "label": "Corte e cobertura", "situation": "Uma falha atravessa A e B e termina sob a camada C, que a recobre sem estar deslocada.", "observation": "A falha é posterior a B e anterior à deposição de C no modelo.", "explanation": "Uma estrutura que corta é posterior ao material cortado; uma camada que a recobre pode delimitar a sequência." },
+      { "id": "pegada-fossil", "label": "Vestígio de atividade", "situation": "Uma impressão de pegada é preservada numa rocha sedimentar, sem os ossos do animal.", "observation": "A pegada pode constituir um fóssil de atividade, mesmo sem resto corporal.", "explanation": "O conceito de fóssil inclui vestígios; a preservação não exige um esqueleto completo." }
+    ],
+    "questions": [
+      { "question": "Em camadas sedimentares não invertidas, qual conclusão é sustentada por A estar abaixo de B?", "options": [
+        { "text": "A tem exatamente o dobro da idade de B.", "correct": false, "explanation": "A posição não fornece uma razão entre idades nem um intervalo de tempo numérico." },
+        { "text": "B se formou antes de A.", "correct": false, "explanation": "Na sequência não invertida, a camada inferior foi depositada primeiro." },
+        { "text": "A foi depositada antes de B, sem uma idade numérica definida.", "correct": true, "explanation": "É uma conclusão de datação relativa baseada no princípio da superposição." }
+      ] },
+      { "question": "Uma falha corta as camadas A e B e é recoberta por C intacta. Qual sequência é compatível?", "options": [
+        { "text": "A → B → falha → C", "correct": true, "explanation": "A falha precisa ser posterior às camadas cortadas e anterior à camada que a recobre intacta." },
+        { "text": "Falha → A → B → C", "correct": false, "explanation": "Uma falha anterior às camadas não poderia cortá-las como descrito sem atividade posterior." },
+        { "text": "A → B → C → falha cortando todas", "correct": false, "explanation": "Isso deveria afetar C também, contrariando o corte em que C recobre a falha intacta." }
+      ] }
+    ]
+  },
+  "fund2_geo_01": {
+    "context": "Uma equipe precisa localizar pontos num globo e combinar um encontro entre cidades. Separe latitude, longitude e horário para não confundir distância norte–sul com diferença de tempo.",
+    "theory": "Latitude é a distância angular em relação ao Equador, de 0° a 90° norte ou sul; longitude é a distância angular em relação ao meridiano de Greenwich, de 0° a 180° leste ou oeste. Paralelos ajudam a representar latitudes e meridianos, longitudes. No modelo de fusos ideais, a Terra gira 360° em aproximadamente 24 horas, ou 15° por hora. A leste, os horários tendem a estar adiantados em relação aos pontos a oeste. Fusos civis seguem decisões territoriais e podem ter limites irregulares; latitude não determina fuso horário. UTC é uma referência de tempo, não uma cidade. As contas deste laboratório usam offsets fixos, sem horário sazonal.",
+    "workedExample": "No modelo ideal, um ponto a 45° O usa UTC−3 e outro a 30° L usa UTC+2. A diferença é 5 horas. Se no primeiro são 20h de terça-feira, no segundo é 1h de quarta-feira. O ponto (20° S, 45° O) continua no hemisfério sul; esse primeiro valor não entra na conta de fuso.",
+    "investigation": [
+      "Localize (20° S, 45° O) e (10° N, 30° L), registrando separadamente hemisférios de latitude e de longitude.",
+      "Calcule a diferença entre os offsets fixos UTC−3 e UTC+2, usando uma reta numérica para conferir o sinal.",
+      "Converta 20h de terça-feira em UTC−3 para UTC+2 e anote explicitamente a mudança de dia.",
+      "Explique por que uma consulta sobre o horário real de uma cidade precisa confirmar seu fuso civil, em vez de aplicar apenas longitude/15."
+    ],
+    "expectedEvidence": "O mapa deve distinguir norte/sul de leste/oeste. A conversão deve mostrar 5 horas de diferença e 1h de quarta-feira no destino. A conclusão deve limitar longitude/15 ao modelo ideal e não atribuir o fuso à latitude.",
+    "reflection": "Dois lugares com latitudes muito diferentes podem usar o mesmo horário civil? Explique quais coordenadas e decisões territoriais são relevantes para responder.",
+    "scenarios": [
+      { "id": "localizacao-sudoeste", "label": "Dois hemisférios", "situation": "Um ponto tem coordenadas 20° S, 45° O.", "observation": "Está ao sul do Equador e a oeste de Greenwich.", "explanation": "O primeiro valor informa latitude; o segundo informa longitude. Nenhum deles é uma distância em quilômetros." },
+      { "id": "diferenca-cinco", "label": "Leste adiantado", "situation": "Offsets fixos UTC−3 e UTC+2, sem alterações sazonais.", "observation": "UTC+2 está 5 horas adiantado em relação a UTC−3.", "explanation": "A diferença é 2 − (−3) = 5. Somam-se cinco horas ao converter do primeiro para o segundo." },
+      { "id": "mudanca-de-data", "label": "Virada do dia", "situation": "São 20h de terça-feira no fuso UTC−3; o destino usa UTC+2.", "observation": "No destino são 1h de quarta-feira.", "explanation": "Adicionar 5 horas ultrapassa a meia-noite; a data precisa acompanhar a conversão." }
+    ],
+    "questions": [
+      { "question": "Qual informação expressa a distância angular de um ponto em relação ao Equador?", "options": [
+        { "text": "Longitude", "correct": false, "explanation": "Longitude é medida a leste ou oeste de Greenwich, e não a norte ou sul do Equador." },
+        { "text": "Latitude", "correct": true, "explanation": "Latitude varia de 0° no Equador a 90° norte ou sul nos polos." },
+        { "text": "Altitude", "correct": false, "explanation": "Altitude é uma medida vertical, geralmente em metros, e não uma coordenada angular em relação ao Equador." }
+      ] },
+      { "question": "Com offsets fixos, se são 22h de domingo em UTC−4, que horário é em UTC+1?", "options": [
+        { "text": "17h de domingo", "correct": false, "explanation": "O destino está adiantado, então é preciso somar, não subtrair, as cinco horas." },
+        { "text": "3h de domingo", "correct": false, "explanation": "A soma atravessa a meia-noite; é necessário avançar a data para segunda-feira." },
+        { "text": "3h de segunda-feira", "correct": true, "explanation": "1 − (−4) = 5 horas; 22h + 5h = 3h do dia seguinte." }
+      ] }
+    ]
+  },
+  "fund2_geo_02": {
+    "context": "Um mapa mostra faixas de terremotos, vulcões e fossas oceânicas. Compare movimentos de placas para explicar os padrões sem supor que todos os limites produzam os mesmos fenômenos.",
+    "theory": "A litosfera está dividida em placas que se movem sobre regiões mais deformáveis do interior terrestre. Em limites divergentes, placas se afastam e pode formar-se nova crosta oceânica. Em convergentes, aproximam-se: uma placa oceânica pode mergulhar sob outra na subducção, associada a fossas, terremotos e arcos vulcânicos. Colisões continentais também formam grandes cadeias montanhosas, sem reproduzir exatamente esse cenário. Em limites transformantes, placas deslizam lateralmente; tensões podem ser liberadas por falhas e terremotos. Há terremotos no interior de placas também. O mapa de limites ajuda a explicar distribuição de riscos, mas não fornece data e hora exatas de um futuro sismo.",
+    "workedExample": "No mapa didático, uma placa oceânica desloca-se em direção a uma continental a 4 cm/ano. Em 100 anos, o deslocamento relativo uniforme ideal seria 400 cm = 4 m. Isso não indica que ocorra um terremoto de 4 m a cada século: movimento médio de placa e ruptura de uma falha não são o mesmo dado.",
+    "investigation": [
+      "Desenhe setas para afastamento, aproximação e deslizamento lateral; associe a cada desenho seu tipo de limite.",
+      "No caso de subducção, identifique a placa que mergulha, a fossa e a posição possível de um arco vulcânico.",
+      "Calcule o deslocamento ideal de 4 cm/ano em 100 anos e explique por que essa conta não prevê uma data de terremoto.",
+      "Compare um limite transformante com um convergente e indique por que o primeiro não exige criação de nova crosta."
+    ],
+    "expectedEvidence": "Os esquemas devem diferenciar os três movimentos, associar subducção ao mergulho de uma placa e calcular 4 m em 100 anos no modelo uniforme. A interpretação deve distinguir deslocamento médio de liberação súbita de tensão e evitar previsão exata de sismos.",
+    "reflection": "Por que conhecer o movimento médio de uma placa ajuda no estudo do risco, mas não basta para anunciar o próximo terremoto? Indique quais etapas do processo não estão representadas por uma taxa anual.",
+    "scenarios": [
+      { "id": "dorsal-divergente", "label": "Placas se afastam", "situation": "Duas placas oceânicas se afastam e material do interior alcança a região de abertura.", "observation": "Pode formar-se nova crosta ao longo de uma dorsal.", "explanation": "É um limite divergente; o afastamento cria espaço para acréscimo de material." },
+      { "id": "subduccao-oceanica", "label": "Uma placa mergulha", "situation": "Uma placa oceânica converge com outra e sofre subducção.", "observation": "O modelo prevê fossa e terremotos em profundidades variadas, podendo haver vulcanismo associado.", "explanation": "A placa que mergulha produz uma geometria diferente da abertura de uma dorsal." },
+      { "id": "falha-transformante", "label": "Movimento lateral", "situation": "Duas placas deslizam uma ao lado da outra, acumulando tensão em partes da falha.", "observation": "A ruptura pode gerar terremotos sem exigir formação de nova crosta.", "explanation": "O movimento relativo é principalmente lateral; o mecanismo difere de divergência e subducção." }
+    ],
+    "questions": [
+      { "question": "Qual movimento caracteriza um limite transformante?", "options": [
+        { "text": "Deslizamento lateral entre placas.", "correct": true, "explanation": "As placas passam lateralmente uma pela outra, podendo acumular e liberar tensão em falhas." },
+        { "text": "Afastamento com criação obrigatória de uma fossa de subducção.", "correct": false, "explanation": "Afastamento é divergência; fossas de subducção são associadas à convergência." },
+        { "text": "Uma placa desaparece instantaneamente sem movimento.", "correct": false, "explanation": "Placas têm movimento e interação; não desaparecem instantaneamente como definição de limite." }
+      ] },
+      { "question": "Uma taxa média de 3 cm/ano permite qual conclusão?", "options": [
+        { "text": "Ocorrerá um terremoto a cada 3 anos.", "correct": false, "explanation": "A unidade cm/ano descreve deslocamento, e não periodicidade de terremotos." },
+        { "text": "Num modelo uniforme, 200 anos correspondem a 6 m de deslocamento.", "correct": true, "explanation": "3 × 200 = 600 cm = 6 m. A conta não especifica como a tensão será liberada." },
+        { "text": "Todo vulcão da região entrará em erupção no mesmo dia.", "correct": false, "explanation": "A velocidade média de placa não fornece previsão de data de erupções." }
+      ] }
+    ],
+    "sources": [
+      { "title": "USGS — Understanding plate motions", "url": "https://pubs.usgs.gov/gip/dynamic/understanding.html" },
+      { "title": "USGS — Earthquakes, Faults, and Tectonics", "url": "https://pubs.usgs.gov/circ/c1198/chapters/037-046_Earthquakes.pdf" },
+      { "title": "USGS — This Dynamic Planet", "url": "https://pubs.usgs.gov/pdf/planet.pdf" }
+    ]
+  },
+  "fund2_geo_03": {
+    "context": "Um rio possui curvas, margens desgastadas e bancos de sedimentos. Relacione velocidade da água, transporte e deposição para reconstruir como o vale pode mudar ao longo do tempo.",
+    "theory": "Rios modelam o relevo por erosão, transporte e deposição de sedimentos. A capacidade de transportar material depende de vazão, velocidade, tamanho das partículas e condições do canal. Em um meandro típico, a margem externa tende a apresentar maior erosão e a interna, maior deposição, embora obstáculos e geometria local possam modificar o padrão. Quando o fluxo perde energia, parte da carga pode se depositar. Erosão vertical contribui para aprofundar vales; erosão lateral amplia e desloca curvas. Um cânion exige história geológica e tempo, não apenas uma cheia isolada. Retirar a cobertura vegetal pode aumentar a chegada de sedimentos ao rio e favorecer assoreamento.",
+    "workedExample": "No modelo de um meandro, a margem externa recua 0,4 m após um intervalo, enquanto na margem interna se forma um banco de areia. O canal migrou lateralmente; isso não demonstra que todo o fundo ficou mais profundo. Num segundo trecho, a redução de velocidade permite deposição de areia e diminui a profundidade disponível do canal.",
+    "investigation": [
+      "Desenhe um meandro e marque a margem externa e a interna. Indique onde espera erosão e deposição no modelo típico.",
+      "Compare fotografias esquemáticas antes e depois de um recuo externo de 0,4 m e diferencie migração lateral de aprofundamento do leito.",
+      "Explique o que pode acontecer à areia transportada quando a velocidade diminui num trecho mais largo.",
+      "Trace o caminho de sedimentos vindos de uma encosta desmatada até o canal e formule uma hipótese sobre assoreamento."
+    ],
+    "expectedEvidence": "O desenho deve associar margem externa à tendência de erosão e interna à deposição. A análise deve separar aprofundamento de migração lateral e explicar que sedimentos podem se acumular quando a capacidade de transporte diminui, com consequências para o canal.",
+    "reflection": "Por que afirmar 'um rio sempre retira material' é incompleto? Use uma curva e um trecho de baixa velocidade para mostrar que erosão e deposição podem ocorrer no mesmo sistema.",
+    "scenarios": [
+      { "id": "margem-externa", "label": "Curva em movimento", "situation": "A margem externa de um meandro típico recua 0,4 m no intervalo observado.", "observation": "Há evidência de erosão lateral e deslocamento do canal.", "explanation": "O recuo da margem não mede diretamente o aprofundamento do fundo." },
+      { "id": "banco-interno", "label": "Areia na parte interna", "situation": "Na parte interna da mesma curva aparece um banco de sedimentos.", "observation": "Ocorreu deposição em uma região com menor capacidade local de transporte.", "explanation": "Um rio pode erodir uma margem enquanto deposita material em outra." },
+      { "id": "encosta-exposta", "label": "Mais carga sedimentar", "situation": "Uma encosta perde cobertura vegetal e a chuva transporta mais solo para o canal.", "observation": "O aumento da entrada de sedimentos pode favorecer assoreamento se superar a capacidade de remoção.", "explanation": "O efeito depende do balanço entre aporte, transporte e deposição, não só da quantidade de chuva." }
+    ],
+    "questions": [
+      { "question": "Num meandro típico, qual associação está correta?", "options": [
+        { "text": "Margem externa deposita sempre; interna erode sempre.", "correct": false, "explanation": "A tendência usual é inversa, e condições locais impedem usar 'sempre' como regra absoluta." },
+        { "text": "Nenhuma margem muda porque o rio já tem um canal.", "correct": false, "explanation": "Canais fluviais são dinâmicos e podem migrar por erosão e deposição." },
+        { "text": "Margem externa tende à erosão e interna à deposição.", "correct": true, "explanation": "A distribuição típica do fluxo favorece desgaste externo e acúmulo interno." }
+      ] },
+      { "question": "O que pode favorecer deposição de areia que estava sendo transportada?", "options": [
+        { "text": "Redução da capacidade de transporte do fluxo.", "correct": true, "explanation": "Quando o fluxo não consegue manter a mesma carga em movimento, parte pode se depositar." },
+        { "text": "A areia deixar de ter massa.", "correct": false, "explanation": "A deposição não exige alteração da massa das partículas; depende da interação com o fluxo." },
+        { "text": "Todo o rio se transformar imediatamente em um cânion.", "correct": false, "explanation": "Cânions envolvem evolução do relevo e erosão ao longo do tempo, não definem a deposição de areia." }
+      ] }
+    ]
+  },
+  "fund2_geo_04": {
+    "context": "Quatro localidades fictícias apresentam gráficos de chuva e temperatura. Use a distribuição anual e características da vegetação para discutir relações com biomas, reconhecendo os limites de identificar paisagens por um único gráfico.",
+    "theory": "Biomas reúnem conjuntos regionais de vida, clima e história ambiental; no Brasil, o IBGE reconhece Amazônia, Mata Atlântica, Cerrado, Caatinga, Pampa e Pantanal. Um climatograma mostra precipitação mensal e temperatura média ao longo do ano. O total de chuva não revela sozinho a duração da estação seca. Caatinga inclui adaptações à escassez sazonal de água, como perda de folhas em muitas espécies; o Cerrado apresenta forte sazonalidade em amplas áreas; a Amazônia possui extensas florestas úmidas; o Pampa reúne importantes formações campestres. Há diversidade interna e transições: um bioma não é uma única espécie nem pode ser identificado com certeza só por uma média climática.",
+    "workedExample": "A localidade fictícia A recebe 1.200 mm por ano em 100 mm a cada mês. B recebe o mesmo total, mas concentra 200 mm por mês em seis meses e zero nos outros seis. Embora os totais coincidam, B possui uma estação seca muito mais marcada. O desenho ilustra sazonalidade, sem representar uma estação real ou definir sozinho um bioma.",
+    "investigation": [
+      "Construa os climatogramas de A e B com o mesmo total de 1.200 mm e compare a distribuição mensal.",
+      "Associe perda sazonal de folhas à redução de perda de água e diferencie adaptação de uma escolha consciente da planta.",
+      "Compare uma paisagem campestre com uma floresta úmida, sem classificar campos automaticamente como área degradada.",
+      "Liste evidências adicionais necessárias para identificar um bioma: localização, vegetação, solos, fauna e histórico ambiental, por exemplo."
+    ],
+    "expectedEvidence": "Os gráficos devem ter totais iguais e distribuições diferentes, com seis meses secos em B. A interpretação deve reconhecer campos como formações naturais possíveis, associar adaptações à disponibilidade de água e evitar identificação conclusiva de bioma por um só indicador.",
+    "reflection": "Duas localidades com a mesma chuva anual têm necessariamente a mesma vegetação? Relacione sazonalidade, temperatura, solo e história da ocupação ao limite dessa conclusão.",
+    "scenarios": [
+      { "id": "chuva-regular", "label": "Total bem distribuído", "situation": "A localidade A recebe 100 mm em cada um dos 12 meses, totalizando 1.200 mm.", "observation": "O gráfico não apresenta meses sem chuva nesse conjunto fictício.", "explanation": "A distribuição mensal complementa o total anual e permite discutir disponibilidade de água ao longo do ano." },
+      { "id": "chuva-concentrada", "label": "Mesmo total, seis meses secos", "situation": "B recebe 200 mm em seis meses e zero nos outros seis, também totalizando 1.200 mm.", "observation": "Há forte concentração sazonal, apesar do total igual ao de A.", "explanation": "A vegetação enfrenta uma sequência prolongada sem chuva no modelo; o total anual oculta essa diferença." },
+      { "id": "campos-naturais", "label": "Paisagem campestre", "situation": "Uma área do Pampa apresenta cobertura natural predominantemente campestre.", "observation": "A presença de poucas árvores não prova desmatamento anterior.", "explanation": "Formações campestres são parte da diversidade natural; sua avaliação exige história e contexto da área." }
+    ],
+    "questions": [
+      { "question": "Dois climatogramas têm a mesma chuva anual. Qual informação ainda pode ser diferente e relevante?", "options": [
+        { "text": "A duração e a intensidade da estação seca.", "correct": true, "explanation": "O mesmo total pode estar distribuído de modo regular ou concentrado em poucos meses." },
+        { "text": "Nenhuma, pois o total define sozinho toda a vegetação.", "correct": false, "explanation": "Sazonalidade, temperatura, solo e outros fatores influenciam os ecossistemas." },
+        { "text": "A quantidade de meses do ano em cada localidade.", "correct": false, "explanation": "Ambas as séries anuais têm 12 meses; muda a distribuição dos valores, não o calendário." }
+      ] },
+      { "question": "Qual afirmação respeita a diversidade dos biomas brasileiros?", "options": [
+        { "text": "Toda paisagem sem floresta alta é resultado de destruição.", "correct": false, "explanation": "Há formações campestres naturais, como importantes áreas do Pampa." },
+        { "text": "Cada bioma contém apenas uma espécie vegetal.", "correct": false, "explanation": "Biomas incluem diversidade de organismos e formações ambientais." },
+        { "text": "Uma paisagem campestre pode ser natural e exige análise de contexto.", "correct": true, "explanation": "A ausência de árvores altas não é prova suficiente de degradação." }
+      ] }
+    ],
+    "sources": [
+      { "title": "IBGE Educa — Biomas brasileiros", "url": "https://educa.ibge.gov.br/jovens/conheca-o-brasil/territorio/18307-biomas-brasileiros.html" },
+      { "title": "IBGE — Biomas e Sistema Costeiro-Marinho", "url": "https://www.ibge.gov.br/geociencias/informacoes-ambientais/vegetacao/15842-biomas.html?lang=pt-BR" },
+      { "title": "IBGE — Síntese da descrição dos biomas", "url": "https://geoftp.ibge.gov.br/informacoes_ambientais/estudos_ambientais/biomas/documentos/Sintese_Descricao_Biomas.pdf" }
+    ]
+  },
+  "fund2_geo_05": {
+    "context": "Um município precisa planejar escolas e serviços para idosos. Compare a distribuição por idade de duas populações fictícias, em vez de usar somente o número total de habitantes.",
+    "theory": "Uma pirâmide etária representa grupos de idade, geralmente separados por sexo e expressos em número ou proporção. A base reúne idades mais jovens e o topo, mais avançadas. Uma base proporcionalmente estreita pode refletir menos nascimentos ao longo dos anos, mas migrações e a história demográfica também influenciam o desenho. Transição demográfica descreve mudanças históricas nos níveis de mortalidade e natalidade, sem uma trajetória idêntica e automática para todos os lugares. Envelhecimento populacional é o aumento da participação de idades avançadas, não a afirmação de que todos envelheceram igualmente. Percentuais permitem comparar estruturas de populações com tamanhos diferentes, mas não substituem seus totais absolutos.",
+    "workedExample": "A cidade fictícia A tem 10.000 habitantes: 3.000 de 0–14 anos, 6.000 de 15–64 e 1.000 de 65 ou mais. B tem 20.000 habitantes: 3.000, 13.000 e 4.000 nesses grupos. A possui 30% de jovens e 10% de idosos; B, 15% e 20%. As duas têm 3.000 jovens, embora a proporção seja diferente.",
+    "investigation": [
+      "Calcule os percentuais dos três grupos nas cidades A e B e confira se cada coluna soma 100%.",
+      "Compare números absolutos e proporções de jovens: explique como duas cidades podem ter 3.000 jovens e bases relativas diferentes.",
+      "Discuta necessidades de planejamento para B, evitando concluir que apenas idosos precisam de serviços ou que jovens deixam de demandar escolas.",
+      "Proponha duas explicações possíveis para uma base estreita, como menos nascimentos e saída de famílias jovens, e indique dados para distingui-las."
+    ],
+    "expectedEvidence": "A tabela deve apresentar A com 30%,60%,10% e B com 15%,65%,20%. A análise deve separar quantidade e participação, reconhecer maior proporção idosa em B e tratar causas demográficas como hipóteses que exigem séries históricas e migração.",
+    "reflection": "É adequado fechar escolas apenas porque a proporção de jovens diminuiu? Use as duas cidades para mostrar por que quantidade absoluta, localização e projeções também importam.",
+    "scenarios": [
+      { "id": "cidade-jovem", "label": "Estrutura de A", "situation": "A tem 10.000 habitantes: 3.000 jovens, 6.000 adultos de 15–64 e 1.000 pessoas de 65 ou mais.", "observation": "A composição é 30%, 60% e 10%, respectivamente.", "explanation": "Cada grupo deve ser dividido pelo total da própria cidade para formar a estrutura relativa." },
+      { "id": "cidade-mais-idosa", "label": "Estrutura de B", "situation": "B tem 20.000 habitantes: 3.000 jovens, 13.000 de 15–64 e 4.000 de 65 ou mais.", "observation": "A composição é 15%, 65% e 20%; a participação idosa é maior que em A.", "explanation": "Comparar percentuais revela a estrutura; B também tem mais idosos em número absoluto." },
+      { "id": "mesmo-numero-jovens", "label": "Proporção não é quantidade", "situation": "A e B possuem exatamente 3.000 pessoas de 0–14 anos, mas totais populacionais diferentes.", "observation": "A proporção jovem é 30% em A e 15% em B.", "explanation": "O denominador modifica a participação. Uma base relativa menor não prova menor número de crianças." }
+    ],
+    "questions": [
+      { "question": "Uma cidade tem 5.000 idosos em 25.000 habitantes. Qual é a participação desse grupo?", "options": [
+        { "text": "5%", "correct": false, "explanation": "5.000 é um número absoluto; a razão correta é 5.000/25.000 = 0,20." },
+        { "text": "20%", "correct": true, "explanation": "Dividir o grupo pelo total e multiplicar por 100 dá 20%." },
+        { "text": "50%", "correct": false, "explanation": "Metade de 25.000 seria 12.500, e não 5.000." }
+      ] },
+      { "question": "Uma base proporcionalmente estreita numa pirâmide permite qual conclusão imediata?", "options": [
+        { "text": "Todos os habitantes têm mais de 65 anos.", "correct": false, "explanation": "A base estreita indica menor participação relativa jovem, não ausência de jovens ou adultos." },
+        { "text": "A causa é necessariamente apenas queda de fecundidade.", "correct": false, "explanation": "Migração e história da população também podem contribuir; é preciso investigar dados adicionais." },
+        { "text": "Os grupos jovens têm menor participação em relação a uma base mais larga comparável.", "correct": true, "explanation": "Essa é uma leitura da forma; identificar as causas requer outras evidências." }
+      ] }
+    ]
+  },
+  "fund2_geo_06": {
+    "context": "Medições simultâneas mostram temperaturas diferentes numa praça arborizada e numa avenida pavimentada. Investigue o microclima sem confundir uma diferença entre pontos com uma tendência global de longo prazo.",
+    "theory": "Ilha de calor urbana é um padrão em que áreas urbanizadas apresentam temperaturas maiores que áreas de referência menos urbanizadas, sob condições comparáveis. Materiais, pouca vegetação, geometria dos edifícios e calor de atividades humanas podem contribuir. Árvores oferecem sombra e favorecem evapotranspiração; pavimento impermeável modifica o balanço de água e energia. Uma medida de superfície ao sol não é equivalente à temperatura do ar na sombra. Comparações exigem horário, altura, instrumento e exposição semelhantes. Ilha de calor e aquecimento global podem interagir, mas descrevem escalas e processos distintos. Um único dia de medições não determina a evolução climática de décadas.",
+    "workedExample": "No conjunto fictício, às 15h, sensores de ar iguais e protegidos medem 31 °C na praça e 35 °C na avenida. A diferença é 4 °C naquele horário. Um termômetro apontado para o asfalto ao sol marca 49 °C, mas não deve ser subtraído diretamente de 31 °C como se ambos medissem o ar sob o mesmo protocolo.",
+    "investigation": [
+      "Calcule a diferença entre as medições de ar de 31 °C e 35 °C e registre horário e condições de coleta.",
+      "Explique por que os 49 °C da superfície do asfalto não são uma terceira medida de temperatura do ar equivalente às anteriores.",
+      "Proponha uma comparação antes e depois de arborização, incluindo um ponto de referência e repetição em diferentes dias.",
+      "Relacione impermeabilização a escoamento da chuva e vegetação a sombra e evapotranspiração, distinguindo os mecanismos."
+    ],
+    "expectedEvidence": "O relatório deve calcular a diferença de 4 °C entre sensores de ar comparáveis, separar superfície de ar e limitar o resultado ao momento observado. Deve propor repetições e controle de exposição, sem atribuir uma tendência global a uma única medição urbana.",
+    "reflection": "Se a praça fica mais fria após uma chuva, como distinguir efeito da arborização de mudança do tempo? Explique a utilidade de medir também um local de referência.",
+    "scenarios": [
+      { "id": "comparacao-simultanea", "label": "Praça e avenida", "situation": "Às 15h, sensores de ar iguais e protegidos registram 31 °C e 35 °C em dois locais.", "observation": "A avenida apresenta 4 °C a mais naquele momento.", "explanation": "A simultaneidade e o protocolo comum tornam a comparação mais defensável, mas não explicam sozinhos todas as causas." },
+      { "id": "superficie-asfalto", "label": "Grandeza diferente", "situation": "Um sensor mede 49 °C na superfície do asfalto, enquanto outro mede 31 °C no ar protegido da praça.", "observation": "A diferença de 18 °C mistura superfícies e ar sob exposições diferentes.", "explanation": "É preciso comparar a mesma grandeza e o mesmo protocolo para estimar a diferença de temperatura do ar." },
+      { "id": "arborizacao-planejada", "label": "Teste de intervenção", "situation": "Uma rua recebe árvores e é acompanhada junto a uma rua de referência em vários dias.", "observation": "A comparação repetida permite avaliar mudanças locais com maior controle sobre variações do tempo.", "explanation": "Sombra e evapotranspiração são mecanismos plausíveis, mas a evidência depende das medições e do desenho do estudo." }
+    ],
+    "questions": [
+      { "question": "Qual comparação é mais adequada para estudar diferença de temperatura do ar entre dois locais?", "options": [
+        { "text": "Asfalto ao sol ao meio-dia e ar da praça à noite.", "correct": false, "explanation": "Grandeza, horário e exposição mudam ao mesmo tempo, confundindo a comparação." },
+        { "text": "Ar medido simultaneamente com sensores equivalentes e exposição padronizada.", "correct": true, "explanation": "O protocolo comum reduz diferenças de método e facilita comparar o ambiente dos locais." },
+        { "text": "Cor do pavimento sem nenhuma medição.", "correct": false, "explanation": "A cor pode sugerir hipóteses sobre absorção, mas não substitui o registro de temperatura." }
+      ] },
+      { "question": "O que as leituras de ar de 31 °C na praça e 35 °C na avenida comprovam diretamente?", "options": [
+        { "text": "Uma diferença local de 4 °C nas condições observadas.", "correct": true, "explanation": "Essa é a conclusão numérica sustentada; causas e tendências exigem evidências adicionais." },
+        { "text": "O planeta aqueceu 4 °C naquele dia.", "correct": false, "explanation": "A diferença entre dois pontos urbanos não mede mudança da temperatura global ao longo do tempo." },
+        { "text": "Toda avenida do mundo será sempre 4 °C mais quente.", "correct": false, "explanation": "O resultado depende de local, horário, tempo e características da área." }
+      ] }
+    ]
+  },
+  "fund2_geo_07": {
+    "context": "Um globo recebe luz com ângulos diferentes do Equador aos polos. Relacione essa distribuição de energia à circulação atmosférica e compare ventos persistentes com reversões sazonais de monção.",
+    "theory": "A incidência solar varia com latitude e estação: raios mais inclinados distribuem a energia por uma área maior. A inclinação do eixo terrestre contribui para as estações, e não uma alternância simples da distância ao Sol. O aquecimento desigual ajuda a organizar a circulação atmosférica. No esquema médio da célula de Hadley, o ar sobe próximo à região equatorial, desloca-se em altitude e desce nas regiões subtropicais. Perto da superfície, parte retorna em direção ao Equador como alísios, desviados pela rotação terrestre. Monções envolvem mudanças sazonais na circulação, associadas ao contraste de aquecimento entre continentes e oceanos. Os esquemas médios não determinam o tempo de cada cidade em cada dia.",
+    "workedExample": "Num modelo com lanterna, a mesma quantidade de luz cobre 1 quadrado quando incide perpendicularmente e 2 quadrados quando inclinada. A energia por área fica menor no segundo caso. No mapa sazonal fictício, ventos vão do oceano ao continente no verão e levam umidade; no inverno, a direção predominante se inverte. É um esquema de monção, não uma previsão diária.",
+    "investigation": [
+      "Desenhe dois feixes com a mesma energia atingindo áreas de 1 e 2 unidades; compare a energia recebida por unidade de área.",
+      "Trace subida equatorial, transporte em altitude, descida subtropical e retorno superficial no modelo de Hadley.",
+      "Identifique o sentido geral dos alísios e explique por que a rotação impede representar todo vento como uma linha reta norte–sul.",
+      "Compare o padrão médio de alísios com uma reversão sazonal de monção e indique a diferença de escala temporal."
+    ],
+    "expectedEvidence": "O desenho deve mostrar menor energia por área no feixe inclinado e representar a circulação média sem prometer tempo diário. Deve distinguir alísios de reversão sazonal de monção e atribuir estações à inclinação do eixo, sem usar proximidade ao Sol como explicação principal.",
+    "reflection": "Por que um mapa de circulação média não diz se choverá amanhã na sua cidade? Diferencie uma tendência de grande escala de uma previsão meteorológica local.",
+    "scenarios": [
+      { "id": "incidencia-inclinada", "label": "Mesmo feixe, área maior", "situation": "A mesma energia luminosa cobre uma área de 1 unidade ou de 2 unidades.", "observation": "No segundo caso, a energia por unidade de área cai à metade no modelo.", "explanation": "A inclinação espalha o feixe por uma superfície maior; isso ajuda a entender diferenças latitudinais de aquecimento." },
+      { "id": "hadley-media", "label": "Circuito tropical", "situation": "No esquema médio, ar sobe perto do Equador e desce em regiões subtropicais.", "observation": "Há um circuito com retorno superficial em direção à região equatorial.", "explanation": "Os alísios integram esse retorno e sofrem desvio associado à rotação da Terra." },
+      { "id": "moncao-sazonal", "label": "Direção muda com a estação", "situation": "No mapa didático, o vento sopra do oceano para o continente no verão e inverte sua direção predominante no inverno.", "observation": "O padrão ilustra uma circulação de monção com reversão sazonal.", "explanation": "Contrastes sazonais de aquecimento contribuem para modificar pressão, vento e transporte de umidade." }
+    ],
+    "questions": [
+      { "question": "O que ocorre no modelo quando a mesma energia solar incide sobre uma área duas vezes maior?", "options": [
+        { "text": "A energia por área dobra.", "correct": false, "explanation": "A energia total foi mantida; espalhá-la por uma área maior reduz sua concentração." },
+        { "text": "A energia total desaparece.", "correct": false, "explanation": "O modelo redistribui a mesma energia, não a elimina." },
+        { "text": "A energia por área cai à metade.", "correct": true, "explanation": "Dividir a mesma energia por uma área duas vezes maior produz metade do valor por unidade de área." }
+      ] },
+      { "question": "Qual característica diferencia o esquema de monção do simples desenho de ventos constantes?", "options": [
+        { "text": "A direção predominante pode se inverter entre estações.", "correct": true, "explanation": "A reversão sazonal da circulação está relacionada a mudanças de aquecimento e pressão." },
+        { "text": "Nenhuma massa de ar se movimenta.", "correct": false, "explanation": "Monções são circulações atmosféricas e envolvem deslocamento de ar." },
+        { "text": "Cada cidade tem chuva obrigatória em todos os dias do ano.", "correct": false, "explanation": "Um padrão sazonal não determina o tempo de cada dia e lugar." }
+      ] }
+    ],
+    "sources": [
+      { "title": "NOAA — Global Atmospheric Circulations", "url": "https://prod-01-alb-www-noaa.woc.noaa.gov/jetstream/global/global-atmospheric-circulations" }
+    ]
+  },
+  "fund2_geo_08": {
+    "context": "Uma cidade fictícia quer comparar formas de produzir eletricidade. Calcule participações e emissões de um conjunto didático, distinguindo fonte renovável, disponibilidade e impactos ao longo do ciclo de vida.",
+    "theory": "Matriz elétrica é a composição das fontes que produzem eletricidade; matriz energética inclui também usos como combustíveis no transporte e calor industrial. Hidrelétrica, eólica e solar utilizam recursos renováveis, mas têm impactos ambientais e materiais de construção. Renovável não significa impacto zero. Emissões podem ser comparadas em gramas de CO₂ equivalente por kWh, informando se a conta inclui apenas operação ou todo o ciclo de vida. Solar e eólica variam com luz e vento; hidrelétricas dependem de condições hídricas. Um sistema precisa conciliar geração, demanda, transmissão, armazenamento e outras formas de flexibilidade. Capacidade em kW e energia produzida em kWh são medidas diferentes.",
+    "workedExample": "No conjunto fictício, 100 kWh são fornecidos: 60 por fonte R e 40 por fonte F. Para exercitar a média, suponha fatores didáticos de 50 e 500 gCO₂e/kWh. A emissão é 60 × 50 + 40 × 500 = 23.000 gCO₂e; a média é 230 gCO₂e/kWh. Esses fatores não são valores medidos de tecnologias reais.",
+    "investigation": [
+      "Represente a matriz fictícia com 60% de R e 40% de F e confira se as participações somam 100%.",
+      "Calcule as emissões usando os fatores didáticos de 50 e 500 gCO₂e/kWh; registre total e média ponderada com unidades.",
+      "Troque a composição para 80 kWh de R e 20 de F, mantendo os fatores, e compare a nova média de emissão.",
+      "Discuta por que uma usina solar de capacidade fixa não produz a mesma energia em toda hora e por que renovabilidade não elimina avaliação de impactos."
+    ],
+    "expectedEvidence": "O relatório deve mostrar 23.000 gCO₂e e 230 gCO₂e/kWh no primeiro caso; no segundo, 14.000 g e 140 g/kWh. Deve identificar números como didáticos e distinguir matriz elétrica de energética, potência de energia e renovabilidade de impacto nulo.",
+    "reflection": "É suficiente escolher uma fonte apenas pela menor emissão por kWh? Considere disponibilidade no horário de consumo, transmissão, território e impactos que uma única métrica não representa.",
+    "scenarios": [
+      { "id": "matriz-sessenta-quarenta", "label": "Média ponderada", "situation": "60 kWh de R a 50 gCO₂e/kWh e 40 kWh de F a 500 gCO₂e/kWh, todos fictícios.", "observation": "O total é 23.000 gCO₂e e a média é 230 gCO₂e/kWh.", "explanation": "A média deve ponderar pela energia de cada fonte, e não simplesmente somar os dois fatores." },
+      { "id": "matriz-oitenta-vinte", "label": "Composição alternativa", "situation": "80 kWh de R e 20 de F, com os mesmos fatores didáticos.", "observation": "O total cai a 14.000 gCO₂e e a média a 140 gCO₂e/kWh.", "explanation": "A maior participação da fonte de menor fator reduz a média dentro das hipóteses do exercício." },
+      { "id": "solar-noturna", "label": "Demanda depois do pôr do sol", "situation": "A cidade tem demanda elétrica à noite e uma instalação solar fotovoltaica sem armazenamento.", "observation": "A geração solar direta não atende sozinha esse período sem luz.", "explanation": "Planejamento combina fontes, rede, armazenamento e gestão da demanda; capacidade instalada não é produção constante." }
+    ],
+    "questions": [
+      { "question": "Qual afirmação distingue matriz elétrica de matriz energética?", "options": [
+        { "text": "A elétrica descreve apenas árvores e a energética apenas ventos.", "correct": false, "explanation": "Ambas tratam de energia; a diferença está nos usos e nas fontes contabilizados." },
+        { "text": "A elétrica trata da produção de eletricidade; a energética inclui outros usos de energia.", "correct": true, "explanation": "Combustíveis de transporte e calor, por exemplo, fazem parte da matriz energética mais ampla." },
+        { "text": "São sempre a mesma composição percentual.", "correct": false, "explanation": "Eletricidade é apenas parte do uso de energia, então os percentuais podem ser distintos." }
+      ] },
+      { "question": "Por que 'renovável' não é sinônimo de 'impacto ambiental zero'?", "options": [
+        { "text": "Construção, materiais e ocupação do território também podem gerar impactos.", "correct": true, "explanation": "A origem renovável do recurso não elimina os efeitos do ciclo de vida e da instalação." },
+        { "text": "Toda fonte renovável usa obrigatoriamente carvão como combustível principal.", "correct": false, "explanation": "Solar e eólica não dependem de queimar carvão para converter seus recursos em eletricidade." },
+        { "text": "A palavra renovável significa que a usina gera potência infinita.", "correct": false, "explanation": "Renovabilidade se refere ao recurso; capacidade, disponibilidade e produção continuam limitadas." }
+      ] }
+    ],
+    "sources": [
+      { "title": "EPE — Matriz energética e elétrica", "url": "https://epe.gov.br/pt/abcdenergia/matriz-energetica-e-eletrica" },
+      { "title": "EPE — Fontes de energia elétrica", "url": "https://www.epe.gov.br/pt/areas-de-atuacao/energia-eletrica/expansao-da-geracao/fontes" },
+      { "title": "EPE — Impactos das mudanças climáticas na geração eólica e solar", "url": "https://www.epe.gov.br/pt/imprensa/noticias/epe-divulga-fact-sheets-sobre-impactos-das-mudancas-climaticas-na-geracao-eolica-e-solar?TermId=aefba229-7167-4b03-8cd5-52171ba1185f&TermSetId=81034557-52ee-41fc-8006-ae8f277b1655&TermStoreId=31423334-e3fc-4ff3-9956-0d09b48b681f" }
+    ]
+  },
+  "fund2_geo_09": {
+    "context": "Uma compra internacional depende de informações digitais e transporte físico. Compare cabos de telecomunicação e rotas de contêineres para identificar conexões, gargalos e desigualdades de acesso.",
+    "theory": "Globalização envolve intensificação de relações econômicas, culturais e informacionais entre lugares, sustentadas por infraestruturas e decisões políticas. Redes digitais usam cabos terrestres, cabos submarinos, estações, centros de dados e enlaces sem fio; uma comunicação pela internet não passa obrigatoriamente por satélite. Mercadorias seguem rotas físicas por portos, ferrovias, rodovias e aeroportos. Um nó muito conectado pode tornar-se um gargalo quando falha. Rotas alternativas aumentam a possibilidade de continuidade, mas podem custar mais ou demorar mais. Conectividade técnica não garante acesso igual: preço, equipamento, qualidade do serviço e habilidades de uso também importam. Um mapa de conexões não demonstra sozinho benefícios iguais para todos.",
+    "workedExample": "Na rede fictícia, a rota digital A–B–C demora 20 + 30 = 50 ms e a alternativa A–D–C demora 40 + 50 = 90 ms. Se o enlace B–C falha, a alternativa mantém conexão com 40 ms extras no modelo. Já um contêiner entre A e C leva 12 dias por mar; o envio de uma mensagem não transporta fisicamente o produto.",
+    "investigation": [
+      "Desenhe os nós A, B, C e D e seus enlaces; calcule a demora total de cada rota digital do exemplo.",
+      "Remova B–C e indique a rota restante. Compare continuidade e tempo, sem afirmar que toda rede real muda de rota instantaneamente.",
+      "Represente separadamente a mensagem de compra e o caminho do contêiner; indique infraestruturas usadas por cada fluxo.",
+      "Identifique duas razões para uma família não acessar um serviço mesmo quando um cabo passa pela região, como preço e falta de equipamento."
+    ],
+    "expectedEvidence": "O mapa deve calcular 50 ms na rota inicial e 90 ms na alternativa, mostrando redundância e atraso adicional de 40 ms. Deve separar circulação de dados e mercadorias e reconhecer barreiras sociais de acesso além da presença de infraestrutura.",
+    "reflection": "Uma região com muitos cabos e portos é necessariamente bem atendida em todas as comunidades? Explique a diferença entre infraestrutura regional e acesso efetivo de uma família.",
+    "scenarios": [
+      { "id": "rota-principal", "label": "Menor demora", "situation": "A–B leva 20 ms e B–C leva 30 ms na rede didática.", "observation": "A demora somada de A até C pela rota principal é 50 ms.", "explanation": "O exercício soma os tempos dos enlaces e desconsidera outros atrasos para isolar o cálculo." },
+      { "id": "rota-redundante", "label": "Falha de enlace", "situation": "B–C falha; a alternativa A–D leva 40 ms e D–C, 50 ms.", "observation": "A conexão pode seguir por uma rota de 90 ms, 40 ms mais lenta no modelo.", "explanation": "Redundância oferece outro caminho, embora as condições e a capacidade de redes reais precisem ser verificadas." },
+      { "id": "dados-e-carga", "label": "Mensagem não é mercadoria", "situation": "Um pedido digital chega rapidamente, mas o contêiner leva 12 dias pelo mar na atividade fictícia.", "observation": "Os fluxos de informação e de produto operam em infraestruturas e tempos diferentes.", "explanation": "A comunicação coordena o transporte, mas não elimina o percurso físico da mercadoria." }
+    ],
+    "questions": [
+      { "question": "Qual benefício uma rota alternativa oferece à rede do exercício?", "options": [
+        { "text": "Garante tempo zero e capacidade infinita.", "correct": false, "explanation": "A rota tem demora própria e recursos limitados; redundância não elimina todas as restrições." },
+        { "text": "Transforma automaticamente contêineres em mensagens digitais.", "correct": false, "explanation": "Mercadorias continuam exigindo transporte físico; rotas digitais movimentam informação." },
+        { "text": "Pode manter a conexão após uma falha, ainda que com maior demora.", "correct": true, "explanation": "A alternativa A–D–C evita o enlace interrompido, mas soma 90 ms em vez de 50 ms." }
+      ] },
+      { "question": "Por que a presença de infraestrutura digital não prova acesso igual para todos?", "options": [
+        { "text": "Preço, equipamentos e condições de uso podem limitar o acesso.", "correct": true, "explanation": "O acesso efetivo combina disponibilidade técnica com condições econômicas e sociais." },
+        { "text": "Toda internet funciona exclusivamente por satélite.", "correct": false, "explanation": "Cabos, estações e outros enlaces também integram redes digitais." },
+        { "text": "Todas as famílias têm automaticamente o mesmo contrato e a mesma qualidade.", "correct": false, "explanation": "Ofertas, cobertura, renda e qualidade podem variar dentro de uma mesma região." }
+      ] }
+    ]
+  },
+  "fund2_geo_10": {
+    "context": "Um grupo planeja uma trilha usando um mapa topográfico. Interprete curvas de nível para localizar trechos íngremes e converter distâncias do papel antes de estimar a declividade.",
+    "theory": "Curvas de nível unem pontos de mesma altitude. A equidistância vertical é a diferença de altitude entre curvas sucessivas; não é a distância horizontal no papel. Em mapas usuais, curvas próximas indicam maior variação de altitude numa curta distância horizontal e, portanto, maior declividade. Curvas fechadas podem representar elevações ou depressões, dependendo das cotas e símbolos; não basta ver um círculo. A escala permite converter a distância do mapa para o terreno. Declividade percentual é desnível dividido pela distância horizontal, vezes 100, e não o ângulo em graus. O desenho do relevo é uma representação que precisa ser lida com legenda e escala.",
+    "workedExample": "Em escala 1:10.000, 3 cm no mapa correspondem a 300 m no terreno. Se o percurso sobe de 100 para 130 m, o desnível é 30 m. A declividade média aproximada é 30/300 × 100 = 10%. Ela não é 10° e não descreve necessariamente a inclinação de cada pequeno trecho.",
+    "investigation": [
+      "Desenhe curvas de 100, 110, 120 e 130 m e identifique a equidistância vertical de 10 m.",
+      "Compare dois trechos com o mesmo desnível: um percorre 100 m horizontais e outro 300 m. Calcule suas declividades médias.",
+      "Converta 3 cm na escala 1:10.000 para metros reais e confira a declividade de um desnível de 30 m.",
+      "Leia cotas de curvas fechadas crescentes para o centro e explique por que cotas e símbolos são necessários para distinguir elevação de depressão."
+    ],
+    "expectedEvidence": "O mapa deve mostrar equidistância de 10 m e associar curvas mais próximas a maior declividade. As contas devem converter 3 cm em 300 m e produzir 10% para 30/300, distinguindo percentagem de ângulo e média do percurso de inclinação local.",
+    "reflection": "Duas trilhas sobem os mesmos 30 m: uma é curta e outra faz curvas longas. Qual tende a ter menor declividade média? Explique sem concluir que distância, segurança e dificuldade sejam sempre a mesma coisa.",
+    "scenarios": [
+      { "id": "curvas-proximas", "label": "Subida curta", "situation": "O terreno sobe 30 m em 100 m horizontais.", "observation": "A declividade média é 30% e as curvas de mesma equidistância ficam relativamente próximas.", "explanation": "Um grande desnível em pouca distância horizontal representa uma subida mais íngreme." },
+      { "id": "curvas-afastadas", "label": "Subida distribuída", "situation": "O mesmo desnível de 30 m ocorre em 300 m horizontais.", "observation": "A declividade média é 10%, menor que no primeiro trecho.", "explanation": "O denominador maior distribui a mesma subida por um percurso horizontal mais longo." },
+      { "id": "escala-conversao", "label": "Do papel ao terreno", "situation": "Na escala 1:10.000, a distância horizontal medida é 3 cm.", "observation": "A distância real é 30.000 cm, equivalente a 300 m.", "explanation": "A escala multiplica comprimentos na mesma unidade; a conversão para metros vem depois." }
+    ],
+    "questions": [
+      { "question": "O que uma curva de nível conecta?", "options": [
+        { "text": "Pontos com a mesma altitude.", "correct": true, "explanation": "A linha representa uma cota constante, mesmo que sua forma acompanhe o relevo." },
+        { "text": "Pontos com a mesma temperatura do ar.", "correct": false, "explanation": "Essa seria uma informação térmica; curvas topográficas representam altitude." },
+        { "text": "Apenas cidades com a mesma população.", "correct": false, "explanation": "Dados populacionais não definem as curvas de um mapa do relevo." }
+      ] },
+      { "question": "Um terreno sobe 20 m em 200 m horizontais. Qual é a declividade percentual média?", "options": [
+        { "text": "10°", "correct": false, "explanation": "A conta desnível/distância × 100 fornece porcentagem, não diretamente um ângulo em graus." },
+        { "text": "10%", "correct": true, "explanation": "20/200 × 100 = 10%. São 10 metros de subida por 100 metros horizontais, em média." },
+        { "text": "100%", "correct": false, "explanation": "100% exigiria desnível igual à distância horizontal; aqui 20 é apenas um décimo de 200." }
+      ] }
+    ]
+  }
+}

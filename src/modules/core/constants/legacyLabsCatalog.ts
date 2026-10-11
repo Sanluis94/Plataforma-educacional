@@ -1,0 +1,92 @@
+import type { LearningLevel } from './learningLevels';
+
+export interface LegacyLabDescriptor {
+  id: string;
+  title: string;
+  subject: string;
+  subjectId: string;
+  academicLevel: LearningLevel;
+  objective: string;
+  source: 'legacy';
+}
+
+/**
+ * Entry levels reflect the existing lesson and bench, not the learner's enrolment.
+ * Introductory professional activities remain a complementary track. Advanced
+ * learners may revisit any entry; a subject alone never determines its level.
+ * This registry deliberately contains no React components or dashboard imports.
+ */
+export const LEGACY_LABS_CATALOG: LegacyLabDescriptor[] = [
+  { id: 'math_1', title: 'Função de 1º Grau', subject: 'Matemática', subjectId: 'matematica', academicLevel: 'fundamental_2', objective: 'Relacionar taxa fixa, variação e raiz de uma função afim, distinguindo solução algébrica e domínio do problema.', source: 'legacy' },
+  { id: 'math_2', title: 'Função de 2º Grau', subject: 'Matemática', subjectId: 'matematica', academicLevel: 'medio', objective: 'Relacionar coeficientes, raízes, concavidade, simetria e vértice de uma parábola.', source: 'legacy' },
+  { id: 'math_3', title: 'Funções Trigonométricas', subject: 'Matemática', subjectId: 'matematica', academicLevel: 'medio', objective: 'Distinguir amplitude e período de uma senoide usando radianos e a circunferência unitária.', source: 'legacy' },
+  { id: 'math_4', title: 'Geometria Espacial', subject: 'Matemática', subjectId: 'matematica', academicLevel: 'medio', objective: 'Calcular volume e área de sólidos, diferenciando altura vertical e altura inclinada de uma pirâmide.', source: 'legacy' },
+  { id: 'math_5', title: 'Estatística Descritiva', subject: 'Matemática', subjectId: 'matematica', academicLevel: 'medio', objective: 'Comparar média, mediana, moda e dispersão e analisar como um valor extremo afeta a descrição da amostra.', source: 'legacy' },
+  { id: 'math_6', title: 'Matrizes e Sistemas', subject: 'Matemática', subjectId: 'matematica', academicLevel: 'medio', objective: 'Representar sistemas por matrizes e distinguir solução única, incompatibilidade e infinitas soluções.', source: 'legacy' },
+  { id: 'fis_1', title: 'Cinemática do Pêndulo', subject: 'Física', subjectId: 'fisica', academicLevel: 'medio', objective: 'Comparar período, comprimento e amplitude no modelo de pêndulo e reconhecer o limite de pequenos ângulos.', source: 'legacy' },
+  { id: 'fis_2', title: 'Leis de Newton', subject: 'Física', subjectId: 'fisica', academicLevel: 'medio', objective: 'Analisar forças e conservação da quantidade de movimento em colisões com hipóteses explícitas.', source: 'legacy' },
+  { id: 'fis_3', title: 'Óptica Geométrica', subject: 'Física', subjectId: 'fisica', academicLevel: 'medio', objective: 'Aplicar a lei de Snell e distinguir refração de reflexão total interna.', source: 'legacy' },
+  { id: 'fis_4', title: 'Eletromagnetismo', subject: 'Física', subjectId: 'fisica', academicLevel: 'medio', objective: 'Relacionar carga, velocidade e campo magnético à força e ao raio de uma trajetória idealizada.', source: 'legacy' },
+  { id: 'fis_5', title: 'Termodinâmica', subject: 'Física', subjectId: 'fisica', academicLevel: 'medio', objective: 'Relacionar pressão, volume, quantidade de matéria e temperatura absoluta no modelo de gás ideal.', source: 'legacy' },
+  { id: 'fis_6', title: 'Física Moderna', subject: 'Física', subjectId: 'fisica', academicLevel: 'medio', objective: 'Distinguir energia e quantidade de fótons ao interpretar o limiar do efeito fotoelétrico.', source: 'legacy' },
+  { id: 'qui_1', title: 'Escala de pH', subject: 'Química', subjectId: 'quimica', academicLevel: 'medio', objective: 'Interpretar a escala logarítmica de pH e distinguir concentração, força ácida e neutralidade.', source: 'legacy' },
+  { id: 'qui_2', title: 'Titulação Ácido-Base', subject: 'Química', subjectId: 'quimica', academicLevel: 'medio', objective: 'Calcular a concentração por estequiometria de titulação e distinguir equivalência e ponto final.', source: 'legacy' },
+  { id: 'qui_3', title: 'Estequiometria', subject: 'Química', subjectId: 'quimica', academicLevel: 'medio', objective: 'Relacionar coeficientes, quantidades de matéria e massas sem alterar as fórmulas das substâncias.', source: 'legacy' },
+  { id: 'qui_4', title: 'Química Orgânica', subject: 'Química', subjectId: 'quimica', academicLevel: 'medio', objective: 'Comparar a conectividade de isômeros e relacionar funções orgânicas e interações intermoleculares.', source: 'legacy' },
+  { id: 'qui_5', title: 'Eletroquímica', subject: 'Química', subjectId: 'quimica', academicLevel: 'medio', objective: 'Identificar oxidação e redução e relacionar transferência de elétrons à quantidade de metal depositada.', source: 'legacy' },
+  { id: 'qui_6', title: 'Gases Ideais', subject: 'Química', subjectId: 'quimica', academicLevel: 'medio', objective: 'Aplicar PV=nRT com unidades compatíveis e reconhecer as hipóteses de transformações gasosas.', source: 'legacy' },
+  { id: 'bio_1', title: 'Microscopia Celular', subject: 'Biologia', subjectId: 'biologia', academicLevel: 'fundamental_2', objective: 'Comparar estruturas celulares e distinguir ampliação de resolução em microscopia óptica.', source: 'legacy' },
+  { id: 'bio_2', title: 'Genética Mendeliana', subject: 'Biologia', subjectId: 'biologia', academicLevel: 'fundamental_2', objective: 'Relacionar gametas, genótipos e fenótipos em um cruzamento mendeliano simples sem confundir probabilidade e certeza.', source: 'legacy' },
+  { id: 'bio_3', title: 'Anatomia Humana', subject: 'Biologia', subjectId: 'biologia', academicLevel: 'fundamental_2', objective: 'Percorrer a circulação sanguínea e distinguir artérias, veias, tecidos, órgãos e sistemas.', source: 'legacy' },
+  { id: 'bio_4', title: 'Ecossistemas', subject: 'Biologia', subjectId: 'biologia', academicLevel: 'fundamental_2', objective: 'Interpretar teias alimentares e diferenciar fluxo de energia e reciclagem de nutrientes.', source: 'legacy' },
+  { id: 'bio_5', title: 'Evolução', subject: 'Biologia', subjectId: 'biologia', academicLevel: 'fundamental_2', objective: 'Analisar variação herdável e seleção natural sem atribuir mudanças intencionais aos organismos.', source: 'legacy' },
+  { id: 'bio_6', title: 'Bioquímica', subject: 'Biologia', subjectId: 'biologia', academicLevel: 'medio', objective: 'Interpretar a atividade enzimática em diferentes condições sem deduzir mecanismos a partir de um dado isolado.', source: 'legacy' },
+  { id: 'port_1', title: 'Sintaxe Dinâmica', subject: 'Português', subjectId: 'portugues', academicLevel: 'fundamental_2', objective: 'Identificar relações entre sujeito, predicado, complementos e modificadores e comparar mudanças de ordem.', source: 'legacy' },
+  { id: 'port_2', title: 'Morfologia', subject: 'Português', subjectId: 'portugues', academicLevel: 'fundamental_2', objective: 'Reconhecer classes e flexões de palavras por seu funcionamento na frase.', source: 'legacy' },
+  { id: 'port_3', title: 'Literatura Clássica', subject: 'Português', subjectId: 'portugues', academicLevel: 'medio', objective: 'Comparar formas literárias e interpretar fragmentos em diálogo com movimentos como Realismo e Modernismo.', source: 'legacy' },
+  { id: 'port_4', title: 'Figuras de Linguagem', subject: 'Português', subjectId: 'portugues', academicLevel: 'fundamental_2', objective: 'Explicar efeitos de personificação, sinestesia e contraste com apoio nas palavras do texto.', source: 'legacy' },
+  { id: 'port_5', title: 'Interpretação de Texto', subject: 'Português', subjectId: 'portugues', academicLevel: 'fundamental_1', objective: 'Distinguir informação explícita, inferência apoiada no texto e hipótese que exige outras informações.', source: 'legacy' },
+  { id: 'port_6', title: 'Fonética', subject: 'Português', subjectId: 'portugues', academicLevel: 'fundamental_2', objective: 'Comparar letras, fonemas, sílabas e acentuação respeitando variações de pronúncia.', source: 'legacy' },
+  { id: 'red_1', title: 'Estrutura Dissertativa', subject: 'Redação', subjectId: 'redacao', academicLevel: 'medio', objective: 'Planejar tese, desenvolvimento e conclusão com funções argumentativas conectadas.', source: 'legacy' },
+  { id: 'red_2', title: 'Coesão e Coerência', subject: 'Redação', subjectId: 'redacao', academicLevel: 'medio', objective: 'Revisar conectivos, retomadas e relações lógicas sem confundir ligação textual e coerência.', source: 'legacy' },
+  { id: 'red_3', title: 'Proposta de Intervenção', subject: 'Redação', subjectId: 'redacao', academicLevel: 'medio', objective: 'Articular agente, ação, meios, efeitos e detalhamento a um diagnóstico e aos direitos humanos.', source: 'legacy' },
+  { id: 'red_4', title: 'Análise de Tema', subject: 'Redação', subjectId: 'redacao', academicLevel: 'medio', objective: 'Delimitar o recorte do comando e identificar tangenciamento antes de desenvolver argumentos.', source: 'legacy' },
+  { id: 'red_5', title: 'Repertório Sociocultural', subject: 'Redação', subjectId: 'redacao', academicLevel: 'medio', objective: 'Relacionar uma referência verificável ao argumento sem inventar citações, números ou garantias.', source: 'legacy' },
+  { id: 'red_6', title: 'Correção de Falhas', subject: 'Redação', subjectId: 'redacao', academicLevel: 'medio', objective: 'Revisar raciocínio, referências e concordância explicando os efeitos das alterações.', source: 'legacy' },
+  { id: 'hist_1', title: 'Linha do Tempo Interativa', subject: 'História', subjectId: 'historia', academicLevel: 'fundamental_2', objective: 'Organizar marcos cronológicos sem confundir anterioridade, periodização e explicação causal.', source: 'legacy' },
+  { id: 'hist_2', title: 'Brasil Colonial', subject: 'História', subjectId: 'historia', academicLevel: 'fundamental_2', objective: 'Relacionar economia colonial, escravização e resistência reconhecendo a diversidade de povos e experiências.', source: 'legacy' },
+  { id: 'hist_3', title: 'Revolução Industrial', subject: 'História', subjectId: 'historia', academicLevel: 'fundamental_2', objective: 'Relacionar mecanização e organização do trabalho sem identificar produtividade com bem-estar.', source: 'legacy' },
+  { id: 'hist_4', title: 'Guerras Mundiais', subject: 'História', subjectId: 'historia', academicLevel: 'fundamental_2', objective: 'Distinguir contextos, estopins e consequências das guerras sem tratar sua sequência como inevitável.', source: 'legacy' },
+  { id: 'hist_5', title: 'Grécia e Roma', subject: 'História', subjectId: 'historia', academicLevel: 'fundamental_2', objective: 'Comparar participação política e exclusões no mundo antigo sem projetar instituições contemporâneas.', source: 'legacy' },
+  { id: 'hist_6', title: 'Guerra Fria', subject: 'História', subjectId: 'historia', academicLevel: 'fundamental_2', objective: 'Relacionar competição política, conflitos e corrida espacial distinguindo marcos e propaganda.', source: 'legacy' },
+  { id: 'lang_1', title: 'Vocabulário Essencial', subject: 'Idiomas', subjectId: 'idiomas', academicLevel: 'fundamental_2', objective: 'Inferir e usar vocabulário em inglês e espanhol pelo contexto, além de equivalências isoladas.', source: 'legacy' },
+  { id: 'lang_2', title: 'Tempos Verbais', subject: 'Idiomas', subjectId: 'idiomas', academicLevel: 'medio', objective: 'Comparar tempo e aspecto em narrativas em inglês e espanhol com apoio no contexto.', source: 'legacy' },
+  { id: 'lang_3', title: 'Listening Comprehension', subject: 'Idiomas', subjectId: 'idiomas', academicLevel: 'medio', objective: 'Relacionar expressões ouvidas e transcrição, reconhecendo os limites da síntese de voz e da alternativa escrita.', source: 'legacy' },
+  { id: 'lang_4', title: 'Expressões Idiomáticas', subject: 'Idiomas', subjectId: 'idiomas', academicLevel: 'medio', objective: 'Interpretar expressões idiomáticas e selecionar paráfrases adequadas à situação comunicativa.', source: 'legacy' },
+  { id: 'lang_5', title: 'Conversação Básica', subject: 'Idiomas', subjectId: 'idiomas', academicLevel: 'fundamental_2', objective: 'Construir turnos conectados, pedir repetição e confirmar informações em diálogos fictícios.', source: 'legacy' },
+  { id: 'lang_6', title: 'Falsos Cognatos', subject: 'Idiomas', subjectId: 'idiomas', academicLevel: 'fundamental_2', objective: 'Usar o contexto para distinguir palavras semelhantes entre português, inglês e espanhol.', source: 'legacy' },
+  { id: 'soft_1', title: 'Comunicação Interpessoal', subject: 'Soft Skills', subjectId: 'softskills', academicLevel: 'profissional', objective: 'Formular pedidos verificáveis e confirmar entendimento sem transformar divergências em ataques pessoais.', source: 'legacy' },
+  { id: 'soft_2', title: 'Liderança', subject: 'Soft Skills', subjectId: 'softskills', academicLevel: 'profissional', objective: 'Delegar entregas com critérios, apoio e acompanhamento e acolher impedimentos da equipe.', source: 'legacy' },
+  { id: 'soft_3', title: 'Gestão de Tempo', subject: 'Soft Skills', subjectId: 'softskills', academicLevel: 'profissional', objective: 'Planejar compromissos com estimativas, prioridades e margem para ajustes e imprevistos.', source: 'legacy' },
+  { id: 'soft_4', title: 'Inteligência Emocional', subject: 'Soft Skills', subjectId: 'softskills', academicLevel: 'profissional', objective: 'Reconhecer emoções e examinar interpretações antes de escolher respostas a situações de trabalho.', source: 'legacy' },
+  { id: 'soft_5', title: 'Resolução de Conflitos', subject: 'Soft Skills', subjectId: 'softskills', academicLevel: 'profissional', objective: 'Distinguir posições e interesses e construir acordos com condições e responsáveis claros.', source: 'legacy' },
+  { id: 'soft_6', title: 'Trabalho em Equipe', subject: 'Soft Skills', subjectId: 'softskills', academicLevel: 'profissional', objective: 'Coordenar tarefas interdependentes e verificar integração sem confundi-la com sucesso de partes isoladas.', source: 'legacy' },
+  { id: 'hard_1', title: 'Lógica de Programação', subject: 'Hard Skills', subjectId: 'hardskills', academicLevel: 'profissional', objective: 'Rastrear condições booleanas e casos de fronteira de um algoritmo com entradas válidas.', source: 'legacy' },
+  { id: 'hard_2', title: 'Estruturas de Dados', subject: 'Hard Skills', subjectId: 'hardskills', academicLevel: 'profissional', objective: 'Comparar operações de fila, pilha e mapa segundo o comportamento exigido pelo problema.', source: 'legacy' },
+  { id: 'hard_3', title: 'Banco de Dados', subject: 'Hard Skills', subjectId: 'hardskills', academicLevel: 'profissional', objective: 'Relacionar chaves e junções em tabelas e distinguir integridade referencial e regras do negócio.', source: 'legacy' },
+  { id: 'hard_4', title: 'Desenvolvimento Web', subject: 'Hard Skills', subjectId: 'hardskills', academicLevel: 'profissional', objective: 'Associar estrutura, apresentação e comportamento a controles acessíveis e validação de formulários.', source: 'legacy' },
+  { id: 'hard_5', title: 'Algoritmos', subject: 'Hard Skills', subjectId: 'hardskills', academicLevel: 'profissional', objective: 'Comparar buscas linear e binária verificando ordenação, rastreamento e crescimento do custo.', source: 'legacy' },
+  { id: 'hard_6', title: 'Redes de Computadores', subject: 'Hard Skills', subjectId: 'hardskills', academicLevel: 'profissional', objective: 'Distinguir endereços, portas, DNS e transporte em casos sintéticos de diagnóstico de rede.', source: 'legacy' },
+  { id: 'geo_1', title: 'Placas Tectônicas', subject: 'Geografia', subjectId: 'geografia', academicLevel: 'fundamental_2', objective: 'Comparar limites de placas e distinguir movimento médio e previsão de terremotos.', source: 'legacy' },
+  { id: 'geo_2', title: 'Agentes do Relevo', subject: 'Geografia', subjectId: 'geografia', academicLevel: 'fundamental_2', objective: 'Diferenciar intemperismo, erosão e deposição e analisar evidências de perda de solo.', source: 'legacy' },
+  { id: 'geo_3', title: 'Tipos de Clima', subject: 'Geografia', subjectId: 'geografia', academicLevel: 'fundamental_2', objective: 'Comparar padrões de temperatura e chuva distinguindo clima, tempo meteorológico e sazonalidade.', source: 'legacy' },
+  { id: 'geo_4', title: 'Cartografia Digital', subject: 'Geografia', subjectId: 'geografia', academicLevel: 'fundamental_2', objective: 'Interpretar escala e camadas cartográficas sem confundir números absolutos, taxas e precisão gráfica.', source: 'legacy' },
+  { id: 'geo_5', title: 'Bacias Hidrográficas', subject: 'Geografia', subjectId: 'geografia', academicLevel: 'fundamental_2', objective: 'Relacionar drenagem, montante, jusante e vazão com unidades e hipóteses de balanço explícitas.', source: 'legacy' },
+  { id: 'geo_6', title: 'Biomas Brasileiros', subject: 'Geografia', subjectId: 'geografia', academicLevel: 'fundamental_2', objective: 'Comparar características dos biomas sem tomar limites regionais como paisagens uniformes.', source: 'legacy' },
+  { id: 'fil_1', title: 'Dilemas Éticos', subject: 'Filosofia', subjectId: 'filosofia', academicLevel: 'medio', objective: 'Comparar razões, consequências e deveres em dilemas sem reduzir a justificativa à preferência.', source: 'legacy' },
+  { id: 'fil_2', title: 'O Mito da Caverna', subject: 'Filosofia', subjectId: 'filosofia', academicLevel: 'medio', objective: 'Interpretar aparência, conhecimento e formação na alegoria sem confundir certeza pessoal e demonstração.', source: 'legacy' },
+  { id: 'fil_3', title: 'Contratualismo', subject: 'Filosofia', subjectId: 'filosofia', academicLevel: 'medio', objective: 'Comparar justificativas de autoridade e limites do poder em Hobbes, Locke e Rousseau.', source: 'legacy' },
+  { id: 'fil_4', title: 'Lógica e Argumentação', subject: 'Filosofia', subjectId: 'filosofia', academicLevel: 'medio', objective: 'Distinguir validade, verdade de premissas e sustentação de conclusões em argumentos.', source: 'legacy' },
+  { id: 'fil_5', title: 'Filosofia Política', subject: 'Filosofia', subjectId: 'filosofia', academicLevel: 'medio', objective: 'Analisar participação, representação e controle do poder além da simples contagem de votos.', source: 'legacy' },
+  { id: 'fil_6', title: 'Ciência e Método', subject: 'Filosofia', subjectId: 'filosofia', academicLevel: 'medio', objective: 'Examinar hipóteses e evidências distinguindo correlação, causalidade e limites de uma investigação.', source: 'legacy' },
+];

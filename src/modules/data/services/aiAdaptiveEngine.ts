@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const apiKey = import.meta.env.VITE_DISABLE_AI === 'true' ? undefined : import.meta.env.VITE_GEMINI_API_KEY;
 
 // Inicializa o SDK do Gemini apenas se a chave estiver configurada
 export const genAI = (apiKey && apiKey !== "COLE_AQUI" && apiKey.trim() !== "") ? new GoogleGenerativeAI(apiKey) : null;

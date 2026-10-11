@@ -1,0 +1,464 @@
+{
+  "soft_1": {
+    "context": "Um grupo precisa entregar um protótipo na sexta-feira. Na segunda, uma mensagem diz apenas: 'A tela está errada, resolva isso logo'. Compare maneiras de comunicar o problema sem transformar uma diferença de expectativa em ataque pessoal. Os diálogos são situações fictícias de trabalho em grupo.",
+    "theory": "Comunicação interpessoal envolve expressar uma necessidade e verificar como ela foi compreendida. Uma observação descreve algo verificável; um julgamento atribui intenção ou característica à pessoa. 'O botão não aparece em 390 px' permite testar o problema, enquanto 'você nunca presta atenção' generaliza. Uma solicitação útil informa a ação esperada, o contexto e um prazo negociável. Escuta ativa inclui parafrasear o que foi dito e pedir confirmação, sem supor que repetir palavras equivale a concordar. Clareza não elimina diferenças, mas permite discutir o mesmo problema.",
+    "workedExample": "A mensagem pode ser reescrita: 'No celular de 390 px, o botão Salvar ficou fora da tela. Isso impede concluir o cadastro. Você consegue verificar o ajuste até quarta às 15h? Se não, combinamos outra pessoa ou outro prazo'. A colega responde: 'Entendi que o problema é a posição do botão no celular, não a cor. É isso?'. A confirmação reduz uma ambiguidade antes do trabalho.",
+    "investigation": [
+      "Separe na mensagem inicial aquilo que pode ser observado daquilo que é julgamento sobre alguém.",
+      "Compare os três diálogos e identifique qual informação permite ao destinatário agir.",
+      "Redija uma solicitação com evidência, efeito no trabalho e oportunidade de confirmar o entendimento."
+    ],
+    "expectedEvidence": "A resposta deve citar o problema verificável do botão, explicar seu efeito no cadastro e formular um pedido com prazo discutível. Deve incluir uma checagem de entendimento, sem diagnosticar a personalidade de ninguém.",
+    "reflection": "Como você verificaria que a colega entendeu o problema sem exigir que ela concorde com todas as suas preferências?",
+    "scenarios": [
+      {
+        "id": "acusacao",
+        "label": "Mensagem acusatória",
+        "situation": "O responsável recebe: 'Você sempre entrega tudo errado; arrume a tela'. Não há imagem, largura de tela nem descrição do defeito.",
+        "observation": "O destinatário sabe que houve insatisfação, mas não sabe qual comportamento da tela deve reproduzir.",
+        "explanation": "A generalização sobre a pessoa não especifica uma tarefa. A ausência de evidência dificulta tanto corrigir quanto verificar se a correção resolveu o problema."
+      },
+      {
+        "id": "pedido",
+        "label": "Pedido verificável",
+        "situation": "A mensagem informa: 'Em 390 px o botão está fora da tela. Podemos deixá-lo visível até quarta e testar juntos?'.",
+        "observation": "O diálogo oferece uma condição de teste, uma alteração desejada e um prazo que pode ser negociado.",
+        "explanation": "Uma solicitação concreta reduz suposições. O prazo em forma de proposta permite comunicar impedimentos antes que o compromisso seja assumido."
+      },
+      {
+        "id": "escuta",
+        "label": "Confirmação do entendimento",
+        "situation": "A colega responde: 'Entendi que devo manter o botão visível no celular; o texto dele continua igual. Confere?'.",
+        "observation": "A pessoa que fez o pedido pode confirmar ou corrigir a interpretação antes de começar a alteração.",
+        "explanation": "A paráfrase torna visível a interpretação do destinatário. Ela verifica o sentido da mensagem sem exigir concordância automática com sua origem ou tom."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual mensagem distingue uma observação verificável de um julgamento pessoal?",
+        "options": [
+          {
+            "text": "Você não se importa com o projeto.",
+            "correct": false,
+            "explanation": "A frase atribui uma intenção que o defeito na interface, por si só, não demonstra."
+          },
+          {
+            "text": "Em 390 px, o botão Salvar está fora da área visível.",
+            "correct": true,
+            "explanation": "A condição de largura e o elemento observado permitem reproduzir e discutir o problema."
+          },
+          {
+            "text": "Todo mundo sabe que sua tela ficou ruim.",
+            "correct": false,
+            "explanation": "A afirmação usa uma aprovação coletiva vaga, sem identificar o comportamento que precisa mudar."
+          }
+        ]
+      },
+      {
+        "question": "Uma colega parafraseia o pedido e pergunta se entendeu corretamente. O que essa ação permite?",
+        "options": [
+          {
+            "text": "Corrigir uma interpretação antes da execução.",
+            "correct": true,
+            "explanation": "A pessoa que solicitou pode confirmar o sentido ou esclarecer o ponto que ficou diferente."
+          },
+          {
+            "text": "Provar que a colega concorda com todas as decisões.",
+            "correct": false,
+            "explanation": "Compreender uma solicitação e concordar com ela são posições diferentes; a paráfrase só verifica entendimento."
+          },
+          {
+            "text": "Eliminar a necessidade de combinar o prazo.",
+            "correct": false,
+            "explanation": "Confirmar o significado não informa automaticamente a disponibilidade para executar a tarefa."
+          }
+        ]
+      }
+    ]
+  },
+  "soft_2": {
+    "context": "Uma equipe de quatro estudantes precisa apresentar um protótipo em uma semana. Ana domina o editor; Rui conhece o roteiro; Bia é iniciante; Caio está disponível apenas em dois dias. Investigue como coordenar o trabalho considerando capacidade, participação e acompanhamento. As situações são hipotéticas.",
+    "theory": "Liderar um trabalho coletivo inclui esclarecer o resultado desejado, distribuir responsabilidades e criar condições para que impedimentos apareçam cedo. Delegar não é apenas repassar uma ordem: é combinar entrega, autonomia, recursos e ponto de acompanhamento. A experiência de quem executa e a dificuldade da tarefa influenciam o apoio necessário. Decisões participativas podem reunir conhecimentos diferentes, mas exigem um critério e um momento de decisão para não paralisar a equipe. A responsabilidade pela coordenação não dispensa a pessoa líder de ouvir objeções nem transforma cada divergência em desobediência.",
+    "workedExample": "O grupo define como entrega uma demonstração de três telas com cadastro fictício. Ana monta a navegação; Rui escreve o roteiro; Bia revisa as instruções com apoio de Ana na terça; Caio testa na quinta. Cada tarefa tem um responsável e um critério de conclusão. Na quarta, uma revisão de 15 minutos verifica impedimentos. Se o cadastro real atrasar, a equipe já combinou apresentar o fluxo com dados fictícios identificados.",
+    "investigation": [
+      "Escreva qual resultado a equipe precisa entregar e quais capacidades ou horários limitam sua divisão.",
+      "Compare centralização, delegação sem apoio e delegação com acompanhamento nos casos apresentados.",
+      "Proponha responsabilidades, um ponto de revisão e uma alternativa para o principal impedimento."
+    ],
+    "expectedEvidence": "O plano deve relacionar cada responsabilidade ao resultado esperado, prever apoio à integrante iniciante e usar os dias disponíveis de Caio. Precisa indicar quando um impedimento será revisto e quem decidirá o ajuste.",
+    "reflection": "Em que tarefa Ana deve orientar alguém em vez de assumir todo o trabalho, e que evidência mostraria que o apoio foi suficiente?",
+    "scenarios": [
+      {
+        "id": "centraliza",
+        "label": "Tudo com a líder",
+        "situation": "Ana decide editar, escrever e testar sozinha porque já conhece o programa. As outras três pessoas aguardam instruções até a véspera.",
+        "observation": "A entrega depende de uma única pessoa e o grupo perde a oportunidade de identificar erros por revisão independente.",
+        "explanation": "A experiência de Ana pode acelerar uma etapa, mas concentrar todas as atividades cria uma dependência e reduz a contribuição disponível das outras pessoas."
+      },
+      {
+        "id": "abandona",
+        "label": "Delegação sem apoio",
+        "situation": "Bia recebe a tarefa 'configurar todas as telas' sem exemplo, acesso ao arquivo ou ponto de revisão. Ela ainda não conhece o editor.",
+        "observation": "Há uma responsável nomeada, mas faltam recursos e apoio para que a responsabilidade seja executável.",
+        "explanation": "Atribuir uma tarefa não substitui verificar condições de execução. Nesse caso, um exemplo inicial, acesso e uma revisão antecipada seriam partes importantes da delegação."
+      },
+      {
+        "id": "acompanha",
+        "label": "Autonomia combinada",
+        "situation": "Bia recebe uma tela de referência e acesso ao arquivo. Ela decide a ordem dos ajustes e combina mostrar uma primeira versão na terça.",
+        "observation": "O acordo define apoio e acompanhamento sem exigir aprovação a cada pequena ação.",
+        "explanation": "Autonomia pode coexistir com critérios de entrega e revisão. O ponto de acompanhamento permite ajustar dificuldades antes do prazo final."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual combinação torna a delegação da tarefa de Bia mais viável neste projeto?",
+        "options": [
+          {
+            "text": "Uma ordem ampla, sem acesso nem exemplos.",
+            "correct": false,
+            "explanation": "A responsabilidade nominal não resolve a ausência de recursos nem a falta de familiaridade com a ferramenta."
+          },
+          {
+            "text": "Ana executar tudo e só informar o resultado.",
+            "correct": false,
+            "explanation": "Essa escolha centraliza a execução e não oferece a Bia uma tarefa acompanhada para realizar."
+          },
+          {
+            "text": "Entrega definida, acesso, apoio inicial e revisão na terça.",
+            "correct": true,
+            "explanation": "O conjunto estabelece o que fazer, com quais condições e quando obter ajuda ou corrigir o rumo."
+          }
+        ]
+      },
+      {
+        "question": "Por que uma revisão curta na quarta-feira pode ajudar antes da apresentação de sexta?",
+        "options": [
+          {
+            "text": "Porque permite reconhecer impedimentos e ajustar o plano com antecedência.",
+            "correct": true,
+            "explanation": "O acompanhamento ocorre enquanto ainda existe tempo para redistribuir uma tarefa ou usar a alternativa combinada."
+          },
+          {
+            "text": "Porque garante que nenhum erro acontecerá depois.",
+            "correct": false,
+            "explanation": "Uma revisão reduz incertezas, mas não oferece garantia de ausência de novos erros ou imprevistos."
+          },
+          {
+            "text": "Porque dispensa os critérios de conclusão de cada tarefa.",
+            "correct": false,
+            "explanation": "Sem critérios, a revisão teria dificuldade para distinguir uma etapa pronta de uma impressão de progresso."
+          }
+        ]
+      }
+    ]
+  },
+  "soft_3": {
+    "context": "Às 14h, uma estudante tem duas horas disponíveis. Precisa revisar uma apresentação para amanhã, responder cinco mensagens e verificar uma inscrição que encerra às 15h. Cada tarefa pode ter consequência e prazo diferentes. Monte uma sequência realista, com margem para interrupções, usando os tempos hipotéticos abaixo.",
+    "theory": "Gestão de tempo começa por tornar visíveis compromissos, duração estimada e consequências de atrasos. Uma tarefa urgente tem um prazo próximo; uma tarefa importante contribui para um resultado relevante. As duas características podem coincidir ou divergir. Estimativas devem incluir preparação, pausas e possíveis retrabalhos. Alternar tarefas continuamente exige retomar o contexto e pode fragmentar a atenção. Reservar blocos de trabalho e agrupar mensagens é uma estratégia a experimentar, não uma regra universal. Um plano útil admite revisão quando a estimativa ou a prioridade muda.",
+    "workedExample": "Entre 14h e 16h há 120 minutos. Um plano reserva 15 min para a inscrição, 10 min para mensagens essenciais, 60 min para revisar os slides, 10 min de pausa e 25 min para ajustes ou imprevistos: 15+10+60+10+25=120. A inscrição vem primeiro pelo encerramento às 15h. Se a revisão exigir 90 min, o plano excederá em 30 min e será preciso reduzir escopo ou negociar outra atividade; 'trabalhar mais rápido' não é uma estimativa suficiente.",
+    "investigation": [
+      "Liste os prazos e some as estimativas antes de encaixar as tarefas nas duas horas disponíveis.",
+      "Compare a consequência de atrasar a inscrição com a de adiar mensagens sem prazo imediato.",
+      "Replaneje o bloco de trabalho quando a revisão dos slides passar de sessenta para noventa minutos."
+    ],
+    "expectedEvidence": "A proposta precisa caber em 120 minutos, respeitar o encerramento da inscrição e explicitar a margem reservada. Quando o tempo de revisão aumentar, deve mostrar qual atividade ou escopo será alterado, com a diferença de 30 minutos calculada.",
+    "reflection": "Qual sinal durante a revisão faria você atualizar a estimativa em vez de manter um plano que já não cabe no horário?",
+    "scenarios": [
+      {
+        "id": "mensagens",
+        "label": "Notificações primeiro",
+        "situation": "A estudante passa de 14h a 15h05 respondendo mensagens sem prazo e só então abre a inscrição que fechava às 15h.",
+        "observation": "O horário da inscrição foi perdido, embora várias mensagens tenham sido respondidas.",
+        "explanation": "O volume de pequenas ações concluídas não demonstra que a consequência mais importante foi tratada. O prazo de encerramento precisava aparecer na ordem das tarefas."
+      },
+      {
+        "id": "bloco",
+        "label": "Plano com margem",
+        "situation": "Ela conclui a inscrição às 14h15, agrupa mensagens em 10 min e reserva 60 min para slides, 10 min de pausa e 25 min de margem.",
+        "observation": "Os blocos somam 120 min e deixam uma reserva explícita sem ultrapassar 16h.",
+        "explanation": "O plano torna a capacidade disponível verificável. A margem não é tempo desperdiçado: ela permite acomodar variações que uma estimativa inicial não captura."
+      },
+      {
+        "id": "reestima",
+        "label": "Revisão mais longa",
+        "situation": "Uma verificação mostra que os slides exigem 90 min em vez de 60. Os outros blocos continuariam com os mesmos tempos.",
+        "observation": "A soma subiria de 120 para 150 min, excedendo a janela em 30 min.",
+        "explanation": "A nova duração exige uma decisão de escopo, adiamento ou negociação. Manter todos os blocos inalterados apenas esconde a incompatibilidade do plano."
+      }
+    ],
+    "questions": [
+      {
+        "question": "No plano com margem, qual é a soma dos blocos de 15, 10, 60, 10 e 25 minutos?",
+        "options": [
+          {
+            "text": "120 minutos, exatamente a janela das 14h às 16h.",
+            "correct": true,
+            "explanation": "Somando os cinco blocos, 15+10+60+10+25=120, incluindo pausa e reserva."
+          },
+          {
+            "text": "95 minutos, pois a margem não conta no horário.",
+            "correct": false,
+            "explanation": "A margem ocupa parte da janela disponível e deve entrar na soma, mesmo sem tarefa definida."
+          },
+          {
+            "text": "150 minutos, já no plano inicial.",
+            "correct": false,
+            "explanation": "150 minutos seria a soma após aumentar a revisão de 60 para 90 min, não a duração inicial."
+          }
+        ]
+      },
+      {
+        "question": "Qual ação responde melhor à descoberta de que a revisão precisa de trinta minutos extras?",
+        "options": [
+          {
+            "text": "Manter a soma antiga porque ela já foi escrita.",
+            "correct": false,
+            "explanation": "O registro anterior não altera a capacidade disponível; a nova duração precisa ser incorporada ao plano."
+          },
+          {
+            "text": "Rever escopo ou negociar outra tarefa e recalcular os blocos.",
+            "correct": true,
+            "explanation": "A ação reconhece a diferença de tempo e permite construir uma sequência que volte a caber na janela."
+          },
+          {
+            "text": "Abrir várias tarefas simultaneamente para criar mais minutos.",
+            "correct": false,
+            "explanation": "A alternância não amplia as duas horas e pode acrescentar retomadas de contexto às atividades."
+          }
+        ]
+      }
+    ]
+  },
+  "soft_4": {
+    "context": "Durante uma revisão de projeto, Joana escuta: 'Não entendi sua explicação'. Ela percebe irritação e vontade de responder na mesma hora. Compare respostas possíveis para reconhecer a emoção, esclarecer o comentário e escolher uma ação. Este exercício não faz diagnóstico psicológico nem supõe conhecer a intenção de quem falou.",
+    "theory": "Inteligência emocional pode ser trabalhada por meio de reconhecer emoções e seus sinais, considerar interpretações alternativas e escolher como agir. Perceber irritação não obriga a suprimi-la nem a expressá-la como ataque. Uma pausa breve pode permitir nomear o que ocorreu e formular uma pergunta. Empatia significa tentar compreender a perspectiva de outra pessoa, sem adivinhar sua mente ou assumir concordância. Emoções fornecem informações sobre uma experiência, mas não constituem, sozinhas, prova da intenção de alguém. Os casos permitem discutir escolhas possíveis; não medem traços de personalidade.",
+    "workedExample": "Joana identifica que ficou irritada e evita concluir automaticamente que o colega quis humilhá-la. Ela diz: 'Fiquei frustrada porque preparei essa parte. Qual trecho ficou confuso: o problema ou a solução?'. O colega aponta que faltou explicar uma sigla. A pergunta produz uma informação que a resposta 'você não presta atenção' não produziria. Se ainda estiver muito alterada, Joana pode pedir alguns minutos e combinar quando retomará a revisão.",
+    "investigation": [
+      "Identifique o comentário observável, a emoção de Joana e as interpretações que ela acrescentou ao comentário.",
+      "Compare as consequências possíveis de atacar, esconder o incômodo e pedir esclarecimento.",
+      "Escreva uma resposta que reconheça a emoção e permita obter informação sobre o trecho confuso."
+    ],
+    "expectedEvidence": "A análise deve separar irritação de prova de hostilidade, reconhecer pelo menos uma interpretação alternativa e propor uma pergunta concreta. Uma pausa sugerida deve incluir retorno combinado, sem afirmar que o exercício diagnostica ou elimina emoções.",
+    "reflection": "Qual informação você precisaria obter antes de concluir que o comentário foi uma crítica pessoal?",
+    "scenarios": [
+      {
+        "id": "ataque",
+        "label": "Conclusão imediata",
+        "situation": "Joana interpreta 'não entendi' como tentativa de humilhação e responde: 'O problema é que você não sabe ouvir'.",
+        "observation": "A resposta atribui culpa ao colega e a dúvida sobre a explicação permanece sem esclarecimento.",
+        "explanation": "A emoção sentida é real, mas a intenção hostil ainda não foi demonstrada. Transformá-la em certeza fecha uma oportunidade de conhecer o ponto de dificuldade."
+      },
+      {
+        "id": "pausa",
+        "label": "Pausa com retorno",
+        "situation": "Ela diz: 'Preciso de cinco minutos para organizar minha resposta; voltamos a esse trecho às 14h10?'.",
+        "observation": "O incômodo não é resolvido de imediato, mas existe um acordo explícito para retomar a conversa.",
+        "explanation": "A pausa pode ajudar a escolher uma resposta. Combinar a retomada distingue essa ação de abandonar silenciosamente a discussão, embora não garanta o resultado."
+      },
+      {
+        "id": "pergunta",
+        "label": "Esclarecimento específico",
+        "situation": "Depois de reconhecer a irritação, Joana pergunta qual parte ficou confusa. O colega aponta a sigla usada na segunda frase.",
+        "observation": "A equipe identifica uma informação que pode ser explicada ou reescrita no material.",
+        "explanation": "A pergunta converte um comentário amplo em evidência sobre a compreensão do texto. Isso não exige que Joana deixe de sentir frustração para colaborar."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que a irritação de Joana permite afirmar, a partir dos dados apresentados?",
+        "options": [
+          {
+            "text": "Que o colega certamente tentou humilhá-la.",
+            "correct": false,
+            "explanation": "A intenção do colega não decorre automaticamente da emoção experimentada por Joana."
+          },
+          {
+            "text": "Que Joana deve fingir que não sentiu nada.",
+            "correct": false,
+            "explanation": "Reconhecer uma emoção não exige negá-la; o exercício discute como escolher a resposta a partir dela."
+          },
+          {
+            "text": "Que o comentário a afetou e ainda é preciso esclarecer sua interpretação.",
+            "correct": true,
+            "explanation": "Essa afirmação reconhece a experiência de Joana e preserva a incerteza sobre a intenção e o trecho confuso."
+          }
+        ]
+      },
+      {
+        "question": "Qual resposta ajuda a compreender a dificuldade do colega sem adivinhar sua intenção?",
+        "options": [
+          {
+            "text": "Qual parte ficou confusa: o problema, a sigla ou a solução?",
+            "correct": true,
+            "explanation": "A pergunta solicita uma informação sobre a explicação e oferece pontos concretos para esclarecer."
+          },
+          {
+            "text": "Você só critica porque não gosta de mim.",
+            "correct": false,
+            "explanation": "A frase apresenta uma interpretação pessoal como fato sem buscar dados que a confirmem."
+          },
+          {
+            "text": "Vou sair e não falaremos mais desse assunto.",
+            "correct": false,
+            "explanation": "Encerrar sem retomada impede a equipe de esclarecer a dúvida que motivou a revisão."
+          }
+        ]
+      }
+    ]
+  },
+  "soft_5": {
+    "context": "Dois integrantes disputam a única sala silenciosa disponível na quinta. Lia precisa gravar uma narração por 30 min; Paulo quer revisar slides com dois colegas durante 60 min. Ambos pediram a sala das 14h às 15h. Analise posições, necessidades e critérios para construir um acordo que possa ser cumprido.",
+    "theory": "Em um conflito, a posição é uma solução que a pessoa defende, enquanto o interesse explica a necessidade que essa solução tenta atender. 'Quero a sala às 14h' é uma posição; 'preciso gravar sem ruído antes das 15h' esclarece um interesse. Explorar interesses pode revelar opções de horário, espaço ou divisão que não aparecem em uma disputa de vencedores. Um acordo precisa ter responsáveis, condições e forma de conferir seu cumprimento. Soluções não são automaticamente justas por dividirem tudo ao meio: os critérios devem considerar o uso e as limitações relevantes. Escutar as partes não obriga a aceitar comportamentos ofensivos nem substitui uma mediação quando necessária.",
+    "workedExample": "Ao esclarecer os interesses, descobre-se que a gravação de Lia precisa acabar até 15h e que a revisão de Paulo pode ocorrer das 14h30 às 15h30. Eles propõem sala silenciosa para Lia das 14h às 14h30 e para Paulo das 14h30 às 15h30, desde que a reserva até 15h30 esteja disponível. Lia entrega a sala preparada às 14h30; Paulo confirma a extensão com o responsável. O acordo depende dessa verificação, não apenas da boa vontade dos dois.",
+    "investigation": [
+      "Registre a posição inicial de cada integrante e pergunte qual necessidade ou prazo está por trás dela.",
+      "Compare a disputa pelo horário com as opções que surgem ao conhecer a duração e a necessidade de silêncio.",
+      "Formule um acordo condicional com horários, responsáveis e uma alternativa se a extensão da reserva não for possível."
+    ],
+    "expectedEvidence": "A solução deve distinguir posições de interesses, atender aos 30 min de gravação e aos 60 min de revisão ou explicar uma negociação de escopo. Deve verificar a disponibilidade até 15h30 e registrar como o acordo será confirmado.",
+    "reflection": "Se a sala só puder ser usada até 15h, que outra informação sobre a revisão de Paulo ajudaria a buscar uma alternativa?",
+    "scenarios": [
+      {
+        "id": "posicoes",
+        "label": "Disputa de posições",
+        "situation": "Lia e Paulo repetem 'eu pedi primeiro' e 'meu trabalho é mais importante', sem mencionar duração ou prazo de entrega.",
+        "observation": "A conversa apresenta duas exigências incompatíveis, mas ainda não informa quais necessidades podem ser negociadas.",
+        "explanation": "Repetir a solução desejada não esclarece por que ela foi escolhida. Perguntar sobre duração, silêncio e prazo pode ampliar as opções disponíveis."
+      },
+      {
+        "id": "interesses",
+        "label": "Necessidades esclarecidas",
+        "situation": "Lia informa que precisa de 30 min de silêncio antes das 15h. Paulo confirma que os 60 min de revisão podem terminar às 15h30.",
+        "observation": "Surge uma sequência possível de 30 min mais 60 min, condicionada à disponibilidade da sala até 15h30.",
+        "explanation": "A nova opção nasce de interesses e flexibilidade de horário, mas exige verificar uma condição externa. Uma promessa de sala indisponível não seria um acordo executável."
+      },
+      {
+        "id": "restricao",
+        "label": "Limite da reserva",
+        "situation": "O responsável informa que outra turma usará a sala às 15h. Paulo pode revisar os slides em uma mesa comum, mas ainda precisa consultar seus colegas.",
+        "observation": "A extensão proposta não é viável; mudar o local da revisão é uma alternativa que precisa de confirmação.",
+        "explanation": "Quando uma condição muda, o acordo deve ser revisto. A disponibilidade dos colegas e a adequação da mesa são informações necessárias antes de declarar o conflito resolvido."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual fala apresenta um interesse em vez de apenas repetir uma posição sobre a sala?",
+        "options": [
+          {
+            "text": "A sala das 14h deve ser minha.",
+            "correct": false,
+            "explanation": "A frase declara uma solução desejada, sem explicar a necessidade que ela atende."
+          },
+          {
+            "text": "Preciso gravar 30 min sem ruído e entregar antes das 15h.",
+            "correct": true,
+            "explanation": "Duração, condição de silêncio e prazo explicam o que Lia precisa preservar em uma solução."
+          },
+          {
+            "text": "Eu exijo ganhar essa discussão.",
+            "correct": false,
+            "explanation": "Ganhar a discussão não informa as condições de trabalho nem ajuda a construir uma alternativa."
+          }
+        ]
+      },
+      {
+        "question": "O que deve acontecer antes de confirmar a sequência de uso das 14h às 15h30?",
+        "options": [
+          {
+            "text": "Verificar se a sala estará disponível até 15h30.",
+            "correct": true,
+            "explanation": "A extensão é uma condição essencial do acordo e precisa ser confirmada com a reserva do espaço."
+          },
+          {
+            "text": "Ignorar a reserva da outra turma.",
+            "correct": false,
+            "explanation": "Ignorar um uso já previsto transfere o conflito e não torna a sala efetivamente disponível."
+          },
+          {
+            "text": "Declarar que cada pessoa recebeu exatamente a mesma duração.",
+            "correct": false,
+            "explanation": "A proposta usa 30 min para gravação e 60 min para revisão; sua justificativa são as necessidades, não durações iguais."
+          }
+        ]
+      }
+    ]
+  },
+  "soft_6": {
+    "context": "Uma equipe prepara uma demonstração de biblioteca digital. A busca, o cadastro e os testes foram divididos, mas ninguém combinou o formato dos dados. Na integração, a busca espera 'titulo' e o cadastro produz 'nome'. Investigue como responsabilidades individuais, interfaces e revisão conjunta influenciam a entrega coletiva.",
+    "theory": "Trabalho em equipe exige mais do que dividir uma lista em partes. Atividades interdependentes precisam combinar entradas, saídas, prazos e critérios de integração. Um responsável claro evita que todos suponham que outra pessoa fará uma etapa; colaboração permite pedir ajuda e revisar sem apagar essa responsabilidade. A revisão de um colega pode revelar incompatibilidades que não aparecem no teste isolado de uma parte. O registro de decisões reduz perda de informação entre encontros. Segurança para relatar um erro favorece sua identificação; isso não significa ausência de critérios ou de compromissos de correção.",
+    "workedExample": "O grupo combina um livro como {id:7,titulo:'Marés',autor:'Nara'} usando dados fictícios. Cadastro e busca passam a usar a mesma chave 'titulo'. Bia implementa o cadastro; Rui revisa um registro; Ana testa a busca com esse registro; Caio registra o resultado. O critério coletivo é cadastrar e encontrar o mesmo livro pela interface. Cada parte funcionar sozinha continua necessário, mas deixa de ser confundido com integração concluída.",
+    "investigation": [
+      "Desenhe qual saída de uma tarefa é usada como entrada de outra na demonstração da biblioteca.",
+      "Compare uma entrega de partes isoladas com um teste que percorre cadastro e busca usando o mesmo registro.",
+      "Defina quem produz, quem revisa e qual evidência conjunta permite declarar o fluxo concluído."
+    ],
+    "expectedEvidence": "A resposta deve apontar a incompatibilidade entre 'nome' e 'titulo', propor um formato combinado e descrever um teste de cadastro seguido de busca. Precisa indicar responsabilidades e permitir relatar o erro com um compromisso de correção.",
+    "reflection": "Que verificação conjunta você colocaria antes da apresentação para descobrir uma incompatibilidade entre duas partes feitas por pessoas diferentes?",
+    "scenarios": [
+      {
+        "id": "isolado",
+        "label": "Partes isoladas",
+        "situation": "O cadastro salva 'nome' e a busca consulta 'titulo'. Cada integrante mostra apenas sua própria tela funcionando com dados preparados por si.",
+        "observation": "Os testes isolados não detectam que o registro criado pelo cadastro deixa de ser encontrado pela busca.",
+        "explanation": "As duas partes dependem de um contrato comum. Dados diferentes nos testes podem esconder uma incompatibilidade que surge no fluxo completo."
+      },
+      {
+        "id": "integracao",
+        "label": "Revisão compartilhada",
+        "situation": "Antes da apresentação, o grupo cadastra o livro fictício 'Marés' e tenta encontrá-lo pela busca. O resultado está vazio, e a equipe compara as chaves do registro.",
+        "observation": "O teste conjunto revela a diferença entre 'nome' e 'titulo' enquanto ainda é possível corrigir a ligação.",
+        "explanation": "A evidência percorre a fronteira entre tarefas. Revisar a integração complementa a responsabilidade individual por cada parte, sem substituí-la."
+      },
+      {
+        "id": "registro",
+        "label": "Erro comunicado e corrigido",
+        "situation": "Bia relata a diferença sem ser ridicularizada. O grupo escolhe 'titulo', registra a decisão e repete cadastro e busca com um novo livro fictício.",
+        "observation": "Há uma decisão explícita e uma nova verificação do fluxo, em vez de apenas uma afirmação de que o problema acabou.",
+        "explanation": "Poder comunicar o erro ajuda a encontrá-lo, mas a conclusão depende de uma correção verificável. O registro evita que outra alteração volte a introduzir duas convenções."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual evidência demonstra melhor que cadastro e busca funcionam juntos nesta biblioteca?",
+        "options": [
+          {
+            "text": "Cada integrante afirmar que terminou a própria tela.",
+            "correct": false,
+            "explanation": "A afirmação de conclusão individual não testa a passagem dos dados de uma parte para outra."
+          },
+          {
+            "text": "Mostrar duas telas bonitas com livros preparados separadamente.",
+            "correct": false,
+            "explanation": "A aparência e os dados isolados não verificam se o registro criado realmente é recuperado pela busca."
+          },
+          {
+            "text": "Cadastrar um livro fictício e encontrá-lo depois usando a busca.",
+            "correct": true,
+            "explanation": "Esse teste percorre a dependência entre as partes e pode revelar uma chave de dados incompatível."
+          }
+        ]
+      },
+      {
+        "question": "Como a equipe deve combinar abertura para relatar erros e responsabilidade pela entrega?",
+        "options": [
+          {
+            "text": "Aceitar o relato, definir correção e verificar novamente o fluxo.",
+            "correct": true,
+            "explanation": "A equipe pode acolher a informação sem abandonar os critérios que demonstram a correção do problema."
+          },
+          {
+            "text": "Evitar qualquer relato para proteger a imagem do grupo.",
+            "correct": false,
+            "explanation": "Ocultar incompatibilidades impede o grupo de agir antes de a falha aparecer na demonstração."
+          },
+          {
+            "text": "Dispensar testes depois que alguém reconhecer o erro.",
+            "correct": false,
+            "explanation": "Reconhecer a falha inicia o trabalho de correção; a verificação é necessária para saber se o fluxo foi restabelecido."
+          }
+        ]
+      }
+    ]
+  }
+}

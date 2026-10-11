@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -12,6 +12,8 @@ import {
 import { useAuth } from '../../core/contexts/AuthContext';
 import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
+import { LEARNING_LABS_CATALOG, getLearningLab, searchLearningLabs } from '../../core/constants/learningCatalog';
+import { LEARNING_LEVELS, normalizeLearningLevel, learningLevelLabel } from '../../core/constants/learningLevels';
 import { generatePedagogicalDiagnosis, generateCompleteLessonWithAI } from '../../core/services/geminiService';
 import { ProfessorLmsModules } from '../components/ProfessorLmsModules';
 import type {
@@ -178,6 +180,42 @@ export function ProfessorDashboard() {
 
   // Auth user data
   const { currentUser, userData } = useAuth();
+  const [catalogueLevel, setCatalogueLevel] = useState(() => normalizeLearningLevel(userData?.gradeLevel));
+  const selectedClass = turmas.find(turma => turma.id === selectedClassId) as (typeof turmas[number] & { gradeLevel?: unknown; academicLevel?: unknown }) | undefined;
+  const classLevel = normalizeLearningLevel(selectedClass?.gradeLevel, normalizeLearningLevel(selectedClass?.academicLevel, normalizeLearningLevel(userData?.gradeLevel)));
+  const catalogueModules = useMemo(() => {
+    const labs = searchLearningLabs({ academicLevel: catalogueLevel });
+    return [...new Set(labs.map(lab => lab.subject))].map(subject => ({
+      id: subject,
+      label: subject,
+      labs: labs.filter(lab => lab.subject === subject),
+    }));
+  }, [catalogueLevel]);
+
+  useEffect(() => {
+    setCatalogueLevel(classLevel);
+  }, [selectedClassId, classLevel]);
+
+  useEffect(() => {
+    if (newPlanLabId && getLearningLab(newPlanLabId)?.academicLevel !== catalogueLevel) setNewPlanLabId('');
+  }, [catalogueLevel, newPlanLabId]);
+
+  const learningLevelControl = (
+    <label style={{ display: 'grid', gap: '0.4rem', marginBottom: '1rem', color: 'var(--text-main)', fontWeight: 600 }}>
+      Nível dos laboratórios
+      <select
+        aria-label="Nível dos laboratórios"
+        value={catalogueLevel}
+        onChange={event => setCatalogueLevel(normalizeLearningLevel(event.target.value))}
+        style={{ padding: '0.65rem', borderRadius: '8px', background: 'var(--color-bg-card, #FAF7EE)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}
+      >
+        {LEARNING_LEVELS.map(level => <option key={level.id} value={level.id}>{level.label}</option>)}
+      </select>
+      <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 400 }}>
+        Selecione a etapa que será trabalhada com a turma.
+      </span>
+    </label>
+  );
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [copiedTextId, setCopiedTextId] = useState<string | null>(null);
   const [savingExam, setSavingExam] = useState(false);
@@ -493,7 +531,7 @@ export function ProfessorDashboard() {
     setSavingPlan(true);
     try {
       const profId = currentUser?.uid || 'prof_current';
-      const associatedLab = (ALL_MODULES as any[]).flatMap((m: any) => m.labs).find((l: any) => l.id === newPlanLabId);
+      const associatedLab = getLearningLab(newPlanLabId);
       const savedPlan = await saveLessonPlanItem({
         professorId: profId,
         turmaId: targetClass,
@@ -547,7 +585,7 @@ export function ProfessorDashboard() {
       await generateCompleteLessonWithAI({
         topic: newPlanTopic.trim(),
         subject: matSubject,
-        gradeLevel: 'Ensino Médio',
+        gradeLevel: learningLevelLabel(catalogueLevel),
         activityType: 'lesson_theory'
       });
       setNewPlanBNCC(`BNCC: Compreensão teórica e experimental de ${newPlanTopic.trim()}`);
@@ -572,7 +610,7 @@ export function ProfessorDashboard() {
       const result = await generateCompleteLessonWithAI({
         topic: examAiTopic.trim(),
         subject: newExamSubject,
-        gradeLevel: 'Ensino Médio',
+        gradeLevel: learningLevelLabel(catalogueLevel),
         activityType: 'quiz'
       });
       setNewExamTitle(result.title || `Avaliação Formal: ${examAiTopic.trim()}`);
@@ -898,7 +936,7 @@ export function ProfessorDashboard() {
           { id: 'lesson_plans', label: '📅 Plano de Aulas Bimestral', icon: Calendar },
           { id: 'exams', label: `📝 Provas & Avaliações (${examsList.length})`, icon: FileText },
           { id: 'materials', label: `📁 Materiais & Uploads (${enhancedMaterials.length})`, icon: Upload },
-          { id: 'labs_overview', label: '🔬 Catálogo 72 Labs', icon: Layers },
+          { id: 'labs_overview', label: `🔬 Catálogo ${LEARNING_LABS_CATALOG.length} Labs`, icon: Layers },
           { id: 'reports', label: '📊 Analytics & Diagnóstico IA', icon: BarChartIcon },
           { id: 'messages', label: `💬 Dúvidas (${profMessages.filter(m => !m.replied).length})`, icon: MessageCircle },
         ].map(tab => (
@@ -1248,16 +1286,18 @@ export function ProfessorDashboard() {
               </div>
 
               <div>
+                {learningLevelControl}
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
-                  Laboratório Virtual Associado (72 Labs):
+                  Laboratório Virtual Associado ({learningLevelLabel(catalogueLevel)}):
                 </label>
                 <select
+                  aria-label="Laboratório Virtual Associado"
                   value={newPlanLabId}
                   onChange={e => setNewPlanLabId(e.target.value)}
-                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'var(--color-bg-card, #FAF7EE)', color: 'var(--text-main)', fontSize: '0.88rem' }}
                 >
                   <option value="">Nenhum / Apenas Teórica</option>
-                  {ALL_MODULES.map(m => (
+                  {catalogueModules.map(m => (
                     <optgroup key={m.id} label={m.label}>
                       {m.labs.map(l => (
                         <option key={l.id} value={l.id}>{m.label}: {l.title}</option>
@@ -2296,27 +2336,29 @@ export function ProfessorDashboard() {
         </div>
       )}
 
-      {/* ── TAB 5: CATÁLOGO DOS 72 LABORATÓRIOS VIRTUAIS ── */}
+      {/* ── TAB 5: CATÁLOGO DE LABORATÓRIOS POR NÍVEL ── */}
       {dashboardTab === 'labs_overview' && (
         <div className="fade-in">
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 800, margin: '0 0 0.4rem' }}>
-              🔬 Catálogo Completo dos 72 Laboratórios Virtuais
+              🔬 Catálogo de {LEARNING_LABS_CATALOG.length} Laboratórios Virtuais
             </h3>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
-              Grade especializada com 6 simuladores interativos e controle de parâmetros para cada uma das 12 disciplinas.
+              Explore os laboratórios da etapa escolhida e associe seus tópicos ao planejamento da turma.
             </p>
           </div>
 
+          {learningLevelControl}
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.25rem' }}>
-            {ALL_MODULES.map((module) => (
+            {catalogueModules.map((module) => (
               <div key={module.id} className="glass-card" style={{ padding: '1.25rem', border: '1px solid var(--border-color, #E2D7C3)', borderRadius: 'var(--radius-sm, 10px)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
                   <h4 style={{ color: 'var(--color-secondary, #293E24)', fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
                     {module.label}
                   </h4>
                   <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', borderRadius: '9999px', background: 'var(--color-secondary-light, rgba(41,62,36,0.12))', color: 'var(--color-secondary, #293E24)', fontWeight: 600 }}>
-                    6 Labs Práticos
+                    {module.labs.length} Labs
                   </span>
                 </div>
 
@@ -2339,7 +2381,7 @@ export function ProfessorDashboard() {
                         {i + 1}. {lab.title}
                       </span>
                       <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontFamily: 'monospace' }}>
-                        mode: {lab.props?.mode || 'padrão'}
+                        {lab.academicLevelLabel}
                       </span>
                     </div>
                   ))}

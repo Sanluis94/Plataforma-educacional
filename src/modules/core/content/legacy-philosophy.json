@@ -1,0 +1,187 @@
+{
+  "fil_1": {
+    "context": "Uma biblioteca escolar cogita publicar uma lista com os nomes de quem atrasou livros para acelerar as devoluções. No caso fictício, você examinará benefício coletivo, respeito às pessoas e alternativas de ação antes de justificar uma decisão.",
+    "theory": "Um dilema ético envolve razões que podem entrar em tensão, como facilitar o acesso aos livros e evitar exposição humilhante. Uma análise consequencialista compara efeitos sobre todos os afetados, incluindo incertezas e consequências posteriores; não equivale a escolher qualquer vantagem pessoal ou apenas contar votos. A ética kantiana pergunta pela máxima da ação, sua possibilidade de universalização e o respeito às pessoas como fins, e não meramente como instrumentos. Uma abordagem de virtudes examina prudência, justiça e o modo de agir nas circunstâncias. Esses enfoques não formam um teste de personalidade e uma escolha isolada não identifica a filosofia de alguém. É possível discordar da decisão e ainda reconstruir corretamente suas razões.",
+    "workedExample": "A proposta fictícia promete recuperar 20 livros por meio de exposição pública. Esse número é uma previsão, não resultado medido. Uma análise de consequências deve comparar também constrangimento, erros na lista e alternativas como lembretes privados. A pergunta pelo respeito às pessoas examina se alguém está sendo usado apenas para intimidar os demais. Uma decisão fundamentada pode preferir contato reservado e prazo de regularização, explicando o princípio adotado e quais efeitos ainda precisariam ser acompanhados.",
+    "investigation": [
+      "Liste os interessados na devolução dos livros e separe consequências previstas de efeitos já conhecidos no enunciado.",
+      "Reconstrua a melhor razão a favor da lista e uma objeção ligada à dignidade, sem atribuir intenções que o caso não informa.",
+      "Proponha uma alternativa concreta e justifique sua escolha por um critério ético, indicando uma informação que poderia fazê-la ser revista."
+    ],
+    "expectedEvidence": "A justificativa deve identificar um conflito de razões, considerar pessoas afetadas e uma alternativa, separar previsão de fato e explicar o critério moral sem diagnosticar o caráter dos participantes.",
+    "reflection": "Que diferença há entre resolver o atraso de um livro e tratar o estudante como exemplo público para controlar os outros?",
+    "scenarios": [
+      {"id":"lembrete-reservado","label":"Contato reservado","situation":"A biblioteca envia avisos privados e oferece uma conversa sobre dificuldades de devolução, mantendo o empréstimo acessível aos demais estudantes.","observation":"A proposta tenta recuperar os livros com menor exposição individual, mas sua eficácia ainda precisa ser acompanhada.","explanation":"A comparação pode mobilizar consequências e respeito às pessoas ao mesmo tempo. Uma ação não pertence exclusivamente a uma escola ética só porque evita constrangimento."},
+      {"id":"nome-incorreto","label":"Erro na lista","situation":"Antes da publicação, uma estudante mostra o comprovante de que devolveu o livro. Seu nome continuava na lista por falha de registro.","observation":"A possibilidade de acusação indevida passa de hipótese abstrata a erro identificado no caso.","explanation":"O erro modifica a avaliação dos danos e exige correção do processo. Contar devoluções sem examinar a confiabilidade do cadastro é uma análise incompleta das consequências."},
+      {"id":"maioria-humilhacao","label":"Votação e respeito","situation":"Numa consulta fictícia, a maioria aprova divulgar os atrasos e afirma que o resultado da votação elimina qualquer objeção ética.","observation":"A votação registra preferências, mas não responde por si só às razões sobre exposição, proporcionalidade e tratamento de cada pessoa.","explanation":"A aprovação coletiva é um dado relevante para certas decisões, não uma demonstração automática de correção moral. O debate precisa examinar os argumentos e os efeitos sobre a minoria."}
+    ],
+    "questions": [
+      {"question":"Qual informação é necessária para avaliar a previsão de recuperar livros com exposição pública?","options":[
+        {"text":"Somente quantas pessoas gostaram da proposta.","correct":false,"explanation":"Popularidade não mede recuperação, danos, erros ou a eficácia de alternativas menos invasivas."},
+        {"text":"Efeitos esperados sobre todos os afetados, incertezas e alternativas disponíveis.","correct":true,"explanation":"A comparação consequencialista exige ampliar os efeitos considerados e explicitar a qualidade das previsões."},
+        {"text":"Um rótulo de personalidade para cada estudante com atraso.","correct":false,"explanation":"O caso não oferece dados para diagnóstico de caráter; rotular pessoas não resolve a análise das ações."}
+      ]},
+      {"question":"Como interpretar corretamente a pergunta kantiana sobre usar alguém apenas como meio?","options":[
+        {"text":"Examinando se a ação respeita a pessoa como fim, além da utilidade que ela possa ter para outros.","correct":true,"explanation":"A formulação considera dignidade e a máxima da ação, em vez de reduzir a pessoa a instrumento de intimidação."},
+        {"text":"Afirmando que toda cooperação com outras pessoas é proibida.","correct":false,"explanation":"A objeção é ao tratamento meramente instrumental; cooperação respeitosa não é excluída pela formulação."},
+        {"text":"Deduzindo que qualquer ação votada pela maioria é universalizável.","correct":false,"explanation":"Universalização de uma máxima não é sinônimo de obter maioria numa consulta de preferências."}
+      ]}
+    ],
+    "sources":[
+      {"title":"John Stuart Mill — Utilitarianism, capítulo II","url":"https://www.gutenberg.org/files/11224/11224-h/11224-h.htm"},
+      {"title":"Immanuel Kant — Fundamental Principles of the Metaphysic of Morals, segunda seção","url":"https://www.gutenberg.org/files/5682/5682-h/5682-h.htm"}
+    ]
+  },
+  "fil_2": {
+    "context": "Uma instalação artística projeta sombras de objetos atrás de um biombo. A turma discutirá a alegoria da caverna de Platão e construirá uma comparação com a instalação, identificando também onde a comparação deixa de funcionar.",
+    "theory": "Na República, livro VII, Sócrates apresenta a alegoria de prisioneiros que tomam sombras por realidade. A libertação, a adaptação à luz e o retorno à caverna articulam conhecimento, educação e vida política. O sol se relaciona à ideia do Bem no argumento platônico; não é apenas uma lâmpada mais potente. A educação envolve uma mudança de orientação e exame das aparências, não a transferência instantânea de frases corretas para uma mente passiva. A instalação contemporânea é uma analogia produzida para estudo, não uma cena histórica nem uma demonstração experimental da teoria das Formas. O desconforto de uma afirmação, sozinho, também não prova que ela seja verdadeira.",
+    "workedExample": "Na instalação fictícia, a sombra parece circular, mas o objeto atrás do biombo é um cilindro visto de frente. Mover a iluminação permite perceber outra projeção. Isso ajuda a distinguir representação e objeto. A comparação se limita quando alguém conclui que ver o cilindro equivale a alcançar a ideia platônica do Bem: uma inspeção física do cenário não reproduz todo o percurso filosófico da República.",
+    "investigation": [
+      "Reconstrua a sequência da alegoria: prisão, libertação, adaptação e retorno, explicando a função de uma passagem.",
+      "Compare sombra, objeto e iluminação na instalação e escreva uma inferência permitida e outra que ultrapasse esses dados.",
+      "Proponha uma forma de dialogar com quem conhece apenas a projeção e explicite um limite entre a analogia artística e a teoria platônica."
+    ],
+    "expectedEvidence": "A interpretação deve relacionar aparência e educação, reconhecer a dimensão política do retorno e apontar um limite da instalação como analogia, sem tratar discordância como prova de ignorância de outra pessoa.",
+    "reflection": "Como apresentar razões para rever uma interpretação sem concluir que você já possui toda a verdade sobre o assunto?",
+    "scenarios": [
+      {"id":"projecao-cilindro","label":"Um objeto, duas vistas","situation":"A turma vê a projeção circular de um cilindro e depois uma projeção retangular ao mudar a direção da luz, mantendo o mesmo objeto.","observation":"A forma projetada varia com a relação entre objeto, luz e superfície.","explanation":"O exemplo questiona uma identificação imediata entre aparência e objeto. Ele ilustra um problema de representação, sem converter a física da sombra em prova da metafísica de Platão."},
+      {"id":"adapta-luz","label":"Adaptação gradual","situation":"No reconto da alegoria, alguém diz que o prisioneiro libertado enxerga tudo perfeitamente no primeiro instante e já pode explicar o Bem.","observation":"O reconto suprime a dificuldade e o percurso de adaptação descritos no livro VII.","explanation":"O movimento educativo não é instantâneo. Recuperar etapas e mudanças de orientação permite analisar a transformação do conhecer na narrativa platônica."},
+      {"id":"retorno-dialogo","label":"Voltar aos demais","situation":"Uma leitura termina no momento em que o prisioneiro sai e omite sua volta e a reação dos que permaneceram na caverna.","observation":"A leitura conserva a saída individual, mas perde o problema do retorno e da relação com a comunidade.","explanation":"A República relaciona formação e organização da vida coletiva. O retorno impede reduzir a alegoria a uma história de sucesso privado ou a um slogan sobre acreditar em si mesmo."}
+    ],
+    "questions":[
+      {"question":"O que a mudança de projeção do cilindro permite concluir na instalação didática?","options":[
+        {"text":"Que qualquer afirmação desconfortável é filosoficamente verdadeira.","correct":false,"explanation":"A reação emocional não determina verdade e não decorre da comparação entre objeto e projeção."},
+        {"text":"Que a instalação comprova integralmente a teoria platônica das Formas.","correct":false,"explanation":"Uma analogia visual ajuda a pensar, mas não demonstra por experimento toda a posição metafísica de Platão."},
+        {"text":"Que uma projeção depende das condições de observação e não esgota o objeto representado.","correct":true,"explanation":"O mesmo cilindro produz vistas diferentes, sustentando essa conclusão limitada sobre a representação."}
+      ]},
+      {"question":"Por que incluir o retorno à caverna na interpretação do livro VII?","options":[
+        {"text":"Porque ele relaciona conhecimento, educação e responsabilidade na vida coletiva.","correct":true,"explanation":"A volta torna visível a dimensão política da formação, além da transformação individual do prisioneiro."},
+        {"text":"Porque mostra que o sol é somente outro objeto iluminado pela fogueira.","correct":false,"explanation":"Essa resposta confunde níveis da imagem e perde a relação do sol com o Bem no argumento platônico."},
+        {"text":"Porque encerra a necessidade de justificar ideias aos outros.","correct":false,"explanation":"O conflito do retorno coloca justamente um problema de relação, compreensão e educação entre pessoas."}
+      ]}
+    ],
+    "sources":[{"title":"Platão — República, livro VII, tradução inglesa de Benjamin Jowett","url":"https://www.gutenberg.org/files/1497/1497-h/1497-h.htm"}]
+  },
+  "fil_3": {
+    "context": "Moradores de uma vila imaginária precisam organizar o uso de uma fonte compartilhada. Compare justificativas de autoridade em Hobbes, Locke e Rousseau sem transformar a vila numa prova histórica de um estado de natureza.",
+    "theory": "Teorias do contrato social investigam a legitimidade da ordem política; seus estados de natureza não devem ser tratados automaticamente como relatos arqueológicos. Hobbes enfatiza a insegurança sem poder comum capaz de assegurar pactos e a instituição da soberania. Locke distingue estado de natureza de estado de guerra e justifica o governo pela proteção de direitos e consentimento, com limites ao poder. Rousseau discute uma associação em que a soberania pertence ao povo e a lei se orienta pelo interesse comum: vontade geral não é simplesmente a soma de desejos privados. Esses autores não são três personalidades morais nem equivalem, respectivamente, a utilitarismo, deontologia e ética das virtudes.",
+    "workedExample": "Na vila fictícia, três propostas regulam a fonte: A institui uma autoridade comum para fazer cumprir acordos; B define competências limitadas e meios de contestar abusos; C pergunta por regras gerais que os cidadãos possam estabelecer para o uso comum. A comparação aproxima problemas enfatizados por Hobbes, Locke e Rousseau, mas não atribui a nenhum deles um projeto literal de administração dessa fonte nem demonstra que as propostas sejam incompatíveis em todos os aspectos.",
+    "investigation": [
+      "Identifique em cada proposta da fonte o problema de legitimidade que recebe prioridade e a razão apresentada para obedecer.",
+      "Compare quem institui a autoridade, quais limites são previstos e como uma contestação seria tratada nas três justificativas.",
+      "Crie uma regra geral de uso da fonte e explique por que benefício do grupo mais numeroso não basta para demonstrar interesse comum."
+    ],
+    "expectedEvidence": "A comparação precisa distinguir segurança dos pactos, governo limitado e soberania popular, citar razões em vez de slogans e reconhecer o caráter hipotético da vila e do exercício contratualista.",
+    "reflection": "Um acordo permanece legítimo apenas porque foi aceito no início, mesmo quando mudam seus efeitos sobre os participantes?",
+    "scenarios":[
+      {"id":"pacto-descumprido","label":"Pactos sem garantia","situation":"Na vila, todos prometem retirar a mesma quantidade de água, mas ninguém confia que os demais cumprirão e não há meio comum de garantir a regra.","observation":"O problema central é a insegurança quanto ao cumprimento recíproco dos acordos.","explanation":"Essa situação permite examinar a ênfase hobbesiana em poder comum e segurança. Não prova que toda pessoa seja sempre cruel nem que qualquer ordem de um governante seja automaticamente justa."},
+      {"id":"governo-limites","label":"Autoridade limitada","situation":"Uma comissão recebe competência para administrar horários, mas tenta confiscar outros bens dos moradores alegando que qualquer poder concedido é ilimitado.","observation":"A nova ação ultrapassa a competência prevista no acordo fictício.","explanation":"O caso permite discutir limites e confiança na perspectiva lockeana: instituir governo não equivale a abandonar toda proteção contra abuso. A análise é conceitual, não um parecer jurídico sobre instituições reais."},
+      {"id":"regra-interesse","label":"Vontades particulares","situation":"O grupo mais numeroso vota para reservar a fonte somente para sua rua, embora a fonte tenha sido construída para uso de toda a vila.","observation":"A contagem de votos não elimina a pergunta sobre uma regra orientada ao interesse comum.","explanation":"Em Rousseau, vontade geral e soma de interesses particulares são conceitos distintos. O exercício pede analisar a generalidade da regra, em vez de identificar qualquer maioria com vontade geral."}
+    ],
+    "questions":[
+      {"question":"Que distinção evita uma simplificação da comparação entre Hobbes e Locke?","options":[
+        {"text":"Ambos descrevem necessariamente um acontecimento arqueológico documentado.","correct":false,"explanation":"Os estados de natureza têm função filosófica na justificação da ordem, não constituem por si um achado arqueológico."},
+        {"text":"Locke não identifica automaticamente estado de natureza com guerra e admite limites ao governo.","correct":true,"explanation":"Isso diferencia seu argumento da ênfase hobbesiana na insegurança sem poder comum, preservando questões de legitimidade."},
+        {"text":"Hobbes discute apenas virtudes individuais e não poder político.","correct":false,"explanation":"Pactos, soberania e segurança política são centrais no Leviatã; a resposta desloca seu objeto de análise."}
+      ]},
+      {"question":"Como analisar o voto que reserva a fonte para a rua mais numerosa à luz de Rousseau?","options":[
+        {"text":"Como vontade geral comprovada somente pelo número de votos.","correct":false,"explanation":"O conceito envolve interesse comum e não se reduz à soma de preferências particulares de um grupo."},
+        {"text":"Como demonstração de que Rousseau rejeita qualquer participação popular.","correct":false,"explanation":"A soberania popular é central ao argumento; a questão é como uma vontade se orienta ao comum."},
+        {"text":"Como decisão que ainda exige examinar a generalidade da regra e o interesse comum.","correct":true,"explanation":"A interpretação distingue resultado de votação e justificação da lei sem equiparar todo privilégio majoritário à vontade geral."}
+      ]}
+    ],
+    "sources":[
+      {"title":"Thomas Hobbes — Leviathan, capítulos XIII e XVII","url":"https://www.gutenberg.org/files/3207/3207-h/3207-h.htm"},
+      {"title":"John Locke — Second Treatise of Government, capítulos II e VIII","url":"https://www.gutenberg.org/files/7370/7370-h/7370-h.htm"},
+      {"title":"Jean-Jacques Rousseau — The Social Contract, livros I e II","url":"https://www.gutenberg.org/files/46333/46333-h/46333-h.htm"}
+    ]
+  },
+  "fil_4": {
+    "context": "Um catálogo escolar marca alguns materiais como áudio e outros como vídeo. Use regras desse pequeno universo fictício para testar argumentos, construir um contraexemplo e distinguir validade lógica de verdade das premissas.",
+    "theory": "Um argumento dedutivo é válido quando não há situação em que todas as premissas sejam verdadeiras e a conclusão falsa. Validade diz respeito à relação de consequência; um argumento sólido é válido e tem premissas verdadeiras. No modus ponens, de se P então Q e P segue Q. Afirmar Q e concluir P é a falácia de afirmação do consequente: Q pode ocorrer por outras razões. Um contraexemplo demonstra uma combinação de premissas verdadeiras com conclusão falsa para a forma analisada. Discordar da pessoa que apresenta uma inferência não resolve sua validade, e uma conclusão verdadeira pode ser defendida por um argumento inválido.",
+    "workedExample": "Regra fictícia: todo áudio do catálogo tem transcrição. O material A é áudio. Logo, A tem transcrição: a conclusão segue por modus ponens. Já o material B tem transcrição; logo, B é áudio não segue, pois B pode ser um vídeo transcrito. Um vídeo com transcrição torna a premissa sobre B verdadeira e sua conclusão falsa, sem violar a regra sobre todos os áudios.",
+    "investigation": [
+      "Reescreva os argumentos usando P para ser áudio e Q para ter transcrição, preservando o sentido da condicional.",
+      "Construa um catálogo com um áudio e um vídeo transcrito para testar a inferência de Q para P.",
+      "Crie um argumento válido com uma premissa falsa e explique por que a validade não transforma essa premissa em fato."
+    ],
+    "expectedEvidence": "O registro deve apresentar a forma de um modus ponens e de uma afirmação do consequente, um contraexemplo consistente e a distinção explícita entre validade e solidez do argumento.",
+    "reflection": "Por que encontrar uma conclusão verdadeira numa discussão não basta para aprovar o raciocínio que levou a ela?",
+    "scenarios":[
+      {"id":"audio-regra","label":"Aplicar a condicional","situation":"São dadas as premissas todo áudio possui transcrição e C é áudio. A conclusão proposta é C possui transcrição.","observation":"Não é possível manter ambas as premissas verdadeiras e tornar essa conclusão falsa na interpretação dada.","explanation":"A forma é modus ponens. A análise mostra validade; verificar se a regra descreve o catálogo real seria outra investigação sobre a verdade das premissas."},
+      {"id":"video-contraexemplo","label":"Inverter a condição","situation":"São dadas a regra todo áudio possui transcrição e D possui transcrição. D é, no catálogo fictício, um vídeo, e a conclusão afirma que D é áudio.","observation":"As premissas podem ser verdadeiras enquanto a conclusão é falsa, porque o vídeo também tem transcrição.","explanation":"Ter a consequência não garante satisfazer o antecedente. O vídeo transcrito é um contraexemplo à afirmação do consequente, não uma exceção à regra sobre áudios."},
+      {"id":"premissa-falsa","label":"Validade sem solidez","situation":"Um argumento diz: todos os vídeos são áudios; E é vídeo; logo E é áudio. Neste universo, as categorias vídeo e áudio são distintas, tornando a primeira premissa falsa.","observation":"A forma de inclusão é válida, mas o argumento não é sólido porque uma premissa é falsa no universo estipulado.","explanation":"Uma estrutura válida preserva a verdade quando as premissas são verdadeiras; ela não garante que as premissas realmente sejam. Identificar o problema factual não exige declarar a forma inválida."}
+    ],
+    "questions":[
+      {"question":"Qual caso refuta a inferência tem transcrição, portanto é áudio sob a regra todo áudio tem transcrição?","options":[
+        {"text":"Um vídeo que tem transcrição e não é áudio.","correct":true,"explanation":"O caso mantém a regra e a premissa sobre transcrição, mas torna a conclusão sobre ser áudio falsa."},
+        {"text":"Um áudio com transcrição, que confirma a conclusão neste exemplo.","correct":false,"explanation":"Um exemplo em que a conclusão é verdadeira não demonstra a invalidade; precisamos de premissas verdadeiras e conclusão falsa."},
+        {"text":"Uma crítica ao jeito de falar da pessoa que apresentou a regra.","correct":false,"explanation":"Características pessoais não fornecem a combinação lógica necessária para um contraexemplo."}
+      ]},
+      {"question":"Como classificar um argumento com forma válida e uma premissa sabidamente falsa?","options":[
+        {"text":"Automaticamente sólido, porque sua forma é válida.","correct":false,"explanation":"Solidez também exige premissas verdadeiras; a forma não corrige uma afirmação factual falsa."},
+        {"text":"Válido, mas não sólido nas condições informadas.","correct":true,"explanation":"As duas propriedades respondem a perguntas diferentes: consequência necessária e verdade das premissas."},
+        {"text":"Necessariamente inválido, independentemente da forma.","correct":false,"explanation":"Uma premissa falsa não basta para tornar a inferência inválida; a validade é avaliada pela relação lógica."}
+      ]}
+    ]
+  },
+  "fil_5": {
+    "context": "Um conselho estudantil tem verba para escolher entre ampliar o horário da sala de estudos e reformar a quadra. A situação é fictícia: investigue representação, participação e controle do poder, em vez de atribuir automaticamente uma escola filosófica a cada voto.",
+    "theory": "Filosofia política pergunta por legitimidade, liberdade, justiça e instituições. Uma decisão coletiva envolve tanto seus resultados quanto quem participa, quais razões são públicas e como o poder pode ser contestado. Representação não elimina a necessidade de ouvir os representados; deliberação exige condições de expressão e revisão, além de contar preferências. Separar funções e prever fiscalização pode limitar concentração de poder, mas nomes diferentes para cargos não garantem controle efetivo. A vontade da maioria é relevante sem transformar todo prejuízo à minoria em irrelevante. O exercício compara critérios institucionais; escolher quadra ou sala não revela por si uma ideologia nem equivale a uma posição textual de Maquiavel, Montesquieu ou Arendt.",
+    "workedExample": "No conselho imaginário, 8 de 12 representantes apoiam a quadra. O número determina a maioria segundo a regra adotada, mas o processo pode continuar problemático se quatro turmas não tiveram acesso à proposta. Uma revisão permite divulgar custos, ouvir usuários de ambos os espaços e registrar razões antes de votar novamente. Isso não garante unanimidade: torna a decisão mais examinável e a representação mais responsável.",
+    "investigation": [
+      "Descreva a regra de votação e calcule a maioria no conselho, separando resultado numérico de justificação da decisão.",
+      "Mapeie quem propõe, decide, executa e fiscaliza o uso da verba, identificando uma concentração de funções que merece discussão.",
+      "Redija uma proposta de participação e prestação de contas que preserve a possibilidade de discordar e revisar argumentos."
+    ],
+    "expectedEvidence": "A análise deve distinguir decisão majoritária e legitimidade do processo, identificar vozes ausentes e propor um controle efetivo do poder com razões e responsabilidades públicas.",
+    "reflection": "Como reconhecer uma decisão coletiva legítima quando você discorda do resultado e continua afetado por ele?",
+    "scenarios":[
+      {"id":"pauta-acesso","label":"Acesso à pauta","situation":"A pauta só foi enviada aos representantes da equipe esportiva. O conselho faz a votação antes que as outras turmas conheçam custos e alternativas.","observation":"Existe uma contagem de votos, mas acesso desigual à informação e à discussão da proposta.","explanation":"A publicidade das razões e condições de participação integra a análise da legitimidade. Um resultado numericamente correto não elimina essa deficiência do processo."},
+      {"id":"fiscaliza-mesmo","label":"Quem controla?","situation":"A mesma pessoa escolhe a obra, autoriza pagamentos e declara que tudo foi bem executado, sem apresentar registros ao conselho.","observation":"A concentração de funções dificulta uma verificação independente da aplicação da verba.","explanation":"Dividir responsabilidades e disponibilizar registros cria condições de controle. Apenas renomear a mesma pessoa como três cargos diferentes não cria fiscalização efetiva."},
+      {"id":"minoria-razoes","label":"Discordância registrada","situation":"Após debate acessível e custos publicados, a sala de estudos vence por 7 a 5. A ata registra a objeção de cinco representantes e uma data para avaliar os efeitos.","observation":"A decisão permanece majoritária e contestável, com razões preservadas e um mecanismo de avaliação posterior.","explanation":"Participação não exige concordância total. Registrar objeções e critérios de revisão permite que a minoria continue atuando politicamente e que a decisão seja acompanhada."}
+    ],
+    "questions":[
+      {"question":"O que a vitória de uma proposta por 8 votos a 4 demonstra diretamente no conselho fictício?","options":[
+        {"text":"Que todas as turmas tiveram as mesmas oportunidades de informação.","correct":false,"explanation":"A contagem não informa como a pauta circulou nem quem pôde discutir os argumentos."},
+        {"text":"Que qualquer objeção à decisão perdeu todo valor político.","correct":false,"explanation":"Discordantes continuam afetados e podem apresentar razões, fiscalizar e propor revisão."},
+        {"text":"Que ela obteve a maioria dos 12 votos, segundo a contagem informada.","correct":true,"explanation":"Essa é a conclusão numérica; avaliar legitimidade exige examinar também regras e condições do processo."}
+      ]},
+      {"question":"Qual mudança cria uma condição mais concreta de fiscalização da verba?","options":[
+        {"text":"Atribuir ao mesmo responsável três títulos sem mudar seus poderes.","correct":false,"explanation":"Novos nomes não introduzem análise independente nem acesso aos registros."},
+        {"text":"Separar execução e verificação, publicar registros e permitir questionamentos fundamentados.","correct":true,"explanation":"A proposta distribui responsabilidades e torna as razões e gastos examináveis por outras pessoas."},
+        {"text":"Impedir acesso aos comprovantes para evitar críticas ao projeto.","correct":false,"explanation":"Ocultar os dados reduz a possibilidade de controle e prestação de contas da decisão coletiva."}
+      ]}
+    ]
+  },
+  "fil_6": {
+    "context": "Um grupo afirma que uma nova música faz sementes germinarem mais depressa. Analise o plano de investigação fictício e os resultados fornecidos, distinguindo hipótese, teste, explicação alternativa e revisão do conhecimento.",
+    "theory": "Uma hipótese científica precisa se relacionar a observações que possam apoiar ou desafiar suas expectativas. O teste exige explicitar variáveis, comparação e formas de registro; não existe uma receita linear única que descreva toda ciência. Repetição, crítica e comunicação dos procedimentos permitem examinar a confiabilidade. Uma hipótese universal não é demonstrada para sempre por alguns resultados favoráveis. Um resultado contrário também exige verificar condições, medidas e hipóteses auxiliares antes de decidir o que revisar. Correlação não estabelece sozinha causalidade: luz, água e temperatura podem explicar diferenças entre grupos. A ciência distingue incerteza fundamentada de uma regra inventada para tornar qualquer resultado uma confirmação.",
+    "workedExample": "Dados inventados para análise: de 20 sementes num grupo com música, 16 germinam em sete dias; no grupo sem música, 15 de 20 germinam. As proporções são 80% e 75%, diferença de 5 pontos percentuais. Se o primeiro grupo recebeu mais luz, o desenho não separa os efeitos. Mesmo com condições equilibradas, esses poucos dados não justificam garantia universal nem uma significância estatística não calculada; uma investigação pode ampliar repetições e avaliar a variação.",
+    "investigation": [
+      "Formule uma hipótese sobre germinação em sete dias e indique qual comparação poderia contrariar a expectativa inicial.",
+      "Desenhe grupos comparáveis com mesma espécie, água, luz e temperatura, descrevendo a distribuição das sementes entre condições.",
+      "Calcule proporções dos dados fornecidos e apresente uma conclusão proporcional à evidência, incluindo uma alternativa e um próximo teste."
+    ],
+    "expectedEvidence": "O relatório deve apresentar hipótese testável, controle de variáveis e cálculo de proporções, distinguir pontos percentuais de certeza causal e explicar como novos resultados poderiam alterar a conclusão.",
+    "reflection": "O que precisaria mudar numa hipótese se quem a defende considera qualquer resultado possível uma confirmação?",
+    "scenarios":[
+      {"id":"luz-desigual","label":"Uma variável a mais","situation":"As sementes com música ficam junto à janela; as sem música permanecem num armário. O relatório atribui toda diferença apenas ao som.","observation":"Luz e música variaram conjuntamente, deixando uma explicação alternativa para a diferença observada.","explanation":"O desenho confunde fatores. Para investigar o efeito proposto, é preciso tornar as condições comparáveis e definir registro e distribuição dos grupos, sem supor que apenas o som mudou."},
+      {"id":"resultado-pequeno","label":"Proporções próximas","situation":"Nos dados didáticos equilibrados, germinam 16 de 20 sementes com música e 15 de 20 sem música em sete dias.","observation":"As proporções são 80% e 75%; a diferença observada é de 5 pontos percentuais.","explanation":"A diferença descreve a amostra. Uma avaliação de variação e incerteza é necessária antes de atribuir causalidade ou generalizar; o caso não fornece um teste estatístico já executado."},
+      {"id":"hipotese-imune","label":"Qualquer resultado serve?","situation":"Antes do teste, um participante diz que mais germinação confirma a música, menos germinação confirma que a música protege sementes adormecidas e igualdade confirma um efeito invisível.","observation":"As justificativas foram construídas para aceitar todos os resultados possíveis sem uma expectativa que possa ser contrariada.","explanation":"Esse procedimento retira o poder crítico da comparação. Uma proposta investigável deve explicitar condições e expectativas, admitindo revisar a explicação diante da evidência."}
+    ],
+    "questions":[
+      {"question":"Qual é a diferença entre 16/20 e 15/20 sementes germinadas, expressa em pontos percentuais?","options":[
+        {"text":"5 pontos percentuais.","correct":true,"explanation":"16/20 corresponde a 80% e 15/20 a 75%; subtrair as proporções percentuais resulta em 5 pontos percentuais."},
+        {"text":"50 pontos percentuais.","correct":false,"explanation":"Uma semente em um grupo de 20 representa 5% desse grupo, e não metade dele."},
+        {"text":"Uma prova de que todas as sementes responderão à música.","correct":false,"explanation":"A opção não é uma diferença numérica e ultrapassa o que uma amostra pequena demonstra."}
+      ]},
+      {"question":"Por que o grupo com música à janela e o grupo sem música no armário não isolam bem o efeito proposto?","options":[
+        {"text":"Porque hipóteses científicas dispensam comparação entre condições.","correct":false,"explanation":"A comparação planejada ajuda a avaliar explicações; dispensá-la não resolve a variação conjunta dos fatores."},
+        {"text":"Porque dois fatores mudaram juntos e a luz pode explicar a diferença.","correct":true,"explanation":"O desenho precisa controlar condições relevantes para não atribuir ao som o efeito de outra variável."},
+        {"text":"Porque observar qualquer resultado garante causalidade da música.","correct":false,"explanation":"Um resultado observado pode ter explicações alternativas e não determina sozinho uma relação causal."}
+      ]}
+    ],
+    "sources":[{"title":"UC Berkeley — Understanding Science: How science works","url":"https://undsci.berkeley.edu/understanding-science-101/how-science-works/"}]
+  }
+}

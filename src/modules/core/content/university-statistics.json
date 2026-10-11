@@ -1,0 +1,832 @@
+{
+  "sup_estat_01": {
+    "context": "Uma fábrica fictícia estuda tempos de espera assimétricos. Dez mil amostras independentes serão planejadas para distinguir população, amostra e distribuição das médias.",
+    "theory": "Para observações independentes de mesma distribuição com média μ e variância finita σ², a média de n valores tem média μ e erro padrão σ/√n. O TCL aproxima sua distribuição por uma normal quando n cresce; não torna os dados originais normais. Dez mil repetições reduzem o ruído do histograma, mas não substituem um n adequado.",
+    "workedExample": "Considere espera exponencial fictícia com μ=σ=12 min. Com n=36, E[média]=12 min e EP=12/6=2 min. Uma faixa normal aproximada de 95% para médias é 12±1,96×2, ou 8,08 a 15,92 min; não é intervalo para esperas individuais.",
+    "investigation": [
+      "Desenhe a população exponencial e marque sua média de 12 min.",
+      "Planeje 10.000 amostras com n=1, 9 e 36 e compare os erros padrão teóricos.",
+      "Se houver gerador disponível, registre a semente; caso contrário, trabalhe com as previsões analíticas."
+    ],
+    "expectedEvidence": "A comparação deve manter o centro em 12 min e explicar a redução de dispersão de 12 para 4 e 2 min sem alegar execuções inexistentes.",
+    "reflection": "Como dependência entre esperas alteraria a interpretação do erro padrão?",
+    "scenarios": [
+      {
+        "id": "sup_estat_01_s0",
+        "label": "Amostras unitárias",
+        "situation": "Cada repetição contém uma única espera exponencial.",
+        "observation": "O histograma das médias continua assimétrico.",
+        "explanation": "Com n=1, a média coincide com a observação e o TCL não suaviza sua distribuição."
+      },
+      {
+        "id": "sup_estat_01_s1",
+        "label": "Amostras maiores",
+        "situation": "Cada média usa 144 esperas independentes da mesma população.",
+        "observation": "O erro padrão previsto cai para 1 min.",
+        "explanation": "A raiz de 144 é 12; portanto 12/12=1, preservando a média populacional."
+      },
+      {
+        "id": "sup_estat_01_s2",
+        "label": "Cauda sem variância",
+        "situation": "A população hipotética é Cauchy, sem média e variância finitas.",
+        "observation": "A regra σ/√n não pode ser aplicada.",
+        "explanation": "As hipóteses clássicas do TCL falham; muitas repetições não corrigem essa ausência de momentos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que muda ao aumentar de 1.000 para 10.000 repetições mantendo n=36?",
+        "options": [
+          {
+            "text": "O erro padrão passa a 0,2 min",
+            "correct": false,
+            "explanation": "O erro padrão depende de n, que permaneceu igual a 36."
+          },
+          {
+            "text": "As esperas individuais tornam-se normais",
+            "correct": false,
+            "explanation": "Repetir a amostragem não modifica a distribuição original das esperas."
+          },
+          {
+            "text": "A precisão do histograma estimado",
+            "correct": true,
+            "explanation": "Mais repetições descrevem melhor a mesma distribuição amostral."
+          }
+        ]
+      },
+      {
+        "question": "Qual é o erro padrão para n=9 neste caso fictício?",
+        "options": [
+          {
+            "text": "4 min",
+            "correct": true,
+            "explanation": "O desvio de 12 min dividido por √9 resulta em 4 min."
+          },
+          {
+            "text": "12 min",
+            "correct": false,
+            "explanation": "Esse é o desvio populacional, antes de calcular a média de nove valores."
+          },
+          {
+            "text": "1,33 min",
+            "correct": false,
+            "explanation": "Dividir por n em vez de √n subestima a dispersão da média."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST/SEMATECH e-Handbook of Statistical Methods",
+        "url": "https://www.itl.nist.gov/div898/handbook/"
+      }
+    ]
+  },
+  "sup_estat_02": {
+    "context": "Um laboratório fictício verifica se o enchimento médio difere de 500 mL. A escolha entre teste t e Z depende de conhecer ou estimar o desvio populacional.",
+    "theory": "Sob H0:μ=μ0, Z=(média−μ0)/(σ/√n) usa σ conhecido; t=(média−μ0)/(s/√n) usa s e n−1 graus de liberdade. Amostragem independente e normalidade para pequenos n são necessárias. Um p pequeno indica incompatibilidade com H0 sob o modelo, não a probabilidade de H0 ser verdadeira.",
+    "workedExample": "Em n=25 frascos fictícios, média=502 mL e s=5 mL. O erro padrão é 1 mL e t=2 com 24 graus de liberdade. No teste bilateral de 5%, o crítico é aproximadamente 2,064; assim não se rejeita H0, embora a estimativa esteja 2 mL acima.",
+    "investigation": [
+      "Defina antes da análise a hipótese bilateral e α=0,05.",
+      "Calcule o erro padrão e justifique se σ é conhecido ou estimado.",
+      "Compare a estatística com a distribuição adequada e relate a diferença em mL."
+    ],
+    "expectedEvidence": "A resposta deve indicar t=2, 24 graus de liberdade e ausência de rejeição a 5%, sem afirmar equivalência entre as médias.",
+    "reflection": "Que margem prática permitiria estudar equivalência de enchimento?",
+    "scenarios": [
+      {
+        "id": "sup_estat_02_s0",
+        "label": "Desvio certificado",
+        "situation": "A população tem σ=5 mL conhecido e n=25.",
+        "observation": "Z=2 ultrapassa o crítico bilateral de 1,96.",
+        "explanation": "O teste Z tem referência normal e rejeita neste caso, ao contrário do t com σ estimado."
+      },
+      {
+        "id": "sup_estat_02_s1",
+        "label": "Hipótese direcional",
+        "situation": "A hipótese de excesso foi fixada antes de observar os frascos.",
+        "observation": "O crítico unilateral t é aproximadamente 1,711.",
+        "explanation": "Com t=2 há rejeição unilateral; escolher a direção após ver os dados invalida essa justificativa."
+      },
+      {
+        "id": "sup_estat_02_s2",
+        "label": "Frascos correlacionados",
+        "situation": "Vinte e cinco medições vêm do mesmo frasco repetido.",
+        "observation": "O tamanho independente não é 25.",
+        "explanation": "Repetições técnicas não substituem unidades independentes e tornam inadequado o erro padrão ingênuo."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual distribuição usar com s estimado de 25 unidades independentes?",
+        "options": [
+          {
+            "text": "Z obrigatoriamente",
+            "correct": false,
+            "explanation": "Z exige σ conhecido ou justificativa assintótica, ausente neste pequeno exemplo."
+          },
+          {
+            "text": "t com 25 graus de liberdade",
+            "correct": false,
+            "explanation": "A estimação da média consome um grau de liberdade na variância amostral."
+          },
+          {
+            "text": "t com 24 graus de liberdade",
+            "correct": true,
+            "explanation": "A estimação do desvio adiciona incerteza representada pela distribuição t."
+          }
+        ]
+      },
+      {
+        "question": "Não rejeitar H0 neste teste permite qual afirmação?",
+        "options": [
+          {
+            "text": "A evidência não basta para rejeitar a 5%",
+            "correct": true,
+            "explanation": "A conclusão é condicionada ao nível, desenho e hipóteses do teste."
+          },
+          {
+            "text": "Foi provado que μ=500 mL",
+            "correct": false,
+            "explanation": "Ausência de rejeição não demonstra uma igualdade exata da população."
+          },
+          {
+            "text": "Há 95% de chance de H0 ser verdadeira",
+            "correct": false,
+            "explanation": "O teste frequencista não atribui essa probabilidade à hipótese fixa."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST/SEMATECH e-Handbook of Statistical Methods",
+        "url": "https://www.itl.nist.gov/div898/handbook/"
+      }
+    ]
+  },
+  "sup_estat_03": {
+    "context": "Três fertilizantes fictícios são comparados em parcelas independentes. O objetivo é separar evidência global de diferença das comparações múltiplas entre pares.",
+    "theory": "Na ANOVA de um fator, F=QMentre/QMdentro compara variação entre médias com variação residual. Sob independência, resíduos aproximadamente normais e variâncias iguais, H0 afirma todas as médias iguais. Rejeitar F não identifica os pares; Tukey controla o erro familiar nas comparações par a par.",
+    "workedExample": "Três grupos de quatro parcelas têm médias 10, 12 e 14 kg, com soma de quadrados residual 18 kg². A média geral é 12; SQentre=4×(4+0+4)=32 kg². F=(32/2)/(18/9)=8. Com q crítico hipotético 3,95, HSD=3,95√(2/4)=2,79 kg: apenas a diferença de 4 kg ultrapassa o limite.",
+    "investigation": [
+      "Organize cada parcela no fertilizante correspondente e preserve a independência.",
+      "Calcule SQentre, QMdentro e os graus de liberdade 2 e 9.",
+      "Aplique Tukey somente com o q da tabela e do nível familiar escolhidos."
+    ],
+    "expectedEvidence": "O relatório deve obter F=8 e distinguir a diferença A–C de 4 kg das diferenças adjacentes de 2 kg usando HSD=2,79 kg.",
+    "reflection": "Por que vários testes t sem ajuste elevam o risco de falso positivo?",
+    "scenarios": [
+      {
+        "id": "sup_estat_03_s0",
+        "label": "Grupos próximos",
+        "situation": "Mantenha MSE=2 kg², mas use médias 11, 12 e 13 kg.",
+        "observation": "As diferenças máximas ficam abaixo do HSD.",
+        "explanation": "A variabilidade residual limita a separação dos pares, mesmo que as médias não coincidam numericamente."
+      },
+      {
+        "id": "sup_estat_03_s1",
+        "label": "Precisão ampliada",
+        "situation": "Considere oito parcelas por grupo e MSE=2 kg².",
+        "observation": "O erro padrão de Tukey torna-se √(2/8)=0,5 kg.",
+        "explanation": "Maior replicação reduz a incerteza; o q crítico também deve ser atualizado para os novos graus de liberdade."
+      },
+      {
+        "id": "sup_estat_03_s2",
+        "label": "Variâncias distintas",
+        "situation": "Um grupo apresenta dispersão dez vezes maior que os outros.",
+        "observation": "A ANOVA clássica pode ter erro mal calibrado.",
+        "explanation": "É necessário examinar heterocedasticidade e considerar Welch e pós-teste compatível, em vez de insistir no MSE comum."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é o quadrado médio residual do exemplo de fertilizantes?",
+        "options": [
+          {
+            "text": "9 kg²",
+            "correct": false,
+            "explanation": "Nove é o número de graus de liberdade, não o valor do quadrado médio."
+          },
+          {
+            "text": "16 kg²",
+            "correct": false,
+            "explanation": "Esse é QMentre=32/2, e não a variação dentro dos grupos."
+          },
+          {
+            "text": "2 kg²",
+            "correct": true,
+            "explanation": "A soma residual 18 é dividida pelos nove graus de liberdade internos."
+          }
+        ]
+      },
+      {
+        "question": "Com HSD=2,79 kg, qual comparação é significativa?",
+        "options": [
+          {
+            "text": "A versus C, diferença de 4 kg",
+            "correct": true,
+            "explanation": "Quatro supera o limiar simultâneo estabelecido para os pares."
+          },
+          {
+            "text": "A versus B, diferença de 2 kg",
+            "correct": false,
+            "explanation": "Dois não ultrapassa 2,79; diferença numérica não basta para Tukey."
+          },
+          {
+            "text": "Todos os pares, pois F é significativo",
+            "correct": false,
+            "explanation": "O teste global não transfere automaticamente significância a cada comparação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST/SEMATECH e-Handbook of Statistical Methods",
+        "url": "https://www.itl.nist.gov/div898/handbook/"
+      }
+    ]
+  },
+  "sup_estat_04": {
+    "context": "Uma oficina fictícia relaciona consumo elétrico às horas de máquina e à temperatura. O exercício interpreta coeficientes condicionais e diagnostica erros do modelo.",
+    "theory": "A regressão múltipla usa y=β0+β1x1+β2x2+ε. Cada coeficiente descreve a mudança prevista mantendo os demais regressores fixos. A inferência usual requer erros independentes, média condicional zero e estrutura de variância apropriada. Resíduos curvos, funil e observações influentes apontam problemas distintos; R² alto não demonstra causalidade.",
+    "workedExample": "Um ajuste didático fornecido é consumo=20+3h+0,5T em kWh, com h em horas e T em °C. Para h=8 e T=30, prevê 59 kWh. Se a observação fictícia é 63 kWh, o resíduo é 63−59=4 kWh. Sem dados completos não se calculam p-valores nem diagnóstico de influência.",
+    "investigation": [
+      "Calcule previsões mantendo explícitas as unidades dos dois regressores.",
+      "Desenhe resíduos contra valores previstos e procure curvatura ou dispersão crescente.",
+      "Compare coeficientes e incertezas após examinar colinearidade e pontos influentes."
+    ],
+    "expectedEvidence": "Devem aparecer previsão de 59 kWh, resíduo positivo de 4 kWh e interpretação de 3 kWh por hora condicionada à temperatura.",
+    "reflection": "Como uma variável omitida, como carga de produção, poderia afetar β1?",
+    "scenarios": [
+      {
+        "id": "sup_estat_04_s0",
+        "label": "Temperatura constante",
+        "situation": "Compare jornadas de 8 e 9 h ambas a 30 °C.",
+        "observation": "A previsão aumenta 3 kWh.",
+        "explanation": "O coeficiente de horas é uma diferença condicional, com temperatura mantida fixa."
+      },
+      {
+        "id": "sup_estat_04_s1",
+        "label": "Funil residual",
+        "situation": "Os resíduos ficam mais dispersos nos consumos previstos elevados.",
+        "observation": "A hipótese de variância constante é questionada.",
+        "explanation": "Heterocedasticidade afeta erros padrão usuais e pode exigir modelagem da variância ou inferência robusta."
+      },
+      {
+        "id": "sup_estat_04_s2",
+        "label": "Colinearidade forte",
+        "situation": "Horas e temperatura variam quase sempre juntas na amostra.",
+        "observation": "Os coeficientes individuais ficam pouco precisos.",
+        "explanation": "Regressores correlacionados dificultam separar suas contribuições, ainda que a previsão conjunta pareça boa."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Como interpretar o coeficiente 0,5 da temperatura?",
+        "options": [
+          {
+            "text": "Aumento causal garantido de 0,5 kWh",
+            "correct": false,
+            "explanation": "Um ajuste observacional não garante ausência de confundimento causal."
+          },
+          {
+            "text": "A temperatura explica 50% do consumo",
+            "correct": false,
+            "explanation": "O coeficiente tem unidades e não representa uma fração de variância explicada."
+          },
+          {
+            "text": "0,5 kWh por °C para as mesmas horas",
+            "correct": true,
+            "explanation": "A interpretação mantém o outro regressor constante dentro da região estudada."
+          }
+        ]
+      },
+      {
+        "question": "Uma previsão de 59 e valor observado de 63 gera qual resíduo?",
+        "options": [
+          {
+            "text": "+4 kWh",
+            "correct": true,
+            "explanation": "Resíduo é observado menos previsto: 63−59=4."
+          },
+          {
+            "text": "−4 kWh",
+            "correct": false,
+            "explanation": "Esse sinal corresponde à diferença invertida, não à convenção residual usada."
+          },
+          {
+            "text": "122 kWh",
+            "correct": false,
+            "explanation": "Somar observado e previsto não quantifica o erro do ajuste."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST/SEMATECH e-Handbook of Statistical Methods",
+        "url": "https://www.itl.nist.gov/div898/handbook/"
+      }
+    ]
+  },
+  "sup_estat_05": {
+    "context": "Uma pesquisa fictícia registra preferência por dois produtos em duas cidades. Contagens, e não porcentagens isoladas, permitem testar independência.",
+    "theory": "O teste χ² soma (O−E)²/E. Em independência, Eij=(total da linha×total da coluna)/N e graus de liberdade são (r−1)(c−1). Em aderência, E vem de probabilidades especificadas e os graus de liberdade descontam parâmetros estimados. Observações devem ser independentes; frequências esperadas pequenas exigem alternativa adequada.",
+    "workedExample": "A tabela fictícia é cidade A:30 e 20; cidade B:20 e 30. Cada linha e coluna soma 50, N=100, então todas as esperadas são 25. χ²=4×25/25=4, com 1 grau de liberdade, p≈0,046. A associação é pequena e não determina que a cidade cause a preferência.",
+    "investigation": [
+      "Monte a tabela de frequências e confira seus totais marginais.",
+      "Calcule cada frequência esperada antes de somar as contribuições ao χ².",
+      "Diferencie associação estatística de tamanho do efeito e explicação causal."
+    ],
+    "expectedEvidence": "A solução deve apresentar esperadas 25, χ²=4 e um grau de liberdade, identificando a análise como independência e não aderência.",
+    "reflection": "Como uma amostra maior poderia tornar significativa uma associação pequena?",
+    "scenarios": [
+      {
+        "id": "sup_estat_05_s0",
+        "label": "Independência exata",
+        "situation": "Cada cidade fornece 25 preferências por cada produto.",
+        "observation": "χ² vale zero na tabela proposta.",
+        "explanation": "Observados iguais aos esperados anulam todas as contribuições, sem provar independência populacional."
+      },
+      {
+        "id": "sup_estat_05_s1",
+        "label": "Célula rara",
+        "situation": "Uma categoria tem frequência esperada de apenas 1,2.",
+        "observation": "A aproximação assintótica fica suspeita.",
+        "explanation": "É preciso considerar teste exato ou simulação apropriada, preservando o significado das categorias."
+      },
+      {
+        "id": "sup_estat_05_s2",
+        "label": "Aderência de dado",
+        "situation": "Sessenta lançamentos fictícios são comparados a seis probabilidades de 1/6.",
+        "observation": "Cada frequência esperada é dez.",
+        "explanation": "Aqui há uma variável categórica e referência especificada; com nenhum parâmetro ajustado, são cinco graus de liberdade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual frequência esperada vale para A e produto 1?",
+        "options": [
+          {
+            "text": "30 pessoas",
+            "correct": false,
+            "explanation": "Trinta é a frequência observada, que não define a referência nula."
+          },
+          {
+            "text": "50 pessoas",
+            "correct": false,
+            "explanation": "Cinquenta é um total marginal e não uma frequência de célula."
+          },
+          {
+            "text": "25 pessoas",
+            "correct": true,
+            "explanation": "O produto dos totais 50×50 dividido por 100 resulta em 25."
+          }
+        ]
+      },
+      {
+        "question": "O p≈0,046 da tabela permite concluir o quê a 5%?",
+        "options": [
+          {
+            "text": "Há evidência de associação sob o desenho assumido",
+            "correct": true,
+            "explanation": "O p é inferior a 0,05, mas a conclusão depende da independência amostral."
+          },
+          {
+            "text": "A cidade determina causalmente a compra",
+            "correct": false,
+            "explanation": "Associação em tabela não elimina explicações alternativas ou confundidores."
+          },
+          {
+            "text": "A probabilidade de independência é 4,6%",
+            "correct": false,
+            "explanation": "O p não é a probabilidade posterior da hipótese de independência."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST/SEMATECH e-Handbook of Statistical Methods",
+        "url": "https://www.itl.nist.gov/div898/handbook/"
+      }
+    ]
+  },
+  "sup_estat_06": {
+    "context": "Um fabricante fictício modela a duração de rolamentos com Weibull. A atividade conecta função de sobrevivência, taxa de falha e mecanismos de envelhecimento.",
+    "theory": "Na Weibull de dois parâmetros, S(t)=exp[−(t/η)^β], com escala η em horas e forma β positiva. A taxa h(t)=(β/η)(t/η)^(β−1) diminui para β<1, é constante em β=1 e cresce para β>1. Tempos censurados contêm informação de sobrevivência e não devem ser registrados como falhas no fim do ensaio.",
+    "workedExample": "Para η=1.000 h e β=2, S(500)=exp(−0,25)=0,7788 e a probabilidade acumulada de falha é 0,2212. A taxa em 500 h é (2/1000)×0,5=0,001 h⁻¹. Em η, a sobrevivência é e⁻¹≈0,3679, não 50%.",
+    "investigation": [
+      "Avalie sobrevivência e falha em 250, 500 e 1.000 h.",
+      "Compare curvas de taxa com β=0,7, 1 e 2 preservando η.",
+      "Separe falhas observadas de unidades ainda funcionando e discuta censura."
+    ],
+    "expectedEvidence": "O aluno deve distinguir probabilidade adimensional de taxa em h⁻¹ e reconhecer η como quantil de 63,2% de falhas.",
+    "reflection": "Por que retirar unidades censuradas pode enviesar a estimativa de vida?",
+    "scenarios": [
+      {
+        "id": "sup_estat_06_s0",
+        "label": "Falhas iniciais",
+        "situation": "Use β=0,7 para representar uma hipótese de defeitos precoces.",
+        "observation": "A taxa decresce com a idade.",
+        "explanation": "Unidades frágeis falham cedo no modelo; β não deve ser escolhido apenas para produzir a curva desejada."
+      },
+      {
+        "id": "sup_estat_06_s1",
+        "label": "Sem envelhecimento",
+        "situation": "Escolha β=1 com a mesma escala de 1.000 h.",
+        "observation": "A taxa é constante em 0,001 h⁻¹.",
+        "explanation": "A Weibull reduz-se à exponencial, cuja propriedade sem memória é uma hipótese específica."
+      },
+      {
+        "id": "sup_estat_06_s2",
+        "label": "Ensaio interrompido",
+        "situation": "Um rolamento ainda opera quando o ensaio termina em 800 h.",
+        "observation": "Há censura à direita em 800 h.",
+        "explanation": "Sabe-se apenas que sua vida excede 800 h; classificá-lo como falha cria um evento inexistente."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quanto vale S(η) em uma Weibull de dois parâmetros?",
+        "options": [
+          {
+            "text": "50% necessariamente",
+            "correct": false,
+            "explanation": "A escala não coincide em geral com a mediana da distribuição."
+          },
+          {
+            "text": "100%",
+            "correct": false,
+            "explanation": "A escala não é um limite garantido de vida sem falhas."
+          },
+          {
+            "text": "e⁻¹, aproximadamente 36,8%",
+            "correct": true,
+            "explanation": "Substituir t=η torna o expoente −1 para qualquer β positivo."
+          }
+        ]
+      },
+      {
+        "question": "Qual forma representa taxa crescente no modelo Weibull?",
+        "options": [
+          {
+            "text": "β maior que 1",
+            "correct": true,
+            "explanation": "O expoente β−1 é positivo e a taxa cresce com o tempo."
+          },
+          {
+            "text": "β igual a 1",
+            "correct": false,
+            "explanation": "Nesse caso o expoente é zero e a taxa fica constante."
+          },
+          {
+            "text": "β entre zero e 1",
+            "correct": false,
+            "explanation": "Um expoente negativo gera taxa decrescente, associada a falhas precoces."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST/SEMATECH e-Handbook of Statistical Methods",
+        "url": "https://www.itl.nist.gov/div898/handbook/"
+      }
+    ]
+  },
+  "sup_estat_07": {
+    "context": "Uma linha fictícia enche embalagens em subgrupos de cinco peças. Cartas de média e amplitude investigam estabilidade antes de comparar o produto a especificações.",
+    "theory": "A carta X-barra usa limites média geral±A2×R-barra; a carta R usa D3×R-barra e D4×R-barra. Para n=5, A2=0,577, D3=0 e D4=2,114. Subgrupos racionais capturam variação curta. Limites de controle descrevem o processo estável e não são tolerâncias de engenharia; padrões não aleatórios também merecem investigação.",
+    "workedExample": "Em dados didáticos fornecidos, média geral=100 g e R-barra=4 g. Os limites X-barra são 97,692 e 102,308 g. A carta R vai de 0 a 8,456 g. Um subgrupo com média 103 g e amplitude 3 g ultrapassa a carta de médias, mas não a de amplitude.",
+    "investigation": [
+      "Defina cinco peças consecutivas por subgrupo e mantenha o intervalo de coleta.",
+      "Calcule separadamente os limites das cartas X-barra e R.",
+      "Marque sinais de causa especial e investigue registros operacionais sem apagar pontos."
+    ],
+    "expectedEvidence": "Os limites calculados devem usar as constantes de n=5 e separar deslocamento da média de aumento de dispersão.",
+    "reflection": "Um processo sob controle pode produzir itens fora da especificação?",
+    "scenarios": [
+      {
+        "id": "sup_estat_07_s0",
+        "label": "Média deslocada",
+        "situation": "Uma regulagem fictícia eleva a média do subgrupo para 103 g.",
+        "observation": "A carta X-barra sinaliza excesso.",
+        "explanation": "A diferença ultrapassa 102,308 g mesmo com amplitude interna compatível com a base."
+      },
+      {
+        "id": "sup_estat_07_s1",
+        "label": "Dispersão ampliada",
+        "situation": "A média de um subgrupo é 100 g, mas sua amplitude é 10 g.",
+        "observation": "A carta R ultrapassa 8,456 g.",
+        "explanation": "O centro aparente pode permanecer estável enquanto a variação de curto prazo aumenta."
+      },
+      {
+        "id": "sup_estat_07_s2",
+        "label": "Tolerância estreita",
+        "situation": "A especificação do produto é 100±1 g e as cartas seguem estáveis.",
+        "observation": "Estabilidade não garante atendimento ao cliente.",
+        "explanation": "Capacidade compara distribuição do processo com tolerâncias e requer análise adicional após estabilidade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é o limite superior da carta de médias neste exemplo?",
+        "options": [
+          {
+            "text": "108,456 g",
+            "correct": false,
+            "explanation": "Esse número mistura a constante D4 da amplitude com o centro de médias."
+          },
+          {
+            "text": "101 g",
+            "correct": false,
+            "explanation": "Esse valor seria uma tolerância hipotética, sem relação com o limite calculado."
+          },
+          {
+            "text": "102,308 g",
+            "correct": true,
+            "explanation": "Soma-se 0,577×4 à média geral de 100 g."
+          }
+        ]
+      },
+      {
+        "question": "Uma amplitude de 10 g com média de 100 g sugere o quê?",
+        "options": [
+          {
+            "text": "Aumento da variação dentro do subgrupo",
+            "correct": true,
+            "explanation": "A amplitude excede o limite de 8,456 g e sinaliza instabilidade da dispersão."
+          },
+          {
+            "text": "Nenhum sinal porque a média é 100 g",
+            "correct": false,
+            "explanation": "A carta de amplitudes examina uma propriedade diferente do centro."
+          },
+          {
+            "text": "Erro obrigatório da balança",
+            "correct": false,
+            "explanation": "O sinal demanda investigação e não identifica sozinho a causa física."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST/SEMATECH e-Handbook of Statistical Methods",
+        "url": "https://www.itl.nist.gov/div898/handbook/"
+      }
+    ]
+  },
+  "sup_estat_08": {
+    "context": "Uma metrologista fictícia combina conhecimento prévio e uma nova média de leituras. O modelo normal-normal explicita como precisão determina o peso das evidências.",
+    "theory": "Com média desconhecida μ, prior N(m0,τ0²) e observações independentes N(μ,σ²) de σ conhecido, a precisão posterior é 1/τ0²+n/σ². A média posterior é a soma de m0/τ0² e n×média/σ² dividida por essa precisão. A variância posterior descreve incerteza sobre μ; uma previsão de nova leitura ainda adiciona σ².",
+    "workedExample": "Use prior N(10,4) em mm, n=4, média=12 mm e σ²=4 mm². A precisão é 0,25+1=1,25 mm⁻²; média posterior=(2,5+12)/1,25=11,6 mm e variância=0,8 mm². Para uma nova leitura, a variância preditiva é 4,8 mm².",
+    "investigation": [
+      "Declare a origem hipotética da prior e a hipótese de σ conhecido.",
+      "Calcule precisões e obtenha média e variância posteriores.",
+      "Compare incerteza sobre μ com dispersão de uma nova observação."
+    ],
+    "expectedEvidence": "A resposta deve apresentar posterior N(11,6;0,8) e variância preditiva 4,8, mantendo mm e mm² distintos.",
+    "reflection": "Como detectar conflito entre uma prior muito precisa e novos dados?",
+    "scenarios": [
+      {
+        "id": "sup_estat_08_s0",
+        "label": "Prior difusa",
+        "situation": "Aumente τ0² de 4 para 400 mm² e mantenha os dados.",
+        "observation": "A média posterior aproxima-se de 12 mm.",
+        "explanation": "A precisão prévia cai para 0,0025 e seu peso relativo torna-se pequeno."
+      },
+      {
+        "id": "sup_estat_08_s1",
+        "label": "Mais informação",
+        "situation": "Use n=16 mantendo média 12 e σ²=4 mm².",
+        "observation": "A precisão dos dados cresce para 4 mm⁻².",
+        "explanation": "Novas unidades independentes concentram a posterior, ao contrário de copiar as mesmas quatro leituras."
+      },
+      {
+        "id": "sup_estat_08_s2",
+        "label": "Previsão individual",
+        "situation": "Peça a distribuição de uma futura leitura, além da média μ.",
+        "observation": "A variância precisa incluir 4 mm² de ruído.",
+        "explanation": "A incerteza paramétrica e a variabilidade observacional são componentes diferentes da previsão."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a média posterior com os números propostos?",
+        "options": [
+          {
+            "text": "11 mm",
+            "correct": false,
+            "explanation": "Essa média simples daria pesos iguais, embora as precisões sejam diferentes."
+          },
+          {
+            "text": "12 mm exatamente",
+            "correct": false,
+            "explanation": "Ignorar a prior elimina sua contribuição de precisão 0,25."
+          },
+          {
+            "text": "11,6 mm",
+            "correct": true,
+            "explanation": "A média ponderada pelas precisões é 14,5/1,25=11,6."
+          }
+        ]
+      },
+      {
+        "question": "Qual variância corresponde a uma nova leitura fictícia?",
+        "options": [
+          {
+            "text": "4,8 mm²",
+            "correct": true,
+            "explanation": "A previsão soma 4 de ruído observacional a 0,8 de incerteza posterior."
+          },
+          {
+            "text": "0,8 mm²",
+            "correct": false,
+            "explanation": "Esse valor descreve μ, não a dispersão completa de uma leitura futura."
+          },
+          {
+            "text": "4 mm² apenas",
+            "correct": false,
+            "explanation": "Esse valor omite a incerteza remanescente sobre a média desconhecida."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST/SEMATECH e-Handbook of Statistical Methods",
+        "url": "https://www.itl.nist.gov/div898/handbook/"
+      }
+    ]
+  },
+  "sup_estat_09": {
+    "context": "Uma equipe fictícia quer estimar a mediana de custos muito assimétricos. O bootstrap aproxima a incerteza reamostrando as unidades observadas com reposição.",
+    "theory": "O bootstrap não paramétrico sorteia amostras de tamanho n da distribuição empírica e recalcula a estatística. O intervalo percentil usa quantis das réplicas e pode ter cobertura ruim com amostras pequenas, vieses e extremos. Reamostrar sem reposição apenas permuta todos os dados; séries dependentes exigem blocos ou outro desenho apropriado.",
+    "workedExample": "Para custos fictícios [10,12,14,16,50] reais, a mediana original é R$14. Uma réplica com reposição [10,10,14,50,50] tem mediana R$14; outra [12,14,16,16,50] tem R$16. Esses dois resultados ilustram o método, mas são insuficientes para alegar intervalo de 95%.",
+    "investigation": [
+      "Identifique a unidade independente e calcule a mediana original.",
+      "Construa réplicas com reposição, preservando n=5 e registrando a semente se executar.",
+      "Explique como os quantis 2,5% e 97,5% formariam um intervalo percentil."
+    ],
+    "expectedEvidence": "Devem ser distinguidos dados originais, réplicas e distribuição da estatística; nenhum intervalo deve ser inventado a partir de duas réplicas.",
+    "reflection": "Que informação sobre a cauda populacional falta em uma amostra de cinco custos?",
+    "scenarios": [
+      {
+        "id": "sup_estat_09_s0",
+        "label": "Sem reposição",
+        "situation": "Cada réplica contém os cinco custos uma única vez.",
+        "observation": "Todas as medianas continuam em R$14.",
+        "explanation": "Permutar a mesma amostra não reproduz a incerteza de amostragem da mediana."
+      },
+      {
+        "id": "sup_estat_09_s1",
+        "label": "Dados temporais",
+        "situation": "Os custos são observados em dias consecutivos com autocorrelação.",
+        "observation": "O bootstrap de observações isoladas perde dependência.",
+        "explanation": "Reamostrar blocos pode preservar parte da estrutura temporal se seu comprimento for justificado."
+      },
+      {
+        "id": "sup_estat_09_s2",
+        "label": "Amostra maior",
+        "situation": "Uma coleta independente registra cem custos em vez de cinco.",
+        "observation": "A distribuição empírica representa melhor a população.",
+        "explanation": "Aumento de dados informativos ajuda a aproximação; aumentar somente as réplicas não acrescenta custos novos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual regra define uma réplica bootstrap não paramétrica usual?",
+        "options": [
+          {
+            "text": "Ordenar os dados sem alterar valores",
+            "correct": false,
+            "explanation": "A ordenação não cria variabilidade na estatística calculada."
+          },
+          {
+            "text": "Eliminar sempre o maior custo",
+            "correct": false,
+            "explanation": "Remover extremos sistematicamente muda o estimando e não define bootstrap."
+          },
+          {
+            "text": "Sortear n observações com reposição",
+            "correct": true,
+            "explanation": "A distribuição empírica é usada como população aproximada para nova amostragem."
+          }
+        ]
+      },
+      {
+        "question": "Duas réplicas bastam para relatar quantis 2,5% e 97,5% confiáveis?",
+        "options": [
+          {
+            "text": "Não, a resolução e o erro Monte Carlo são inadequados",
+            "correct": true,
+            "explanation": "Quantis extremos exigem número suficiente de réplicas e avaliação da estabilidade."
+          },
+          {
+            "text": "Sim, basta usar os dois extremos",
+            "correct": false,
+            "explanation": "Os extremos de duas réplicas não estimam bem quantis de cauda."
+          },
+          {
+            "text": "Sim, porque n=5 determina cobertura exata",
+            "correct": false,
+            "explanation": "O tamanho original não torna o intervalo percentil automaticamente exato."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST/SEMATECH e-Handbook of Statistical Methods",
+        "url": "https://www.itl.nist.gov/div898/handbook/"
+      }
+    ]
+  },
+  "sup_estat_10": {
+    "context": "Um classificador fictício identifica peças defeituosas por uma pontuação. Variar o limiar revela o compromisso entre capturar defeitos e gerar alarmes falsos.",
+    "theory": "A curva ROC relaciona sensibilidade TP/(TP+FN) à taxa de falsos positivos FP/(FP+TN). AUC resume ordenação dos escores, sem escolher limiar nem incorporar custos. Precisão positiva TP/(TP+FP) depende da prevalência. O conjunto de avaliação deve ser separado do treinamento para evitar desempenho otimista por vazamento.",
+    "workedExample": "Em cem peças fictícias há vinte defeituosas. Um limiar produz TP=16, FN=4, FP=8 e TN=72. Sensibilidade=16/20=0,8, FPR=8/80=0,1 e precisão=16/24≈0,667. O ponto ROC é (0,1;0,8); uma única matriz não determina toda a AUC.",
+    "investigation": [
+      "Monte a matriz de confusão preservando os totais reais de classes.",
+      "Calcule sensibilidade, especificidade e precisão no limiar apresentado.",
+      "Planeje vários limiares e justifique a seleção usando custos de erros e validação."
+    ],
+    "expectedEvidence": "A evidência deve conter o ponto (0,1;0,8), precisão 66,7% e a distinção entre taxa de falso positivo e fração de alarmes errados.",
+    "reflection": "Por que a precisão pode cair quando defeitos ficam mais raros?",
+    "scenarios": [
+      {
+        "id": "sup_estat_10_s0",
+        "label": "Limiar reduzido",
+        "situation": "Uma regra mais permissiva aceita mais peças como defeituosas.",
+        "observation": "TP e FP tendem a aumentar juntos.",
+        "explanation": "A sensibilidade costuma subir ao custo de mais alarmes, seguindo os escores fixos avaliados."
+      },
+      {
+        "id": "sup_estat_10_s1",
+        "label": "Prevalência baixa",
+        "situation": "Considere 1% de defeitos com as mesmas taxas 0,8 e 0,1.",
+        "observation": "A precisão prevista é 0,008/(0,008+0,099)≈7,48%.",
+        "explanation": "A grande base de peças boas produz muitos falsos positivos apesar do mesmo ponto ROC."
+      },
+      {
+        "id": "sup_estat_10_s2",
+        "label": "Informação vazada",
+        "situation": "O limiar é escolhido e avaliado nas mesmas peças usadas para ajuste.",
+        "observation": "O desempenho pode parecer melhor que em produção.",
+        "explanation": "Decisões repetidas sobre os dados de teste contaminam a avaliação e exigem conjunto separado."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a taxa de falsos positivos da matriz didática?",
+        "options": [
+          {
+            "text": "33,3%",
+            "correct": false,
+            "explanation": "Essa é a fração aproximada de erros entre alarmes, com outro denominador."
+          },
+          {
+            "text": "8%",
+            "correct": false,
+            "explanation": "Dividir FP pelo total de cem peças não define a taxa ROC."
+          },
+          {
+            "text": "10%",
+            "correct": true,
+            "explanation": "Oito falsos positivos divididos por oitenta peças realmente boas dão 0,1."
+          }
+        ]
+      },
+      {
+        "question": "Uma AUC elevada determina automaticamente o melhor limiar?",
+        "options": [
+          {
+            "text": "Não, faltam custos e objetivo operacional",
+            "correct": true,
+            "explanation": "AUC agrega ordenação e não escolhe o compromisso concreto de erros."
+          },
+          {
+            "text": "Sim, sempre o limiar 0,5",
+            "correct": false,
+            "explanation": "A escala do escore e o custo dos erros podem exigir outro valor."
+          },
+          {
+            "text": "Sim, se a precisão for maior que 50%",
+            "correct": false,
+            "explanation": "Precisão isolada não especifica a utilidade de cada tipo de erro."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIST/SEMATECH e-Handbook of Statistical Methods",
+        "url": "https://www.itl.nist.gov/div898/handbook/"
+      }
+    ]
+  }
+}
