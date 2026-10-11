@@ -21,6 +21,7 @@ import { Lab3DRenderer } from './labs/Lab3DRenderer';
 import type { LabLearningContent } from '../../core/content/labLearningContent';
 import { GuidedLabActivity } from './labs/GuidedLabActivity';
 import { LabLearningWorkspace } from './labs/LabLearningWorkspace';
+import { learningLevelLabel, type LearningLevel } from '../../core/constants/learningLevels';
 
 export interface UniversalLabParam {
   id: string;
@@ -47,7 +48,7 @@ export interface UniversalLabQuestion {
 export interface UniversalLabConfig {
   id: string;
   title: string;
-  academicLevel: 'fundamental_1' | 'fundamental_2' | 'medio' | 'graduacao' | 'pos_graduacao';
+  academicLevel: LearningLevel;
   subject: string;
   topic: string;
   objective: string;
@@ -83,9 +84,9 @@ interface UniversalLabContainerProps {
 export function UniversalLabContainer({ config, onComplete }: UniversalLabContainerProps) {
   if (config.presentation === 'guided_activity') {
     if (!config.learningContent) throw new Error(`Atividade sem conteúdo: ${config.id}`);
-    return <GuidedLabActivity key={config.id} labId={config.id} title={config.title} subject={config.subject} objective={config.objective} content={config.learningContent} onComplete={onComplete} />;
+    return <GuidedLabActivity key={config.id} labId={config.id} title={config.title} subject={config.subject} objective={config.objective} academicLevel={config.academicLevel} content={config.learningContent} onComplete={onComplete} />;
   }
-  return <LabLearningWorkspace key={config.id} labId={config.id} title={config.title} subject={config.subject} objective={config.objective} content={config.learningContent} onComplete={onComplete}>
+  return <LabLearningWorkspace key={config.id} labId={config.id} title={config.title} subject={config.subject} objective={config.objective} academicLevel={config.academicLevel} content={config.learningContent} onComplete={onComplete}>
     <SimulatedLabContainer config={config} onComplete={onComplete} />
   </LabLearningWorkspace>;
 }
@@ -396,7 +397,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
               textTransform: 'uppercase',
               letterSpacing: '0.5px'
             }}>
-              {config.subject} · {config.academicLevel.replace('_', ' ')}
+              {config.subject} · {learningLevelLabel(config.academicLevel)}
             </span>
             <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
               ID: {config.id}
@@ -1022,7 +1023,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', fontSize: '0.85rem' }}>
             <div><strong>Experimento:</strong> {config.title}</div>
-            <div><strong>Área / Nível:</strong> {config.subject} ({config.academicLevel})</div>
+            <div><strong>Área / Nível:</strong> {config.subject} ({learningLevelLabel(config.academicLevel)})</div>
             <div><strong>Status:</strong> {isRunning ? 'Em Andamento' : 'Concluído'}</div>
             <div><strong>Amostras de Telemetria:</strong> {telemetryHistory.length} pontos</div>
           </div>

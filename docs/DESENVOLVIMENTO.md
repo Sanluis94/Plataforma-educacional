@@ -41,13 +41,15 @@ npm.cmd run build
 npm.cmd run lint
 ```
 
-`test:local` executa a suíte sem configuração Firebase/Gemini real. `emulators:check` inicia os emuladores e testa uma sessão anônima de Auth, criação/leitura/atualização/exclusão de progresso no Firestore e recusa de leitura/escrita sem sessão. O teste usa o SDK cliente e as regras do repositório, recusa endpoints fora de `127.0.0.1:9099` e `127.0.0.1:8080`, e encerra os emuladores ao final. Não execute enquanto `emulators:start` ocupa as mesmas portas. Esse smoke verifica integração básica; não cobre todas as permissões de estudantes, professores e administradores. `build` conserva a configuração normal do projeto: revise o ambiente antes de publicar qualquer artefato gerado.
+`test:local` executa a suíte sem configuração Firebase/Gemini real. `emulators:check` inicia os emuladores e testa uma sessão anônima de Auth, criação/leitura/atualização/exclusão de progresso no Firestore e recusa de leitura/escrita sem sessão. O teste usa o SDK cliente e as regras do repositório, recusa endpoints fora de `127.0.0.1:9099` e `127.0.0.1:8080`, e encerra os emuladores ao final. Não execute enquanto `emulators:start` ocupa as mesmas portas. Esse smoke verifica integração básica; não cobre todas as permissões de estudantes, professores e administradores. `build` conserva a configuração normal do projeto. Para publicar, use `build:production`, descrito abaixo.
 
 O workflow `.github/workflows/ci.yml` valida testes e build em pushes e pull requests para `dev`/`main`, sem precisar de secrets. As versões de [checkout](https://github.com/actions/checkout) e [setup-node](https://github.com/actions/setup-node) seguem os exemplos oficiais. O lint roda em job separado, informa suas falhas e não bloqueia essa primeira etapa: a análise inicial encontrou 182 erros e 17 avisos. O resultado é dívida técnica, não aprovação do lint. Depois de corrigir a base, remova o `continue-on-error` e torne o job obrigatório na proteção de branches.
 
 ## Dados e colaboração
 
 Crie branches de trabalho a partir de `dev`, faça alterações pequenas e revise o diff antes de abrir pull request. A publicação de regras, índices e Hosting é uma operação separada; os comandos de desenvolvimento e CI não publicam no Firebase.
+
+O usuário autorizou publicar no GitHub e no Firebase Hosting após cada conjunto de alterações validado. Essa preferência está registrada em `AGENTS.md`. Não é um agendamento nem um deploy automático do CI: o agente deve concluir testes, enviar a revisão, integrar em `main` e publicar o artefato correspondente durante o trabalho. Alterações de dados, usuários ou regras do banco precisam de escopo próprio.
 
 Arquivos `.env*`, `.local/`, contas de serviço e exportações privadas devem permanecer ignorados. Somente dados fictícios podem alimentar fixtures/seed versionados ou arquivos em `public/`; tudo nessa pasta pode chegar ao navegador. Exportações reais do Firestore devem usar um caminho privado em `.local/`, nunca `public/local-data/`. Para demonstrações, use a fonte seed de `npm.cmd run etl:seed`.
 
@@ -68,8 +70,19 @@ O GitHub MCP reutiliza a sessão de `gh auth login`, obtendo o token somente na 
 
 Confira os servidores com `codex mcp list`. Antes de qualquer alteração no ambiente real, confirme o projeto selecionado; o alias `production` identifica `plataforma-educacional-73df6`.
 
-## Estado da preparação
+## Publicação no GitHub e Firebase
 
-Os testes locais, build e smoke dos emuladores foram executados neste computador. O workflow está preparado no repositório local; será executado no GitHub depois que estas mudanças forem enviadas. A configuração não publica o site.
+O Hosting está em [plataforma-educacional-73df6.web.app](https://plataforma-educacional-73df6.web.app). A primeira publicação dos 582 roteiros usou a revisão `4d137a2`, enviada a `dev`, com validação de testes e build no GitHub. A tela publicada e os arquivos do artefato foram conferidos após o deploy. As revisões seguintes devem repetir a verificação.
+
+O `.env` do projeto fica neste computador, fora do Git. Para uma compilação destinada ao Hosting:
+
+```powershell
+npm.cmd run build:production
+node node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting --project plataforma-educacional-73df6 --non-interactive
+```
+
+`build:production` carrega o ambiente de produção, exige os seis campos do SDK Firebase e confirma o projeto do alias `production`. Força emuladores desligados e chave Gemini vazia no processo do Vite, sem modificar o `.env`. A configuração web Firebase é pública por definição; permissões de dados dependem das regras e da autenticação. A chave privada Gemini do projeto não deve aparecer no pacote; o fluxo opcional de chave informada pelo usuário continua disponível conforme `VITE_DISABLE_AI`.
+
+Antes de executar o deploy, confira o diff e os arquivos elegíveis, rode testes, auditoria de conteúdo e compilação, envie ao GitHub e integre a revisão validada em `main`. Compile a revisão exata que será publicada; não reutilize o `dist` de `dev:local` nem de emuladores. Confira depois o login Google, os arquivos publicados e a ausência de exportações privadas. O Hosting ignora `local-data/**`, mas essas exportações também devem permanecer fora da pasta de publicação.
 
 A instalação ainda apresenta dívida de dependências: `npm audit` encontrou 41 entradas (2 baixas, 14 moderadas, 24 altas e 1 crítica). A crítica já existia; dez entradas novas pertencem à árvore de desenvolvimento do Firebase CLI. Não foi aplicado `audit fix --force`, que sugere mudanças incompatíveis. Revise atualizações em trabalho separado e repita `npm audit` para obter o diagnóstico atual. O lint global também permanece pendente de correção.

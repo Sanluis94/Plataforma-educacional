@@ -1,12 +1,14 @@
 import { useState, type ReactNode } from 'react';
 import type { LabLearningContent } from '../../../core/content/labLearningContent';
 import { GuidedLabActivity } from './GuidedLabActivity';
+import type { LearningLevel } from '../../../core/constants/learningLevels';
 
 interface LabLearningWorkspaceProps {
   labId: string;
   title: string;
   subject: string;
   objective: string;
+  academicLevel?: LearningLevel;
   content?: LabLearningContent;
   onComplete?: (report: { score: number; telemetryRows: number }) => void;
   children: ReactNode;
@@ -14,7 +16,7 @@ interface LabLearningWorkspaceProps {
 
 // Existing benches keep their own models and controls. An authored lesson adds
 // investigation and assessment without replacing the underlying bench.
-export function LabLearningWorkspace({ labId, title, subject, objective, content, onComplete, children }: LabLearningWorkspaceProps) {
+export function LabLearningWorkspace({ labId, title, subject, objective, academicLevel, content, onComplete, children }: LabLearningWorkspaceProps) {
   const [view, setView] = useState<'lesson' | 'bench'>('lesson');
   if (!content) return children;
 
@@ -25,7 +27,7 @@ export function LabLearningWorkspace({ labId, title, subject, objective, content
     </nav>
     {view === 'bench' && <p className="guided-lab-hint">Ao voltar ao roteiro, esta execução da bancada será encerrada. Suas anotações do roteiro serão mantidas.</p>}
     <div hidden={view !== 'lesson'}>
-      <GuidedLabActivity labId={labId} title={title} subject={subject} objective={objective} content={content} onComplete={onComplete} />
+      <GuidedLabActivity labId={labId} title={title} subject={subject} objective={objective} academicLevel={academicLevel} content={content} onComplete={onComplete} />
     </div>
     {view === 'bench' && children}
   </div>;

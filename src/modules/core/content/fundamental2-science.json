@@ -120,32 +120,32 @@
     ]
   },
   "fund2_mat_05": {
-    "context": "Um ponto gira numa roda de raio 1. Suas sombras nos eixos horizontal e vertical permitem comparar seno e cosseno, inclusive quando o ponto passa para o lado negativo de um eixo.",
-    "theory": "No círculo unitário, o centro é a origem e o raio mede 1. O ângulo é contado a partir do eixo x positivo, no sentido anti-horário. O ponto associado ao ângulo θ tem coordenadas (cos θ, sen θ): cosseno é a projeção horizontal e seno é a vertical. No primeiro quadrante, ambos são positivos; no segundo, o cosseno fica negativo e o seno positivo. Pelo teorema de Pitágoras, cos² θ + sen² θ = 1. As projeções são razões sem unidade e permanecem entre −1 e 1. Em um círculo de raio r, as coordenadas passam a r cos θ e r sen θ.",
-    "workedExample": "Em 30°, o ponto é (√3/2, 1/2), aproximadamente (0,866; 0,500). Em 60°, as projeções trocam de valor: (1/2, √3/2). Em 90°, toda a projeção é vertical: (0, 1). A troca entre 30° e 60° ocorre porque esses ângulos são complementares.",
+    "context": "Uma maquete de rampa forma um triângulo retângulo. Ao ampliar o desenho sem mudar sua inclinação, os comprimentos mudam, mas certas razões entre os lados permanecem iguais. Esta introdução parte de proporcionalidade e semelhança nos anos finais do Fundamental.",
+    "theory": "Em um triângulo retângulo, a hipotenusa fica em frente ao ângulo reto. Escolhido um ângulo agudo de referência, o cateto oposto não toca esse ângulo e o cateto adjacente toca-o. As razões seno = oposto/hipotenusa e cosseno = adjacente/hipotenusa comparam comprimentos medidos na mesma unidade. Triângulos semelhantes mantêm essas razões porque todos os lados são multiplicados pelo mesmo fator. Trocar o ângulo agudo de referência troca os papéis dos catetos. A atividade usa apenas triângulos retângulos e razões positivas; círculo trigonométrico, radianos e quadrantes ficam para aprofundamento posterior.",
+    "workedExample": "A maquete tem base horizontal de 12 cm, altura de 5 cm e rampa de 13 cm. Para o ângulo da rampa com a base, seno = 5/13 e cosseno = 12/13. Uma ampliação por dois tem lados 24 cm, 10 cm e 26 cm: 10/26 = 5/13 e 24/26 = 12/13. As razões não têm unidade e a inclinação foi preservada.",
     "investigation": [
-      "Desenhe um círculo de raio 1 com os eixos e localize os pontos de 0°, 90°, 180° e 270°.",
-      "Compare os pares de projeções de 30° e 60°. Registre qual coordenada é seno e qual é cosseno, sem trocar a ordem (x, y).",
-      "Marque 120° por simetria em relação ao eixo vertical e justifique o sinal de cada projeção.",
-      "Verifique cos² θ + sen² θ = 1 para 45°, usando √2/2 nas duas projeções, e explique por que a soma simples não precisa ser 1."
+      "Desenhe a maquete com lados 5, 12 e 13 cm e identifique o ângulo reto e a hipotenusa.",
+      "Marque o ângulo entre a base e a rampa. Identifique seus catetos oposto e adjacente antes de escrever as razões.",
+      "Amplie todos os lados por dois e compare as razões 5/13 e 10/26, assim como 12/13 e 24/26.",
+      "Escolha o outro ângulo agudo como referência. Explique o que muda nos nomes dos catetos e o que continua sendo a hipotenusa."
     ],
-    "expectedEvidence": "A tabela deve associar 0° a (1,0), 90° a (0,1), 180° a (−1,0) e 270° a (0,−1). Deve identificar em 120° o cosseno −1/2 e o seno √3/2, além de verificar a soma dos quadrados em 45°.",
-    "reflection": "Por que o seno de 90° é máximo enquanto o cosseno é zero? Explique com as sombras do ponto, em vez de apenas citar uma tabela.",
+    "expectedEvidence": "O registro deve identificar 13 cm como hipotenusa e, para o ângulo da base, obter seno 5/13 e cosseno 12/13. A ampliação por dois preserva ambas as razões; ao usar o outro ângulo agudo, os valores de seno e cosseno trocam de papel.",
+    "reflection": "Por que aumentar todos os lados da maquete pelo mesmo fator mantém a inclinação, enquanto aumentar somente a altura não preserva a semelhança?",
     "scenarios": [
-      { "id": "trinta-graus", "label": "Ponto a 30°", "situation": "Raio 1 e ângulo de 30° a partir do eixo x positivo.", "observation": "A projeção horizontal é √3/2 e a vertical é 1/2.", "explanation": "A coordenada x representa cos 30°; y representa sen 30°. A sombra horizontal é maior." },
-      { "id": "noventa-graus", "label": "Topo do círculo", "situation": "O ponto completa um quarto de volta, chegando a 90°.", "observation": "O ponto fica em (0,1): cosseno zero e seno 1.", "explanation": "O raio está sobre o eixo vertical, sem componente horizontal." },
-      { "id": "cento-vinte", "label": "Segundo quadrante", "situation": "O ponto gira até 120° no círculo unitário.", "observation": "As projeções são (−1/2, √3/2), com sinais diferentes.", "explanation": "O ponto está à esquerda da origem e acima dela; a simetria com 60° muda apenas o sinal de x." }
+      { "id": "rampa-original", "label": "Maquete original", "situation": "Base de 12 cm, altura de 5 cm e rampa de 13 cm; use o ângulo junto à base.", "observation": "A razão oposto/hipotenusa vale 5/13 e adjacente/hipotenusa vale 12/13.", "explanation": "A altura fica em frente ao ângulo escolhido; a base toca esse ângulo e a rampa é a hipotenusa." },
+      { "id": "rampa-ampliada", "label": "Ampliação uniforme", "situation": "Multiplique todos os lados da maquete por três: base 36 cm, altura 15 cm e rampa 39 cm.", "observation": "As razões 15/39 e 36/39 simplificam para 5/13 e 12/13.", "explanation": "O fator três aparece no numerador e no denominador; a semelhança conserva os ângulos e as razões." },
+      { "id": "outro-angulo", "label": "Outro ângulo agudo", "situation": "Na maquete original, use o ângulo entre a altura e a rampa como referência.", "observation": "O seno passa a 12/13 e o cosseno a 5/13; a hipotenusa continua medindo 13 cm.", "explanation": "Os catetos trocam de papel em relação ao novo ângulo, enquanto o lado oposto ao ângulo reto não muda." }
     ],
     "questions": [
-      { "question": "Qual ponto do círculo unitário corresponde ao ângulo de 180°?", "options": [
-        { "text": "(−1, 0)", "correct": true, "explanation": "Meia volta leva ao extremo esquerdo: cos 180° = −1 e sen 180° = 0." },
-        { "text": "(0, −1)", "correct": false, "explanation": "Esse é o extremo inferior, associado a 270°, não a meia volta." },
-        { "text": "(1, 0)", "correct": false, "explanation": "Esse ponto corresponde a 0° ou a uma volta completa de 360°." }
+      { "question": "Qual é o seno do ângulo entre a base e a rampa na maquete de lados 5, 12 e 13 cm?", "options": [
+        { "text": "5/13", "correct": true, "explanation": "O cateto oposto mede 5 cm e a hipotenusa mede 13 cm; o quociente não tem unidade." },
+        { "text": "12/13", "correct": false, "explanation": "Esse é o cosseno do ângulo escolhido, pois a base é o cateto adjacente." },
+        { "text": "13/5", "correct": false, "explanation": "A divisão está invertida: o seno usa cateto oposto dividido pela hipotenusa." }
       ] },
-      { "question": "Em 45°, seno e cosseno valem √2/2. Qual afirmação é correta?", "options": [
-        { "text": "A soma sen 45° + cos 45° é 1.", "correct": false, "explanation": "A soma é √2. A identidade de valor 1 usa os quadrados das projeções." },
-        { "text": "Cada projeção vale 1 porque o raio mede 1.", "correct": false, "explanation": "O raio combina as duas projeções; ambas valerem 1 produziria distância √2 até a origem." },
-        { "text": "A soma dos quadrados das duas projeções é 1.", "correct": true, "explanation": "(√2/2)² + (√2/2)² = 1/2 + 1/2 = 1, conforme Pitágoras." }
+      { "question": "O que acontece com as razões entre lados quando todos os comprimentos do triângulo são duplicados?", "options": [
+        { "text": "Todas as razões dobram.", "correct": false, "explanation": "Numerador e denominador dobram juntos; o fator dois se cancela." },
+        { "text": "A hipotenusa deixa de ficar em frente ao ângulo reto.", "correct": false, "explanation": "A ampliação mantém os ângulos e a posição relativa dos lados." },
+        { "text": "As razões permanecem iguais às do triângulo original.", "correct": true, "explanation": "10/26 = 5/13 e 24/26 = 12/13: a escala muda os comprimentos, não a inclinação." }
       ] }
     ]
   },

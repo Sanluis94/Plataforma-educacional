@@ -69,15 +69,14 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
             REPÚBLICA FEDERATIVA DO BRASIL &bull; SUPER LMS KORTEX
           </div>
           <h2 className="text-xl md:text-2xl font-serif font-bold text-white mb-4">
-            CERTIFICADO DE EXTENSÃO & PRÁTICA EXPERIMENTAL
+            REGISTRO DE ATIVIDADES DE APRENDIZAGEM
           </h2>
 
           <p className="text-xs text-slate-300 leading-relaxed max-w-lg mx-auto mb-6">
             Certificamos que o(a) estudante <strong className="text-white text-sm">{certificate.studentName}</strong> concluiu
-            com êxito <strong>{certificate.completedLabsCount} laboratórios virtuais avançados</strong> no nível de{' '}
-            <strong>{certificate.academicLevelLabel}</strong>, perfazendo a carga horária total de{' '}
-            <strong className="text-amber-400 text-sm">{certificate.totalSimulatedHours} horas complementares</strong> de
-            investigação científica e modelagem computacional.
+            <strong>{certificate.completedLabsCount} atividades de aprendizagem</strong> no nível de{' '}
+            <strong>{certificate.academicLevelLabel}</strong>.
+            {certificate.totalSimulatedHours > 0 ? <>{' '}Carga horária registrada: <strong className="text-amber-400 text-sm">{certificate.totalSimulatedHours} horas</strong>.</> : <>{' '}Carga horária não contabilizada.</>}
           </p>
 
           <div className="grid grid-cols-2 gap-4 max-w-md mx-auto pt-4 border-t border-slate-800 text-left text-[11px]">

@@ -12,29 +12,25 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { writeLog } from '../../data/repositories/logRepository';
 import { DEFAULT_PROGRESS } from '../../data/types';
 import { getLocalEtlUserByRole } from '../../data/services/localEtlClient';
+import { LEARNING_LEVELS, isLearningLevel, normalizeLearningLevel, type LearningLevel } from '../constants/learningLevels';
 
-export type GradeLevel = 
-  | 'fundamental_1' 
-  | 'fundamental_2' 
-  | 'medio' 
-  | 'profissional'
-  | 'graduacao'
-  | 'pos_graduacao';
+export type GradeLevel = LearningLevel;
 
-export const GRADE_LABELS: Record<GradeLevel, string> = {
-  fundamental_1: 'Ensino Fundamental I (1º ao 5º ano)',
-  fundamental_2: 'Ensino Fundamental II (6º ao 9º ano)',
-  medio: 'Ensino Médio (1º ao 3º ano)',
-  profissional: 'Capacitação Profissional / Técnico',
-  graduacao: 'Ensino Superior (Graduação)',
-  pos_graduacao: 'Pós-Graduação & Pesquisa',
-};
+export const GRADE_LABELS = Object.fromEntries(LEARNING_LEVELS.map(level => [level.id, level.label])) as Record<GradeLevel, string>;
 
 interface UserData {
   role: 'professor' | 'coordenador' | 'estudante' | 'admin';
   name: string;
   email: string;
   gradeLevel: GradeLevel;
+}
+
+/** Normaliza somente a sessão; a leitura de um perfil não regrava seu cadastro. */
+function normalizeUserData(data: Record<string, unknown>, fallback: GradeLevel = 'medio'): UserData {
+  const gradeLevel = isLearningLevel(data.gradeLevel)
+    ? data.gradeLevel
+    : normalizeLearningLevel(data.academicLevel, normalizeLearningLevel(data.gradeLevel, fallback));
+  return { ...data, gradeLevel } as unknown as UserData;
 }
 
 type AuthRole = UserData['role'];
@@ -117,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: profile.name,
         email: profile.email,
         role,
-        gradeLevel: normalizeGradeLevel(profile.gradeLevel, gradeLevel),
+        gradeLevel: normalizeLearningLevel(profile.gradeLevel, gradeLevel),
       };
 
       setCurrentUser(localUser);
@@ -168,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           user.uid
         );
       } else {
-        setUserData(docSnap.data() as UserData);
+        setUserData(normalizeUserData(docSnap.data(), gradeLevel));
       }
 
       // Log de login
@@ -235,7 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const parsedSession = JSON.parse(storedSession) as LocalSession;
           setCurrentUser(parsedSession.currentUser);
-          setUserData(parsedSession.userData);
+          setUserData(normalizeUserData(parsedSession.userData as unknown as Record<string, unknown>));
         } catch {
           localStorage.removeItem(LOCAL_SESSION_KEY);
         }
@@ -251,7 +247,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const docRef = doc(db!, 'users', user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setUserData(docSnap.data() as UserData);
+          setUserData(normalizeUserData(docSnap.data()));
         } else {
            setUserData(null);
         }
@@ -271,8 +267,4 @@ const value: AuthContextType = { currentUser, userData, loading, isLocalAuthMode
       {!loading && children}
     </AuthContext.Provider>
   );
-}
-
-function normalizeGradeLevel(value: string | undefined, fallback: GradeLevel): GradeLevel {
-  return value && value in GRADE_LABELS ? value as GradeLevel : fallback;
 }

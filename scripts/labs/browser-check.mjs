@@ -3,13 +3,14 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { createHash } from 'node:crypto';
+import { readCatalog, levels, verifyPreview } from './browser-fixture.mjs';
 
-// Start dev:local on 127.0.0.1:5175 before this check. It deliberately uses the
+// Build with build-browser-preview.mjs, then serve preview on 127.0.0.1:5175.
+// It deliberately uses the
 // actual login, catalog search and runner rather than a separate test page.
 const origin = 'http://127.0.0.1:5175';
 const root = new URL('../../', import.meta.url);
-const source = await readFile(new URL('src/modules/core/constants/masterLabsCatalog.ts', root), 'utf8');
-const catalog = JSON.parse(source.match(/export const MASTER_LABS_CATALOG: CatalogLabItem\[\] = (\[[\s\S]*?\]);/)[1]);
+const catalog = await readCatalog();
 const directory = new URL('src/modules/core/content/', root);
 const entries = {};
 for (const file of (await readdir(directory)).filter(name => name.endsWith('.json'))) {
@@ -19,18 +20,14 @@ for (const file of (await readdir(directory)).filter(name => name.endsWith('.jso
     entries[id] = content;
   }
 }
-const legacySource = await readFile(new URL('src/modules/core/constants/dashboardConstants.ts', root), 'utf8');
-const legacy = [...legacySource.matchAll(/\{\s+id: '([^']+)', label: '([^']+)',\s+labs: \[([\s\S]*?)\]\s+\}/g)].flatMap(module =>
-  [...module[3].matchAll(/\{ id: '([^']+)', title: '([^']+)'/g)].map(lab => ({ id: lab[1], title: lab[2], subjectId: module[1], subject: module[2] })));
+const legacy = catalog.filter(lab => lab.source === 'legacy');
 assert.equal(legacy.length, 72, 'Inventário da biblioteca inicial incompleto.');
-const dashboardSource = await readFile(new URL('src/modules/ux/pages/EstudanteDashboard.tsx', root), 'utf8');
-const areas = [...dashboardSource.matchAll(/\{ id: '[^']+', label: '([^']+)', subjects: \[([^\]]+)\]/g)].map(match => ({ label: match[1], subjects: [...match[2].matchAll(/'([^']+)'/g)].map(item => item[1]) }));
 const selectedIds = process.argv.find(argument => argument.startsWith('--ids='))?.slice(6).split(',').filter(Boolean);
 const workers = Number(process.argv.find(argument => argument.startsWith('--workers='))?.slice(10) ?? 1);
 assert.ok(Number.isInteger(workers) && workers >= 1 && workers <= 4, 'Use entre um e quatro navegadores de verificação.');
 const selected = new Set(selectedIds);
 const included = lab => entries[lab.id] && (!selectedIds || selected.has(lab.id));
-const labs = process.argv.includes('--legacy-only') ? [] : catalog.filter(included);
+const labs = process.argv.includes('--legacy-only') ? [] : catalog.filter(lab => lab.source === 'catalog' && included(lab));
 const legacyLabs = legacy.filter(included);
 const total = labs.length + legacyLabs.length;
 assert.ok(total > 0, 'Nenhum conteúdo autorado disponível.');
@@ -49,6 +46,8 @@ const visited = [];
 async function verifyActivity(page, lab) {
   const activity = page.getByRole('region', { name: `Laboratório: ${lab.title}`, exact: true });
   await activity.waitFor();
+  const level = levels.find(level => level.id === lab.academicLevel);
+  await activity.getByText(`${level.label} · ${lab.subject} · Exploração de cenários`, { exact: true }).waitFor();
   const content = entries[lab.id];
   assert.ok(await activity.getByText(content.context, { exact: true }).isVisible(), `${lab.id}: contexto ausente`);
   for (const step of content.investigation) await activity.getByText(step, { exact: true }).waitFor({ state: 'visible' });
@@ -115,20 +114,18 @@ async function verifyShard(index) {
   await page.getByText('Modo local ativo para testes neste clone.', { exact: true }).waitFor();
   await page.getByRole('button', { name: 'Entrar localmente', exact: true }).click();
   await page.goto(`${origin}/simulacao`);
-  for (const lab of labs.filter((_, position) => position % workers === index)) {
-    await page.getByRole('button', { name: 'Abrir Navegador de 500 Labs', exact: true }).click();
-    await page.getByPlaceholder('Pesquisar entre 500+ laboratórios', { exact: false }).fill(lab.id);
-    await page.getByRole('button', { name: 'Abrir laboratório', exact: true }).click();
-    await verifyActivity(page, lab);
-  }
-  for (const lab of legacyLabs.filter((_, position) => position % workers === index)) {
-    await page.goto(origin + '/estudante');
-    const area = areas.find(item => item.subjects.includes(lab.subjectId));
-    assert.ok(area, lab.id + ': área não encontrada');
-    await page.getByRole('button', { name: area.label, exact: true }).click();
-    await page.getByRole('button', { name: lab.subject + ' (6 Labs)', exact: true }).click();
-    const card = page.getByRole('article', { name: lab.title, exact: true });
-    await card.getByRole('button', { name: 'Iniciar Laboratório Virtual', exact: false }).click();
+  const catalogRegion = page.getByRole('region', { name: 'Catálogo de laboratórios', exact: true });
+  for (const lab of [...labs, ...legacyLabs].filter((_, position) => position % workers === index)) {
+    const level = levels.find(level => level.id === lab.academicLevel);
+    await page.getByRole('navigation', { name: 'Níveis de aprendizagem', exact: true })
+      .getByRole('button', { name: `${level.label} (${level.count})`, exact: true }).click();
+    await catalogRegion.getByLabel('Disciplina', { exact: true }).selectOption('');
+    await catalogRegion.getByLabel('Buscar laboratórios', { exact: true }).fill(lab.id);
+    const card = catalogRegion.getByRole('article', { name: lab.title, exact: true });
+    await card.getByText(`${level.label} · ${lab.subject}`, { exact: true }).waitFor();
+    assert.equal(await card.getByRole('button', { name: 'Abrir laboratório', exact: true }).count(), 1);
+    await card.getByRole('button', { name: 'Abrir laboratório', exact: true }).click();
+    await page.waitForURL(url => url.searchParams.get('lab') === lab.id && url.searchParams.get('level') === lab.academicLevel);
     await verifyActivity(page, lab);
     if (lab.id === 'soft_1') {
       await page.getByRole('button', { name: 'Abrir bancada', exact: true }).click();
@@ -141,9 +138,13 @@ async function verifyShard(index) {
 }
 
 try {
+  const preflightPage = await browser.newPage();
+  await verifyPreview(preflightPage.request);
+  await preflightPage.close();
   const results = await Promise.allSettled(Array.from({ length: workers }, (_, index) => verifyShard(index)));
   const failure = results.find(result => result.status === 'rejected');
   if (failure) throw failure.reason;
+  await verifyPreview(pages[0].request);
   assert.deepEqual([...visited].sort(), [...labs, ...legacyLabs].map(lab => lab.id).sort(), 'Nem todos os laboratórios foram visitados exatamente uma vez.');
   assert.deepEqual(pageErrors, [], 'Erros de runtime no navegador.');
   visited.sort();

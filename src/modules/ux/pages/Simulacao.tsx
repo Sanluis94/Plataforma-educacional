@@ -1,26 +1,28 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import {
   Play, Pause, RotateCcw, ArrowLeft, Home as HomeIcon,
-  ChevronDown, ChevronUp, HelpCircle, Settings2,
-  Search, Sparkles, Layers
+  ChevronDown, ChevronUp, HelpCircle, Settings2
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
 import { UniversalLabContainer } from '../components/UniversalLabContainer';
 import { NEW_ADVANCED_LABS } from '../../core/constants/advancedLabsRegistry';
 import {
   MASTER_LABS_CATALOG,
-  searchLabsCatalog,
   resolveUniversalLab,
   createGuidedLabConfig
 } from '../../core/constants/masterLabsCatalog';
 import type { StudioLab } from '../../core/services/labStudioService';
+import { LEARNING_LABS_CATALOG, getLearningLab, getLearningLabCounts, searchLearningLabs, type LearningLab } from '../../core/constants/learningCatalog';
+import { LEARNING_LEVELS, normalizeLearningLevel, learningLevelLabel, type LearningLevel } from '../../core/constants/learningLevels';
 import { SkillTreeExplorerModal } from '../components/labs/SkillTreeExplorerModal';
 import { LabStudioBuilderModal } from '../components/labs/LabStudioBuilderModal';
 import { CertificateModal } from '../components/labs/CertificateModal';
 import { issueLabCertificate, type LabCertificate } from '../../core/services/certificateService';
 import { GitBranch, PlusCircle, Award } from 'lucide-react';
+
+const LegacyLabRunner = lazy(() => import('../components/labs/LegacyLabRunner'));
 
 interface LabMission {
   id: string;
@@ -141,39 +143,66 @@ interface SimulacaoProps {
   onComplete?: (score: number) => void;
 }
 
-export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
+export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onComplete }) => {
   const { currentUser, userData } = useAuth();
-  const [activeTab, setActiveTab] = useState<string>(mode || 'pendulum');
-
-  useEffect(() => {
-    if (mode) {
-      setActiveTab(mode);
-    }
-  }, [mode]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const embedded = mode !== undefined || labId !== undefined;
+  const [customLabs, setCustomLabs] = useState<StudioLab[]>([]);
+  const requestedLab = getLearningLab(searchParams.get('lab') || '') ?? customLabs.find(lab => lab.id === searchParams.get('lab'));
+  const activeTab = embedded ? mode || 'pendulum' : requestedLab?.id || '';
+  const catalogLevel = requestedLab?.academicLevel ?? normalizeLearningLevel(searchParams.get('level'), normalizeLearningLevel(userData?.gradeLevel));
   const [showMission, setShowMission] = useState(true);
   const [selectedMissionOption, setSelectedMissionOption] = useState<number | null>(null);
   const [missionCompleted, setMissionCompleted] = useState(false);
   const [missionFeedback, setMissionFeedback] = useState<string | null>(null);
-
-  const [showCatalogExplorer, setShowCatalogExplorer] = useState(false);
+  const [catalogExpanded, setShowCatalogExplorer] = useState(false);
+  const showCatalogExplorer = !activeTab || catalogExpanded;
   const [catalogSearch, setCatalogSearch] = useState('');
-  const [catalogLevel, setCatalogLevel] = useState<string>('todos');
+  const [subjectSelection, setSubjectSelection] = useState({ labId: activeTab, value: requestedLab?.subject || '' });
+  const [completedActivities, setCompletedActivities] = useState<{ id: string; academicLevel: LearningLevel }[]>([]);
+  const counts = getLearningLabCounts();
 
   // Novos modais estratégicos
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [showStudio, setShowStudio] = useState(false);
   const [showCertModal, setShowCertModal] = useState(false);
   const [currentCertificate, setCurrentCertificate] = useState<LabCertificate | null>(null);
-  const [customLabs, setCustomLabs] = useState<StudioLab[]>([]);
   const activeCustomLab = customLabs.find(lab => lab.id === activeTab);
 
+  const selectedLab = activeCustomLab ?? getLearningLab(activeTab);
+  const completedAtLevel = completedActivities.filter(activity => activity.academicLevel === catalogLevel);
+  const subjects = [...new Set([
+    ...searchLearningLabs({ academicLevel: catalogLevel }).map(lab => lab.subject),
+    ...customLabs.filter(lab => lab.academicLevel === catalogLevel).map(lab => lab.subject),
+  ])].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const selectedSubject = subjectSelection.labId === activeTab ? subjectSelection.value : selectedLab?.subject || '';
+  const catalogSubject = subjects.includes(selectedSubject) ? selectedSubject : '';
+  const filteredLabs = searchLearningLabs({ query: catalogSearch, academicLevel: catalogLevel, subject: catalogSubject || undefined });
+  const query = catalogSearch.trim().toLocaleLowerCase('pt-BR');
+  const customResults = customLabs.filter(lab => lab.academicLevel === catalogLevel && (!catalogSubject || lab.subject === catalogSubject) && `${lab.title} ${lab.subject} ${lab.topic}`.toLocaleLowerCase('pt-BR').includes(query));
+
+  function setCatalogSubject(value: string) {
+    setSubjectSelection({ labId: activeTab, value });
+  }
+
+  function openLab(lab: LearningLab | StudioLab) {
+    setSearchParams({ lab: lab.id, level: lab.academicLevel });
+    setShowCatalogExplorer(false);
+  }
+
+  function completeSelectedLab(score: number) {
+    if (selectedLab) setCompletedActivities(previous => previous.some(item => item.id === selectedLab.id) ? previous : [...previous, { id: selectedLab.id, academicLevel: selectedLab.academicLevel }]);
+    onComplete?.(score * 10);
+  }
+
   const handleOpenCertificate = async () => {
+    if (completedAtLevel.length === 0) return;
     const cert = await issueLabCertificate({
       studentId: currentUser?.uid || userData?.email || 'estudante_default',
       studentName: userData?.name || 'Estudante Kortex',
-      academicLevelLabel: 'Ensino Superior & Prática Avançada',
-      completedLabsCount: 15,
-      totalSimulatedHours: 150
+      academicLevelLabel: learningLevelLabel(catalogLevel),
+      completedLabsCount: completedAtLevel.length,
+      totalSimulatedHours: 0,
     });
     setCurrentCertificate(cert);
     setShowCertModal(true);
@@ -316,7 +345,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let localBalls = balls.map(b => ({ ...b }));
+    const localBalls = balls.map(b => ({ ...b }));
 
     const draw = () => {
       // Fundo de bancada de laboratório claro
@@ -434,420 +463,55 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
 
   return (
     <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '80rem', margin: '0 auto' }}>
-      {/* Top Hub Navigation Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Link
-            to="/"
-            className="btn-outline"
-            style={{
-              padding: '0.45rem 0.85rem',
-              borderRadius: '0.5rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              fontSize: '0.82rem',
-              fontWeight: 700
-            }}
-            title="Retornar à página inicial da plataforma"
-          >
-            <HomeIcon style={{ width: '1rem', height: '1rem' }} />
-            <span>Voltar ao Hub Inicial</span>
-          </Link>
-
-          <Link
-            to={userData?.role === 'professor' ? '/professor' : '/estudante'}
-            style={{
-              padding: '0.45rem 0.85rem',
-              borderRadius: '0.5rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              fontSize: '0.82rem',
-              color: 'var(--text-secondary)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              textDecoration: 'none',
-              fontWeight: 600
-            }}
-          >
-            <ArrowLeft style={{ width: '0.95rem', height: '0.95rem' }} />
-            <span>{userData?.role === 'professor' ? 'Painel do Professor' : 'Meu Aprendizado'}</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)', margin: '0 0 0.25rem' }}>
-            Laboratório Virtual: Mecânica Clássica
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0 }}>
-            Explore módulos dinâmicos para dominar conceitos da Física e Matemática.
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setActiveTab('pendulum')}
-            className={activeTab === 'pendulum' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-          >
-            Pêndulo
-          </button>
-          <button
-            onClick={() => setActiveTab('collisions')}
-            className={activeTab === 'collisions' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-          >
-            Leis de Newton
-          </button>
-          <button
-            onClick={() => setActiveTab('optics')}
-            className={activeTab === 'optics' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-          >
-            Óptica geométrica
-          </button>
-          <button
-            onClick={() => setActiveTab('electromagnetism')}
-            className={activeTab === 'electromagnetism' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-          >
-            Eletromagnetismo
-          </button>
-          <button
-            onClick={() => setActiveTab('thermodynamics')}
-            className={activeTab === 'thermodynamics' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-          >
-            Termodinâmica
-          </button>
-          <button
-            onClick={() => setActiveTab('modern_physics')}
-            className={activeTab === 'modern_physics' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-          >
-            Física moderna
-          </button>
-          <div style={{ width: '100%', height: '1px', background: 'var(--border-color)', margin: '0.4rem 0' }} />
-          <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              🏛️ Ensino Superior & Engenharias (Laboratórios Avançados Kortex):
-            </span>
+      {!embedded && <>
+        <nav aria-label="Navegação dos laboratórios" style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+          <Link to="/" className="btn-outline"><HomeIcon size={16} /> Hub inicial</Link>
+          <Link to={userData?.role === 'professor' ? '/professor' : userData?.role === 'coordenador' ? '/coordenacao' : userData?.role === 'admin' ? '/admin' : '/estudante'} className="btn-outline"><ArrowLeft size={16} /> Meu aprendizado</Link>
+        </nav>
+        <header style={{ marginBottom: '1.25rem' }}>
+          <h1 style={{ color: 'var(--text-main)', marginBottom: '0.4rem' }}>Laboratórios por nível de aprendizagem</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Escolha seu nível, a disciplina e a atividade. O catálogo reúne {LEARNING_LABS_CATALOG.length} laboratórios.</p>
+        </header>
+        <section aria-label="Catálogo de laboratórios" className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+          <nav aria-label="Níveis de aprendizagem" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            {LEARNING_LEVELS.map(level => <button key={level.id} type="button" aria-pressed={catalogLevel === level.id} className={catalogLevel === level.id ? 'btn-primary' : 'btn-outline'} onClick={() => {
+              setCatalogSubject('');
+              setSearchParams({ level: level.id });
+            }}>{level.label} ({counts[level.id]})</button>)}
+          </nav>
+          <p style={{ color: 'var(--text-secondary)', margin: '0.85rem 0' }}>{LEARNING_LEVELS.find(level => level.id === catalogLevel)?.description}</p>
+          <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'end' }}>
+            <label style={{ display: 'grid', gap: '0.3rem', flex: '1 1 250px', color: 'var(--text-main)' }}>Disciplina
+              <select aria-label="Disciplina" value={catalogSubject} onChange={event => { setCatalogSubject(event.target.value); setShowCatalogExplorer(true); }} style={{ padding: '0.6rem', color: 'var(--text-main)', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+                <option value="">Todas as disciplinas deste nível</option>
+                {subjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+              </select>
+            </label>
+            <label style={{ display: 'grid', gap: '0.3rem', flex: '1 1 260px', color: 'var(--text-main)' }}>Buscar laboratórios
+              <input type="search" aria-label="Buscar laboratórios" placeholder="Título, tópico ou código" value={catalogSearch} onChange={event => { setCatalogSearch(event.target.value); setShowCatalogExplorer(true); }} style={{ padding: '0.6rem', color: 'var(--text-main)', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px' }} />
+            </label>
+            <button type="button" className="btn-outline" onClick={() => setShowSkillTree(true)}><GitBranch size={16} /> Mapa de atividades</button>
+            <button type="button" className="btn-outline" onClick={() => setShowStudio(true)}><PlusCircle size={16} /> Criar atividade</button>
+            <button type="button" className="btn-outline" disabled={completedAtLevel.length === 0} onClick={handleOpenCertificate} title="Atividades concluídas nesta sessão; carga horária não contabilizada"><Award size={16} /> Certificado deste nível</button>
           </div>
-          <button
-            onClick={() => setActiveTab('sup_fis_01')}
-            className={activeTab === 'sup_fis_01' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-          >
-            ⚛️ Ressonância Mecânica
-          </button>
-          <button
-            onClick={() => setActiveTab('sup_calc_01')}
-            className={activeTab === 'sup_calc_01' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-          >
-            📐 Somas de Riemann
-          </button>
-          <button
-            onClick={() => setActiveTab('sup_comp_01')}
-            className={activeTab === 'sup_comp_01' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-          >
-            💻 Algoritmos O(n)
-          </button>
-          <button
-            onClick={() => setActiveTab('sup_qui_01')}
-            className={activeTab === 'sup_qui_01' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-          >
-            🧪 Cinética & Arrhenius
-          </button>
-          <button
-            onClick={() => setActiveTab('sup_eletr_03')}
-            className={activeTab === 'sup_eletr_03' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-          >
-            ⚡ Osciloscópio RLC
-          </button>
-          <button
-            onClick={() => setActiveTab('sup_resmat_01')}
-            className={activeTab === 'sup_resmat_01' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-          >
-            🏗️ Ensaio de Tração
-          </button>
-          <button
-            onClick={() => setActiveTab('sup_bioq_01')}
-            className={activeTab === 'sup_bioq_01' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-          >
-            🧬 Michaelis-Menten
-          </button>
-          <div style={{ width: '100%', height: '1px', background: 'var(--border-color)', margin: '0.4rem 0' }} />
-          <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              🎓 Pós-Graduação & Mestrado/Doutorado (Pesquisa & Modelagem Avançada):
-            </span>
-          </div>
-          <button
-            onClick={() => setActiveTab('pos_ia_01')}
-            className={activeTab === 'pos_ia_01' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-          >
-            🧠 Redes Neurais & Otimização (IA)
-          </button>
-          <button
-            onClick={() => setActiveTab('pos_termo_01')}
-            className={activeTab === 'pos_termo_01' ? 'btn-primary' : 'btn-outline'}
-            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-          >
-            🚀 Ciclo Brayton & Cogeração Exergética
-          </button>
-          {onComplete && (
-            <button
-              onClick={() => onComplete(100)}
-              className="btn-secondary"
-              style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-            >
-              ✓ Concluir laboratório
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── BOTÃO E EXPANSOR DO CATÁLOGO MASTER DE 500+ LABORATÓRIOS ── */}
-      <div className="glass-card mb-4" style={{ padding: '1rem 1.25rem', borderRadius: '12px', background: 'var(--bg-glass)', border: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', color: 'var(--color-primary-accessible, #B8441F)', padding: '0.5rem', borderRadius: '8px' }}>
-              <Layers style={{ width: '1.3rem', height: '1.3rem' }} />
+          {activeTab && <button type="button" className="btn-outline" style={{ marginTop: '1rem' }} onClick={() => setShowCatalogExplorer(previous => !previous)}>{showCatalogExplorer ? 'Recolher atividades' : 'Explorar atividades deste nível'}</button>}
+          {showCatalogExplorer && <>
+            <p role="status" style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>{filteredLabs.length + customResults.length} atividades em {learningLevelLabel(catalogLevel)}.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: '0.85rem', maxHeight: '500px', overflowY: 'auto', padding: '0.2rem' }}>
+              {[...customResults, ...filteredLabs].map(lab => <article key={lab.id} aria-label={lab.title} data-lab-id={lab.id} data-academic-level={lab.academicLevel} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{learningLevelLabel(lab.academicLevel)} · {lab.subject}</span>
+                <h2 style={{ fontSize: '1rem', margin: 0 }}>{lab.icon} {lab.title}</h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{lab.topic}</p>
+                <button type="button" className="btn-outline" onClick={() => openLab(lab)} style={{ marginTop: 'auto' }}><Play size={14} /> Abrir laboratório</button>
+              </article>)}
             </div>
-            <div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                Catálogo Kortex de 500+ Laboratórios Virtuais
-              </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                5 Níveis Acadêmicos • Fundamental I & II • Médio/ENEM • Graduação • Pós-Graduação & Mestrado
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <button
-              onClick={() => setShowSkillTree(true)}
-              className="btn-outline"
-              style={{
-                padding: '0.5rem 0.9rem',
-                borderRadius: '8px',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem'
-              }}
-              title="Abrir Árvore de Competências e Trilhas de Aprendizagem"
-            >
-              <GitBranch style={{ width: '15px', height: '15px', color: '#E4683F' }} />
-              <span>Árvore de Competências</span>
-            </button>
-
-            <button
-              onClick={() => setShowStudio(true)}
-              className="btn-outline"
-              style={{
-                padding: '0.5rem 0.9rem',
-                borderRadius: '8px',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem'
-              }}
-              title="Criar novo laboratório visual sem código"
-            >
-              <PlusCircle style={{ width: '15px', height: '15px', color: '#10b981' }} />
-              <span>Kortex Studio</span>
-            </button>
-
-            <button
-              onClick={handleOpenCertificate}
-              className="btn-outline"
-              style={{
-                padding: '0.5rem 0.9rem',
-                borderRadius: '8px',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem'
-              }}
-              title="Emitir certificado de horas de extensão e prática"
-            >
-              <Award style={{ width: '15px', height: '15px', color: '#f59e0b' }} />
-              <span>Certificados</span>
-            </button>
-
-            <button
-              onClick={() => setShowCatalogExplorer(!showCatalogExplorer)}
-              className="btn-gradient"
-              style={{
-                padding: '0.55rem 1.15rem',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              <Sparkles style={{ width: '16px', height: '16px' }} />
-              <span>{showCatalogExplorer ? 'Fechar Navegador de 500 Labs' : 'Abrir Navegador de 500 Labs'}</span>
-              {showCatalogExplorer ? <ChevronUp style={{ width: '16px', height: '16px' }} /> : <ChevronDown style={{ width: '16px', height: '16px' }} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Painel Expansível de Busca e Filtro de 500+ Laboratórios */}
-        {showCatalogExplorer && (
-          <div className="fade-in" style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }}>
-            {/* Campo de Busca em Tempo Real */}
-            <div style={{ position: 'relative', marginBottom: '1rem' }}>
-              <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', color: 'var(--text-muted)' }} />
-              <input
-                type="text"
-                placeholder="Pesquisar entre 500+ laboratórios por título, disciplina, tópico ou código (Ex: Pitágoras, Arrhenius, RLC, PPO, Quântica...)"
-                value={catalogSearch}
-                onChange={e => setCatalogSearch(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.65rem 1rem 0.65rem 2.5rem',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--bg-surface)',
-                  color: 'var(--text-main)',
-                  fontSize: '0.85rem'
-                }}
-              />
-            </div>
-
-            {/* Pílulas de Níveis Acadêmicos */}
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-              {[
-                { id: 'todos', label: 'Todos os Níveis (510 Labs)' },
-                { id: 'fundamental_1', label: '🎒 Fundamental I (20 Labs)' },
-                { id: 'fundamental_2', label: '🏫 Fundamental II (60 Labs)' },
-                { id: 'medio', label: '🎓 Ensino Médio / ENEM (100 Labs)' },
-                { id: 'graduacao', label: '🏛️ Graduação / Engenharias (160 Labs)' },
-                { id: 'pos_graduacao', label: '🔬 Pós-Graduação & Stricto Sensu (170 Labs)' },
-              ].map(levelItem => (
-                <button
-                  key={levelItem.id}
-                  onClick={() => setCatalogLevel(levelItem.id)}
-                  style={{
-                    padding: '0.4rem 0.85rem',
-                    borderRadius: '8px',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    border: catalogLevel === levelItem.id ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
-                    background: catalogLevel === levelItem.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.15))' : 'transparent',
-                    color: catalogLevel === levelItem.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {levelItem.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Grade de Resultados dos Laboratórios */}
-            {(() => {
-              const catalogResults = searchLabsCatalog(catalogSearch, catalogLevel === 'todos' ? undefined : catalogLevel);
-              const search = catalogSearch.trim().toLocaleLowerCase('pt-BR');
-              const customResults = customLabs.filter(lab => (catalogLevel === 'todos' || lab.academicLevel === catalogLevel) && `${lab.id} ${lab.title} ${lab.subject} ${lab.topic}`.toLocaleLowerCase('pt-BR').includes(search));
-              const filtered = [...customResults, ...catalogResults];
-              return (
-                <div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-                    Exibindo <strong>{filtered.length}</strong> laboratórios encontrados:
-                  </div>
-
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                    gap: '0.85rem',
-                    maxHeight: '420px',
-                    overflowY: 'auto',
-                    paddingRight: '0.5rem'
-                  }}>
-                    {filtered.map(lab => (
-                      <div
-                        key={lab.id}
-                        style={{
-                          background: activeTab === lab.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.12))' : 'var(--bg-card)',
-                          border: activeTab === lab.id ? '1.5px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
-                          borderRadius: '10px',
-                          padding: '0.85rem',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between',
-                          gap: '0.5rem'
-                        }}
-                      >
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800 }}>
-                              {lab.id}
-                            </span>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--color-verde-700, #293E24)', background: 'var(--color-verde-light, rgba(41, 62, 36, 0.12))', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
-                              {customLabs.some(custom => custom.id === lab.id) ? `${lab.simulatedHours}h estimadas` : 'Roteiro e avaliação'}
-                            </span>
-                          </div>
-
-                          <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.2rem' }}>
-                            {lab.icon} {lab.title}
-                          </div>
-
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                            {lab.subject} • {lab.topic}
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => {
-                            setActiveTab(lab.id);
-                            setShowCatalogExplorer(false);
-                          }}
-                          className="btn-outline"
-                          style={{
-                            padding: '0.35rem 0.75rem',
-                            fontSize: '0.78rem',
-                            fontWeight: 700,
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.3rem'
-                          }}
-                        >
-                          <Play style={{ width: '12px', height: '12px' }} />
-                          {activeTab === lab.id ? 'Em Execução' : 'Abrir laboratório'}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        )}
-      </div>
+            {filteredLabs.length + customResults.length === 0 && <p>Nenhum laboratório encontrado. Experimente outra disciplina ou termo de busca.</p>}
+          </>}
+        </section>
+        {searchParams.get('lab') && !selectedLab && <p role="alert">Laboratório não encontrado. Escolha uma atividade no catálogo.</p>}
+        {selectedLab && <p style={{ color: 'var(--text-secondary)' }}>{learningLevelLabel(selectedLab.academicLevel)} › {selectedLab.subject} › {selectedLab.title}</p>}
+      </>}
+      {embedded && <h2 style={{ color: 'var(--text-main)' }}>Bancada: {labTitle || LAB_MISSIONS[activeTab]?.title || 'Física'}</h2>}
 
       {/* ── PAINEL DE MISSÃO EXPERIMENTAL GUIADA ── */}
       {LAB_MISSIONS[activeTab] && (
@@ -1384,49 +1048,51 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
       )}
 
       {/* Renderização Dinâmica dos Laboratórios Avançados e Catálogo Master (UniversalLabContainer) */}
-      {(activeCustomLab || NEW_ADVANCED_LABS[activeTab] || MASTER_LABS_CATALOG.some(l => l.id === activeTab)) && (
+      {!embedded && getLearningLab(activeTab)?.source === 'legacy' && <Suspense fallback={<p role="status">Carregando bancada…</p>}>
+        <LegacyLabRunner key={activeTab} labId={activeTab} onComplete={({ score }) => completeSelectedLab(score)} />
+      </Suspense>}
+      {!embedded && (activeCustomLab || NEW_ADVANCED_LABS[activeTab] || MASTER_LABS_CATALOG.some(l => l.id === activeTab)) && (
         <UniversalLabContainer
           config={activeCustomLab ? createGuidedLabConfig(activeCustomLab, activeCustomLab.learningContent) : resolveUniversalLab(activeTab)}
-          onComplete={({ score }) => {
-            if (onComplete) onComplete(score * 10);
-          }}
+          onComplete={({ score }) => completeSelectedLab(score)}
         />
       )}
 
       {/* Mediação Ativa: Tutor Socrático e Freiriano (para labs legados) */}
-      {!activeCustomLab && !NEW_ADVANCED_LABS[activeTab] && !MASTER_LABS_CATALOG.some(l => l.id === activeTab) && (
+      {embedded && LAB_MISSIONS[activeTab] && (
         <SocraticTutorWidget
           labTitle={`Laboratório de ${activeTab.toUpperCase()}`}
           subject="Ciências e Física Interativa"
         />
       )}
 
-      {/* Modais Globais: Árvore de Competências, Kortex Studio e Certificados */}
-      <SkillTreeExplorerModal
-        isOpen={showSkillTree}
-        onClose={() => setShowSkillTree(false)}
-        onSelectLab={(id) => {
-          setActiveTab(id);
-          setShowSkillTree(false);
-        }}
-        completedLabIds={['sup_fis_01', 'em_fis_01', 'fund2_mat_01']}
-      />
+      {!embedded && <>
+        <SkillTreeExplorerModal
+          isOpen={showSkillTree}
+          onClose={() => setShowSkillTree(false)}
+          academicLevel={catalogLevel}
+          subject={catalogSubject || undefined}
+          query={catalogSearch}
+          completedLabIds={completedActivities.map(activity => activity.id)}
+          onSelectLab={id => {
+            const lab = getLearningLab(id);
+            if (lab) openLab(lab);
+          }}
+        />
+        <LabStudioBuilderModal
+          key={catalogLevel}
+          initialAcademicLevel={catalogLevel}
+          isOpen={showStudio}
+          onClose={() => setShowStudio(false)}
+          existingLabs={customLabs}
+          onSaveNewLab={newLab => {
+            setCustomLabs(previous => [newLab, ...previous]);
+            openLab(newLab);
+          }}
+        />
+        <CertificateModal isOpen={showCertModal} onClose={() => setShowCertModal(false)} certificate={currentCertificate} />
+      </>}
 
-      <LabStudioBuilderModal
-        isOpen={showStudio}
-        onClose={() => setShowStudio(false)}
-        existingLabs={customLabs}
-        onSaveNewLab={(newLab) => {
-          setCustomLabs(prev => [newLab, ...prev]);
-          setActiveTab(newLab.id);
-        }}
-      />
-
-      <CertificateModal
-        isOpen={showCertModal}
-        onClose={() => setShowCertModal(false)}
-        certificate={currentCertificate}
-      />
     </div>
   );
 };

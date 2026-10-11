@@ -18,6 +18,7 @@
     "etl:seed": "node scripts/etl/run-local-etl.mjs --source ./scripts/etl/source/educational-platform.seed.json",
     "etl:serve": "node scripts/etl/serve-local-etl.mjs",
     "build": "tsc -b && vite build",
+    "build:production": "node --experimental-strip-types scripts/dev/build-production.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",

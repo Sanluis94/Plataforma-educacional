@@ -1,15 +1,17 @@
 import type { CatalogLabItem } from '../constants/masterLabsCatalog';
 import { LAB_LEARNING_CONTENT, type LabLearningContent } from '../content/labLearningContent';
 import { findRepeatedContent, validateLearningContent } from '../content/contentQuality';
+import { isLearningLevel, learningLevelLabel, type LearningLevel } from '../constants/learningLevels';
 
-export interface StudioLab extends CatalogLabItem {
+export interface StudioLab extends Omit<CatalogLabItem, 'academicLevel'> {
+  academicLevel: LearningLevel;
   learningContent: LabLearningContent;
 }
 
 export interface StudioLabDraft {
   title: string;
   subject: string;
-  academicLevel: CatalogLabItem['academicLevel'];
+  academicLevel: LearningLevel;
   topic: string;
   objective: string;
   estimatedHours: number;
@@ -24,17 +26,12 @@ export function emptyLearningContent(): LabLearningContent {
   };
 }
 
-const levels = {
-  fundamental_1: 'Ensino Fundamental I', fundamental_2: 'Ensino Fundamental II', medio: 'Ensino Médio',
-  graduacao: 'Ensino Superior', pos_graduacao: 'Pós-Graduação',
-};
-
 export function createStudioLab(draft: StudioLabDraft, existing: StudioLab[] = []): StudioLab {
   const errors: string[] = [];
   for (const [label, value, minimum] of [
     ['Título', draft.title, 5], ['Disciplina', draft.subject, 3], ['Tópico', draft.topic, 3], ['Objetivo', draft.objective, 30],
   ] as const) if (typeof value !== 'string' || value.trim().length < minimum) errors.push(`${label}: informe pelo menos ${minimum} caracteres.`);
-  if (!Object.hasOwn(levels, draft.academicLevel)) errors.push('Escolha um nível acadêmico válido.');
+  if (!isLearningLevel(draft.academicLevel)) errors.push('Escolha um nível acadêmico válido.');
   if (!Number.isFinite(draft.estimatedHours) || draft.estimatedHours <= 0 || draft.estimatedHours > 40) errors.push('Informe uma estimativa de estudo entre 0 e 40 horas, maior que zero.');
   errors.push(...validateLearningContent('Novo laboratório', draft.content));
   if (errors.length) throw new Error(errors.join('\n'));
@@ -46,7 +43,7 @@ export function createStudioLab(draft: StudioLabDraft, existing: StudioLab[] = [
 
   return {
     id, title: draft.title.trim(), subject: draft.subject.trim(), academicLevel: draft.academicLevel,
-    academicLevelLabel: levels[draft.academicLevel], subjectCategory: 'Personalizados', topic: draft.topic.trim(),
+    academicLevelLabel: learningLevelLabel(draft.academicLevel), subjectCategory: 'Personalizados', topic: draft.topic.trim(),
     objective: draft.objective.trim(), theoreticalBackground: `${draft.content.theory}\n\nExemplo explicado\n${draft.content.workedExample}`,
     curriculumCode: 'CUSTOM-LAB', simulatedHours: draft.estimatedHours, icon: '🛠️', solverType: 'guided_activity',
     defaultParams: [], diagnosticQuestion: structuredClone(draft.content.questions[0]), learningContent: structuredClone(draft.content),

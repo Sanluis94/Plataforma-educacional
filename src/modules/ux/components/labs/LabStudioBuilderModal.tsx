@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { createStudioLab, emptyLearningContent, type StudioLab, type StudioLabDraft } from '../../../core/services/labStudioService';
 import { LearningContentEditor } from './LearningContentEditor';
+import { LEARNING_LEVELS, type LearningLevel } from '../../../core/constants/learningLevels';
 import './LabStudioBuilderModal.css';
 
 interface LabStudioBuilderModalProps {
@@ -8,12 +9,13 @@ interface LabStudioBuilderModalProps {
   onClose: () => void;
   onSaveNewLab: (lab: StudioLab) => void;
   existingLabs?: StudioLab[];
+  initialAcademicLevel?: LearningLevel;
 }
 
-const initialDraft = (): StudioLabDraft => ({ title: '', subject: '', academicLevel: 'medio', topic: '', objective: '', estimatedHours: 1, content: emptyLearningContent() });
+const initialDraft = (academicLevel: LearningLevel): StudioLabDraft => ({ title: '', subject: '', academicLevel, topic: '', objective: '', estimatedHours: 1, content: emptyLearningContent() });
 
-export function LabStudioBuilderModal({ isOpen, onClose, onSaveNewLab, existingLabs = [] }: LabStudioBuilderModalProps) {
-  const [draft, setDraft] = useState(initialDraft);
+export function LabStudioBuilderModal({ isOpen, onClose, onSaveNewLab, existingLabs = [], initialAcademicLevel = 'medio' }: LabStudioBuilderModalProps) {
+  const [draft, setDraft] = useState(() => initialDraft(initialAcademicLevel));
   const [error, setError] = useState('');
   const dialog = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -42,7 +44,7 @@ export function LabStudioBuilderModal({ isOpen, onClose, onSaveNewLab, existingL
     try {
       const lab = createStudioLab(draft, existingLabs);
       onSaveNewLab(lab);
-      setDraft(initialDraft());
+      setDraft(initialDraft(initialAcademicLevel));
       setError('');
       onClose();
     } catch (failure) { setError(failure instanceof Error ? failure.message : 'Confira o conteúdo antes de adicionar a atividade.'); }
@@ -65,7 +67,7 @@ export function LabStudioBuilderModal({ isOpen, onClose, onSaveNewLab, existingL
           {metadata('Objetivo de aprendizagem', 'objective', 30)}
           <label className="studio-field"><span>Nível acadêmico</span>
             <select aria-label="Nível acadêmico" value={draft.academicLevel} onChange={event => setDraft(previous => ({ ...previous, academicLevel: event.target.value as StudioLabDraft['academicLevel'] }))}>
-              <option value="fundamental_1">Fundamental I</option><option value="fundamental_2">Fundamental II</option><option value="medio">Ensino Médio</option><option value="graduacao">Graduação</option><option value="pos_graduacao">Pós-Graduação</option>
+              {LEARNING_LEVELS.map(level => <option key={level.id} value={level.id}>{level.label}</option>)}
             </select>
           </label>
           <label className="studio-field"><span>Tempo de estudo estimado (horas)</span><input type="number" min="0.25" max="40" step="0.25" required value={draft.estimatedHours} onChange={event => setDraft(previous => ({ ...previous, estimatedHours: Number(event.target.value) }))} /></label>

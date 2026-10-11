@@ -1572,15 +1572,15 @@ export const MASTER_LABS_CATALOG: CatalogLabItem[] = [
   },
   {
     "id": "fund2_mat_05",
-    "title": "Círculo Trigonométrico Básico",
+    "title": "Triângulos Semelhantes e Razões Trigonométricas",
     "academicLevel": "fundamental_2",
     "academicLevelLabel": "Ensino Fundamental II",
     "subject": "Matemática Fundamental II",
     "subjectCategory": "Exatas & Lógica",
-    "topic": "Trigonometria Plana",
-    "objective": "Projeções de seno e cosseno para ângulos notáveis",
-    "theoreticalBackground": "O laboratório virtual \"Círculo Trigonométrico Básico\" investiga a temática de Trigonometria Plana no âmbito da disciplina de Matemática Fundamental II para o nível Ensino Fundamental II (Anos Finais). O objetivo central da experimentação é projeções de seno e cosseno para ângulos notáveis. Teoreticamente, a prática sustenta-se em consonância com a BNCC (BNCC EF09MA08), consolidando a passagem do pensamento concreto para a abstração científica, análise gráfica e relação quantitativa de grandezas. Durante a execução, o estudante manipula os parâmetros do sistema em tempo real, verificando como perturbações nas condições iniciais afetam as grandezas de estado, convergência analítica e variáveis de resposta registradas na telemetria.",
-    "curriculumCode": "BNCC EF09MA08",
+    "topic": "Razões em Triângulos Retângulos",
+    "objective": "Comparar razões entre lados em triângulos retângulos semelhantes e distinguir o ângulo de referência",
+    "theoreticalBackground": "Triângulos retângulos semelhantes mantêm as razões entre lados correspondentes. Esta introdução guiada usa proporcionalidade, identificação da hipotenusa e escolha de um ângulo agudo de referência para comparar seno e cosseno, sem exigir círculo trigonométrico, radianos ou quadrantes.",
+    "curriculumCode": "Semelhança e proporcionalidade — introdução guiada",
     "simulatedHours": 20,
     "icon": "📐",
     "solverType": "analytical",
@@ -32717,7 +32717,7 @@ export function searchLabsCatalog(query: string, level?: string): CatalogLabItem
  * Resolve e instancia uma configuração executável de UniversalLabConfig
  * para qualquer um dos 510 laboratórios do catálogo.
  */
-export function createGuidedLabConfig(item: CatalogLabItem, content: LabLearningContent): UniversalLabConfig {
+export function createGuidedLabConfig(item: Pick<UniversalLabConfig, 'id' | 'title' | 'academicLevel' | 'subject' | 'topic' | 'objective'>, content: LabLearningContent): UniversalLabConfig {
   return {
     id: item.id, title: item.title, academicLevel: item.academicLevel, subject: item.subject, topic: item.topic,
     objective: item.objective, theoreticalBackground: `${content.theory}\n\nExemplo explicado\n${content.workedExample}`,

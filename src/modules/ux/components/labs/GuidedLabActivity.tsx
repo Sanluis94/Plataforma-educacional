@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { LabLearningContent } from '../../../core/content/labLearningContent';
+import { getLearningLab } from '../../../core/constants/learningCatalog';
+import { learningLevelLabel, type LearningLevel } from '../../../core/constants/learningLevels';
 import './GuidedLabActivity.css';
 
 interface GuidedLabActivityProps {
@@ -7,11 +9,13 @@ interface GuidedLabActivityProps {
   title: string;
   subject: string;
   objective: string;
+  academicLevel?: LearningLevel;
   content: LabLearningContent;
   onComplete?: (report: { score: number; telemetryRows: number }) => void;
 }
 
-export function GuidedLabActivity({ labId, title, subject, objective, content, onComplete }: GuidedLabActivityProps) {
+export function GuidedLabActivity({ labId, title, subject, objective, academicLevel, content, onComplete }: GuidedLabActivityProps) {
+  const level = academicLevel ?? getLearningLab(labId)?.academicLevel;
   const [activeTab, setActiveTab] = useState<'activity' | 'theory' | 'assessment'>('activity');
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [revealedScenarios, setRevealedScenarios] = useState<number[]>([]);
@@ -33,7 +37,7 @@ export function GuidedLabActivity({ labId, title, subject, objective, content, o
 
   function downloadNotes() {
     const text = [
-      `# ${title}`, `Laboratório: ${labId}`, `Objetivo: ${objective}`,
+      `# ${title}`, `Laboratório: ${labId}`, ...(level ? [`Nível: ${learningLevelLabel(level)}`] : []), `Objetivo: ${objective}`,
       ...content.scenarios.flatMap((item, index) => [
         `## ${item.label}`, item.situation,
         `Minha previsão: ${hypotheses[index] || '(não registrada)'}`,
@@ -53,7 +57,7 @@ export function GuidedLabActivity({ labId, title, subject, objective, content, o
   return (
     <section className="guided-lab" aria-label={`Laboratório: ${title}`}>
       <header>
-        <p className="guided-lab-subject">{subject} · Exploração de cenários</p>
+        <p className="guided-lab-subject">{level && `${learningLevelLabel(level)} · `}{subject} · Exploração de cenários</p>
         <h2>{title}</h2>
         <p>{objective}</p>
       </header>

@@ -1,6 +1,10 @@
 # Edu-Interact — Plataforma Educacional de Ciências, Laboratórios Virtuais & LMS Inclusivo
 
-> Plataforma educacional com uma biblioteca inicial de **72 laboratórios** e um catálogo master de **510 entradas**, módulos de LMS e fundamentação em metodologias ativas e Desenho Universal para a Aprendizagem (DUA). A cobertura de conteúdo próprio está sendo verificada conforme os [critérios dos laboratórios](./docs/LABORATORIOS_CONTEUDO.md).
+> Plataforma educacional com **582 laboratórios com roteiros próprios**, organizados por nível de aprendizado e disciplina, módulos de LMS e fundamentação em metodologias ativas e Desenho Universal para a Aprendizagem (DUA). Consulte os [critérios e a verificação dos laboratórios](./docs/LABORATORIOS_CONTEUDO.md).
+
+Aplicação publicada: [plataforma-educacional-73df6.web.app](https://plataforma-educacional-73df6.web.app).
+
+O catálogo reúne 21 atividades do Fundamental I, 85 do Fundamental II, 134 do Ensino Médio, 160 da graduação e 170 da pós-graduação, além de uma trilha complementar de formação profissional com 12 atividades. O perfil sugere o nível inicial; os filtros permitem explorar outros níveis. Os 72 laboratórios da biblioteca inicial estão incluídos nessa distribuição.
 
 ---
 
@@ -111,8 +115,10 @@ npx tsc -b
 ### Build de Produção
 
 ```bash
-npm run build
+npm run build:production
 ```
+
+Esse comando usa o `.env` privado, exige a configuração do Firebase de produção e exclui a chave Gemini do JavaScript público. O fluxo de testes, revisão e publicação está no [guia de desenvolvimento](./docs/DESENVOLVIMENTO.md).
 
 ---
 
