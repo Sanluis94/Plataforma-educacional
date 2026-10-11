@@ -331,8 +331,9 @@ export const enrollLocalStudent = async (classCodeOrId: string, studentId: strin
   const classData = db.classes.find((c: ClassData) => 
     c.id === classCodeOrId.trim() || 
     (c.code && c.code.toUpperCase() === search) || 
-    (c.id && c.id.toUpperCase().startsWith(search))
+    (!c.code && search.length === 6 && c.id?.slice(0, 6).toUpperCase() === search)
   );
+  if (!classData) throw new Error('Código de turma não encontrado.');
   if (classData) {
     if (!classData.studentIds) classData.studentIds = [];
     if (!classData.studentIds.includes(studentId)) {

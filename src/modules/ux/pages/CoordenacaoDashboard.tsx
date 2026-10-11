@@ -1,5 +1,8 @@
+import { useNavigationParams } from '../hooks/useNavigationParams';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../core/contexts/AuthContext';
+import { getReturnDestination, withReturnTo } from '../../core/utils/navigation';
 import {
   Building2, TrendingUp, AlertTriangle,
   FileSpreadsheet, Printer, CheckCircle2, Home as HomeIcon
@@ -45,9 +48,17 @@ const ALUNOS_RISCO_PADRAO: StudentRiskItem[] = [
   { id: 'risk_4', nome: 'Larissa Mendes Duarte', turma: '9º Ano Fundamental', mediaGeral: 6.1, frequenciaLabs: 48, nivelRisco: 'Leve', fatorPrincipal: 'Oscilação na entrega dos roteiros socráticos' },
 ];
 
+const COORDINATION_TABS = ['visao_geral', 'importacao_csv', 'radar_evasao', 'matriz_curricular', 'dossie_mec', 'relatorio_oficial'] as const;
+type CoordinationTab = typeof COORDINATION_TABS[number];
 export function CoordenacaoDashboard() {
-  const [activeTab, setActiveTab] = useState<'visao_geral' | 'importacao_csv' | 'radar_evasao' | 'matriz_curricular' | 'dossie_mec' | 'relatorio_oficial'>('visao_geral');
-  const [escolaNome] = useState('Universidade Kortex de Tecnologia & Inovação');
+  const [searchParams, setSearchParams] = useNavigationParams();
+  const location = useLocation();
+  const { userData } = useAuth();
+  const selectedTab = searchParams.get('tab');
+  const activeTab = COORDINATION_TABS.includes(selectedTab as CoordinationTab) ? selectedTab as CoordinationTab : 'visao_geral';
+  const setActiveTab = (tab: CoordinationTab) => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('tab', tab); return next; });
+  const [escolaNome] = useState('Escola de demonstração');
+  const [supportPreview, setSupportPreview] = useState<string | null>(null);
   const [diretorNome] = useState('Prof. Dr. Ricardo Valença');
 
   // Estado da importação CSV
@@ -120,6 +131,13 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
 
   return (
     <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '80rem', margin: '0 auto' }}>
+      <aside aria-label="Sobre este painel" className="card" style={{ padding: '1rem', marginBottom: '1rem', border: '2px solid var(--color-primary)', color: 'var(--text-main)', overflowWrap: 'anywhere' }}>
+        <strong>Painel de demonstração.</strong> Os indicadores, estudantes e documentos desta área são exemplos. A prévia de CSV não cadastra alunos; os avisos não são enviados. Os documentos impressos são modelos sem validade institucional.
+      </aside>
+      <nav aria-label="Caminhos da coordenação" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <Link className="btn-outline" to={withReturnTo('/professor?tab=classes', location.pathname + location.search)}>Turmas e planejamento</Link>
+        {searchParams.get('returnTo') && <Link className="btn-outline" to={getReturnDestination(userData?.role, searchParams.get('returnTo'))}>Voltar à tela anterior</Link>}
+      </nav>
       {/* Top Hub Navigation Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <Link
@@ -149,7 +167,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
         border: '1px solid var(--border-color)',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{
               width: '3.25rem',
               height: '3.25rem',
@@ -167,9 +185,9 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
-                  EdTech SaaS B2B
+                  Coordenação escolar
                 </span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Multi-Tenancy Escolar</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Demonstração</span>
               </div>
               <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.2rem 0', fontFamily: 'var(--font-heading)' }}>
                 {escolaNome}
@@ -186,7 +204,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
               className="btn-outline"
               style={{ padding: '0.5rem 1rem', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: 'var(--radius-sm, 10px)' }}
             >
-              <Printer style={{ width: '0.9rem', height: '0.9rem' }} /> Imprimir Parecer Oficial
+              <Printer style={{ width: '0.9rem', height: '0.9rem' }} /> Imprimir modelo
             </button>
           </div>
         </div>
@@ -207,7 +225,8 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as CoordinationTab)}
+              aria-pressed={isActive}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -234,7 +253,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
       {activeTab === 'visao_geral' && (
         <div className="fade-in">
           {/* Métricas Principais da Escola */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
             <div className="glass-card" style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Alunos Matriculados</div>
               <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>482</div>
@@ -324,7 +343,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
             {/* Pré-visualização com Validação */}
             {previewAlunos.length > 0 && (
               <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
                     Prévia da Importação ({previewAlunos.filter(a => a.valido).length} válidos de {previewAlunos.length})
                   </span>
@@ -334,7 +353,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
                     className="btn-gradient"
                     style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem', fontWeight: 700 }}
                   >
-                    Efetivar Matrículas dos Válidos
+                    Simular prévia de matrículas
                   </button>
                 </div>
 
@@ -380,7 +399,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
               <div style={{ padding: '1rem', borderRadius: '0.5rem', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#34d399' }}>
                 <CheckCircle2 style={{ width: '1.25rem', height: '1.25rem', flexShrink: 0 }} />
                 <div>
-                  <strong>Sucesso!</strong> {totalImportados} alunos foram cadastrados no sistema com sucesso e receberam acesso instantâneo às turmas.
+                  <strong>Prévia concluída.</strong> {totalImportados} registros válidos nesta simulação. Nenhum aluno foi cadastrado ou recebeu acesso.
                 </div>
               </div>
             )}
@@ -413,13 +432,13 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
                     background: aluno.nivelRisco === 'Crítico' ? 'rgba(239,68,68,0.08)' : aluno.nivelRisco === 'Médio' ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.02)',
                     border: aluno.nivelRisco === 'Crítico' ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(245,158,11,0.3)',
                     display: 'grid',
-                    gridTemplateColumns: '1fr 140px 140px auto',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))',
                     gap: '1rem',
                     alignItems: 'center'
                   }}
                 >
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.2rem' }}>
                       <span style={{
                         fontSize: '0.7rem',
                         padding: '0.15rem 0.5rem',
@@ -454,11 +473,11 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
 
                   <div>
                     <button
-                      onClick={() => alert(`Aviso de apoio pedagógico enviado com sucesso para ${aluno.nome} e seus responsáveis!`)}
+                      onClick={() => setSupportPreview(`Exemplo de apoio para ${aluno.nome}: combine uma conversa sobre as dificuldades e planeje uma atividade de revisão. Esta mensagem não foi enviada.`)}
                       className="btn-outline"
                       style={{ padding: '0.45rem 0.85rem', fontSize: '0.78rem', borderRadius: 'var(--radius-sm, 10px)' }}
                     >
-                      Enviar Intervenção
+                      Ver exemplo de apoio
                     </button>
                   </div>
                 </div>
@@ -469,6 +488,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
       )}
 
       {/* ── ABA 4: RELATÓRIO OFICIAL WHITE-LABEL ── */}
+      {supportPreview && <p role="status" style={{ color: 'var(--text-main)', padding: '1rem' }}>{supportPreview}</p>}
       {activeTab === 'relatorio_oficial' && (
         <div className="fade-in">
           <div className="glass-card mb-4" style={{ padding: '2rem', borderRadius: 'var(--radius-lg, 14px)', background: 'var(--color-nude-100, #FAF7EE)', color: 'var(--color-verde-900, #172314)', border: '1px solid var(--color-nude-300, #E2D7C3)' }}>
@@ -538,7 +558,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
               </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1rem' }}>
               {[
                 {
                   semestre: '1º Semestre',
@@ -636,7 +656,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
                 Governança Regulatória & SINAES
               </span>
               <h3 style={{ margin: '0.2rem 0', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                Dossiê Oficial para Avaliação In Loco / Virtual do MEC / INEP
+                Modelo de dossiê institucional — dados demonstrativos
               </h3>
               <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                 Documento comprobatório de atendimento pleno das Dimensões 1, 2 e 3 do Instrumento de Avaliação de Cursos de Graduação (MEC).
@@ -662,7 +682,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
                 }}
               >
                 <Printer style={{ width: '18px', height: '18px' }} />
-                Imprimir Dossiê Oficial (MEC / INEP)
+                Imprimir modelo de dossiê
               </button>
             </div>
           </div>
@@ -672,7 +692,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
             {/* Cabeçalho Oficial da República e IES */}
             <div style={{ borderBottom: '3px double #172314', paddingBottom: '1.5rem', marginBottom: '2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                   <div style={{
                     width: '3.75rem',
                     height: '3.75rem',
@@ -718,10 +738,10 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
                 1. IDENTIFICAÇÃO E CONFORMIDADE COM AS 3 DIMENSÕES DO INEP
               </h4>
               <p style={{ fontSize: '0.85rem', lineHeight: '1.6', color: '#2b3a28', margin: '0 0 1rem 0' }}>
-                Este dossiê atesta a plena conformidade da infraestrutura tecnológica de laboratórios didáticos virtuais Kortex com as exigências dos instrumentos de avaliação de cursos de graduação do Sistema Nacional de Avaliação da Educação Superior (SINAES/INEP).
+                Este é um exemplo de organização de informações institucionais. Os dados e conceitos abaixo são fictícios; este modelo não comprova conformidade nem substitui uma avaliação institucional.
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1rem' }}>
                 <div style={{ background: '#FFFFFF', padding: '1rem', borderRadius: '8px', border: '1px solid #E2D7C3' }}>
                   <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#293E24' }}>DIMENSÃO 1: ORGANIZAÇÃO DIDÁTICO-PEDAGÓGICA</div>
                   <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#22c55e', margin: '0.25rem 0' }}>Conceito: 5.0</div>
@@ -874,7 +894,7 @@ Thiago Lacerda Prado,thiago.prado@escola.com.br,3º Ano EM - A,20260105`;
 
             {/* Termo de Homologação, Assinaturas e Autenticidade Digital */}
             <div style={{ borderTop: '2px solid #293E24', paddingTop: '1.5rem', marginTop: '2rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', alignItems: 'center' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1.5rem', alignItems: 'center' }}>
                 <div>
                   <h5 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#172314', margin: '0 0 0.35rem 0' }}>
                     DECLARAÇÃO DE IDONEIDADE TÉCNICA E PEDAGÓGICA

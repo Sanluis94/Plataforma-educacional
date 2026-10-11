@@ -216,20 +216,20 @@ export function processarSimuladoEnemTRI(
   const recomendacoesPedagogicas: string[] = [];
   if (indiceCoerenciaPedagogica < 65) {
     recomendacoesPedagogicas.push(
-      'Atenção ao Padrão de Chute: Você errou questões com conceitos fundamentais mas acertou questões de alta complexidade. Na TRI, consolidar a base teórica eleva muito mais sua pontuação do que arriscar itens difíceis.'
+      'Revise os conceitos das questões de menor dificuldade que você errou. Acertar questões difíceis e errar outras mais simples pode indicar pontos diferentes a revisar; isso não demonstra que você chutou.'
     );
   }
   if (porcentagemAcerto >= 80) {
     recomendacoesPedagogicas.push(
-      'Excelente consistência de domínio cognitivo! Sua proficiência indica alta probabilidade de aprovação em cursos concorridos no SiSU (Medicina, Engenharia, Direito).'
+      'Você acertou a maior parte das questões deste treino. Revise os erros e pratique outros conteúdos para acompanhar sua evolução; esta estimativa não prevê aprovação no SiSU.'
     );
   } else if (porcentagemAcerto >= 50) {
     recomendacoesPedagogicas.push(
-      'Bom desempenho intermediário. Foque na revisão das habilidades de aplicação prática nos laboratórios virtuais da plataforma para transformar acertos medianos em proficiência consistente.'
+      'Você acertou pelo menos metade das questões deste treino. Revise as resoluções das questões que errou e pratique essas habilidades nos laboratórios da plataforma.'
     );
   } else {
     recomendacoesPedagogicas.push(
-      'Recomendamos realizar os experimentos virtuais guiados de nível introdutório e utilizar a Maiêutica Socrática para fixar as bases conceituais antes do próximo simulado.'
+      'Revise os conceitos básicos nas resoluções comentadas e pratique atividades introdutórias antes do próximo treino. Você também pode usar o tutor para tirar dúvidas.'
     );
   }
 

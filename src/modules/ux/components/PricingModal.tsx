@@ -3,6 +3,7 @@ import {
   Sparkles, Check, Building2, User, Globe, Calculator, X
 } from 'lucide-react';
 import { Logo } from './Logo';
+import { useDialogAccessibility } from '../hooks/useDialogAccessibility';
 
 interface PricingModalProps {
   onClose: () => void;
@@ -11,6 +12,8 @@ interface PricingModalProps {
 export function PricingModal({ onClose }: PricingModalProps) {
   const [billingCycle, setBillingCycle] = useState<'mensal' | 'anual'>('anual');
   const [numAlunosROI, setNumAlunosROI] = useState(300);
+  const [planPreview, setPlanPreview] = useState('');
+  const dialogRef = useDialogAccessibility(true, onClose);
 
   // Cálculos de ROI
   const custoPlataformaAno = numAlunosROI * (billingCycle === 'anual' ? 7.9 * 12 : 9.9 * 12);
@@ -40,6 +43,12 @@ export function PricingModal({ onClose }: PricingModalProps) {
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pricing-title"
+        aria-describedby="pricing-demo"
         className="card slide-down"
         onClick={e => e.stopPropagation()}
         style={{
@@ -48,31 +57,35 @@ export function PricingModal({ onClose }: PricingModalProps) {
           borderRadius: '14px',
           background: 'var(--bg-card)',
           border: '1px solid var(--border-color)',
-          padding: '2rem',
+          padding: 'clamp(1rem, 4vw, 2rem)',
           maxHeight: '92vh',
           overflowY: 'auto'
         }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <Logo symbolSize={26} />
               <span className="badge badge-primary">
-                <Sparkles style={{ width: '0.8rem', height: '0.8rem' }} /> Planos comerciais e assinatura
+                <Sparkles style={{ width: '0.8rem', height: '0.8rem' }} /> Demonstração de planos
               </span>
             </div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)', margin: '0 0 0.35rem' }}>
-              Transforme o ensino de ciências na sua escola
+            <h2 id="pricing-title" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)', margin: '0 0 0.35rem' }}>
+              Planos para estudantes, escolas e redes
             </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0 }}>
-              Planos desenhados para estudantes individuais, colégios privados e redes públicas de ensino.
+            <p id="pricing-demo" style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0 }}>
+              Valores e condições ilustrativos. Você pode comparar opções nesta demonstração; nenhuma assinatura, cobrança ou solicitação de contato será realizada.
             </p>
           </div>
           <button
             onClick={onClose}
+            aria-label="Fechar planos"
             style={{
               background: 'none',
+              flexShrink: 0,
+              minWidth: '44px',
+              minHeight: '44px',
               border: '1px solid var(--border-color)',
               borderRadius: '10px',
               color: 'var(--text-muted)',
@@ -89,9 +102,10 @@ export function PricingModal({ onClose }: PricingModalProps) {
 
         {/* Seletor Mensal / Anual */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', background: 'rgba(41, 62, 36, 0.05)', padding: '0.25rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', background: 'rgba(41, 62, 36, 0.05)', padding: '0.25rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
             <button
               onClick={() => setBillingCycle('mensal')}
+              aria-pressed={billingCycle === 'mensal'}
               style={{
                 padding: '0.45rem 1.25rem',
                 borderRadius: '8px',
@@ -108,6 +122,7 @@ export function PricingModal({ onClose }: PricingModalProps) {
             </button>
             <button
               onClick={() => setBillingCycle('anual')}
+              aria-pressed={billingCycle === 'anual'}
               style={{
                 padding: '0.45rem 1.25rem',
                 borderRadius: '8px',
@@ -129,7 +144,7 @@ export function PricingModal({ onClose }: PricingModalProps) {
         </div>
 
         {/* Grid de 3 Planos */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
           {/* Plano 1: Aluno Pro (B2C) */}
           <div style={{
             padding: '1.5rem',
@@ -155,7 +170,7 @@ export function PricingModal({ onClose }: PricingModalProps) {
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem', fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Check style={{ width: '0.9rem', height: '0.9rem', color: 'var(--color-verde-700)' }} /> Acesso a todos os 72 laboratórios
+                  <Check style={{ width: '0.9rem', height: '0.9rem', color: 'var(--color-verde-700)' }} /> Catálogo de atividades por nível
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <Check style={{ width: '0.9rem', height: '0.9rem', color: 'var(--color-verde-700)' }} /> Simulados ENEM com cálculo TRI
@@ -169,11 +184,11 @@ export function PricingModal({ onClose }: PricingModalProps) {
               </ul>
             </div>
             <button
-              onClick={() => alert('Redirecionando para o checkout com Pix e Cartão...')}
+              onClick={() => setPlanPreview('Opção individual selecionada para comparação. Nenhuma assinatura foi contratada.')}
               className="btn-outline"
               style={{ width: '100%', padding: '0.65rem', fontSize: '0.85rem' }}
             >
-              Assinar Aluno Pro
+              Ver opção individual
             </button>
           </div>
 
@@ -233,11 +248,11 @@ export function PricingModal({ onClose }: PricingModalProps) {
               </ul>
             </div>
             <button
-              onClick={() => alert('Iniciando contratação institucional para o Colégio...')}
+              onClick={() => setPlanPreview('Opção para escola selecionada para comparação. Nenhuma contratação foi realizada.')}
               className="btn-primary"
               style={{ width: '100%', padding: '0.65rem', fontSize: '0.85rem' }}
             >
-              Contratar para a escola
+              Ver opção para escola
             </button>
           </div>
 
@@ -280,14 +295,15 @@ export function PricingModal({ onClose }: PricingModalProps) {
               </ul>
             </div>
             <button
-              onClick={() => alert('Entraremos em contato com a equipe pedagógica da rede!')}
+              onClick={() => setPlanPreview('Opção para rede selecionada para comparação. Nenhuma solicitação de contato foi enviada.')}
               className="btn-secondary"
               style={{ width: '100%', padding: '0.65rem', fontSize: '0.85rem' }}
             >
-              Falar com consultor B2G
+              Ver opção para rede
             </button>
           </div>
         </div>
+        {planPreview && <p role="status" style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{planPreview}</p>}
 
         {/* Calculadora de ROI para Diretores de Escola */}
         <div style={{
@@ -302,15 +318,16 @@ export function PricingModal({ onClose }: PricingModalProps) {
           </div>
 
           <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
-            Compare o custo de montar e manter um laboratório físico tradicional de ciências versus a assinatura da plataforma Edu-Interact:
+            Simule uma comparação ilustrativa. Este exemplo considera R$ 120.000 por ano para um laboratório físico; os custos reais variam por escola.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', alignItems: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '1.25rem', alignItems: 'center' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+              <label htmlFor="pricing-demo-students" style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                 Número de alunos na escola: <strong>{numAlunosROI} alunos</strong>
               </label>
               <input
+                id="pricing-demo-students"
                 type="range"
                 min={50}
                 max={2000}

@@ -957,7 +957,7 @@ body.dyslexia-font * {
 
 /* Modo Foco (TDAH e TEA) estilizado com as cores da identidade visual */
 body.focus-mode-active {
-  background: #172314 !important;
+  background: var(--bg-base) !important;
 }
 
 body.focus-mode-active * {
@@ -969,8 +969,8 @@ body.focus-mode-active .glass-card,
 body.focus-mode-active .card {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  background: #1F311B !important;
-  border: 1px solid rgba(241, 234, 217, 0.2) !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
   box-shadow: none !important;
 }
 
@@ -979,7 +979,7 @@ body.focus-mode-active a:focus,
 body.focus-mode-active input:focus,
 body.focus-mode-active select:focus,
 body.focus-mode-active textarea:focus {
-  outline: 3px solid #E4683F !important;
+  outline: 3px solid var(--color-primary-accessible) !important;
   outline-offset: 3px !important;
 }
 

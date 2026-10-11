@@ -1,5 +1,6 @@
+import { useNavigationParams } from '../hooks/useNavigationParams';
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Beaker, Trophy, BookOpen, Clock, FileText,
   Calendar, Upload, ExternalLink, Play, Bell,
@@ -33,6 +34,7 @@ import type {
   LessonPlanItem
 } from '../../data/types';
 import { useAuth } from '../../core/contexts/AuthContext';
+import { withReturnTo } from '../../core/utils/navigation';
 
 function ConfettiCanvas({ active, onComplete }: { active: boolean; onComplete: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -126,11 +128,14 @@ function ConfettiCanvas({ active, onComplete }: { active: boolean; onComplete: (
 
 type LegacyLab = (typeof ALL_MODULES)[number]['labs'][number];
 const LEGACY_LABS = ALL_MODULES.flatMap<LegacyLab>(module => module.labs);
+const STUDENT_TABS = ['labs', 'exams', 'lesson_plans', 'materials', 'classes', 'gamification', 'gradebook', 'forum', 'certificates'] as const;
+type StudentTab = typeof STUDENT_TABS[number];
 
 export function EstudanteDashboard() {
   const { currentUser, userData } = useAuth();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useNavigationParams();
   const linkedLab = getLearningLab(searchParams.get('lab') || '');
   const selectedLevel = linkedLab?.academicLevel || normalizeLearningLevel(searchParams.get('level'), normalizeLearningLevel(userData?.gradeLevel));
   const studentUid = currentUser?.uid || 'student-demo';
@@ -154,19 +159,19 @@ export function EstudanteDashboard() {
 
   const { level, xp, coins } = progress;
 
-  // Active top-level navigation tab
-  const [activeTab, setActiveTab] = useState<
-    'labs' | 'exams' | 'lesson_plans' | 'materials' | 'classes' | 'gamification' | 'gradebook' | 'forum' | 'certificates'
-  >('labs');
-
-  // Sync tab with query parameters if present
-  useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    const validTabs = ['labs', 'exams', 'lesson_plans', 'materials', 'classes', 'gamification', 'gradebook', 'forum', 'certificates'];
-    if (tabParam && validTabs.includes(tabParam)) {
-      setActiveTab(tabParam as any);
-    }
-  }, [searchParams]);
+  const tabParam = searchParams.get('tab');
+  const activeTab: StudentTab = STUDENT_TABS.includes(tabParam as StudentTab) ? tabParam as StudentTab : 'labs';
+  const panelLocation = location.pathname + location.search;
+  const setActiveTab = (tab: StudentTab) => {
+    setActiveLab(null);
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous);
+      next.set('tab', tab);
+      next.delete('lab');
+      next.delete('labReturnTab');
+      return next;
+    });
+  };
 
   const selectedSubject = linkedLab?.subject || searchParams.get('subject');
   const currentSubjectModule = modules.find(module => module.id === selectedSubject) || modules[0];
@@ -177,12 +182,15 @@ export function EstudanteDashboard() {
       return;
     }
     if (linkedLab.source === 'catalog') {
-      navigate(`/simulacao?lab=${encodeURIComponent(linkedLab.id)}&level=${linkedLab.academicLevel}`, { replace: true });
+      const returnParams = new URLSearchParams(searchParams);
+      returnParams.delete('lab');
+      returnParams.set('tab', returnParams.get('labReturnTab') === 'lesson_plans' ? 'lesson_plans' : 'labs');
+      returnParams.delete('labReturnTab');
+      navigate(withReturnTo(`/simulacao?lab=${encodeURIComponent(linkedLab.id)}&level=${linkedLab.academicLevel}`, `${location.pathname}?${returnParams}`), { replace: true });
       return;
     }
     const lab = LEGACY_LABS.find(item => item.id === linkedLab.id);
     setActiveLab(lab || null);
-    setActiveTab('labs');
     if (searchParams.get('level') !== linkedLab.academicLevel || searchParams.get('subject') !== linkedLab.subject || searchParams.get('tab') !== 'labs') {
       const next = new URLSearchParams(searchParams);
       next.set('level', linkedLab.academicLevel);
@@ -190,36 +198,43 @@ export function EstudanteDashboard() {
       next.set('tab', 'labs');
       setSearchParams(next, { replace: true });
     }
-  }, [linkedLab, navigate, searchParams, setActiveLab, setSearchParams]);
+  }, [linkedLab, location.pathname, navigate, searchParams, setActiveLab, setSearchParams]);
 
   const closeLab = () => {
     setActiveLab(null);
     setSearchParams(previous => {
       const next = new URLSearchParams(previous);
+      next.set('tab', next.get('labReturnTab') === 'lesson_plans' ? 'lesson_plans' : 'labs');
       next.delete('lab');
+      next.delete('labReturnTab');
       return next;
     });
   };
 
-  const openLearningLab = (lab: LearningLab) => {
+  const openLearningLab = (lab: LearningLab, fromTab: StudentTab = activeTab) => {
     if (lab.source === 'catalog') {
-      navigate(`/simulacao?lab=${encodeURIComponent(lab.id)}&level=${lab.academicLevel}`);
+      navigate(withReturnTo(`/simulacao?lab=${encodeURIComponent(lab.id)}&level=${lab.academicLevel}`, panelLocation));
       return;
     }
-    setActiveTab('labs');
     setSearchParams(previous => {
       const next = new URLSearchParams(previous);
       next.set('lab', lab.id);
       next.set('level', lab.academicLevel);
       next.set('subject', lab.subject);
       next.set('tab', 'labs');
+      if (fromTab === 'lesson_plans') next.set('labReturnTab', 'lesson_plans');
+      else next.delete('labReturnTab');
       return next;
     });
     SoundEffects.playClick();
   };
 
-  // Class selection state
-  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const selectedClassId = studentClasses.find(turma => turma.id === searchParams.get('class'))?.id ?? studentClasses[0]?.id ?? null;
+  const setSelectedClassId = (classId: string) => setSearchParams(previous => {
+    const next = new URLSearchParams(previous);
+    next.set('class', classId);
+    return next;
+  });
 
   // Real-time Class Data States
   const [classNotices, setClassNotices] = useState<any[]>([]);
@@ -248,12 +263,16 @@ export function EstudanteDashboard() {
   const [submittingExam, setSubmittingExam] = useState(false);
   const [copiedMatId, setCopiedMatId] = useState<string | null>(null);
 
-  // Auto-select first class when available
+  // Keep the class context when refreshing or returning from another screen.
   useEffect(() => {
-    if (!selectedClassId && studentClasses.length > 0) {
-      setSelectedClassId(studentClasses[0].id);
+    if (selectedClassId && searchParams.get('class') !== selectedClassId) {
+      setSearchParams(previous => {
+        const next = new URLSearchParams(previous);
+        next.set('class', selectedClassId);
+        return next;
+      }, { replace: true });
     }
-  }, [studentClasses, selectedClassId]);
+  }, [selectedClassId, searchParams, setSearchParams]);
 
   // Subscribe to real-time class data
   useEffect(() => {
@@ -303,7 +322,11 @@ export function EstudanteDashboard() {
     setJoinLoading(true);
     setJoinFeedback(null);
     try {
-      await joinClass(classCodeInput.trim());
+      const joined = await joinClass(classCodeInput.trim());
+      if (!joined) {
+        setJoinFeedback({ msg: 'Não foi possível entrar na turma. Confira o código com seu professor e tente novamente.', type: 'error' });
+        return;
+      }
       setClassCodeInput('');
       SoundEffects.playSuccess();
       setJoinFeedback({ msg: '🎉 Matrícula realizada com sucesso na turma!', type: 'success' });
@@ -311,7 +334,6 @@ export function EstudanteDashboard() {
     } catch (err: any) {
       console.error('Erro ao matricular na turma:', err);
       setJoinFeedback({ msg: err?.message || 'Código de turma não encontrado. Verifique com seu professor.', type: 'error' });
-      setTimeout(() => setJoinFeedback(null), 6000);
     } finally {
       setJoinLoading(false);
     }
@@ -431,17 +453,17 @@ export function EstudanteDashboard() {
           className="hover:scale-102"
         >
           <HomeIcon style={{ width: '1rem', height: '1rem' }} />
-          ← Voltar ao Hub Inicial
+          ← Página inicial
         </Link>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', minWidth: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
           <span style={{ color: 'var(--text-secondary)' }}>Acesso rápido:</span>
-          <Link to={`/simulacao?level=${gradeLevel}`} style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <Link to={withReturnTo(`/simulacao?level=${gradeLevel}`, panelLocation)} style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             🔬 Catálogo de Laboratórios
           </Link>
           <span>•</span>
-          <Link to="/enem" style={{ color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            📝 Simulado ENEM TRI
+          <Link to={withReturnTo('/enem', panelLocation)} style={{ color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            📝 Simulado ENEM
           </Link>
         </div>
       </div>
@@ -456,7 +478,7 @@ export function EstudanteDashboard() {
             </h1>
           </div>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.92rem' }}>
-            Hub de Laboratórios Virtuais, Provas Formais, Cronograma de Aulas e Materiais Didáticos.
+            Acesse seus laboratórios, provas, aulas e materiais de estudo.
           </p>
         </div>
 
@@ -473,6 +495,16 @@ export function EstudanteDashboard() {
           </div>
         </div>
       </div>
+
+      {studentClasses.length > 0 && (
+        <label style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem', color: 'var(--text-main)', fontWeight: 600 }}>
+          Turma selecionada
+          <select aria-label="Turma selecionada" value={selectedClassId || ''} onChange={event => setSelectedClassId(event.target.value)} style={{ padding: '0.65rem', borderRadius: '8px', background: 'var(--color-bg-card, #FAF7EE)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}>
+            {studentClasses.map(turma => <option key={turma.id} value={turma.id}>{turma.name}</option>)}
+          </select>
+          <span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--text-secondary)' }}>As provas, aulas, materiais e avisos são desta turma.</span>
+        </label>
+      )}
 
       {/* Reorganized Student Navigation Bar with Dynamic Badges */}
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--border-color)' }}>
@@ -496,16 +528,8 @@ export function EstudanteDashboard() {
         ].map(tab => (
           <button
             key={tab.id}
-            onClick={() => {
-              setActiveTab(tab.id as any);
-              setActiveLab(null);
-              setSearchParams(previous => {
-                const next = new URLSearchParams(previous);
-                next.set('tab', tab.id);
-                next.delete('lab');
-                return next;
-              });
-            }}
+            onClick={() => setActiveTab(tab.id as StudentTab)}
+            aria-pressed={activeTab === tab.id}
             style={{
               padding: '0.65rem 1.25rem',
               borderRadius: 'var(--radius-sm, 10px) var(--radius-sm, 10px) 0 0',
@@ -685,7 +709,7 @@ export function EstudanteDashboard() {
               className="btn-outline"
               style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
             >
-              ← Voltar aos Laboratórios
+              {searchParams.get('labReturnTab') === 'lesson_plans' ? '← Voltar ao Plano de Aulas' : '← Voltar aos Laboratórios'}
             </button>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
               Laboratório Ativo: <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{activeLab.title}</strong>
@@ -1043,13 +1067,13 @@ export function EstudanteDashboard() {
                       <button
                         onClick={() => {
                           const lab = getLearningLab(plan.laboratorioAssociadoId || '');
-                          if (lab) openLearningLab(lab);
+                          if (lab) openLearningLab(lab, 'lesson_plans');
                         }}
                         disabled={!getLearningLab(plan.laboratorioAssociadoId || '')}
                         className="btn-outline"
                         style={{ padding: '0.45rem 0.85rem', fontSize: '0.78rem', whiteSpace: 'nowrap', borderRadius: 'var(--radius-sm, 10px)' }}
                       >
-                        🔬 Abrir Lab da Aula
+                        🔬 Abrir Laboratório da Aula
                       </button>
                     )}
                   </div>
@@ -1183,12 +1207,13 @@ export function EstudanteDashboard() {
               ➕ Matricular-se em uma Nova Turma
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', marginBottom: '1rem' }}>
-              Insira o <strong>código de 6 dígitos</strong> fornecido pelo seu professor (ex: <code>K7M9P2</code>) para acessar os avisos, materiais e provas da turma.
+              Insira o <strong>código da turma</strong> fornecido pelo seu professor (ex: <code>K7M9P2</code>) para acessar os avisos, materiais e provas da turma.
             </p>
             <form onSubmit={handleJoinClassSubmit} style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <input
                 type="text"
-                placeholder="Código de 6 dígitos (ex: K7M9P2)..."
+                aria-label="Código da turma"
+                placeholder="Código da turma (ex: K7M9P2)"
                 value={classCodeInput}
                 maxLength={25}
                 onChange={e => setClassCodeInput(e.target.value.toUpperCase())}
@@ -1217,7 +1242,7 @@ export function EstudanteDashboard() {
             </form>
 
             {joinFeedback && (
-              <div style={{
+              <div role={joinFeedback.type === 'error' ? 'alert' : 'status'} style={{
                 marginTop: '0.85rem',
                 padding: '0.75rem 1rem',
                 borderRadius: '8px',

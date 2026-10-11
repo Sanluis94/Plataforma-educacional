@@ -9,6 +9,7 @@ import {
   BookMarked, PenTool
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { canAccessPath, getRoleHome, ROLE_LABELS, withReturnTo } from '../../core/utils/navigation';
 
 export function InteractivePendulum() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -190,11 +191,12 @@ export function Home({ onLoginOpen }: HomeProps) {
   const { currentUser, userData } = useAuth();
   const isProfessor = userData?.role === 'professor';
   const isAdmin = userData?.role === 'admin';
+  const isCoordinator = userData?.role === 'coordenador';
   const userName = userData?.name || currentUser?.displayName || (isProfessor ? 'Professor(a)' : 'Estudante');
 
   // Hub Navigation Cards com a paleta oficial da identidade visual (Verde, Laranja, Nude)
   const getHubCards = () => {
-    if (isProfessor) {
+    if (isProfessor || isCoordinator) {
       return [
         {
           id: 'classes',
@@ -237,14 +239,14 @@ export function Home({ onLoginOpen }: HomeProps) {
           href: '/simulacao',
           icon: Beaker,
           color: '#293E24',
-          badgeText: '6 Laboratórios ativos',
+          badgeText: 'Atividades por nível',
           actionText: 'Abrir simuladores'
         },
         {
           id: 'enem',
-          title: 'Simulado oficial ENEM (TRI)',
-          category: 'Avaliação oficial',
-          description: 'Acesse o banco de questões calibrado do ENEM com régua de proficiência TRI oficial e cronômetro de aplicação.',
+          title: 'Simulado ENEM para praticar',
+          category: 'Preparação para o ENEM',
+          description: 'Pratique com questões, acompanhe o tempo e consulte uma nota estimada para orientar seus estudos.',
           href: '/enem',
           icon: GraduationCap,
           color: '#172314',
@@ -255,11 +257,11 @@ export function Home({ onLoginOpen }: HomeProps) {
           id: 'coordenacao',
           title: 'Painel da coordenação e gestão',
           category: 'Coordenação institucional',
-          description: 'Radar preventivo de evasão escolar, importação de turmas em massa via CSV e relatórios consolidados da escola.',
+          description: 'Conheça os exemplos de indicadores e relatórios da coordenação. A importação de alunos nesta área funciona como demonstração.',
           href: '/coordenacao',
           icon: Building2,
           color: '#293E24',
-          badgeText: 'Radar de evasão + CSV',
+          badgeText: 'Demonstração',
           actionText: 'Abrir coordenação'
         },
         {
@@ -304,11 +306,11 @@ export function Home({ onLoginOpen }: HomeProps) {
           id: 'coordenacao',
           title: 'Coordenação escolar',
           category: 'Institucional',
-          description: 'Importação de alunos, monitoramento de evasão e relatórios educacionais.',
+          description: 'Exemplos de indicadores, prévia de alunos e modelos de relatórios educacionais.',
           href: '/coordenacao',
           icon: Building2,
           color: '#293E24',
-          badgeText: 'Visão escolar',
+          badgeText: 'Demonstração',
           actionText: 'Ver coordenação'
         },
         {
@@ -362,25 +364,25 @@ export function Home({ onLoginOpen }: HomeProps) {
       },
       {
         id: 'enem',
-        title: 'Simulado oficial ENEM (TRI)',
+        title: 'Simulado ENEM para praticar',
         category: 'Preparatório vestibular',
-        description: 'Treine com itens oficiais do ENEM com cronômetro real de 30 minutos e veja sua nota TRI calculada na hora.',
+        description: 'Pratique com questões em 30 minutos e consulte uma nota estimada. O resultado serve para orientar seus estudos.',
         href: '/enem',
         icon: GraduationCap,
         color: '#172314',
-        badgeText: 'Nota TRI oficial',
+        badgeText: 'Nota estimada',
         actionText: 'Fazer simulado'
       },
       {
         id: 'redacao',
-        title: 'Laboratório de redação com IA',
+        title: 'Atividades de redação',
         category: 'Produção textual',
-        description: 'Escreva dissertações temáticas com tema gerador e receba nota e comentários imediatos nas 5 competências do ENEM.',
-        href: '/estudante?tab=labs',
+        description: 'Pratique a construção de teses, a coesão do texto e a proposta de intervenção nas atividades de redação.',
+        href: '/simulacao?level=medio&subject=Reda%C3%A7%C3%A3o+Dissertativa+Nota+1000',
         icon: PenTool,
         color: '#B8441F',
-        badgeText: 'Correção IA C1-C5',
-        actionText: 'Escrever redação'
+        badgeText: 'Prática de escrita',
+        actionText: 'Abrir atividades de redação'
       },
       {
         id: 'exams',
@@ -429,7 +431,7 @@ export function Home({ onLoginOpen }: HomeProps) {
     ];
   };
 
-  const hubCards = getHubCards();
+  const hubCards = getHubCards().filter(card => canAccessPath(userData?.role, card.href));
 
   return (
     <div style={{ minHeight: 'calc(100vh - 4rem)', paddingBottom: '4rem' }}>
@@ -449,9 +451,10 @@ export function Home({ onLoginOpen }: HomeProps) {
             flexWrap: 'wrap',
             gap: '1.5rem'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem', minWidth: 0 }}>
               <div style={{
                 width: '3.75rem',
+                flexShrink: 0,
                 height: '3.75rem',
                 borderRadius: '12px',
                 background: 'var(--color-primary)',
@@ -468,9 +471,9 @@ export function Home({ onLoginOpen }: HomeProps) {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
                   <span className={isProfessor ? 'badge badge-secondary' : isAdmin ? 'badge badge-error' : 'badge badge-primary'}>
-                    {isProfessor ? 'Painel do professor' : isAdmin ? 'Administrador' : 'Painel do estudante'}
+                    {userData ? ROLE_LABELS[userData.role] : 'Minha conta'}
                   </span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>• Hub central de navegação</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>• Página inicial</span>
                 </div>
                 <h1 style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.1rem)', fontWeight: 700, color: 'var(--text-main)', margin: '0.2rem 0' }}>
                   Olá, {userName}! Para onde você deseja ir?
@@ -483,7 +486,7 @@ export function Home({ onLoginOpen }: HomeProps) {
 
             {/* Quick Action Button */}
             <Link
-              to={isProfessor ? '/professor' : isAdmin ? '/admin' : '/estudante'}
+              to={getRoleHome(userData?.role)}
               className="btn-primary"
               style={{
                 padding: '0.75rem 1.6rem',
@@ -516,7 +519,7 @@ export function Home({ onLoginOpen }: HomeProps) {
           {/* Grid of Clickable Hub Cards */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 330px), 1fr))',
             gap: '1.25rem',
             marginBottom: '3rem'
           }}>
@@ -539,7 +542,7 @@ export function Home({ onLoginOpen }: HomeProps) {
               return (
                 <Link
                   key={card.id}
-                  to={card.href}
+                  to={['/simulacao', '/enem'].includes(card.href.split('?')[0]) ? withReturnTo(card.href, '/') : card.href}
                   className="card card-interactive"
                   style={{
                     padding: '1.5rem',
@@ -629,7 +632,7 @@ export function Home({ onLoginOpen }: HomeProps) {
             background: 'var(--bg-card)',
             border: '1px solid var(--border-color)'
           }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', alignItems: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '2rem', alignItems: 'center' }}>
               <div>
                 <span className="badge badge-primary" style={{ marginBottom: '0.5rem' }}>
                   Simulador em tempo real
@@ -642,7 +645,7 @@ export function Home({ onLoginOpen }: HomeProps) {
                 </p>
                 <Link to="/simulacao" className="btn-primary" style={{ padding: '0.65rem 1.4rem', fontSize: '0.88rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
                   <Beaker style={{ width: '1rem', height: '1rem' }} />
-                  Abrir todos os 6 laboratórios virtuais
+                  Abrir o catálogo de laboratórios
                   <ArrowRight style={{ width: '1rem', height: '1rem' }} />
                 </Link>
               </div>
@@ -667,6 +670,7 @@ export function Home({ onLoginOpen }: HomeProps) {
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
                 <Logo symbolSize={44} showTagline={false} />
               </div>
+              <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', color: 'var(--text-main)', marginBottom: '1rem' }}>Aprenda e ensine com atividades práticas</h1>
 
               <p style={{
                 fontSize: 'clamp(1.05rem, 2.5vw, 1.25rem)',
@@ -675,7 +679,7 @@ export function Home({ onLoginOpen }: HomeProps) {
                 lineHeight: 1.65,
                 fontFamily: 'var(--font-body)'
               }}>
-                Uma plataforma educacional que une o rigor da tecnologia à calidez do olhar humano. Laboratórios virtuais, simulador oficial do ENEM com correção TRI e metodologias ativas baseadas em Sócrates, Aristóteles e Freire.
+                Estude com atividades práticas, acompanhe sua turma e treine para o ENEM. Escolha seu perfil para acessar as ferramentas de aprendizagem e ensino.
               </p>
 
               {/* Action Buttons */}
@@ -712,7 +716,7 @@ export function Home({ onLoginOpen }: HomeProps) {
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1.25rem', textAlign: 'center' }}>
                   Conheça os ambientes da plataforma
                 </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1.25rem' }}>
                   <div
                     onClick={onLoginOpen}
                     className="card card-interactive"
@@ -737,7 +741,7 @@ export function Home({ onLoginOpen }: HomeProps) {
                     </div>
                     <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Área do estudante</h4>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
-                      Mural da turma, roteiros de laboratórios práticos, simulado ENEM oficial, gamificação com XP e loja de avatares.
+                      Mural da turma, atividades de laboratório, simulado ENEM para praticar e conquistas por atividades concluídas.
                     </p>
                   </div>
 
@@ -763,9 +767,9 @@ export function Home({ onLoginOpen }: HomeProps) {
                     <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '10px', background: 'rgba(23, 35, 20, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
                       <GraduationCap style={{ width: '1.3rem', height: '1.3rem', color: 'var(--color-verde-900)' }} />
                     </div>
-                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Simulado oficial ENEM</h4>
+                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Simulado ENEM para praticar</h4>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
-                      Algoritmo estatístico TRI oficial do INEP avaliando a coerência pedagógica das respostas em tempo real.
+                      Responda às questões e consulte uma nota estimada para orientar seus estudos. O resultado não substitui a nota oficial do exame.
                     </p>
                   </Link>
                 </div>
@@ -783,7 +787,7 @@ export function Home({ onLoginOpen }: HomeProps) {
                 border: '1px solid var(--border-color)',
               }}>
                 <div style={{
-                  display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
                   gap: '2rem', alignItems: 'center',
                 }}>
                   <div>

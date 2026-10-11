@@ -3,10 +3,11 @@
  * Verifica autenticação e role do usuário antes de renderizar a página.
  * Redireciona para Home se não autenticado, ou exibe Forbidden se role não autorizada.
  */
-import { Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { isAuthorizedRole } from '../../core/services/securityService';
 import type { ReactNode } from 'react';
+import { getRoleHome } from '../../core/utils/navigation';
 
 type UserRole = 'professor' | 'coordenador' | 'estudante' | 'admin';
 
@@ -23,14 +24,14 @@ export function ProtectedRoute({ children, allowedRoles, redirectTo = '/' }: Pro
   const location = useLocation();
 
   // Enquanto carrega, não renderiza nada (o Suspense/LoadingFallback cuida disso)
-  if (loading) return null;
+  if (loading) return <p role="status" style={{ padding: '2rem' }}>Verificando seu acesso…</p>;
 
   // Não autenticado → redireciona para Home e sinaliza necessidade de login
   if (!currentUser || !userData) {
     return (
       <Navigate
         to={redirectTo}
-        state={{ from: location.pathname, requiresAuth: true }}
+        state={{ from: location.pathname + location.search + location.hash, requiresAuth: true }}
         replace
       />
     );
@@ -50,8 +51,8 @@ export function ProtectedRoute({ children, allowedRoles, redirectTo = '/' }: Pro
 function Forbidden({ userRole }: { userRole: string }) {
   const roleRedirects: Record<string, { path: string; label: string }> = {
     coordenador: { path: '/coordenacao', label: 'Painel da Coordenação' },
-    professor: { path: '/professor', label: 'Dashboard do Professor' },
-    estudante: { path: '/estudante', label: 'Dashboard do Estudante' },
+    professor: { path: '/professor', label: 'Painel do Professor' },
+    estudante: { path: '/estudante', label: 'Meu Aprendizado' },
     admin: { path: '/admin', label: 'Painel Administrativo' },
   };
 
@@ -72,13 +73,13 @@ function Forbidden({ userRole }: { userRole: string }) {
       </p>
       <div style={{ display: 'flex', gap: '0.75rem' }}>
         {redirect && (
-          <a href={redirect.path} className="btn-gradient" style={{ padding: '0.65rem 1.5rem', textDecoration: 'none' }}>
+          <Link to={getRoleHome(userRole)} className="btn-gradient" style={{ padding: '0.65rem 1.5rem', textDecoration: 'none' }}>
             Ir para {redirect.label}
-          </a>
+          </Link>
         )}
-        <a href="/" className="btn-outline" style={{ padding: '0.65rem 1.5rem', textDecoration: 'none' }}>
+        <Link to="/" className="btn-outline" style={{ padding: '0.65rem 1.5rem', textDecoration: 'none' }}>
           Voltar ao Início
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useId } from 'react';
 import {
   VolumeX, Pause, Play, Eye, RotateCcw,
   Sparkles, Check, Accessibility
@@ -34,6 +34,8 @@ export function AccessibilityToolbar() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
 
   // Apply settings to DOM
   useEffect(() => {
@@ -71,11 +73,20 @@ export function AccessibilityToolbar() {
         setIsOpen(false);
       }
     };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen]);
 
@@ -145,6 +156,7 @@ export function AccessibilityToolbar() {
     <div style={{ position: 'relative' }} ref={dropdownRef}>
       {/* Trigger Button */}
       <button
+        ref={triggerRef}
         onClick={() => setIsOpen(!isOpen)}
         style={{
           display: 'flex',
@@ -158,9 +170,10 @@ export function AccessibilityToolbar() {
           cursor: 'pointer',
           transition: 'all 0.2s',
         }}
-        title="Painel de Acessibilidade & Inclusão DUA"
-        aria-label="Opções de acessibilidade e desenho universal para aprendizagem"
+        title="Opções de acessibilidade"
+        aria-label="Opções de acessibilidade"
         aria-expanded={isOpen}
+        aria-controls={panelId}
       >
         <Accessibility style={{ width: '1.15rem', height: '1.15rem' }} />
       </button>
@@ -168,6 +181,9 @@ export function AccessibilityToolbar() {
       {/* Popover Menu */}
       {isOpen && (
         <div
+          id={panelId}
+          role="region"
+          aria-label="Opções de acessibilidade"
           className="slide-down"
           style={{
             position: 'absolute',
@@ -187,7 +203,7 @@ export function AccessibilityToolbar() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.85rem' }}>
               <Sparkles style={{ width: '1rem', height: '1rem', color: 'var(--color-primary)' }} />
-              Acessibilidade & Inclusão DUA
+              Acessibilidade
             </div>
             <button
               onClick={handleReset}
@@ -204,6 +220,7 @@ export function AccessibilityToolbar() {
                 borderRadius: '6px',
               }}
               title="Restaurar padrões"
+              aria-label="Restaurar opções de acessibilidade"
             >
               <RotateCcw style={{ width: '0.75rem', height: '0.75rem' }} />
               Padrão
@@ -236,6 +253,8 @@ export function AccessibilityToolbar() {
                     transition: 'all 0.15s',
                   }}
                   title={scale.label}
+                  aria-label={`Tamanho do texto: ${scale.label}`}
+                  aria-pressed={settings.fontSizePercent === scale.val}
                 >
                   {scale.symbol}
                 </button>
@@ -247,6 +266,7 @@ export function AccessibilityToolbar() {
           <div style={{ marginBottom: '1rem' }}>
             <button
               onClick={() => setSettings((s) => ({ ...s, dyslexiaFont: !s.dyslexiaFont }))}
+              aria-pressed={settings.dyslexiaFont}
               style={{
                 width: '100%',
                 display: 'flex',
@@ -290,6 +310,7 @@ export function AccessibilityToolbar() {
           <div style={{ marginBottom: '1rem' }}>
             <button
               onClick={() => setSettings((s) => ({ ...s, focusMode: !s.focusMode }))}
+              aria-pressed={settings.focusMode}
               style={{
                 width: '100%',
                 display: 'flex',
@@ -306,10 +327,10 @@ export function AccessibilityToolbar() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', fontWeight: 600, color: settings.focusMode ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-main)' }}>
                   <Eye style={{ width: '0.9rem', height: '0.9rem' }} />
-                  Modo foco (TDAH e TEA)
+                  Reduzir distrações
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                  Elimina animações e excesso de estímulos visuais
+                  Reduz animações e efeitos visuais
                 </div>
               </div>
               <div
@@ -334,7 +355,7 @@ export function AccessibilityToolbar() {
           <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.85rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
               <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Áudio-guia e leitor de tela
+                Leitura em voz alta
               </div>
               {isSpeaking && (
                 <span style={{ fontSize: '0.68rem', color: 'var(--color-secondary)', fontWeight: 700 }}>
@@ -386,13 +407,14 @@ export function AccessibilityToolbar() {
                     cursor: 'pointer',
                   }}
                   title="Parar áudio"
+                  aria-label="Parar leitura em voz alta"
                 >
                   <VolumeX style={{ width: '0.9rem', height: '0.9rem' }} />
                 </button>
               )}
             </div>
             <p style={{ margin: '0.35rem 0 0', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-              Dica: selecione qualquer parágrafo ou clique no botão para ouvir o texto com voz humanizada.
+              Selecione um trecho ou clique em Ler tela para ouvir o texto com a voz disponível no navegador.
             </p>
           </div>
         </div>

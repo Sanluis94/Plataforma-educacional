@@ -1,15 +1,17 @@
+import { useNavigationParams } from '../hooks/useNavigationParams';
 import { Users, BookOpen, Activity, Shield, TrendingUp, Search } from 'lucide-react';
 import { useAdminDashboard } from '../../core/hooks/useAdminDashboard';
 import { useState } from 'react';
 
 export function AdminPanel() {
   const {
-    activeTab,
-    setActiveTab,
     teachers,
     logs,
     stats
   } = useAdminDashboard();
+  const [searchParams, setSearchParams] = useNavigationParams();
+  const activeTab = ['teachers', 'logs'].includes(searchParams.get('tab') || '') ? searchParams.get('tab') : 'overview';
+  const setActiveTab = (tab: string) => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('tab', tab); return next; });
 
   const [searchQuery, setSearchQuery] = useState('');
   const { totalStudents, totalClasses, totalTeachers, totalActivities } = stats;
@@ -49,7 +51,7 @@ export function AdminPanel() {
       </div>
 
       {/* Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -72,6 +74,7 @@ export function AdminPanel() {
         {tabs.map(tab => (
           <button
             key={tab.id}
+            aria-pressed={activeTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
             style={{
               padding: '0.65rem 1rem', background: 'none', border: 'none', cursor: 'pointer',
@@ -209,7 +212,7 @@ export function AdminPanel() {
       {/* Permissions Section */}
       <div style={{ marginTop: '2.5rem' }}>
         <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>Permissões por Função</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1rem' }}>
           {[
             { title: 'Admin', icon: Shield, color: 'var(--color-vermelho, #BC391F)', perms: ['Acesso total ao sistema', 'Gerenciar usuários', 'Configurações globais'] },
             { title: 'Professor', icon: Users, color: 'var(--color-verde-700, #293E24)', perms: ['Visualizar métricas', 'Gerenciar turmas', 'Criar laboratórios'] },

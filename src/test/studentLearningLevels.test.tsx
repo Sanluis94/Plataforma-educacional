@@ -1,13 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react';
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { EstudanteDashboard } from '../modules/ux/pages/EstudanteDashboard';
 import { LEARNING_LABS_CATALOG, getLearningLab, searchLearningLabs } from '../modules/core/constants/learningCatalog';
 import { LEARNING_LEVELS } from '../modules/core/constants/learningLevels';
+import type { Turma } from '../modules/data/repositories/classRepository';
+import type { LessonPlanItem } from '../modules/data/types';
 
 const session = vi.hoisted(() => ({
   currentUser: { uid: 'student-level-test', displayName: 'Estudante' },
   userData: { role: 'estudante', gradeLevel: 'fundamental_1' },
+}));
+const fixtures = vi.hoisted(() => ({
+  classes: [] as Turma[],
+  plans: [] as LessonPlanItem[],
+  enroll: vi.fn(async () => {}),
 }));
 
 vi.mock('../modules/core/contexts/AuthContext', () => ({ useAuth: () => session }));
@@ -26,17 +33,24 @@ vi.mock('../modules/core/services/studentService', () => ({
   processModuleCompletion: vi.fn(), processItemPurchase: vi.fn(),
 }));
 vi.mock('../modules/data/repositories/classRepository', () => ({
-  getStudentClasses: vi.fn(async () => []), enrollStudent: vi.fn(), sendStudentMessage: vi.fn(),
+  getStudentClasses: vi.fn(async () => fixtures.classes), enrollStudent: fixtures.enroll, sendStudentMessage: vi.fn(),
   subscribeStudentMessages: vi.fn(() => () => {}), subscribeClassNotices: vi.fn(() => () => {}),
   subscribeEnhancedMaterials: vi.fn(() => () => {}),
 }));
 vi.mock('../modules/data/repositories/examRepository', () => ({
   getExamAttemptsByStudent: vi.fn(async () => []), subscribeExamsByClass: vi.fn(() => () => {}), saveExamAttempt: vi.fn(),
 }));
-vi.mock('../modules/data/repositories/lessonPlanRepository', () => ({ subscribeLessonPlansByClass: vi.fn(() => () => {}) }));
+vi.mock('../modules/data/repositories/lessonPlanRepository', () => ({
+  subscribeLessonPlansByClass: vi.fn((_classId: string, callback: (plans: LessonPlanItem[]) => void) => {
+    callback(fixtures.plans);
+    return () => {};
+  }),
+}));
 vi.mock('../modules/data/repositories/submissionRepository', () => ({ saveSubmission: vi.fn() }));
-vi.mock('../modules/core/services/soundEffects', () => ({ default: { playClick: vi.fn(), playUnlock: vi.fn() } }));
-vi.mock('../modules/ux/components/StudentLmsModules', () => ({ StudentLmsModules: () => null }));
+vi.mock('../modules/core/services/soundEffects', () => ({ default: { playClick: vi.fn(), playUnlock: vi.fn(), playSuccess: vi.fn() } }));
+vi.mock('../modules/ux/components/StudentLmsModules', () => ({
+  StudentLmsModules: ({ onViewChange }: { onViewChange: (view: 'forum') => void }) => <button onClick={() => onViewChange('forum')}>Abrir fórum pelo boletim</button>,
+}));
 vi.mock('../modules/ux/components/labs/LabLearningWorkspace', () => ({
   LabLearningWorkspace: ({ labId, academicLevel, children }: { labId: string; academicLevel: string; children: React.ReactNode }) =>
     <section data-testid="learning-workspace" data-level={academicLevel} aria-label={labId}>{children}</section>,
@@ -46,9 +60,14 @@ function Destination() {
   const location = useLocation();
   return <output data-testid="destination">{location.pathname}{location.search}</output>;
 }
+function HistoryControls() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  return <><button onClick={() => navigate(-1)}>Histórico anterior</button><span data-testid="panel-url">{location.pathname}{location.search}</span></>;
+}
 
 function renderStudent(url = '/estudante') {
-  return render(<MemoryRouter initialEntries={[url]}><Routes>
+  return render(<MemoryRouter initialEntries={[url]}><HistoryControls /><Routes>
     <Route path="/estudante" element={<EstudanteDashboard />} />
     <Route path="/simulacao" element={<Destination />} />
   </Routes></MemoryRouter>);
@@ -57,6 +76,10 @@ function renderStudent(url = '/estudante') {
 beforeEach(() => {
   cleanup();
   session.userData.gradeLevel = 'fundamental_1';
+  fixtures.classes = [];
+  fixtures.plans = [];
+  fixtures.enroll.mockReset();
+  fixtures.enroll.mockResolvedValue(undefined);
 });
 
 describe('trilha do estudante por nível de aprendizado', () => {
@@ -127,5 +150,48 @@ describe('trilha do estudante por nível de aprendizado', () => {
     fireEvent.click(screen.getByRole('button', { name: /Plano de Aulas/ }));
     expect(screen.getByText('📅 Cronograma & Plano de Aulas da Turma')).toBeInTheDocument();
     expect(screen.queryByTestId('legacy-bench')).not.toBeInTheDocument();
+  });
+
+  it('volta à aba inicial pelo histórico quando a URL não contém tab', async () => {
+    await act(async () => { renderStudent(); });
+    fireEvent.click(screen.getByRole('button', { name: /Plano de Aulas/ }));
+    expect(screen.getByTestId('panel-url')).toHaveTextContent('tab=lesson_plans');
+    fireEvent.click(screen.getByRole('button', { name: 'Histórico anterior' }));
+    expect(screen.getByRole('combobox', { name: 'Nível de aprendizado' })).toBeInTheDocument();
+    expect(screen.getByTestId('panel-url')).toHaveTextContent('/estudante');
+    expect(screen.queryByText('📅 Cronograma & Plano de Aulas da Turma')).not.toBeInTheDocument();
+  });
+
+  it('preserva a turma e a subaba LMS nos links de retorno', async () => {
+    fixtures.classes = [{ id: 'class-a', name: 'Turma A', studentsCount: 1 }, { id: 'class-b', name: 'Turma B', studentsCount: 1 }];
+    await act(async () => { renderStudent('/estudante?tab=gradebook&class=class-b'); });
+    expect(screen.getByRole('combobox', { name: 'Turma selecionada' })).toHaveValue('class-b');
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir fórum pelo boletim' }));
+    const url = new URL(screen.getByRole('link', { name: /Simulado ENEM/ }).getAttribute('href')!, 'https://test.local');
+    expect(url.searchParams.get('returnTo')).toBe('/estudante?tab=forum&class=class-b');
+  });
+
+  it('mantém o código e mostra erro quando a matrícula falha', async () => {
+    fixtures.enroll.mockRejectedValueOnce(new Error('Código inválido'));
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await act(async () => { renderStudent('/estudante?tab=classes'); });
+    fireEvent.change(screen.getByRole('textbox', { name: 'Código da turma' }), { target: { value: 'ERRADO' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar na Turma' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível entrar na turma');
+    expect(screen.getByRole('textbox', { name: 'Código da turma' })).toHaveValue('ERRADO');
+    expect(screen.queryByText(/Matrícula realizada com sucesso/)).not.toBeInTheDocument();
+    log.mockRestore();
+  });
+
+  it('retorna ao plano após abrir o laboratório associado à aula', async () => {
+    fixtures.classes = [{ id: 'class-a', name: 'Turma A', studentsCount: 1 }];
+    fixtures.plans = [{ id: 'plan-a', turmaId: 'class-a', professorId: 'professor-a', periodo: '1º Bimestre', ordemSemana: 1, topico: 'Aula de funções', metodologia: 'Compare as funções.', laboratorioAssociadoId: 'math_3', status: 'planejada', criadoEm: '2026-10-11' }];
+    await act(async () => { renderStudent('/estudante?tab=lesson_plans&class=class-a'); });
+    fireEvent.click(screen.getByRole('button', { name: /Abrir Laboratório da Aula/ }));
+    expect(await screen.findByTestId('legacy-bench')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Voltar ao Plano de Aulas/ }));
+    expect(screen.getByText('Aula de funções')).toBeInTheDocument();
+    expect(screen.getByTestId('panel-url')).toHaveTextContent('tab=lesson_plans');
+    expect(screen.getByRole('combobox', { name: 'Turma selecionada' })).toHaveValue('class-a');
   });
 });

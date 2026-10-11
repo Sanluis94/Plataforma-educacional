@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useId } from 'react';
 import { 
   Play, Pause, RotateCcw, Download, 
   FileText, CheckCircle2, Sliders,
@@ -92,6 +92,7 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
 }
 
 function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProps) {
+  const controlsId = useId();
   // Parâmetros ajustáveis
   const [params, setParams] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
@@ -358,11 +359,18 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
   const socraticContext = config.socraticPromptContext 
     ? config.socraticPromptContext(params, stateRef.current)
     : `O estudante está no laboratório "${config.title}" com parâmetros: ${JSON.stringify(params)}. Telemetria atual: ${JSON.stringify(currentTelemetry)}.`;
+  const highContrastStyles = isHighContrast ? {
+    '--bg-card': '#000000', '--bg-surface': '#171717', '--text-main': '#FFFFFF',
+    '--text-secondary': '#F3F4F6', '--text-muted': '#D1D5DB', '--border-color': '#EAB308',
+    '--color-primary': '#EAB308', '--color-primary-accessible': '#FDE047',
+    '--color-secondary': '#FDE047', '--color-verde-700': '#FDE047', '--color-verde-900': '#FFFFFF',
+  } as React.CSSProperties : {};
 
   return (
     <div 
       className={`fade-in ${isHighContrast ? 'bg-black text-yellow-300' : ''}`} 
       style={{
+        ...highContrastStyles,
         background: isHighContrast ? '#000' : 'var(--bg-card)',
         borderRadius: '16px',
         border: isHighContrast ? '2px solid #eab308' : '1px solid var(--border-color)',
@@ -371,7 +379,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
         display: 'flex',
         flexDirection: 'column',
         gap: '1rem',
-        padding: '1.25rem',
+        padding: 'clamp(0.75rem, 3vw, 1.25rem)',
         position: 'relative'
       }}
     >
@@ -385,7 +393,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
         borderBottom: '1px solid var(--border-color)',
         paddingBottom: '1rem'
       }}>
-        <div>
+        <div style={{ minWidth: 0, maxWidth: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
             <span style={{
               background: 'rgba(228, 104, 63, 0.12)',
@@ -399,7 +407,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
             }}>
               {config.subject} · {learningLevelLabel(config.academicLevel)}
             </span>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem', overflowWrap: 'anywhere' }}>
               ID: {config.id}
             </span>
           </div>
@@ -433,17 +441,18 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           />
 
           {/* Abas Superiores */}
-          <div style={{ display: 'flex', gap: '0.35rem', background: 'var(--bg-surface)', padding: '0.3rem', borderRadius: '10px' }}>
+          <div role="group" aria-label="Etapas da bancada" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', background: 'var(--bg-surface)', padding: '0.3rem', borderRadius: '10px', minWidth: 0 }}>
             {(['simulacao', 'teoria', 'avaliacao', 'laudo'] as const).map(tab => (
               <button
                 key={tab}
+                aria-pressed={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
                 style={{
                   padding: '0.4rem 0.85rem',
                   borderRadius: '8px',
                   border: 'none',
                   background: activeTab === tab ? 'var(--color-primary)' : 'transparent',
-                  color: activeTab === tab ? '#fff' : 'var(--text-secondary)',
+                  color: activeTab === tab ? (isHighContrast ? '#000' : '#fff') : 'var(--text-secondary)',
                   fontSize: '0.8rem',
                   fontWeight: activeTab === tab ? 600 : 500,
                   cursor: 'pointer',
@@ -451,7 +460,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                   textTransform: 'capitalize'
                 }}
               >
-                {tab === 'simulacao' ? '⚗️ Simulação' : tab === 'teoria' ? '📖 Teoria' : tab === 'avaliacao' ? '📝 Avaliação TRI' : '📄 Laudo Técnico'}
+                {tab === 'simulacao' ? '⚗️ Experimento' : tab === 'teoria' ? '📖 Teoria' : tab === 'avaliacao' ? '📝 Perguntas' : '📄 Relatório'}
               </button>
             ))}
           </div>
@@ -477,17 +486,18 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           title="Comparar dois cenários com parâmetros distintos"
         >
           <Columns2 style={{ width: '13px', height: '13px', color: '#38bdf8' }} />
-          <span>Comparar A/B</span>
+          <span>Comparar cenários</span>
         </button>
 
         <button
           onClick={() => setShowTimeTravel(!showTimeTravel)}
+          aria-pressed={showTimeTravel}
           className="btn-outline"
           style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem', background: showTimeTravel ? 'rgba(56, 189, 248, 0.15)' : 'transparent' }}
           title="Ativar linha do tempo de replay"
         >
           <History style={{ width: '13px', height: '13px', color: '#a855f7' }} />
-          <span>Time-Travel Replay</span>
+          <span>Rever experimento</span>
         </button>
 
         <button
@@ -522,16 +532,18 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
 
         <button
           onClick={() => setIs3DMode(!is3DMode)}
+          aria-pressed={is3DMode}
           className="btn-outline"
           style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem', background: is3DMode ? 'rgba(228, 104, 63, 0.15)' : 'transparent' }}
           title="Alternar entre visualização 2D e 3D Espacial"
         >
           <Box style={{ width: '13px', height: '13px', color: '#E4683F' }} />
-          <span>{is3DMode ? 'Voltar para 2D' : 'Visão 3D WebGPU'}</span>
+          <span>{is3DMode ? 'Voltar para 2D' : 'Ver em 3D'}</span>
         </button>
 
         <button
           onClick={() => setIsNoiseActive(!isNoiseActive)}
+          aria-pressed={isNoiseActive}
           className="btn-outline"
           style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem', background: isNoiseActive ? 'rgba(234, 179, 8, 0.15)' : 'transparent' }}
           title="Injetar ruído gaussiano Monte Carlo para simular instrumentos reais"
@@ -605,7 +617,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                   onClick={() => setIsRunning(!isRunning)}
                   style={{
                     background: isRunning ? '#eab308' : '#22c55e',
-                    color: '#fff',
+                    color: '#172314',
                     border: 'none',
                     borderRadius: '6px',
                     padding: '0.35rem 0.75rem',
@@ -717,6 +729,8 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           <div className="mobile-only" style={{ width: '100%' }}>
             <button
               onClick={() => setIsControlsOpenOnMobile(prev => !prev)}
+              aria-expanded={isControlsOpenOnMobile}
+              aria-controls={`${controlsId}-parameters`}
               style={{
                 width: '100%',
                 padding: '0.6rem 0.85rem',
@@ -741,7 +755,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           </div>
 
           {/* Painel Lateral: Parâmetros da Bancada */}
-          <div style={{
+          <div id={`${controlsId}-parameters`} style={{
             background: 'var(--bg-surface)',
             borderRadius: '12px',
             border: '1px solid var(--border-color)',
@@ -761,10 +775,12 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
               {config.parameters.map(param => (
                 <div key={param.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{param.label}</span>
+                    <label htmlFor={`${controlsId}-${param.id}-number`} style={{ fontWeight: 600, color: 'var(--text-main)' }}>{param.label}</label>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                       <input
+                        id={`${controlsId}-${param.id}-number`}
                         type="number"
+                        aria-label={`${param.label}${param.unit ? ` (${param.unit})` : ''}`}
                         min={param.min}
                         max={param.max}
                         step={param.step}
@@ -794,7 +810,9 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                   </div>
 
                   <input
+                    id={`${controlsId}-${param.id}-range`}
                     type="range"
+                    aria-label={`${param.label}${param.unit ? ` (${param.unit})` : ''}: ajuste deslizante`}
                     min={param.min}
                     max={param.max}
                     step={param.step}
@@ -888,15 +906,15 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           </div>
 
           {(config.questions || []).map((q, qIdx) => (
-            <div key={qIdx} style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-              <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-main)' }}>
+            <fieldset key={qIdx} disabled={answeredSubmitted} style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', minWidth: 0, border: 0, padding: 0, margin: 0 }}>
+              <legend style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '0.65rem' }}>
                 {qIdx + 1}. {q.question}
-              </span>
+              </legend>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 {q.options.map((opt, optIdx) => {
                   const isSelected = selectedAnswers[qIdx] === optIdx;
-                  let optStyle: React.CSSProperties = {
+                  const optStyle: React.CSSProperties = {
                     padding: '0.55rem 0.85rem',
                     borderRadius: '8px',
                     border: '1px solid var(--border-color)',
@@ -920,19 +938,19 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                   }
 
                   return (
-                    <div
+                    <label
                       key={optIdx}
                       style={optStyle}
-                      onClick={() => !answeredSubmitted && setSelectedAnswers(prev => ({ ...prev, [qIdx]: optIdx }))}
                     >
                       <input
                         type="radio"
+                        name={`${controlsId}-question-${qIdx}`}
                         checked={isSelected}
-                        onChange={() => {}}
+                        onChange={() => setSelectedAnswers(prev => ({ ...prev, [qIdx]: optIdx }))}
                         disabled={answeredSubmitted}
                       />
                       <span>{opt.text}</span>
-                    </div>
+                    </label>
                   );
                 })}
               </div>
@@ -949,7 +967,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                   💡 <strong>Justificativa:</strong> {q.options[selectedAnswers[qIdx] ?? 0]?.explanation || 'Consulte a teoria.'}
                 </div>
               )}
-            </div>
+            </fieldset>
           ))}
 
           {!answeredSubmitted ? (
@@ -958,7 +976,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
               style={{
                 alignSelf: 'flex-start',
                 background: 'var(--color-primary)',
-                color: '#fff',
+                color: isHighContrast ? '#000' : '#fff',
                 border: 'none',
                 padding: '0.65rem 1.4rem',
                 borderRadius: '8px',
@@ -967,12 +985,12 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                 fontSize: '0.85rem'
               }}
             >
-              Enviar Respostas e Calcular Proficiência TRI
+              Corrigir respostas
             </button>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#22c55e', fontSize: '0.85rem', fontWeight: 600 }}>
               <CheckCircle2 style={{ width: '18px', height: '18px' }} />
-              Avaliação concluída com sucesso! Sincronizado com a plataforma Kortex.
+              Respostas corrigidas. Confira as justificativas acima.
             </div>
           )}
         </div>
@@ -1058,7 +1076,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
               alignItems: 'center',
               gap: '0.4rem',
               background: 'var(--color-primary)',
-              color: '#fff',
+              color: isHighContrast ? '#000' : '#fff',
               border: 'none',
               padding: '0.6rem 1.25rem',
               borderRadius: '8px',
