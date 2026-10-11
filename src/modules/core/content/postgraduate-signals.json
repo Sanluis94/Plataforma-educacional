@@ -1,0 +1,832 @@
+{
+  "pos_pds_01": {
+    "context": "Um sinal sintético precisa conservar uma faixa e atenuar outra. Especificar transição e ondulação vem antes de escolher o filtro.",
+    "theory": "FIR tem resposta ao impulso finita e pode obter fase linear com coeficientes simétricos; IIR usa realimentação e exige polos dentro do círculo unitário para estabilidade causal no caso racional usual. Parks-McClellan projeta FIR por aproximação minimax ponderada, não é um método geral de IIR. Ordem, largura de transição e tolerâncias se relacionam; aumentar seletividade costuma exigir maior custo ou atraso.",
+    "workedExample": "O FIR h=[0,25;0,5;0,25] tem ganho em DC igual à soma um. Em frequência π, H=0,25−0,5+0,25=0. A simetria dá atraso de grupo de uma amostra no regime de fase linear; esse exemplo não é um projeto remez executado.",
+    "investigation": [
+      "Calcule a resposta nas frequências zero e π.",
+      "Verifique simetria dos três coeficientes do FIR.",
+      "Declare faixas e tolerâncias antes de comparar FIR e IIR."
+    ],
+    "expectedEvidence": "Mostre ganho um e zero e diferencie método FIR, estabilidade IIR e atraso, sem confundir comprimento três com ordem três.",
+    "reflection": "Por que uma faixa de transição menor pode exigir mais coeficientes?",
+    "scenarios": [
+      {
+        "id": "dc",
+        "label": "Sinal constante",
+        "situation": "O sinal de entrada permanece constante no regime.",
+        "observation": "A soma dos coeficientes vale um.",
+        "explanation": "O filtro preserva a componente de frequência zero após transientes de borda."
+      },
+      {
+        "id": "nyquist",
+        "label": "Alternância de sinais",
+        "situation": "A entrada alterna sinal a cada amostra.",
+        "observation": "A resposta ideal do exemplo em π é zero.",
+        "explanation": "Os termos se cancelam pela combinação dos coeficientes simétricos."
+      },
+      {
+        "id": "polo",
+        "label": "Realimentação instável",
+        "situation": "Um IIR causal possui polo de magnitude 1,1.",
+        "observation": "A condição usual de estabilidade falha.",
+        "explanation": "Polos fora do círculo unitário produzem crescimento da resposta ao impulso."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é o ganho DC do FIR apresentado?",
+        "options": [
+          {
+            "text": "1",
+            "correct": true,
+            "explanation": "Somar um quarto, meio e um quarto resulta em um."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "O cancelamento ocorre em π, não na frequência zero."
+          },
+          {
+            "text": "3",
+            "correct": false,
+            "explanation": "Quantidade de coeficientes não é o ganho do filtro."
+          }
+        ]
+      },
+      {
+        "question": "Qual afirmação sobre Parks-McClellan é correta?",
+        "options": [
+          {
+            "text": "É usado para projeto FIR minimax",
+            "correct": true,
+            "explanation": "O procedimento aproxima uma resposta desejada com erro máximo ponderado."
+          },
+          {
+            "text": "É um teste de polos de qualquer IIR",
+            "correct": false,
+            "explanation": "Estabilidade por polos é outro problema de análise."
+          },
+          {
+            "text": "Elimina todo atraso de filtragem",
+            "correct": false,
+            "explanation": "FIR de fase linear pode introduzir atraso associado à ordem."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "SciPy — remez",
+        "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.remez.html"
+      }
+    ]
+  },
+  "pos_pds_02": {
+    "context": "Quatro amostras sintéticas são divididas em aproximação e detalhe para revelar variações em escalas distintas.",
+    "theory": "A DWT usa filtros e subamostragem para decompor o sinal em componentes de aproximação e detalhe. Com Haar ortonormal, pares geram (a+b)/√2 e (a−b)/√2, conforme a convenção de sinal escolhida. A escolha da wavelet e da extensão nas bordas influencia coeficientes. Multirresolução repete a decomposição na aproximação; limiarizar detalhes pode remover ruído e também informação útil.",
+    "workedExample": "Para x=[2,2,4,0], Haar dá aproximações [2√2,2√2] e detalhes [0,2√2]. A energia original é 4+4+16=24; a soma das energias dos coeficientes é 8+8+0+8=24, sob essa transformação ortonormal.",
+    "investigation": [
+      "Aplique soma e diferença normalizadas a cada par.",
+      "Confira conservação de energia na base ortonormal.",
+      "Reconstrua os pares e discuta zerar o segundo detalhe."
+    ],
+    "expectedEvidence": "Apresente coeficientes e convenção de sinal, distinguindo reconstrução exata de reconstrução após descarte ou limiarização.",
+    "reflection": "Qual diferença local desaparece ao zerar um coeficiente de detalhe grande?",
+    "scenarios": [
+      {
+        "id": "constante",
+        "label": "Par uniforme",
+        "situation": "O primeiro par de amostras é dois,dois.",
+        "observation": "O detalhe correspondente é zero.",
+        "explanation": "A diferença normalizada detecta ausência de contraste dentro do par."
+      },
+      {
+        "id": "contraste",
+        "label": "Par desigual",
+        "situation": "O segundo par contém quatro e zero.",
+        "observation": "O detalhe é dois raiz de dois.",
+        "explanation": "A diferença concentra a variação que a aproximação média não descreve."
+      },
+      {
+        "id": "limiar",
+        "label": "Detalhe removido",
+        "situation": "O segundo detalhe é zerado antes da reconstrução.",
+        "observation": "O par volta como dois,dois.",
+        "explanation": "O descarte elimina o contraste original, embora preserve a média do par."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual detalhe Haar corresponde ao par (4,0)?",
+        "options": [
+          {
+            "text": "2√2",
+            "correct": true,
+            "explanation": "Quatro dividido por raiz de dois equivale a dois raiz de dois."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "Esse resultado corresponderia a duas amostras iguais."
+          },
+          {
+            "text": "4√2",
+            "correct": false,
+            "explanation": "Esse valor aplica uma escala diferente da ortonormal definida."
+          }
+        ]
+      },
+      {
+        "question": "Qual energia total aparece nos coeficientes completos?",
+        "options": [
+          {
+            "text": "24",
+            "correct": true,
+            "explanation": "A transformação ortonormal preserva a soma dos quadrados neste exemplo."
+          },
+          {
+            "text": "12",
+            "correct": false,
+            "explanation": "A normalização escolhida não divide a energia por dois."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "Os coeficientes de aproximação e detalhe não são todos nulos."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "PyWavelets — DWT",
+        "url": "https://pywavelets.readthedocs.io/en/latest/ref/dwt-discrete-wavelet-transform.html"
+      }
+    ]
+  },
+  "pos_pds_03": {
+    "context": "Uma referência sintética correlacionada ao ruído alimenta um filtro adaptativo para estimar a parcela que se deseja remover.",
+    "theory": "LMS ajusta pesos usando erro e referência. Na convenção L=e²/2, y=wᵀx, e=d−y e w novo=w+μex. Outras convenções absorvem fator dois na taxa. Cancelamento exige referência relacionada ao ruído e suficientemente distinta do sinal desejado; uma referência que contém o alvo pode removê-lo. Estabilidade depende da energia e correlação das entradas e da taxa, sem garantia por uma única atualização.",
+    "workedExample": "Para w=0,2, x=2 e d=1, y=0,4 e e=0,6. Com μ=0,1, w novo=0,2+0,1×0,6×2=0,32. A nova previsão na mesma amostra é 0,64 e o erro 0,36; isso não mede desempenho em um fluxo real.",
+    "investigation": [
+      "Calcule saída e erro antes da atualização.",
+      "Atualize o peso pela convenção de perda definida.",
+      "Analise uma referência contaminada pelo sinal desejado."
+    ],
+    "expectedEvidence": "Registre 0,32 e o sentido da correção, declarando a convenção da taxa e as condições da referência de ruído.",
+    "reflection": "Por que uma referência de alta correlação com a voz pode prejudicar um cancelador de ruído?",
+    "scenarios": [
+      {
+        "id": "passo",
+        "label": "Erro positivo",
+        "situation": "O alvo é um e a saída atual vale 0,4.",
+        "observation": "O erro é positivo, igual a 0,6.",
+        "explanation": "Com referência positiva, o peso aumenta para elevar a saída estimada."
+      },
+      {
+        "id": "taxa-lms",
+        "label": "Atualização forte",
+        "situation": "A taxa é elevada sem observar a potência da referência.",
+        "observation": "A adaptação pode oscilar ou divergir.",
+        "explanation": "A faixa segura depende das estatísticas da entrada e da convenção utilizada."
+      },
+      {
+        "id": "contaminada",
+        "label": "Alvo na referência",
+        "situation": "A referência contém a mesma voz que se deseja preservar.",
+        "observation": "Parte da voz pode ser aprendida como ruído.",
+        "explanation": "O cancelamento depende da separação estatística entre referência e sinal desejado."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual peso resulta do passo LMS fornecido?",
+        "options": [
+          {
+            "text": "0,32",
+            "correct": true,
+            "explanation": "O incremento é 0,12, somado ao peso 0,2."
+          },
+          {
+            "text": "0,08",
+            "correct": false,
+            "explanation": "Esse resultado subtrai o incremento com sinal incorreto."
+          },
+          {
+            "text": "0,6",
+            "correct": false,
+            "explanation": "Esse é o erro anterior, não o peso atualizado."
+          }
+        ]
+      },
+      {
+        "question": "Qual característica se deseja na referência de cancelamento?",
+        "options": [
+          {
+            "text": "Correlação com o ruído e pouca com o alvo",
+            "correct": true,
+            "explanation": "Ela deve ajudar a estimar ruído sem remover o sinal que se quer preservar."
+          },
+          {
+            "text": "Cópia perfeita da voz desejada sempre",
+            "correct": false,
+            "explanation": "Isso pode levar o filtro a cancelar justamente o alvo."
+          },
+          {
+            "text": "Nenhuma relação com o ruído",
+            "correct": false,
+            "explanation": "Sem relação, a referência não fornece informação útil para estimá-lo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT — Adaptive LMS Filters",
+        "url": "https://ocw.mit.edu/courses/2-161-signal-processing-continuous-and-discrete-fall-2008/resources/adaptivels/"
+      }
+    ]
+  },
+  "pos_pds_04": {
+    "context": "Uma imagem sintética contém bordas fortes, fracas e ruído. O detector deve ligar contornos relevantes sem aceitar toda variação.",
+    "theory": "Canny combina suavização, gradiente, supressão de não máximos e histerese. A suavização reduz ruído, mas pode apagar detalhes; a supressão afina respostas ao longo da direção do gradiente. Na histerese, pixels acima do limiar alto iniciam bordas e pixels intermediários são mantidos quando conectados a bordas fortes. Limiar baixo e alto não são duas classificações independentes sem conectividade.",
+    "workedExample": "Adote limiar baixo 4 e alto 8. Um pixel de magnitude 9 é forte; um de 6 conectado ao forte é mantido; outro de 6 isolado é descartado. O exemplo pressupõe que já ocorreu supressão de não máximos e define a conectividade no roteiro.",
+    "investigation": [
+      "Ordene as quatro etapas do detector de bordas.",
+      "Classifique magnitudes nove,seis e três pelos limiares.",
+      "Compare dois pixels de magnitude seis com conectividades diferentes."
+    ],
+    "expectedEvidence": "Mostre que a conectividade diferencia os dois pixels fracos e declare a escolha de vizinhança, sem apresentar borda como identificação completa de objeto.",
+    "reflection": "Como aumentar a suavização muda o compromisso entre ruído e pequenos contornos?",
+    "scenarios": [
+      {
+        "id": "forte",
+        "label": "Semente de borda",
+        "situation": "A magnitude após supressão é nove com limiar alto oito.",
+        "observation": "O pixel inicia uma borda forte.",
+        "explanation": "Ele supera o limiar de aceitação independente de ligação a outro pixel forte."
+      },
+      {
+        "id": "fraco-conexo",
+        "label": "Continuação",
+        "situation": "A magnitude seis está ligada a uma semente forte.",
+        "observation": "O pixel fraco é mantido.",
+        "explanation": "A histerese preserva continuidade de contornos com respostas variáveis."
+      },
+      {
+        "id": "fraco-isolado",
+        "label": "Resposta isolada",
+        "situation": "Outro pixel seis não se conecta a nenhuma semente forte.",
+        "observation": "Ele é rejeitado na histerese.",
+        "explanation": "Estar entre os limiares não basta sem a ligação exigida."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual destino tem magnitude seis conectada a um pixel forte?",
+        "options": [
+          {
+            "text": "É mantida pela histerese",
+            "correct": true,
+            "explanation": "Ela supera o limiar baixo e está ligada a uma semente válida."
+          },
+          {
+            "text": "É sempre descartada por ser menor que oito",
+            "correct": false,
+            "explanation": "A ligação a uma borda forte permite conservar pixels intermediários."
+          },
+          {
+            "text": "Vira magnitude nove",
+            "correct": false,
+            "explanation": "Histerese seleciona conectividade, não aumenta a magnitude do gradiente."
+          }
+        ]
+      },
+      {
+        "question": "Qual é a função da supressão de não máximos?",
+        "options": [
+          {
+            "text": "Afinar respostas ao longo do gradiente",
+            "correct": true,
+            "explanation": "Ela conserva máximos locais na direção apropriada para localizar a borda."
+          },
+          {
+            "text": "Criar rótulos semânticos de objetos",
+            "correct": false,
+            "explanation": "Detecção de borda não identifica a classe do objeto."
+          },
+          {
+            "text": "Substituir todos os limiares por zero",
+            "correct": false,
+            "explanation": "A seleção posterior por histerese continua necessária."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "scikit-image — Canny",
+        "url": "https://scikit-image.org/docs/stable/auto_examples/edges/plot_canny.html"
+      }
+    ]
+  },
+  "pos_pds_05": {
+    "context": "Pontos de borda sintéticos votam por linhas possíveis. Um pico no acumulador indica apoio geométrico, sem garantir um objeto real.",
+    "theory": "A transformada de Hough para retas usa ρ=x cosθ+y sinθ, evitando problemas de representar retas verticais por inclinação. Cada ponto vota em parâmetros compatíveis; alinhamentos geram picos. Resolução dos bins controla precisão, custo e fragmentação do apoio. Para círculos, centro e raio ampliam o espaço de busca. Ruído, bordas incompletas e critérios de pico influenciam detecções.",
+    "workedExample": "Os pontos (2,0),(2,1),(2,3) estão na reta x=2. Para θ=0, ρ=x=2 em todos, acumulando três votos no mesmo parâmetro ideal. θ indica a normal à reta, não sua direção ao longo do traço.",
+    "investigation": [
+      "Calcule ρ para os três pontos em θ zero.",
+      "Repita para outro ângulo e compare coincidência dos votos.",
+      "Discuta discretização do acumulador e extensão para círculos."
+    ],
+    "expectedEvidence": "Mostre o pico em (ρ=2,θ=0) e a convenção da normal, sem confundir votos com uma probabilidade calibrada de presença de linha.",
+    "reflection": "Como bins muito finos podem dividir o apoio de uma linha sob ruído?",
+    "scenarios": [
+      {
+        "id": "vertical",
+        "label": "Reta x=2",
+        "situation": "Três pontos possuem coordenada x igual a dois.",
+        "observation": "Eles votam em ρ dois para θ zero.",
+        "explanation": "A forma normal representa a reta vertical sem inclinação infinita."
+      },
+      {
+        "id": "quantizacao",
+        "label": "Bins próximos",
+        "situation": "Pontos ruidosos geram parâmetros em células adjacentes.",
+        "observation": "O apoio pode ficar dividido.",
+        "explanation": "A discretização precisa equilibrar tolerância ao ruído e resolução geométrica."
+      },
+      {
+        "id": "circulo",
+        "label": "Raio desconhecido",
+        "situation": "A busca inclui círculos de centros e raios variados.",
+        "observation": "O espaço de parâmetros aumenta.",
+        "explanation": "Adicionar raio à busca eleva custo e exige limites ou informação de gradiente."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual parâmetro identifica x=2 na convenção definida?",
+        "options": [
+          {
+            "text": "ρ=2, θ=0",
+            "correct": true,
+            "explanation": "Coseno zero angular vale um e seno vale zero, restando x."
+          },
+          {
+            "text": "ρ=0, θ=0",
+            "correct": false,
+            "explanation": "Esses parâmetros descreveriam x igual a zero."
+          },
+          {
+            "text": "ρ=2, θ=π/2",
+            "correct": false,
+            "explanation": "Esse ângulo usa y na equação e representa uma reta horizontal."
+          }
+        ]
+      },
+      {
+        "question": "O que representa um pico de votos no acumulador?",
+        "options": [
+          {
+            "text": "Apoio de pontos a parâmetros compatíveis",
+            "correct": true,
+            "explanation": "Ele resume alinhamento geométrico sob a discretização escolhida."
+          },
+          {
+            "text": "Certeza semântica sobre um objeto",
+            "correct": false,
+            "explanation": "Linhas podem vir de ruído ou estruturas que não são o objeto procurado."
+          },
+          {
+            "text": "Um único pixel obrigatoriamente",
+            "correct": false,
+            "explanation": "O pico agrega votos de vários pontos de borda."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "scikit-image — Hough Transform",
+        "url": "https://scikit-image.org/docs/stable/auto_examples/edges/plot_line_hough_transform.html"
+      }
+    ]
+  },
+  "pos_pds_06": {
+    "context": "Duas imagens médicas sintéticas de modalidades diferentes devem ser alinhadas para um exercício matemático, sem uso diagnóstico.",
+    "theory": "Registro estima uma transformação espacial, uma métrica e uma estratégia de otimização. Informação mútua usa dependência estatística entre intensidades e pode atender modalidades cujo brilho não coincide diretamente. Maximizar a métrica não garante alinhamento anatômico correto; interpolação, região de sobreposição e mínimos locais importam. Pirâmides multirresolução ajudam a capturar deslocamentos amplos antes de detalhes.",
+    "workedExample": "Para variáveis binárias sintéticas idênticas e equilibradas, H(X)=H(Y)=1 e H(X,Y)=1; I(X;Y)=1+1−1=1 bit. Se forem independentes e equilibradas, H(X,Y)=2 e I=0. Isso ilustra dependência, não qualidade clínica de um registro.",
+    "investigation": [
+      "Calcule entropias das duas distribuições conjuntas sintéticas.",
+      "Declare transformação rígida ou deformável antes de otimizar.",
+      "Defina pontos de referência para checar o alinhamento além da métrica."
+    ],
+    "expectedEvidence": "Apresente um bit e zero nos dois casos, distinguindo dependência de intensidades de validação anatômica e sem interpretar dados reais de pacientes.",
+    "reflection": "Por que uma métrica favorável pode coexistir com um alinhamento espacial inadequado?",
+    "scenarios": [
+      {
+        "id": "dependente",
+        "label": "Intensidades relacionadas",
+        "situation": "Dois bits equilibrados coincidem perfeitamente.",
+        "observation": "A informação mútua é um bit.",
+        "explanation": "Conhecer um elimina a incerteza sobre o outro nesse modelo."
+      },
+      {
+        "id": "independente",
+        "label": "Sem relação",
+        "situation": "As quatro combinações de bits têm probabilidade um quarto.",
+        "observation": "A informação mútua vale zero.",
+        "explanation": "A entropia conjunta é a soma das marginais quando há independência."
+      },
+      {
+        "id": "piramide",
+        "label": "Escalas de imagem",
+        "situation": "O deslocamento inicial é grande em relação aos detalhes locais.",
+        "observation": "Uma escala grossa pode facilitar a busca inicial.",
+        "explanation": "Multirresolução organiza a otimização, mas não dispensa avaliar transformações e sobreposição."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual I(X;Y) existe para bits idênticos e equilibrados?",
+        "options": [
+          {
+            "text": "1 bit",
+            "correct": true,
+            "explanation": "Somar as entropias marginais um e um e subtrair a conjunta um dá um."
+          },
+          {
+            "text": "2 bits",
+            "correct": false,
+            "explanation": "Dois é a soma marginal antes de descontar informação compartilhada."
+          },
+          {
+            "text": "0 bit",
+            "correct": false,
+            "explanation": "Zero corresponderia ao caso independente, não ao idêntico."
+          }
+        ]
+      },
+      {
+        "question": "O que deve complementar a otimização da métrica?",
+        "options": [
+          {
+            "text": "Validação espacial com referências pertinentes",
+            "correct": true,
+            "explanation": "Uma pontuação isolada não demonstra alinhamento anatômico correto."
+          },
+          {
+            "text": "Assumir diagnóstico a partir da pontuação",
+            "correct": false,
+            "explanation": "O exercício não valida interpretação clínica nem diagnóstico."
+          },
+          {
+            "text": "Ignorar interpolação e sobreposição",
+            "correct": false,
+            "explanation": "Esses elementos alteram o valor e a confiabilidade do registro."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "SimpleITK — Registration Overview",
+        "url": "https://simpleitk.readthedocs.io/en/master/registrationOverview.html"
+      }
+    ]
+  },
+  "pos_pds_07": {
+    "context": "Um espectro de áudio sintético contém componentes fortes e fracas. Compressão perceptual distribui erro conforme um modelo de audição.",
+    "theory": "MP3 e AAC são formatos com perdas que usam transformações ou bancos de filtros, quantização e codificação. Mascaramento pode tornar certos erros menos perceptíveis perto de energia dominante ou em intervalos temporais, dependendo do conteúdo e do ouvinte. Não significa apagar todas as frequências baixas ou altas nem remover exclusivamente sons fisicamente inaudíveis. Bitrate, transientes e escuta influenciam artefatos.",
+    "workedExample": "Um áudio de dez segundos a 128 kbit/s ocupa idealmente 1.280 kbit=160 kB de dados de fluxo, usando mil bits por kbit. O tamanho real inclui estrutura e metadados; a conta de taxa não garante transparência auditiva.",
+    "investigation": [
+      "Calcule tamanho ideal para dez segundos no bitrate dado.",
+      "Separe mascaramento espectral de mascaramento temporal.",
+      "Planeje comparar um transiente e um trecho sustentado em escuta controlada."
+    ],
+    "expectedEvidence": "Informe 160 kB e a convenção decimal, reconhecendo perdas e limites perceptuais sem afirmar codificação ou audição executada.",
+    "reflection": "Por que um erro pequeno em energia pode ser perceptível em um ataque de instrumento?",
+    "scenarios": [
+      {
+        "id": "taxa-audio",
+        "label": "Tamanho do fluxo",
+        "situation": "A duração é dez segundos e a taxa 128 kbit/s.",
+        "observation": "O total ideal é cento e sessenta quilobytes.",
+        "explanation": "Converte-se bits para bytes dividindo por oito após multiplicar pela duração."
+      },
+      {
+        "id": "mascara",
+        "label": "Energia dominante",
+        "situation": "Uma componente forte está próxima de uma fraca no espectro.",
+        "observation": "A percepção da componente fraca pode diminuir.",
+        "explanation": "O efeito depende de nível e separação, não de uma regra fixa de corte de frequências."
+      },
+      {
+        "id": "transiente",
+        "label": "Ataque breve",
+        "situation": "O sinal contém um pulso de início rápido.",
+        "observation": "Artefatos temporais podem se tornar audíveis.",
+        "explanation": "A distribuição do erro no tempo importa além da média de potência."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual tamanho ideal de dez segundos a 128 kbit/s?",
+        "options": [
+          {
+            "text": "160 kB",
+            "correct": true,
+            "explanation": "Mil duzentos e oitenta quilobits divididos por oito resultam em cento e sessenta."
+          },
+          {
+            "text": "1.280 kB",
+            "correct": false,
+            "explanation": "Esse valor confunde a unidade de bits com bytes."
+          },
+          {
+            "text": "16 kB",
+            "correct": false,
+            "explanation": "Esse resultado omite um fator dez na duração ou na taxa."
+          }
+        ]
+      },
+      {
+        "question": "Qual afirmação descreve compressão perceptual com perdas?",
+        "options": [
+          {
+            "text": "Ela admite erro guiado por modelos de percepção",
+            "correct": true,
+            "explanation": "O erro é distribuído para reduzir audibilidade, sem garantia de transparência universal."
+          },
+          {
+            "text": "Ela remove somente conteúdo sempre inaudível",
+            "correct": false,
+            "explanation": "Mascaramento depende do contexto e a quantização introduz perdas."
+          },
+          {
+            "text": "Ela preserva cada amostra exatamente",
+            "correct": false,
+            "explanation": "Preservação exata caracteriza compressão sem perdas, diferente do caso estudado."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "iZotope — Codec Preview",
+        "url": "https://downloads.izotope.com/docs/ozone8/codec-preview/index.html"
+      }
+    ]
+  },
+  "pos_pds_08": {
+    "context": "Dois microfones fictícios recebem uma onda plana em instantes diferentes. Compensar atrasos permite somar a direção de interesse.",
+    "theory": "Beamforming delay-and-sum alinha temporalmente sinais de uma direção e os combina. O padrão de resposta depende de geometria, frequência, pesos e velocidade de propagação. Outros ângulos podem sofrer interferência, mas lóbulos laterais e aliasing espacial limitam rejeição. Atraso geométrico não é distância sem conversão; em áudio a velocidade é muito menor que em radiofrequência. Não há isolamento perfeito de fontes em qualquer sala.",
+    "workedExample": "Para separação d=0,17 m e som c=340 m/s chegando ao longo do eixo do arranjo, o atraso máximo é d/c=0,0005 s=0,5 ms. Em fs=48 kHz, isso corresponde a 24 amostras. Atraso fracionário seria necessário em outras direções.",
+    "investigation": [
+      "Converta separação e velocidade em atraso temporal.",
+      "Converta o atraso em amostras para 48 kHz.",
+      "Compare chegada axial com chegada perpendicular ao eixo."
+    ],
+    "expectedEvidence": "Mostre 0,5 ms e 24 amostras, declarando onda plana, geometria e convenção angular, sem alegar processamento de microfones reais.",
+    "reflection": "Por que a mesma separação entre sensores tem efeitos diferentes em frequências distintas?",
+    "scenarios": [
+      {
+        "id": "axial",
+        "label": "Atraso máximo",
+        "situation": "A onda chega ao longo do eixo dos dois sensores.",
+        "observation": "A diferença de percurso é 0,17 metro.",
+        "explanation": "Essa geometria produz o atraso máximo d/c no modelo de onda plana."
+      },
+      {
+        "id": "broadside",
+        "label": "Chegada perpendicular",
+        "situation": "A onda chega perpendicular ao eixo do par simétrico.",
+        "observation": "Os percursos são iguais e o atraso é zero.",
+        "explanation": "Compensar vinte e quatro amostras nessa direção desalinharia os sinais."
+      },
+      {
+        "id": "fracoes",
+        "label": "Direção intermediária",
+        "situation": "O atraso calculado não corresponde a um inteiro de amostras.",
+        "observation": "É necessária aproximação de atraso fracionário.",
+        "explanation": "Arredondar pode limitar o alinhamento, principalmente em frequências mais altas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quantas amostras representam 0,5 ms a 48 kHz?",
+        "options": [
+          {
+            "text": "24",
+            "correct": true,
+            "explanation": "Quarenta e oito mil vezes 0,0005 resulta em vinte e quatro."
+          },
+          {
+            "text": "240",
+            "correct": false,
+            "explanation": "Esse valor corresponde a um atraso dez vezes maior."
+          },
+          {
+            "text": "0,024",
+            "correct": false,
+            "explanation": "Esse resultado mistura milissegundos com segundos sem conversão correta."
+          }
+        ]
+      },
+      {
+        "question": "Qual atraso ideal existe na chegada perpendicular descrita?",
+        "options": [
+          {
+            "text": "Zero",
+            "correct": true,
+            "explanation": "A onda percorre distâncias iguais até os dois sensores."
+          },
+          {
+            "text": "Sempre d/c",
+            "correct": false,
+            "explanation": "d/c é o máximo axial, não o atraso para qualquer direção."
+          },
+          {
+            "text": "Um segundo",
+            "correct": false,
+            "explanation": "Esse valor não decorre da geometria nem da velocidade informadas."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MathWorks — Time-Delay Beamformer",
+        "url": "https://www.mathworks.com/help/phased/ref/timedelaybeamformer.html"
+      }
+    ]
+  },
+  "pos_pds_09": {
+    "context": "Uma imagem sintética borrada é modelada por uma função de espalhamento conhecida. Recuperar detalhes exige controlar também amplificação de ruído.",
+    "theory": "Richardson-Lucy é uma atualização multiplicativa associada ao modelo Poisson, usualmente com imagem e PSF não negativas. Uma forma é x novo=x·[h invertida*(y/(h*x))], com tratamento de bordas e denominadores. PSF errada compromete restauração; muitas iterações podem amplificar ruído e artefatos. O critério de parada funciona como regularização prática, sem garantir recuperar informações completamente apagadas.",
+    "workedExample": "No caso escalar h=1, observação y=6 e estimativa inicial x=3, a atualização dá x novo=3×(6/3)=6. É um caso identidade sem borramento, útil para conferir a razão e a multiplicação, não evidência de restauração de imagem real.",
+    "investigation": [
+      "Identifique observação, estimativa e PSF no modelo.",
+      "Confira a atualização escalar sem borramento.",
+      "Discuta erro de PSF e necessidade de interromper iterações."
+    ],
+    "expectedEvidence": "Mostre a estimativa seis e ressalve não negatividade, bordas e parada, sem interpretar nitidez aparente como recuperação fiel de toda informação.",
+    "reflection": "Por que continuar iterando pode piorar a interpretação de uma imagem ruidosa?",
+    "scenarios": [
+      {
+        "id": "identidade-rl",
+        "label": "PSF identidade",
+        "situation": "O modelo escalar usa h igual a um.",
+        "observation": "A estimativa passa de três para seis.",
+        "explanation": "Sem borramento nesse caso, a razão corrige diretamente a diferença de escala."
+      },
+      {
+        "id": "psf",
+        "label": "Modelo errado",
+        "situation": "A restauração assume borramento horizontal, mas o dado foi borrado verticalmente.",
+        "observation": "O operador não corresponde à observação.",
+        "explanation": "Uma PSF incorreta pode criar estruturas e impedir reconstrução compatível."
+      },
+      {
+        "id": "iteracoes",
+        "label": "Ruído amplificado",
+        "situation": "O número de iterações cresce muito em dados ruidosos.",
+        "observation": "Detalhes espúrios podem aumentar.",
+        "explanation": "Parada e validação precisam controlar a recuperação de frequências dominadas por ruído."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual resultado tem a atualização escalar proposta?",
+        "options": [
+          {
+            "text": "6",
+            "correct": true,
+            "explanation": "Três multiplicado por seis dividido por três resulta em seis."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Dois é somente a razão, antes de multiplicar pela estimativa."
+          },
+          {
+            "text": "18",
+            "correct": false,
+            "explanation": "Esse valor omite a divisão pelo sinal previsto."
+          }
+        ]
+      },
+      {
+        "question": "Qual hipótese é central à atualização RL usual?",
+        "options": [
+          {
+            "text": "Modelo não negativo associado a ruído Poisson",
+            "correct": true,
+            "explanation": "A forma multiplicativa é construída para esse tipo de observação e operador."
+          },
+          {
+            "text": "Toda PSF desconhecida é recuperada automaticamente",
+            "correct": false,
+            "explanation": "O exemplo assume PSF conhecida; deconvolução cega é outro problema."
+          },
+          {
+            "text": "Iterações infinitas sempre melhoram fidelidade",
+            "correct": false,
+            "explanation": "Ruído e incompatibilidade do modelo podem gerar artefatos crescentes."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "scikit-image — Deconvolution",
+        "url": "https://scikit-image.org/docs/stable/auto_examples/filters/plot_deconvolution.html"
+      }
+    ]
+  },
+  "pos_pds_10": {
+    "context": "Um sinal sintético alterna notas curtas. Um espectrograma precisa localizar mudanças e separar frequências próximas.",
+    "theory": "STFT aplica uma janela a segmentos do sinal e calcula espectros ao longo do tempo. Uma janela maior melhora a discriminação de frequências próximas e piora a localização de mudanças rápidas, conforme seu formato. Hop controla espaçamento temporal das análises, não a resolução espectral fundamental. Zero-padding interpola bins e não substitui mais duração observada. A escala de magnitude ou potência deve ser explicitada.",
+    "workedExample": "Em fs=8 kHz, janela de N=400 amostras dura 50 ms e espaçamento FFT sem padding é fs/N=20 Hz. Com N=800, dura 100 ms e o espaçamento cai para 10 Hz. Dobrar zero-padding do primeiro caso não cria os detalhes de uma janela de 100 ms.",
+    "investigation": [
+      "Converta dois comprimentos de janela em duração.",
+      "Calcule espaçamento de bins para cada FFT sem padding.",
+      "Compare efeito de hop e de zero-padding separadamente."
+    ],
+    "expectedEvidence": "Apresente 50 ms/20 Hz e 100 ms/10 Hz, distinguindo espaçamento de bins de resolução efetiva da janela e de localização temporal.",
+    "reflection": "Por que mostrar mais pontos no eixo de frequência não garante distinguir dois tons próximos?",
+    "scenarios": [
+      {
+        "id": "curta",
+        "label": "Janela de 400",
+        "situation": "O segmento possui quatrocentas amostras a oito quilohertz.",
+        "observation": "A duração é cinquenta milissegundos.",
+        "explanation": "A observação curta favorece localização temporal em comparação com a janela maior."
+      },
+      {
+        "id": "longa",
+        "label": "Janela de 800",
+        "situation": "O segmento dobra para oitocentas amostras.",
+        "observation": "O espaçamento sem padding passa a dez hertz.",
+        "explanation": "Mais duração observada permite melhor separação frequencial sob uma janela adequada."
+      },
+      {
+        "id": "padding",
+        "label": "FFT ampliada",
+        "situation": "Acrescentam-se zeros sem aumentar as amostras observadas.",
+        "observation": "O gráfico ganha bins intermediários.",
+        "explanation": "A interpolação espectral não cria informação temporal que não foi observada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual duração tem a janela de 400 amostras a 8 kHz?",
+        "options": [
+          {
+            "text": "50 ms",
+            "correct": true,
+            "explanation": "Quatrocentos dividido por oito mil vale 0,05 segundo."
+          },
+          {
+            "text": "20 ms",
+            "correct": false,
+            "explanation": "Vinte é o espaçamento em hertz da FFT, não a duração."
+          },
+          {
+            "text": "400 ms",
+            "correct": false,
+            "explanation": "Esse valor ignora a taxa de oito mil amostras por segundo."
+          }
+        ]
+      },
+      {
+        "question": "O que zero-padding faz no exemplo?",
+        "options": [
+          {
+            "text": "Adensa a amostragem do espectro calculado",
+            "correct": true,
+            "explanation": "Ele interpola a representação, preservando a duração do sinal observado."
+          },
+          {
+            "text": "Equivale sempre a dobrar a janela real",
+            "correct": false,
+            "explanation": "Dobrar duração inclui informação que acrescentar zeros não fornece."
+          },
+          {
+            "text": "Elimina o compromisso tempo-frequência",
+            "correct": false,
+            "explanation": "A limitação depende da janela e continua existindo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "SciPy — ShortTimeFFT",
+        "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.ShortTimeFFT.html"
+      }
+    ]
+  }
+}

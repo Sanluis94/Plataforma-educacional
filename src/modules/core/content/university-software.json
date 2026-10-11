@@ -1,0 +1,802 @@
+{
+  "sup_engsoft_01": {
+    "context": "Uma escola fictícia guarda matrículas e dados de cursos na mesma tabela. Atualizações repetidas produzem nomes divergentes.",
+    "theory": "Dependências funcionais exprimem regras do domínio, não coincidências da amostra. A primeira forma normal usa valores do domínio escolhido em cada posição; a segunda remove dependências parciais de chaves candidatas compostas. Na terceira, para cada dependência não trivial X→A, X é superchave ou A é atributo primo. Decompor exige preservar junção sem perda e considerar dependências.",
+    "workedExample": "Em Matrícula(aluno,curso,nomeCurso), a chave é (aluno,curso), mas curso→nomeCurso. Separe Curso(curso,nomeCurso) e Matrícula(aluno,curso). Duas matrículas no curso C passam a consultar uma única descrição, evitando duas atualizações.",
+    "investigation": [
+      "Declare as chaves candidatas e dependências do domínio.",
+      "Decomponha a relação e indique a chave estrangeira.",
+      "Reconstrua duas matrículas por junção e confira ausência de linhas espúrias."
+    ],
+    "expectedEvidence": "A entrega deve explicar a dependência parcial e mostrar uma junção sem perda, sem alegar normalização apenas por dividir uma tabela.",
+    "reflection": "Como distinguir dependência funcional de uma coincidência nos registros?",
+    "scenarios": [
+      {
+        "id": "parcial",
+        "label": "Nome do curso",
+        "situation": "A chave composta é aluno+curso, mas o nome depende apenas de curso.",
+        "observation": "Há dependência de parte da chave.",
+        "explanation": "Essa redundância viola a segunda forma normal na relação descrita."
+      },
+      {
+        "id": "transitiva",
+        "label": "Departamento",
+        "situation": "Curso determina departamento, que determina telefoneDepartamento.",
+        "observation": "O telefone se repete em cursos do mesmo departamento.",
+        "explanation": "Separar Departamento evita a dependência transitiva entre atributos não primos."
+      },
+      {
+        "id": "orfao",
+        "label": "Referência inválida",
+        "situation": "Uma matrícula aponta para um curso ausente do cadastro.",
+        "observation": "A integridade referencial falha.",
+        "explanation": "Uma chave estrangeira impede a referência órfã, mas não substitui o estudo de dependências."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual dependência motiva separar Curso da matrícula?",
+        "options": [
+          {
+            "text": "curso→nomeCurso",
+            "correct": true,
+            "explanation": "O nome depende só de uma parte da chave composta."
+          },
+          {
+            "text": "nomeCurso→aluno",
+            "correct": false,
+            "explanation": "O domínio não afirma que um curso identifica uma pessoa."
+          },
+          {
+            "text": "aluno→curso",
+            "correct": false,
+            "explanation": "Um aluno pode participar de mais de um curso."
+          }
+        ]
+      },
+      {
+        "question": "O que deve ser verificado além da redução de redundância?",
+        "options": [
+          {
+            "text": "Junção sem perda",
+            "correct": true,
+            "explanation": "A decomposição precisa permitir reconstruir exatamente os registros válidos."
+          },
+          {
+            "text": "Ter uma coluna por tabela",
+            "correct": false,
+            "explanation": "Fragmentação máxima não demonstra correção relacional."
+          },
+          {
+            "text": "Eliminar todas as chaves estrangeiras",
+            "correct": false,
+            "explanation": "Essas referências expressam relações e sustentam integridade."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_engsoft_02": {
+    "context": "Uma consulta fictícia seleciona poucos pedidos por data. Ler todas as páginas pode ser mais caro que seguir um índice.",
+    "theory": "Índices B-tree organizam chaves e favorecem igualdade e intervalos ordenados. O otimizador estima custos usando estatísticas, seletividade e acesso a páginas; a existência de índice não obriga seu uso. Um índice composto (cliente,data) favorece filtros pelo prefixo cliente. EXPLAIN descreve um plano estimado; EXPLAIN ANALYZE executa a instrução e produz medições, portanto não se deve confundir os dois.",
+    "workedExample": "Em 100.000 pedidos, um filtro seleciona 100 registros: seletividade=100/100.000=0,1%. Um índice pode economizar leitura, mas se 90.000 registros forem pedidos, uma varredura sequencial pode custar menos. São cenários de custo, não planos executados aqui.",
+    "investigation": [
+      "Calcule a seletividade de dois filtros propostos.",
+      "Desenhe o acesso por cliente seguido de intervalo de data.",
+      "Compare planos hipotéticos separando estimativas de medições."
+    ],
+    "expectedEvidence": "Justifique a escolha pelo volume e pela ordem das colunas; inclua custo de escrita e espaço, além da expectativa de acelerar a leitura.",
+    "reflection": "Por que um índice útil para leitura também afeta a manutenção da tabela?",
+    "scenarios": [
+      {
+        "id": "seletivo",
+        "label": "Filtro restrito",
+        "situation": "A consulta pede cem linhas entre cem mil pedidos.",
+        "observation": "A fração selecionada é um milésimo.",
+        "explanation": "Um índice pode reduzir páginas consultadas quando a distribuição e os custos favorecem esse acesso."
+      },
+      {
+        "id": "amplo",
+        "label": "Filtro abrangente",
+        "situation": "O relatório seleciona noventa por cento dos pedidos.",
+        "observation": "Quase toda a tabela precisa ser lida.",
+        "explanation": "Acesso sequencial pode ser preferido ao custo de muitas buscas pelo índice."
+      },
+      {
+        "id": "prefixo",
+        "label": "Ordem composta",
+        "situation": "O índice foi definido em (cliente,data), mas o filtro usa só data.",
+        "observation": "O prefixo inicial não é restringido.",
+        "explanation": "A utilidade depende do plano e das capacidades do banco; a ordenação das colunas importa."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual a seletividade de 100 linhas entre 100.000?",
+        "options": [
+          {
+            "text": "0,1%",
+            "correct": true,
+            "explanation": "A razão é 0,001, equivalente a um décimo de um por cento."
+          },
+          {
+            "text": "10%",
+            "correct": false,
+            "explanation": "Dez por cento corresponderiam a dez mil linhas."
+          },
+          {
+            "text": "100%",
+            "correct": false,
+            "explanation": "Selecionar a tabela inteira exigiria cem mil linhas."
+          }
+        ]
+      },
+      {
+        "question": "Qual diferença entre EXPLAIN e EXPLAIN ANALYZE deve orientar a leitura?",
+        "options": [
+          {
+            "text": "ANALYZE executa a instrução",
+            "correct": true,
+            "explanation": "As medições dependem de executar o plano, inclusive seus efeitos."
+          },
+          {
+            "text": "EXPLAIN sempre mede tempo real",
+            "correct": false,
+            "explanation": "O plano simples fornece estimativas do otimizador."
+          },
+          {
+            "text": "ANALYZE apenas cria índices",
+            "correct": false,
+            "explanation": "A opção de EXPLAIN não é uma instrução de criação de índice."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "PostgreSQL — Index Types",
+        "url": "https://www.postgresql.org/docs/current/indexes-types.html"
+      }
+    ]
+  },
+  "sup_engsoft_03": {
+    "context": "Dois operadores fictícios reservam o último assento ao mesmo tempo. Cada um pode ler disponibilidade antes de o outro gravar.",
+    "theory": "Atomicidade evita efeitos parciais; consistência depende de restrições e regras corretas; isolamento limita interferências; durabilidade preserva commits. Read Committed permite que consultas sucessivas vejam commits novos. Serializable exige resultado equivalente a alguma execução serial, podendo abortar transações que devem ser repetidas integralmente. Uma leitura seguida de escrita sem proteção não garante a regra de estoque.",
+    "workedExample": "O estoque começa em 1. T1 e T2 leem 1 e cada uma escreve 0: o saldo final parece válido, mas duas reservas foram emitidas. Uma atualização condicional que decrementa somente se estoque>0, verificando a linha afetada, permite identificar a segunda tentativa sem saldo.",
+    "investigation": [
+      "Trace o entrelaçamento das leituras e gravações descritas.",
+      "Defina a regra de estoque como restrição verificável.",
+      "Compare atualização condicional e repetição após falha serializável."
+    ],
+    "expectedEvidence": "Mostre o estado e as reservas, pois conferir apenas saldo final oculta a venda dupla; explicite o tratamento de aborto e repetição.",
+    "reflection": "Que parte da consistência depende da aplicação, além do nível de isolamento?",
+    "scenarios": [
+      {
+        "id": "leitura-nova",
+        "label": "Novo commit",
+        "situation": "T1 consulta duas vezes enquanto T2 confirma uma alteração entre consultas.",
+        "observation": "Read Committed pode mostrar valores diferentes.",
+        "explanation": "Cada instrução pode observar um novo conjunto de dados confirmados."
+      },
+      {
+        "id": "parcial",
+        "label": "Falha intermediária",
+        "situation": "A reserva foi gravada, mas a operação falha antes de debitar o estoque.",
+        "observation": "Um efeito parcial seria incoerente.",
+        "explanation": "Colocar ambos os efeitos na mesma transação permite revertê-los juntos."
+      },
+      {
+        "id": "retry",
+        "label": "Aborto serializável",
+        "situation": "O banco rejeita uma transação por conflito de serialização.",
+        "observation": "O commit daquela tentativa não ocorreu.",
+        "explanation": "A aplicação deve repetir a transação completa com leitura atualizada e política de tentativas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Por que saldo final zero não prova que houve só uma reserva?",
+        "options": [
+          {
+            "text": "Duas escritas podem ter sobrescrito o mesmo saldo",
+            "correct": true,
+            "explanation": "O entrelaçamento descrito emite duas reservas usando a mesma leitura inicial."
+          },
+          {
+            "text": "Atomicidade proíbe leituras simultâneas",
+            "correct": false,
+            "explanation": "Atomicidade trata efeitos parciais, não exclui toda concorrência."
+          },
+          {
+            "text": "Durabilidade remove registros duplicados",
+            "correct": false,
+            "explanation": "Durabilidade preserva commits; não deduplica regras do negócio."
+          }
+        ]
+      },
+      {
+        "question": "Como tratar uma falha de serialização corretamente?",
+        "options": [
+          {
+            "text": "Repetir a transação inteira",
+            "correct": true,
+            "explanation": "As decisões devem ser recalculadas com uma nova visão dos dados."
+          },
+          {
+            "text": "Considerar o commit bem-sucedido",
+            "correct": false,
+            "explanation": "Uma transação abortada não confirmou os efeitos pretendidos."
+          },
+          {
+            "text": "Reenviar só a última gravação sem reler",
+            "correct": false,
+            "explanation": "Isso reaproveita decisões tomadas sobre um estado possivelmente inválido."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "PostgreSQL — Transaction Isolation",
+        "url": "https://www.postgresql.org/docs/18/transaction-iso.html"
+      }
+    ]
+  },
+  "sup_engsoft_04": {
+    "context": "Um sistema fictício calcula fretes, cria exportadores e avisa telas sobre mudanças. Cada variação exige uma responsabilidade diferente.",
+    "theory": "Strategy encapsula algoritmos intercambiáveis sob um contrato; Observer distribui notificações a assinantes; Factory Method delega uma etapa de criação a subclasses. São padrões de comportamento e criação: o conjunto citado não é exclusivamente estrutural. Aplicá-los requer motivação concreta, pois novas abstrações também trazem custo. Observer exige atenção a inscrição, remoção e efeitos da notificação.",
+    "workedExample": "Um pedido de R$100 usa Strategy FreteFixo=R$8 ou FretePercentual=10% do valor=R$10. O cliente chama calcular sem condicionar pelo tipo. A troca preserva o contrato monetário, enquanto notificar a tela é outra responsabilidade.",
+    "investigation": [
+      "Separe criação, cálculo e comunicação no caso proposto.",
+      "Defina o contrato de frete e duas estratégias verificáveis.",
+      "Trace inscrição, notificação e remoção de um observador."
+    ],
+    "expectedEvidence": "Associe cada padrão à mudança que ele acomoda; demonstre o resultado de duas estratégias sem atribuir ao padrão garantia de desempenho.",
+    "reflection": "Quando uma condicional simples seria mais clara que uma hierarquia de estratégias?",
+    "scenarios": [
+      {
+        "id": "troca-frete",
+        "label": "Algoritmo variável",
+        "situation": "Uma promoção troca frete fixo por percentual.",
+        "observation": "O cliente mantém a mesma chamada de cálculo.",
+        "explanation": "Strategy permite variar o algoritmo por composição sem alterar seu consumidor."
+      },
+      {
+        "id": "assinante",
+        "label": "Tela assinante",
+        "situation": "Duas telas observam pedidos, e uma é fechada.",
+        "observation": "A tela fechada deve cancelar a inscrição.",
+        "explanation": "Observer sem gestão de ciclo de vida pode reter referências e gerar notificações indevidas."
+      },
+      {
+        "id": "criador",
+        "label": "Criação especializada",
+        "situation": "Um exportador base delega a construção do documento a subclasses.",
+        "observation": "Cada subclasse fornece um produto compatível.",
+        "explanation": "Essa etapa de criação caracteriza Factory Method, diferente de selecionar um algoritmo de frete."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual padrão acomoda as duas fórmulas de frete?",
+        "options": [
+          {
+            "text": "Strategy",
+            "correct": true,
+            "explanation": "As fórmulas são algoritmos substituíveis com o mesmo contrato."
+          },
+          {
+            "text": "Observer",
+            "correct": false,
+            "explanation": "Observer distribui avisos; não define a fórmula intercambiável."
+          },
+          {
+            "text": "Factory Method",
+            "correct": false,
+            "explanation": "O foco de Factory Method é delegar a criação de produtos."
+          }
+        ]
+      },
+      {
+        "question": "Que cuidado pertence ao ciclo de vida de Observer?",
+        "options": [
+          {
+            "text": "Remover assinantes encerrados",
+            "correct": true,
+            "explanation": "Cancelar inscrições evita referências e avisos que deixaram de ser necessários."
+          },
+          {
+            "text": "Garantir que cada evento rode em paralelo",
+            "correct": false,
+            "explanation": "Concorrência não é uma propriedade obrigatória do padrão."
+          },
+          {
+            "text": "Eliminar o contrato dos assinantes",
+            "correct": false,
+            "explanation": "Um contrato de notificação permite ao emissor chamar os observadores."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_engsoft_05": {
+    "context": "Um pedido fictício aguarda pagamento e pode ser cancelado. O time precisa alinhar mensagens do fluxo com transições permitidas.",
+    "theory": "Diagramas de sequência mostram participantes e ordem de mensagens em uma interação; máquinas de estados mostram estados, eventos, guardas e ações. Uma chamada síncrona espera seu retorno; uma mensagem assíncrona não implica aguardar conclusão. Uma guarda condiciona uma transição. Os dois diagramas são visões complementares: uma mensagem recebida só altera o pedido se houver uma transição válida no estado atual.",
+    "workedExample": "O pedido inicia Aguardando. Ao evento confirmarPagamento com guarda valorRecebido≥total, passa a Pago. Para total R$80 e recebimento R$60, a guarda é falsa: permanece Aguardando. Uma mensagem de confirmação sozinha não prova pagamento válido.",
+    "investigation": [
+      "Desenhe comprador, serviço e provedor no fluxo de pagamento.",
+      "Liste estados e guardas para confirmar ou cancelar.",
+      "Confronte uma mensagem tardia com o estado Cancelado."
+    ],
+    "expectedEvidence": "A sequência deve respeitar a causalidade das mensagens e a máquina deve definir transições legais, inclusive quando uma guarda é falsa.",
+    "reflection": "Como representar uma resposta atrasada sem permitir transição indevida?",
+    "scenarios": [
+      {
+        "id": "insuficiente",
+        "label": "Valor parcial",
+        "situation": "Chegam R$60 para um pedido de R$80.",
+        "observation": "A guarda de pagamento completo falha.",
+        "explanation": "O evento foi recebido, mas não habilita a transição para Pago."
+      },
+      {
+        "id": "assincrona",
+        "label": "Resposta posterior",
+        "situation": "O provedor recebe uma solicitação e responde por evento depois.",
+        "observation": "O solicitante não bloqueia esperando conclusão.",
+        "explanation": "Uma mensagem assíncrona desacopla envio e resposta, sem eliminar falhas."
+      },
+      {
+        "id": "cancelado",
+        "label": "Evento tardio",
+        "situation": "O pedido foi cancelado antes da confirmação do provedor.",
+        "observation": "O estado atual limita a reação ao evento.",
+        "explanation": "É necessário definir rejeição ou compensação; a sequência feliz não basta."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que ocorre ao receber R$60 quando a guarda exige R$80?",
+        "options": [
+          {
+            "text": "A transição para Pago não é habilitada",
+            "correct": true,
+            "explanation": "A condição valorRecebido≥total permanece falsa."
+          },
+          {
+            "text": "Toda mensagem obriga mudar de estado",
+            "correct": false,
+            "explanation": "Eventos podem ser ignorados ou bloqueados por guardas."
+          },
+          {
+            "text": "O diagrama de sequência substitui a guarda",
+            "correct": false,
+            "explanation": "A ordem das mensagens não verifica a regra monetária."
+          }
+        ]
+      },
+      {
+        "question": "Qual visão descreve melhor estados e transições legais?",
+        "options": [
+          {
+            "text": "Máquina de estados",
+            "correct": true,
+            "explanation": "Ela explicita estado atual, evento, guarda e estado de destino."
+          },
+          {
+            "text": "Diagrama de classes isolado",
+            "correct": false,
+            "explanation": "Estrutura de classes não descreve por si o ciclo de vida do pedido."
+          },
+          {
+            "text": "Lista de participantes",
+            "correct": false,
+            "explanation": "Identificar atores não especifica suas transições permitidas."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "OMG — UML 2.5.1",
+        "url": "https://www.omg.org/spec/UML/2.5.1"
+      }
+    ]
+  },
+  "sup_engsoft_06": {
+    "context": "Uma equipe fictícia deseja que toda mudança produza um artefato identificável e passe por verificações antes de chegar ao ambiente de teste.",
+    "theory": "Integração contínua combina mudanças frequentemente com build e testes automatizados. Entrega contínua mantém versões prontas para publicação; implantação contínua publica automaticamente após os critérios definidos. Um pipeline deve promover o mesmo artefato validado, registrar versões e impedir avanço quando uma etapa obrigatória falha. Passar testes não demonstra ausência de defeitos; cobertura e qualidade das verificações continuam relevantes.",
+    "workedExample": "Uma sequência de etapas leva lint=1 min, testes=3 min e build=2 min. Em execução estritamente serial, total=6 min. Se os testes falham, o build dependente não deve promover um pacote. Esses tempos são dados do exercício, não uma execução de CI.",
+    "investigation": [
+      "Defina dependências entre verificações e empacotamento.",
+      "Marque quais falhas bloqueiam a promoção do artefato.",
+      "Projete identificação por commit e uma estratégia de reversão."
+    ],
+    "expectedEvidence": "Apresente o grafo das etapas e a política de falha, distinguindo construir um pacote de publicá-lo e mantendo rastreabilidade da versão.",
+    "reflection": "Por que reconstruir após aprovação pode comprometer a identidade do artefato?",
+    "scenarios": [
+      {
+        "id": "falha-teste",
+        "label": "Teste reprovado",
+        "situation": "O lint passa, mas uma verificação funcional obrigatória falha.",
+        "observation": "A promoção deve ser interrompida.",
+        "explanation": "Um sinal vermelho não pode ser ignorado por etapas posteriores bem-sucedidas."
+      },
+      {
+        "id": "artefato",
+        "label": "Mesma versão",
+        "situation": "Teste e produção recebem o mesmo digest de imagem aprovada.",
+        "observation": "A identidade do pacote é rastreável.",
+        "explanation": "Promover um artefato imutável evita divergência entre pacote testado e entregue."
+      },
+      {
+        "id": "paralelo",
+        "label": "Etapas independentes",
+        "situation": "Lint e testes podem rodar juntos antes do build de dois minutos.",
+        "observation": "O caminho crítico é max(1,3)+2=5 minutos.",
+        "explanation": "Paralelizar só etapas independentes reduz duração sem remover suas dependências."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quanto dura o pipeline serial de 1,3 e 2 minutos?",
+        "options": [
+          {
+            "text": "6 minutos",
+            "correct": true,
+            "explanation": "No caso estritamente serial, somam-se as três durações."
+          },
+          {
+            "text": "3 minutos",
+            "correct": false,
+            "explanation": "O maior estágio só determina o total quando as demais dependências permitem."
+          },
+          {
+            "text": "2 minutos",
+            "correct": false,
+            "explanation": "Esse número considera apenas o empacotamento final."
+          }
+        ]
+      },
+      {
+        "question": "O que diferencia entrega contínua de implantação contínua neste contexto?",
+        "options": [
+          {
+            "text": "A publicação pode requerer decisão na entrega contínua",
+            "correct": true,
+            "explanation": "Estar pronto para publicar não obriga publicar cada alteração automaticamente."
+          },
+          {
+            "text": "Entrega contínua dispensa testes",
+            "correct": false,
+            "explanation": "Verificações sustentam a capacidade de entregar com confiança."
+          },
+          {
+            "text": "Implantação contínua não cria artefatos",
+            "correct": false,
+            "explanation": "A publicação precisa de uma versão reproduzível e identificada."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_engsoft_07": {
+    "context": "Duas pessoas alteram a mesma regra de desconto em ramos fictícios. A união precisa preservar intenção, e não apenas remover marcadores.",
+    "theory": "Commits de Git formam um grafo dirigido acíclico de ancestrais. Merge reúne histórias usando uma base comum; rebase reaplica commits e muda suas identidades. Cherry-pick reaplica a alteração de um commit escolhido, sem unir toda a ancestralidade. Um conflito indica que Git não decidiu a composição textual; também existem conflitos semânticos em arquivos que se mesclam automaticamente.",
+    "workedExample": "A base contém desconto=5. Um ramo muda para 10 e outro para 15 na mesma linha. Escolher 10 ou 15 resolve o texto, mas a regra correta exige decidir qual política vale. Após combinar, um teste de preço R$100 deve refletir a regra escolhida.",
+    "investigation": [
+      "Desenhe base comum e dois commits descendentes.",
+      "Explique as intenções antes de resolver a mesma linha.",
+      "Compare o grafo resultante de merge com o de rebase."
+    ],
+    "expectedEvidence": "Apresente a regra final e uma verificação funcional; distinguir hash novo de alteração de conteúdo evita tratar rebase como simples movimentação de rótulo.",
+    "reflection": "Por que ausência de marcadores não garante compatibilidade das mudanças?",
+    "scenarios": [
+      {
+        "id": "mesma-linha",
+        "label": "Conflito textual",
+        "situation": "Dois ramos alteram desconto=5 para valores distintos.",
+        "observation": "A composição automática pede resolução.",
+        "explanation": "O resultado exige uma decisão de domínio além de escolher um lado."
+      },
+      {
+        "id": "api",
+        "label": "Conflito semântico",
+        "situation": "Um ramo renomeia uma função e outro adiciona uma chamada ao nome antigo.",
+        "observation": "Os arquivos podem se mesclar sem conflito textual.",
+        "explanation": "O programa combinado pode falhar mesmo com a mesclagem automática concluída."
+      },
+      {
+        "id": "reaplicar",
+        "label": "Novo ancestral",
+        "situation": "Um commit é reaplicado sobre uma base diferente por rebase.",
+        "observation": "A identidade do commit muda.",
+        "explanation": "Pais fazem parte do objeto commit; preservar a intenção não preserva seu hash."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual operação reaplica um commit específico sem unir toda a história?",
+        "options": [
+          {
+            "text": "Cherry-pick",
+            "correct": true,
+            "explanation": "A operação aplica a mudança selecionada ao ramo atual."
+          },
+          {
+            "text": "Merge sempre com toda a história",
+            "correct": false,
+            "explanation": "Merge integra ancestralidade, não equivale a selecionar uma mudança isolada."
+          },
+          {
+            "text": "Renomear um arquivo",
+            "correct": false,
+            "explanation": "Essa alteração de conteúdo não define integração de commits."
+          }
+        ]
+      },
+      {
+        "question": "Qual verificação é necessária após remover os marcadores de conflito?",
+        "options": [
+          {
+            "text": "Conferir o comportamento e a intenção combinada",
+            "correct": true,
+            "explanation": "Resolver texto não demonstra que as regras funcionais continuam corretas."
+          },
+          {
+            "text": "Apenas contar linhas do arquivo",
+            "correct": false,
+            "explanation": "Quantidade de linhas não verifica descontos ou compatibilidade de chamadas."
+          },
+          {
+            "text": "Assumir que Git validou a regra de negócio",
+            "correct": false,
+            "explanation": "Git compara conteúdo e ancestralidade, não entende a política comercial."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Git — User Manual",
+        "url": "https://git-scm.com/docs/user-manual"
+      }
+    ]
+  },
+  "sup_engsoft_08": {
+    "context": "Uma compra fictícia publica um evento para estoque e faturamento. As etapas podem falhar e receber a mesma mensagem novamente.",
+    "theory": "Microsserviços se comunicam por contratos de rede e têm falhas parciais. Em entrega pelo menos uma vez, o consumidor deve tolerar repetição; uma chave de evento e registro transacional de processamento ajudam a obter efeitos idempotentes. Ordem costuma valer por partição, não globalmente. O padrão outbox registra alteração e evento na mesma transação local, evitando a janela entre commit e publicação.",
+    "workedExample": "O evento E42 reserva dois itens e é entregue duas vezes. Sem deduplicação, o estoque cai quatro; com registro E42 aplicado, a segunda entrega não repete o débito. A queda correta é dois, desde que deduplicação e efeito sejam atômicos.",
+    "investigation": [
+      "Trace falha entre gravar a compra e publicar seu evento.",
+      "Modele outbox e aplicação idempotente do evento E42.",
+      "Defina a chave de partição e a ordem necessária por pedido."
+    ],
+    "expectedEvidence": "Mostre o efeito de uma entrega duplicada e o limite da ordem por partição; não prometa processamento exatamente uma vez só pela configuração da fila.",
+    "reflection": "Que inconsistência surge se registrar a deduplicação e debitar estoque forem separados?",
+    "scenarios": [
+      {
+        "id": "duplicado",
+        "label": "Evento repetido",
+        "situation": "E42 retorna à fila após uma confirmação perdida.",
+        "observation": "A compra já pode ter sido aplicada.",
+        "explanation": "Deduplicação atômica evita repetir o efeito mesmo que a entrega se repita."
+      },
+      {
+        "id": "outbox",
+        "label": "Falha após commit",
+        "situation": "A compra confirma e o processo encerra antes de publicar.",
+        "observation": "Sem outbox, o evento pode desaparecer.",
+        "explanation": "Um registro pendente na mesma transação permite publicação posterior recuperável."
+      },
+      {
+        "id": "particoes",
+        "label": "Ordem local",
+        "situation": "Eventos de dois pedidos estão em partições distintas.",
+        "observation": "A ordem global pode diferir entre consumidores.",
+        "explanation": "Use garantias locais de ordenação e evite inferir sequência total sem protocolo adicional."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual queda de estoque corresponde a E42 aplicado uma única vez?",
+        "options": [
+          {
+            "text": "Dois itens",
+            "correct": true,
+            "explanation": "O evento reserva dois; a entrega repetida não deve multiplicar o efeito."
+          },
+          {
+            "text": "Quatro itens",
+            "correct": false,
+            "explanation": "Esse resultado aplica duas vezes a mesma reserva lógica."
+          },
+          {
+            "text": "Zero itens sempre",
+            "correct": false,
+            "explanation": "Idempotência permite aplicar a primeira ocorrência válida."
+          }
+        ]
+      },
+      {
+        "question": "Qual problema o outbox procura resolver?",
+        "options": [
+          {
+            "text": "A janela entre commit local e publicação",
+            "correct": true,
+            "explanation": "Registrar o evento com a mudança permite recuperar uma publicação interrompida."
+          },
+          {
+            "text": "Toda ordem global entre serviços",
+            "correct": false,
+            "explanation": "Outbox não transforma partições independentes em uma única sequência mundial."
+          },
+          {
+            "text": "Qualquer mudança incompatível de contrato",
+            "correct": false,
+            "explanation": "Compatibilidade de eventos requer evolução e validação de esquema."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_engsoft_09": {
+    "context": "Uma suíte fictícia executa todas as linhas, mas pode aceitar uma comparação errada. Mutação avalia se as asserções detectam mudanças pequenas.",
+    "theory": "Cobertura indica o que foi executado, não se o resultado foi suficientemente verificado. Testes de mutação introduzem alterações controladas; um mutante é morto quando um teste detecta a mudança. Mutantes equivalentes preservam o comportamento observável e precisam de tratamento separado. O escore depende do denominador declarado, da seleção de operadores e de exclusões; não equivale à probabilidade de ausência de defeitos.",
+    "workedExample": "De dez mutantes gerados, dois são equivalentes e seis dos oito não equivalentes são mortos. O escore ajustado é 6/8=75%. Dividir por dez daria 60%, uma métrica diferente; documentar a exclusão evita comparação enganosa.",
+    "investigation": [
+      "Identifique uma mutação de > para ≥ em um limite.",
+      "Crie casos abaixo, no limite e acima do limiar.",
+      "Classifique mortos, sobreviventes e equivalentes antes de calcular."
+    ],
+    "expectedEvidence": "Informe numerador e denominador, justifique equivalências e mostre a asserção que distingue o limite, em vez de citar somente cobertura de linhas.",
+    "reflection": "Como um teste pode executar a regra e ainda não distinguir um mutante?",
+    "scenarios": [
+      {
+        "id": "fronteira",
+        "label": "Valor de fronteira",
+        "situation": "A regra original aceita x>10 e o mutante aceita x≥10.",
+        "observation": "Somente x=10 distingue essas versões.",
+        "explanation": "Testes apenas com 9 e 11 podem cobrir a linha e deixar o mutante sobreviver."
+      },
+      {
+        "id": "equivalente",
+        "label": "Mudança sem efeito",
+        "situation": "Uma alteração não muda nenhuma saída possível no domínio válido.",
+        "observation": "O mutante é equivalente nesse domínio.",
+        "explanation": "Nenhum teste válido o mata; a equivalência deve ser argumentada e registrada."
+      },
+      {
+        "id": "assertiva",
+        "label": "Teste sem verificação",
+        "situation": "O teste chama a função, mas não confere retorno nem efeitos.",
+        "observation": "A cobertura pode aumentar sem detecção.",
+        "explanation": "Executar instruções não substitui asserções com resultados esperados."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é o escore após excluir dois equivalentes dos dez mutantes?",
+        "options": [
+          {
+            "text": "75%",
+            "correct": true,
+            "explanation": "Seis mutantes mortos são divididos pelos oito não equivalentes."
+          },
+          {
+            "text": "60%",
+            "correct": false,
+            "explanation": "Esse cálculo mantém equivalentes no denominador, diferindo da métrica pedida."
+          },
+          {
+            "text": "80%",
+            "correct": false,
+            "explanation": "Oito é a quantidade avaliada, não a quantidade morta."
+          }
+        ]
+      },
+      {
+        "question": "Qual entrada detecta a troca de >10 por ≥10?",
+        "options": [
+          {
+            "text": "10",
+            "correct": true,
+            "explanation": "No limiar, as duas comparações devolvem respostas diferentes."
+          },
+          {
+            "text": "9",
+            "correct": false,
+            "explanation": "As duas condições são falsas para esse valor."
+          },
+          {
+            "text": "11",
+            "correct": false,
+            "explanation": "As duas condições são verdadeiras acima do limiar."
+          }
+        ]
+      }
+    ]
+  },
+  "sup_engsoft_10": {
+    "context": "Uma função fictícia mistura desconto, validação e emissão de recibo. A equipe precisa reorganizar responsabilidades sem mudar resultados.",
+    "theory": "Refatoração altera estrutura interna preservando comportamento observável sob o contrato definido. Em um grafo de fluxo conectado, a complexidade ciclomática é E−N+2; para decisões binárias simples, também é número de decisões mais um. Ela estima caminhos independentes, não dificuldade total ou quantidade de testes suficientes. Extrair métodos pode reduzir a complexidade local sem remover decisões do sistema.",
+    "workedExample": "Uma função com três ifs binários independentes tem complexidade ciclomática 4. Existem até 2³=8 combinações de condições: quatro caminhos independentes não significam apenas quatro comportamentos possíveis. Extrair validação exige manter saídas e efeitos dos casos de fronteira.",
+    "investigation": [
+      "Conte decisões e desenhe os ramos do fluxo apresentado.",
+      "Separe validação e cálculo mantendo o contrato original.",
+      "Compare os casos antes e depois, incluindo erros e efeitos."
+    ],
+    "expectedEvidence": "Demonstre equivalência observável e declare a convenção da métrica; um número menor não basta se a lógica apenas foi espalhada entre métodos.",
+    "reflection": "Que comportamento além do retorno pode ser alterado acidentalmente ao extrair uma função?",
+    "scenarios": [
+      {
+        "id": "tres-ifs",
+        "label": "Decisões simples",
+        "situation": "O fluxo contém três ifs binários sem curto-circuito adicional.",
+        "observation": "A complexidade ciclomática é quatro.",
+        "explanation": "Somar um às decisões vale para esse grafo conectado e estrutura simples."
+      },
+      {
+        "id": "extracao",
+        "label": "Método extraído",
+        "situation": "A validação passa a outro método, mantendo as mesmas condições.",
+        "observation": "A métrica da função principal diminui.",
+        "explanation": "A soma de responsabilidades ainda precisa ser analisada; mover código não elimina sua lógica."
+      },
+      {
+        "id": "efeito",
+        "label": "Recibo antecipado",
+        "situation": "A reorganização emite recibo antes de confirmar o cálculo.",
+        "observation": "A ordem de efeitos foi alterada.",
+        "explanation": "Preservação de retorno não basta quando o contrato inclui efeitos e falhas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual complexidade corresponde aos três ifs simples do exercício?",
+        "options": [
+          {
+            "text": "4",
+            "correct": true,
+            "explanation": "Para esse fluxo, três decisões somadas a um produzem quatro."
+          },
+          {
+            "text": "8",
+            "correct": false,
+            "explanation": "Oito conta combinações de condições, não o número ciclomático."
+          },
+          {
+            "text": "3",
+            "correct": false,
+            "explanation": "Esse número ignora o caminho básico sem decisões adicionais."
+          }
+        ]
+      },
+      {
+        "question": "O que define uma refatoração correta neste caso?",
+        "options": [
+          {
+            "text": "Preservar comportamento e efeitos do contrato",
+            "correct": true,
+            "explanation": "A mudança estrutural deve manter os resultados observáveis relevantes."
+          },
+          {
+            "text": "Apenas diminuir o tamanho de cada arquivo",
+            "correct": false,
+            "explanation": "Arquivos menores podem continuar incorretos ou excessivamente acoplados."
+          },
+          {
+            "text": "Alterar a regra junto sem verificação",
+            "correct": false,
+            "explanation": "Mudar comportamento não é a preservação exigida pela refatoração."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Fowler — Catalog of Refactorings",
+        "url": "https://refactoring.com/catalog/index.html"
+      }
+    ]
+  }
+}

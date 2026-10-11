@@ -1099,6 +1099,8 @@ export function resolveUniversalLab(labId: string): UniversalLabConfig {
 }
 `;
 
-const outputPath = path.resolve('src/modules/core/constants/masterLabsCatalog.ts');
+const previewDirectory = path.resolve('.local/catalog-preview');
+fs.mkdirSync(previewDirectory, { recursive: true });
+const outputPath = path.join(previewDirectory, 'legacy-generated-catalog.ts');
 fs.writeFileSync(outputPath, tsContent, 'utf-8');
-console.log(`Arquivo gravado com sucesso em: ${outputPath}`);
+console.log(`Rascunho legado gravado em: ${outputPath}. Não substitui o conteúdo individual do app.`);

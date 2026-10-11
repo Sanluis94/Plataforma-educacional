@@ -7,6 +7,7 @@ import {
   searchLabsCatalog,
   resolveUniversalLab
 } from '../modules/core/constants/masterLabsCatalog';
+import { NEW_ADVANCED_LABS } from '../modules/core/constants/advancedLabsRegistry';
 
 describe('Kortex Master Laboratories Catalog (500+ Labs)', () => {
   it('deve conter no mínimo 500 laboratórios no catálogo geral', () => {
@@ -63,6 +64,16 @@ describe('Kortex Master Laboratories Catalog (500+ Labs)', () => {
     expect(labsFisica.length).toBeGreaterThanOrEqual(20);
   });
 
+  it('mantém a identidade do catálogo ao abrir os motores avançados', () => {
+    for (const id of Object.keys(NEW_ADVANCED_LABS)) {
+      const item = MASTER_LABS_CATALOG.find(lab => lab.id === id)!;
+      const config = resolveUniversalLab(id);
+      expect(config).toMatchObject({ id, title: item.title, subject: item.subject,
+        topic: item.topic, objective: item.objective, academicLevel: item.academicLevel });
+      expect(config.physicsStep).toBe(NEW_ADVANCED_LABS[id].physicsStep);
+    }
+  });
+
   it('resolveUniversalLab deve instanciar qualquer laboratório do catálogo em um motor funcional', () => {
     const testIds = [
       'fund1_mat_01',
@@ -79,7 +90,13 @@ describe('Kortex Master Laboratories Catalog (500+ Labs)', () => {
       expect(config.id).toBe(id);
       expect(typeof config.physicsStep).toBe('function');
       expect(typeof config.renderCanvas).toBe('function');
-      expect(config.parameters.length).toBeGreaterThan(0);
+      if (config.presentation === 'guided_activity') {
+        expect(config.learningContent?.scenarios.length).toBeGreaterThanOrEqual(3);
+        expect(config.questions?.length).toBeGreaterThanOrEqual(2);
+        expect(config.parameters).toEqual([]);
+      } else {
+        expect(config.parameters.length).toBeGreaterThan(0);
+      }
 
       // Simulação de um passo de física
       const initialParams: Record<string, number> = {};

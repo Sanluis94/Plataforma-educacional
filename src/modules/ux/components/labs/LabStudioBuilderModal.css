@@ -1,0 +1,15 @@
+.lab-studio { color: var(--text-main); background: var(--bg-surface); width: min(760px, 100%); max-height: 90vh; overflow: auto; border: 1px solid var(--border-color); border-radius: 1rem; padding: 1.25rem; }
+.lab-studio header, .lab-studio footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.lab-studio h2 { font-size: 1.4rem; }
+.lab-studio button { color: var(--text-main); background: var(--bg-dark, var(--bg-surface)); border: 1px solid var(--border-color); border-radius: .5rem; padding: .6rem 1rem; cursor: pointer; }
+.lab-studio button[type="submit"] { border-color: var(--color-primary); font-weight: 700; }
+.lab-studio fieldset { min-width: 0; border: 1px solid var(--border-color); border-radius: .6rem; margin: 1.25rem 0; padding: 1rem; }
+.lab-studio legend { font-weight: 700; padding: 0 .4rem; }
+.studio-field { display: block; margin: .75rem 0; }
+.studio-field > span { display: block; margin-bottom: .35rem; }
+.studio-field input, .studio-field textarea, .studio-field select { box-sizing: border-box; width: 100%; background: var(--bg-dark, var(--bg-surface)); color: var(--text-main); border: 1px solid var(--border-color); padding: .65rem; border-radius: .4rem; font: inherit; }
+.studio-field textarea { resize: vertical; }
+.lab-studio :is(input, textarea, select, button):focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+.studio-option { padding: .25rem .75rem; border-left: 2px solid var(--border-color); margin: 1rem 0; }
+.studio-errors { white-space: pre-line; padding: .75rem; border-left: 3px solid var(--color-primary); }
+.lab-studio-backdrop { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; background: var(--bg-overlay, #000b); }

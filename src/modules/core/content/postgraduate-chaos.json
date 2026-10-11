@@ -1,0 +1,832 @@
+{
+  "pos_caos_01": {
+    "context": "Um sistema de Lorenz fictício é analisado por seu campo vetorial. A atividade separa determinismo, sensibilidade e contração de volume.",
+    "theory": "Lorenz usa x′=σ(y−x), y′=x(ρ−z)−y e z′=xy−βz. A divergência é −σ−1−β, indicando contração de volumes para parâmetros positivos. Isso não prova sozinho caos; sensibilidade exige análise de trajetórias ou expoentes. Pequenos erros podem crescer enquanto o conjunto permanece limitado.",
+    "workedExample": "Com σ=10, ρ=28, β=8/3 e estado (1,1,1), as derivadas são (0,26,−5/3). A divergência vale −41/3. Esse cálculo local não integra órbita nem demonstra um atrator numérico.",
+    "investigation": [
+      "Calcule cada derivada no estado dado.",
+      "Obtenha divergência pelo traço do Jacobiano.",
+      "Planeje comparação de trajetórias com passo e tolerâncias controlados."
+    ],
+    "expectedEvidence": "A solução deve obter y′=26 e divergência −41/3, separando contração de volume de demonstração de caos.",
+    "reflection": "Como crescimento numa direção pode coexistir com contração de volume?",
+    "scenarios": [
+      {
+        "id": "pos_caos_01_s0",
+        "label": "Equilíbrio",
+        "situation": "Avalie o estado (0,0,0) com os mesmos parâmetros.",
+        "observation": "Todas as derivadas são nulas.",
+        "explanation": "A origem é equilíbrio, embora possa ser instável para o parâmetro escolhido."
+      },
+      {
+        "id": "pos_caos_01_s1",
+        "label": "Simetria",
+        "situation": "Troque (x,y,z) por (−x,−y,z).",
+        "observation": "A forma das equações é preservada.",
+        "explanation": "A simetria relaciona os dois lados da geometria do sistema."
+      },
+      {
+        "id": "pos_caos_01_s2",
+        "label": "Erro numérico",
+        "situation": "Compare órbitas com passos temporais muito distintos.",
+        "observation": "A divergência observada pode incluir erro de integração.",
+        "explanation": "Sensibilidade física precisa ser diferenciada de artefatos de discretização."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é y′ em (1,1,1) para ρ=28?",
+        "options": [
+          {
+            "text": "27",
+            "correct": false,
+            "explanation": "Esse valor omite o termo de amortecimento −y."
+          },
+          {
+            "text": "Zero",
+            "correct": false,
+            "explanation": "x′ é zero nesse estado, mas y′ não é."
+          },
+          {
+            "text": "26",
+            "correct": true,
+            "explanation": "O cálculo 1×(28−1)−1 fornece 26."
+          }
+        ]
+      },
+      {
+        "question": "Divergência negativa prova caos em qualquer sistema?",
+        "options": [
+          {
+            "text": "Não, mostra contração local de volume",
+            "correct": true,
+            "explanation": "Um sistema pode contrair volumes e convergir para equilíbrio estável."
+          },
+          {
+            "text": "Sim, sem outras hipóteses",
+            "correct": false,
+            "explanation": "A contração não garante expoente positivo nem comportamento aperiódico."
+          },
+          {
+            "text": "Não permite sensibilidade em nenhuma direção",
+            "correct": false,
+            "explanation": "Contração total pode coexistir com expansão em uma direção."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Lorenz: Deterministic Nonperiodic Flow",
+        "url": "https://journals.ametsoc.org/doi/abs/10.1175/1520-0469%281963%29020%3C0130%3Adnf%3E2.0.CO%3B2"
+      }
+    ]
+  },
+  "pos_caos_02": {
+    "context": "Uma população normalizada fictícia segue o mapa logístico. O estudo acompanha perda de estabilidade e duplicações de período sem interpretar r como taxa ecológica medida.",
+    "theory": "O mapa xn+1=rxn(1−xn) preserva [0,1] para 0≤r≤4. O equilíbrio não nulo é x*=1−1/r e sua derivada é 2−r. Estabilidade exige |2−r|<1. A cascata de duplicações apresenta escalas de Feigenbaum, mas também há janelas periódicas: r maior não implica caos em todo valor.",
+    "workedExample": "Para r=2,8, x*=1−1/2,8≈0,642857 e multiplicador=−0,8, portanto o equilíbrio é localmente estável. Para r=3,2, x*=0,6875 e multiplicador=−1,2, tornando-o instável; isso não identifica sozinho toda a órbita atratora.",
+    "investigation": [
+      "Encontre os dois pontos fixos do mapa.",
+      "Teste o módulo da derivada no equilíbrio não nulo.",
+      "Planeje descartar transientes ao montar bifurcações."
+    ],
+    "expectedEvidence": "Espera-se distinguir −0,8 estável de −1,2 instável e reconhecer que um diagrama exige muitas iterações verificadas.",
+    "reflection": "Por que amostrar poucos iterados pode confundir transiente e período?",
+    "scenarios": [
+      {
+        "id": "pos_caos_02_s0",
+        "label": "Origem",
+        "situation": "Avalie x*=0 para r=2,8.",
+        "observation": "A derivada é 2,8 e o ponto é instável.",
+        "explanation": "Uma perturbação pequena cresce localmente perto da população nula."
+      },
+      {
+        "id": "pos_caos_02_s1",
+        "label": "Limiar",
+        "situation": "Considere r=3 no equilíbrio não nulo.",
+        "observation": "O multiplicador é −1.",
+        "explanation": "O teste estrito |f′|<1 deixa de valer e sinaliza a fronteira de estabilidade."
+      },
+      {
+        "id": "pos_caos_02_s2",
+        "label": "Fora da faixa",
+        "situation": "Use r>4 mantendo estados em [0,1].",
+        "observation": "Iterados podem sair do intervalo.",
+        "explanation": "A interpretação de população normalizada precisa ser reavaliada nesse domínio."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual multiplicador local ocorre em r=2,8 no equilíbrio não nulo?",
+        "options": [
+          {
+            "text": "2,8",
+            "correct": false,
+            "explanation": "Esse é o multiplicador na origem, não no ponto não nulo."
+          },
+          {
+            "text": "0,642857",
+            "correct": false,
+            "explanation": "Esse número é a posição de equilíbrio, não sua derivada."
+          },
+          {
+            "text": "−0,8",
+            "correct": true,
+            "explanation": "A derivada no ponto fixo simplifica-se para 2−r."
+          }
+        ]
+      },
+      {
+        "question": "O que |f′(x*)|>1 informa localmente?",
+        "options": [
+          {
+            "text": "Instabilidade do ponto fixo",
+            "correct": true,
+            "explanation": "Pequenas perturbações são amplificadas pela aplicação local do mapa."
+          },
+          {
+            "text": "Caos obrigatório de toda órbita",
+            "correct": false,
+            "explanation": "Pode haver um ciclo estável diferente do ponto fixo."
+          },
+          {
+            "text": "Extinção automática",
+            "correct": false,
+            "explanation": "Instabilidade local não determina o destino global ou interpretação ecológica."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT: Chaos and Non-Linear Dynamics",
+        "url": "https://ocw.mit.edu/courses/8-09-classical-mechanics-iii-fall-2014/a3b977a17091d225ee1870d100c7a308_MIT8_09F14_Chapter_7.pdf"
+      }
+    ]
+  },
+  "pos_caos_03": {
+    "context": "Duas trajetórias fictícias começam próximas e se afastam. O exercício estima crescimento finito sem confundi-lo com expoente assintótico comprovado.",
+    "theory": "Um expoente de Lyapunov mede taxa média logarítmica de crescimento de perturbações infinitesimais, com evolução tangente e normalizações adequadas. A estimativa finita ln[d(t)/d0]/t depende da janela e saturação. Expoente máximo positivo apoia sensibilidade, mas ruído e transientes podem imitar crescimento em dados limitados.",
+    "workedExample": "Uma separação fornecida cresce de 10⁻⁶ para 10⁻³ em 10 s. A taxa finita é ln(1000)/10≈0,6908 s⁻¹ e o tempo de duplicação local≈ln2/0,6908=1,003 s. Não foi estimado o espectro assintótico completo.",
+    "investigation": [
+      "Calcule a razão entre separações.",
+      "Obtenha taxa logarítmica e unidade.",
+      "Discuta renormalização e faixa de crescimento linearizado."
+    ],
+    "expectedEvidence": "Devem aparecer 0,6908 s⁻¹ e cerca de um segundo por duplicação, com limites da janela finita.",
+    "reflection": "Por que a distância satura em um atrator limitado?",
+    "scenarios": [
+      {
+        "id": "pos_caos_03_s0",
+        "label": "Contração",
+        "situation": "A separação cai de 10⁻³ para 10⁻⁶ em 10 s.",
+        "observation": "A taxa finita é −0,6908 s⁻¹.",
+        "explanation": "O logaritmo da razão menor que um indica contração nessa janela."
+      },
+      {
+        "id": "pos_caos_03_s1",
+        "label": "Saturação",
+        "situation": "As trajetórias atingem a escala total do atrator.",
+        "observation": "O crescimento exponencial inicial deixa de valer.",
+        "explanation": "Distâncias finitas não podem crescer indefinidamente em conjunto limitado."
+      },
+      {
+        "id": "pos_caos_03_s2",
+        "label": "Renormalização",
+        "situation": "Reescale a perturbação ao longo da evolução.",
+        "observation": "A direção tangente pode continuar sendo acompanhada.",
+        "explanation": "Somar os logaritmos das expansões evita confundir saturação com ausência de instabilidade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual taxa finita decorre de fator mil em dez segundos?",
+        "options": [
+          {
+            "text": "100 s⁻¹",
+            "correct": false,
+            "explanation": "A razão linear dividida pelo tempo não define expoente de Lyapunov."
+          },
+          {
+            "text": "3 s⁻¹",
+            "correct": false,
+            "explanation": "Logaritmo decimal sem ajuste não corresponde à taxa exponencial natural usada."
+          },
+          {
+            "text": "0,6908 s⁻¹",
+            "correct": true,
+            "explanation": "O logaritmo natural de mil dividido por dez fornece a taxa."
+          }
+        ]
+      },
+      {
+        "question": "Por que um único afastamento finito não prova expoente assintótico?",
+        "options": [
+          {
+            "text": "Depende de janela, transiente e saturação",
+            "correct": true,
+            "explanation": "A definição envolve comportamento de longo prazo de perturbações infinitesimais."
+          },
+          {
+            "text": "Porque logaritmos nunca podem ser usados",
+            "correct": false,
+            "explanation": "O logaritmo é essencial; a limitação está no desenho da estimativa."
+          },
+          {
+            "text": "Porque todo sistema determinista tem taxa zero",
+            "correct": false,
+            "explanation": "Sistemas deterministas podem ter expansão de perturbações."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT: Chaos and Non-Linear Dynamics",
+        "url": "https://ocw.mit.edu/courses/8-09-classical-mechanics-iii-fall-2014/a3b977a17091d225ee1870d100c7a308_MIT8_09F14_Chapter_7.pdf"
+      }
+    ]
+  },
+  "pos_caos_04": {
+    "context": "Um oscilador fictício é observado por seção de Poincaré e coordenadas atrasadas. O estudo distingue redução de fluxo e reconstrução por uma série escalar.",
+    "theory": "Uma seção de Poincaré registra cruzamentos orientados de uma superfície transversal, produzindo um mapa de retorno. Reconstrução por atraso usa vetores (s(t),s(t+τ),...). Atraso nulo gera redundância e atraso inadequado pode esconder geometria. Resultados de imersão exigem hipóteses e observáveis apropriados, não garantem qualquer escolha de τ.",
+    "workedExample": "Para x=cos t e y=sin t, a seção y=0 com y′>0 registra x=1 a cada 2π. Com atraso τ=π/2, (x(t),x(t+τ))=(cos t,−sin t) descreve um círculo; τ=2π reduz o vetor à diagonal.",
+    "investigation": [
+      "Defina a orientação dos cruzamentos da seção.",
+      "Calcule os pontos de retorno do oscilador.",
+      "Compare atrasos π/2 e 2π na reconstrução."
+    ],
+    "expectedEvidence": "A resposta deve identificar um ponto fixo na seção e uma curva circular no atraso não degenerado.",
+    "reflection": "Como ruído e frequência de amostragem afetam os cruzamentos?",
+    "scenarios": [
+      {
+        "id": "pos_caos_04_s0",
+        "label": "Direção oposta",
+        "situation": "Aceite cruzamentos y=0 com y′<0.",
+        "observation": "A seção registra x=−1.",
+        "explanation": "A orientação evita misturar eventos diferentes de uma mesma órbita."
+      },
+      {
+        "id": "pos_caos_04_s1",
+        "label": "Atraso nulo",
+        "situation": "Use τ=0 no vetor de duas coordenadas.",
+        "observation": "Os pontos ficam na diagonal.",
+        "explanation": "As duas coordenadas são idênticas e não acrescentam dimensão observacional."
+      },
+      {
+        "id": "pos_caos_04_s2",
+        "label": "Período dois",
+        "situation": "Um ciclo cruza a seção em duas posições alternadas.",
+        "observation": "O mapa de retorno mostra dois pontos.",
+        "explanation": "Contar pontos de retorno pode revelar periodicidade quando a seção é apropriada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual ponto aparece na seção y=0 e y′>0 do exemplo?",
+        "options": [
+          {
+            "text": "x=−1",
+            "correct": false,
+            "explanation": "Esse ponto corresponde ao cruzamento com derivada negativa."
+          },
+          {
+            "text": "Todos os valores de x",
+            "correct": false,
+            "explanation": "A seção orientada seleciona eventos específicos, não toda a trajetória."
+          },
+          {
+            "text": "x=1",
+            "correct": true,
+            "explanation": "y′=cos t é positivo em t=2πk, onde x=1."
+          }
+        ]
+      },
+      {
+        "question": "Por que τ=2π é degenerado para x=cos t?",
+        "options": [
+          {
+            "text": "As coordenadas atrasadas são iguais",
+            "correct": true,
+            "explanation": "O atraso de um período reproduz o mesmo valor em cada instante."
+          },
+          {
+            "text": "Porque o sinal deixa de ser determinista",
+            "correct": false,
+            "explanation": "A degeneração é geométrica e não introduz aleatoriedade."
+          },
+          {
+            "text": "Porque a frequência passa a zero",
+            "correct": false,
+            "explanation": "O sinal continua oscilando com o mesmo período."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT: classical mechanics and Poincare sections",
+        "url": "https://live.ocw.mit.edu/courses/8-09-classical-mechanics-iii-fall-2014/d9bac33f6c60b304dc0398e99b327102_MIT8_09F14_full.pdf"
+      }
+    ]
+  },
+  "pos_caos_05": {
+    "context": "O sistema de Rössler fictício ilustra rotação e reinjeção em três dimensões. O exercício examina campo local sem alegar uma órbita integrada.",
+    "theory": "Rössler usa x′=−y−z, y′=x+ay e z′=b+z(x−c). A não linearidade z x possibilita geometria dobrada em certos parâmetros. A divergência a+x−c varia no espaço; um valor local negativo não estabelece contração média global ou caos. Periodicidade e atrator dependem dos parâmetros.",
+    "workedExample": "Com a=b=0,2, c=5,7 e estado (1;0;0), o vetor de derivadas é (0;1;0,2): x′=0, y′=1 e z′=0,2. A divergência local é 0,2+1−5,7=−4,5. Esses valores são avaliações analíticas, sem integrar uma órbita.",
+    "investigation": [
+      "Substitua o estado em cada equação separadamente.",
+      "Calcule a divergência local pelo Jacobiano.",
+      "Discuta quais diagnósticos exigiriam integrar trajetórias."
+    ],
+    "expectedEvidence": "Espera-se x′=0, y′=1 e z′=0,2, sem interpretar derivadas locais como forma completa do atrator.",
+    "reflection": "Como uma única não linearidade pode produzir dobramento global?",
+    "scenarios": [
+      {
+        "id": "pos_caos_05_s0",
+        "label": "Plano inicial",
+        "situation": "Inicie com z=0 e b=0,2.",
+        "observation": "z′ permanece positivo em 0,2.",
+        "explanation": "O plano z=0 não é invariante quando há o termo constante b."
+      },
+      {
+        "id": "pos_caos_05_s1",
+        "label": "Região expansiva",
+        "situation": "Avalie x=6 com a=0,2 e c=5,7.",
+        "observation": "A divergência local vale +0,5.",
+        "explanation": "A contração ou expansão local depende da posição na variável x."
+      },
+      {
+        "id": "pos_caos_05_s2",
+        "label": "Parâmetro alterado",
+        "situation": "Mude c e mantenha os demais parâmetros.",
+        "observation": "A órbita pode mudar de regime.",
+        "explanation": "Bifurcações não são previstas apenas pela derivada em um estado isolado."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é z′ em (1,0,0) nos parâmetros dados?",
+        "options": [
+          {
+            "text": "−4,5",
+            "correct": false,
+            "explanation": "Esse valor é a divergência local, não a derivada de z."
+          },
+          {
+            "text": "Zero",
+            "correct": false,
+            "explanation": "O termo constante b impede que z′ seja zero nesse estado."
+          },
+          {
+            "text": "0,2",
+            "correct": true,
+            "explanation": "O produto z(x−c) se anula e sobra b."
+          }
+        ]
+      },
+      {
+        "question": "Divergência local negativa permite concluir qual fato imediato?",
+        "options": [
+          {
+            "text": "Contração infinitesimal de volume naquele estado",
+            "correct": true,
+            "explanation": "O traço do Jacobiano informa a taxa local, sem fixar o regime global."
+          },
+          {
+            "text": "Toda órbita é caótica",
+            "correct": false,
+            "explanation": "Caos exige propriedades adicionais da evolução."
+          },
+          {
+            "text": "Toda separação entre trajetórias diminui",
+            "correct": false,
+            "explanation": "Volume pode contrair com expansão em uma direção."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Otto Rössler: Rössler attractor",
+        "url": "https://www.scholarpedia.org/article/Rossler_oscillator"
+      }
+    ]
+  },
+  "pos_caos_06": {
+    "context": "Um conjunto de Cantor fictício é construído retirando terços centrais. O exercício compara dimensão por caixas com a dimensão de Hausdorff neste caso especial.",
+    "theory": "A dimensão de caixas é o limite de log N(ε)/log(1/ε), se existir, para cobrir o conjunto por caixas de escala ε. Dimensão de Hausdorff usa coberturas mais gerais e não coincide sempre com a de caixas. Para o Cantor autossimilar sem sobreposição, ambas valem log2/log3. Dados finitos só permitem estimar uma faixa de escala.",
+    "workedExample": "Na etapa k, ε=3⁻k e N=2^k. Para k=4, ε=1/81 e N=16: D=ln16/ln81=ln2/ln3≈0,63093. Isso é cálculo da construção ideal, não medida de imagem com resolução limitada.",
+    "investigation": [
+      "Conte intervalos nas primeiras quatro etapas.",
+      "Calcule inclinação logarítmica entre escalas.",
+      "Separe prova autossimilar de estimativa em dados finitos."
+    ],
+    "expectedEvidence": "Devem aparecer 16 caixas na escala 1/81 e D≈0,631, sem equiparar universalmente todas as dimensões fractais.",
+    "reflection": "Como pixels e fundo podem alterar a inclinação em pequenas escalas?",
+    "scenarios": [
+      {
+        "id": "pos_caos_06_s0",
+        "label": "Segmento",
+        "situation": "Aplique a contagem a um segmento completo.",
+        "observation": "N cresce como 1/ε e D=1.",
+        "explanation": "Cobrir um objeto linear requer número inversamente proporcional ao tamanho da caixa."
+      },
+      {
+        "id": "pos_caos_06_s1",
+        "label": "Quadrado",
+        "situation": "Conte caixas para uma região quadrada preenchida.",
+        "observation": "N cresce como ε⁻² e D=2.",
+        "explanation": "Duas direções independentes multiplicam a contagem por escala."
+      },
+      {
+        "id": "pos_caos_06_s2",
+        "label": "Ruído",
+        "situation": "Adicione pontos espúrios em toda a imagem.",
+        "observation": "A dimensão estimada pode aumentar.",
+        "explanation": "O ruído ocupa caixas extras e altera a faixa de escalas ajustada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual dimensão tem o Cantor ideal apresentado?",
+        "options": [
+          {
+            "text": "Dois",
+            "correct": false,
+            "explanation": "O conjunto está na reta e não é uma região bidimensional."
+          },
+          {
+            "text": "Zero",
+            "correct": false,
+            "explanation": "Apesar de medida de comprimento nula, sua dimensão fractal é positiva."
+          },
+          {
+            "text": "ln2/ln3≈0,631",
+            "correct": true,
+            "explanation": "Cada redução por três deixa duas cópias e determina a escala autossimilar."
+          }
+        ]
+      },
+      {
+        "question": "Uma estimativa por caixas prova sempre a dimensão de Hausdorff?",
+        "options": [
+          {
+            "text": "Não, as definições podem produzir valores diferentes",
+            "correct": true,
+            "explanation": "A coincidência neste Cantor requer propriedades particulares da construção."
+          },
+          {
+            "text": "Sim, são definições idênticas",
+            "correct": false,
+            "explanation": "Hausdorff permite coberturas diferentes da grade de caixas."
+          },
+          {
+            "text": "Sim, basta uma única escala",
+            "correct": false,
+            "explanation": "O limite ou faixa de escala não pode ser identificado com uma contagem isolada."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "ETH Zurich: computational physics and fractals",
+        "url": "https://ethz.ch/content/dam/ethz/special-interest/phys/theoretical-physics/itp-dam/documents/introcompphys/CompPhysScript-2019HS.pdf"
+      }
+    ]
+  },
+  "pos_caos_07": {
+    "context": "Um esquema fictício de Pecora-Carroll transmite x de Lorenz a um subsistema resposta. O exercício demonstra estabilidade transversal sem eliminar o caos do emissor.",
+    "theory": "Com x compartilhado, a resposta usa yr′=x(ρ−zr)−yr e zr′=xyr−βzr. Para erros ey=yr−y e ez=zr−z, ey′=−ey−xez e ez′=xey−βez. V=(ey²+ez²)/2 satisfaz V′=−ey²−βez², negativo para β>0 fora do erro nulo. A prova depende de parâmetros idênticos e sinal compartilhado correto.",
+    "workedExample": "Com ey=1, ez=0 e β=8/3, V=0,5 e V′=−1. Para ey=0 e ez=1, V′=−8/3. O termo xeyez cancela na derivada, mostrando contração do erro ideal sem integrar o sinal caótico.",
+    "investigation": [
+      "Derive as equações de erro por subtração.",
+      "Calcule V′ e cancele os termos cruzados.",
+      "Discuta ruído e diferenças de parâmetros."
+    ],
+    "expectedEvidence": "A resposta deve demonstrar V′ negativo e distinguir sincronização transversal de periodicidade ou segurança de comunicação.",
+    "reflection": "Por que sincronizar dois sistemas não garante criptografia segura?",
+    "scenarios": [
+      {
+        "id": "pos_caos_07_s0",
+        "label": "Erro nulo",
+        "situation": "Inicie yr=y e zr=z com parâmetros idênticos.",
+        "observation": "O erro permanece zero no modelo ideal.",
+        "explanation": "O conjunto sincronizado é invariante pelas equações de erro."
+      },
+      {
+        "id": "pos_caos_07_s1",
+        "label": "Parâmetros diferentes",
+        "situation": "Use β distinto no receptor.",
+        "observation": "A dinâmica de erro ganha termo de desajuste.",
+        "explanation": "A demonstração simples de V′ negativo já não se aplica na mesma forma."
+      },
+      {
+        "id": "pos_caos_07_s2",
+        "label": "Sinal ruidoso",
+        "situation": "O receptor recebe x somado a ruído.",
+        "observation": "Pode persistir erro de sincronização.",
+        "explanation": "A entrada compartilhada deixa de ser exatamente igual e atua como perturbação."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é V′ no esquema ideal derivado?",
+        "options": [
+          {
+            "text": "ey²+βez²",
+            "correct": false,
+            "explanation": "Esse sinal indicaria expansão e contradiz as equações de erro."
+          },
+          {
+            "text": "Sempre zero",
+            "correct": false,
+            "explanation": "A derivada só é nula no erro nulo com β positivo."
+          },
+          {
+            "text": "−ey²−βez²",
+            "correct": true,
+            "explanation": "Os termos cruzados opostos se cancelam na derivada quadrática."
+          }
+        ]
+      },
+      {
+        "question": "Qual hipótese sustenta a prova transversal apresentada?",
+        "options": [
+          {
+            "text": "Parâmetros iguais e x compartilhado corretamente",
+            "correct": true,
+            "explanation": "A subtração das equações exige as mesmas leis e entrada."
+          },
+          {
+            "text": "Ausência de caos no emissor",
+            "correct": false,
+            "explanation": "O emissor pode continuar caótico enquanto o erro converge."
+          },
+          {
+            "text": "Qualquer ruído arbitrariamente grande",
+            "correct": false,
+            "explanation": "Ruído altera a entrada e pode impedir sincronização exata."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Pecora and Carroll: synchronization of chaotic systems",
+        "url": "https://acoustique.ec-lyon.fr/chaos/PecoraCarroll_Chaos15.pdf"
+      }
+    ]
+  },
+  "pos_caos_08": {
+    "context": "Um oscilador autossustentado fictício é descrito por Van der Pol. A energia local explica crescimento e limitação da amplitude.",
+    "theory": "O modelo x′=y, y′=μ(1−x²)y−x possui amortecimento que muda de sinal. Para H=(x²+y²)/2, H′=μ(1−x²)y²: há ganho quando |x|<1 e perda quando |x|>1 para μ>0. O sistema autônomo plano ideal apresenta ciclo limite, sem exigir que sua oscilação seja caótica.",
+    "workedExample": "Com μ=1 e estado x=0,y=1, x′=1, y′=1 e H′=1. Em x=2,y=1, H′=−3. O cálculo mostra troca local de energia, não amplitude exata do ciclo ou integração temporal.",
+    "investigation": [
+      "Derive H′ a partir das duas equações.",
+      "Avalie ganho e perda nos estados fornecidos.",
+      "Compare μ=0 com μ positivo e maior."
+    ],
+    "expectedEvidence": "É necessário obter H′=1 e −3 e separar ciclo limite atrator de órbita periódica neutra do sistema linear.",
+    "reflection": "Como grande μ cria escalas de tempo de relaxação distintas?",
+    "scenarios": [
+      {
+        "id": "pos_caos_08_s0",
+        "label": "Linear",
+        "situation": "Faça o parâmetro de não linearidade μ=0 no modelo.",
+        "observation": "H′=0 e há órbitas periódicas neutras.",
+        "explanation": "O oscilador harmônico conserva energia e não seleciona uma amplitude atratora."
+      },
+      {
+        "id": "pos_caos_08_s1",
+        "label": "Amplitude pequena",
+        "situation": "Use |x|<1 com y não nulo e μ>0.",
+        "observation": "H aumenta localmente.",
+        "explanation": "O amortecimento efetivo é negativo nessa região."
+      },
+      {
+        "id": "pos_caos_08_s2",
+        "label": "Amplitude grande",
+        "situation": "Use |x|>1 com y não nulo e μ>0.",
+        "observation": "H diminui localmente.",
+        "explanation": "A dissipação cresce e ajuda limitar a oscilação sustentada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a derivada da energia H′ em x=2,y=1,μ=1?",
+        "options": [
+          {
+            "text": "+3",
+            "correct": false,
+            "explanation": "Esse sinal inverteria o efeito dissipativo fora de |x|=1."
+          },
+          {
+            "text": "Zero",
+            "correct": false,
+            "explanation": "A conservação só ocorre em condições particulares como μ=0."
+          },
+          {
+            "text": "−3",
+            "correct": true,
+            "explanation": "A expressão (1−4)×1² fornece −3."
+          }
+        ]
+      },
+      {
+        "question": "Qual distinção vale entre μ=0 e μ>0 no modelo?",
+        "options": [
+          {
+            "text": "O primeiro conserva energia; o segundo pode selecionar ciclo limite",
+            "correct": true,
+            "explanation": "O termo não linear muda o balanço energético conforme amplitude."
+          },
+          {
+            "text": "Ambos sempre têm caos autônomo",
+            "correct": false,
+            "explanation": "O oscilador plano descrito não exige dinâmica caótica."
+          },
+          {
+            "text": "μ>0 remove a variável y",
+            "correct": false,
+            "explanation": "O parâmetro não elimina a equação de velocidade."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT: Van der Pol oscillator problem set",
+        "url": "https://ocw.mit.edu/courses/18-353j-nonlinear-dynamics-i-chaos-fall-2012/6df0b35fbd1aa47c281a18155b87cf24_MIT18_353JF12_pset6.pdf"
+      }
+    ]
+  },
+  "pos_caos_09": {
+    "context": "Uma partícula fictícia colide elasticamente em mesas de bilhar ideais. A atividade distingue conservação de energia de regularidade das trajetórias.",
+    "theory": "No bilhar ideal há movimento livre e reflexão especular v′=v−2(v·n)n com normal unitária. A energia cinética se conserva, mas geometria pode gerar sensibilidade. Retângulo é integrável; Sinai usa dispersão e estádio usa desfocalização. Sistemas Hamiltonianos conservativos não possuem atração dissipativa típica de Lorenz.",
+    "workedExample": "Para v=(3;−4) m/s e normal n=(0;1), v·n=−4 e v′=(3;4) m/s. O módulo continua 5 m/s; com massa 1 kg, energia antes e depois=12,5 J. Não foi calculada sequência completa de colisões.",
+    "investigation": [
+      "Aplique a fórmula com normal unitária.",
+      "Confira módulo e energia após a colisão.",
+      "Compare mesas integráveis e geometrias caóticas."
+    ],
+    "expectedEvidence": "Espera-se reflexão para (3;4) m/s e energia conservada, sem concluir que conservação impede caos.",
+    "reflection": "Como um sistema sem dissipação ainda perde previsibilidade prática?",
+    "scenarios": [
+      {
+        "id": "pos_caos_09_s0",
+        "label": "Parede vertical",
+        "situation": "Use n=(1;0) com v=(3;−4).",
+        "observation": "A reflexão torna v′=(−3;−4).",
+        "explanation": "A componente normal inverte e a tangencial permanece."
+      },
+      {
+        "id": "pos_caos_09_s1",
+        "label": "Retângulo",
+        "situation": "A mesa possui apenas paredes planas retangulares.",
+        "observation": "A dinâmica ideal é integrável.",
+        "explanation": "A reflexão pode ser desdobrada em movimento retilíneo periódico ou quase periódico."
+      },
+      {
+        "id": "pos_caos_09_s2",
+        "label": "Dispersor",
+        "situation": "Inclua obstáculo convexo no tipo Sinai.",
+        "observation": "Colisões próximas podem divergir.",
+        "explanation": "Curvatura dispersiva cria instabilidade sem violar conservação de energia."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual velocidade resulta da parede horizontal fornecida?",
+        "options": [
+          {
+            "text": "(−3;−4) m/s",
+            "correct": false,
+            "explanation": "Esse resultado corresponderia à normal horizontal da parede vertical."
+          },
+          {
+            "text": "(0;0) m/s",
+            "correct": false,
+            "explanation": "Parar a partícula dissiparia energia e não seria colisão elástica."
+          },
+          {
+            "text": "(3;4) m/s",
+            "correct": true,
+            "explanation": "A componente normal −4 inverte e a tangencial 3 é preservada."
+          }
+        ]
+      },
+      {
+        "question": "Conservação de energia exclui caos Hamiltoniano?",
+        "options": [
+          {
+            "text": "Não, geometria e instabilidade podem gerar caos",
+            "correct": true,
+            "explanation": "Energia constante restringe o espaço acessível sem tornar toda órbita regular."
+          },
+          {
+            "text": "Sim, toda órbita conservativa é periódica",
+            "correct": false,
+            "explanation": "Sistemas conservativos podem ter trajetórias não periódicas sensíveis."
+          },
+          {
+            "text": "Sim, porque o atrator precisa dissipar energia",
+            "correct": false,
+            "explanation": "Caos conservativo não exige um atrator dissipativo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Cvitanovic et al.: Chaos, Classical and Quantum",
+        "url": "https://chaosbk.physics.gatech.edu/version12/chapters/ChaosBook-I-2p.pdf"
+      }
+    ]
+  },
+  "pos_caos_10": {
+    "context": "Um ecossistema fictício é representado por uma variável normalizada de desvio. Uma forma normal ilustra passagens lentas sem prever colapso de população real.",
+    "theory": "Perto de uma dobra, x′=μ+x² com μ>0 cria um gargalo sem equilíbrio. A passagem lenta pode integrar um modelo de intermitência tipo I, mas surtos repetidos exigem mecanismo de reinjeção. O tempo entre −a e a é 2 arctan(a/√μ)/√μ, aproximando π/√μ para a muito maior que √μ. x é desvio, não contagem populacional.",
+    "workedExample": "Na aproximação de gargalo largo, μ=0,04 dá tempo≈π/0,2=15,71 unidades; μ=0,01 dá≈31,42. A redução por quatro de μ duplica o tempo. Não são tempos medidos nem previsão de resiliência de um ecossistema.",
+    "investigation": [
+      "Identifique a variável como desvio normalizado.",
+      "Calcule a escala π/√μ nos dois casos.",
+      "Explique por que uma reinjeção é necessária para intermitência repetida."
+    ],
+    "expectedEvidence": "A análise deve obter razão temporal dois e declarar a condição a≫√μ, sem confundir demora com confirmação de transição real.",
+    "reflection": "Como distinguir gargalo determinista de surtos produzidos por ruído?",
+    "scenarios": [
+      {
+        "id": "pos_caos_10_s0",
+        "label": "Dobra",
+        "situation": "Considere μ=0 na forma normal.",
+        "observation": "Surge equilíbrio não hiperbólico em x=0.",
+        "explanation": "A derivada em x=0 é zero e a dinâmica linear perde poder de diagnóstico."
+      },
+      {
+        "id": "pos_caos_10_s1",
+        "label": "Lado com equilíbrios",
+        "situation": "Faça μ=−0,04 no modelo.",
+        "observation": "Há pontos fixos em x=±0,2.",
+        "explanation": "Resolver μ+x²=0 produz dois equilíbrios, de estabilidade diferente."
+      },
+      {
+        "id": "pos_caos_10_s2",
+        "label": "Sem reinjeção",
+        "situation": "Mantenha apenas x′=μ+x² com μ>0.",
+        "observation": "Uma passagem lenta não gera surtos recorrentes sozinha.",
+        "explanation": "A forma local precisa de dinâmica global que retorne à região do gargalo."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Reduzir μ de 0,04 para 0,01 altera π/√μ por qual fator?",
+        "options": [
+          {
+            "text": "Quatro",
+            "correct": false,
+            "explanation": "A dependência é na raiz quadrada e não no inverso direto de μ."
+          },
+          {
+            "text": "Um quarto",
+            "correct": false,
+            "explanation": "O tempo aumenta quando o parâmetro positivo diminui."
+          },
+          {
+            "text": "Dois",
+            "correct": true,
+            "explanation": "A raiz de μ cai à metade e seu inverso dobra."
+          }
+        ]
+      },
+      {
+        "question": "Qual ingrediente falta à forma local para surtos repetidos?",
+        "options": [
+          {
+            "text": "Reinjeção à região lenta",
+            "correct": true,
+            "explanation": "A dinâmica global deve devolver a trajetória após a saída do gargalo."
+          },
+          {
+            "text": "Somente aumentar o tempo de integração",
+            "correct": false,
+            "explanation": "Integrar por mais tempo não cria um mecanismo de retorno ausente nas equações."
+          },
+          {
+            "text": "Escolher uma condição inicial diferente uma única vez",
+            "correct": false,
+            "explanation": "A condição inicial muda uma passagem, mas não garante retorno repetido à região do gargalo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Manneville and Pomeau: routes to turbulence and intermittency",
+        "url": "https://www.sciencedirect.com/science/article/pii/0167278980900135"
+      }
+    ]
+  }
+}

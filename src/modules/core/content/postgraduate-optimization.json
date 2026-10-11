@@ -1,0 +1,832 @@
+{
+  "pos_otim_01": {
+    "context": "Uma oficina fictícia decide quantidades de dois produtos por programação linear. Simplex e dualidade verificam a solução por limites coincidentes.",
+    "theory": "Simplex percorre soluções básicas viáveis por pivôs que melhoram o objetivo, com cuidados para degeneração e ciclagem. Na forma max cᵀx com Ax≤b e x≥0, o dual é min bᵀu com Aᵀu≥c e u≥0. Viabilidade primal e dual com valores iguais certifica ótimo; preço sombra vale localmente sob base estável.",
+    "workedExample": "Maximize 3x+2y sujeito a x+y≤4, x≤2 e y≤3. O ponto (2,2) vale 10. O dual u=2,v=1,w=0 é viável: u+v=3, u+w=2 e 4u+2v+3w=10. A igualdade certifica o ótimo fictício.",
+    "investigation": [
+      "Liste vértices viáveis e valores do objetivo.",
+      "Construa o dual com uma variável por restrição.",
+      "Verifique igualdade de valores e folga complementar."
+    ],
+    "expectedEvidence": "Espera-se ótimo 10 e certificado dual (2,1,0), distinguindo solução plausível de prova por dualidade.",
+    "reflection": "Quando um preço sombra deixa de valer após mudar o recurso?",
+    "scenarios": [
+      {
+        "id": "pos_otim_01_s0",
+        "label": "Mais recurso total",
+        "situation": "Eleve o limite x+y de 4 para 4,5.",
+        "observation": "O ótimo local passa a (2;2,5), valor 11.",
+        "explanation": "A base permanece viável e o preço sombra dois explica o ganho de um."
+      },
+      {
+        "id": "pos_otim_01_s1",
+        "label": "Restrição frouxa",
+        "situation": "No ótimo original, o limite y≤3 tem folga um.",
+        "observation": "Seu multiplicador dual é zero.",
+        "explanation": "A restrição não limita marginalmente o objetivo naquela base."
+      },
+      {
+        "id": "pos_otim_01_s2",
+        "label": "Degeneração",
+        "situation": "Um pivô muda a base sem mudar o ponto.",
+        "observation": "O objetivo pode permanecer igual na etapa.",
+        "explanation": "Degeneração exige regras apropriadas e não implica melhora estrita em todo pivô."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual valor certifica o ótimo no exemplo primal-dual?",
+        "options": [
+          {
+            "text": "12",
+            "correct": false,
+            "explanation": "x=2,y=3 daria doze, mas viola x+y≤4."
+          },
+          {
+            "text": "6",
+            "correct": false,
+            "explanation": "Esse valor é viável em alguns vértices, mas não é o melhor."
+          },
+          {
+            "text": "10",
+            "correct": true,
+            "explanation": "A solução primal e a dual viáveis atingem o mesmo valor dez."
+          }
+        ]
+      },
+      {
+        "question": "Por que igualdade primal-dual certifica o ótimo?",
+        "options": [
+          {
+            "text": "Nenhum primal viável pode superar o limite dual",
+            "correct": true,
+            "explanation": "Dualidade fraca fornece o limite e a igualdade o atinge."
+          },
+          {
+            "text": "Porque todo vértice é ótimo",
+            "correct": false,
+            "explanation": "Vértices podem apresentar objetivos diferentes no mesmo problema."
+          },
+          {
+            "text": "Porque variáveis têm nomes diferentes",
+            "correct": false,
+            "explanation": "A certificação depende de viabilidade e valores, não de nomenclatura."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT: simplex and duality lecture notes",
+        "url": "https://ocw.mit.edu/courses/15-093j-optimization-methods-fall-2009/pages/lecture-notes/"
+      }
+    ]
+  },
+  "pos_otim_02": {
+    "context": "Um planejamento fictício exige quantidades inteiras. Branch and Bound compara relaxações com uma solução incumbente sem arredondar cegamente.",
+    "theory": "Em maximização, a relaxação linear fornece limite superior; uma solução inteira viável fornece limite inferior incumbente. Nós são podados por inviabilidade, solução inteira ou limite que não supera a incumbente. Ramificar divide o domínio fracionário em disjunções inteiras. Heurísticas encontram candidatos, mas o certificado depende dos limites globais.",
+    "workedExample": "Maximize 3x+2y, x+y≤2,5, x≤2, y≤2 e inteiros não negativos. A relaxação admite (2;0,5), valor 7. Como x+y inteiro é no máximo 2, o melhor é (2;0), valor 6. Um nó com limite superior 5,8 pode ser podado ante incumbente 6.",
+    "investigation": [
+      "Resolva a relaxação e identifique variável fracionária.",
+      "Construa uma solução inteira e calcule seu valor.",
+      "Justifique poda pela comparação de limites."
+    ],
+    "expectedEvidence": "A resposta deve distinguir limite 7 de solução inteira 6 e explicar por que arredondar pode violar restrições em outros modelos.",
+    "reflection": "Como tolerâncias numéricas afetam a identificação de integralidade?",
+    "scenarios": [
+      {
+        "id": "pos_otim_02_s0",
+        "label": "Limite inferior",
+        "situation": "Em outro MIP, com custos não inteiros, um nó retorna solução inteira viável de valor 6,2.",
+        "observation": "A incumbente melhora para 6,2.",
+        "explanation": "Em um MIP geral com custos não inteiros, a solução viável atualiza o melhor valor conhecido."
+      },
+      {
+        "id": "pos_otim_02_s1",
+        "label": "Nó promissor",
+        "situation": "Em outro MIP, cujo objetivo não é necessariamente inteiro, um nó tem limite superior 6,5 e incumbente 6.",
+        "observation": "Esse limite não autoriza poda por valor.",
+        "explanation": "Nesse outro modelo, uma decisão inteira pode ter objetivo entre 6 e 6,5. No exemplo original, 3x+2y é inteiro: o limite 6,5 poderia ser arredondado para 6 e autorizaria a poda."
+      },
+      {
+        "id": "pos_otim_02_s2",
+        "label": "Inviável",
+        "situation": "Um ramo exige x≥2 e y≥1 no exemplo.",
+        "observation": "O ramo viola x+y≤2,5.",
+        "explanation": "A soma mínima três excede o limite e permite poda por inviabilidade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual limite a relaxação linear fornece na maximização?",
+        "options": [
+          {
+            "text": "Inferior obrigatoriamente",
+            "correct": false,
+            "explanation": "O conjunto relaxado pode alcançar valores maiores, não menores no máximo."
+          },
+          {
+            "text": "Nenhum limite",
+            "correct": false,
+            "explanation": "A inclusão de conjuntos é justamente a base da certificação."
+          },
+          {
+            "text": "Superior ao ótimo inteiro ou igual a ele",
+            "correct": true,
+            "explanation": "Remover integralidade amplia o conjunto de decisões admissíveis."
+          }
+        ]
+      },
+      {
+        "question": "Incumbente 6 e limite superior 5,8 permitem qual ação?",
+        "options": [
+          {
+            "text": "Podar o nó por não melhorar o valor atual",
+            "correct": true,
+            "explanation": "Nenhuma solução daquele nó pode superar seis sob o limite válido."
+          },
+          {
+            "text": "Trocar a incumbente por 5,8",
+            "correct": false,
+            "explanation": "O limite não é solução viável melhor e ainda é menor."
+          },
+          {
+            "text": "Declarar todos os nós globalmente resolvidos",
+            "correct": false,
+            "explanation": "A poda de um nó não resolve automaticamente o restante da árvore."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "SCIP: primal and dual solving bounds",
+        "url": "https://scipopt.org/doc/html/group__PublicSolvingStatsMethods.php"
+      }
+    ]
+  },
+  "pos_otim_03": {
+    "context": "Uma função quadrática fictícia permite examinar BFGS em uma dimensão. A atividade distingue gradiente, Hessiana e aproximação de sua inversa.",
+    "theory": "BFGS atualiza uma aproximação de curvatura com s=xnovo−x e y=gnovo−g, satisfazendo a equação secante. A condição sᵀy>0 ajuda preservar positividade; busca linear adequada é importante. BFGS não garante ótimo global em função não convexa, e uma atualização não equivale a avaliar Hessiana exata em todo problema.",
+    "workedExample": "Para f(x)=(x−3)², x0=0 e H0=1 como inversa aproximada, g0=−6 e direção=6. Um passo α=0,5 chega a x1=3. s=3,y=6 e s y=18; em uma dimensão a atualização inversa torna-se s/y=0,5.",
+    "investigation": [
+      "Calcule gradiente e direção inicial.",
+      "Aplique o passo de busca linear fornecido.",
+      "Verifique curvatura e a condição secante."
+    ],
+    "expectedEvidence": "Espera-se x1=3 e inversa 0,5, com sᵀy positivo e identificação de que o passo foi fornecido.",
+    "reflection": "O que pode ocorrer quando ruído de gradiente viola a condição de curvatura?",
+    "scenarios": [
+      {
+        "id": "pos_otim_03_s0",
+        "label": "Passo unitário",
+        "situation": "Use α=1 na direção inicial do exemplo.",
+        "observation": "O ponto vai a x=6 e não melhora f.",
+        "explanation": "Busca linear evita aceitar indiscriminadamente um avanço excessivo."
+      },
+      {
+        "id": "pos_otim_03_s1",
+        "label": "Curvatura negativa",
+        "situation": "Uma atualização tem sᵀy<0 em função não convexa.",
+        "observation": "A positividade exige tratamento adicional.",
+        "explanation": "Atualização pode ser ignorada ou amortecida conforme a implementação."
+      },
+      {
+        "id": "pos_otim_03_s2",
+        "label": "Gradiente nulo",
+        "situation": "Avalie g em x=3 para a quadrática.",
+        "observation": "O gradiente é zero.",
+        "explanation": "A condição de estacionariedade coincide com mínimo global nesta função convexa específica."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é g0 para f=(x−3)² em x0=0?",
+        "options": [
+          {
+            "text": "9",
+            "correct": false,
+            "explanation": "Nove é o valor da função inicial e não o gradiente."
+          },
+          {
+            "text": "3",
+            "correct": false,
+            "explanation": "Esse é o minimizador e não a derivada na origem."
+          },
+          {
+            "text": "−6",
+            "correct": true,
+            "explanation": "A derivada 2(x−3) avaliada na origem vale −6."
+          }
+        ]
+      },
+      {
+        "question": "Qual condição favorece positividade na atualização BFGS?",
+        "options": [
+          {
+            "text": "sᵀy>0",
+            "correct": true,
+            "explanation": "Curvatura positiva mantém a aproximação definida positiva nas hipóteses usuais."
+          },
+          {
+            "text": "sᵀy<0 sempre",
+            "correct": false,
+            "explanation": "O sinal negativo pode impedir a propriedade desejada."
+          },
+          {
+            "text": "s e y sem relação com gradientes",
+            "correct": false,
+            "explanation": "A informação secante depende da mudança de gradiente entre iterados."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "SciPy: BFGS curvature update",
+        "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.BFGS.html"
+      }
+    ]
+  },
+  "pos_otim_04": {
+    "context": "Um enxame fictício de partículas explora uma função objetivo. O exercício calcula uma atualização PSO e distingue melhor valor encontrado de prova de ótimo.",
+    "theory": "PSO usa vnovo=wv+c1r1(pbest−x)+c2r2(gbest−x), seguido de xnovo=x+vnovo. Termos de inércia, experiência individual e vizinhança governam exploração. Os números aleatórios e a política de fronteira devem ser registrados. Convergência empírica do enxame não certifica ótimo global nem viabilidade de restrições não tratadas.",
+    "workedExample": "Adote x=2, v=1, pbest=1, gbest=0, w=0,5, c1=c2=1 e r1=r2=0,5. vnovo=0,5−0,5−1=−1, então xnovo=1. Os sorteios foram fixados para a conta, sem executar um enxame.",
+    "investigation": [
+      "Calcule separadamente os três termos de velocidade.",
+      "Atualize posição e cheque o domínio permitido.",
+      "Planeje várias sementes e comparação com referência conhecida."
+    ],
+    "expectedEvidence": "A solução deve obter vnovo=−1 e xnovo=1, sem declarar sucesso global a partir de uma partícula.",
+    "reflection": "Como pressão social excessiva pode reduzir diversidade?",
+    "scenarios": [
+      {
+        "id": "pos_otim_04_s0",
+        "label": "Sem memória",
+        "situation": "Faça c1=c2=0 com w=0,5.",
+        "observation": "A velocidade passa a 0,5.",
+        "explanation": "Somente a inércia permanece na atualização dessa etapa."
+      },
+      {
+        "id": "pos_otim_04_s1",
+        "label": "Fronteira",
+        "situation": "Uma posição proposta fica fora do domínio permitido.",
+        "observation": "É necessária política explícita de reparo ou rejeição.",
+        "explanation": "Atualização vetorial não garante automaticamente satisfação das restrições."
+      },
+      {
+        "id": "pos_otim_04_s2",
+        "label": "Estagnação",
+        "situation": "Todas as partículas se concentram no mesmo ponto local.",
+        "observation": "O melhor encontrado pode ser subótimo.",
+        "explanation": "Perda de diversidade reduz exploração de regiões alternativas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual posição resulta dos parâmetros fornecidos?",
+        "options": [
+          {
+            "text": "3",
+            "correct": false,
+            "explanation": "Esse resultado usa a velocidade antiga e ignora a atualização."
+          },
+          {
+            "text": "Zero",
+            "correct": false,
+            "explanation": "gbest influencia a direção, mas não impõe chegada imediata a ele."
+          },
+          {
+            "text": "1",
+            "correct": true,
+            "explanation": "A velocidade nova −1 somada à posição dois resulta em um."
+          }
+        ]
+      },
+      {
+        "question": "Qual registro permite reproduzir uma execução estocástica?",
+        "options": [
+          {
+            "text": "Semente e regras de atualização e fronteira",
+            "correct": true,
+            "explanation": "A sequência aleatória e as escolhas algorítmicas afetam o trajeto."
+          },
+          {
+            "text": "Apenas o melhor valor final",
+            "correct": false,
+            "explanation": "O resultado isolado não descreve o processo que o gerou."
+          },
+          {
+            "text": "Somente o nome PSO",
+            "correct": false,
+            "explanation": "Existem parâmetros e variantes que mudam o comportamento do algoritmo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Kennedy and Eberhart: Particle Swarm Optimization",
+        "url": "https://staff.washington.edu/paymana/swarm/kennedy95-ijcnn.pdf"
+      }
+    ]
+  },
+  "pos_otim_05": {
+    "context": "Um depósito fictício atende clientes por rotas com capacidade limitada. Clarke-Wright usa economias de distância e exige verificar cada fusão.",
+    "theory": "A economia de unir i e j é sij=d0i+d0j−dij na versão simétrica. A heurística ordena economias e funde rotas por extremidades compatíveis, preservando capacidade e demais restrições. Ela não garante ótimo global; janelas de tempo exigem verificação e adaptação específicas, não decorrem da fórmula básica.",
+    "workedExample": "Com d0A=10 km, d0B=12 km e dAB=8 km, economia=14 km. Duas rotas isoladas somam 44 km e a rota 0–A–B–0 tem 30 km. Demandas 3 e 4 unidades somam 7: veículo de capacidade 6 torna a fusão inviável, apesar da economia.",
+    "investigation": [
+      "Calcule economia e distância da rota unida.",
+      "Some demandas e compare com capacidade.",
+      "Confira extremidades, visita única e restrições adicionais."
+    ],
+    "expectedEvidence": "A resposta deve obter economia de 14 km e rejeitar a fusão para capacidade seis, sem confundir economia com viabilidade.",
+    "reflection": "Como tempo de serviço pode invalidar uma rota curta?",
+    "scenarios": [
+      {
+        "id": "pos_otim_05_s0",
+        "label": "Capacidade suficiente",
+        "situation": "Eleve capacidade do veículo para oito unidades.",
+        "observation": "A fusão atende a restrição de carga.",
+        "explanation": "A demanda total sete cabe, mas outras restrições ainda precisam ser verificadas."
+      },
+      {
+        "id": "pos_otim_05_s1",
+        "label": "Janela apertada",
+        "situation": "B só aceita entrega antes de um horário não alcançado após A.",
+        "observation": "A ordem A–B pode ser inviável.",
+        "explanation": "Distância menor não garante atendimento temporal; horários devem ser calculados."
+      },
+      {
+        "id": "pos_otim_05_s2",
+        "label": "Extremo ocupado",
+        "situation": "Um cliente já é interior de uma rota existente.",
+        "observation": "A fusão básica por essa posição não é admissível.",
+        "explanation": "Clarke-Wright precisa manter a estrutura de rota e evitar subtours ou visitas repetidas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual economia é calculada para A e B?",
+        "options": [
+          {
+            "text": "30 km",
+            "correct": false,
+            "explanation": "Esse é o comprimento da rota unida, não a economia."
+          },
+          {
+            "text": "44 km",
+            "correct": false,
+            "explanation": "Esse é o total das duas rotas isoladas."
+          },
+          {
+            "text": "14 km",
+            "correct": true,
+            "explanation": "Dez mais doze menos oito produz quatorze."
+          }
+        ]
+      },
+      {
+        "question": "A fusão com carga sete e capacidade seis deve ser aceita?",
+        "options": [
+          {
+            "text": "Não, viola a capacidade",
+            "correct": true,
+            "explanation": "Economia positiva não supera uma restrição obrigatória do problema."
+          },
+          {
+            "text": "Sim, porque poupa distância",
+            "correct": false,
+            "explanation": "Uma solução mais curta ainda precisa ser viável."
+          },
+          {
+            "text": "Sim, pois a fórmula garante todas as restrições",
+            "correct": false,
+            "explanation": "A fórmula mede economia e não realiza checagem de capacidade ou tempo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Clarke and Wright: scheduling vehicles from a central depot",
+        "url": "https://pubsonline.informs.org/doi/epdf/10.1287/opre.12.4.568"
+      }
+    ]
+  },
+  "pos_otim_06": {
+    "context": "Uma matriz simétrica fictícia define um problema semidefinido pequeno. Autovalores verificam viabilidade e distinguem semidefinição de positividade estrita.",
+    "theory": "SDP otimiza função linear sob restrições afins e matriz positiva semidefinida, isto é, zᵀXz≥0 para todo z. O cone PSD é convexo. Diagonal não negativa sozinha não garante PSD; autovalores e menores apropriados precisam ser considerados. Fronteiras podem conter autovalores zero e não satisfazem positividade estrita.",
+    "workedExample": "Maximize t sujeito a X=[[1,t],[t,1]] ser PSD. Os autovalores são 1+t e 1−t, então −1≤t≤1. O ótimo é t=1, com autovalores 2 e 0: viável semidefinido, mas não definido positivo. Nenhum solver foi usado.",
+    "investigation": [
+      "Calcule autovalores simbolicamente.",
+      "Converta PSD em intervalo para t.",
+      "Identifique o ótimo e sua posição na fronteira."
+    ],
+    "expectedEvidence": "Espera-se t*=1 e distinção entre autovalor zero admissível no cone e positividade estrita.",
+    "reflection": "Por que uma matriz com diagonal positiva ainda pode ser indefinida?",
+    "scenarios": [
+      {
+        "id": "pos_otim_06_s0",
+        "label": "Interior",
+        "situation": "Avalie t=0 no problema.",
+        "observation": "X é identidade e definida positiva.",
+        "explanation": "Os dois autovalores valem um e a matriz fica no interior do cone."
+      },
+      {
+        "id": "pos_otim_06_s1",
+        "label": "Fora do cone",
+        "situation": "Avalie t=2 com diagonal ainda igual a um.",
+        "observation": "Os autovalores são 3 e −1.",
+        "explanation": "O autovalor negativo viola PSD apesar da diagonal positiva."
+      },
+      {
+        "id": "pos_otim_06_s2",
+        "label": "Fronteira oposta",
+        "situation": "Use t=−1 no conjunto viável.",
+        "observation": "Os autovalores são 0 e 2.",
+        "explanation": "A outra extremidade também pertence à fronteira semidefinida."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual intervalo garante PSD para a matriz fornecida?",
+        "options": [
+          {
+            "text": "Todo t positivo",
+            "correct": false,
+            "explanation": "Valores maiores que um criam autovalor negativo."
+          },
+          {
+            "text": "Somente t=0",
+            "correct": false,
+            "explanation": "A identidade é viável, mas o cone inclui todo o intervalo indicado."
+          },
+          {
+            "text": "−1≤t≤1",
+            "correct": true,
+            "explanation": "As duas desigualdades 1+t≥0 e 1−t≥0 precisam valer juntas."
+          }
+        ]
+      },
+      {
+        "question": "A solução t=1 é definida positiva?",
+        "options": [
+          {
+            "text": "Não, possui autovalor zero",
+            "correct": true,
+            "explanation": "Definição positiva exige todos os autovalores estritamente positivos."
+          },
+          {
+            "text": "Sim, porque a diagonal é positiva",
+            "correct": false,
+            "explanation": "Diagonal positiva não evita autovalor zero ou negativo."
+          },
+          {
+            "text": "Não é sequer semidefinida",
+            "correct": false,
+            "explanation": "Zero é permitido no cone PSD e a matriz continua viável."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Vandenberghe and Boyd: Semidefinite Programming",
+        "url": "https://web.stanford.edu/~boyd/papers/sdp.html"
+      }
+    ]
+  },
+  "pos_otim_07": {
+    "context": "Projetos fictícios são comparados em custo normalizado e emissão. NSGA-II procura diversidade entre compromissos, sem escolher sozinho a preferência final.",
+    "theory": "Em minimização, A domina B se não piora nenhum objetivo e melhora ao menos um. NSGA-II usa frentes de não dominância e distância de crowding para seleção e diversidade. Os extremos recebem tratamento especial; normalização e restrições importam. A população retornada é aproximação e não certificado de toda a fronteira de Pareto.",
+    "workedExample": "Considere A=(4,8), B=(6,5), C=(8,7) e D=(5,9), com ambos objetivos minimizados. A domina D e B domina C. A e B não se dominam, formando a primeira frente do conjunto fornecido; não houve execução evolutiva.",
+    "investigation": [
+      "Compare objetivos de cada par de projetos.",
+      "Separe a primeira frente não dominada.",
+      "Explique como crowding preserva dispersão na frente."
+    ],
+    "expectedEvidence": "Espera-se frente {A,B} e identificação de que decisão final exige preferências entre custo e emissão.",
+    "reflection": "Por que uma soma ponderada pode perder partes de uma fronteira não convexa?",
+    "scenarios": [
+      {
+        "id": "pos_otim_07_s0",
+        "label": "Projeto novo",
+        "situation": "Adicione E=(3,4) ao conjunto.",
+        "observation": "E domina A e B.",
+        "explanation": "O novo ponto melhora simultaneamente os dois objetivos em relação à antiga frente."
+      },
+      {
+        "id": "pos_otim_07_s1",
+        "label": "Escalas distintas",
+        "situation": "Substitua o crowding normalizado por distâncias brutas e multiplique o custo por mil.",
+        "observation": "A diversidade pode ser dominada pela escala do custo.",
+        "explanation": "O crowding usual normaliza cada objetivo; omitir essa etapa muda a métrica e dá peso indevido à unidade."
+      },
+      {
+        "id": "pos_otim_07_s2",
+        "label": "Empate",
+        "situation": "Dois projetos têm o mesmo par de objetivos.",
+        "observation": "Nenhum melhora estritamente o outro.",
+        "explanation": "A definição de dominância exige pelo menos uma melhoria estrita."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual projeto domina C=(8,7) no conjunto original?",
+        "options": [
+          {
+            "text": "A=(4,8)",
+            "correct": false,
+            "explanation": "A tem menor custo mas emissão maior, portanto não domina C."
+          },
+          {
+            "text": "D=(5,9)",
+            "correct": false,
+            "explanation": "D também tem emissão maior que C."
+          },
+          {
+            "text": "B=(6,5)",
+            "correct": true,
+            "explanation": "B tem custo e emissão menores que C."
+          }
+        ]
+      },
+      {
+        "question": "Qual função a distância de crowding cumpre no NSGA-II?",
+        "options": [
+          {
+            "text": "Favorecer diversidade entre soluções da mesma frente",
+            "correct": true,
+            "explanation": "Ela ajuda manter pontos distribuídos entre compromissos não dominados."
+          },
+          {
+            "text": "Provar ótimo global de cada indivíduo",
+            "correct": false,
+            "explanation": "A métrica de diversidade não fornece certificado de otimalidade."
+          },
+          {
+            "text": "Escolher automaticamente a preferência do usuário",
+            "correct": false,
+            "explanation": "Preferências finais não são determinadas apenas pela não dominância."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "pymoo: NSGA-II rank and crowding",
+        "url": "https://pymoo.org/algorithms/moo/nsga2.html"
+      }
+    ]
+  },
+  "pos_otim_08": {
+    "context": "Um problema convexo fictício ilustra barreira logarítmica e trajetória central. O ótimo de fronteira é aproximado por pontos estritamente interiores.",
+    "theory": "Para minimizar f(x) com desigualdades gi(x)≤0, a barreira usa t f(x)−Σln(−gi(x)) no interior estrito. Aumentar t reduz a influência da barreira e aproxima condições de otimalidade, com limitações de condicionamento. No caso convexo sob hipóteses adequadas, m/t limita a lacuna da trajetória central exata.",
+    "workedExample": "Minimize x sujeito a x≥0. Para x>0, a barreira é t x−ln x; derivada t−1/x=0 dá x=1/t. Em t=10, x=0,1; em t=100, x=0,01. O ótimo original é zero, alcançado apenas no limite da trajetória.",
+    "investigation": [
+      "Derive o objetivo com barreira.",
+      "Resolva a condição de estacionariedade.",
+      "Compare pontos interiores com o ótimo de fronteira."
+    ],
+    "expectedEvidence": "A solução deve obter x=1/t e distinguir minimizador da barreira de ótimo exato do problema original.",
+    "reflection": "Por que aumentar t demais sem centralização adequada pode prejudicar a solução?",
+    "scenarios": [
+      {
+        "id": "pos_otim_08_s0",
+        "label": "Barreira indefinida",
+        "situation": "Tente avaliar −ln x em x=0.",
+        "observation": "O valor diverge para positivo infinito.",
+        "explanation": "O método exige interior estrito enquanto a barreira é finita."
+      },
+      {
+        "id": "pos_otim_08_s1",
+        "label": "Lacuna menor",
+        "situation": "Aumente t de 10 para 100 no caso exato.",
+        "observation": "A lacuna de objetivo cai de 0,1 para 0,01.",
+        "explanation": "Com uma restrição, a diferença efetiva coincide com 1/t neste exemplo."
+      },
+      {
+        "id": "pos_otim_08_s2",
+        "label": "Sem interior",
+        "situation": "As restrições não admitem ponto estritamente viável.",
+        "observation": "A barreira simples não inicia como descrita.",
+        "explanation": "É necessário tratar viabilidade, reduzir dimensão ou usar outra formulação apropriada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual ponto minimiza t x−ln x para t positivo?",
+        "options": [
+          {
+            "text": "x=t",
+            "correct": false,
+            "explanation": "Esse ponto não resolve a derivada para t geral."
+          },
+          {
+            "text": "x=0 diretamente",
+            "correct": false,
+            "explanation": "A barreira não é finita na fronteira zero."
+          },
+          {
+            "text": "x=1/t",
+            "correct": true,
+            "explanation": "A condição t−1/x=0 e a segunda derivada positiva dão o mínimo."
+          }
+        ]
+      },
+      {
+        "question": "Aumentar t faz a trajetória central deste caso tender a quê?",
+        "options": [
+          {
+            "text": "Ao ótimo original x=0",
+            "correct": true,
+            "explanation": "O ponto 1/t permanece positivo e aproxima a fronteira."
+          },
+          {
+            "text": "Ao infinito",
+            "correct": false,
+            "explanation": "O inverso de t diminui quando t cresce."
+          },
+          {
+            "text": "A x=1 sempre",
+            "correct": false,
+            "explanation": "A igualdade um só ocorre para t=1."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Boyd and Vandenberghe: Convex Optimization",
+        "url": "https://web.stanford.edu/~boyd/cvxbook/"
+      }
+    ]
+  },
+  "pos_otim_09": {
+    "context": "Formigas artificiais fictícias escolhem duas arestas de um grafo. O caso avalia probabilidade e evaporação sem tratar feromônio como prova de ótimo.",
+    "theory": "Em ACO, uma regra comum usa pij proporcional a τij^αηij^β sobre movimentos viáveis, com η como atratividade heurística. Feromônio é atualizado por evaporação e depósito; variantes diferem nas regras. Restrições definem a lista admissível. Reforço excessivo pode causar estagnação e a melhor rota encontrada não certifica ótimo global.",
+    "workedExample": "Use τ1=2,τ2=1, distâncias d1=1,d2=2, η=1/d, α=1 e β=2. Pesos são 2 e 0,25; probabilidades 8/9 e 1/9. Com evaporação ρ=0,2 e depósito 0,5 na primeira, τ1novo=0,8×2+0,5=2,1.",
+    "investigation": [
+      "Calcule atratividades e pesos das arestas.",
+      "Normalize os pesos no conjunto viável.",
+      "Aplique evaporação antes de somar o depósito definido."
+    ],
+    "expectedEvidence": "Espera-se probabilidades 8/9 e 1/9 e feromônio 2,1, com regras e conjunto admissível explícitos.",
+    "reflection": "Como preservar exploração quando uma aresta acumula quase todo o feromônio?",
+    "scenarios": [
+      {
+        "id": "pos_otim_09_s0",
+        "label": "Só feromônio",
+        "situation": "Faça β=0 mantendo τ e α dados.",
+        "observation": "As probabilidades passam a 2/3 e 1/3.",
+        "explanation": "A distância deixa de influenciar a escolha dessa etapa."
+      },
+      {
+        "id": "pos_otim_09_s1",
+        "label": "Aresta proibida",
+        "situation": "A segunda aresta viola uma restrição obrigatória.",
+        "observation": "Ela deve sair do conjunto admissível.",
+        "explanation": "Normalização não deve atribuir probabilidade a movimento inviável."
+      },
+      {
+        "id": "pos_otim_09_s2",
+        "label": "Evaporação total",
+        "situation": "Use ρ=1 antes do depósito na regra apresentada.",
+        "observation": "O feromônio anterior é totalmente removido.",
+        "explanation": "A atualização preserva apenas os depósitos novos e pode mudar exploração."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual probabilidade cabe à primeira aresta no exemplo?",
+        "options": [
+          {
+            "text": "2/3",
+            "correct": false,
+            "explanation": "Esse valor ignoraria a atratividade de distância com β=2."
+          },
+          {
+            "text": "1/2",
+            "correct": false,
+            "explanation": "As arestas não têm pesos iguais no cálculo fornecido."
+          },
+          {
+            "text": "8/9",
+            "correct": true,
+            "explanation": "O peso dois dividido pela soma 2,25 resulta em 0,8889."
+          }
+        ]
+      },
+      {
+        "question": "Qual é o feromônio após evaporação e depósito definidos?",
+        "options": [
+          {
+            "text": "2,1",
+            "correct": true,
+            "explanation": "O restante 1,6 somado ao depósito 0,5 dá 2,1."
+          },
+          {
+            "text": "2,5",
+            "correct": false,
+            "explanation": "Esse valor esquece a evaporação de vinte por cento."
+          },
+          {
+            "text": "0,9",
+            "correct": false,
+            "explanation": "Subtrair ρ diretamente de τ não segue a regra multiplicativa."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Marco Dorigo: Ant Colony Optimization",
+        "url": "https://www.scholarpedia.org/article/Ant_colony_optimization"
+      }
+    ]
+  },
+  "pos_otim_10": {
+    "context": "Uma restrição fictícia de consumo possui coeficientes incertos em elipsoide. Otimização robusta verifica o pior caso sem atribuir probabilidades inexistentes.",
+    "theory": "Para a=a0+Pu com ||u||2≤1, impor aᵀx≤b para toda incerteza equivale a a0ᵀx+||Pᵀx||2≤b. A norma é o suporte do elipsoide. O conjunto define proteção determinista e não uma confiança estatística sem calibração adicional. Maior conjunto aumenta conservadorismo e pode reduzir viabilidade.",
+    "workedExample": "Adote a0=(1;1), P=diag(0,2;0,1), x=(3;4) e b=7,5. Consumo nominal=7; margem de pior caso=√(0,6²+0,4²)=√0,52≈0,7211. Total robusto≈7,7211 viola o limite apesar da viabilidade nominal.",
+    "investigation": [
+      "Calcule consumo nominal do vetor de decisão.",
+      "Obtenha Pᵀx e sua norma euclidiana.",
+      "Compare pior caso com o limite e declare o conjunto de incerteza."
+    ],
+    "expectedEvidence": "Espera-se rejeitar a decisão robustamente por 7,7211>7,5, sem interpretar o elipsoide como probabilidade automática.",
+    "reflection": "Como calibrar o conjunto sem torná-lo pequeno demais ou excessivamente conservador?",
+    "scenarios": [
+      {
+        "id": "pos_otim_10_s0",
+        "label": "Sem incerteza",
+        "situation": "Faça P=0 mantendo a0 e x.",
+        "observation": "A margem robusta torna-se zero.",
+        "explanation": "O modelo reduz-se à restrição nominal quando não há variação de coeficientes."
+      },
+      {
+        "id": "pos_otim_10_s1",
+        "label": "Raio maior",
+        "situation": "Use ||u||2≤2 no mesmo elipsoide.",
+        "observation": "A margem dobra para cerca de 1,4422.",
+        "explanation": "O suporte de um conjunto escalado cresce linearmente com seu raio."
+      },
+      {
+        "id": "pos_otim_10_s2",
+        "label": "Direção crítica",
+        "situation": "Escolha u alinhado a Pᵀx no caso não nulo.",
+        "observation": "A perturbação alcança a margem de norma.",
+        "explanation": "Cauchy-Schwarz identifica a direção que maximiza o produto escalar."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual consumo de pior caso resulta dos dados?",
+        "options": [
+          {
+            "text": "7 exatamente",
+            "correct": false,
+            "explanation": "Esse valor ignora a perturbação elipsoidal."
+          },
+          {
+            "text": "8",
+            "correct": false,
+            "explanation": "Somar módulos 0,6+0,4 corresponderia a outro conjunto de incerteza."
+          },
+          {
+            "text": "Aproximadamente 7,7211",
+            "correct": true,
+            "explanation": "Soma-se o nominal sete à norma de (0,6;0,4)."
+          }
+        ]
+      },
+      {
+        "question": "A restrição robusta assegura qual propriedade?",
+        "options": [
+          {
+            "text": "Viabilidade para todo coeficiente no conjunto especificado",
+            "correct": true,
+            "explanation": "A garantia é determinista e condicionada ao conjunto declarado."
+          },
+          {
+            "text": "Viabilidade para qualquer coeficiente real",
+            "correct": false,
+            "explanation": "O modelo só protege contra variações contidas no elipsoide."
+          },
+          {
+            "text": "Probabilidade de 95% automaticamente",
+            "correct": false,
+            "explanation": "Uma interpretação probabilística exige calibração que não foi fornecida."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Boyd and Vandenberghe: Convex Optimization",
+        "url": "https://web.stanford.edu/~boyd/cvxbook/"
+      }
+    ]
+  }
+}

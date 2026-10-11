@@ -18,6 +18,9 @@ import { LabSocraticTutorModal } from './labs/LabSocraticTutorModal';
 import { LabPythonRunnerModal } from './labs/LabPythonRunnerModal';
 import { SecureExamModal } from './labs/SecureExamModal';
 import { Lab3DRenderer } from './labs/Lab3DRenderer';
+import type { LabLearningContent } from '../../core/content/labLearningContent';
+import { GuidedLabActivity } from './labs/GuidedLabActivity';
+import { LabLearningWorkspace } from './labs/LabLearningWorkspace';
 
 export interface UniversalLabParam {
   id: string;
@@ -49,6 +52,8 @@ export interface UniversalLabConfig {
   topic: string;
   objective: string;
   theoreticalBackground: string;
+  learningContent?: LabLearningContent;
+  presentation?: 'simulation' | 'guided_activity';
   parameters: UniversalLabParam[];
   initialState?: Record<string, any>;
   physicsStep: (
@@ -76,6 +81,16 @@ interface UniversalLabContainerProps {
 }
 
 export function UniversalLabContainer({ config, onComplete }: UniversalLabContainerProps) {
+  if (config.presentation === 'guided_activity') {
+    if (!config.learningContent) throw new Error(`Atividade sem conteúdo: ${config.id}`);
+    return <GuidedLabActivity key={config.id} labId={config.id} title={config.title} subject={config.subject} objective={config.objective} content={config.learningContent} onComplete={onComplete} />;
+  }
+  return <LabLearningWorkspace key={config.id} labId={config.id} title={config.title} subject={config.subject} objective={config.objective} content={config.learningContent} onComplete={onComplete}>
+    <SimulatedLabContainer config={config} onComplete={onComplete} />
+  </LabLearningWorkspace>;
+}
+
+function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProps) {
   // Parâmetros ajustáveis
   const [params, setParams] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};

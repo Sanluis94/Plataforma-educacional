@@ -1,0 +1,832 @@
+{
+  "pos_termo_01": {
+    "context": "Uma turbina fictícia recupera calor do escape para pré-aquecer o ar comprimido. O balanço distingue economia de combustível de aumento de trabalho.",
+    "theory": "No Brayton regenerativo, efetividade ε=(T3−T2)/(T5−T2) para capacidades térmicas iguais e T5>T2. O regenerador reduz calor externo, mas não muda trabalho ideal se estados do compressor e turbina forem fixos. Exergia destruída é T0Sger e exige temperatura absoluta; perdas de pressão podem reduzir o benefício.",
+    "workedExample": "Com T2=500 K, T5=700 K e ε=0,75, T3=650 K. Para cp=1 kJ/(kg·K), recuperam-se 150 kJ/kg. Se trabalho líquido=200 e calor externo cai de 500 para 350 kJ/kg, eficiência sobe de 40% para 57,1% no modelo idealizado.",
+    "investigation": [
+      "Calcule temperatura após o regenerador.",
+      "Compare calor externo com e sem recuperação.",
+      "Discuta geração de entropia e perdas de pressão."
+    ],
+    "expectedEvidence": "Devem aparecer 650 K e 150 kJ/kg recuperados, com a hipótese de trabalho fixo identificada.",
+    "reflection": "Quando o escape frio demais torna inútil a regeneração?",
+    "scenarios": [
+      {
+        "id": "pos_termo_01_s0",
+        "label": "Escape frio",
+        "situation": "Considere T5=450 K com T2=500 K.",
+        "observation": "Não há pré-aquecimento passivo útil.",
+        "explanation": "Calor não flui espontaneamente do escape mais frio para o ar mais quente."
+      },
+      {
+        "id": "pos_termo_01_s1",
+        "label": "Ideal",
+        "situation": "Faça ε=1 sem perda de pressão.",
+        "observation": "O ar chega a 700 K.",
+        "explanation": "A efetividade unitária iguala a entrada fria à entrada quente no limite proposto."
+      },
+      {
+        "id": "pos_termo_01_s2",
+        "label": "Irreversibilidade",
+        "situation": "Adote Sger=0,1 kJ/(kg·K) e T0=300 K.",
+        "observation": "A destruição exergética é 30 kJ/kg.",
+        "explanation": "O produto T0Sger quantifica trabalho útil potencial perdido."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual temperatura resulta com efetividade 0,75?",
+        "options": [
+          {
+            "text": "700 K",
+            "correct": false,
+            "explanation": "Esse limite exigiria efetividade unitária nas condições dadas."
+          },
+          {
+            "text": "375 K",
+            "correct": false,
+            "explanation": "Multiplicar somente T2 por ε ignora a diferença térmica disponível."
+          },
+          {
+            "text": "650 K",
+            "correct": true,
+            "explanation": "Somam-se 0,75×200 K aos 500 K do ar."
+          }
+        ]
+      },
+      {
+        "question": "O benefício ideal da regeneração vem de qual mudança?",
+        "options": [
+          {
+            "text": "Menor calor externo para o mesmo trabalho",
+            "correct": true,
+            "explanation": "A recuperação substitui parte do aporte sem alterar os estados mecânicos fixados."
+          },
+          {
+            "text": "Trabalho de compressor nulo",
+            "correct": false,
+            "explanation": "O compressor ainda exige trabalho mesmo com pré-aquecimento posterior."
+          },
+          {
+            "text": "Ausência de geração de entropia real",
+            "correct": false,
+            "explanation": "Troca com diferença finita de temperatura continua irreversível."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT: applications of the second law",
+        "url": "https://web.mit.edu/16.unified/www/SPRING/propulsion/notes/node42.html"
+      }
+    ]
+  },
+  "pos_termo_02": {
+    "context": "Uma planta fictícia combina turbina a gás e HRSG para fornecer eletricidade e vapor. A demanda útil de calor define o aproveitamento real.",
+    "theory": "Cogeração aproveita calor de escape após gerar trabalho. A eficiência global (W+Qútil)/Qcomb mistura produtos de qualidades distintas e difere da eficiência elétrica. A HRSG exige diferenças térmicas positivas no pinch e limites de temperatura de chaminé. Energia recuperável não equivale a calor efetivamente demandado.",
+    "workedExample": "Com 100 MW de combustível, 30 MW elétricos e 45 MW de vapor útil, eficiência elétrica=30% e global=75%. Os 25 MW restantes são perdas e rejeição. Se apenas 20 MW térmicos forem usados, o indicador útil cai para 50%, sem mudar a eletricidade.",
+    "investigation": [
+      "Feche o balanço energético da central.",
+      "Separe eficiência elétrica de aproveitamento global.",
+      "Compare produção de vapor e demanda simultânea."
+    ],
+    "expectedEvidence": "É preciso obter 30% e 75% e reconhecer que calor desperdiçado não pode contar como produto útil.",
+    "reflection": "Por que somar MW elétricos e térmicos não avalia sua mesma qualidade?",
+    "scenarios": [
+      {
+        "id": "pos_termo_02_s0",
+        "label": "Demanda pequena",
+        "situation": "A fábrica usa somente 20 dos 45 MW de vapor.",
+        "observation": "O aproveitamento útil torna-se 50%.",
+        "explanation": "O restante produzido não atende serviço e não integra Qútil."
+      },
+      {
+        "id": "pos_termo_02_s1",
+        "label": "Pinch reduzido",
+        "situation": "A HRSG é redesenhada para menor diferença mínima.",
+        "observation": "A área de troca necessária tende a crescer.",
+        "explanation": "Menor força térmica exige mais superfície para transmitir calor semelhante."
+      },
+      {
+        "id": "pos_termo_02_s2",
+        "label": "Escape limitado",
+        "situation": "A temperatura de chaminé não pode cair abaixo de um limite de projeto.",
+        "observation": "Há calor residual não recuperável nessa configuração.",
+        "explanation": "Restrições térmicas e de corrosão impedem recuperar arbitrariamente toda energia do escape."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual eficiência global usa 30 MW e 45 MW úteis?",
+        "options": [
+          {
+            "text": "30%",
+            "correct": false,
+            "explanation": "Esse é apenas o indicador de conversão elétrica."
+          },
+          {
+            "text": "100%",
+            "correct": false,
+            "explanation": "O balanço ainda contém 25 MW sem produto útil."
+          },
+          {
+            "text": "75%",
+            "correct": true,
+            "explanation": "Os produtos 30+45 são divididos pelos 100 MW de entrada."
+          }
+        ]
+      },
+      {
+        "question": "Por que a demanda simultânea de vapor importa?",
+        "options": [
+          {
+            "text": "Determina quanto calor produzido é útil",
+            "correct": true,
+            "explanation": "O indicador depende de serviço entregue, além da capacidade de recuperação."
+          },
+          {
+            "text": "Elimina as perdas da turbina",
+            "correct": false,
+            "explanation": "Demanda não torna os componentes termodinamicamente reversíveis."
+          },
+          {
+            "text": "Transforma calor em eletricidade automaticamente",
+            "correct": false,
+            "explanation": "Os produtos têm usos e conversões distintas na configuração especificada."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "DOE: combined heat and power systems",
+        "url": "https://www.energy.gov/sites/default/files/2017/06/f35/CHP-Absorption%20Chiller-compliant.pdf"
+      }
+    ]
+  },
+  "pos_termo_03": {
+    "context": "Um Rankine supercrítico fictício é avaliado com entalpias fornecidas. O exercício usa propriedades consistentes sem fingir consulta a tabelas ou solver.",
+    "theory": "Água acima de 22,064 MPa não atravessa uma fronteira líquido-vapor ao aquecer a pressão constante acima do crítico. Rankine usa trabalho de turbina h3−h4, de bomba h2−h1 e calor h3−h2. Supercrítico não garante eficiência maior sozinho; temperatura, irreversibilidades, reaquecimento e materiais limitam o ciclo.",
+    "workedExample": "Para estados fictícios h1=200, h2=230, h3=3500 e h4=2300 kJ/kg, wt=1200, wb=30 e qin=3270 kJ/kg. A eficiência é 1170/3270≈35,78%. As entalpias são dados didáticos, não resultados de uma formulação IAPWS executada.",
+    "investigation": [
+      "Marque bomba, aquecimento, turbina e condensação.",
+      "Calcule trabalhos e calor usando os estados fornecidos.",
+      "Identifique propriedades necessárias para estados reais supercríticos."
+    ],
+    "expectedEvidence": "Espera-se 35,78% e balanço qout=2100 kJ/kg, mantendo unidades e caráter fornecido dos dados.",
+    "reflection": "Que limites de materiais acompanham elevar temperatura de entrada?",
+    "scenarios": [
+      {
+        "id": "pos_termo_03_s0",
+        "label": "Bomba desprezada",
+        "situation": "Ignore os 30 kJ/kg de trabalho da bomba.",
+        "observation": "A eficiência fica superestimada em cerca de 0,92 ponto percentual.",
+        "explanation": "O trabalho líquido precisa subtrair o consumo interno da bomba."
+      },
+      {
+        "id": "pos_termo_03_s1",
+        "label": "Turbina pior",
+        "situation": "Aumente h4 para 2400 kJ/kg com entradas fixas.",
+        "observation": "O trabalho líquido cai para 1070 kJ/kg.",
+        "explanation": "Menor queda de entalpia representa menor conversão útil na expansão."
+      },
+      {
+        "id": "pos_termo_03_s2",
+        "label": "Pressão subcrítica",
+        "situation": "Aqueça água a pressão constante abaixo do ponto crítico.",
+        "observation": "Pode existir trecho de vaporização bifásica.",
+        "explanation": "A mudança de fase tem fronteira distinta abaixo do crítico, diferentemente do aquecimento supercrítico."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é o trabalho líquido específico fornecido?",
+        "options": [
+          {
+            "text": "1200 kJ/kg",
+            "correct": false,
+            "explanation": "Esse valor omite o consumo de trabalho na bomba."
+          },
+          {
+            "text": "3270 kJ/kg",
+            "correct": false,
+            "explanation": "Esse é o calor externo e não o trabalho líquido."
+          },
+          {
+            "text": "1170 kJ/kg",
+            "correct": true,
+            "explanation": "A diferença entre turbina 1200 e bomba 30 é 1170."
+          }
+        ]
+      },
+      {
+        "question": "Qual propriedade caracteriza o ponto crítico da água citado?",
+        "options": [
+          {
+            "text": "Pressão de 22,064 MPa",
+            "correct": true,
+            "explanation": "O valor de referência IAPWS delimita a pressão crítica da água ordinária."
+          },
+          {
+            "text": "Pressão de 1 atm",
+            "correct": false,
+            "explanation": "Uma atmosfera refere-se à ebulição usual, não ao crítico."
+          },
+          {
+            "text": "Eficiência obrigatória de 100%",
+            "correct": false,
+            "explanation": "A condição crítica não elimina rejeição de calor ou irreversibilidades."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "IAPWS: thermodynamic properties of water",
+        "url": "https://iapws.org/documents/release/fundam.download"
+      }
+    ]
+  },
+  "pos_termo_04": {
+    "context": "Um chiller fictício usa água como refrigerante e LiBr como absorvente. O exercício acompanha o calor acionador e o limite de cristalização.",
+    "theory": "No ciclo de absorção, o gerador separa refrigerante da solução, enquanto o absorvedor substitui parte da função do compressor. COP térmico≈Qevap/Qger quando trabalho da bomba é pequeno. Água/LiBr opera sob vácuo e requer controle de concentração e temperatura para evitar cristalização; água refrigerante limita aplicações abaixo do congelamento.",
+    "workedExample": "Se Qger=100 kW e Qevap=70 kW, COP=0,70. Desprezando bomba, absorvedor e condensador rejeitam juntos 170 kW. Esses números são fictícios e não determinam temperatura ou composição segura de uma máquina real.",
+    "investigation": [
+      "Rastreie água e solução entre os quatro componentes.",
+      "Calcule COP e calor total rejeitado.",
+      "Discuta restrições de vácuo e cristalização sem operar equipamento."
+    ],
+    "expectedEvidence": "O balanço deve mostrar COP=0,70 e rejeição de 170 kW, identificando água como refrigerante.",
+    "reflection": "Por que calor de baixa qualidade pode ser útil para absorção?",
+    "scenarios": [
+      {
+        "id": "pos_termo_04_s0",
+        "label": "Carga menor",
+        "situation": "Mantenha 100 kW no gerador e reduza evaporação a 50 kW.",
+        "observation": "O COP cai para 0,50.",
+        "explanation": "O calor acionador só conta como útil na medida em que produz refrigeração desejada."
+      },
+      {
+        "id": "pos_termo_04_s1",
+        "label": "Solução concentrada",
+        "situation": "A solução hipotética entra em região de cristalização.",
+        "observation": "A circulação pode ser comprometida.",
+        "explanation": "A concentração de LiBr tem limites dependentes de temperatura e composição."
+      },
+      {
+        "id": "pos_termo_04_s2",
+        "label": "Refrigeração negativa",
+        "situation": "Peça temperatura bem abaixo de 0 °C usando água refrigerante.",
+        "observation": "A escolha do par torna-se inadequada.",
+        "explanation": "O congelamento da água impõe restrição fundamental à aplicação proposta."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual fluido é o refrigerante no par água/LiBr?",
+        "options": [
+          {
+            "text": "Brometo de lítio",
+            "correct": false,
+            "explanation": "O sal permanece principalmente na solução absorvente."
+          },
+          {
+            "text": "Ar",
+            "correct": false,
+            "explanation": "O ciclo descrito não utiliza ar como refrigerante."
+          },
+          {
+            "text": "Água",
+            "correct": true,
+            "explanation": "A água evapora e condensa enquanto LiBr atua como absorvente."
+          }
+        ]
+      },
+      {
+        "question": "Qual calor é rejeitado com entradas 100 e 70 kW?",
+        "options": [
+          {
+            "text": "170 kW",
+            "correct": true,
+            "explanation": "O balanço estacionário soma calor acionador e calor retirado da carga."
+          },
+          {
+            "text": "30 kW",
+            "correct": false,
+            "explanation": "Subtrair a carga do calor acionador viola o balanço do refrigerador."
+          },
+          {
+            "text": "70 kW",
+            "correct": false,
+            "explanation": "Esse é apenas o calor retirado no evaporador."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "DOE: absorption chillers",
+        "url": "https://www.energy.gov/sites/default/files/2017/06/f35/CHP-Absorption%20Chiller-compliant.pdf"
+      }
+    ]
+  },
+  "pos_termo_05": {
+    "context": "Uma combustão fictícia de metano é analisada por balanço molar. Estequiometria será separada da cinética que controla emissões reais.",
+    "theory": "CH4+2O2→CO2+2H2O é a reação completa ideal. Com ar seco simplificado O2+3,76N2, a demanda é 9,52 mol de ar por mol de metano. Excesso de ar λ>1 não garante emissões mínimas: CO depende de mistura e oxidação incompleta, e NOx térmico depende fortemente de temperatura, oxigênio e tempo.",
+    "workedExample": "Para um mol de CH4 e 20% de excesso de ar, entram 2,4 mol O2 e 9,024 mol N2. No modelo completo saem 1 CO2, 2 H2O, 0,4 O2 e 9,024 N2. Trata-se de balanço ideal, não previsão quantitativa de NOx ou CO.",
+    "investigation": [
+      "Balanceie carbono, hidrogênio e oxigênio.",
+      "Inclua nitrogênio inerte e excesso de ar de 20%.",
+      "Explique quais mecanismos faltam para prever poluentes."
+    ],
+    "expectedEvidence": "É necessário conservar todos os elementos e evitar inferir emissões reais apenas da equação completa.",
+    "reflection": "Por que temperatura menor pode reduzir NOx e aumentar CO?",
+    "scenarios": [
+      {
+        "id": "pos_termo_05_s0",
+        "label": "Estequiométrica",
+        "situation": "Use λ=1 para a reação completa ideal.",
+        "observation": "Não sobra oxigênio no balanço.",
+        "explanation": "O consumo ideal de dois mols de O2 corresponde exatamente à oxidação completa."
+      },
+      {
+        "id": "pos_termo_05_s1",
+        "label": "Mistura rica",
+        "situation": "Use λ=0,8 com o mesmo combustível.",
+        "observation": "Não há O2 suficiente para a reação completa proposta.",
+        "explanation": "Produtos como CO e combustível não queimado exigem um modelo adicional."
+      },
+      {
+        "id": "pos_termo_05_s2",
+        "label": "Resfriamento rápido",
+        "situation": "Os gases são resfriados antes da oxidação final do CO.",
+        "observation": "A concentração de CO pode permanecer elevada.",
+        "explanation": "O equilíbrio final não é necessariamente alcançado quando a cinética é interrompida."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual demanda estequiométrica de O2 para um mol de CH4?",
+        "options": [
+          {
+            "text": "1 mol",
+            "correct": false,
+            "explanation": "Um mol de O2 não fornece todos os átomos necessários aos produtos completos."
+          },
+          {
+            "text": "9,52 mol",
+            "correct": false,
+            "explanation": "Esse é o total de ar simplificado, que inclui nitrogênio."
+          },
+          {
+            "text": "2 mol",
+            "correct": true,
+            "explanation": "O carbono e quatro hidrogênios exigem quatro átomos de oxigênio."
+          }
+        ]
+      },
+      {
+        "question": "O balanço completo ideal prevê NOx real sozinho?",
+        "options": [
+          {
+            "text": "Não, faltam cinética e condições térmicas",
+            "correct": true,
+            "explanation": "Formação de poluentes depende do histórico de temperatura, mistura e tempo."
+          },
+          {
+            "text": "Sim, sempre NOx zero na instalação",
+            "correct": false,
+            "explanation": "Ausência de NOx na reação simplificada não prova ausência na chama real."
+          },
+          {
+            "text": "Sim, basta multiplicar CO2 por λ",
+            "correct": false,
+            "explanation": "Excesso de ar não define uma relação universal de emissão de NOx."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Cantera: thermodynamics and equivalence ratio",
+        "url": "https://www.cantera.org/stable/python/thermo.html"
+      }
+    ]
+  },
+  "pos_termo_06": {
+    "context": "Uma PEMFC fictícia converte hidrogênio em eletricidade. O caso acompanha corrente, consumo e perdas de tensão.",
+    "theory": "Na PEMFC, H2 é oxidado no ânodo e O2 reduzido no cátodo. Cada mol de H2 transfere 2F coulombs. Tensão real cai por ativação, resistência e transporte de massa; hidratação da membrana afeta condutividade, mas excesso de água pode inundar eletrodos.",
+    "workedExample": "Com I=100 A, V=0,7 V e F=96485 C/mol, potência=70 W e consumo ideal I/(2F)=0,000518 mol H2/s. Vazão alimentada deve considerar utilização; não houve teste físico.",
+    "investigation": [
+      "Calcule potência elétrica fornecida.",
+      "Converta corrente em mols de H2 por segundo.",
+      "Separe as três perdas da polarização."
+    ],
+    "expectedEvidence": "Obtenha 70 W e 0,518 mmol/s, distinguindo consumo eletroquímico de vazão alimentada.",
+    "reflection": "Como secagem e inundação afetam regiões diferentes?",
+    "scenarios": [
+      {
+        "id": "pos_termo_06_s0",
+        "label": "Resistência",
+        "situation": "Adicione resistência ôhmica fictícia de 1 mΩ.",
+        "observation": "A perda em 100 A é 0,1 V.",
+        "explanation": "A queda resistiva segue I×R e cresce com a corrente."
+      },
+      {
+        "id": "pos_termo_06_s1",
+        "label": "Utilização",
+        "situation": "Adote utilização de hidrogênio de 80%.",
+        "observation": "A alimentação ideal sobe a 0,648 mmol/s.",
+        "explanation": "O consumo divide-se pela fração utilizada para obter vazão de entrada."
+      },
+      {
+        "id": "pos_termo_06_s2",
+        "label": "Transporte",
+        "situation": "Eleve corrente até faltar reagente junto ao eletrodo.",
+        "observation": "A tensão cai acentuadamente.",
+        "explanation": "Limitação de transporte concentra perdas em correntes altas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quantos elétrons são transferidos por molécula de H2?",
+        "options": [
+          {
+            "text": "Um",
+            "correct": false,
+            "explanation": "Esse número não conserva a carga na semirreação."
+          },
+          {
+            "text": "Quatro",
+            "correct": false,
+            "explanation": "Quatro elétrons correspondem a dois H2 neste balanço."
+          },
+          {
+            "text": "Dois",
+            "correct": true,
+            "explanation": "A oxidação H2→2H+ +2e− transfere dois elétrons."
+          }
+        ]
+      },
+      {
+        "question": "Qual potência resulta de 100 A e 0,7 V?",
+        "options": [
+          {
+            "text": "70 W",
+            "correct": true,
+            "explanation": "Potência elétrica é o produto corrente por tensão."
+          },
+          {
+            "text": "142,9 W",
+            "correct": false,
+            "explanation": "Dividir corrente por tensão não calcula potência."
+          },
+          {
+            "text": "0,007 W",
+            "correct": false,
+            "explanation": "A divisão invertida também tem dimensão inadequada."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "DOE NETL: Fuel Cell Handbook",
+        "url": "https://www.netl.doe.gov/sites/default/files/netl-file/FCHandbook7.pdf"
+      }
+    ]
+  },
+  "pos_termo_07": {
+    "context": "Um reservatório térmico fictício usa PCM para armazenar calor latente. A capacidade será separada da taxa de carregamento.",
+    "theory": "A energia inclui calor sensível mcpΔT e latente mL durante a mudança de fase. O patamar térmico ideal depende de pureza e equilíbrio; sub-resfriamento, histerese e baixa condutividade podem limitar a utilização. Capacidade em kJ difere de potência em kW.",
+    "workedExample": "Para 10 kg de PCM, cp=2 kJ/(kg·K), aquecimento de 20 a 30 °C e L=200 kJ/kg a 30 °C: Q=200+2000=2200 kJ. A 1 kW constante, o mínimo ideal é 2200 s.",
+    "investigation": [
+      "Separe aquecimento sensível e fusão.",
+      "Calcule energia total e tempo ideal.",
+      "Discuta perdas e resistência térmica."
+    ],
+    "expectedEvidence": "A resposta deve obter 2200 kJ e 36,7 min, sem confundir massa fundida com temperatura.",
+    "reflection": "Por que maior capacidade não garante maior potência?",
+    "scenarios": [
+      {
+        "id": "pos_termo_07_s0",
+        "label": "Meia fusão",
+        "situation": "Pare após fundir metade da massa já a 30 °C.",
+        "observation": "O calor latente absorvido é 1000 kJ.",
+        "explanation": "A fração fundida multiplica mL sem exigir aumento de temperatura."
+      },
+      {
+        "id": "pos_termo_07_s1",
+        "label": "Perda",
+        "situation": "A fonte entrega 1 kW e há perda constante de 0,2 kW.",
+        "observation": "O carregamento idealizado demora 2750 s.",
+        "explanation": "A potência líquida de 0,8 kW determina o tempo para 2200 kJ."
+      },
+      {
+        "id": "pos_termo_07_s2",
+        "label": "Condutividade",
+        "situation": "Use PCM pouco condutor em recipiente largo.",
+        "observation": "O interior pode permanecer sólido.",
+        "explanation": "Resistência térmica gera frentes e limita quanto da capacidade é acessado."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual parcela latente corresponde à fusão total?",
+        "options": [
+          {
+            "text": "200 kJ",
+            "correct": false,
+            "explanation": "Esse valor é por quilograma e precisa multiplicar a massa."
+          },
+          {
+            "text": "2200 kJ",
+            "correct": false,
+            "explanation": "Esse total também inclui os 200 kJ sensíveis."
+          },
+          {
+            "text": "2000 kJ",
+            "correct": true,
+            "explanation": "Dez kg multiplicados por 200 kJ/kg fornecem 2000 kJ."
+          }
+        ]
+      },
+      {
+        "question": "Qual unidade representa capacidade energética?",
+        "options": [
+          {
+            "text": "kJ",
+            "correct": true,
+            "explanation": "Joule mede energia acumulada durante o processo térmico."
+          },
+          {
+            "text": "kW",
+            "correct": false,
+            "explanation": "Watt mede taxa de transferência, não capacidade."
+          },
+          {
+            "text": "°C",
+            "correct": false,
+            "explanation": "Temperatura não mede diretamente energia armazenada."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NREL: renewable thermal energy systems",
+        "url": "https://www.nrel.gov/docs/fy23osti/83021.pdf"
+      }
+    ]
+  },
+  "pos_termo_08": {
+    "context": "Um Stirling fictício troca calor em duas isotermas e usa regeneração incompleta. O caso avalia eficiência sem supor regenerador perfeito.",
+    "theory": "O Stirling ideal possui duas isotermas e duas isócoras regenerativas. Com regeneração perfeita e reversibilidade, η=1−Tc/Th. Um regenerador real devolve apenas parte do calor isocórico, exigindo calor externo adicional; volumes mortos, perdas de pressão e taxas finitas também reduzem desempenho.",
+    "workedExample": "Para Th=600 K e Tc=300 K, o limite reversível é 50%. Se o trabalho didático é 100 J e o calor externo ideal 200 J, mas a regeneração imperfeita exige mais 50 J, η=100/250=40%.",
+    "investigation": [
+      "Desenhe as quatro transformações do ciclo.",
+      "Calcule limite com temperaturas absolutas.",
+      "Inclua o calor externo devido à regeneração incompleta."
+    ],
+    "expectedEvidence": "Espera-se comparar 50% e 40% e explicar que o regenerador armazena calor internamente.",
+    "reflection": "Por que temperaturas em Celsius não servem na razão de Carnot?",
+    "scenarios": [
+      {
+        "id": "pos_termo_08_s0",
+        "label": "Perfeito",
+        "situation": "O regenerador devolve todo calor isocórico no modelo.",
+        "observation": "O aporte externo adicional desaparece.",
+        "explanation": "A troca interna ideal evita repor externamente o calor das isócoras."
+      },
+      {
+        "id": "pos_termo_08_s1",
+        "label": "Frio maior",
+        "situation": "Eleve Tc para 400 K com Th=600 K.",
+        "observation": "O limite cai para 33,3%.",
+        "explanation": "Menor diferença entre reservatórios reduz o trabalho potencial."
+      },
+      {
+        "id": "pos_termo_08_s2",
+        "label": "Atrito",
+        "situation": "Inclua atrito mantendo o calor externo de 250 J.",
+        "observation": "O trabalho útil cai abaixo de 100 J.",
+        "explanation": "Dissipação mecânica reduz a razão entre trabalho entregue e calor recebido."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual eficiência resulta de 100 J úteis e 250 J externos?",
+        "options": [
+          {
+            "text": "50%",
+            "correct": false,
+            "explanation": "Esse era o limite do caso sem calor adicional."
+          },
+          {
+            "text": "250%",
+            "correct": false,
+            "explanation": "Inverter a razão não define eficiência de motor."
+          },
+          {
+            "text": "40%",
+            "correct": true,
+            "explanation": "A razão 100/250 é 0,4."
+          }
+        ]
+      },
+      {
+        "question": "Qual função exerce o regenerador ideal?",
+        "options": [
+          {
+            "text": "Armazenar e devolver calor entre etapas",
+            "correct": true,
+            "explanation": "A energia é trocada internamente entre as isócoras."
+          },
+          {
+            "text": "Criar calor sem fonte",
+            "correct": false,
+            "explanation": "Regeneração preserva energia e não a produz."
+          },
+          {
+            "text": "Eliminar diferença de temperatura dos reservatórios",
+            "correct": false,
+            "explanation": "O motor ainda opera entre Th e Tc distintos."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT: thermodynamics and climate change",
+        "url": "https://ocw.mit.edu/courses/res-2-008-thermodynamics-and-climate-change-summer-2020/mitres-2-008su22_book.pdf"
+      }
+    ]
+  },
+  "pos_termo_09": {
+    "context": "Uma biomassa fictícia é gaseificada para produzir syngas. O caso distingue conversão parcial, limpeza e poder calorífico do gás.",
+    "theory": "Gaseificação usa oxidante limitado e reações com vapor e CO2 para gerar CO e H2, além de outros produtos. A reação C+H2O→CO+H2 consome calor. Gás bruto pode conter alcatrão e particulados; composição seca difere de úmida. Eficiência de gás frio compara energia química do gás com a da alimentação.",
+    "workedExample": "Uma alimentação fictícia fornece 100 kW de energia química e o gás seco transporta 65 kW. Eficiência de gás frio=65%. Isso não soma calor sensível e não demonstra que o gás está limpo para um catalisador.",
+    "investigation": [
+      "Balanceie a reação de carbono com vapor.",
+      "Calcule eficiência de gás frio.",
+      "Liste contaminantes e base seca ou úmida."
+    ],
+    "expectedEvidence": "Obtenha 65% e explicite a fronteira energética e a necessidade de limpeza do gás bruto.",
+    "reflection": "Como umidade elevada altera a demanda térmica do processo?",
+    "scenarios": [
+      {
+        "id": "pos_termo_09_s0",
+        "label": "Ar atmosférico",
+        "situation": "Use ar no lugar de oxigênio puro no modelo.",
+        "observation": "O nitrogênio dilui o gás produzido.",
+        "explanation": "A fração combustível e o poder calorífico por volume tendem a diminuir."
+      },
+      {
+        "id": "pos_termo_09_s1",
+        "label": "Vapor",
+        "situation": "Aumente vapor sem fornecer calor adicional suficiente.",
+        "observation": "A temperatura pode cair.",
+        "explanation": "Vaporização e reações endotérmicas consomem parte da energia disponível."
+      },
+      {
+        "id": "pos_termo_09_s2",
+        "label": "Alcatrão",
+        "situation": "O gás bruto contém espécies condensáveis.",
+        "observation": "Há risco de depósitos a jusante.",
+        "explanation": "A energia química útil não elimina exigências de limpeza e compatibilidade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual reação gera CO e H2 a partir de carbono e vapor?",
+        "options": [
+          {
+            "text": "C+O2→CO2",
+            "correct": false,
+            "explanation": "Essa é oxidação completa e não gera hidrogênio."
+          },
+          {
+            "text": "H2+O2→H2O",
+            "correct": false,
+            "explanation": "Essa reação consome hidrogênio e ainda precisa de balanceamento."
+          },
+          {
+            "text": "C+H2O→CO+H2",
+            "correct": true,
+            "explanation": "A equação conserva um carbono, um oxigênio e dois hidrogênios."
+          }
+        ]
+      },
+      {
+        "question": "Qual eficiência de gás frio tem entradas 100 e produto 65 kW?",
+        "options": [
+          {
+            "text": "65%",
+            "correct": true,
+            "explanation": "A razão da energia química do gás pela alimentação vale 0,65."
+          },
+          {
+            "text": "35%",
+            "correct": false,
+            "explanation": "Esse valor corresponde à parcela não retida no gás."
+          },
+          {
+            "text": "165%",
+            "correct": false,
+            "explanation": "Somar entrada e produto não define eficiência."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NREL: thermal and catalytic process development",
+        "url": "https://www.nrel.gov/bioenergy/tcpdu.html"
+      }
+    ]
+  },
+  "pos_termo_10": {
+    "context": "Uma central fictícia atribui custos aos produtos por balanços exergéticos. O exercício separa eficiência energética de custo de irreversibilidade.",
+    "theory": "Termoeconomia combina balanço de exergia e custos: custo dos produtos iguala custos de recursos e encargos na fronteira escolhida. Destruição exergética D=T0Sger mede perda de potencial útil, mas seu custo depende do método de alocação. Produtos múltiplos requerem regras explícitas; menor D não garante menor custo total.",
+    "workedExample": "Um equipamento fictício recebe recurso de 100 kW exergéticos, entrega produto de 70 kW e destrói 30 kW sem outra saída. Se recurso custa R$10/h e encargos R$4/h, custo unitário do produto=(10+4)/70=R$0,20 por kWh exergético.",
+    "investigation": [
+      "Feche balanço de exergia com a fronteira definida.",
+      "Some custos horários de recurso e encargos.",
+      "Divida pelo produto e examine efeito de investimento."
+    ],
+    "expectedEvidence": "A solução deve identificar 30 kW destruídos e R$0,20/kWh exergético, declarando a convenção de produto.",
+    "reflection": "Uma redução de irreversibilidade sempre paga o investimento necessário?",
+    "scenarios": [
+      {
+        "id": "pos_termo_10_s0",
+        "label": "Produto maior",
+        "situation": "Eleve produto para 80 kW com custos horários iguais.",
+        "observation": "O custo cai para R$0,175/kWh.",
+        "explanation": "Mais produto distribui os mesmos custos e reduz destruição na fronteira."
+      },
+      {
+        "id": "pos_termo_10_s1",
+        "label": "Investimento caro",
+        "situation": "Uma melhoria eleva encargos totais de 14 para 20 reais/h.",
+        "observation": "O custo pode subir mesmo com eficiência maior.",
+        "explanation": "Ganhos termodinâmicos precisam ser comparados ao custo adicional do equipamento."
+      },
+      {
+        "id": "pos_termo_10_s2",
+        "label": "Dois produtos",
+        "situation": "A central fornece trabalho e calor útil.",
+        "observation": "É necessária regra de alocação.",
+        "explanation": "Um único balanço de custos não determina sozinho os custos unitários de dois produtos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quanto vale a destruição exergética sem outras saídas?",
+        "options": [
+          {
+            "text": "70 kW",
+            "correct": false,
+            "explanation": "Esse é o produto útil, não a parcela destruída."
+          },
+          {
+            "text": "170 kW",
+            "correct": false,
+            "explanation": "Somar entrada e produto viola a contabilidade da fronteira."
+          },
+          {
+            "text": "30 kW",
+            "correct": true,
+            "explanation": "Entrada 100 menos produto 70 fecha o balanço proposto."
+          }
+        ]
+      },
+      {
+        "question": "Qual informação adicional é necessária para dois produtos?",
+        "options": [
+          {
+            "text": "Uma regra de alocação coerente",
+            "correct": true,
+            "explanation": "Há mais custos unitários desconhecidos do que o balanço único resolve."
+          },
+          {
+            "text": "Apenas o título do equipamento",
+            "correct": false,
+            "explanation": "A identificação do componente não define a distribuição de custos."
+          },
+          {
+            "text": "Temperatura em Celsius sem referência",
+            "correct": false,
+            "explanation": "Exergia exige estado de referência e temperaturas absolutas apropriadas."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT: applications of the second law",
+        "url": "https://web.mit.edu/16.unified/www/SPRING/propulsion/notes/node42.html"
+      }
+    ]
+  }
+}

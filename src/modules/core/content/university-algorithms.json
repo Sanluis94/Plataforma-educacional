@@ -1,0 +1,832 @@
+{
+  "sup_comp_01": {
+    "context": "Uma biblioteca precisa ordenar registros antes de remover duplicatas. O custo muda com o tamanho e a disposição das chaves.",
+    "theory": "Na ordenação por comparações, MergeSort divide a entrada e intercala partes em Θ(n log n). QuickSort tem custo esperado Θ(n log n) com pivôs aleatórios, mas pode chegar a Θ(n²). Um limite O(n) não vale para ordenação geral por comparações: ordenação linear exige hipóteses adicionais, como universo limitado para CountingSort. Contagens de comparações isolam o algoritmo de ruídos do relógio.",
+    "workedExample": "Para n=8, n log₂ n=24; para n=16, vale 64. A razão 64/24≈2,67 mostra que dobrar a entrada não implica dobrar esse modelo de trabalho. São estimativas assintóticas, não contagens exatas de MergeSort.",
+    "investigation": [
+      "Estime n log₂ n para 8, 16 e 32 chaves.",
+      "Trace uma partição com pivô mínimo em lista crescente.",
+      "Separe contagem de comparações de tempo hipotético de execução."
+    ],
+    "expectedEvidence": "A evidência deve comparar crescimento linear, n log n e quadrático, explicitando a política de pivô e as hipóteses do modelo.",
+    "reflection": "Por que um cronômetro isolado não prova a complexidade assintótica?",
+    "scenarios": [
+      {
+        "id": "pivo-extremo",
+        "label": "Pivô mínimo",
+        "situation": "QuickSort sempre escolhe a primeira chave de uma lista crescente.",
+        "observation": "As partições têm tamanhos 0 e n−1.",
+        "explanation": "A recorrência T(n)=T(n−1)+Θ(n) soma trabalho quadrático."
+      },
+      {
+        "id": "intercalacao",
+        "label": "Intercalação",
+        "situation": "Dois blocos já ordenados possuem quatro elementos cada.",
+        "observation": "Uma intercalação visita no máximo oito posições de saída.",
+        "explanation": "O custo linear de cada nível se repete em aproximadamente log₂ n níveis."
+      },
+      {
+        "id": "universo-curto",
+        "label": "Chaves limitadas",
+        "situation": "Todas as chaves são inteiros entre 0 e 9.",
+        "observation": "Um vetor de dez contadores é suficiente.",
+        "explanation": "CountingSort custa Θ(n+k), aproveitando a restrição k=10 em vez de só comparações."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que explica o pior caso quadrático do QuickSort deste exemplo?",
+        "options": [
+          {
+            "text": "Partições muito desiguais",
+            "correct": true,
+            "explanation": "O pivô extremo elimina apenas uma chave a cada nível."
+          },
+          {
+            "text": "Sempre usar dois subproblemas iguais",
+            "correct": false,
+            "explanation": "Partições equilibradas favorecem o custo n log n."
+          },
+          {
+            "text": "Intercalar vetores ordenados",
+            "correct": false,
+            "explanation": "A intercalação pertence ao MergeSort considerado."
+          }
+        ]
+      },
+      {
+        "question": "Qual conclusão é válida ao dobrar n de 8 para 16 no modelo n log₂ n?",
+        "options": [
+          {
+            "text": "O trabalho cresce cerca de 2,67 vezes",
+            "correct": true,
+            "explanation": "Os valores calculados são 24 e 64, cuja razão é 8/3."
+          },
+          {
+            "text": "O custo torna-se exatamente linear",
+            "correct": false,
+            "explanation": "O fator logarítmico também aumenta com a entrada."
+          },
+          {
+            "text": "Todo algoritmo fica quatro vezes mais lento",
+            "correct": false,
+            "explanation": "Essa razão corresponderia ao modelo quadrático, não ao adotado."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT OpenCourseWare — Introduction to Algorithms",
+        "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2008/resources/lecture-notes/"
+      }
+    ]
+  },
+  "sup_comp_02": {
+    "context": "Um índice em memória recebe chaves crescentes. Sem balanceamento, a busca pode percorrer quase todos os registros.",
+    "theory": "Uma árvore binária de busca preserva chaves menores à esquerda e maiores à direita. AVL limita a diferença de alturas das subárvores a −1, 0 ou 1; rotações restauram esse invariante sem alterar a ordem em percurso simétrico. Árvores rubro-negras usam regras de cores e altura negra, com limite logarítmico de altura, mas não exigem o mesmo equilíbrio local da AVL.",
+    "workedExample": "Inserir 30, 20 e 10 gera uma cadeia à esquerda. A rotação à direita em 30 produz raiz 20 com filhos 10 e 30. O percurso simétrico continua 10,20,30 e a altura cai de três para dois níveis.",
+    "investigation": [
+      "Desenhe a árvore após cada inserção de 30, 20 e 10.",
+      "Calcule alturas e fatores antes e depois da rotação.",
+      "Compare o invariante AVL com o requisito de altura negra."
+    ],
+    "expectedEvidence": "Mostre a ordem preservada pela rotação e os fatores de balanceamento; não confunda número de níveis com convenção de altura em arestas.",
+    "reflection": "Qual propriedade uma rotação preserva mesmo quando muda a raiz?",
+    "scenarios": [
+      {
+        "id": "caso-ll",
+        "label": "Cadeia esquerda",
+        "situation": "As chaves 30,20,10 entram nessa ordem em uma AVL vazia.",
+        "observation": "O nó 30 fica pesado à esquerda.",
+        "explanation": "Uma rotação simples à direita resolve o caso esquerda-esquerda."
+      },
+      {
+        "id": "caso-lr",
+        "label": "Zigue-zague",
+        "situation": "A sequência de inserção é 30,10,20.",
+        "observation": "O novo nó está à direita do filho esquerdo.",
+        "explanation": "Rotacione 10 à esquerda e depois 30 à direita para resolver esquerda-direita."
+      },
+      {
+        "id": "cores",
+        "label": "Altura negra",
+        "situation": "Dois caminhos da raiz a folhas nulas têm quantidades diferentes de nós negros.",
+        "observation": "O invariante rubro-negro foi violado.",
+        "explanation": "Não basta conferir a ordem das chaves; as regras de cor também precisam valer."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a raiz após balancear a AVL obtida de 30,20,10?",
+        "options": [
+          {
+            "text": "20",
+            "correct": true,
+            "explanation": "A rotação promove a chave intermediária sem mudar a ordenação."
+          },
+          {
+            "text": "10",
+            "correct": false,
+            "explanation": "Promover o mínimo manteria desequilíbrio nesse conjunto."
+          },
+          {
+            "text": "30",
+            "correct": false,
+            "explanation": "Manter a antiga raiz conservaria a cadeia à esquerda."
+          }
+        ]
+      },
+      {
+        "question": "Qual afirmação distingue AVL de rubro-negra?",
+        "options": [
+          {
+            "text": "AVL restringe a diferença local de alturas",
+            "correct": true,
+            "explanation": "A exigência local da AVL é mais estrita que as regras de cores."
+          },
+          {
+            "text": "Rubro-negra dispensa ordem de busca",
+            "correct": false,
+            "explanation": "Ela também é uma árvore binária de busca ordenada."
+          },
+          {
+            "text": "Rotação altera a ordenação simétrica",
+            "correct": false,
+            "explanation": "Preservar essa ordenação é a finalidade estrutural da rotação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT OpenCourseWare — Introduction to Algorithms",
+        "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2008/resources/lecture-notes/"
+      }
+    ]
+  },
+  "sup_comp_03": {
+    "context": "Um cadastro fictício associa matrículas a fichas. Chaves diferentes podem apontar à mesma posição de uma tabela hash.",
+    "theory": "Colisão é diferente de chave duplicada. No encadeamento separado, cada posição guarda uma coleção; no endereçamento aberto, a busca segue a mesma sequência de sondagem usada na inserção. O fator de carga α=n/m pode exceder um no encadeamento, mas não no endereçamento aberto. Custo esperado constante requer dispersão adequada e controle da ocupação; não é garantia de pior caso.",
+    "workedExample": "Com m=5 e h(k)=k mod 5, as chaves 7 e 12 colidem na posição 2. Sondagem linear armazena 7 em 2 e 12 em 3. Buscar 12 deve continuar após encontrar 7; com duas chaves, α=2/5=0,4.",
+    "investigation": [
+      "Distribua as chaves 7,12,17 usando módulo cinco.",
+      "Repita a inserção por lista e por sondagem linear.",
+      "Remova a primeira chave e planeje como preservar a busca."
+    ],
+    "expectedEvidence": "Registre cada posição sondada, o fator de carga e o marcador de remoção, explicando por que colisão não autoriza sobrescrever um registro.",
+    "reflection": "Como uma remoção ingênua pode tornar uma chave existente invisível?",
+    "scenarios": [
+      {
+        "id": "aglomeracao",
+        "label": "Agrupamento primário",
+        "situation": "7,12,17 usam h(k)=k mod 5 e sondagem linear.",
+        "observation": "Três posições consecutivas são ocupadas.",
+        "explanation": "O agrupamento aumenta o comprimento de futuras sequências de sondagem."
+      },
+      {
+        "id": "lapide",
+        "label": "Remoção sinalizada",
+        "situation": "A posição de 7 é apagada enquanto 12 continua na próxima célula.",
+        "observation": "Uma célula vazia poderia encerrar a busca cedo.",
+        "explanation": "Um marcador de remoção permite prosseguir, ao contrário de uma célula nunca ocupada."
+      },
+      {
+        "id": "lista-longa",
+        "label": "Lista por balde",
+        "situation": "Todas as dez chaves de teste recebem o mesmo hash.",
+        "observation": "A lista de um balde contém dez elementos.",
+        "explanation": "A busca pode custar Θ(n), evidenciando a hipótese de boa dispersão."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é o fator de carga de duas chaves em cinco posições?",
+        "options": [
+          {
+            "text": "0,4",
+            "correct": true,
+            "explanation": "Divide-se a quantidade de chaves pelo número de posições."
+          },
+          {
+            "text": "2,5",
+            "correct": false,
+            "explanation": "Esse valor inverte a razão definida para o fator de carga."
+          },
+          {
+            "text": "0,2",
+            "correct": false,
+            "explanation": "Esse resultado contaria apenas uma das duas chaves."
+          }
+        ]
+      },
+      {
+        "question": "Por que preservar um marcador ao remover uma chave da sondagem linear?",
+        "options": [
+          {
+            "text": "Para continuar a busca de chaves colidentes",
+            "correct": true,
+            "explanation": "A sequência pode conter registros inseridos depois da posição removida."
+          },
+          {
+            "text": "Para proibir qualquer nova inserção",
+            "correct": false,
+            "explanation": "Uma posição removida pode ser reutilizada com a política adequada."
+          },
+          {
+            "text": "Para tornar todos os hashes distintos",
+            "correct": false,
+            "explanation": "Marcadores não modificam a função de dispersão das chaves."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT OpenCourseWare — Introduction to Algorithms",
+        "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2008/resources/lecture-notes/"
+      }
+    ]
+  },
+  "sup_comp_04": {
+    "context": "Uma rede de entrega fictícia tem custos não negativos nas ligações. Deseja-se a menor soma de custos desde um depósito.",
+    "theory": "Dijkstra mantém distâncias provisórias e confirma o vértice ainda não confirmado de menor distância. Relaxar u→v significa substituir d(v) por d(u)+w(u,v) quando essa soma é menor. A prova de confirmação depende de pesos não negativos. Um heap organiza as prioridades; implementações com entradas duplicadas precisam descartar entradas obsoletas.",
+    "workedExample": "Considere A→B=4, A→C=1 e C→B=2. Após retirar A, d(B)=4 e d(C)=1. Retirar C relaxa B para 3. O caminho A,C,B custa 1+2=3, melhor que a ligação direta.",
+    "investigation": [
+      "Monte a tabela inicial com zero na origem e infinito nos demais.",
+      "Retire a menor prioridade e documente cada relaxamento.",
+      "Introduza uma aresta negativa e identifique a hipótese quebrada."
+    ],
+    "expectedEvidence": "Apresente distâncias finais, predecessores e a ordem de confirmação, incluindo ao menos uma melhoria de distância antes da confirmação.",
+    "reflection": "Por que a menor prioridade provisória pode ser confirmada sem pesos negativos?",
+    "scenarios": [
+      {
+        "id": "atalho",
+        "label": "Atalho por C",
+        "situation": "A ligação direta A→B custa 4, mas A→C→B custa 3.",
+        "observation": "A distância provisória de B diminui.",
+        "explanation": "Relaxar considera caminhos intermediários, não apenas vizinhos da origem."
+      },
+      {
+        "id": "isolado",
+        "label": "Vértice isolado",
+        "situation": "O vértice D não é alcançável por nenhuma aresta desde A.",
+        "observation": "Sua distância permanece infinita.",
+        "explanation": "Infinito representa ausência de caminho, não um custo numericamente alto medido."
+      },
+      {
+        "id": "peso-negativo",
+        "label": "Hipótese violada",
+        "situation": "Uma aresta posterior pode reduzir uma distância já confirmada usando peso negativo.",
+        "observation": "A confirmação deixa de ser segura.",
+        "explanation": "O algoritmo padrão exige pesos não negativos; Bellman-Ford trata outra classe de entradas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a distância mínima de A a B no grafo apresentado?",
+        "options": [
+          {
+            "text": "3",
+            "correct": true,
+            "explanation": "O caminho passando por C soma 1 e 2, melhorando o custo direto."
+          },
+          {
+            "text": "4",
+            "correct": false,
+            "explanation": "A ligação direta existe, mas não é a opção de menor soma."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "Esse é somente o custo até C, faltando alcançar B."
+          }
+        ]
+      },
+      {
+        "question": "O que invalida a justificativa usual de Dijkstra?",
+        "options": [
+          {
+            "text": "Permitir pesos negativos",
+            "correct": true,
+            "explanation": "Uma aresta negativa pode melhorar um vértice já confirmado."
+          },
+          {
+            "text": "Usar uma fila de prioridades",
+            "correct": false,
+            "explanation": "A fila implementa a seleção do menor valor provisório."
+          },
+          {
+            "text": "Existirem vértices inalcançáveis",
+            "correct": false,
+            "explanation": "Esses vértices simplesmente conservam distância infinita."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT OpenCourseWare — Introduction to Algorithms",
+        "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2008/resources/lecture-notes/"
+      }
+    ]
+  },
+  "sup_comp_05": {
+    "context": "Uma mochila comporta um peso inteiro limitado. Cada equipamento fictício tem valor e pode ser escolhido no máximo uma vez.",
+    "theory": "Na mochila 0/1, DP[i,c] guarda o maior valor usando os primeiros i itens com capacidade c. A transição compara excluir o item e incluí-lo, quando cabe: max(DP[i−1,c],vᵢ+DP[i−1,c−wᵢ]). A tabela bottom-up evita recalcular subproblemas. O(nC) é pseudopolinomial porque depende do valor numérico da capacidade C, e não apenas de sua quantidade de bits.",
+    "workedExample": "Com capacidade 5, itens A=(peso2,valor3), B=(3,4) e C=(4,5), escolher A+B dá peso 5 e valor 7. C sozinho vale 5. A tabela final deve registrar 7 em DP[3,5]; nenhuma fração de item é permitida.",
+    "investigation": [
+      "Preencha capacidades de zero a cinco para o primeiro item.",
+      "Adicione B e C consultando somente a linha anterior.",
+      "Reconstrua os itens escolhidos a partir da célula final."
+    ],
+    "expectedEvidence": "Entregue a recorrência, a célula ótima e uma reconstrução factível; explique por que a versão 0/1 não admite repetir ou fracionar objetos.",
+    "reflection": "Por que ordenar apenas pela razão valor/peso não resolve toda mochila 0/1?",
+    "scenarios": [
+      {
+        "id": "capacidade-zero",
+        "label": "Mochila vazia",
+        "situation": "A capacidade disponível é zero e os pesos são positivos.",
+        "observation": "O valor ótimo é zero.",
+        "explanation": "Essa condição de contorno sustenta a construção das demais células."
+      },
+      {
+        "id": "par-complementar",
+        "label": "Combinação A+B",
+        "situation": "A e B juntos ocupam exatamente a capacidade cinco.",
+        "observation": "O valor alcançado é sete.",
+        "explanation": "A combinação supera o item C, apesar de C ter o maior valor individual."
+      },
+      {
+        "id": "vetor-unico",
+        "label": "Atualização reversa",
+        "situation": "Uma implementação compacta atualiza capacidades em ordem crescente.",
+        "observation": "O mesmo item pode ser reutilizado na própria passagem.",
+        "explanation": "Na mochila 0/1 com um vetor, percorrer capacidades decrescentes evita esse reuso."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual seleção maximiza o valor para a capacidade cinco do exemplo?",
+        "options": [
+          {
+            "text": "A e B",
+            "correct": true,
+            "explanation": "Os pesos somam cinco e os valores somam sete."
+          },
+          {
+            "text": "Somente C",
+            "correct": false,
+            "explanation": "C cabe, mas seu valor cinco é menor que sete."
+          },
+          {
+            "text": "A, B e C",
+            "correct": false,
+            "explanation": "O peso total nove excede a capacidade permitida."
+          }
+        ]
+      },
+      {
+        "question": "Por que O(nC) é chamado pseudopolinomial?",
+        "options": [
+          {
+            "text": "C é um valor numérico da entrada",
+            "correct": true,
+            "explanation": "A codificação binária de C ocupa apenas ordem de log C bits."
+          },
+          {
+            "text": "O resultado sempre é aproximado",
+            "correct": false,
+            "explanation": "A tabela completa resolve exatamente a instância inteira modelada."
+          },
+          {
+            "text": "A tabela usa números aleatórios",
+            "correct": false,
+            "explanation": "A recorrência apresentada é determinística e não depende de sorteio."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT OpenCourseWare — Introduction to Algorithms",
+        "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2008/resources/lecture-notes/"
+      }
+    ]
+  },
+  "sup_comp_06": {
+    "context": "Um sensor fictício transmite símbolos com frequências distintas. Códigos curtos devem favorecer os símbolos mais comuns.",
+    "theory": "Huffman combina repetidamente os dois pesos menores e cria um nó de peso igual à soma. As folhas formam um código prefixo: nenhum código completo inicia outro, permitindo decodificação inequívoca sem separadores. Para frequências conhecidas e códigos binários de símbolos independentes, a construção minimiza o comprimento médio. Empates podem gerar árvores diferentes igualmente ótimas.",
+    "workedExample": "Para A:5, B:2 e C:1, combine B e C em peso 3; depois combine 3 com A:5. Um código é A=0, B=10, C=11. O comprimento médio é (5×1+2×2+1×2)/8=11/8=1,375 bits por símbolo.",
+    "investigation": [
+      "Ordene as frequências e realize as duas combinações.",
+      "Atribua zero e um às arestas e liste os códigos.",
+      "Decodifique 01011 sem introduzir separadores artificiais."
+    ],
+    "expectedEvidence": "Mostre a árvore, os códigos e o custo ponderado, verificando prefixos e distinguindo o custo dos dados do custo de transmitir a árvore.",
+    "reflection": "Por que a frequência de uma mensagem curta pode não compensar o cabeçalho?",
+    "scenarios": [
+      {
+        "id": "frequencias",
+        "label": "Símbolo dominante",
+        "situation": "A aparece cinco vezes e os outros símbolos somam três.",
+        "observation": "A recebe um código de um bit.",
+        "explanation": "A árvore coloca o peso maior perto da raiz e reduz o custo ponderado."
+      },
+      {
+        "id": "empate",
+        "label": "Pesos empatados",
+        "situation": "Duas folhas têm a mesma frequência mínima.",
+        "observation": "Sua ordem pode ser trocada.",
+        "explanation": "Trocar folhas de igual peso não altera o comprimento médio do código."
+      },
+      {
+        "id": "prefixo-invalido",
+        "label": "Código ambíguo",
+        "situation": "Propõe-se A=0, B=01 e C=1.",
+        "observation": "O código de A é prefixo de B.",
+        "explanation": "Essa proposta perde a propriedade prefixo necessária à decodificação imediata."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é o comprimento médio do código apresentado?",
+        "options": [
+          {
+            "text": "1,375 bits por símbolo",
+            "correct": true,
+            "explanation": "A soma ponderada de onze bits é dividida por oito ocorrências."
+          },
+          {
+            "text": "2 bits por símbolo",
+            "correct": false,
+            "explanation": "Esse seria o comprimento fixo de três símbolos binariamente codificados."
+          },
+          {
+            "text": "0,375 bit por símbolo",
+            "correct": false,
+            "explanation": "Esse valor não corresponde à soma dos comprimentos ponderados."
+          }
+        ]
+      },
+      {
+        "question": "O que caracteriza um código prefixo?",
+        "options": [
+          {
+            "text": "Nenhuma palavra-código inicia outra",
+            "correct": true,
+            "explanation": "Assim o fim de cada símbolo é reconhecido sem ambiguidade."
+          },
+          {
+            "text": "Todos os símbolos possuem o mesmo comprimento",
+            "correct": false,
+            "explanation": "Comprimentos variáveis são justamente a vantagem explorada por Huffman."
+          },
+          {
+            "text": "Cada palavra começa com zero",
+            "correct": false,
+            "explanation": "Essa regra não impede que uma palavra seja prefixo de outra."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT OpenCourseWare — Introduction to Algorithms",
+        "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2008/resources/lecture-notes/"
+      }
+    ]
+  },
+  "sup_comp_07": {
+    "context": "Uma cooperativa fictícia quer conectar três instalações com o menor custo total, sem exigir o menor caminho entre cada par.",
+    "theory": "Uma árvore geradora mínima conecta todos os vértices de um grafo não dirigido e conexo com |V|−1 arestas de soma mínima. Kruskal ordena arestas e aceita as que unem componentes distintas; Union-Find verifica essa condição. Prim expande uma árvore pelo menor enlace que atravessa seu corte. Pesos negativos são permitidos; em grafo desconexo, o resultado é uma floresta geradora mínima.",
+    "workedExample": "No triângulo AB=1, BC=2, AC=4, Kruskal aceita AB e BC, custo 3. AC ligaria vértices já conectados e formaria um ciclo. A árvore tem duas arestas para três vértices, embora o caminho A→C passe por B.",
+    "investigation": [
+      "Ordene as três arestas pelo peso e registre componentes.",
+      "Aceite somente ligações entre representantes diferentes.",
+      "Execute Prim a partir de C e compare o custo total."
+    ],
+    "expectedEvidence": "A prova deve mostrar conectividade, ausência de ciclos e soma três, sem confundir árvore mínima com tabela de menores caminhos desde uma origem.",
+    "reflection": "Uma árvore mínima precisa ser única quando existem pesos empatados?",
+    "scenarios": [
+      {
+        "id": "ciclo-triangulo",
+        "label": "Fechamento de ciclo",
+        "situation": "AB e BC já foram aceitas quando se examina AC.",
+        "observation": "A e C têm o mesmo representante.",
+        "explanation": "Union-Find rejeita a aresta que fecharia o ciclo nessa etapa."
+      },
+      {
+        "id": "dois-blocos",
+        "label": "Grafo desconexo",
+        "situation": "Dois grupos de instalações não possuem ligação entre si.",
+        "observation": "Não existe árvore que cubra o grafo todo.",
+        "explanation": "O procedimento produz uma floresta, com uma árvore por componente."
+      },
+      {
+        "id": "peso-empatado",
+        "label": "Empate de custo",
+        "situation": "Todas as arestas de um triângulo possuem peso um.",
+        "observation": "Há três escolhas de duas arestas.",
+        "explanation": "Cada escolha conecta sem ciclo e tem o mesmo custo mínimo dois."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual custo mínimo conecta o triângulo de pesos 1,2 e 4?",
+        "options": [
+          {
+            "text": "3",
+            "correct": true,
+            "explanation": "As duas menores arestas já conectam os três vértices."
+          },
+          {
+            "text": "7",
+            "correct": false,
+            "explanation": "Usar todas as arestas adiciona um ciclo e custo desnecessário."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "Uma única aresta deixa a terceira instalação desconectada."
+          }
+        ]
+      },
+      {
+        "question": "Para que serve Union-Find na implementação de Kruskal?",
+        "options": [
+          {
+            "text": "Identificar componentes e evitar ciclos",
+            "correct": true,
+            "explanation": "Uma aresta interna à mesma componente não é necessária à floresta."
+          },
+          {
+            "text": "Calcular todas as distâncias mínimas",
+            "correct": false,
+            "explanation": "A estrutura acompanha conectividade, não somas de caminhos."
+          },
+          {
+            "text": "Proibir arestas negativas",
+            "correct": false,
+            "explanation": "Pesos negativos não invalidam o problema de árvore geradora mínima."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT OpenCourseWare — Introduction to Algorithms",
+        "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2008/resources/lecture-notes/"
+      }
+    ]
+  },
+  "sup_comp_08": {
+    "context": "Um mapa fictício de dependências precisa revelar alcançabilidade, distâncias em saltos e uma possível ordem de tarefas.",
+    "theory": "BFS usa uma fila e explora camadas; em grafo sem pesos, a primeira descoberta dá a menor quantidade de arestas desde a origem. DFS aprofunda caminhos com pilha ou recursão. Para ordenar tarefas em um DAG, pode-se inverter a ordem de término de DFS; detectar uma aresta para nó ainda ativo revela ciclo e impede ordem topológica. Em listas de adjacência, ambas custam O(V+E).",
+    "workedExample": "Com A→B, A→C e B→D, BFS desde A atribui distâncias 0,1,1,2. Uma ordem topológica válida é A,B,C,D, mas A,C,B,D também vale: somente B deve preceder D e A deve preceder B e C.",
+    "investigation": [
+      "Liste a fila da BFS a cada descoberta e calcule saltos.",
+      "Trace a pilha e os tempos de término de uma DFS.",
+      "Adicione D→A e verifique a possibilidade de ordenar tarefas."
+    ],
+    "expectedEvidence": "Registre estados visitados e predecessores; uma ordem topológica deve respeitar cada aresta, e não apenas reproduzir uma sequência de visita.",
+    "reflection": "Por que a BFS deixa de garantir menor custo quando os pesos variam?",
+    "scenarios": [
+      {
+        "id": "camadas",
+        "label": "Descoberta de D",
+        "situation": "D só é vizinho de B e A inicia a BFS.",
+        "observation": "D surge na camada dois.",
+        "explanation": "A fila processa a camada um antes de descobrir camadas mais profundas."
+      },
+      {
+        "id": "ciclo-tarefas",
+        "label": "Dependência circular",
+        "situation": "Acrescenta-se D→A ao conjunto A→B→D.",
+        "observation": "A depende de si por um caminho.",
+        "explanation": "Uma ordenação topológica exige ausência de ciclos dirigidos."
+      },
+      {
+        "id": "origem-isolada",
+        "label": "Componente separada",
+        "situation": "E e F se conectam entre si, mas não a A.",
+        "observation": "BFS desde A não visita E nem F.",
+        "explanation": "Para explorar todas as componentes, inicie uma busca em cada vértice ainda não visitado."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quantas arestas tem o menor caminho de A a D no exemplo?",
+        "options": [
+          {
+            "text": "2",
+            "correct": true,
+            "explanation": "A sequência A,B,D usa duas ligações do grafo."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "Não há aresta direta A→D na entrada descrita."
+          },
+          {
+            "text": "3",
+            "correct": false,
+            "explanation": "BFS encontra um caminho com apenas duas arestas."
+          }
+        ]
+      },
+      {
+        "question": "Qual condição impede uma ordenação topológica?",
+        "options": [
+          {
+            "text": "Um ciclo dirigido",
+            "correct": true,
+            "explanation": "As precedências circulares não admitem uma primeira tarefa válida."
+          },
+          {
+            "text": "Duas tarefas independentes",
+            "correct": false,
+            "explanation": "Elas podem aparecer em qualquer ordem que respeite as demais arestas."
+          },
+          {
+            "text": "Mais de uma ordem possível",
+            "correct": false,
+            "explanation": "Um DAG pode admitir várias ordenações topológicas corretas."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT OpenCourseWare — Introduction to Algorithms",
+        "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2008/resources/lecture-notes/"
+      }
+    ]
+  },
+  "sup_comp_09": {
+    "context": "Um editor procura um padrão em um texto grande com trechos repetidos. Recomeçar do zero desperdiça comparações já feitas.",
+    "theory": "KMP pré-calcula para cada prefixo do padrão o tamanho de seu maior prefixo próprio que também é sufixo. Após uma divergência, essa tabela permite recuar apenas no padrão, mantendo a posição do texto. A função de falha preserva correspondências possíveis e evita retroceder na leitura. O custo total é O(n+m), para texto de tamanho n e padrão de tamanho m, sob comparação de caracteres constante.",
+    "workedExample": "Para o padrão ABAB, a tabela de prefixos é [0,0,1,2]. Após casar ABA e divergir no quarto caractere, o comprimento candidato recua de 3 para π[2]=1. O A já compatível é aproveitado; não se reinicia a leitura do texto.",
+    "investigation": [
+      "Calcule os prefixos próprios e sufixos de A, AB, ABA e ABAB.",
+      "Trace a busca de ABAB em ABACABAB indicando cada recuo.",
+      "Compare avanço do texto com recuo do índice do padrão."
+    ],
+    "expectedEvidence": "Entregue a tabela [0,0,1,2], o início da ocorrência e um traço que mostre a reutilização de prefixo sem mover o texto para trás.",
+    "reflection": "Qual informação da tabela permite evitar comparações já resolvidas?",
+    "scenarios": [
+      {
+        "id": "prefixo-aba",
+        "label": "Borda de ABA",
+        "situation": "O prefixo analisado do padrão é ABA.",
+        "observation": "A maior borda própria tem tamanho um.",
+        "explanation": "A é simultaneamente prefixo e sufixo, mas ABA inteiro não é próprio."
+      },
+      {
+        "id": "falha-c",
+        "label": "Divergência em C",
+        "situation": "O texto ABAC diverge do padrão ABAB no último caractere.",
+        "observation": "O candidato de três caracteres recua pela tabela.",
+        "explanation": "A busca testa bordas compatíveis antes de avançar, sem repetir o trecho inteiro."
+      },
+      {
+        "id": "ocorrencia-final",
+        "label": "Casamento final",
+        "situation": "O texto completo ABACABAB tem comprimento oito.",
+        "observation": "ABAB começa no índice quatro, contando do zero.",
+        "explanation": "A última sequência de quatro caracteres coincide integralmente com o padrão."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a tabela de prefixos do padrão ABAB?",
+        "options": [
+          {
+            "text": "[0,0,1,2]",
+            "correct": true,
+            "explanation": "A borda de ABA é A e a borda de ABAB é AB."
+          },
+          {
+            "text": "[1,2,3,4]",
+            "correct": false,
+            "explanation": "O prefixo inteiro é excluído pela definição de borda própria."
+          },
+          {
+            "text": "[0,0,0,0]",
+            "correct": false,
+            "explanation": "Essa resposta ignora as repetições internas A e AB."
+          }
+        ]
+      },
+      {
+        "question": "Qual índice do texto pode permanecer monotonicamente crescente no KMP?",
+        "options": [
+          {
+            "text": "O índice de leitura do texto",
+            "correct": true,
+            "explanation": "Os recuos ocorrem no padrão usando a função de falha."
+          },
+          {
+            "text": "O tamanho do prefixo casado",
+            "correct": false,
+            "explanation": "Esse tamanho pode diminuir após uma divergência."
+          },
+          {
+            "text": "Todos os índices recuam juntos",
+            "correct": false,
+            "explanation": "Recuar também no texto elimina a principal economia do método."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT OpenCourseWare — Introduction to Algorithms",
+        "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2008/resources/lecture-notes/"
+      }
+    ]
+  },
+  "sup_comp_10": {
+    "context": "Um planejador fictício compara uma solução exata com uma rota obtida por escolha local. Rapidez e qualidade são objetivos diferentes.",
+    "theory": "Um problema NP-completo é uma versão de decisão em NP à qual todo problema de NP se reduz em tempo polinomial. A otimização do caixeiro viajante é NP-difícil; perguntar se há rota com custo no máximo K é a versão de decisão. Heurística não implica garantia de aproximação. Para TSP métrico, duplicar uma árvore geradora e atalhar vértices fornece fator dois, apoiado na desigualdade triangular.",
+    "workedExample": "Se uma instância métrica tem árvore mínima de custo 12 e ótimo 15, duplicar a árvore custa 24. Atalhos não aumentam o custo, logo a rota obtida custa no máximo 24 e sua razão para esse ótimo é no máximo 24/15=1,6.",
+    "investigation": [
+      "Distinga a pergunta de decisão da minimização do custo.",
+      "Verifique simetria e desigualdade triangular nos dados.",
+      "Compare uma rota candidata com um limite inferior pela árvore mínima."
+    ],
+    "expectedEvidence": "Declare as hipóteses métricas e a razão de aproximação; uma solução rápida em uma instância não constitui prova de tempo polinomial geral.",
+    "reflection": "Por que observar bons resultados médios não estabelece uma garantia no pior caso?",
+    "scenarios": [
+      {
+        "id": "limite-inferior",
+        "label": "Árvore como limite",
+        "situation": "Remova uma aresta de uma rota ótima para obter uma árvore.",
+        "observation": "O custo da árvore mínima não supera o ótimo.",
+        "explanation": "Essa relação permite usar a MST como limite inferior para avaliar rotas."
+      },
+      {
+        "id": "sem-metrica",
+        "label": "Atalho mais caro",
+        "situation": "Um enlace direto custa mais que o caminho por um intermediário.",
+        "observation": "A desigualdade triangular falha.",
+        "explanation": "A prova de fator dois por atalhos não vale para esse conjunto de custos."
+      },
+      {
+        "id": "coloracao",
+        "label": "Coloração gulosa",
+        "situation": "Uma ordem de vértices faz a heurística usar mais cores que outra.",
+        "observation": "A qualidade depende da ordem escolhida.",
+        "explanation": "Uma regra local de coloração não demonstra que o número de cores é mínimo."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual hipótese sustenta que atalhar uma caminhada não aumenta seu custo?",
+        "options": [
+          {
+            "text": "A desigualdade triangular",
+            "correct": true,
+            "explanation": "Ela limita a ligação direta pelo custo de passar por intermediários."
+          },
+          {
+            "text": "Apenas haver poucas cidades",
+            "correct": false,
+            "explanation": "O tamanho pequeno não impõe relação entre os custos das arestas."
+          },
+          {
+            "text": "O algoritmo usar sorteios",
+            "correct": false,
+            "explanation": "Aleatoriedade não substitui a hipótese métrica da prova."
+          }
+        ]
+      },
+      {
+        "question": "Qual é a versão de decisão correspondente ao TSP?",
+        "options": [
+          {
+            "text": "Existe uma rota com custo no máximo K?",
+            "correct": true,
+            "explanation": "Um certificado de rota pode ser verificado contra o limite proposto."
+          },
+          {
+            "text": "Qual rota tem o menor custo?",
+            "correct": false,
+            "explanation": "Essa formulação pede o ótimo e é uma pergunta de otimização."
+          },
+          {
+            "text": "Toda heurística encontra o ótimo?",
+            "correct": false,
+            "explanation": "Essa é uma questão sobre algoritmos, não a decisão de uma instância."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT OpenCourseWare — Introduction to Algorithms",
+        "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2008/resources/lecture-notes/"
+      }
+    ]
+  }
+}

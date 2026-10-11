@@ -1,0 +1,836 @@
+{
+  "pos_ia_01": {
+    "context": "Uma perda quadrática sintética tem curvaturas muito diferentes nos dois eixos. O mesmo passo pode ser lento em um e instável no outro.",
+    "theory": "A Hessiana reúne segundas derivadas e descreve curvatura local. Para L=(ax²+by²)/2, H=diag(a,b); em gradiente simples com taxa constante, estabilidade exige 0<η<2/λmax nesse modelo positivo definido. Momentum acumula uma direção, mas sua convenção e hiperparâmetros mudam a dinâmica. Ele não remove automaticamente instabilidade, pontos de sela ou a necessidade de ajustar taxa.",
+    "workedExample": "Para L=(x²+100y²)/2, a Hessiana tem autovalores 1 e 100. O limite do gradiente simples é η<0,02. Com η=0,01, x é multiplicado por 0,99 e y por 0 a cada passo; o avanço fica muito mais lento no eixo x.",
+    "investigation": [
+      "Derive gradiente e Hessiana da perda quadrática.",
+      "Calcule fatores de atualização para duas taxas.",
+      "Defina v novo=βv+g antes de estudar momentum."
+    ],
+    "expectedEvidence": "Relacione autovalores à estabilidade e declare a convenção de momentum; uma trajetória desenhada não comprova desempenho de treinamento real.",
+    "reflection": "Por que curvatura anisotrópica dificulta usar uma única taxa de aprendizado?",
+    "scenarios": [
+      {
+        "id": "taxa-estavel",
+        "label": "Taxa pequena",
+        "situation": "A maior curvatura é cem e a taxa vale 0,01.",
+        "observation": "O fator do eixo y é zero.",
+        "explanation": "A atualização zera y nessa quadrática diagonal exata, mas quase não reduz x."
+      },
+      {
+        "id": "taxa-instavel",
+        "label": "Taxa excessiva",
+        "situation": "O gradiente simples usa taxa 0,03 no eixo de curvatura cem.",
+        "observation": "O fator é menos dois.",
+        "explanation": "A magnitude cresce por dois e alterna sinal, produzindo divergência."
+      },
+      {
+        "id": "acumulo",
+        "label": "Direção acumulada",
+        "situation": "Adote β=0,9, v anterior=2 e g=1.",
+        "observation": "A nova velocidade é 2,8.",
+        "explanation": "A convenção v←βv+g soma memória do passado e gradiente presente."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual limite superior de taxa estabiliza o gradiente simples nessa quadrática?",
+        "options": [
+          {
+            "text": "0,02, sem incluir o limite",
+            "correct": true,
+            "explanation": "Dois dividido pelo maior autovalor cem fornece a fronteira de estabilidade."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Esse limite ignoraria a direção com curvatura cem."
+          },
+          {
+            "text": "100",
+            "correct": false,
+            "explanation": "Maior curvatura exige passos menores, não maiores."
+          }
+        ]
+      },
+      {
+        "question": "Qual velocidade resulta de β=0,9, v=2 e g=1?",
+        "options": [
+          {
+            "text": "2,8",
+            "correct": true,
+            "explanation": "A conta é 0,9 vezes dois, mais um."
+          },
+          {
+            "text": "1,9",
+            "correct": false,
+            "explanation": "Esse resultado troca a posição dos valores na convenção definida."
+          },
+          {
+            "text": "0,8",
+            "correct": false,
+            "explanation": "O gradiente é somado à memória, não subtraído dela."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Why Momentum Really Works",
+        "url": "https://distill.pub/2017/momentum/"
+      }
+    ]
+  },
+  "pos_ia_02": {
+    "context": "Um bloco profundo fictício combina normalização de atributos e uma conexão que permite atravessar o bloco diretamente.",
+    "theory": "LayerNorm calcula estatísticas nos atributos de cada exemplo ou token, conforme os eixos definidos, e aplica γ(x−μ)/√(σ²+ε)+β. Não depende da média do minibatch como BatchNorm. Um bloco residual y=x+F(x) possui Jacobiano I+JF, criando uma rota direta, sem garantir que todos os gradientes tenham magnitude ideal. A posição pré ou pós-normalização altera a dinâmica da arquitetura.",
+    "workedExample": "Para x=(1,3), média=2 e variância populacional=1. Com γ=1, β=0 e ε desprezado apenas na conta, LayerNorm dá (−1,1). Se F(x)=(0,5,−0,5), o residual sobre x original resulta em (1,5,2,5), não no vetor normalizado.",
+    "investigation": [
+      "Identifique os eixos usados para calcular estatísticas.",
+      "Calcule média, variância e normalização do vetor.",
+      "Desenhe separadamente a soma residual e a normalização."
+    ],
+    "expectedEvidence": "Diferencie os vetores antes e depois de cada operação e explique a função de ε; não trate normalização ou residual como cura universal para treino profundo.",
+    "reflection": "Como mudar a ordem entre soma residual e normalização altera o bloco?",
+    "scenarios": [
+      {
+        "id": "por-token",
+        "label": "Estatística individual",
+        "situation": "Dois tokens distintos estão no mesmo minibatch.",
+        "observation": "Cada token pode usar suas próprias estatísticas de atributos.",
+        "explanation": "LayerNorm normaliza os eixos declarados, sem misturar obrigatoriamente exemplos."
+      },
+      {
+        "id": "constante",
+        "label": "Vetor constante",
+        "situation": "O vetor de atributos é (2,2).",
+        "observation": "A variância é zero.",
+        "explanation": "Epsilon evita divisão por zero e os parâmetros afins definem a saída final."
+      },
+      {
+        "id": "identidade",
+        "label": "Ramo nulo",
+        "situation": "O ramo F devolve zero para uma entrada.",
+        "observation": "A soma residual devolve a própria entrada.",
+        "explanation": "A rota identidade permanece disponível nessa forma de bloco."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual saída normalizada aproxima (1,3) com os parâmetros dados?",
+        "options": [
+          {
+            "text": "(−1,1)",
+            "correct": true,
+            "explanation": "Subtrai-se a média dois e divide-se pelo desvio um."
+          },
+          {
+            "text": "(1,3)",
+            "correct": false,
+            "explanation": "Esse é o vetor original antes de normalização."
+          },
+          {
+            "text": "(0,0)",
+            "correct": false,
+            "explanation": "As componentes não coincidem com a média ao mesmo tempo."
+          }
+        ]
+      },
+      {
+        "question": "Qual Jacobiano corresponde à soma y=x+F(x)?",
+        "options": [
+          {
+            "text": "I+JF",
+            "correct": true,
+            "explanation": "A derivada da rota direta soma identidade à derivada do ramo."
+          },
+          {
+            "text": "Somente JF",
+            "correct": false,
+            "explanation": "Esse resultado ignora a conexão identidade."
+          },
+          {
+            "text": "Sempre zero",
+            "correct": false,
+            "explanation": "O residual preserva uma rota direta e não anula toda derivada."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Layer Normalization",
+        "url": "https://arxiv.org/abs/1607.06450"
+      }
+    ]
+  },
+  "pos_ia_03": {
+    "context": "Uma sequência fictícia de tokens usa atenção causal para agregar informações disponíveis sem consultar posições futuras.",
+    "theory": "A atenção escalada calcula softmax(QKᵀ/√dₖ+M)V. Query compara com keys; os pesos agregam values. A máscara causal atribui peso zero a posições futuras após o softmax, normalmente usando −∞ nos logits. Múltiplas cabeças usam projeções distintas e depois combinam resultados; pesos de atenção não são por si explicações causais da decisão. O custo padrão cresce quadraticamente com o comprimento.",
+    "workedExample": "Para dois logits permitidos iguais a zero, softmax dá (0,5,0,5). Com values escalares 2 e 6, a saída é 4. Se o segundo token for futuro e mascarado, os pesos viram (1,0) e a saída é 2.",
+    "investigation": [
+      "Calcule os pesos para logits iguais antes da máscara.",
+      "Aplique a máscara causal e recalcule a agregação.",
+      "Separe projeções Q,K,V de concatenação das cabeças."
+    ],
+    "expectedEvidence": "Mostre pesos que somam um sobre posições permitidas e saída quatro ou dois, sem afirmar que a plataforma executou um Transformer.",
+    "reflection": "Por que zerar um logit futuro não equivale a removê-lo do softmax?",
+    "scenarios": [
+      {
+        "id": "media-atencao",
+        "label": "Pesos iguais",
+        "situation": "Dois logits válidos têm o mesmo valor zero.",
+        "observation": "Cada posição recebe peso meio.",
+        "explanation": "A exponencial e a normalização tratam igualmente valores iguais."
+      },
+      {
+        "id": "futuro",
+        "label": "Máscara causal",
+        "situation": "A segunda posição ainda não foi gerada.",
+        "observation": "Seu peso deve ser zero.",
+        "explanation": "O logit −∞ exclui a posição; um logit zero ainda teria exponencial um."
+      },
+      {
+        "id": "dimensao",
+        "label": "Escala da chave",
+        "situation": "A dimensão da chave passa de um para quatro.",
+        "observation": "O divisor passa de um para dois.",
+        "explanation": "A raiz da dimensão controla a escala dos produtos internos antes do softmax."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual saída agrega values 2 e 6 com pesos iguais?",
+        "options": [
+          {
+            "text": "4",
+            "correct": true,
+            "explanation": "Meio de dois mais meio de seis resulta em quatro."
+          },
+          {
+            "text": "8",
+            "correct": false,
+            "explanation": "Esse resultado soma valores sem normalizar os pesos."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Dois ocorreria se apenas a primeira posição recebesse peso."
+          }
+        ]
+      },
+      {
+        "question": "Qual tratamento exclui uma posição futura da atenção causal?",
+        "options": [
+          {
+            "text": "Logit −∞ antes do softmax",
+            "correct": true,
+            "explanation": "Sua exponencial é zero e a posição não contribui à normalização."
+          },
+          {
+            "text": "Logit zero necessariamente",
+            "correct": false,
+            "explanation": "A exponencial de zero é um, portanto ainda recebe peso."
+          },
+          {
+            "text": "Dobrar o value futuro",
+            "correct": false,
+            "explanation": "Alterar o valor não impede sua consulta nem remove o peso."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Attention Is All You Need",
+        "url": "https://arxiv.org/abs/1706.03762"
+      }
+    ]
+  },
+  "pos_ia_04": {
+    "context": "Um valor sintético recebe ruído gaussiano em etapas. O exercício separa o processo conhecido de ruído e a reversão aprendida.",
+    "theory": "DDPM define um processo direto que adiciona ruído segundo uma agenda βt. Pela forma fechada, xt=√ᾱt x0+√(1−ᾱt)ε, com ε normal padrão. A rede aprende uma quantidade ligada ao ruído ou score para parametrizar a reversão. Retirar ruído não é simplesmente subtrair uma amostra nova; amostragem reversa depende do modelo, agenda e variante. Aqui só se calculam valores fornecidos.",
+    "workedExample": "Com x0=2, ᾱt=0,64 e ε=1, xt=0,8×2+0,6×1=2,2. A variância condicional do ruído é 0,36, e não 0,6. O desvio 0,6 multiplica a amostra normal fornecida.",
+    "investigation": [
+      "Calcule os coeficientes de sinal e ruído da forma fechada.",
+      "Compare média condicional com a realização xt calculada.",
+      "Explique o que precisaria ser aprendido para executar a reversão."
+    ],
+    "expectedEvidence": "Apresente média 1,6, variância 0,36 e realização 2,2, distinguindo cálculo analítico de geração por um modelo de difusão treinado.",
+    "reflection": "Por que uma observação ruidosa não determina sozinha a imagem original?",
+    "scenarios": [
+      {
+        "id": "sinal",
+        "label": "Retenção do sinal",
+        "situation": "O produto acumulado ᾱt vale 0,64.",
+        "observation": "O coeficiente do sinal é 0,8.",
+        "explanation": "A média condicional multiplica o dado limpo pela raiz desse produto."
+      },
+      {
+        "id": "ruido",
+        "label": "Variância condicional",
+        "situation": "Um normal padrão é multiplicado por 0,6.",
+        "observation": "A variância resultante é 0,36.",
+        "explanation": "Variância escala pelo quadrado do multiplicador, não pelo próprio multiplicador."
+      },
+      {
+        "id": "reversao",
+        "label": "Ruído previsto",
+        "situation": "Um procedimento tenta subtrair ruído aleatório independente.",
+        "observation": "Ele não recupera o ruído que produziu a observação.",
+        "explanation": "A reversão precisa de informação estatística aprendida, não de uma nova amostra arbitrária."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual xt resulta dos valores propostos?",
+        "options": [
+          {
+            "text": "2,2",
+            "correct": true,
+            "explanation": "O termo do sinal vale 1,6 e o termo do ruído vale 0,6."
+          },
+          {
+            "text": "1,6",
+            "correct": false,
+            "explanation": "Esse é apenas o valor médio condicional, sem a realização de ruído."
+          },
+          {
+            "text": "2,6",
+            "correct": false,
+            "explanation": "Esse resultado preserva o sinal sem o coeficiente 0,8."
+          }
+        ]
+      },
+      {
+        "question": "Qual é a variância do termo 0,6ε com ε normal padrão?",
+        "options": [
+          {
+            "text": "0,36",
+            "correct": true,
+            "explanation": "Multiplicar por 0,6 multiplica a variância um por 0,6 ao quadrado."
+          },
+          {
+            "text": "0,6",
+            "correct": false,
+            "explanation": "Esse é o desvio padrão, não a variância."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "A variância um pertence ao ruído antes da multiplicação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Denoising Diffusion Probabilistic Models",
+        "url": "https://arxiv.org/abs/2006.11239"
+      }
+    ]
+  },
+  "pos_ia_05": {
+    "context": "Uma atualização fictícia de política compara probabilidades antigas e novas para limitar incentivos a mudanças grandes.",
+    "theory": "PPO usa uma razão r=πnova(a|s)/πantiga(a|s) e objetivo min(rÂ,clip(r,1−ε,1+ε)Â). O sinal da vantagem muda qual ramo limita a melhoria. A clipagem do objetivo não prende todas as razões ao intervalo nem garante um limite rígido de KL. Avaliar o objetivo em números fornecidos é diferente de otimizar uma política ou executar um ambiente contínuo.",
+    "workedExample": "Para r=1,3, vantagem Â=2 e ε=0,2, os termos são 2,6 e 2,4; o objetivo mínimo vale 2,4. Com Â=−2 e mesma razão, o mínimo é −2,6: usar sempre o valor clipado produziria a conta errada.",
+    "investigation": [
+      "Calcule razão entre probabilidades nova e antiga.",
+      "Avalie os dois ramos para vantagens positiva e negativa.",
+      "Discuta por que clipping não impõe uma restrição rígida de KL."
+    ],
+    "expectedEvidence": "Mostre o mínimo com o sinal correto da vantagem e declare que o exercício não mede melhoria de retorno de uma política treinada.",
+    "reflection": "Por que o sinal da vantagem precisa entrar antes de escolher o ramo mínimo?",
+    "scenarios": [
+      {
+        "id": "positiva",
+        "label": "Ação vantajosa",
+        "situation": "A razão é 1,3 e a vantagem é dois.",
+        "observation": "O objetivo fica limitado a 2,4.",
+        "explanation": "Aumentar ainda mais a probabilidade deixa de melhorar esse termo positivo clipado."
+      },
+      {
+        "id": "negativa",
+        "label": "Ação desfavorável",
+        "situation": "A razão permanece 1,3 e a vantagem é menos dois.",
+        "observation": "O mínimo é menos 2,6.",
+        "explanation": "A função mínimo opera sobre produtos com sinal, não escolhe sempre a razão clipada."
+      },
+      {
+        "id": "probabilidade-zero",
+        "label": "Razão indefinida",
+        "situation": "A probabilidade antiga fornecida para a ação é zero.",
+        "observation": "A divisão não está definida.",
+        "explanation": "É necessário respeitar suporte e cálculo numérico apropriado das probabilidades."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual objetivo clipado corresponde a r=1,3 e Â=2?",
+        "options": [
+          {
+            "text": "2,4",
+            "correct": true,
+            "explanation": "O mínimo entre 2,6 e 2,4 é o segundo termo."
+          },
+          {
+            "text": "2,6",
+            "correct": false,
+            "explanation": "Esse resultado ignora o limite do ramo positivo clipado."
+          },
+          {
+            "text": "1,2",
+            "correct": false,
+            "explanation": "Esse é o limite da razão, antes de multiplicar pela vantagem."
+          }
+        ]
+      },
+      {
+        "question": "O que PPO clipping garante neste cálculo?",
+        "options": [
+          {
+            "text": "Limita o incentivo de certos termos do objetivo",
+            "correct": true,
+            "explanation": "A função recorta a melhoria considerada, sem fixar todas as razões possíveis."
+          },
+          {
+            "text": "Todas as probabilidades ficam no intervalo 0,8 a 1,2",
+            "correct": false,
+            "explanation": "O intervalo se refere à razão clipada e não a probabilidades absolutas."
+          },
+          {
+            "text": "Uma restrição rígida de KL sempre satisfeita",
+            "correct": false,
+            "explanation": "O objetivo clipado não equivale a impor essa restrição global exata."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Proximal Policy Optimization Algorithms",
+        "url": "https://arxiv.org/abs/1707.06347"
+      }
+    ]
+  },
+  "pos_ia_06": {
+    "context": "Uma matriz de pesos fictícia permanece congelada enquanto uma atualização fatorada aprende uma adaptação de menor dimensão.",
+    "theory": "LoRA representa ΔW=BA, com B de tamanho d×r e A de tamanho r×k para uma matriz W de tamanho d×k. Só os fatores são treinados na forma básica, possivelmente com escala α/r. Isso reduz parâmetros ajustáveis, mas memória total também inclui pesos base, ativações, estados do otimizador e implementação. Baixo posto é uma restrição de atualização, não uma garantia universal de qualidade.",
+    "workedExample": "Para W de 100×80 e r=4, ajuste completo envolve 8.000 parâmetros; os fatores têm 100×4+4×80=720. A razão é 720/8.000=9%. Essa conta não significa que a VRAM total caia para nove por cento.",
+    "investigation": [
+      "Confira dimensões de A, B e do produto BA.",
+      "Conte parâmetros completos e fatorados no exemplo.",
+      "Liste componentes de memória além dos parâmetros treináveis."
+    ],
+    "expectedEvidence": "Apresente 720 parâmetros e o limite de posto da atualização, separando economia de ajuste da memória total e de qualidade do resultado.",
+    "reflection": "Quando uma atualização de posto pequeno pode limitar uma adaptação desejada?",
+    "scenarios": [
+      {
+        "id": "dimensoes",
+        "label": "Produto compatível",
+        "situation": "B tem cem linhas e quatro colunas; A tem quatro linhas e oitenta colunas.",
+        "observation": "BA tem forma cem por oitenta.",
+        "explanation": "As dimensões internas quatro coincidem e as externas reproduzem W."
+      },
+      {
+        "id": "posto",
+        "label": "Restrição estrutural",
+        "situation": "O posto escolhido é quatro.",
+        "observation": "O posto de BA não supera quatro.",
+        "explanation": "A fatoração limita a dimensão das mudanças representáveis."
+      },
+      {
+        "id": "memoria-base",
+        "label": "Pesos congelados",
+        "situation": "W não recebe gradientes, mas continua necessário no cálculo.",
+        "observation": "Seus pesos ainda ocupam memória.",
+        "explanation": "Congelar não apaga o modelo base nem todas as ativações de execução."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quantos parâmetros ajustáveis há nos fatores do exemplo?",
+        "options": [
+          {
+            "text": "720",
+            "correct": true,
+            "explanation": "Somam-se quatrocentos de B e trezentos e vinte de A."
+          },
+          {
+            "text": "8.000",
+            "correct": false,
+            "explanation": "Esse é o número de parâmetros da matriz completa."
+          },
+          {
+            "text": "400",
+            "correct": false,
+            "explanation": "Esse número conta B e omite o fator A."
+          }
+        ]
+      },
+      {
+        "question": "Qual conclusão é correta sobre a economia de LoRA?",
+        "options": [
+          {
+            "text": "Menos parâmetros treináveis não determina toda a VRAM",
+            "correct": true,
+            "explanation": "Pesos base, ativações e estados adicionais também precisam ser contabilizados."
+          },
+          {
+            "text": "O modelo base deixa de existir",
+            "correct": false,
+            "explanation": "A adaptação usa a matriz base congelada junto da atualização."
+          },
+          {
+            "text": "Todo ajuste tem qualidade idêntica ao completo",
+            "correct": false,
+            "explanation": "O posto e a tarefa podem limitar a capacidade de adaptação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "LoRA",
+        "url": "https://arxiv.org/abs/2106.09685"
+      }
+    ]
+  },
+  "pos_ia_07": {
+    "context": "Um grafo molecular sintético representa átomos por nós e ligações por arestas. A atualização deve respeitar a ausência de uma ordem natural dos vizinhos.",
+    "theory": "Em passagem de mensagens, cada nó agrega informações dos vizinhos e atualiza sua representação. Agregadores como soma ou média são invariantes à ordem dos vizinhos. Depois de k camadas locais, a dependência alcança até k saltos, sob essa arquitetura. A leitura global pode ser invariante a permutações; isso não implica distinguir todos os grafos. Muitas camadas podem provocar suavização excessiva de representações.",
+    "workedExample": "Na cadeia A–B–C com atributos escalares 1,2,4, use h novo=h próprio+soma dos vizinhos, sem pesos. A vira 3, B vira 7 e C vira 6. Trocar a ordem de listar os vizinhos de B não altera 1+4.",
+    "investigation": [
+      "Desenhe o grafo e liste vizinhos sem duplicar arestas.",
+      "Calcule a atualização simultânea usando os atributos antigos.",
+      "Compare alcance de uma e duas camadas de mensagens."
+    ],
+    "expectedEvidence": "Mostre 3,7,6 e preserve simultaneidade; usar valores recém-atualizados na mesma camada mudaria o operador definido.",
+    "reflection": "Que informação um nó não recebe em uma única camada puramente local?",
+    "scenarios": [
+      {
+        "id": "centro",
+        "label": "Agregação em B",
+        "situation": "B recebe atributos antigos um e quatro de seus vizinhos.",
+        "observation": "Sua atualização soma dois,um e quatro.",
+        "explanation": "O resultado sete depende dos dados antigos e do agregador declarado."
+      },
+      {
+        "id": "permutacao",
+        "label": "Ordem irrelevante",
+        "situation": "A lista de vizinhos de B muda de [A,C] para [C,A].",
+        "observation": "A soma permanece cinco.",
+        "explanation": "O agregador de soma é invariante à ordenação da lista."
+      },
+      {
+        "id": "dois-saltos",
+        "label": "Influência de C",
+        "situation": "A e C estão separados pelo nó B.",
+        "observation": "C não contribui diretamente ao A na primeira camada.",
+        "explanation": "Uma segunda rodada permite propagar informações por dois saltos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual valor atualizado de B na regra proposta?",
+        "options": [
+          {
+            "text": "7",
+            "correct": true,
+            "explanation": "Atributo próprio dois somado aos vizinhos um e quatro resulta em sete."
+          },
+          {
+            "text": "5",
+            "correct": false,
+            "explanation": "Cinco é somente a soma dos vizinhos, omitindo o termo próprio."
+          },
+          {
+            "text": "9",
+            "correct": false,
+            "explanation": "Esse valor não usa a atualização simultânea definida."
+          }
+        ]
+      },
+      {
+        "question": "Qual propriedade tem somar as mensagens dos vizinhos?",
+        "options": [
+          {
+            "text": "Invariância à ordem dos vizinhos",
+            "correct": true,
+            "explanation": "Trocar a sequência dos termos não muda a soma."
+          },
+          {
+            "text": "Distinção garantida entre todos os grafos",
+            "correct": false,
+            "explanation": "Agregação local pode produzir representações iguais para estruturas diferentes."
+          },
+          {
+            "text": "Acesso instantâneo a todos os nós",
+            "correct": false,
+            "explanation": "O alcance depende das conexões e da quantidade de camadas."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Neural Message Passing for Quantum Chemistry",
+        "url": "https://arxiv.org/abs/1704.01212"
+      }
+    ]
+  },
+  "pos_ia_08": {
+    "context": "Duas transformações de uma imagem sintética formam um par positivo. O exercício questiona quais invariâncias realmente são desejáveis.",
+    "theory": "SimCLR aproxima representações de duas vistas do mesmo exemplo e contrasta com outras do lote, usando uma perda baseada em similaridade e temperatura. Um projetor separa o espaço da perda da representação usada em outras tarefas. A escolha das transformações define o que se aprende a ignorar; uma transformação que muda a classe pode produzir um positivo errado. Não há garantia de invariância a qualquer alteração geométrica.",
+    "workedExample": "Em uma classificação fictícia de dígitos, um recorte pequeno pode preservar o significado, mas girar 6 em 180 graus pode fazê-lo parecer 9. Tratar essa rotação como positivo força aproximação de classes potencialmente distintas, prejudicando a tarefa.",
+    "investigation": [
+      "Defina duas vistas que preservem a semântica da tarefa.",
+      "Identifique um par positivo e os contrastes no lote.",
+      "Analise uma transformação que altere a classe desejada."
+    ],
+    "expectedEvidence": "Justifique cada transformação pelo objetivo e diferencie representação e projeção, sem afirmar que uma perda baixa prova boas classes.",
+    "reflection": "Qual viés de tarefa está embutido na escolha das transformações?",
+    "scenarios": [
+      {
+        "id": "positivo",
+        "label": "Mesma origem",
+        "situation": "Dois recortes moderados vêm da mesma imagem de um objeto.",
+        "observation": "O treinamento os trata como par positivo.",
+        "explanation": "A proximidade é desejada se ambos mantêm a informação semântica relevante."
+      },
+      {
+        "id": "rotacao",
+        "label": "Classe alterada",
+        "situation": "Uma rotação transforma a aparência de um seis em nove.",
+        "observation": "A invariância pode ser inadequada.",
+        "explanation": "O rótulo relevante à tarefa não precisa ser preservado por toda transformação."
+      },
+      {
+        "id": "temperatura",
+        "label": "Logits reescalados",
+        "situation": "A temperatura da perda é reduzida com similaridades fixas.",
+        "observation": "A distribuição fica mais concentrada nos maiores logits.",
+        "explanation": "Dividir por uma temperatura menor aumenta diferenças antes da normalização."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual condição deve orientar uma transformação positiva?",
+        "options": [
+          {
+            "text": "Preservar a semântica relevante à tarefa",
+            "correct": true,
+            "explanation": "A invariância aprendida deve ignorar apenas variações que não mudam o objetivo."
+          },
+          {
+            "text": "Modificar obrigatoriamente a classe",
+            "correct": false,
+            "explanation": "Isso criaria um vínculo positivo incompatível com a classificação pretendida."
+          },
+          {
+            "text": "Ser sempre a transformação mais intensa",
+            "correct": false,
+            "explanation": "Intensidade excessiva pode remover justamente o objeto ou atributo útil."
+          }
+        ]
+      },
+      {
+        "question": "O que ocorre ao diminuir temperatura com similaridades fixas?",
+        "options": [
+          {
+            "text": "Maior concentração nos logits mais altos",
+            "correct": true,
+            "explanation": "A divisão por valor menor amplia diferenças relativas no softmax."
+          },
+          {
+            "text": "Todos os pesos tornam-se uniformes",
+            "correct": false,
+            "explanation": "Uniformidade é favorecida por temperatura maior, não menor."
+          },
+          {
+            "text": "As imagens originais mudam de pixels",
+            "correct": false,
+            "explanation": "Temperatura altera a perda, não a transformação dos dados."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "SimCLR",
+        "url": "https://arxiv.org/abs/2002.05709"
+      }
+    ]
+  },
+  "pos_ia_09": {
+    "context": "Uma consulta fictícia recupera trechos de uma base pequena antes de produzir uma resposta. Recuperar informação e usá-la fielmente são etapas separadas.",
+    "theory": "RAG combina recuperação e geração condicionada a documentos. Vetores densos permitem comparar consulta e trechos; produto interno e cosseno só são equivalentes sob normalização apropriada. Um índice aproximado troca custo por possibilidade de perder vizinhos relevantes. Recuperação de alta similaridade não prova que o trecho responde à pergunta ou que a resposta o representa corretamente. Aqui a base e os escores são fornecidos, sem executar FAISS ou um LLM.",
+    "workedExample": "A pergunta é o prazo de devolução. O trecho A diz “devolução em 7 dias” e pontua 0,82; B diz “entrega em 2 dias” e pontua 0,90. Escolher só B pelo escore pode omitir a evidência necessária; a resposta deve conferir relevância do conteúdo, não copiar o maior número.",
+    "investigation": [
+      "Separe pergunta, trechos recuperados e resposta proposta.",
+      "Compare similaridade numérica com pertinência à pergunta.",
+      "Marque a afirmação que cada trecho de fato sustenta."
+    ],
+    "expectedEvidence": "Identifique o trecho de devolução e a evidência textual, declarando o caráter analítico do exercício e evitando alegar consulta a uma base externa.",
+    "reflection": "Como distinguir falha de recuperação de falha de geração quando a resposta está errada?",
+    "scenarios": [
+      {
+        "id": "relevancia",
+        "label": "Assunto parecido",
+        "situation": "O trecho de entrega pontua mais que o de devolução.",
+        "observation": "Similaridade e relevância não coincidem necessariamente.",
+        "explanation": "Termos próximos podem receber escores altos mesmo sem responder ao prazo pedido."
+      },
+      {
+        "id": "suporte",
+        "label": "Resposta fundamentada",
+        "situation": "A resposta proposta afirma devolução em sete dias e cita A.",
+        "observation": "O trecho A sustenta esse prazo.",
+        "explanation": "O vínculo deve ser verificável entre a afirmação e o conteúdo recuperado."
+      },
+      {
+        "id": "lacuna",
+        "label": "Base insuficiente",
+        "situation": "Nenhum trecho menciona a política de troca internacional.",
+        "observation": "A evidência disponível não resolve a pergunta.",
+        "explanation": "O comportamento adequado é reconhecer a lacuna em vez de inventar uma política."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual trecho sustenta o prazo de devolução do exercício?",
+        "options": [
+          {
+            "text": "A, que informa sete dias",
+            "correct": true,
+            "explanation": "Ele menciona explicitamente a política perguntada."
+          },
+          {
+            "text": "B, apenas por pontuar 0,90",
+            "correct": false,
+            "explanation": "Seu conteúdo trata de entrega, não de devolução."
+          },
+          {
+            "text": "Qualquer trecho com um número",
+            "correct": false,
+            "explanation": "Um número precisa se referir ao fato solicitado para ser evidência."
+          }
+        ]
+      },
+      {
+        "question": "O que um índice aproximado pode sacrificar?",
+        "options": [
+          {
+            "text": "Recuperar algum vizinho relevante",
+            "correct": true,
+            "explanation": "A aproximação pode trocar recall por eficiência de busca."
+          },
+          {
+            "text": "A necessidade de verificar fontes",
+            "correct": false,
+            "explanation": "A checagem de suporte continua necessária após a recuperação."
+          },
+          {
+            "text": "Toda diferença entre entrega e devolução",
+            "correct": false,
+            "explanation": "Essa diferença semântica permanece importante para responder corretamente."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Retrieval-Augmented Generation",
+        "url": "https://arxiv.org/abs/2005.11401"
+      }
+    ]
+  },
+  "pos_ia_10": {
+    "context": "Uma previsão fictícia é decomposta em contribuições de atributos. Um mapa visual de relevância exige outra interpretação e outros limites.",
+    "theory": "Valores de Shapley distribuem diferença entre previsão e referência por contribuições marginais de atributos em coalizões. A escolha da distribuição de referência e o tratamento de dependências afetam a explicação; contribuição não é causalidade. Grad-CAM agrega mapas de ativação ponderados por gradientes para uma classe, produzindo localização geralmente grosseira. Os métodos explicam aspectos de um modelo definido, sem validar a verdade da previsão.",
+    "workedExample": "Uma referência vale 10 e contribuições fornecidas são +3 e −1. A reconstrução aditiva dá previsão 10+3−1=12. O atributo de contribuição +3 aumenta a saída relativa à referência usada; isso não prova que intervir nele causará aumento de três.",
+    "investigation": [
+      "Reconstrua a previsão a partir de referência e contribuições.",
+      "Declare qual classe e camada seriam usadas no mapa visual.",
+      "Separe atribuição observacional de efeito de intervenção."
+    ],
+    "expectedEvidence": "Mostre a soma doze e discuta a referência e a resolução espacial, sem apresentar atribuições fornecidas como resultados de modelo executado.",
+    "reflection": "Como mudar a referência pode alterar a narrativa de uma explicação aditiva?",
+    "scenarios": [
+      {
+        "id": "aditividade",
+        "label": "Soma das contribuições",
+        "situation": "Referência dez recebe contribuições três e menos um.",
+        "observation": "A saída reconstruída é doze.",
+        "explanation": "A soma relaciona explicação e previsão no modelo aditivo fornecido."
+      },
+      {
+        "id": "referencia",
+        "label": "Novo contexto",
+        "situation": "A população de referência é alterada.",
+        "observation": "A distribuição de contribuições pode mudar.",
+        "explanation": "Uma explicação relativa depende de como se define a ausência ou substituição de atributos."
+      },
+      {
+        "id": "mapa",
+        "label": "Região destacada",
+        "situation": "Um mapa Grad-CAM marca uma região ampla da imagem.",
+        "observation": "A localização tem resolução limitada.",
+        "explanation": "Destaque de gradiente não demonstra que a região é causa suficiente da classe."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual previsão corresponde à referência e às contribuições dadas?",
+        "options": [
+          {
+            "text": "12",
+            "correct": true,
+            "explanation": "Dez mais três menos um resulta em doze."
+          },
+          {
+            "text": "14",
+            "correct": false,
+            "explanation": "Esse valor soma a magnitude da contribuição negativa com sinal errado."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Dois é apenas a soma das contribuições, sem a referência."
+          }
+        ]
+      },
+      {
+        "question": "O que não pode ser concluído apenas de uma contribuição SHAP positiva?",
+        "options": [
+          {
+            "text": "Um efeito causal de intervir no atributo",
+            "correct": true,
+            "explanation": "A atribuição relativa ao modelo e à referência não é uma estimativa causal por si."
+          },
+          {
+            "text": "Que a contribuição na explicação é positiva",
+            "correct": false,
+            "explanation": "Esse sinal é justamente o dado fornecido na atribuição."
+          },
+          {
+            "text": "Que existe uma referência escolhida",
+            "correct": false,
+            "explanation": "O cálculo aditivo explicitado usa uma referência definida."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "A Unified Approach to Interpreting Model Predictions",
+        "url": "https://arxiv.org/abs/1705.07874"
+      },
+      {
+        "title": "Grad-CAM",
+        "url": "https://arxiv.org/abs/1610.02391"
+      }
+    ]
+  }
+}

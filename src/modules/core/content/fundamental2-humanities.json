@@ -1,0 +1,2368 @@
+{
+  "fund2_hist_01": {
+    "context": "Uma turma monta uma exposição sobre o Egito antigo. Como explicar a relação entre as cheias do Nilo, a produção de alimentos e os grandes monumentos sem atribuir tudo à vontade do faraó?",
+    "theory": "Antes das barragens modernas, as cheias anuais do Nilo levavam água e sedimentos às margens. A agricultura dependia do ritmo do rio e também do trabalho de irrigação, armazenamento e organização coletiva. Uma cheia insuficiente ou excessiva podia prejudicar a colheita. O faraó ocupava o topo de uma sociedade hierarquizada, mas agricultores, artesãos, escribas e outros grupos realizavam trabalhos distintos. Pirâmides eram monumentos funerários de certos períodos: não eram casas de todos os egípcios, nem foram construídas ao longo de toda a história egípcia da mesma forma. Paisagem e poder ajudam a explicar a sociedade, sem tornar o rio sua causa única.",
+    "workedExample": "Modelo didático, sem representar um ano documentado: uma aldeia guarda 30 cestos de grãos após uma boa colheita; no ano seguinte, uma cheia fraca reduz a produção a 18. O estoque pode sustentar a população e as obras por algum tempo. O exemplo relaciona excedente e organização, mas não permite calcular a produção real do Egito antigo.",
+    "investigation": [
+      "Compare os efeitos de uma cheia baixa, moderada e excessiva sobre campos e canais.",
+      "Desenhe uma cadeia que ligue água, colheita, armazenamento, distribuição e trabalhadores especializados.",
+      "Escreva duas legendas para a exposição: uma sobre agricultura e outra sobre hierarquia; indique o limite do modelo didático."
+    ],
+    "expectedEvidence": "Uma explicação que mostre a importância do Nilo, a necessidade de trabalho humano e a participação de diferentes grupos, sem afirmar que toda cheia era benéfica.",
+    "reflection": "Que informações sobre trabalhadores e distribuição de alimentos ficam invisíveis quando observamos apenas a imagem de uma pirâmide?",
+    "scenarios": [
+      {
+        "id": "cheia-baixa",
+        "label": "Água insuficiente",
+        "situation": "Cenário hipotético: a água não alcança parte dos campos.",
+        "observation": "Menos áreas recebem água e sedimentos; o risco de escassez aumenta.",
+        "explanation": "A regularidade do rio era importante, mas sua variação exigia armazenamento e outras respostas humanas."
+      },
+      {
+        "id": "cheia-moderada",
+        "label": "Cheia e canais",
+        "situation": "Cenário hipotético: a inundação alcança as margens e os canais são mantidos.",
+        "observation": "Água disponível e trabalho organizado favorecem o cultivo.",
+        "explanation": "O ambiente oferece condições; irrigação e manutenção transformam essas condições em produção."
+      },
+      {
+        "id": "monumento",
+        "label": "Olhar além do faraó",
+        "situation": "Uma legenda escolar atribui uma pirâmide apenas ao faraó.",
+        "observation": "A legenda apaga os trabalhadores, os alimentos e a logística necessários à obra.",
+        "explanation": "Autoridade política e execução coletiva precisam aparecer na interpretação de um monumento."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual explicação relaciona melhor o Nilo à sociedade egípcia?",
+        "options": [
+          {
+            "text": "As cheias eliminavam qualquer necessidade de trabalho agrícola.",
+            "correct": false,
+            "explanation": "Plantar, colher, manter canais e armazenar continuavam necessários."
+          },
+          {
+            "text": "As cheias favoreciam o cultivo, mas seus resultados dependiam também de organização e trabalho.",
+            "correct": true,
+            "explanation": "A relação combina condições ambientais e ações humanas, incluindo respostas às variações do rio."
+          },
+          {
+            "text": "As pirâmides controlavam fisicamente o nível anual do rio.",
+            "correct": false,
+            "explanation": "Esses monumentos funerários não regulavam as cheias."
+          }
+        ]
+      },
+      {
+        "question": "Uma foto de uma pirâmide permite concluir, sozinha, que...",
+        "options": [
+          {
+            "text": "é necessário buscar outras evidências para compreender quem trabalhou e como a obra foi abastecida.",
+            "correct": true,
+            "explanation": "A imagem revela aspectos materiais, mas não resolve sozinha as relações de trabalho e abastecimento."
+          },
+          {
+            "text": "todos os egípcios viviam em pirâmides.",
+            "correct": false,
+            "explanation": "A função funerária do monumento não representa as moradias da população."
+          },
+          {
+            "text": "a sociedade não dependia da agricultura.",
+            "correct": false,
+            "explanation": "Alimentos e excedentes agrícolas eram fundamentais também para trabalhadores especializados."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "The Metropolitan Museum of Art — The Art of Ancient Egypt",
+        "url": "https://resources.metmuseum.org/resources/metpublications/pdf/The_Art_of_Ancient_Egypt_A_Resource_for_Educators.pdf"
+      }
+    ]
+  },
+  "fund2_hist_02": {
+    "context": "Uma assembleia escolar quer se inspirar na Atenas antiga. Antes de copiar o modelo, a turma investiga quem podia decidir em Atenas e quem sustentava a organização de Esparta.",
+    "theory": "A democracia ateniense clássica envolvia a participação direta de cidadãos homens adultos na assembleia, a Eclésia. Mulheres, pessoas escravizadas e estrangeiros residentes não tinham os mesmos direitos políticos. Portanto, democracia antiga não significava voto universal. Esparta possuía uma organização política com dois reis, conselho de anciãos, éforos e assembleia de cidadãos. A formação dos meninos esparciatas, chamada agogê, valorizava disciplina e preparação militar. Hilotas realizavam grande parte do trabalho agrícola sob dominação. Contrastar as cidades ajuda a perceber diferentes instituições, mas não reduz Atenas à liberdade perfeita nem Esparta a um quartel sem vida política.",
+    "workedExample": "Atividade hipotética: uma sala tem 30 pessoas, mas só 8 recebem cartão de cidadão para votar. A votação é direta entre elas, porém exclui a maioria. O resultado demonstra que o modo de votar e a extensão da cidadania são duas questões diferentes; os cartões não reproduzem estatísticas de Atenas.",
+    "investigation": [
+      "Separe duas perguntas: quem participa e como a decisão é tomada.",
+      "Monte um quadro com Eclésia, agogê e hilotas, identificando a cidade e a função de cada termo.",
+      "Compare a votação restrita do exemplo com uma assembleia escolar em que todos os estudantes podem se manifestar."
+    ],
+    "expectedEvidence": "Um quadro que reconheça participação direta e exclusões em Atenas, além de formação militar e dominação dos hilotas em Esparta, sem equiparar cidadania antiga à atual.",
+    "reflection": "Uma decisão pode ser tomada diretamente e ainda assim excluir muitas pessoas? Explique usando o exemplo dos cartões.",
+    "scenarios": [
+      {
+        "id": "ecclesia",
+        "label": "Voto direto restrito",
+        "situation": "Cidadãos atenienses se reúnem para deliberar na Eclésia.",
+        "observation": "Os participantes decidem diretamente, mas nem todos os moradores são cidadãos.",
+        "explanation": "Participação direta descreve o procedimento, não a inclusão universal."
+      },
+      {
+        "id": "agoge",
+        "label": "Formação espartana",
+        "situation": "A turma analisa a preparação coletiva dos meninos esparciatas.",
+        "observation": "Disciplina e formação militar ocupam papel central.",
+        "explanation": "A agogê estava ligada à reprodução do grupo de cidadãos guerreiros."
+      },
+      {
+        "id": "hilotas",
+        "label": "Quem produz?",
+        "situation": "Um esquema de Esparta mostra apenas os guerreiros.",
+        "observation": "Faltam os hilotas e seu trabalho agrícola submetido à dominação.",
+        "explanation": "A organização militar dependia de relações sociais e econômicas que o esquema omitiu."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que diferencia democracia direta de voto universal?",
+        "options": [
+          {
+            "text": "São expressões idênticas em qualquer época.",
+            "correct": false,
+            "explanation": "Uma trata da forma de decidir; a outra, da abrangência dos direitos de voto."
+          },
+          {
+            "text": "Democracia direta exige escolher representantes que votem no lugar dos cidadãos.",
+            "correct": false,
+            "explanation": "A decisão por representantes caracteriza outra forma de organização."
+          },
+          {
+            "text": "A decisão direta pode ser restrita a um grupo, como ocorria em Atenas.",
+            "correct": true,
+            "explanation": "Cidadãos participavam pessoalmente, enquanto vários grupos ficavam excluídos."
+          }
+        ]
+      },
+      {
+        "question": "Por que incluir os hilotas ao estudar Esparta?",
+        "options": [
+          {
+            "text": "Porque seu trabalho e sua dominação ajudam a compreender a base da organização espartana.",
+            "correct": true,
+            "explanation": "A vida dos cidadãos guerreiros se articulava à exploração do trabalho de outros grupos."
+          },
+          {
+            "text": "Porque hilotas era outro nome dado aos dois reis.",
+            "correct": false,
+            "explanation": "Hilotas eram uma população submetida, não os governantes espartanos."
+          },
+          {
+            "text": "Porque eles tinham os mesmos direitos dos esparciatas.",
+            "correct": false,
+            "explanation": "O contraste entre esses grupos é justamente uma desigualdade central."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_hist_03": {
+    "context": "Em uma maquete de um senhorio medieval, três campos recebem placas de cultivo. A turma precisa explicar por que um campo fica em pousio e como as obrigações servis afetam o trabalho.",
+    "theory": "Em partes da Europa medieval, o sistema de três campos alternava culturas e pousio: uma parcela podia receber cereal de inverno, outra uma cultura de primavera e a terceira descansar. A rotação distribuía usos da terra, mas não eliminava perdas nem existia de forma igual em toda a Europa. Nos senhorios, camponeses submetidos à servidão tinham obrigações diversas. Corveia designava trabalho devido nas terras do senhor; talha, entrega de parte da produção. Servidão e escravidão não eram condições idênticas. Castelos também expressavam defesa e poder local. É preciso distinguir a terra cultivada, os direitos sobre ela e as pessoas obrigadas a trabalhar.",
+    "workedExample": "Modelo didático: no ano 1, o campo A recebe cereal de inverno, B recebe cultura de primavera e C fica em pousio. No ano 2, C recebe cereal, A cultura de primavera e B pousio. A parcela em descanso muda; abandonar para sempre um campo não seria rotação.",
+    "investigation": [
+      "Organize três anos de uso dos campos A, B e C, fazendo o pousio circular.",
+      "Marque separadamente uma obrigação de trabalho e uma entrega de parte da colheita.",
+      "Explique por que o esquema de campos não informa, sozinho, se a vida dos camponeses era confortável."
+    ],
+    "expectedEvidence": "Uma sequência coerente de três anos de rotação e a distinção entre corveia e talha, reconhecendo que técnicas agrícolas não anulavam desigualdades ou riscos de fome.",
+    "reflection": "Quem decide o uso da terra e quem recebe o que ela produz? Como essas perguntas mudam a leitura da maquete?",
+    "scenarios": [
+      {
+        "id": "pousio",
+        "label": "Descanso que circula",
+        "situation": "O campo C descansa no primeiro ano e o campo B no segundo.",
+        "observation": "A área em pousio alterna entre parcelas.",
+        "explanation": "O descanso integra um ciclo de uso, não o abandono permanente da área."
+      },
+      {
+        "id": "corveia",
+        "label": "Obrigação em trabalho",
+        "situation": "Exemplo hipotético: um camponês dedica parte da semana à reserva senhorial.",
+        "observation": "O senhor recebe dias de trabalho.",
+        "explanation": "Essa obrigação corresponde à corveia, e não à entrega de uma fração da colheita."
+      },
+      {
+        "id": "talha",
+        "label": "Parte da produção",
+        "situation": "Exemplo hipotético: uma família entrega ao senhor parte dos grãos colhidos.",
+        "observation": "A obrigação é satisfeita com produtos.",
+        "explanation": "A talha incidia sobre a produção; sua forma concreta variava entre locais e épocas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual esquema representa rotação trienal?",
+        "options": [
+          {
+            "text": "Manter uma parcela em pousio para sempre.",
+            "correct": false,
+            "explanation": "Sem alternância de uso entre as parcelas, não há o ciclo proposto."
+          },
+          {
+            "text": "Alternar culturas e pousio entre três parcelas ao longo dos anos.",
+            "correct": true,
+            "explanation": "A posição de cada uso muda, permitindo que diferentes parcelas passem pelo descanso."
+          },
+          {
+            "text": "Plantar o mesmo cereal nas três parcelas todos os anos.",
+            "correct": false,
+            "explanation": "Isso não inclui nem alternância de culturas nem pousio."
+          }
+        ]
+      },
+      {
+        "question": "A entrega de uma parte dos grãos ao senhor corresponde a qual obrigação?",
+        "options": [
+          {
+            "text": "Corveia, porque toda obrigação se media em dias de trabalho.",
+            "correct": false,
+            "explanation": "A corveia é uma obrigação de trabalho, diferente da entrega de produtos."
+          },
+          {
+            "text": "Agogê, por envolver disciplina agrícola.",
+            "correct": false,
+            "explanation": "Agogê refere-se à formação espartana, de outro contexto histórico."
+          },
+          {
+            "text": "Talha, pois se trata de parcela da produção.",
+            "correct": true,
+            "explanation": "A forma da prestação, neste caso em produtos, permite distinguir as obrigações."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_hist_04": {
+    "context": "Um mapa escolar representa uma viagem pelo Atlântico nos séculos XV e XVI. A turma deve escolher informações de navegação e discutir os encontros e violências envolvidos na expansão europeia.",
+    "theory": "As viagens oceânicas combinaram conhecimentos de diferentes origens, investimentos, embarcações e interesses comerciais e políticos. A bússola indicava uma direção magnética, sem fornecer a distância percorrida ou uma posição completa no mapa. Instrumentos como o astrolábio náutico ajudavam a estimar a latitude por observações dos astros. Ventos, correntes, cartas e experiência dos navegadores também importavam. A expansão marítima europeia não foi uma simples marcha do progresso: articulou trocas e circulação de conhecimentos a conquista, escravização e expropriação. Chamar a chegada a um território habitado de descoberta exige considerar a perspectiva de quem já vivia ali.",
+    "workedExample": "Situação hipotética: dois navios mantêm a mesma direção indicada pela bússola, mas correntes diferentes os deslocam de modo desigual. A agulha não mostra esse desvio como uma posição exata. Os navegadores precisariam combinar observações, registros da viagem e conhecimentos sobre o mar.",
+    "investigation": [
+      "Associe bússola a direção e observação dos astros à estimativa de latitude, sem atribuir a elas funções de GPS.",
+      "Sobre um mapa esquemático, compare rumo pretendido e deslocamento causado por uma corrente lateral.",
+      "Escreva uma legenda que reconheça a presença de povos nos territórios alcançados e um efeito violento da expansão."
+    ],
+    "expectedEvidence": "Um mapa comentado que diferencie direção e localização, reconheça o uso combinado de conhecimentos e inclua as populações afetadas pela expansão marítima.",
+    "reflection": "Como a expressão chegada dos europeus muda a perspectiva de uma legenda que antes dizia descoberta de terras vazias?",
+    "scenarios": [
+      {
+        "id": "bussola",
+        "label": "Rumo magnético",
+        "situation": "O navegador consulta a agulha da bússola.",
+        "observation": "Obtém uma referência de direção.",
+        "explanation": "A bússola não informa sozinha longitude, latitude e distância ao destino."
+      },
+      {
+        "id": "astro",
+        "label": "Observar o céu",
+        "situation": "O navegador mede a altura de um astro com instrumento adequado.",
+        "observation": "A observação pode auxiliar a estimativa da latitude.",
+        "explanation": "A posição é construída com medidas e cálculos, sujeitos a condições de observação e erros."
+      },
+      {
+        "id": "chegada",
+        "label": "Território habitado",
+        "situation": "Uma carta didática representa uma costa sem mostrar seus habitantes.",
+        "observation": "O desenho pode sugerir que a terra estava vazia.",
+        "explanation": "Mapas e legendas selecionam perspectivas; ocupação e conhecimentos locais não devem ser apagados."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que uma bússola fornece diretamente ao navegador?",
+        "options": [
+          {
+            "text": "Uma referência magnética de direção.",
+            "correct": true,
+            "explanation": "A agulha permite orientar o rumo, embora não determine uma localização completa."
+          },
+          {
+            "text": "A distância exata até qualquer porto.",
+            "correct": false,
+            "explanation": "Essa distância exige outras informações e procedimentos."
+          },
+          {
+            "text": "O nome dos povos que vivem na próxima costa.",
+            "correct": false,
+            "explanation": "Informações sociais não são medidas pela bússola."
+          }
+        ]
+      },
+      {
+        "question": "Qual legenda considera mais de uma perspectiva histórica?",
+        "options": [
+          {
+            "text": "Os europeus chegaram a um espaço sem história.",
+            "correct": false,
+            "explanation": "Territórios habitados possuíam sociedades e histórias anteriores à chegada europeia."
+          },
+          {
+            "text": "A chegada europeia estabeleceu contatos e também processos de conquista sobre povos que já habitavam o território.",
+            "correct": true,
+            "explanation": "A frase reconhece os habitantes e diferentes consequências dos contatos."
+          },
+          {
+            "text": "Toda viagem foi explicada apenas pela curiosidade científica.",
+            "correct": false,
+            "explanation": "Interesses comerciais, políticos e religiosos também participaram da expansão."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Royal Museums Greenwich — What is a mariner’s astrolabe?",
+        "url": "https://www.rmg.co.uk/stories/space-astronomy/what-mariners-astrolabe"
+      }
+    ]
+  },
+  "fund2_hist_05": {
+    "context": "Um museu escolar recebeu três etiquetas misturadas: Andes, cidades maias e Tenochtitlán. A turma precisa reconstruir as diferenças entre sociedades americanas anteriores à conquista europeia.",
+    "theory": "Maias, mexicas — frequentemente chamados de astecas — e incas não formavam uma única civilização. Sociedades maias desenvolveram cidades, escrita e conhecimentos calendáricos na Mesoamérica, com trajetórias políticas diversas. Os mexicas construíram poder centrado em Tenochtitlán e no recebimento de tributos; chinampas eram áreas agrícolas de ambientes lacustres. O Estado inca se expandiu pelos Andes e articulou caminhos, trabalho e administração de territórios diversos. Terraços agrícolas ajudavam a cultivar encostas. Essas técnicas respondem a ambientes e relações sociais específicos. Os povos indígenas não desapareceram com a conquista: suas comunidades e línguas permanecem vivas e mudam ao longo do tempo.",
+    "workedExample": "Em uma comparação didática, uma encosta andina recebe degraus agrícolas para reduzir o escoamento e criar superfícies de cultivo; uma área lacustre mesoamericana recebe chinampas. Ambas ampliam condições de produção, mas transformar uma técnica na outra apagaria diferenças de ambiente e história.",
+    "investigation": [
+      "Localize Andes e Mesoamérica em um mapa e associe corretamente as três sociedades.",
+      "Compare terraços e chinampas, registrando o problema ambiental ao qual cada técnica responde.",
+      "Reescreva a frase todos esses povos eram iguais usando duas diferenças e uma observação sobre sua presença atual."
+    ],
+    "expectedEvidence": "Etiquetas que distingam incas, mexicas e maias, relacionem técnica agrícola ao ambiente e evitem afirmar que os povos indígenas pertencem apenas ao passado.",
+    "reflection": "Por que agrupar sociedades distintas como povos sem tecnologia impede compreender seus conhecimentos?",
+    "scenarios": [
+      {
+        "id": "andes",
+        "label": "Cultivar a encosta",
+        "situation": "A equipe observa terraços em uma paisagem andina.",
+        "observation": "Degraus criam superfícies aproveitáveis para cultivo.",
+        "explanation": "A técnica se relaciona às condições do relevo e integra histórias agrícolas andinas."
+      },
+      {
+        "id": "lago",
+        "label": "Agricultura lacustre",
+        "situation": "Uma representação didática mostra chinampas perto de Tenochtitlán.",
+        "observation": "Áreas agrícolas articulam terra e água em um ambiente de lagos.",
+        "explanation": "A solução difere dos terraços de encostas e não deve receber a mesma etiqueta."
+      },
+      {
+        "id": "maias",
+        "label": "Cidades e registros",
+        "situation": "A turma organiza uma seção sobre escrita e calendários maias.",
+        "observation": "Os registros revelam conhecimentos e organizações políticas complexas.",
+        "explanation": "Complexidade não exige que todas as cidades tenham pertencido a um único Estado unificado."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual associação respeita diferenças entre essas sociedades?",
+        "options": [
+          {
+            "text": "Incas — Tenochtitlán; mexicas — império andino.",
+            "correct": false,
+            "explanation": "As localizações foram invertidas: Tenochtitlán se relaciona aos mexicas e os Andes aos incas."
+          },
+          {
+            "text": "Todos possuíam a mesma capital, língua e técnica agrícola.",
+            "correct": false,
+            "explanation": "Essa generalização apaga a diversidade histórica e geográfica."
+          },
+          {
+            "text": "Incas — Andes e terraços; mexicas — Tenochtitlán e agricultura lacustre.",
+            "correct": true,
+            "explanation": "A associação conecta sociedades e ambientes sem torná-las idênticas."
+          }
+        ]
+      },
+      {
+        "question": "Que correção deve ser feita à frase os maias desapareceram?",
+        "options": [
+          {
+            "text": "Distinguir transformações de antigas cidades da continuidade de povos e línguas maias.",
+            "correct": true,
+            "explanation": "Mudanças políticas e a conquista não equivalem ao desaparecimento de todas as comunidades."
+          },
+          {
+            "text": "Substituir maias por todos os povos americanos.",
+            "correct": false,
+            "explanation": "A troca ampliaria uma afirmação incorreta."
+          },
+          {
+            "text": "Dizer que não houve mudanças na vida maia desde a Antiguidade.",
+            "correct": false,
+            "explanation": "Continuidade de povos não significa ausência de transformações históricas."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "British Museum — Mexico",
+        "url": "https://www.britishmuseum.org/collection/galleries/mexico"
+      },
+      {
+        "title": "British Museum — Peru resources",
+        "url": "https://www.britishmuseum.org/peru-resources"
+      }
+    ]
+  },
+  "fund2_hist_06": {
+    "context": "Ao analisar uma imagem de um engenho, a turma investiga quem produzia o açúcar, quais etapas dependiam de trabalho especializado e por que a riqueza exportada não significava liberdade para todos.",
+    "theory": "O engenho colonial reunia lavoura, moagem da cana, cozimento do caldo e outras etapas da produção de açúcar. O termo também podia designar o conjunto da propriedade. A produção voltada ao comércio atlântico articulava terras, crédito, transporte e trabalho. Africanos e afrodescendentes escravizados tiveram papel central, em uma sociedade que também explorou trabalho indígena. Escravização envolvia violência e restrição de liberdade; pessoas escravizadas tinham conhecimentos, laços sociais e formas de resistência. Casa-grande e instalações de trabalho revelam desigualdades, mas uma planta arquitetônica sozinha não explica toda a vida de seus habitantes.",
+    "workedExample": "Roteiro didático: cana colhida → moenda → caldo → cozimento → preparação do açúcar → transporte. Se a moenda para, as etapas seguintes são afetadas. O fluxo ajuda a entender interdependência técnica, mas deve ser acompanhado da pergunta sobre as pessoas coagidas a executar cada trabalho.",
+    "investigation": [
+      "Ordene as etapas da produção e identifique pelo menos duas tarefas diferentes.",
+      "Acrescente ao fluxograma as pessoas que trabalhavam e as relações de coerção que o desenho técnico omite.",
+      "Elabore uma legenda que explique produção para exportação, escravização e resistência sem tratar pessoas como simples peças de uma máquina."
+    ],
+    "expectedEvidence": "Um fluxograma tecnicamente coerente acompanhado de análise das relações de trabalho, que reconheça violência, habilidades e ação histórica das pessoas escravizadas.",
+    "reflection": "O que muda quando a visita ao engenho acompanha os trabalhadores, em vez de observar apenas a casa do proprietário?",
+    "scenarios": [
+      {
+        "id": "moenda",
+        "label": "Etapas articuladas",
+        "situation": "Um esquema mostra cana entrando na moenda e caldo saindo dela.",
+        "observation": "A moagem extrai o caldo que seguirá para outras operações.",
+        "explanation": "Moer não produz imediatamente açúcar pronto; a cadeia possui outras etapas e saberes."
+      },
+      {
+        "id": "exportacao",
+        "label": "Circuito atlântico",
+        "situation": "O açúcar segue da propriedade para um porto e para mercados externos.",
+        "observation": "A produção local integra redes de comércio e financiamento.",
+        "explanation": "O engenho não era uma unidade isolada que produzia apenas para seus moradores."
+      },
+      {
+        "id": "resistencia",
+        "label": "Pessoas com história",
+        "situation": "Uma legenda menciona somente máquinas e lucros.",
+        "observation": "A experiência e as ações das pessoas escravizadas ficam ausentes.",
+        "explanation": "Uma interpretação histórica precisa considerar coerção, conhecimentos e resistência, além dos resultados econômicos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Por que um fluxograma de máquinas é insuficiente para explicar o engenho colonial?",
+        "options": [
+          {
+            "text": "Porque não existiam etapas técnicas de produção.",
+            "correct": false,
+            "explanation": "Lavoura, moagem e cozimento eram operações articuladas, que precisam ser estudadas."
+          },
+          {
+            "text": "Porque também é necessário analisar as pessoas, a escravização e as redes de comércio.",
+            "correct": true,
+            "explanation": "Técnica, trabalho e relações econômicas compõem conjuntamente esse processo histórico."
+          },
+          {
+            "text": "Porque todo o trabalho era livre e voluntário.",
+            "correct": false,
+            "explanation": "A escravização foi central para a produção açucareira colonial."
+          }
+        ]
+      },
+      {
+        "question": "Qual legenda reconhece a ação histórica das pessoas escravizadas?",
+        "options": [
+          {
+            "text": "Eram objetos sem conhecimento ou formas de resistência.",
+            "correct": false,
+            "explanation": "A condição imposta de escravização não eliminava conhecimentos, vínculos e ações próprias."
+          },
+          {
+            "text": "A exportação de açúcar garantiu liberdade imediata a todos.",
+            "correct": false,
+            "explanation": "A riqueza gerada coexistiu com a manutenção da coerção e da desigualdade."
+          },
+          {
+            "text": "Submetidas à violência, empregavam saberes e construíam estratégias de vida e resistência.",
+            "correct": true,
+            "explanation": "A frase reconhece a opressão sem apagar as pessoas que a enfrentavam."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Biblioteca Nacional — Pernambuco e a produção colonial",
+        "url": "https://bndigital.bn.gov.br/dossies/projetoresgate/acervo-digital/capitanias/pernambuco/"
+      },
+      {
+        "title": "Biblioteca Nacional — Tráfico de escravos no Brasil",
+        "url": "https://bndigital.bn.gov.br/projetos/escravos/introducao.html"
+      }
+    ]
+  },
+  "fund2_hist_07": {
+    "context": "A turma prepara uma linha do tempo de 1789 e percebe que a tomada da Bastilha, o fim de privilégios e a Declaração dos Direitos não aconteceram no mesmo dia nem resolveram todas as desigualdades.",
+    "theory": "A crise francesa no final do século XVIII envolvia finanças do Estado, tensões sociais e problemas de abastecimento. A sociedade de ordens distinguia clero, nobreza e Terceiro Estado, este formado por grupos muito diversos. Em 14 de julho de 1789, a tomada da Bastilha tornou-se símbolo da contestação ao poder real. Em agosto, a Assembleia atacou privilégios e aprovou a Declaração dos Direitos do Homem e do Cidadão, que afirmava liberdade e igualdade jurídica. A distância entre princípios e prática permaneceu: mulheres não alcançaram de imediato direitos políticos iguais, e a escravidão colonial não terminou com a declaração de 1789. Revolução foi um processo de disputas, não um evento único.",
+    "workedExample": "Um aluno escreve: a Bastilha caiu e, no mesmo instante, todos passaram a votar. A revisão separa acontecimento simbólico, mudanças legislativas e limites da participação política. A linha do tempo melhora quando datas são ligadas a processos e não usadas como prova de uma igualdade já realizada.",
+    "investigation": [
+      "Ordene: convocação dos Estados Gerais, tomada da Bastilha em julho e Declaração dos Direitos em agosto de 1789.",
+      "Distinga igualdade perante a lei de participação política efetivamente assegurada a todos.",
+      "Produza uma legenda para a Bastilha que explique seu valor simbólico e evite transformá-la em causa única da Revolução."
+    ],
+    "expectedEvidence": "Uma linha do tempo que diferencie eventos e processos, identifique a sociedade de ordens e reconheça limites da aplicação dos direitos proclamados em 1789.",
+    "reflection": "Por que proclamar um princípio pode ser uma mudança importante mesmo quando sua aplicação ainda é desigual?",
+    "scenarios": [
+      {
+        "id": "ordens",
+        "label": "Terceiro Estado diverso",
+        "situation": "Um desenho apresenta o Terceiro Estado como se todos tivessem a mesma riqueza.",
+        "observation": "Camponeses, trabalhadores urbanos e burgueses ficam indistintos.",
+        "explanation": "A categoria reunia grupos com condições e interesses diferentes."
+      },
+      {
+        "id": "bastilha",
+        "label": "Símbolo de ruptura",
+        "situation": "A linha do tempo marca 14 de julho de 1789.",
+        "observation": "A tomada da fortaleza representa uma contestação popular ao poder real.",
+        "explanation": "Seu significado político não permite atribuir a um só dia todas as transformações posteriores."
+      },
+      {
+        "id": "direitos",
+        "label": "Princípio e alcance",
+        "situation": "A turma compara a igualdade jurídica proclamada com a exclusão política de mulheres.",
+        "observation": "Há uma distância entre uma afirmação universal e seu alcance prático.",
+        "explanation": "Reconhecer essa tensão permite estudar disputas e reivindicações por ampliação dos direitos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual leitura de 1789 evita confundir evento e processo?",
+        "options": [
+          {
+            "text": "A Bastilha foi um marco simbólico em um processo mais amplo de crise e mudanças.",
+            "correct": true,
+            "explanation": "O acontecimento se relaciona a tensões anteriores e transformações posteriores."
+          },
+          {
+            "text": "A tomada da Bastilha implantou imediatamente direitos políticos iguais para todos.",
+            "correct": false,
+            "explanation": "Permaneceram exclusões e disputas sobre o alcance dos direitos."
+          },
+          {
+            "text": "Nada mudou porque os princípios não foram aplicados integralmente.",
+            "correct": false,
+            "explanation": "Limites de aplicação não anulam a ruptura jurídica e política que estava em disputa."
+          }
+        ]
+      },
+      {
+        "question": "O Terceiro Estado era composto...",
+        "options": [
+          {
+            "text": "apenas por camponeses com propriedades iguais.",
+            "correct": false,
+            "explanation": "A ordem incluía grupos rurais e urbanos com grandes diferenças sociais."
+          },
+          {
+            "text": "por grupos diversos, fora das ordens do clero e da nobreza.",
+            "correct": true,
+            "explanation": "Burgueses, camponeses e trabalhadores urbanos podiam integrar essa categoria."
+          },
+          {
+            "text": "pelos membros hereditários da nobreza.",
+            "correct": false,
+            "explanation": "A nobreza constituía outra ordem da sociedade francesa."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Château de Versailles — Versailles at the heart of the French Revolution",
+        "url": "https://en.chateauversailles.fr/discover/history/key-dates/versailles-heart-french-revolution"
+      }
+    ]
+  },
+  "fund2_hist_08": {
+    "context": "Em uma exposição sobre Minas Gerais no século XVIII, uma balança de ouro aparece ao lado de uma igreja barroca. A turma investiga impostos, trabalho e conflitos políticos sem transformar a Inconfidência em independência já conquistada.",
+    "theory": "A mineração ampliou a ocupação e a circulação comercial no interior da América portuguesa, apoiada fortemente no trabalho escravizado. O quinto correspondia à cobrança de uma quinta parte do ouro devido à Coroa, embora os métodos de arrecadação tenham mudado ao longo do tempo. A derrama era um mecanismo de cobrança de valores faltantes para atingir a quota fiscal. A ameaça de sua execução integrou o contexto da conspiração mineira de 1789, que foi denunciada antes de se realizar como revolta. Seus participantes não formavam um grupo social homogêneo nem um movimento consensual de abolição. Obras de Antônio Francisco Lisboa, o Aleijadinho, integram o patrimônio artístico desse ambiente, mas arte e riqueza não eliminavam a desigualdade colonial.",
+    "workedExample": "Cálculo didático: de 100 gramas sujeitos ao quinto, 20 gramas correspondem a um quinto. Esse cálculo explica a fração, não todos os procedimentos fiscais do período. A derrama não era simplesmente outro nome para os mesmos 20 gramas: estava ligada à cobrança de valores faltantes da quota.",
+    "investigation": [
+      "Calcule um quinto de 50 e de 100 unidades hipotéticas de ouro.",
+      "Separe em cartões quinto, derrama e conspiração de 1789, registrando a relação entre eles sem tratá-los como sinônimos.",
+      "Escreva uma legenda de patrimônio barroco que inclua trabalho, religiosidade e desigualdade, além da beleza artística."
+    ],
+    "expectedEvidence": "Cálculos corretos do quinto e uma explicação que distinga imposto, cobrança de atrasados e conspiração, reconhecendo o papel do trabalho escravizado na sociedade mineradora.",
+    "reflection": "Como uma cidade pode produzir obras admiradas e, ao mesmo tempo, ser marcada por exploração e exclusões?",
+    "scenarios": [
+      {
+        "id": "quinto",
+        "label": "A fração fiscal",
+        "situation": "Modelo aritmético: 50 unidades de ouro são submetidas à taxa de um quinto.",
+        "observation": "A parcela calculada é de 10 unidades.",
+        "explanation": "Dividir por cinco permite compreender a taxa, sem reproduzir toda a administração colonial."
+      },
+      {
+        "id": "derrama",
+        "label": "Cobrança faltante",
+        "situation": "A administração não atinge a quota fiscal e ameaça cobrar a diferença.",
+        "observation": "A ameaça amplia tensões entre autoridades e setores da sociedade mineira.",
+        "explanation": "Esse mecanismo ajuda a entender o contexto da conspiração, sem ser sua explicação exclusiva."
+      },
+      {
+        "id": "conspiracao",
+        "label": "Projeto interrompido",
+        "situation": "Uma linha do tempo situa a denúncia da conspiração em 1789.",
+        "observation": "O projeto não se concretiza como uma revolta vitoriosa.",
+        "explanation": "Conspiração e independência realizada são situações históricas diferentes."
+      }
+    ],
+    "questions": [
+      {
+        "question": "No modelo de um quinto, qual parcela corresponde à taxa sobre 100 unidades?",
+        "options": [
+          {
+            "text": "5 unidades, porque quinto significa cinco no total.",
+            "correct": false,
+            "explanation": "Um quinto é uma das cinco partes iguais: 100 dividido por 5."
+          },
+          {
+            "text": "80 unidades, a parte que permanece após a taxa.",
+            "correct": false,
+            "explanation": "80 é o restante no modelo, não a parcela de um quinto."
+          },
+          {
+            "text": "20 unidades.",
+            "correct": true,
+            "explanation": "100 ÷ 5 = 20; o cálculo representa a fração fiscal estudada."
+          }
+        ]
+      },
+      {
+        "question": "Qual descrição distingue corretamente a Inconfidência Mineira?",
+        "options": [
+          {
+            "text": "Foi uma conspiração denunciada antes de se realizar como revolta.",
+            "correct": true,
+            "explanation": "Isso a diferencia de uma independência conquistada ou de um conflito militar vitorioso."
+          },
+          {
+            "text": "Aboliu a escravidão em toda a América portuguesa em 1789.",
+            "correct": false,
+            "explanation": "O movimento não teve esse resultado, e seus participantes não compartilhavam um projeto abolicionista consensual."
+          },
+          {
+            "text": "Foi apenas o nome de uma técnica de escultura barroca.",
+            "correct": false,
+            "explanation": "A Inconfidência se refere à conspiração política, não a uma técnica artística."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Arquivo Nacional — Conjuração em Minas Gerais",
+        "url": "https://historialuso.arquivonacional.gov.br/index.php/historia-luso-brasileira/assuntos/brasil/conjuracao-em-minas-gerais"
+      }
+    ]
+  },
+  "fund2_hist_09": {
+    "context": "Um mural do Segundo Reinado reúne um mapa da região do Prata, soldados e datas da abolição. A turma precisa relacionar esses elementos sem afirmar que a Guerra do Paraguai, sozinha, acabou com a escravidão.",
+    "theory": "A Guerra do Paraguai, entre 1864 e 1870, envolveu o Paraguai e a Tríplice Aliança formada por Brasil, Argentina e Uruguai. O conflito se insere em disputas de poder, fronteiras e influência na região do Prata, com consequências devastadoras, sobretudo para a sociedade paraguaia. O Brasil era uma monarquia escravista, e o recrutamento de homens escravizados e libertos expôs contradições entre defesa do país e restrição de direitos. A guerra ampliou o protagonismo do Exército no Brasil, mas a crise imperial teve várias causas. A abolição de 1888 resultou de um processo com luta de pessoas escravizadas, ação abolicionista, transformações políticas e leis anteriores; não foi uma consequência automática da guerra.",
+    "workedExample": "Na linha do tempo, 1870 marca o fim da guerra; 1888, a Lei Áurea; 1889, a proclamação da República. A ordem mostra que os eventos são distintos. Para propor uma relação entre eles, é necessário explicar mecanismos e agentes históricos, e não apenas ligar datas com uma seta.",
+    "investigation": [
+      "Identifique em um mapa os quatro países envolvidos, separando Paraguai e membros da Tríplice Aliança.",
+      "Organize guerra, abolição e fim do Império em uma linha do tempo.",
+      "Redija uma hipótese sobre contradições do recrutamento numa sociedade escravista e outra sobre a participação de diferentes agentes na abolição."
+    ],
+    "expectedEvidence": "Um mapa e uma linha do tempo corretos, acompanhados de explicação multicausal que reconheça o impacto humano da guerra e não apague a luta pela liberdade.",
+    "reflection": "Por que proximidade de datas não é prova suficiente de que um acontecimento causou sozinho outro?",
+    "scenarios": [
+      {
+        "id": "alianca",
+        "label": "Quem combateu?",
+        "situation": "Um cartão coloca Paraguai e Brasil na mesma aliança.",
+        "observation": "A organização dos lados do conflito está incorreta.",
+        "explanation": "A Tríplice Aliança reuniu Brasil, Argentina e Uruguai contra o Paraguai."
+      },
+      {
+        "id": "recrutamento",
+        "label": "Direitos contraditórios",
+        "situation": "A turma investiga a participação de escravizados e libertos nas forças brasileiras.",
+        "observation": "Serviço militar e ausência ou limitação de direitos convivem na mesma sociedade.",
+        "explanation": "A situação revela tensões de um Estado escravista, sem significar liberdade automática para todos."
+      },
+      {
+        "id": "abolicao",
+        "label": "Processos diferentes",
+        "situation": "Uma seta liga 1870 a 1888 com a frase causa única.",
+        "observation": "A seta omite resistência à escravidão, mobilizações e mudanças políticas.",
+        "explanation": "Uma interpretação histórica precisa apresentar outros agentes e fatores do processo abolicionista."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quais países compunham a Tríplice Aliança?",
+        "options": [
+          {
+            "text": "Brasil, Argentina e Uruguai.",
+            "correct": true,
+            "explanation": "Esses três países constituíram a aliança que combateu o Paraguai."
+          },
+          {
+            "text": "Brasil, Paraguai e Chile.",
+            "correct": false,
+            "explanation": "O Paraguai estava no lado adversário e o Chile não integrava essa aliança."
+          },
+          {
+            "text": "Argentina, Portugal e Uruguai.",
+            "correct": false,
+            "explanation": "Portugal não compunha a aliança; o Brasil era um Estado independente."
+          }
+        ]
+      },
+      {
+        "question": "Qual interpretação da abolição é mais adequada?",
+        "options": [
+          {
+            "text": "Ocorreu automaticamente no dia em que a guerra terminou.",
+            "correct": false,
+            "explanation": "A guerra terminou em 1870 e a abolição legal ocorreu em 1888, após um processo de lutas."
+          },
+          {
+            "text": "Resultou de um processo com vários agentes e fatores, incluindo a luta de pessoas escravizadas.",
+            "correct": true,
+            "explanation": "A explicação evita atribuir uma transformação complexa a uma única causa."
+          },
+          {
+            "text": "Foi realizada por uma decisão da Tríplice Aliança no Paraguai.",
+            "correct": false,
+            "explanation": "A abolição da escravidão no Brasil não foi uma decisão daquele tratado militar."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Arquivo Nacional — Fundo Ministério da Guerra",
+        "url": "https://www.gov.br/arquivonacional/pt-br/servicos/copy_of_instrumentos-de-pesquisa/ministerio-da-guerra.pdf"
+      }
+    ]
+  },
+  "fund2_hist_10": {
+    "context": "Uma exposição sobre a Primeira Guerra Mundial apresenta trincheiras, cartas e armamentos. A turma investiga por que a experiência dos soldados não pode ser resumida a movimentos coloridos em um mapa.",
+    "theory": "Na Frente Ocidental, extensas redes de trincheiras se consolidaram após os movimentos iniciais de 1914. Artilharia, metralhadoras, arame farpado e sistemas defensivos dificultavam avanços. A guerra de atrito buscava desgastar recursos e efetivos do adversário, produzindo enormes perdas sem garantir grandes mudanças territoriais. Lama, doenças, cansaço e medo faziam parte da experiência de muitos soldados, embora a vida variasse entre setores e momentos. Gases tóxicos acrescentaram um perigo relacionado também ao vento e às medidas de proteção. Nem toda a Primeira Guerra ocorreu em trincheiras, e nenhuma arma explica isoladamente seu resultado.",
+    "workedExample": "Mapa hipotético, sem números históricos: após uma ofensiva custosa, a linha avança apenas uma pequena faixa. Comparar recursos consumidos e terreno conquistado ajuda a explicar atrito. O desenho não mede o sofrimento nem autoriza transformar perdas humanas em simples pontuação de jogo.",
+    "investigation": [
+      "Diferencie avanço territorial e desgaste de recursos em um mapa esquemático.",
+      "Identifique como metralhadoras, artilharia e obstáculos podiam se combinar numa defesa.",
+      "Produza uma legenda que inclua condições de vida e o limite do mapa como fonte para compreender experiências humanas."
+    ],
+    "expectedEvidence": "Uma interpretação que relacione impasse, defesa e guerra de atrito, considere experiências dos soldados e delimite a análise à Frente Ocidental quando falar das trincheiras.",
+    "reflection": "Que perguntas uma carta de soldado poderia ajudar a investigar que um mapa de frentes não responde?",
+    "scenarios": [
+      {
+        "id": "impasse",
+        "label": "Pouco terreno, alto custo",
+        "situation": "Cenário hipotético: uma ofensiva consome muitos recursos e desloca pouco a frente.",
+        "observation": "Desgaste e conquista de terreno não crescem na mesma proporção.",
+        "explanation": "Esse contraste ajuda a compreender a lógica e os custos da guerra de atrito."
+      },
+      {
+        "id": "lama",
+        "label": "Vida nas posições",
+        "situation": "Uma representação mostra água acumulada e abrigo precário em uma trincheira.",
+        "observation": "O ambiente afeta saúde, descanso e circulação.",
+        "explanation": "A experiência militar depende de condições materiais e humanas, além do uso de armas."
+      },
+      {
+        "id": "gas",
+        "label": "Perigo e proteção",
+        "situation": "A turma estuda o emprego histórico de gás tóxico, sem reproduzir qualquer experimento.",
+        "observation": "Vento e equipamentos de proteção influenciavam o risco.",
+        "explanation": "Armas químicas acrescentaram terror, mas não resolveram sozinhas o impasse da guerra."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que caracteriza a guerra de atrito estudada aqui?",
+        "options": [
+          {
+            "text": "Vitórias sem consumo de recursos e sem perdas humanas.",
+            "correct": false,
+            "explanation": "Atrito envolve justamente desgaste prolongado de efetivos e recursos."
+          },
+          {
+            "text": "Ausência de sistemas defensivos e avanços sempre rápidos.",
+            "correct": false,
+            "explanation": "Defesas articuladas dificultavam movimentos rápidos em vários setores."
+          },
+          {
+            "text": "Busca de desgaste do adversário, mesmo com pequenos ganhos territoriais.",
+            "correct": true,
+            "explanation": "O contraste entre custos elevados e avanço limitado é central para compreender esse contexto."
+          }
+        ]
+      },
+      {
+        "question": "Qual conclusão respeita os limites de um mapa da Frente Ocidental?",
+        "options": [
+          {
+            "text": "Ele ajuda a localizar posições, mas não representa sozinho toda a guerra nem a experiência dos combatentes.",
+            "correct": true,
+            "explanation": "Outras frentes e fontes sobre condições de vida ampliam a interpretação."
+          },
+          {
+            "text": "Ele prova que todos os soldados viveram exatamente a mesma situação.",
+            "correct": false,
+            "explanation": "Setores, momentos e funções diferentes produziram experiências distintas."
+          },
+          {
+            "text": "Ele permite medir diretamente medo e sofrimento pela cor das linhas.",
+            "correct": false,
+            "explanation": "Essas experiências exigem outras evidências, como relatos contextualizados."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Imperial War Museums — First World War gallery guide",
+        "url": "https://www.iwm.org.uk/sites/default/files/files/2023-10/first_world_war_large_print_guide.pdf"
+      }
+    ]
+  },
+  "fund2_port_01": {
+    "context": "O jornal da escola precisa revisar frases sobre uma feira de ciências. A turma identifica sobre quem se declara algo e o que se declara, sem confundir sujeito com a primeira palavra da oração.",
+    "theory": "Na análise sintática, sujeito e predicado são funções dos termos na oração. Em Os jovens pesquisadores apresentaram o projeto, o sujeito é Os jovens pesquisadores, cujo núcleo é pesquisadores; o predicado é apresentaram o projeto. O sujeito pode aparecer depois do verbo, estar subentendido ou não existir em construções impessoais, como Choveu ontem. Um sujeito simples tem um núcleo; um sujeito composto tem dois ou mais. A concordância ajuda a localizar o sujeito, mas perguntar quem praticou a ação não funciona em todos os casos: em A sala está silenciosa, há estado, e em O projeto foi apresentado pelos alunos, o sujeito recebe a ação.",
+    "workedExample": "Frase original: Chegaram à feira duas pesquisadoras. Mudando para o singular, Chegou à feira uma pesquisadora, o verbo acompanha pesquisadora. Logo, duas pesquisadoras é o sujeito posposto; chegaram à feira é o predicado. À feira informa destino, não o sujeito.",
+    "investigation": [
+      "Separe sujeito e predicado em Os estudantes montaram a exposição e identifique o núcleo do sujeito.",
+      "Reordene Chegaram duas pesquisadoras sem mudar os participantes da situação.",
+      "Compare Ana e Rui apresentaram o cartaz com Choveu durante a feira, justificando sujeito composto e oração sem sujeito."
+    ],
+    "expectedEvidence": "Marcações que identifiquem núcleos, reconheçam sujeito depois do verbo e distingam sujeito composto de oração impessoal, com justificativas baseadas na estrutura das frases.",
+    "reflection": "Por que buscar sempre a pessoa que faz algo levaria a erros ao analisar estados e construções passivas?",
+    "scenarios": [
+      {
+        "id": "sujeito-simples",
+        "label": "Um núcleo",
+        "situation": "Os cartazes coloridos chamaram atenção.",
+        "observation": "O núcleo cartazes determina a concordância plural de chamaram.",
+        "explanation": "Coloridos caracteriza o núcleo; a existência de várias palavras não torna o sujeito composto."
+      },
+      {
+        "id": "sujeito-composto",
+        "label": "Dois núcleos",
+        "situation": "Ana e Rui organizaram a bancada.",
+        "observation": "Ana e Rui são núcleos coordenados do sujeito.",
+        "explanation": "O sujeito é composto porque reúne dois núcleos, não apenas porque se refere a duas pessoas."
+      },
+      {
+        "id": "impessoal",
+        "label": "Fenômeno natural",
+        "situation": "Choveu durante a visita.",
+        "observation": "Não há um termo que funcione como sujeito de choveu nesse uso literal.",
+        "explanation": "O verbo que indica esse fenômeno natural forma oração sem sujeito; durante a visita marca tempo."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Em Chegaram cedo os visitantes, qual é o sujeito?",
+        "options": [
+          {
+            "text": "Cedo.",
+            "correct": false,
+            "explanation": "Cedo indica tempo, não o termo com que o verbo concorda."
+          },
+          {
+            "text": "Os visitantes.",
+            "correct": true,
+            "explanation": "O sujeito aparece após o verbo; no singular, O visitante chegou cedo."
+          },
+          {
+            "text": "Chegaram cedo.",
+            "correct": false,
+            "explanation": "Esse trecho contém o verbo e integra o predicado."
+          }
+        ]
+      },
+      {
+        "question": "Qual frase apresenta sujeito composto?",
+        "options": [
+          {
+            "text": "Os três visitantes sorriram.",
+            "correct": false,
+            "explanation": "O núcleo é apenas visitantes, apesar de serem três pessoas."
+          },
+          {
+            "text": "Choveu bastante.",
+            "correct": false,
+            "explanation": "Nesse uso literal, chover é impessoal e a oração não tem sujeito."
+          },
+          {
+            "text": "A professora e o monitor sorriram.",
+            "correct": true,
+            "explanation": "Professora e monitor são dois núcleos coordenados do sujeito."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_port_02": {
+    "context": "Uma equipe prepara convites e relatos da biblioteca. Ao comparar ler, gostar e entregar, a turma descobre por que certos verbos pedem complementos com preposição e outros se ligam diretamente a eles.",
+    "theory": "A transitividade deve ser observada no uso concreto do verbo. Em Li o conto, o conto é objeto direto: o complemento não é introduzido por uma preposição exigida pelo verbo. Em Gosto de contos, de contos é objeto indireto, ligado pela preposição de. Em Entreguei o livro à colega, há dois complementos: o livro e à colega. Nem todo trecho com preposição é objeto indireto: em Li o conto na biblioteca, na biblioteca informa lugar. Verbos podem apresentar sentidos e construções diferentes; por isso, memorizar uma classificação isolada sem analisar a oração pode causar erro.",
+    "workedExample": "Compare Preciso de ajuda e Levei a caixa para a sala. De ajuda completa o sentido de precisar nessa construção. Para a sala indica o destino do deslocamento, enquanto a caixa é o objeto direto de levei. A presença de preposição, sozinha, não decide a função de um termo.",
+    "investigation": [
+      "Sublinhe os complementos em Li a carta e Gosto de cartas, observando a ligação com o verbo.",
+      "Separe os dois objetos em A bibliotecária entregou o livro ao estudante.",
+      "Compare Li o livro na biblioteca e Preciso de um livro, explicando por que os termos preposicionados têm funções diferentes."
+    ],
+    "expectedEvidence": "Uma análise que associe objeto à complementação verbal, reconheça as preposições exigidas e diferencie complementos de informações de lugar, sem classificar apenas pela presença de preposição.",
+    "reflection": "Como o contexto impede que a mesma palavra ou a presença de uma preposição determine automaticamente uma função sintática?",
+    "scenarios": [
+      {
+        "id": "ler",
+        "label": "Ligação direta",
+        "situation": "A turma leu a notícia.",
+        "observation": "A notícia completa leu sem preposição exigida pelo verbo.",
+        "explanation": "Nessa oração, a notícia é objeto direto."
+      },
+      {
+        "id": "gostar",
+        "label": "Preposição exigida",
+        "situation": "A turma gostou da notícia.",
+        "observation": "Gostar se liga ao complemento por de, contraído com a em da.",
+        "explanation": "Da notícia é objeto indireto; a preposição integra a construção do verbo."
+      },
+      {
+        "id": "entregar",
+        "label": "Coisa e destinatário",
+        "situation": "Rui entregou o convite à diretora.",
+        "observation": "O convite é aquilo que se entrega; à diretora identifica a destinatária.",
+        "explanation": "Nesse uso, entregar apresenta objeto direto e objeto indireto."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Em Gosto de histórias, qual análise é adequada?",
+        "options": [
+          {
+            "text": "De histórias é objeto indireto, ligado ao verbo pela preposição de.",
+            "correct": true,
+            "explanation": "A construção gostar de exige essa ligação para o complemento."
+          },
+          {
+            "text": "Histórias é sujeito porque está no plural.",
+            "correct": false,
+            "explanation": "O sujeito está subentendido como eu; o plural de histórias não determina o verbo."
+          },
+          {
+            "text": "De histórias é apenas uma indicação de lugar.",
+            "correct": false,
+            "explanation": "O trecho informa aquilo de que a pessoa gosta, não onde a ação ocorre."
+          }
+        ]
+      },
+      {
+        "question": "Por que na biblioteca não é objeto indireto em Li a notícia na biblioteca?",
+        "options": [
+          {
+            "text": "Porque nenhuma expressão com preposição pode ser objeto.",
+            "correct": false,
+            "explanation": "Objetos indiretos são justamente introduzidos por preposição exigida na construção verbal."
+          },
+          {
+            "text": "Porque informa o lugar da leitura; a notícia já funciona como objeto direto.",
+            "correct": true,
+            "explanation": "É preciso observar a função do trecho na oração, não somente sua forma."
+          },
+          {
+            "text": "Porque o sujeito é biblioteca.",
+            "correct": false,
+            "explanation": "O sujeito da forma li é eu, subentendido pela flexão verbal."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_port_03": {
+    "context": "A turma lê versos originais escritos para um mural: A cidade acordou com mil vozes; meu medo era um nó. O laboratório investiga como sentidos figurados produzem imagens e avaliações.",
+    "theory": "Figuras de linguagem dependem de relações de sentido e de contexto. Metáfora aproxima elementos por semelhança sem usar obrigatoriamente uma comparação explícita: meu medo era um nó. Metonímia substitui um elemento por outro associado: li Machado de Assis usa o autor para se referir às obras. Hipérbole intensifica por exagero, como esperei uma eternidade. Paradoxo reúne ideias aparentemente incompatíveis para provocar reflexão: um silêncio cheio de vozes. Ironia pode afirmar algo para sugerir uma avaliação contrária, apoiando-se na situação e no tom. Uma mesma passagem pode admitir mais de um recurso; identificar a figura deve ajudar a explicar o efeito, não encerrar a leitura em uma etiqueta.",
+    "workedExample": "Texto original: Meu caderno virou um jardim de ideias. Não se afirma que papel se tornou solo. A aproximação sugere crescimento, variedade e criação, caracterizando metáfora. Se o texto fosse Comprei dois cadernos, o emprego literal de caderno não produziria essa mesma relação figurada.",
+    "investigation": [
+      "Explique a imagem de nó em meu medo era um nó usando suas próprias palavras.",
+      "Compare li Machado de Assis e esperei uma eternidade, indicando a relação que constrói cada figura.",
+      "Crie duas falas com Que pontual!: uma elogiosa e outra irônica, descrevendo contextos diferentes."
+    ],
+    "expectedEvidence": "Interpretações que relacionem cada figura ao mecanismo e ao efeito de sentido, usando o contexto para distinguir ironia de elogio literal e sem apenas listar nomes.",
+    "reflection": "A frase isolada Que pontual! permite garantir que há ironia? Que informações adicionais ajudam a decidir?",
+    "scenarios": [
+      {
+        "id": "metafora",
+        "label": "Medo em imagem",
+        "situation": "Verso original: Meu medo era um nó no caminho.",
+        "observation": "Medo e nó são aproximados para sugerir dificuldade ou bloqueio.",
+        "explanation": "A metáfora desloca o sentido de nó e permite imaginar uma experiência abstrata."
+      },
+      {
+        "id": "metonimia",
+        "label": "Autor pela obra",
+        "situation": "Uma leitora diz: Hoje li Machado de Assis.",
+        "observation": "Ela leu uma obra do autor, não a pessoa fisicamente.",
+        "explanation": "A associação entre autor e obra sustenta a metonímia."
+      },
+      {
+        "id": "ironia",
+        "label": "Elogio aparente",
+        "situation": "Cenário fictício: alguém chega uma hora atrasado e ouve Que pontual!.",
+        "observation": "A fala parece elogio, mas a situação sugere crítica ao atraso.",
+        "explanation": "A interpretação irônica depende do contraste contextual, não apenas das palavras."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual explicação corresponde a li Machado de Assis?",
+        "options": [
+          {
+            "text": "O nome transforma-se em um objeto por semelhança de formato.",
+            "correct": false,
+            "explanation": "A relação é de associação entre autor e obras, não de semelhança visual."
+          },
+          {
+            "text": "Há obrigatoriamente uma crítica irônica ao autor.",
+            "correct": false,
+            "explanation": "A frase não fornece esse contraste avaliativo; refere-se à leitura de uma obra."
+          },
+          {
+            "text": "O autor representa suas obras, numa metonímia.",
+            "correct": true,
+            "explanation": "O vínculo entre a pessoa e o que escreveu permite a substituição."
+          }
+        ]
+      },
+      {
+        "question": "Em esperei uma eternidade pelo ônibus, que efeito a hipérbole produz?",
+        "options": [
+          {
+            "text": "Intensifica a sensação de demora por exagero.",
+            "correct": true,
+            "explanation": "Eternidade não é uma medida literal possível dessa espera cotidiana."
+          },
+          {
+            "text": "Informa a duração exata da espera em minutos.",
+            "correct": false,
+            "explanation": "A expressão é figurada e não fornece um dado cronológico preciso."
+          },
+          {
+            "text": "Troca o autor pelo nome de sua obra.",
+            "correct": false,
+            "explanation": "Esse mecanismo seria metonímico, mas não ocorre no exemplo."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_port_04": {
+    "context": "A secretaria escolar revisa um aviso sobre visita à biblioteca. A turma testa quando o acento grave registra a fusão de dois sons escritos como a e por que ser palavra feminina não basta.",
+    "theory": "Crase é a fusão de vogais; o acento grave pode registrar o encontro da preposição a com o artigo feminino a: Fomos à biblioteca. É preciso verificar as duas condições: o termo anterior pede a preposição e o seguinte admite artigo. Uma troca por masculino ajuda em muitos casos: fomos ao museu corresponde a fomos à biblioteca. Não se usa esse teste mecanicamente em todas as construções. Não há artigo feminino antes de verbo ou de pronome pessoal como ela: começou a estudar; entregou a ela. Também pode ocorrer crase com demonstrativos iniciados por a: referiu-se àquela proposta. Locuções como à tarde exigem atenção própria ao uso consagrado.",
+    "workedExample": "Compare Entreguei o bilhete à professora e Vi a professora. No primeiro caso, entregar algo a alguém fornece a preposição a e professora admite o artigo a. No segundo, ver a professora não exige essa preposição: a é apenas artigo, sem acento grave.",
+    "investigation": [
+      "Compare Fui à biblioteca com Visitei a biblioteca, indicando qual verbo exige preposição.",
+      "Faça a troca biblioteca → museu para observar à e ao na primeira construção.",
+      "Revise começou a ler, entregou a ela e referiu-se àquela notícia, justificando cada grafia."
+    ],
+    "expectedEvidence": "Uma revisão que identifique a preposição e o artigo ou demonstrativo envolvidos, explique ausências de crase antes de verbo e pronome pessoal e não dependa só do gênero feminino.",
+    "reflection": "Por que a mesma palavra professora pode aparecer com à em uma frase e com a em outra?",
+    "scenarios": [
+      {
+        "id": "destino",
+        "label": "Duas condições",
+        "situation": "A turma foi à biblioteca.",
+        "observation": "Ir a fornece preposição; a biblioteca apresenta artigo feminino.",
+        "explanation": "O encontro a + a é registrado por à, como ao em foi ao museu."
+      },
+      {
+        "id": "objeto-direto",
+        "label": "Só artigo",
+        "situation": "A turma visitou a biblioteca.",
+        "observation": "Visitar liga-se diretamente ao objeto nessa construção.",
+        "explanation": "Sem a preposição exigida, não ocorre a fusão; a é apenas artigo."
+      },
+      {
+        "id": "demonstrativo",
+        "label": "Aquela proposta",
+        "situation": "A diretora referiu-se àquela proposta.",
+        "observation": "Referir-se a encontra o a inicial de aquela.",
+        "explanation": "A crase não se limita ao encontro de preposição com artigo feminino."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual par justifica corretamente a diferença de grafia?",
+        "options": [
+          {
+            "text": "Fui à escola e vi a escola: no primeiro há preposição a mais artigo; no segundo há apenas artigo.",
+            "correct": true,
+            "explanation": "A construção do verbo, junto do termo seguinte, determina a ocorrência de crase."
+          },
+          {
+            "text": "Fui à escola porque toda palavra feminina exige acento grave.",
+            "correct": false,
+            "explanation": "Vi a escola contém a mesma palavra feminina e não exige a preposição a."
+          },
+          {
+            "text": "Vi à escola porque toda palavra que vem depois de verbo recebe crase.",
+            "correct": false,
+            "explanation": "A posição após um verbo não basta; ver tem objeto direto nesse uso."
+          }
+        ]
+      },
+      {
+        "question": "Por que começou a estudar não recebe acento grave em a?",
+        "options": [
+          {
+            "text": "Porque estudar é um substantivo masculino nessa frase.",
+            "correct": false,
+            "explanation": "Estudar é verbo no infinitivo; classificá-lo como substantivo aqui não explica a construção."
+          },
+          {
+            "text": "Porque não há artigo feminino antes do verbo estudar para se fundir com a preposição.",
+            "correct": true,
+            "explanation": "Falta o segundo a necessário ao encontro estudado."
+          },
+          {
+            "text": "Porque palavras longas nunca permitem crase antes delas.",
+            "correct": false,
+            "explanation": "O tamanho da palavra não é critério gramatical para o uso da crase."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_port_05": {
+    "context": "Um aviso diz Vende-se livros usados e outro diz Precisa-se de monitores. A turma analisa por que as duas construções com se seguem relações de concordância diferentes.",
+    "theory": "Na norma-padrão, o verbo concorda com o sujeito, mas a identificação deste exige analisar a construção. Em Vendem-se livros, livros é sujeito da passiva sintética: a frase pode ser transformada em Livros são vendidos. Em Precisa-se de monitores, precisar de não forma essa passiva; o se indetermina o sujeito e o verbo permanece no singular. Coletivos no singular normalmente pedem verbo singular: A equipe chegou. Expressões partitivas com complemento plural podem admitir concordância com a expressão ou com o complemento, conforme a construção: A maioria dos alunos chegou ou chegaram. Reconhecer essa variação evita corrigir como erro uma alternativa aceita.",
+    "workedExample": "Revisão do aviso: Vende-se livros torna-se Vendem-se livros porque livros funciona como sujeito plural; a transformação Livros são vendidos confirma a análise. Já Precisa-se de monitores permanece no singular: De monitores não pode virar sujeito de Monitores são precisados nesse sentido.",
+    "investigation": [
+      "Transforme Alugam-se bicicletas em uma construção com são alugadas e localize o sujeito.",
+      "Compare Alugam-se bicicletas com Precisa-se de bicicletas, observando a preposição exigida por precisar.",
+      "Revise A equipe chegaram e explique por que A maioria dos colegas chegou e chegaram admitem análise diferente."
+    ],
+    "expectedEvidence": "Uma revisão justificada por sujeito e tipo de construção com se, que mantenha coletivos singulares coerentes e reconheça a possibilidade de variação em expressões partitivas.",
+    "reflection": "Como uma transformação para a passiva analítica ajuda a revisar um aviso, e por que ela não se aplica a qualquer frase com se?",
+    "scenarios": [
+      {
+        "id": "passiva",
+        "label": "Livros vendidos",
+        "situation": "Vendem-se livros usados.",
+        "observation": "Livros é plural e pode ser sujeito em Livros usados são vendidos.",
+        "explanation": "A concordância plural corresponde à passiva sintética nessa construção."
+      },
+      {
+        "id": "indeterminacao",
+        "label": "Precisar de ajuda",
+        "situation": "Precisa-se de monitores.",
+        "observation": "De monitores é complemento preposicionado, não sujeito da passiva.",
+        "explanation": "Com se indeterminador nessa construção, o verbo fica na terceira pessoa do singular."
+      },
+      {
+        "id": "partitivo",
+        "label": "A maioria dos alunos",
+        "situation": "A maioria dos alunos chegou cedo ou A maioria dos alunos chegaram cedo.",
+        "observation": "As duas concordâncias podem ser admitidas em construções partitivas desse tipo.",
+        "explanation": "Pode-se considerar o núcleo singular maioria ou o complemento plural alunos; o contexto orienta a escolha."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual aviso segue a concordância da passiva sintética na norma-padrão?",
+        "options": [
+          {
+            "text": "Aluga-se bicicletas.",
+            "correct": false,
+            "explanation": "Bicicletas é sujeito plural da passiva: Bicicletas são alugadas."
+          },
+          {
+            "text": "Alugam-se bicicletas.",
+            "correct": true,
+            "explanation": "O verbo plural concorda com o sujeito bicicletas."
+          },
+          {
+            "text": "Precisam-se de bicicletas.",
+            "correct": false,
+            "explanation": "Precisar de forma aqui uma construção de sujeito indeterminado, com verbo singular."
+          }
+        ]
+      },
+      {
+        "question": "Como revisar A maioria dos estudantes chegaram?",
+        "options": [
+          {
+            "text": "É preciso trocar estudantes para o singular em qualquer situação.",
+            "correct": false,
+            "explanation": "O complemento plural é coerente com o sentido da expressão partitiva."
+          },
+          {
+            "text": "Chegaram é sempre errado porque existe uma palavra singular na frase.",
+            "correct": false,
+            "explanation": "Expressões partitivas desse tipo admitem concordância com o complemento plural."
+          },
+          {
+            "text": "A construção pode admitir o plural; chegou também é possível, concordando com maioria.",
+            "correct": true,
+            "explanation": "A revisão precisa reconhecer a variação aceita, em vez de aplicar uma regra única sem análise."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_port_06": {
+    "context": "O jornal escolar publica dois textos sobre a biblioteca: um informa seu novo horário; o outro defende ampliar o atendimento. A turma compara o propósito, as vozes e as evidências desses gêneros.",
+    "theory": "A notícia relata acontecimentos de interesse público, procurando tornar verificáveis informações como o que ocorreu, onde, quando e quem está envolvido. Fontes, datas e contexto ajudam o leitor a conferir o relato. O editorial apresenta a posição institucional de um veículo sobre uma questão, sustentada por argumentos. Não se distingue gênero apenas pela presença de uma palavra de opinião: uma notícia pode citar a avaliação de uma entrevistada, claramente atribuída a ela. Também a escolha de assuntos e fontes interfere no enquadramento. Um editorial responsável fundamenta sua posição em evidências; não recebe licença para inventar fatos.",
+    "workedExample": "Textos originais: A biblioteca abrirá às 7h a partir de segunda-feira, informou a direção é um enunciado noticioso com fonte. Defendemos que a abertura às 7h seja mantida, pois atende estudantes do primeiro turno explicita posição e justificativa compatíveis com editorial. Os dois podem tratar do mesmo assunto sem cumprir a mesma função.",
+    "investigation": [
+      "Sublinhe informação verificável e fonte no enunciado sobre o novo horário.",
+      "Identifique tese e justificativa no texto que defende a manutenção do horário.",
+      "Escreva uma notícia curta e um editorial curto sobre o mesmo fato hipotético, identificando o fato como hipotético e preservando a distinção entre voz do jornal e voz citada."
+    ],
+    "expectedEvidence": "Dois textos com funções distintas: notícia com acontecimento e atribuição de fonte; editorial com posição institucional e argumento, sem apresentar opinião ou informação inventada como dado comprovado.",
+    "reflection": "Uma notícia deixa de ser notícia quando registra que uma entrevistada gostou de uma decisão? O que a atribuição da fala permite ao leitor?",
+    "scenarios": [
+      {
+        "id": "noticia",
+        "label": "Informar uma mudança",
+        "situation": "Texto fictício: A direção anunciou nesta terça-feira que a biblioteca abrirá às 7h.",
+        "observation": "Há acontecimento, marca temporal e fonte identificada.",
+        "explanation": "Esses elementos permitem compreender e buscar verificação da informação relatada."
+      },
+      {
+        "id": "editorial",
+        "label": "Defender uma posição",
+        "situation": "Texto fictício: Este jornal defende atendimento ampliado para facilitar o acesso aos livros.",
+        "observation": "O veículo assume uma tese e apresenta uma razão.",
+        "explanation": "A voz institucional e a argumentação caracterizam a função editorial."
+      },
+      {
+        "id": "voz-citada",
+        "label": "Opinião atribuída",
+        "situation": "Uma notícia informa: A mudança facilita minha rotina, avaliou a estudante Lia.",
+        "observation": "A avaliação pertence à estudante nomeada.",
+        "explanation": "Citar uma opinião não transforma automaticamente o texto em editorial; é necessário distinguir as vozes."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que melhor caracteriza um editorial?",
+        "options": [
+          {
+            "text": "O relato de um fato sempre sem qualquer fonte.",
+            "correct": false,
+            "explanation": "Ausência de fonte não define editorial, e argumentos também precisam de sustentação."
+          },
+          {
+            "text": "Qualquer texto que contenha a palavra importante.",
+            "correct": false,
+            "explanation": "Uma palavra isolada não determina propósito, autoria e organização do gênero."
+          },
+          {
+            "text": "A defesa argumentada de uma posição institucional do veículo.",
+            "correct": true,
+            "explanation": "O editorial apresenta uma tese assumida pelo veículo, acompanhada de razões."
+          }
+        ]
+      },
+      {
+        "question": "A frase Estou satisfeita, afirmou a diretora, dentro de uma notícia, apresenta...",
+        "options": [
+          {
+            "text": "uma avaliação atribuída à fonte, que não deve ser confundida automaticamente com a posição do jornal.",
+            "correct": true,
+            "explanation": "A atribuição identifica quem avalia e permite distinguir as vozes do texto."
+          },
+          {
+            "text": "uma prova de que todos os estudantes estão satisfeitos.",
+            "correct": false,
+            "explanation": "A avaliação de uma pessoa não representa necessariamente a opinião de todos."
+          },
+          {
+            "text": "a opinião institucional obrigatória do veículo.",
+            "correct": false,
+            "explanation": "A fala foi atribuída à diretora; não há nessa frase adesão explícita do jornal."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_port_07": {
+    "context": "Duas mensagens chegam ao mural: Vamos comer, turma! e Vamos comer turma!. A turma investiga como a vírgula organiza relações entre palavras e pode impedir uma leitura involuntariamente engraçada.",
+    "theory": "A vírgula não representa simplesmente qualquer pausa da fala. Ela marca relações sintáticas e discursivas. O vocativo chama o interlocutor e costuma ser isolado: Lia, venha aqui. O aposto explicativo acrescenta uma identificação: Lia, nossa monitora, abriu a sala. Expressões intercaladas também podem ser delimitadas por vírgulas. Não se deve separar com vírgula o sujeito de seu verbo ou o verbo de seu complemento apenas porque o trecho é longo. Em certas construções, a pontuação altera o alcance de uma informação: Os alunos que estudaram passaram seleciona um grupo; Os alunos, que estudaram, passaram apresenta a explicação como referente ao conjunto mencionado.",
+    "workedExample": "Compare Não espere e Não, espere. Na primeira frase, a negação incide sobre esperar: a pessoa deve seguir. Na segunda, não rejeita algo anterior e espere solicita permanência. A mudança resulta da organização da mensagem, não apenas de ler com uma pausa maior.",
+    "investigation": [
+      "Insira vírgulas para marcar o chamado em Turma vamos começar.",
+      "Compare Lia nossa monitora abriu a sala com uma versão em que nossa monitora fica isolado, explicando o aposto.",
+      "Descreva contextos diferentes para Não espere e Não, espere, indicando como cada mensagem orienta a ação."
+    ],
+    "expectedEvidence": "Uma revisão que justifique vocativo, aposto e mudança de alcance, preserve a ligação entre sujeito e verbo e explique efeitos de sentido com contextos adequados.",
+    "reflection": "Por que a regra coloque vírgula onde você respira pode produzir pontuação diferente e inadequada para a mesma frase?",
+    "scenarios": [
+      {
+        "id": "vocativo",
+        "label": "Chamar a turma",
+        "situation": "Mensagem original no mural do lanche: Vamos comer, turma!",
+        "observation": "Turma nomeia os interlocutores chamados para comer.",
+        "explanation": "A vírgula isola o vocativo e evita lê-lo como aquilo que seria comido."
+      },
+      {
+        "id": "aposto",
+        "label": "Explicar quem é",
+        "situation": "Lia, nossa monitora, abriu a sala.",
+        "observation": "Nossa monitora acrescenta uma informação explicativa sobre Lia.",
+        "explanation": "As duas vírgulas delimitam o aposto intercalado; o verbo continua ligado ao sujeito Lia."
+      },
+      {
+        "id": "restricao",
+        "label": "Grupo ou conjunto",
+        "situation": "Compare Os alunos que estudaram passaram e Os alunos, que estudaram, passaram.",
+        "observation": "Sem vírgulas, seleciona-se um grupo; com elas, a informação é apresentada como explicação do conjunto citado.",
+        "explanation": "A pontuação afeta o alcance da oração e, portanto, a interpretação."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Em Ana, venha aqui, o que justifica a vírgula?",
+        "options": [
+          {
+            "text": "Ana é um vocativo, a pessoa chamada pelo enunciador.",
+            "correct": true,
+            "explanation": "A pontuação delimita o chamamento, uma função diferente de sujeito nessa frase."
+          },
+          {
+            "text": "Toda palavra com três letras exige uma vírgula depois.",
+            "correct": false,
+            "explanation": "O número de letras não determina a pontuação."
+          },
+          {
+            "text": "Ana é o objeto direto do verbo vir.",
+            "correct": false,
+            "explanation": "O nome funciona como chamamento, não como complemento de venha."
+          }
+        ]
+      },
+      {
+        "question": "Qual revisão preserva a relação entre sujeito e verbo?",
+        "options": [
+          {
+            "text": "Os cartazes da feira, ficaram prontos.",
+            "correct": false,
+            "explanation": "A vírgula separa indevidamente o sujeito Os cartazes da feira do verbo ficaram."
+          },
+          {
+            "text": "Os cartazes da feira ficaram prontos.",
+            "correct": true,
+            "explanation": "Não há elemento intercalado nem outra estrutura que justifique separar sujeito e verbo."
+          },
+          {
+            "text": "Os cartazes, da feira ficaram prontos.",
+            "correct": false,
+            "explanation": "A vírgula isolada rompe a ligação de da feira com cartazes sem construir uma intercalação coerente."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_port_08": {
+    "context": "A equipe escreve instruções para uma feira: Quando eu fazer o cartaz, aviso vocês. O laboratório compara formas irregulares para revisar essa mensagem e distinguir certeza, hipótese e acontecimentos anteriores.",
+    "theory": "O indicativo costuma apresentar fatos como constatados ou afirmados; o subjuntivo participa de construções de hipótese, desejo e possibilidade. A escolha depende também das relações entre orações. Verbos irregulares não seguem integralmente o paradigma regular: fazer tem fiz no passado e fizer no futuro do subjuntivo; ter tem tive e tiver. Em Quando eu fizer o cartaz, avisarei, a conclusão é futura e eventual. Em Se eu tivesse feito o cartaz, teria avisado, tivesse feito é um tempo composto do subjuntivo e situa uma condição anterior não realizada no contexto. Irregular não significa sem regra: famílias e contextos ajudam a reconhecer formas adequadas.",
+    "workedExample": "A revisão de Quando eu fazer o cartaz produz Quando eu fizer o cartaz. Uma pista é partir do pretérito perfeito plural: fizeram → fizer. A mesma relação ajuda com tiveram → tiver. Trata-se de um apoio para esses verbos, que não dispensa verificar o sentido e a construção da frase.",
+    "investigation": [
+      "Compare Eu fiz o cartaz e Quando eu fizer o cartaz, identificando fato passado e condição temporal futura.",
+      "Revise Se ela ter tempo amanhã, participará para Se ela tiver tempo amanhã, participará.",
+      "Explique a relação temporal em Se eu tivesse terminado, teria enviado, destacando os dois tempos compostos."
+    ],
+    "expectedEvidence": "Mensagens revisadas com fizer e tiver nos contextos propostos e uma explicação que distinga afirmação passada, eventualidade futura e condição anterior expressa por tempo composto.",
+    "reflection": "Por que a forma fazer pode estar correta em Vou fazer o cartaz, mas não em Quando eu fazer o cartaz?",
+    "scenarios": [
+      {
+        "id": "indicativo",
+        "label": "Fato apresentado",
+        "situation": "Ontem eu fiz o cartaz.",
+        "observation": "Fiz apresenta a produção como um fato passado.",
+        "explanation": "É uma forma irregular do pretérito perfeito do indicativo de fazer."
+      },
+      {
+        "id": "futuro-subjuntivo",
+        "label": "Quando acontecer",
+        "situation": "Quando eu fizer o cartaz, avisarei.",
+        "observation": "Fizer situa uma realização futura tomada como eventual.",
+        "explanation": "Essa construção temporal pede o futuro do subjuntivo, diferente do infinitivo fazer."
+      },
+      {
+        "id": "composto",
+        "label": "Condição anterior",
+        "situation": "Se eu tivesse feito o cartaz, teria avisado.",
+        "observation": "A condição de fazer antecede o aviso que não ocorreu no contexto.",
+        "explanation": "Auxiliar flexionado e particípio formam tempos compostos e estabelecem uma relação entre os acontecimentos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual forma completa Se eu ___ tempo amanhã, participarei?",
+        "options": [
+          {
+            "text": "ter.",
+            "correct": false,
+            "explanation": "O infinitivo não é a forma adequada para a condição futura nesta construção."
+          },
+          {
+            "text": "tive.",
+            "correct": false,
+            "explanation": "Tive é passado do indicativo e não combina com a condição futura proposta."
+          },
+          {
+            "text": "tiver.",
+            "correct": true,
+            "explanation": "O futuro do subjuntivo de ter corresponde à condição eventual situada em amanhã."
+          }
+        ]
+      },
+      {
+        "question": "Qual frase apresenta um tempo composto do subjuntivo?",
+        "options": [
+          {
+            "text": "Se ela tivesse feito a revisão, perceberia o erro.",
+            "correct": true,
+            "explanation": "Tivesse feito combina auxiliar no subjuntivo e particípio, indicando uma condição anterior."
+          },
+          {
+            "text": "Ela fez a revisão ontem.",
+            "correct": false,
+            "explanation": "Fez é forma simples do pretérito perfeito do indicativo."
+          },
+          {
+            "text": "Ela fará a revisão amanhã.",
+            "correct": false,
+            "explanation": "Fará é forma simples do futuro do presente do indicativo."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_port_09": {
+    "context": "Duas legendas descrevem a mesma ação: A turma pintou o mural e O mural foi pintado pela turma. A atividade investiga como a escolha da voz verbal muda o foco sem trocar os participantes da situação.",
+    "theory": "Na voz ativa, o sujeito normalmente ocupa o papel de agente da ação: A turma pintou o mural. Na passiva analítica, o sujeito é o elemento que recebe a ação, com auxiliar ser e particípio: O mural foi pintado pela turma. Pela turma é o agente da passiva e pode ser omitido quando desconhecido ou pouco relevante. A transformação deve preservar tempo verbal, concordância e relações entre participantes: pintou corresponde a foi pintado, não a será pintado. A voz passiva é possível em construções adequadas com objeto direto, mas não transforma qualquer verbo. A escolha de voz influencia o que recebe destaque e pode ocultar quem age.",
+    "workedExample": "Ativa: As estudantes organizaram as mesas. Passiva: As mesas foram organizadas pelas estudantes. Mesas passa de objeto direto a sujeito; foram preserva o passado e organizadas concorda com mesas. A frase As mesas serão organizadas mudaria o tempo e deixaria de descrever o mesmo acontecimento passado.",
+    "investigation": [
+      "Identifique agente e elemento afetado em A equipe revisou o relatório.",
+      "Transforme a frase para O relatório foi revisado pela equipe, verificando tempo e concordância.",
+      "Compare O vidro foi quebrado e Lia quebrou o vidro, discutindo o que a omissão do agente informa ou deixa de informar."
+    ],
+    "expectedEvidence": "Uma transposição que preserve participantes e tempo verbal, faça o particípio concordar com o novo sujeito e explique a mudança de foco e o efeito da omissão do agente.",
+    "reflection": "Quando uma notícia escreve erros foram cometidos, que pergunta sobre responsabilidade o leitor ainda precisa fazer?",
+    "scenarios": [
+      {
+        "id": "ativa",
+        "label": "Quem realizou",
+        "situation": "A equipe revisou o relatório.",
+        "observation": "A equipe é sujeito e agente da revisão.",
+        "explanation": "A voz ativa destaca o grupo que realizou a ação."
+      },
+      {
+        "id": "passiva",
+        "label": "O que foi afetado",
+        "situation": "O relatório foi revisado pela equipe.",
+        "observation": "O relatório é sujeito paciente; pela equipe identifica o agente.",
+        "explanation": "A mesma ação aparece com foco inicial no elemento revisado."
+      },
+      {
+        "id": "agente-omitido",
+        "label": "Responsável ausente",
+        "situation": "O relatório foi revisado.",
+        "observation": "O enunciado não identifica quem fez a revisão.",
+        "explanation": "A ausência pode decorrer de desconhecimento ou de uma escolha de foco; o leitor não deve inventar o agente."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual passiva preserva o sentido temporal de A turma decorou a sala?",
+        "options": [
+          {
+            "text": "A sala será decorada pela turma.",
+            "correct": false,
+            "explanation": "Será decorada situa a ação no futuro, enquanto decorou a apresenta no passado."
+          },
+          {
+            "text": "A sala foi decorada pela turma.",
+            "correct": true,
+            "explanation": "A frase preserva a ação passada e os participantes, mudando o foco sintático."
+          },
+          {
+            "text": "A turma foi decorada pela sala.",
+            "correct": false,
+            "explanation": "A frase inverte quem age e quem recebe a ação, alterando o acontecimento."
+          }
+        ]
+      },
+      {
+        "question": "Em As mesas foram organizadas pelas estudantes, pelas estudantes é...",
+        "options": [
+          {
+            "text": "sujeito paciente.",
+            "correct": false,
+            "explanation": "O sujeito paciente é As mesas, elemento que recebeu a organização."
+          },
+          {
+            "text": "objeto direto do auxiliar foram.",
+            "correct": false,
+            "explanation": "Foram integra a locução passiva e não toma esse trecho como objeto direto."
+          },
+          {
+            "text": "agente da passiva.",
+            "correct": true,
+            "explanation": "O termo identifica quem realizou a ação apresentada em voz passiva."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_port_10": {
+    "context": "A turma cria uma paródia sobre a fila da cantina a partir de uma pequena quadra original. O desafio é manter pistas reconhecíveis do texto de partida e transformar seu sentido com uma finalidade clara.",
+    "theory": "Intertextualidade é a relação que um texto estabelece com outros por citação, alusão, estrutura, tema ou outras pistas. Uma paródia retoma elementos reconhecíveis e os transforma, frequentemente com humor ou crítica, mas não depende apenas de trocar palavras ao acaso. O efeito pressupõe que o leitor identifique algum diálogo com o texto de partida. Uma paráfrase busca reformular preservando o sentido central; uma paródia pode deslocá-lo. Na produção escolar, identificar a referência e explicar a transformação torna o processo transparente. O repertório dos leitores também importa: uma alusão conhecida por um grupo pode passar despercebida por outro.",
+    "workedExample": "Quadra original desta atividade: Na praça nasceu uma flor / que abriu ao raiar do dia / quem passa percebe a cor / e leva consigo alegria. Releitura: Na fila esfriou meu pão / enquanto a manhã corria / quem passa segura o balcão / e conta a fome do dia. Ritmo e algumas estruturas aproximam os textos; o tema cotidiano desloca a cena e permite humor.",
+    "investigation": [
+      "Marque duas pistas de forma que conectam a quadra original à releitura da cantina.",
+      "Explique o deslocamento entre contemplação da flor e espera por alimento.",
+      "Crie uma nova quadra com referência indicada, preserve pelo menos uma pista reconhecível e explique a intenção da transformação."
+    ],
+    "expectedEvidence": "Uma produção acompanhada da referência, de pistas identificáveis de diálogo e de uma explicação do novo efeito, demonstrando transformação intencional em vez de simples cópia ou troca aleatória.",
+    "reflection": "O que um leitor precisa conhecer para perceber a graça de uma paródia? Como tornar o diálogo acessível a quem não conhece a referência?",
+    "scenarios": [
+      {
+        "id": "parafrase",
+        "label": "Reformular o sentido",
+        "situation": "A flor abriu cedo vira A flor desabrochou pela manhã.",
+        "observation": "O enunciado central se mantém com outras palavras.",
+        "explanation": "Essa reformulação exemplifica paráfrase, sem criar por si só efeito paródico."
+      },
+      {
+        "id": "parodia",
+        "label": "Transformar a cena",
+        "situation": "A quadra sobre a flor inspira a quadra sobre a demora na cantina.",
+        "observation": "Pistas de ritmo e estrutura permanecem, enquanto o tema se desloca.",
+        "explanation": "O diálogo reconhecível e a transformação orientada por humor sustentam a releitura paródica."
+      },
+      {
+        "id": "repertorio",
+        "label": "Referência desconhecida",
+        "situation": "Um leitor vê apenas a quadra da cantina, sem acesso à quadra inicial.",
+        "observation": "Ele pode compreender a reclamação, mas não reconhecer a relação entre textos.",
+        "explanation": "Apresentar a referência pode ampliar a percepção da intertextualidade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que torna uma releitura paródica diferente de uma troca aleatória de palavras?",
+        "options": [
+          {
+            "text": "A presença de um diálogo reconhecível e de uma transformação com efeito pretendido.",
+            "correct": true,
+            "explanation": "A relação com a referência e o novo sentido precisam funcionar para o leitor."
+          },
+          {
+            "text": "A proibição de qualquer semelhança com o texto de partida.",
+            "correct": false,
+            "explanation": "Sem pistas de relação, o diálogo pode deixar de ser reconhecido."
+          },
+          {
+            "text": "A manutenção obrigatória de todas as palavras e do mesmo sentido.",
+            "correct": false,
+            "explanation": "Isso impediria a transformação que caracteriza a paródia proposta."
+          }
+        ]
+      },
+      {
+        "question": "Por que indicar a quadra original ao apresentar a paródia escolar?",
+        "options": [
+          {
+            "text": "Para provar que uma paródia não modifica o sentido.",
+            "correct": false,
+            "explanation": "A comparação permite justamente observar as mudanças de sentido."
+          },
+          {
+            "text": "Para permitir que o leitor reconheça as pistas e avalie a transformação.",
+            "correct": true,
+            "explanation": "A referência torna visível o diálogo entre as duas produções."
+          },
+          {
+            "text": "Para dispensar qualquer explicação da intenção de quem escreveu.",
+            "correct": false,
+            "explanation": "Identificar a referência ajuda, mas explicar o efeito ainda faz parte da análise."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_ing_01": {
+    "context": "Uma dupla recebe cartões de personagens fictícios para montar uma apresentação em inglês. O desafio é combinar pronome e verb to be, depois transformar a informação em negativa e pergunta.",
+    "theory": "No presente, o verb to be assume am com I, is com he, she e it, e are com you, we e they. Pode expressar identidade, estado e localização: I am a student; She is tired; They are here. A negativa acrescenta not: She is not tired, ou She isn't tired. A pergunta desloca o verbo antes do sujeito: Is she tired? Não se usa do ou does para formar perguntas simples com be. You pode se referir a uma ou mais pessoas, mas combina com are nos dois casos. A tradução depende do contexto, pois be pode corresponder a ser ou estar em português.",
+    "workedExample": "Cartão fictício: Mina, student, at school. Apresentação: She is a student. She is at school. Negativa: She isn't at home. Pergunta: Is she at school? Resposta curta: Yes, she is. A posição de is muda na pergunta; o pronome she permanece adequado ao cartão.",
+    "investigation": [
+      "Complete I ___ ready, They ___ students e He ___ at home com am, are ou is.",
+      "Transforme We are at school em uma negativa e uma pergunta, preservando o sujeito.",
+      "Apresente um personagem fictício com duas frases e faça uma pergunta ao colega, que responderá com Yes ou No e a forma adequada de be."
+    ],
+    "expectedEvidence": "Frases com concordância entre pronome e be, negativa com not e pergunta por inversão, acompanhadas de respostas curtas coerentes com os cartões de personagens.",
+    "reflection": "Por que Are you ready? usa are tanto ao falar com um colega quanto ao falar com toda a turma?",
+    "scenarios": [
+      {
+        "id": "afirmativa",
+        "label": "Apresentar identidade",
+        "situation": "I am Leo. We are students.",
+        "observation": "I combina com am; we combina com are.",
+        "explanation": "A forma de be acompanha o sujeito, mesmo quando as duas frases falam de identidade."
+      },
+      {
+        "id": "negativa",
+        "label": "Corrigir uma informação",
+        "situation": "She is at school. She isn't at home.",
+        "observation": "Isn't expressa is not e nega a segunda localização.",
+        "explanation": "A negativa não troca is por are nem exige o auxiliar do."
+      },
+      {
+        "id": "pergunta",
+        "label": "Verificar localização",
+        "situation": "They are here. Are they here? Yes, they are.",
+        "observation": "Are passa para antes de they na pergunta.",
+        "explanation": "A inversão forma a pergunta; a resposta curta retoma pronome e verbo."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual pergunta corresponde a She is ready?",
+        "options": [
+          {
+            "text": "Does she is ready?",
+            "correct": false,
+            "explanation": "O presente simples de be forma a pergunta sem does."
+          },
+          {
+            "text": "Is she ready?",
+            "correct": true,
+            "explanation": "Is vem antes do sujeito she na pergunta."
+          },
+          {
+            "text": "Are she ready?",
+            "correct": false,
+            "explanation": "She combina com is, não com are."
+          }
+        ]
+      },
+      {
+        "question": "Qual frase completa corretamente a apresentação de um grupo?",
+        "options": [
+          {
+            "text": "We am students.",
+            "correct": false,
+            "explanation": "Am é usado com I, não com we."
+          },
+          {
+            "text": "We is students.",
+            "correct": false,
+            "explanation": "Is não concorda com o sujeito we."
+          },
+          {
+            "text": "We are students.",
+            "correct": true,
+            "explanation": "Are é a forma de be adequada a we no presente."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_ing_02": {
+    "context": "A turma compara rotinas fictícias de duas pessoas para planejar um clube de leitura. Horários e frequência ajudam a praticar o simple present sem confundir hábito com o que está acontecendo agora.",
+    "theory": "O simple present pode descrever hábitos e situações regulares: I walk to school; Mina walks to school. Na afirmativa com he, she e it, o verbo normalmente recebe s ou es, com alterações como study → studies. Perguntas e negativas usam do ou does, seguidos do verbo na forma básica: Does Mina walk? She doesn't walk. Adverbs of frequency, como always, usually, sometimes e never, indicam frequência, sem necessariamente fornecer uma porcentagem exata. Costumam vir antes do verbo principal: She usually reads; com be, geralmente depois: She is usually early. O contexto orienta a interpretação da rotina.",
+    "workedExample": "Ficha fictícia de Mina: lê após o almoço em quase todos os dias de aula. She usually reads after lunch. Pergunta: Does she read after lunch? Ao acrescentar does, reads volta à forma read. Para dizer que isso não ocorre aos domingos: She doesn't read after lunch on Sundays.",
+    "investigation": [
+      "Escreva uma rotina fictícia com I e outra com she, ajustando o verbo.",
+      "Transforme Mina studies at night em pergunta e negativa, verificando o efeito de does.",
+      "Compare usually e never em duas rotinas e escolha um horário compatível para o clube de leitura."
+    ],
+    "expectedEvidence": "Descrições de hábitos com flexão adequada na afirmativa, verbo básico depois de does e advérbios de frequência coerentes com as rotinas fornecidas.",
+    "reflection": "Por que does já fornece a marca necessária à pergunta Does she study?, dispensando studies depois dele?",
+    "scenarios": [
+      {
+        "id": "habito",
+        "label": "Rotina em terceira pessoa",
+        "situation": "Leo plays football on Saturdays.",
+        "observation": "Plays descreve um hábito de Leo e apresenta s.",
+        "explanation": "Leo pode ser retomado por he, que exige essa flexão na afirmativa regular."
+      },
+      {
+        "id": "does",
+        "label": "Perguntar pelo hábito",
+        "situation": "Does Leo play football on Saturdays?",
+        "observation": "O verbo principal aparece como play, sem s.",
+        "explanation": "Does realiza o papel de auxiliar na pergunta da terceira pessoa."
+      },
+      {
+        "id": "frequencia",
+        "label": "Frequência e posição",
+        "situation": "She usually walks to school. She is usually early.",
+        "observation": "Usually aparece antes de walks e depois de is.",
+        "explanation": "A posição habitual do advérbio varia entre verbo principal e be."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual pergunta está adequada ao hábito She studies at night?",
+        "options": [
+          {
+            "text": "Does she study at night?",
+            "correct": true,
+            "explanation": "Depois de does, o verbo principal usa a forma básica study."
+          },
+          {
+            "text": "Does she studies at night?",
+            "correct": false,
+            "explanation": "Não se mantém o s de terceira pessoa depois do auxiliar does."
+          },
+          {
+            "text": "Do she studies at night?",
+            "correct": false,
+            "explanation": "She pede does, e o verbo principal também precisaria voltar à forma básica."
+          }
+        ]
+      },
+      {
+        "question": "A rotina fictícia diz que Rui nunca joga aos domingos. Qual frase corresponde?",
+        "options": [
+          {
+            "text": "Rui always plays on Sundays.",
+            "correct": false,
+            "explanation": "Always indica sempre, invertendo a frequência informada."
+          },
+          {
+            "text": "Rui never plays on Sundays.",
+            "correct": true,
+            "explanation": "Never expressa nunca e a afirmativa mantém plays com Rui."
+          },
+          {
+            "text": "Rui sometimes plays on Sundays.",
+            "correct": false,
+            "explanation": "Sometimes indica às vezes, diferente de nunca."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_ing_03": {
+    "context": "Um diário fictício registra o passeio da turma ontem. O laboratório organiza uma linha do tempo e revisa verbos irregulares sem acrescentar ed automaticamente a todos eles.",
+    "theory": "O simple past situa acontecimentos em um tempo passado, frequentemente com expressões como yesterday ou last week. Verbos regulares costumam terminar em ed, mas os irregulares têm formas próprias: go → went, see → saw, eat → ate, buy → bought. Em perguntas e negativas com did, o verbo principal volta à forma básica: Did you go? I didn't go. A forma went é usada na afirmativa, não depois de did. Be apresenta was e were e forma suas próprias perguntas e negativas: Were they there? A interpretação da sequência depende também de marcadores temporais, não apenas de reconhecer formas isoladas.",
+    "workedExample": "Diário original: Yesterday we went to the museum and saw an old map. Pergunta sobre o destino: Did you go to the museum? Negativa alternativa: We didn't go to the park. Went e saw indicam passado na afirmativa; depois de did ou didn't, go aparece na forma básica.",
+    "investigation": [
+      "Associe go, see, eat e buy a went, saw, ate e bought.",
+      "Escreva três acontecimentos fictícios de ontem numa ordem marcada por first, then e finally.",
+      "Transforme We bought a map em pergunta e negativa, observando o verbo depois de did."
+    ],
+    "expectedEvidence": "Um pequeno diário com formas irregulares corretas e sequência compreensível, acompanhado de perguntas e negativas que usem did mais verbo na forma básica.",
+    "reflection": "Se did já situa a pergunta no passado, o que explica usar buy, em vez de bought, em Did you buy a map?",
+    "scenarios": [
+      {
+        "id": "afirmativa-passada",
+        "label": "Registrar o passeio",
+        "situation": "We went to the museum yesterday.",
+        "observation": "Went é o passado irregular de go.",
+        "explanation": "A afirmativa não recebe did e usa a forma passada do verbo principal."
+      },
+      {
+        "id": "pergunta-passada",
+        "label": "Confirmar o destino",
+        "situation": "Did you go to the museum yesterday?",
+        "observation": "Go aparece sem a flexão de passado depois de did.",
+        "explanation": "O auxiliar estabelece a pergunta no passado nessa construção."
+      },
+      {
+        "id": "negativa-passada",
+        "label": "Descartar uma compra",
+        "situation": "We didn't buy a souvenir.",
+        "observation": "Didn't nega o acontecimento e buy fica na forma básica.",
+        "explanation": "Didn't bought duplicaria a marcação do passado de forma inadequada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual frase corresponde a nós vimos um mapa ontem?",
+        "options": [
+          {
+            "text": "We seed a map yesterday.",
+            "correct": false,
+            "explanation": "O passado de see é irregular: saw, não seed."
+          },
+          {
+            "text": "We see a map yesterday.",
+            "correct": false,
+            "explanation": "See está na forma básica e não realiza o passado afirmativo pedido."
+          },
+          {
+            "text": "We saw a map yesterday.",
+            "correct": true,
+            "explanation": "Saw é a forma de passado de see, coerente com yesterday."
+          }
+        ]
+      },
+      {
+        "question": "Qual pergunta revisa corretamente Did they went to the park?",
+        "options": [
+          {
+            "text": "Did they go to the park?",
+            "correct": true,
+            "explanation": "Depois de did, usa-se a forma básica go."
+          },
+          {
+            "text": "Did they goed to the park?",
+            "correct": false,
+            "explanation": "Goed não é o passado de go, e após did não se usa a forma passada."
+          },
+          {
+            "text": "Do they went to the park?",
+            "correct": false,
+            "explanation": "Do não forma a pergunta passada proposta, e went não deve seguir esse auxiliar."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_ing_04": {
+    "context": "A turma monta uma lista fictícia de compras para um lanche coletivo. O desafio é perguntar por maçãs, água e pão usando unidades e quantificadores adequados ao sentido de cada nome.",
+    "theory": "Nomes contáveis permitem contar unidades diretamente: one apple, two apples. Nomes incontáveis como water, rice e bread, nos usos alimentares comuns desta atividade, não recebem normalmente número e plural desse modo. Pode-se contar recipientes ou porções: two bottles of water, three slices of bread. Many combina com contáveis plurais e much com incontáveis, especialmente em perguntas e negativas: How many apples? How much water? A lot of pode acompanhar ambos. Some é frequente em afirmativas; any, em perguntas e negativas. Essa tendência não é absoluta: Would you like some water? usa some numa oferta. O uso depende da construção e do contexto.",
+    "workedExample": "Lista fictícia: six apples, two bottles of water and three slices of bread. Perguntas: How many apples do we need? How much water do we need? As garrafas tornam contável a embalagem; water continua incontável no sentido empregado. We don't have any bread registra ausência de pão.",
+    "investigation": [
+      "Separe apples e sandwiches de water e rice, justificando a contagem usada.",
+      "Escreva uma pergunta com how many e outra com how much para a lista fictícia.",
+      "Transforme water e bread em porções contáveis e produza uma oferta educada com Would you like some...?"
+    ],
+    "expectedEvidence": "Uma lista com unidades coerentes, perguntas que distingam many e much e exemplos de some e any adequados, incluindo o reconhecimento de some numa oferta.",
+    "reflection": "Por que two bottles of water permite contar bottles sem concluir que water se tornou um nome contável nesse uso?",
+    "scenarios": [
+      {
+        "id": "apples",
+        "label": "Unidades individuais",
+        "situation": "How many apples do we need? Six apples.",
+        "observation": "Apples tem plural e pode ser contado diretamente.",
+        "explanation": "Many acompanha o nome contável plural nessa pergunta."
+      },
+      {
+        "id": "water",
+        "label": "Quantidade de líquido",
+        "situation": "How much water do we need? Two bottles of water.",
+        "observation": "A pergunta trata de água; a resposta usa garrafas como medida.",
+        "explanation": "Much acompanha water, enquanto bottles nomeia unidades contáveis."
+      },
+      {
+        "id": "offer",
+        "label": "Oferecer uma porção",
+        "situation": "Would you like some bread?",
+        "observation": "A pergunta usa some em uma oferta.",
+        "explanation": "A intenção comunicativa mostra por que a regra some só em afirmativas seria insuficiente."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual pergunta combina com uma quantidade de água?",
+        "options": [
+          {
+            "text": "How much water do we need?",
+            "correct": true,
+            "explanation": "Water é incontável nesse uso; much pergunta pela quantidade."
+          },
+          {
+            "text": "How many water do we need?",
+            "correct": false,
+            "explanation": "Many pede nome contável plural; seria possível perguntar por bottles of water."
+          },
+          {
+            "text": "How many waters bread?",
+            "correct": false,
+            "explanation": "A sequência não constrói uma pergunta e usa os nomes de forma inadequada ao sentido proposto."
+          }
+        ]
+      },
+      {
+        "question": "Que análise é correta para Would you like some water?",
+        "options": [
+          {
+            "text": "É necessariamente incorreta porque toda pergunta exige any.",
+            "correct": false,
+            "explanation": "Ofertas frequentemente usam some; a intenção importa."
+          },
+          {
+            "text": "É uma oferta adequada com some e um nome incontável.",
+            "correct": true,
+            "explanation": "Some pode aparecer numa pergunta quando se oferece algo."
+          },
+          {
+            "text": "Water está no plural porque vem depois de some.",
+            "correct": false,
+            "explanation": "Some não transforma automaticamente um nome incontável em contável plural."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_ing_05": {
+    "context": "Em um mapa fictício de bairro, um visitante está na escola e procura a biblioteca. A turma precisa dar instruções executáveis, indicando o ponto de partida e a orientação de quem caminha.",
+    "theory": "Para orientar um percurso, é preciso combinar verbos de movimento, referências espaciais e um ponto inicial claro. Go straight indica seguir em frente; turn left e turn right indicam virar à esquerda e à direita em relação à orientação da pessoa. At the next corner localiza a próxima esquina. Next to significa ao lado; across from indica posição em frente, do outro lado de uma rua ou espaço. Cross the street descreve atravessar, enquanto across from descreve localização. Um roteiro não pode ser conferido apenas pela gramática: deve levar ao destino no mapa. Na vida real, a travessia depende também de condições seguras e sinalização.",
+    "workedExample": "Mapa fictício: a escola está no início da Rua A; a pessoa olha para o norte. A biblioteca fica na primeira esquina à direita, ao lado do parque. Roteiro: Go straight to the first corner. Turn right. The library is next to the park. Se a pessoa começar olhando para o sul, as mesmas instruções não produzem o mesmo caminho.",
+    "investigation": [
+      "Desenhe o mapa fictício com escola, primeira esquina, parque e biblioteca; marque a direção inicial.",
+      "Siga as três instruções e verifique se elas chegam à biblioteca.",
+      "Escreva um roteiro alternativo a partir do parque e compare next to com across from em duas descrições."
+    ],
+    "expectedEvidence": "Um mapa com partida e orientação explícitas, um percurso conferido e descrições que distingam virar, atravessar, estar ao lado e estar em frente do outro lado.",
+    "reflection": "Por que turn right pode levar a lugares diferentes se não sabemos para onde a pessoa está olhando?",
+    "scenarios": [
+      {
+        "id": "turn",
+        "label": "Mudar de direção",
+        "situation": "Turn right at the first corner.",
+        "observation": "A pessoa vira para o seu lado direito na primeira esquina.",
+        "explanation": "Right depende da orientação de quem se desloca, não de um lado fixo da página."
+      },
+      {
+        "id": "next-to",
+        "label": "Ao lado",
+        "situation": "The library is next to the park.",
+        "observation": "Biblioteca e parque são vizinhos no mapa.",
+        "explanation": "Next to descreve proximidade lateral, sem exigir uma travessia entre os dois."
+      },
+      {
+        "id": "across-from",
+        "label": "Do outro lado",
+        "situation": "The café is across from the school.",
+        "observation": "O café fica em frente à escola, do outro lado da rua no mapa.",
+        "explanation": "Across from descreve a posição; cross the street seria uma instrução de movimento."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual instrução pede virar à esquerda na próxima esquina?",
+        "options": [
+          {
+            "text": "Go straight past every corner.",
+            "correct": false,
+            "explanation": "A instrução manda seguir em frente e não determina a virada pedida."
+          },
+          {
+            "text": "Turn right at the next corner.",
+            "correct": false,
+            "explanation": "Right significa direita, não esquerda."
+          },
+          {
+            "text": "Turn left at the next corner.",
+            "correct": true,
+            "explanation": "Left indica esquerda e next corner indica a próxima esquina."
+          }
+        ]
+      },
+      {
+        "question": "O que diferencia across from de cross the street?",
+        "options": [
+          {
+            "text": "Across from descreve posição; cross the street orienta uma ação de atravessar.",
+            "correct": true,
+            "explanation": "As expressões cumprem funções diferentes no mapa e no roteiro."
+          },
+          {
+            "text": "As duas expressões significam sempre vire à direita.",
+            "correct": false,
+            "explanation": "Nenhuma delas determina uma virada à direita."
+          },
+          {
+            "text": "Across from indica necessariamente estar dentro do mesmo prédio.",
+            "correct": false,
+            "explanation": "No contexto do mapa, indica estar em frente, do outro lado da rua."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_ing_06": {
+    "context": "A turma compara três mochilas fictícias por preço e peso. O laboratório transforma os dados em comparações em inglês, distinguindo comparar duas opções e destacar uma dentro de um conjunto.",
+    "theory": "O comparativo relaciona elementos: Bag A is cheaper than Bag B. O superlativo destaca um elemento em um grupo definido: Bag A is the cheapest of the three. Muitos adjetivos curtos recebem er e est; certos ajustes ocorrem, como big → bigger → biggest e easy → easier → easiest. Adjetivos mais longos geralmente usam more e most: more expensive, the most expensive. Há formas irregulares, como good → better → best e bad → worse → worst. Não se acumulam as duas estratégias em more cheaper. A comparação precisa corresponder aos dados e ao critério: a opção mais barata não é automaticamente a mais leve ou a melhor para todos.",
+    "workedExample": "Dados fictícios: A custa 40 unidades e pesa 800 g; B custa 60 e pesa 600 g; C custa 90 e pesa 1.000 g. A is cheaper than B. B is lighter than A. A is the cheapest of the three. Nenhuma dessas frases, sozinha, prova qual mochila é melhor para cada pessoa.",
+    "investigation": [
+      "Compare A e B por preço usando cheaper than e por peso usando lighter than.",
+      "Identifique a mais cara do conjunto e escreva uma frase com the most expensive.",
+      "Escolha uma mochila para um personagem fictício, explicando por que preço e peso podem apontar opções diferentes."
+    ],
+    "expectedEvidence": "Comparativos e superlativos com formação adequada e correspondência aos dados, sem misturar critérios nem transformar uma medida isolada em julgamento universal de qualidade.",
+    "reflection": "Como A is cheaper than B pode ser verdadeira ao mesmo tempo que B is lighter than A?",
+    "scenarios": [
+      {
+        "id": "price",
+        "label": "Comparar preços",
+        "situation": "A custa 40; B custa 60 unidades fictícias.",
+        "observation": "A is cheaper than B.",
+        "explanation": "Cheaper than expressa menor preço na comparação entre as duas opções."
+      },
+      {
+        "id": "weight",
+        "label": "Comparar pesos",
+        "situation": "A pesa 800 g; B pesa 600 g.",
+        "observation": "B is lighter than A.",
+        "explanation": "O critério peso inverte a opção destacada em relação ao critério menor preço."
+      },
+      {
+        "id": "group",
+        "label": "Destacar no conjunto",
+        "situation": "Os preços fictícios de A, B e C são 40, 60 e 90.",
+        "observation": "C is the most expensive of the three.",
+        "explanation": "O superlativo considera o grupo definido e usa most com expensive."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual frase compara corretamente duas opções por preço?",
+        "options": [
+          {
+            "text": "A is more cheaper than B.",
+            "correct": false,
+            "explanation": "Cheaper já é comparativo; não se acrescenta more nessa formação."
+          },
+          {
+            "text": "A is cheaper than B.",
+            "correct": true,
+            "explanation": "Cheaper é o comparativo de cheap e than introduz o segundo elemento."
+          },
+          {
+            "text": "A is the cheapest than B.",
+            "correct": false,
+            "explanation": "A frase mistura a forma superlativa com a estrutura comparativa pedida."
+          }
+        ]
+      },
+      {
+        "question": "Nos dados A=40, B=60 e C=90, qual frase está correta?",
+        "options": [
+          {
+            "text": "C is the cheapest of the three.",
+            "correct": false,
+            "explanation": "C tem o maior preço, não o menor."
+          },
+          {
+            "text": "A is the most expensive of the three.",
+            "correct": false,
+            "explanation": "A tem o menor preço no conjunto."
+          },
+          {
+            "text": "C is the most expensive of the three.",
+            "correct": true,
+            "explanation": "O maior preço pertence a C; expensive forma o superlativo com most."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_ing_07": {
+    "context": "A turma descreve uma cena fictícia ao vivo: uma pessoa lê, outra desenha e duas conversam. O desafio é distinguir ações em andamento de hábitos e montar corretamente be mais verbo com ing.",
+    "theory": "O present continuous combina am, is ou are com uma forma verbal em ing: I am reading; She is drawing; They are talking. Frequentemente apresenta ações em progresso no momento ou em torno dele. A negativa acrescenta not ao auxiliar; a pergunta o coloca antes do sujeito: Are they talking? A grafia pode mudar: write → writing, run → running. O simple present, por sua vez, pode indicar rotina: She reads every day. Verbos que normalmente expressam estados, como know, geralmente não aparecem no continuous nesse sentido: I know the answer. A escolha do aspecto depende do significado e do contexto, não apenas da tradução de agora.",
+    "workedExample": "Cena fictícia: Rui corre neste instante. Rui is running now. Pergunta: Is Rui running now? Rotina diferente: Rui runs every morning. As frases podem ser verdadeiras, mas uma descreve a ação em andamento e a outra um hábito; now e every morning ajudam a interpretar a diferença.",
+    "investigation": [
+      "Descreva três ações da cena usando sujeitos e formas de be adequadas.",
+      "Transforme They are talking em negativa e pergunta, mantendo talking.",
+      "Compare She writes every day e She is writing now; explique qual mostra hábito e qual mostra andamento."
+    ],
+    "expectedEvidence": "Descrições com auxiliar flexionado e forma ing, perguntas e negativas corretas e uma justificativa contextual para distinguir hábito, ação em andamento e verbos de estado.",
+    "reflection": "O que se perde ao traduzir She reads e She is reading sempre pela mesma frase em português, sem observar o contexto?",
+    "scenarios": [
+      {
+        "id": "now",
+        "label": "Ação em andamento",
+        "situation": "Mina is writing a message now.",
+        "observation": "Is writing apresenta a escrita em progresso.",
+        "explanation": "O auxiliar is concorda com Mina e writing completa a estrutura contínua."
+      },
+      {
+        "id": "routine",
+        "label": "Hábito de escrita",
+        "situation": "Mina writes a message every morning.",
+        "observation": "Writes e every morning descrevem uma rotina.",
+        "explanation": "O simple present não afirma que ela esteja escrevendo exatamente agora."
+      },
+      {
+        "id": "state",
+        "label": "Conhecimento como estado",
+        "situation": "Uma estudante responde ao desafio: I know the answer.",
+        "observation": "Know expressa um estado de conhecimento neste uso.",
+        "explanation": "A forma comum nesse sentido é o simple present, e não I am knowing the answer."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual frase descreve adequadamente duas pessoas conversando agora?",
+        "options": [
+          {
+            "text": "They are talking now.",
+            "correct": true,
+            "explanation": "Are concorda com they e talking apresenta a ação em andamento."
+          },
+          {
+            "text": "They is talking now.",
+            "correct": false,
+            "explanation": "They exige are, não is."
+          },
+          {
+            "text": "They are talk now.",
+            "correct": false,
+            "explanation": "A estrutura contínua precisa da forma talking após are."
+          }
+        ]
+      },
+      {
+        "question": "Qual contraste distingue hábito e ação em andamento?",
+        "options": [
+          {
+            "text": "She reads every day e She is read now.",
+            "correct": false,
+            "explanation": "A segunda frase não apresenta a forma ing necessária."
+          },
+          {
+            "text": "She reads every day e She is reading now.",
+            "correct": true,
+            "explanation": "A primeira descreve rotina; a segunda, uma ação apresentada em progresso."
+          },
+          {
+            "text": "She is reading now e She reading every day.",
+            "correct": false,
+            "explanation": "A segunda frase está sem auxiliar e não constrói adequadamente o hábito proposto."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_ing_08": {
+    "context": "Um boletim meteorológico fictício ajuda a planejar uma atividade no pátio. A turma comunica previsões em inglês e compara a expectativa expressa com will à possibilidade expressa com might ou could.",
+    "theory": "Modal verbs como might, could e can são seguidos da forma básica do verbo, sem to na construção estudada: It might rain; We can play indoors. Might e could podem expressar possibilidade; can pode expressar capacidade, permissão ou possibilidade geral, conforme o contexto. Will pode apresentar uma previsão: It will rain tomorrow, mas a frase não transforma uma previsão em certeza científica. Não existe uma porcentagem fixa universal para cada modal. É preciso observar fonte, contexto e grau de compromisso do falante. Na negativa, won't corresponde a will not. Após will e might, não se usa rains para a terceira pessoa: It might rain.",
+    "workedExample": "Boletim fictício, sem dados meteorológicos reais: Rain is possible tomorrow. A turma escreve It might rain tomorrow, so we can play indoors. Might rain comunica possibilidade; can play apresenta uma opção disponível. Trocar por It will rain apresenta uma previsão mais afirmada, mas ainda não garante o tempo futuro.",
+    "investigation": [
+      "Classifique It might rain e We can use the gym pelo sentido do modal no contexto.",
+      "Reescreva It might rains corrigindo a forma após o modal.",
+      "Produza um plano fictício com uma previsão e uma alternativa, evitando atribuir uma porcentagem numérica inventada a might."
+    ],
+    "expectedEvidence": "Frases com modal mais verbo básico, distinção entre previsão, possibilidade e capacidade no contexto e um plano alternativo coerente com a incerteza do boletim fictício.",
+    "reflection": "Por que uma previsão escrita com will ainda deve ser confrontada com a fonte e a possibilidade de mudança do tempo?",
+    "scenarios": [
+      {
+        "id": "might",
+        "label": "Possibilidade de chuva",
+        "situation": "It might rain tomorrow.",
+        "observation": "O falante apresenta a chuva como possível.",
+        "explanation": "Might não fornece por si só uma probabilidade numérica exata."
+      },
+      {
+        "id": "will",
+        "label": "Previsão afirmada",
+        "situation": "It will be windy tomorrow, says the fictional forecast.",
+        "observation": "Will apresenta uma previsão mais afirmada nesse contexto.",
+        "explanation": "A fonte continua sendo uma previsão; o modal não garante que o fenômeno ocorrerá."
+      },
+      {
+        "id": "can",
+        "label": "Alternativa disponível",
+        "situation": "We can play indoors if it rains.",
+        "observation": "Can indica uma possibilidade prática para o grupo.",
+        "explanation": "O sentido é de opção disponível, diferente de atribuir uma chance de chuva."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual frase usa a forma verbal adequada após might?",
+        "options": [
+          {
+            "text": "It might rains tomorrow.",
+            "correct": false,
+            "explanation": "Após might, o verbo principal fica na forma básica, sem s."
+          },
+          {
+            "text": "It might to rain tomorrow.",
+            "correct": false,
+            "explanation": "Might não é seguido de to nessa estrutura."
+          },
+          {
+            "text": "It might rain tomorrow.",
+            "correct": true,
+            "explanation": "Rain aparece na forma básica após o modal."
+          }
+        ]
+      },
+      {
+        "question": "Em We can play indoors if it rains, can expressa...",
+        "options": [
+          {
+            "text": "uma opção disponível ao grupo no contexto.",
+            "correct": true,
+            "explanation": "O enunciado apresenta a atividade interna como alternativa possível."
+          },
+          {
+            "text": "uma probabilidade fixa de exatamente 50% de chuva.",
+            "correct": false,
+            "explanation": "Can não codifica essa porcentagem e, nessa frase, modifica play."
+          },
+          {
+            "text": "uma ação que obrigatoriamente ocorreu ontem.",
+            "correct": false,
+            "explanation": "A frase apresenta uma alternativa condicionada, não um acontecimento passado."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_ing_09": {
+    "context": "Em uma encenação fictícia de aeroporto, um passageiro precisa confirmar destino, bagagem e portão em inglês. O objetivo é compreender e pedir esclarecimentos, sem transformar o diálogo em regra universal de viagem.",
+    "theory": "Diálogos de viagem combinam perguntas de serviço e respostas breves: Where are you flying today?; Do you have any bags to check?; May I see your passport? A boarding pass é um cartão de embarque; gate é portão; baggage ou luggage nomeiam bagagem e são normalmente incontáveis. A checked bag é despachada, enquanto uma carry-on bag acompanha o passageiro na cabine conforme as regras aplicáveis. Atendimento de check-in e controle de imigração têm funções distintas. Franquias, documentos e procedimentos variam por companhia e viagem. Para aprender a língua, é útil pedir repetição: Could you repeat that, please? e confirmar informação, em vez de fingir compreensão.",
+    "workedExample": "Diálogo original fictício: Agent: Where are you flying today? Passenger: To Recife. Agent: Do you have any bags to check? Passenger: One bag. Could you repeat the gate number, please? A resposta informa quantidade de volumes e o pedido de repetição evita confundir uma informação ouvida; não determina qualquer franquia real.",
+    "investigation": [
+      "Associe boarding pass, gate e checked bag aos seus significados no diálogo.",
+      "Encene atendente e passageiro com destino e quantidade de volumes fictícios, sem fornecer dados pessoais reais.",
+      "Inclua um pedido educado de repetição e uma confirmação do portão; distinga essa cena de um controle de imigração."
+    ],
+    "expectedEvidence": "Um diálogo compreensível que responda às perguntas, use vocabulário de embarque e peça esclarecimento, reconhecendo que o exercício não comprova exigências ou permissões de uma viagem real.",
+    "reflection": "Por que pedir Could you repeat that, please? pode ser uma estratégia de comunicação melhor do que responder sem ter compreendido?",
+    "scenarios": [
+      {
+        "id": "destination",
+        "label": "Confirmar destino",
+        "situation": "Agent: Where are you flying today? Passenger: To Recife.",
+        "observation": "A resposta fornece o destino, não a quantidade de bagagens.",
+        "explanation": "Where pergunta por lugar; reconhecer a palavra interrogativa orienta a resposta."
+      },
+      {
+        "id": "bags",
+        "label": "Informar volumes",
+        "situation": "Agent: How many bags are you checking? Passenger: One bag.",
+        "observation": "O diálogo conta bags, unidades de bagagem.",
+        "explanation": "Bag é contável; luggage geralmente não recebe plural s nesse sentido."
+      },
+      {
+        "id": "clarification",
+        "label": "Pedir repetição",
+        "situation": "Passenger: Could you repeat the gate number, please?",
+        "observation": "O passageiro solicita novamente a informação do portão.",
+        "explanation": "O pedido educado permite conferir a compreensão antes de agir."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual resposta atende a Where are you flying today?",
+        "options": [
+          {
+            "text": "One bag.",
+            "correct": false,
+            "explanation": "A resposta informa quantidade de volumes, mas a pergunta pede destino."
+          },
+          {
+            "text": "To Recife.",
+            "correct": true,
+            "explanation": "Where solicita lugar, e To Recife indica o destino da viagem fictícia."
+          },
+          {
+            "text": "My boarding pass is blue.",
+            "correct": false,
+            "explanation": "A cor do cartão não responde para onde a pessoa vai."
+          }
+        ]
+      },
+      {
+        "question": "O que o diálogo fictício permite aprender sobre bagagem?",
+        "options": [
+          {
+            "text": "Que toda companhia aceita gratuitamente qualquer número de malas.",
+            "correct": false,
+            "explanation": "O exercício não estabelece franquias; as regras variam e exigem consulta específica."
+          },
+          {
+            "text": "Que check-in e imigração são sempre a mesma etapa.",
+            "correct": false,
+            "explanation": "São procedimentos com funções distintas; o diálogo de check-in não substitui imigração."
+          },
+          {
+            "text": "Como informar volumes e pedir esclarecimentos usando vocabulário adequado.",
+            "correct": true,
+            "explanation": "Esse é o objetivo linguístico da encenação, sem generalizar procedimentos reais."
+          }
+        ]
+      }
+    ]
+  },
+  "fund2_ing_10": {
+    "context": "Uma mensagem fictícia diz Actually, I am reading a novel. A turma revisa uma tradução automática apressada que confundiu actually com atualmente e novel com novela de televisão.",
+    "theory": "False friends são palavras parecidas entre línguas cujos sentidos não coincidem no contexto. Actually costuma significar na verdade ou de fato; atualmente pode ser expresso por currently. Pretend significa fingir, não pretender no sentido de ter intenção; para isso, pode-se usar intend ou plan. Push significa empurrar, enquanto puxar corresponde a pull em instruções comuns de porta. Novel pode nomear um romance literário; uma novela de televisão pode ser chamada soap opera. O contexto continua essencial: novel também pode funcionar como adjetivo com sentido de novo ou original. Semelhança gráfica ajuda a formular hipóteses, mas não substitui a leitura da frase.",
+    "workedExample": "Mensagem original: Actually, I am reading a novel, not watching TV. Tradução contextual: Na verdade, estou lendo um romance, não assistindo à TV. Not watching TV reforça que novel se refere a livro. Traduzir actually por atualmente apagaria a correção ou contraste expressa no início.",
+    "investigation": [
+      "Revisite a tradução de actually e novel na mensagem, usando o restante da frase como pista.",
+      "Associe placas PUSH e PULL a empurrar e puxar numa porta desenhada, sem testar uma porta real.",
+      "Escreva dois minidiálogos originais: um com pretend para fingir e outro com plan para ter intenção, explicando a diferença."
+    ],
+    "expectedEvidence": "Traduções justificadas pelo contexto, distinção entre actually e currently, pretend e plan, push e pull e identificação de novel como romance na mensagem proposta.",
+    "reflection": "Por que reconhecer uma palavra parecida pode acelerar a leitura e, ao mesmo tempo, produzir um erro se o contexto for ignorado?",
+    "scenarios": [
+      {
+        "id": "actually",
+        "label": "Corrigir uma suposição",
+        "situation": "You live in London? Actually, I live in Bristol.",
+        "observation": "Actually introduz uma correção: na verdade, moro em Bristol.",
+        "explanation": "Atualmente não exprime tão diretamente a correção da suposição do interlocutor."
+      },
+      {
+        "id": "pretend",
+        "label": "Fingir na brincadeira",
+        "situation": "The children pretend to be astronauts.",
+        "observation": "As crianças fazem de conta que são astronautas.",
+        "explanation": "Pretend indica fingimento nesse contexto, não necessariamente um plano de profissão futura."
+      },
+      {
+        "id": "push-pull",
+        "label": "Instrução na porta",
+        "situation": "Uma porta desenhada recebe a placa PUSH; outra recebe PULL.",
+        "observation": "PUSH indica empurrar; PULL indica puxar.",
+        "explanation": "A semelhança visual de push com puxar pode induzir uma ação oposta à instrução."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Em Actually, I live in Bristol, após uma pergunta sobre Londres, actually significa...",
+        "options": [
+          {
+            "text": "na verdade, introduzindo uma correção.",
+            "correct": true,
+            "explanation": "O falante corrige a suposição de que mora em Londres."
+          },
+          {
+            "text": "atualmente, sem qualquer contraste possível.",
+            "correct": false,
+            "explanation": "Nesse contexto, a função central é corrigir; currently seria uma escolha para atualmente."
+          },
+          {
+            "text": "acidentalmente, indicando um erro de endereço.",
+            "correct": false,
+            "explanation": "Actually não significa acidentalmente e a frase informa a cidade onde a pessoa mora."
+          }
+        ]
+      },
+      {
+        "question": "Qual interpretação corresponde a They pretend to be doctors in the game?",
+        "options": [
+          {
+            "text": "Eles planejam obrigatoriamente cursar medicina.",
+            "correct": false,
+            "explanation": "O jogo e pretend indicam fazer de conta, sem afirmar um plano profissional."
+          },
+          {
+            "text": "Eles fingem ser médicos na brincadeira.",
+            "correct": true,
+            "explanation": "Pretend descreve fingimento ou representação no contexto fornecido."
+          },
+          {
+            "text": "Eles empurram médicos durante o jogo.",
+            "correct": false,
+            "explanation": "Empurrar corresponde a push, outro verbo e outro sentido."
+          }
+        ]
+      }
+    ]
+  }
+}

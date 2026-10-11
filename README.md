@@ -1,6 +1,6 @@
 # Edu-Interact — Plataforma Educacional de Ciências, Laboratórios Virtuais & LMS Inclusivo
 
-> Plataforma educacional moderna com **72 laboratórios virtuais interativos**, módulos avançados de **LMS (estilo Moodle)**, arquitetura de **segurança RBAC** e fundamentação em **Metodologia Ativa de Aprendizagem & Desenho Universal para a Aprendizagem (DUA)**.
+> Plataforma educacional com uma biblioteca inicial de **72 laboratórios** e um catálogo master de **510 entradas**, módulos de LMS e fundamentação em metodologias ativas e Desenho Universal para a Aprendizagem (DUA). A cobertura de conteúdo próprio está sendo verificada conforme os [critérios dos laboratórios](./docs/LABORATORIOS_CONTEUDO.md).
 
 ---
 
@@ -76,30 +76,33 @@ No topo da aplicação (acessível por teclado e leitor de tela), a **Barra de A
 ## 💻 Como Executar o Projeto
 
 ### Pré-requisitos
-- Node.js 18+ instalado
+- Node.js 22.12 ou superior da linha 22 e npm
 - Git
+- JDK 21 ou superior para os emuladores Firebase
+
+O guia de [desenvolvimento local, GitHub, Firebase e MCPs](./docs/DESENVOLVIMENTO.md) descreve os modos de execução e a configuração das integrações. No PowerShell, use `npm.cmd` se a política de execução bloquear `npm.ps1`.
 
 ### Instalação
 
 ```bash
 # 1. Clone o repositório
 git clone https://github.com/Sanluis94/Plataforma-educacional.git
-cd Plataforma-educacional/plataforma-educacional
+cd Plataforma-educacional
 
 # 2. Instale as dependências
-npm install
+npm ci
 
 # 3. Inicie o servidor de desenvolvimento
-npm run dev
+npm run dev:local
 ```
 
-A aplicação estará disponível em `http://localhost:5173`.
+A aplicação estará disponível em `http://localhost:5173`, com Firebase e IA externa desativados. Para desenvolver com Auth e Firestore locais, execute `npm run emulators:start` e `npm run dev:emulator` em terminais separados.
 
 ### Execução de Testes
 
 ```bash
 # Executar a suíte de testes unitários e de integração
-npm run test:run
+npm run test:local
 
 # Checagem estrita de tipos TypeScript
 npx tsc -b

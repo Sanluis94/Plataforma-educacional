@@ -1,0 +1,832 @@
+{
+  "pos_bioinf_01": {
+    "context": "Uma família fictícia de proteínas gera um perfil HMM. O alinhamento considera conservação por posição e inserções sem equiparar pontuação a função comprovada.",
+    "theory": "Um perfil HMM possui estados de match, inserção e deleção, probabilidades de transição e emissão. A pontuação log-odds compara o perfil a um modelo de fundo; Viterbi busca caminho mais provável, enquanto forward soma caminhos. Composição enviesada, amostragem e alinhamento inicial afetam a inferência.",
+    "workedExample": "Num estado fictício, emitir A tem probabilidade 0,8 contra fundo 0,2: log2(0,8/0,2)=2 bits. Esse ganho local não é o escore completo, que também inclui transições e demais posições.",
+    "investigation": [
+      "Defina emissão e probabilidade de fundo.",
+      "Calcule a contribuição local em bits.",
+      "Compare caminho ótimo com soma de caminhos."
+    ],
+    "expectedEvidence": "A resposta deve obter 2 bits e explicar que evidência de homologia não prova atividade específica da proteína.",
+    "reflection": "Como sequências muito semelhantes enviesam a construção do perfil?",
+    "scenarios": [
+      {
+        "id": "pos_bioinf_01_s0",
+        "label": "Sem preferência",
+        "situation": "A emissão de A iguala o fundo em 0,2.",
+        "observation": "A contribuição local vale zero bits.",
+        "explanation": "A razão um não favorece perfil nem modelo nulo naquele estado."
+      },
+      {
+        "id": "pos_bioinf_01_s1",
+        "label": "Inserção",
+        "situation": "Uma sequência contém resíduos extras entre colunas conservadas.",
+        "observation": "Estados de inserção acomodam a extensão.",
+        "explanation": "O perfil distingue material inserido de posições correspondentes da família."
+      },
+      {
+        "id": "pos_bioinf_01_s2",
+        "label": "Deleção",
+        "situation": "Uma sequência não contém um resíduo da coluna modelo.",
+        "observation": "Um estado de deleção pode saltar a emissão.",
+        "explanation": "Ausência alinhada é representada por transição sem emitir o resíduo."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quanto vale log2(0,8/0,2) no exemplo?",
+        "options": [
+          {
+            "text": "4 bits",
+            "correct": false,
+            "explanation": "Quatro é a razão antes da transformação logarítmica."
+          },
+          {
+            "text": "0,6 bits",
+            "correct": false,
+            "explanation": "A diferença de probabilidades não é log-odds."
+          },
+          {
+            "text": "2 bits",
+            "correct": true,
+            "explanation": "A razão é quatro e log2(4)=2."
+          }
+        ]
+      },
+      {
+        "question": "Qual algoritmo soma probabilidades de vários caminhos HMM?",
+        "options": [
+          {
+            "text": "Forward",
+            "correct": true,
+            "explanation": "O algoritmo marginaliza os caminhos que podem gerar a sequência."
+          },
+          {
+            "text": "Viterbi",
+            "correct": false,
+            "explanation": "Viterbi seleciona o caminho individual mais provável."
+          },
+          {
+            "text": "Ordenação alfabética",
+            "correct": false,
+            "explanation": "Ordenar letras não realiza inferência probabilística do perfil."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "HMMER: profile hidden Markov models",
+        "url": "https://hmmer.org/"
+      }
+    ]
+  },
+  "pos_bioinf_02": {
+    "context": "Uma partícula fictícia em potencial conhecido é integrada por Verlet. O exercício verifica atualização e limites de passo sem gerar trajetória molecular real.",
+    "theory": "Velocity Verlet atualiza x1=x0+v0Δt+a0Δt²/2 e v1=v0+(a0+a1)Δt/2, recalculando força na nova posição. O passo deve resolver as frequências mais rápidas. Conservação aproximada em NVE depende de forças consistentes e passo; termostatos alteram a interpretação da energia.",
+    "workedExample": "Com x0=0 nm, v0=1 nm/ps, a0=a1=2 nm/ps² e Δt=0,1 ps, x1=0,11 nm e v1=1,2 nm/ps. A aceleração constante é didática; forças moleculares reais precisam ser reavaliadas.",
+    "investigation": [
+      "Calcule posição pela atualização de Verlet.",
+      "Atualize a velocidade com as duas acelerações.",
+      "Discuta teste de energia em um conjunto NVE."
+    ],
+    "expectedEvidence": "Espera-se 0,11 nm e 1,2 nm/ps, com a unidade temporal consistente em todas as parcelas.",
+    "reflection": "Por que um termostato pode ocultar deriva energética do integrador?",
+    "scenarios": [
+      {
+        "id": "pos_bioinf_02_s0",
+        "label": "Força nula",
+        "situation": "Faça a0=a1=0 com os demais dados.",
+        "observation": "x1=0,1 nm e v1=1 nm/ps.",
+        "explanation": "Sem força, o movimento é uniforme e a velocidade não muda."
+      },
+      {
+        "id": "pos_bioinf_02_s1",
+        "label": "Passo amplo",
+        "situation": "Escolha passo comparável ao período vibracional mais rápido.",
+        "observation": "A integração pode perder precisão ou estabilidade.",
+        "explanation": "A frequência máxima limita a resolução temporal necessária."
+      },
+      {
+        "id": "pos_bioinf_02_s2",
+        "label": "NVE",
+        "situation": "Retire termostato e monitore energia total.",
+        "observation": "Deriva sistemática merece investigação.",
+        "explanation": "Energia é um diagnóstico do passo e da consistência das forças conservativas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual posição resulta dos dados fornecidos?",
+        "options": [
+          {
+            "text": "0,1 nm",
+            "correct": false,
+            "explanation": "Esse valor despreza a aceleração da etapa."
+          },
+          {
+            "text": "1,2 nm",
+            "correct": false,
+            "explanation": "Esse número é a velocidade final, com outra unidade."
+          },
+          {
+            "text": "0,11 nm",
+            "correct": true,
+            "explanation": "O avanço 0,1 soma a parcela acelerada de 0,01 nm."
+          }
+        ]
+      },
+      {
+        "question": "Quando a força deve ser recalculada em velocity Verlet?",
+        "options": [
+          {
+            "text": "Após atualizar a posição",
+            "correct": true,
+            "explanation": "A aceleração final depende da configuração final da etapa."
+          },
+          {
+            "text": "Nunca após o início",
+            "correct": false,
+            "explanation": "A força molecular em geral muda com a posição dos átomos."
+          },
+          {
+            "text": "Somente depois de toda a trajetória",
+            "correct": false,
+            "explanation": "Isso não fornece as acelerações necessárias a cada passo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "GROMACS: molecular dynamics algorithms",
+        "url": "https://manual.gromacs.org/2022/reference-manual/algorithms/molecular-dynamics.html"
+      }
+    ]
+  },
+  "pos_bioinf_03": {
+    "context": "Uma proteína fictícia é avaliada por ângulos de Ramachandran. O objetivo é identificar regiões plausíveis sem reduzir toda validação a um gráfico.",
+    "theory": "φ descreve rotação em torno de N–Cα e ψ em torno de Cα–C. A ligação peptídica possui restrição de planaridade. Colisões estéricas limitam combinações; glicina e prolina têm distribuições particulares. Pontos fora das regiões favorecidas merecem inspeção da evidência estrutural, não correção automática.",
+    "workedExample": "Um resíduo fictício com φ=−60° e ψ=−45° é compatível com região de hélice α direita. Outro com φ=−120° e ψ=130° se aproxima da região β. Esses pares isolados não demonstram estrutura secundária contínua.",
+    "investigation": [
+      "Identifique as ligações associadas a φ e ψ.",
+      "Localize os dois pares angulares fornecidos.",
+      "Examine contexto de glicina, prolina e pontos atípicos."
+    ],
+    "expectedEvidence": "A resposta deve associar os pares às regiões usuais e separar geometria local de função ou dobramento global.",
+    "reflection": "Um ponto raro pode ser sustentado por evidência experimental forte?",
+    "scenarios": [
+      {
+        "id": "pos_bioinf_03_s0",
+        "label": "Glicina",
+        "situation": "O resíduo tem cadeia lateral mínima de glicina.",
+        "observation": "Mais regiões angulares são acessíveis.",
+        "explanation": "Menor impedimento estérico altera a distribuição em relação a resíduos comuns."
+      },
+      {
+        "id": "pos_bioinf_03_s1",
+        "label": "Prolina",
+        "situation": "O resíduo contém o anel de prolina.",
+        "observation": "A faixa de φ é mais restrita.",
+        "explanation": "A ligação da cadeia lateral ao nitrogênio limita rotação da cadeia principal."
+      },
+      {
+        "id": "pos_bioinf_03_s2",
+        "label": "Ponto raro",
+        "situation": "Um resíduo cai fora de regiões favorecidas.",
+        "observation": "É preciso revisar contexto e dados estruturais.",
+        "explanation": "A raridade não prova erro, mas exige justificativa geométrica e experimental."
+      }
+    ],
+    "questions": [
+      {
+        "question": "A qual ligação se associa o ângulo φ?",
+        "options": [
+          {
+            "text": "Cα–C",
+            "correct": false,
+            "explanation": "Essa ligação define ψ na convenção de Ramachandran."
+          },
+          {
+            "text": "Ligação peptídica C–N",
+            "correct": false,
+            "explanation": "A ligação peptídica está associada a ω e é mais restrita."
+          },
+          {
+            "text": "N–Cα",
+            "correct": true,
+            "explanation": "φ mede a rotação da cadeia principal em torno dessa ligação."
+          }
+        ]
+      },
+      {
+        "question": "Um único par −60°,−45° comprova uma hélice longa?",
+        "options": [
+          {
+            "text": "Não, a continuidade exige vários resíduos e contexto",
+            "correct": true,
+            "explanation": "Geometria local compatível não estabelece um segmento inteiro."
+          },
+          {
+            "text": "Sim, qualquer resíduo define toda a hélice",
+            "correct": false,
+            "explanation": "A organização secundária depende de padrão e ligações ao longo da cadeia."
+          },
+          {
+            "text": "Não, esse par é sempre impossível",
+            "correct": false,
+            "explanation": "Esse par se encontra na região comum de hélice α direita."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "RCSB PDB: structural biology glossary",
+        "url": "https://www.rcsb.org/docs/general-help/glossary"
+      }
+    ]
+  },
+  "pos_bioinf_04": {
+    "context": "Um complexo fictício é analisado por MM-PBSA com termos fornecidos. O caso avalia aproximações sem alegar energia livre experimental ou eficácia de ligante.",
+    "theory": "MM-PBSA combina diferenças de energia molecular, solvatação polar e não polar, frequentemente com correção entrópica aproximada. ΔGbind é estimado por complexo menos receptor e ligante. Amostragem, dielétricos, águas e mudanças conformacionais limitam precisão. Omitir entropia muda a grandeza relatada e deve ser explícito.",
+    "workedExample": "Dados fictícios: ΔEMM=−40, ΔGPB=+25 e ΔGnp=−5 kcal/mol. A soma sem entropia é −20. Com contribuição −TΔS=+8, a estimativa passa a −12 kcal/mol. Não houve dinâmica nem cálculo PB executado.",
+    "investigation": [
+      "Some separadamente os termos fornecidos.",
+      "Inclua o termo entrópico com sinal explícito.",
+      "Liste limites de amostragem e solvente."
+    ],
+    "expectedEvidence": "Espera-se −20 sem entropia e −12 kcal/mol com ela, distinguindo estimativa de medida validada.",
+    "reflection": "Como incertezas de grandes termos podem afetar uma diferença pequena?",
+    "scenarios": [
+      {
+        "id": "pos_bioinf_04_s0",
+        "label": "Entropia omitida",
+        "situation": "Relate apenas os três termos energéticos.",
+        "observation": "A soma é −20 kcal/mol.",
+        "explanation": "O resultado deve ser identificado como estimativa sem contribuição entrópica."
+      },
+      {
+        "id": "pos_bioinf_04_s1",
+        "label": "Penalidade maior",
+        "situation": "A solvatação polar sobe de +25 para +35.",
+        "observation": "A soma sem entropia vira −10.",
+        "explanation": "O custo polar compensa parte do ganho de interação molecular."
+      },
+      {
+        "id": "pos_bioinf_04_s2",
+        "label": "Poucos quadros",
+        "situation": "Use poucos quadros correlacionados da trajetória.",
+        "observation": "A média pode ter grande incerteza.",
+        "explanation": "Amostras próximas no tempo não equivalem a observações independentes."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual total inclui a contribuição entrópica +8?",
+        "options": [
+          {
+            "text": "−28 kcal/mol",
+            "correct": false,
+            "explanation": "Esse valor subtrai a penalidade entrópica de sinal positivo."
+          },
+          {
+            "text": "−20 kcal/mol",
+            "correct": false,
+            "explanation": "Esse total omite a contribuição de entropia especificada."
+          },
+          {
+            "text": "−12 kcal/mol",
+            "correct": true,
+            "explanation": "Somar −40+25−5+8 resulta em −12."
+          }
+        ]
+      },
+      {
+        "question": "Uma estimativa MM-PBSA negativa prova eficácia?",
+        "options": [
+          {
+            "text": "Não, ligação estimada não determina resposta clínica",
+            "correct": true,
+            "explanation": "A aproximação estrutural não caracteriza exposição, efeito ou segurança."
+          },
+          {
+            "text": "Sim, em qualquer concentração",
+            "correct": false,
+            "explanation": "Nem afinidade real nem resposta em organismo foram demonstradas."
+          },
+          {
+            "text": "Sim, dispensa controles",
+            "correct": false,
+            "explanation": "Estimativas exigem validação e comparação compatível de condições."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Hou et al.: assessment of MM/PBSA and MM/GBSA",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3029230/"
+      }
+    ]
+  },
+  "pos_bioinf_05": {
+    "context": "Uma matriz fictícia de expressão gênica é usada em WGCNA. O estudo distingue coexpressão, módulo e regulação causal.",
+    "theory": "WGCNA transforma correlações em adjacência ponderada e agrupa genes por padrões de conectividade. Em rede não assinada, aij=|rij|^β. Redes assinadas preservam a direção de associação de modo diferente. Normalização, efeitos de lote e número de amostras afetam correlações; módulo associado a fenótipo não identifica causalidade.",
+    "workedExample": "Numa rede não assinada fictícia com β=2, r=0,8 gera adjacência 0,64 e r=−0,8 também gera 0,64. Isso mostra por que associações de sinal oposto se aproximam nesse desenho. Não foi inferida rede de dados reais.",
+    "investigation": [
+      "Calcule adjacências das duas correlações.",
+      "Compare rede assinada e não assinada.",
+      "Discuta lote e estabilidade dos módulos."
+    ],
+    "expectedEvidence": "A solução deve reconhecer 0,64 em ambos e explicar a perda de sinal da rede não assinada.",
+    "reflection": "Como um lote técnico compartilhado pode criar um módulo artificial?",
+    "scenarios": [
+      {
+        "id": "pos_bioinf_05_s0",
+        "label": "Correlação fraca",
+        "situation": "Use correlação r=0,2 com expoente β=2 na rede.",
+        "observation": "A adjacência fica 0,04.",
+        "explanation": "A potência reduz relações fracas mais que relações fortes."
+      },
+      {
+        "id": "pos_bioinf_05_s1",
+        "label": "Lote",
+        "situation": "Todas as amostras de um grupo foram processadas juntas.",
+        "observation": "Correlação pode refletir técnica.",
+        "explanation": "Confundimento de lote e fenótipo limita interpretação biológica."
+      },
+      {
+        "id": "pos_bioinf_05_s2",
+        "label": "Causalidade",
+        "situation": "Dois genes pertencem ao mesmo módulo.",
+        "observation": "Isso não prova regulação direta.",
+        "explanation": "Padrões comuns podem decorrer de fatores compartilhados ou composição celular."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual adjacência não assinada resulta de r=−0,8 e β=2?",
+        "options": [
+          {
+            "text": "−0,64",
+            "correct": false,
+            "explanation": "A adjacência não assinada é não negativa nessa definição."
+          },
+          {
+            "text": "−1,6",
+            "correct": false,
+            "explanation": "Multiplicar por β não corresponde à transformação de potência."
+          },
+          {
+            "text": "0,64",
+            "correct": true,
+            "explanation": "O módulo de r remove o sinal antes da potência."
+          }
+        ]
+      },
+      {
+        "question": "Qual conclusão é sustentada por módulo de coexpressão?",
+        "options": [
+          {
+            "text": "Similaridade de padrões sob o método adotado",
+            "correct": true,
+            "explanation": "Agrupamento descreve associação, dependente dos dados e processamento."
+          },
+          {
+            "text": "Regulação direta comprovada",
+            "correct": false,
+            "explanation": "Correlação não distingue interação direta de causas compartilhadas."
+          },
+          {
+            "text": "Ausência de efeito de lote",
+            "correct": false,
+            "explanation": "O método não elimina automaticamente artefatos técnicos."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Langfelder and Horvath: official WGCNA tutorials",
+        "url": "https://edo98811.github.io/WGCNA_official_documentation/"
+      }
+    ]
+  },
+  "pos_bioinf_06": {
+    "context": "Uma biblioteca fictícia é triada virtualmente para priorizar ensaios de pesquisa. A atividade avalia enriquecimento sem declarar candidatos terapêuticos validados.",
+    "theory": "Triagem virtual ordena compostos por métodos aproximados, seguida de controles e validação experimental. Protonação, estereoquímica e diversidade influenciam a biblioteca. Enriquecimento compara fração de ativos no topo à fração global; decoys fáceis ou vazamento podem inflar métricas. Escore sozinho não prova atividade, seletividade ou segurança.",
+    "workedExample": "Uma biblioteca didática de 1000 compostos contém 50 ativos conhecidos. Entre os 100 primeiros de uma ordenação fornecida, há 20 ativos. EF10%=(20/100)/(50/1000)=4. A recuperação de ativos é 20/50=40%. Não foi executado docking.",
+    "investigation": [
+      "Calcule a prevalência global de ativos.",
+      "Obtenha enriquecimento e recuperação no topo.",
+      "Discuta decoys e divisão independente de avaliação."
+    ],
+    "expectedEvidence": "Espera-se EF=4 e recuperação=40%, distinguindo melhora de ordenação de confirmação de atividade.",
+    "reflection": "Como compostos quase idênticos em treino e teste enviesam a triagem?",
+    "scenarios": [
+      {
+        "id": "pos_bioinf_06_s0",
+        "label": "Top menor",
+        "situation": "Os 10 primeiros contêm dois ativos.",
+        "observation": "EF1%=4 no exemplo.",
+        "explanation": "A fração 2/10 é quatro vezes a fração global de 0,05."
+      },
+      {
+        "id": "pos_bioinf_06_s1",
+        "label": "Ordenação aleatória",
+        "situation": "A fração no topo coincide com os 5% globais.",
+        "observation": "O enriquecimento é um.",
+        "explanation": "Uma seleção sem preferência não aumenta a concentração de ativos."
+      },
+      {
+        "id": "pos_bioinf_06_s2",
+        "label": "Interferente",
+        "situation": "Um composto altera o sinal do ensaio sem agir no alvo.",
+        "observation": "Pode parecer ativo falsamente.",
+        "explanation": "Controles ortogonais ajudam separar interação alvo de artefato de detecção."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual enriquecimento resulta de 20% no topo e 5% global?",
+        "options": [
+          {
+            "text": "40%",
+            "correct": false,
+            "explanation": "Esse valor é a recuperação de vinte entre cinquenta ativos."
+          },
+          {
+            "text": "Vinte",
+            "correct": false,
+            "explanation": "O número de ativos no topo não é uma razão normalizada."
+          },
+          {
+            "text": "Quatro",
+            "correct": true,
+            "explanation": "A razão 0,20/0,05 mede o enriquecimento relativo."
+          }
+        ]
+      },
+      {
+        "question": "Qual etapa confirma uma hipótese da triagem?",
+        "options": [
+          {
+            "text": "Ensaio independente com controles adequados",
+            "correct": true,
+            "explanation": "A ordenação computacional deve ser confrontada com evidência de atividade."
+          },
+          {
+            "text": "Aceitar o menor escore como eficácia",
+            "correct": false,
+            "explanation": "Pontuação aproximada não demonstra resposta farmacológica."
+          },
+          {
+            "text": "Prescrever o melhor colocado",
+            "correct": false,
+            "explanation": "O caso de pesquisa não autoriza uso clínico."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "AutoDock Vina: batch virtual screening",
+        "url": "https://autodock-vina.readthedocs.io/en/latest/docking_in_batch.html"
+      }
+    ]
+  },
+  "pos_bioinf_07": {
+    "context": "Uma sequência fictícia é modelada por homologia a um molde conhecido. O exercício separa cobertura, identidade e qualidade local.",
+    "theory": "Modelagem comparativa transfere restrições de um molde por alinhamento sequência-estrutura. Identidade alta pode ajudar, mas cobertura, inserções, estados conformacionais e resolução do molde afetam precisão. Loops sem suporte são mais incertos. Geometria aceitável não comprova que o estado funcional correto foi reconstruído.",
+    "workedExample": "Uma sequência fictícia tem 200 resíduos; o molde alinha 160, dos quais 64 são idênticos. Cobertura=80% e identidade na região alinhada=40%. Dividir 64 por 200 daria 32%, uma métrica diferente que precisa ser nomeada.",
+    "investigation": [
+      "Calcule cobertura e identidade com denominadores explícitos.",
+      "Marque regiões sem molde e inserções.",
+      "Planeje validação geométrica e comparação funcional."
+    ],
+    "expectedEvidence": "Devem aparecer 80% e 40%, com incerteza maior nas quarenta posições sem alinhamento de molde.",
+    "reflection": "Como um alinhamento errado desloca restrições mesmo com bom molde?",
+    "scenarios": [
+      {
+        "id": "pos_bioinf_07_s0",
+        "label": "Cobertura total",
+        "situation": "Um segundo molde cobre os 200 resíduos.",
+        "observation": "O suporte se amplia, mas qualidade ainda importa.",
+        "explanation": "Mais cobertura não assegura melhor identidade ou estado conformacional."
+      },
+      {
+        "id": "pos_bioinf_07_s1",
+        "label": "Loop inserido",
+        "situation": "O alvo possui inserção de dez resíduos não presente no molde.",
+        "observation": "A geometria local é menos determinada.",
+        "explanation": "A região precisa de modelagem adicional e avaliação de incerteza."
+      },
+      {
+        "id": "pos_bioinf_07_s2",
+        "label": "Alinhamento deslocado",
+        "situation": "Uma coluna é deslocada em uma posição no sítio.",
+        "observation": "Contatos transferidos podem ficar incorretos.",
+        "explanation": "Correspondências erradas propagam restrições para resíduos inadequados."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a identidade entre os 160 resíduos alinhados?",
+        "options": [
+          {
+            "text": "80%",
+            "correct": false,
+            "explanation": "Oitenta por cento é a cobertura de 160 sobre 200."
+          },
+          {
+            "text": "32%",
+            "correct": false,
+            "explanation": "Esse valor usa a sequência total como denominador."
+          },
+          {
+            "text": "40%",
+            "correct": true,
+            "explanation": "Sessenta e quatro dividido por 160 resulta em 0,4."
+          }
+        ]
+      },
+      {
+        "question": "Qual região tende a ter menos suporte no modelo comparativo?",
+        "options": [
+          {
+            "text": "Inserção sem correspondente no molde",
+            "correct": true,
+            "explanation": "A região não recebe as mesmas restrições de uma parte alinhada."
+          },
+          {
+            "text": "Núcleo bem alinhado e conservado",
+            "correct": false,
+            "explanation": "Essa região costuma possuir suporte comparativo maior."
+          },
+          {
+            "text": "Toda região com geometria aceitável",
+            "correct": false,
+            "explanation": "Geometria por si só não define a qualidade do suporte do molde."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MODELLER: comparative protein modelling manual",
+        "url": "https://salilab.org/modeller/10.6/manual.pdf"
+      }
+    ]
+  },
+  "pos_bioinf_08": {
+    "context": "Uma proteína fictícia é representada por cargas e dielétricos contínuos. Poisson-Boltzmann estima eletrostática sem simular explicitamente cada íon.",
+    "theory": "Poisson-Boltzmann combina campo eletrostático com distribuição média de íons móveis em solvente contínuo. Dielétricos, protonação, força iônica e condições de fronteira alteram a solução. A linearização exige potencial suficientemente pequeno. Concentração local específica, correlações iônicas e efeitos de água podem escapar ao modelo médio.",
+    "workedExample": "No modelo planar simplificado de blindagem ψ(r)=ψ0e^(−κr), adote ψ0=5 mV e κ=1 nm⁻¹. Em r=1 nm, ψ≈1,84 mV. O potencial de referência é pequeno diante da escala térmica de cerca de 26 mV para íons monovalentes à temperatura ambiente. A conta ilustra decaimento linearizado, sem resolver a geometria de uma proteína real.",
+    "investigation": [
+      "Declare cargas e hipótese dielétrica.",
+      "Calcule o decaimento no modelo fornecido.",
+      "Compare maior força iônica e comprimento de blindagem."
+    ],
+    "expectedEvidence": "Espera-se 1,84 mV, comprimento de blindagem de 1 nm e reconhecimento de que a linearização exige pequeno potencial. O modelo contínuo também depende de protonação e parâmetros do solvente.",
+    "reflection": "Por que mudar pH pode alterar o campo sem mudar coordenadas?",
+    "scenarios": [
+      {
+        "id": "pos_bioinf_08_s0",
+        "label": "Blindagem maior",
+        "situation": "Na expressão ψ(r)=ψ0e^(−κr), use ψ0=5 mV e r=1 nm. Compare κ=1 nm⁻¹ com κ=2 nm⁻¹.",
+        "observation": "Com ψ0=5 mV e κ=2 nm⁻¹, o potencial cai a cerca de 0,677 mV.",
+        "explanation": "Mais blindagem reduz o alcance eletrostático no modelo exponencial."
+      },
+      {
+        "id": "pos_bioinf_08_s1",
+        "label": "Sem sal",
+        "situation": "Faça κ tender a zero nesta expressão.",
+        "observation": "O fator exponencial tende a um.",
+        "explanation": "A parcela de blindagem desaparece, mas a geometria real ainda impõe dependência espacial."
+      },
+      {
+        "id": "pos_bioinf_08_s2",
+        "label": "Protonação",
+        "situation": "Altere cargas tituláveis por uma hipótese de pH.",
+        "observation": "O campo calculado pode mudar.",
+        "explanation": "Os termos de fonte dependem das cargas e não só da forma molecular."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é o comprimento de blindagem para κ=1 nm⁻¹?",
+        "options": [
+          {
+            "text": "1 nm⁻¹",
+            "correct": false,
+            "explanation": "Essa unidade pertence ao parâmetro inverso de comprimento."
+          },
+          {
+            "text": "5 mV",
+            "correct": false,
+            "explanation": "Esse é o potencial de referência e não uma distância."
+          },
+          {
+            "text": "1 nm",
+            "correct": true,
+            "explanation": "O comprimento característico é o inverso de κ."
+          }
+        ]
+      },
+      {
+        "question": "Qual condição favorece a linearização de Poisson-Boltzmann?",
+        "options": [
+          {
+            "text": "Potenciais pequenos na escala térmica relevante",
+            "correct": true,
+            "explanation": "A aproximação expande a resposta iônica perto de potenciais baixos."
+          },
+          {
+            "text": "Qualquer potencial arbitrariamente alto",
+            "correct": false,
+            "explanation": "A não linearidade cresce quando a hipótese de pequeno potencial falha."
+          },
+          {
+            "text": "Ausência de toda carga fixa",
+            "correct": false,
+            "explanation": "Cargas podem existir mesmo quando a linearização é apropriada."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "APBS: continuum solvation model background",
+        "url": "https://apbs.readthedocs.io/en/latest/background.html"
+      }
+    ]
+  },
+  "pos_bioinf_09": {
+    "context": "Um alinhamento fictício é usado para comparar árvores por máxima verossimilhança. O objetivo é interpretar ajuste e suporte sem equiparar bootstrap a certeza histórica.",
+    "theory": "Máxima verossimilhança escolhe árvore e parâmetros que tornam o alinhamento mais provável sob um modelo de substituição. Comprimentos de ramos e heterogeneidade por sítio importam. Bootstrap reamostra colunas e mede estabilidade do procedimento; não é diretamente probabilidade posterior do clado. Modelo e alinhamento inadequados podem gerar suporte alto enganoso.",
+    "workedExample": "Duas árvores fictícias têm log-verossimilhanças −120 e −125 sob o mesmo modelo e dados. A razão de verossimilhanças é e⁵≈148,4 a favor da primeira. Isso não constitui sozinho teste de topologia nem probabilidade de a árvore ser verdadeira.",
+    "investigation": [
+      "Compare log-verossimilhanças em condições iguais.",
+      "Converta sua diferença em razão de verossimilhanças.",
+      "Discuta reamostragem de sítios e suporte de clados."
+    ],
+    "expectedEvidence": "Espera-se preferência por −120 e razão 148,4, sem interpretar o número como probabilidade de verdade.",
+    "reflection": "Como recombinação pode contrariar uma única árvore para todos os sítios?",
+    "scenarios": [
+      {
+        "id": "pos_bioinf_09_s0",
+        "label": "Modelo distinto",
+        "situation": "Compare logs obtidos com modelos e parâmetros diferentes.",
+        "observation": "A diferença exige critério apropriado.",
+        "explanation": "Mais parâmetros podem melhorar ajuste sem representar melhor generalização."
+      },
+      {
+        "id": "pos_bioinf_09_s1",
+        "label": "Bootstrap",
+        "situation": "Um clado aparece em 900 de 1000 réplicas.",
+        "observation": "O suporte de reamostragem é 90%.",
+        "explanation": "A frequência resume estabilidade das réplicas sob o desenho, não probabilidade posterior."
+      },
+      {
+        "id": "pos_bioinf_09_s2",
+        "label": "Alinhamento ruim",
+        "situation": "Colunas não homólogas são incluídas no alinhamento.",
+        "observation": "O ajuste pode ser sistematicamente enviesado.",
+        "explanation": "A inferência depende de sítios correspondentes e modelo biologicamente adequado."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual árvore tem maior verossimilhança nos logs fornecidos?",
+        "options": [
+          {
+            "text": "A de −125",
+            "correct": false,
+            "explanation": "Esse log menor representa pior ajuste sob as mesmas condições."
+          },
+          {
+            "text": "Ambas por terem sinal negativo",
+            "correct": false,
+            "explanation": "Log-probabilidades são negativas e ainda podem ser ordenadas."
+          },
+          {
+            "text": "A de −120",
+            "correct": true,
+            "explanation": "O valor menos negativo corresponde à maior probabilidade dos dados."
+          }
+        ]
+      },
+      {
+        "question": "O que significa suporte bootstrap de 90%?",
+        "options": [
+          {
+            "text": "Clado presente em 90% das réplicas do procedimento",
+            "correct": true,
+            "explanation": "A frequência mede estabilidade ao reamostrar as colunas."
+          },
+          {
+            "text": "90% de chance posterior de ser verdadeiro",
+            "correct": false,
+            "explanation": "Bootstrap não fornece diretamente essa interpretação bayesiana."
+          },
+          {
+            "text": "90% de sítios idênticos",
+            "correct": false,
+            "explanation": "Suporte de clado não é identidade de sequência."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "IQ-TREE: maximum likelihood and bootstrap documentation",
+        "url": "https://iqtree.github.io/doc/"
+      }
+    ]
+  },
+  "pos_bioinf_10": {
+    "context": "Um QSAR fictício relaciona descritores a atividade de pesquisa. A atividade considera domínio de aplicação e validação sem recomendar composto para uso humano.",
+    "theory": "QSAR aprende relação entre estrutura codificada e um desfecho definido. pIC50=−log10(IC50 em mol/L) cresce quando a concentração inibitória cai. Divisão por famílias estruturais, validação externa e domínio de aplicação ajudam evitar otimismo. Descritor correlacionado não prova mecanismo e extrapolação química pode falhar.",
+    "workedExample": "Uma IC50 fictícia de 10 µM equivale a 10⁻⁵ mol/L, portanto pIC50=5. Para 1 µM, pIC50=6. A diferença de uma unidade logarítmica representa fator dez na concentração, não aumento linear de 1 µM.",
+    "investigation": [
+      "Converta micromolar para molar.",
+      "Calcule pIC50 dos dois exemplos.",
+      "Planeje separação por esqueleto e domínio de aplicação."
+    ],
+    "expectedEvidence": "Espera-se pIC50 de cinco e seis e distinção entre ajuste de treino e previsão externa.",
+    "reflection": "Por que compostos próximos distribuídos entre treino e teste inflam desempenho?",
+    "scenarios": [
+      {
+        "id": "pos_bioinf_10_s0",
+        "label": "Fora do domínio",
+        "situation": "Um composto possui descritores além da faixa de treino.",
+        "observation": "A previsão merece maior cautela.",
+        "explanation": "Distância química reduz o suporte empírico para extrapolação."
+      },
+      {
+        "id": "pos_bioinf_10_s1",
+        "label": "Vazamento",
+        "situation": "Descritores são escolhidos usando todos os desfechos antes da divisão.",
+        "observation": "A avaliação fica contaminada.",
+        "explanation": "Informação do teste participou das decisões de modelagem."
+      },
+      {
+        "id": "pos_bioinf_10_s2",
+        "label": "Duplicação",
+        "situation": "A mesma molécula aparece em treino e teste com outro identificador.",
+        "observation": "O desempenho pode parecer artificialmente alto.",
+        "explanation": "Identificadores distintos não tornam as estruturas observações independentes."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual pIC50 corresponde a 10 µM?",
+        "options": [
+          {
+            "text": "−5",
+            "correct": false,
+            "explanation": "A definição inclui sinal negativo diante do logaritmo."
+          },
+          {
+            "text": "10",
+            "correct": false,
+            "explanation": "O valor em micromolar não é o escore logarítmico."
+          },
+          {
+            "text": "5",
+            "correct": true,
+            "explanation": "Dez micromolar é 10⁻⁵ molar, cujo log negativo é cinco."
+          }
+        ]
+      },
+      {
+        "question": "Qual estratégia avalia melhor transferência entre famílias químicas?",
+        "options": [
+          {
+            "text": "Separação por esqueleto estrutural",
+            "correct": true,
+            "explanation": "Ela reduz a proximidade trivial entre estruturas de treino e teste."
+          },
+          {
+            "text": "Duplicar moléculas em ambos os grupos",
+            "correct": false,
+            "explanation": "Duplicação cria vazamento e não testa transferência."
+          },
+          {
+            "text": "Medir apenas erro de treino",
+            "correct": false,
+            "explanation": "O ajuste aos dados usados não mede desempenho em novas moléculas."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "OECD: QSAR assessment framework",
+        "url": "https://www.oecd.org/en/publications/2023/11/q-sar-assessment-framework-guidance-for-the-regulatory-assessment-of-quantitative-structure-activity-relationship-models-and-predictions_9b064821.html"
+      }
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+name: Desenvolvimento
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# No credentials are required for tests or compilation. Explicit empty values
+# also override any accidental local .env files included in the checkout.
+env:
+  VITE_FIREBASE_API_KEY: ''
+  VITE_FIREBASE_AUTH_DOMAIN: ''
+  VITE_FIREBASE_PROJECT_ID: ''
+  VITE_FIREBASE_STORAGE_BUCKET: ''
+  VITE_FIREBASE_MESSAGING_SENDER_ID: ''
+  VITE_FIREBASE_APP_ID: ''
+  VITE_FIREBASE_MEASUREMENT_ID: ''
+  VITE_GEMINI_API_KEY: ''
+  VITE_USE_FIREBASE_EMULATORS: 'false'
+  VITE_DISABLE_AI: 'true'
+
+jobs:
+  validate:
+    name: Testes e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Instalar dependências do lockfile
+        run: npm ci
+      - name: Exigir conteúdo individual nos 582 laboratórios
+        run: npm run labs:audit
+      - name: Testar sem serviços reais
+        run: npm run test:local
+      - name: Compilar TypeScript e aplicação
+        run: npm run build
+
+  lint:
+    name: Lint informativo — dívida existente
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Instalar dependências do lockfile
+        run: npm ci
+      - name: Executar lint e preservar diagnóstico
+        id: lint
+        continue-on-error: true
+        run: npm run lint
+      - name: Registrar resultado do lint
+        if: always()
+        env:
+          LINT_OUTCOME: ${{ steps.lint.outcome }}
+        run: |
+          if [ "$LINT_OUTCOME" = "success" ]; then
+            echo '### Lint aprovado' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo '### Lint com falhas — ver diagnóstico da etapa anterior' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Este job é informativo durante a correção da dívida existente. Testes e build continuam obrigatórios.' >> "$GITHUB_STEP_SUMMARY"
+            echo '::warning::O lint não passou. Consulte os erros; este resultado não bloqueia a validação nesta etapa.'
+          fi

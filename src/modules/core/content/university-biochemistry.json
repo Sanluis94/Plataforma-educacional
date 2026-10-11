@@ -1,0 +1,832 @@
+{
+  "sup_bioq_01": {
+    "context": "Uma enzima fictícia é estudada em velocidades iniciais para estimar saturação e discutir por que Km não é automaticamente uma constante de afinidade.",
+    "theory": "Michaelis-Menten usa v=Vmax[S]/(Km+[S]) sob estado quase estacionário, substrato em excesso e pouca conversão em produto. Km é concentração e Vmax é velocidade. Lineweaver-Burk transforma em 1/v=(Km/Vmax)/[S]+1/Vmax, amplificando erros nas menores velocidades; ajuste não linear evita essa alteração da escala do erro.",
+    "workedExample": "Para Vmax=100 µmol/min e Km=2 mM, [S]=2 mM gera 50 µmol/min e [S]=8 mM gera 80 µmol/min. O intercepto recíproco é 0,01 min/µmol e a inclinação é 0,02 mM·min/µmol. Valores são calculados, sem ensaio executado.",
+    "investigation": [
+      "Calcule v em 0,5, 2 e 8 mM de substrato.",
+      "Identifique as unidades de ambos os eixos recíprocos.",
+      "Compare erros absolutos iguais em v após a transformação 1/v."
+    ],
+    "expectedEvidence": "A análise deve localizar a meia velocidade em Km e justificar a distorção de erros da representação recíproca.",
+    "reflection": "Em que mecanismo Km difere da constante de dissociação?",
+    "scenarios": [
+      {
+        "id": "sup_bioq_01_s0",
+        "label": "Baixo substrato",
+        "situation": "Considere [S] muito menor que Km=2 mM.",
+        "observation": "v é quase proporcional à concentração.",
+        "explanation": "Km domina o denominador e v≈(Vmax/Km)[S], antes da saturação."
+      },
+      {
+        "id": "sup_bioq_01_s1",
+        "label": "Saturação",
+        "situation": "Eleve [S] muito acima de Km mantendo a enzima.",
+        "observation": "v aproxima-se de 100 µmol/min.",
+        "explanation": "A enzima disponível limita a capacidade quando seus sítios estão quase ocupados."
+      },
+      {
+        "id": "sup_bioq_01_s2",
+        "label": "Competição",
+        "situation": "Um inibidor hipotético duplica Km aparente e preserva Vmax.",
+        "observation": "A meia velocidade ocorre em 4 mM.",
+        "explanation": "A inibição competitiva desloca a concentração necessária sem mudar o limite de saturação."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual velocidade corresponde a [S]=8 mM no modelo?",
+        "options": [
+          {
+            "text": "100 µmol/min",
+            "correct": false,
+            "explanation": "A velocidade limite não é atingida exatamente nesta concentração finita."
+          },
+          {
+            "text": "400 µmol/min",
+            "correct": false,
+            "explanation": "Essa previsão linear ignora a saturação dos sítios."
+          },
+          {
+            "text": "80 µmol/min",
+            "correct": true,
+            "explanation": "O cálculo 100×8/(2+8) resulta em 80 µmol/min."
+          }
+        ]
+      },
+      {
+        "question": "Qual limitação acompanha Lineweaver-Burk?",
+        "options": [
+          {
+            "text": "Amplificação do erro em velocidades pequenas",
+            "correct": true,
+            "explanation": "Perturbações pequenas em v baixo produzem diferenças grandes em 1/v."
+          },
+          {
+            "text": "Km perde sua unidade",
+            "correct": false,
+            "explanation": "Km continua sendo uma concentração nas duas representações."
+          },
+          {
+            "text": "A reta comprova o mecanismo completo",
+            "correct": false,
+            "explanation": "Uma curva compatível não identifica exclusivamente todas as etapas mecanísticas."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIH Assay Guidance Manual: enzymatic assays",
+        "url": "https://www.ncbi.nlm.nih.gov/books/NBK92007/"
+      }
+    ]
+  },
+  "sup_bioq_02": {
+    "context": "Uma qPCR fictícia quantifica DNA de cultura de pesquisa. Eficiência e controles permitem interpretar Cq sem confundir quantidade de molde com número de células.",
+    "theory": "Na fase exponencial, N=N0(1+E)^c, com E=1 na duplicação ideal. Uma reta de Cq contra log10(N0), de inclinação b, fornece E=10^(−1/b)−1. A razão 2^(−ΔΔCq) requer eficiências compatíveis e referência estável. Controles sem molde e especificidade ajudam separar alvo de contaminação e amplificação inespecífica.",
+    "workedExample": "Uma curva padrão fictícia tem b=−3,322 ciclos por década: E≈1,00. Uma amostra cruza o mesmo limiar três ciclos antes de outra; sob eficiência ideal e preparo comparável, contém 2³=8 vezes mais molde. Isso não demonstra oito vezes mais células.",
+    "investigation": [
+      "Desenhe Cq contra logaritmo decimal das cópias iniciais.",
+      "Estime a eficiência pela inclinação fornecida.",
+      "Inspecione controle sem molde e dispersão entre réplicas."
+    ],
+    "expectedEvidence": "Espera-se eficiência de aproximadamente 100%, razão de oito e interpretação condicionada à qualidade dos controles.",
+    "reflection": "Como uma referência instável afetaria a expressão relativa?",
+    "scenarios": [
+      {
+        "id": "sup_bioq_02_s0",
+        "label": "Diluição",
+        "situation": "Reduza em dez vezes o molde em reação ideal.",
+        "observation": "O Cq aumenta cerca de 3,322 ciclos.",
+        "explanation": "log2(10) ciclos adicionais são necessários para recuperar a mesma quantidade no limiar."
+      },
+      {
+        "id": "sup_bioq_02_s1",
+        "label": "Contaminação",
+        "situation": "O controle sem molde apresenta amplificação precoce.",
+        "observation": "O resultado da amostra requer investigação.",
+        "explanation": "DNA contaminante ou produto inespecífico pode explicar sinal onde não deveria haver alvo."
+      },
+      {
+        "id": "sup_bioq_02_s2",
+        "label": "Eficiências distintas",
+        "situation": "Uma reação tem E=0,8 e a outra E=1.",
+        "observation": "A conversão simples em oito vezes falha.",
+        "explanation": "Ganhos diferentes por ciclo exigem cálculo ajustado e validação da comparação."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual razão inicial corresponde a três ciclos ideais?",
+        "options": [
+          {
+            "text": "Três vezes",
+            "correct": false,
+            "explanation": "Quantidade inicial não varia linearmente com a diferença de ciclos."
+          },
+          {
+            "text": "Dez vezes",
+            "correct": false,
+            "explanation": "Uma década corresponde a cerca de 3,322 ciclos, não três exatos."
+          },
+          {
+            "text": "Oito vezes",
+            "correct": true,
+            "explanation": "A duplicação em três ciclos produz o fator exponencial 2³."
+          }
+        ]
+      },
+      {
+        "question": "Qual condição sustenta 2^(−ΔΔCq)?",
+        "options": [
+          {
+            "text": "Eficiências compatíveis e referência estável",
+            "correct": true,
+            "explanation": "A expressão relativa depende dessas condições além da especificidade do ensaio."
+          },
+          {
+            "text": "Qualquer fluorescência crescente",
+            "correct": false,
+            "explanation": "Sinal inespecífico crescente não quantifica necessariamente o alvo."
+          },
+          {
+            "text": "Ausência de controles",
+            "correct": false,
+            "explanation": "Controles são necessários para interpretar a origem e validade da amplificação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Bustin et al.: MIQE Guidelines",
+        "url": "https://www.gene-quantification.de/miqe-bustin-et-al-clin-chem-2009.pdf"
+      }
+    ]
+  },
+  "sup_bioq_03": {
+    "context": "Uma mistura padrão fictícia é separada por HPLC. O exercício calcula retenção e resolução antes de usar uma curva calibrada para concentração.",
+    "theory": "O fator de retenção é k=(tR−t0)/t0. Para larguras de base w1 e w2, a resolução é Rs=2(tR2−tR1)/(w1+w2). Retenção, seletividade e dispersão determinam separação. Área exige calibração com detector adequado; tempo de retenção isolado não garante identidade e coeluição pode prejudicar a quantificação.",
+    "workedExample": "Com t0=1 min, tR1=3 min, tR2=4 min, w1=0,4 min e w2=0,6 min, k1=2 e Rs=2. Na reta fictícia área=200c+10, c em mg/L, área 410 dá c=(410−10)/200=2 mg/L, dentro da faixa validada.",
+    "investigation": [
+      "Marque tempo morto, retenções e larguras de base.",
+      "Calcule k1 e Rs usando a convenção correta de largura.",
+      "Interpole a área e discuta branco e coeluição."
+    ],
+    "expectedEvidence": "Devem ser apresentados k1=2, Rs=2 e 2 mg/L, sem tratar área instrumental como concentração direta.",
+    "reflection": "Por que retenção coincidente não prova identidade química?",
+    "scenarios": [
+      {
+        "id": "sup_bioq_03_s0",
+        "label": "Alargamento",
+        "situation": "Dobre ambas as larguras sem deslocar os centros.",
+        "observation": "A resolução cai para 1.",
+        "explanation": "A separação temporal permanece, mas a sobreposição cresce com a dispersão."
+      },
+      {
+        "id": "sup_bioq_03_s1",
+        "label": "Fundo",
+        "situation": "O branco gera área 10 nas condições da calibração.",
+        "observation": "A área líquida da amostra é 400.",
+        "explanation": "Subtrair o intercepto evita atribuir o fundo ao analito."
+      },
+      {
+        "id": "sup_bioq_03_s2",
+        "label": "Coeluição",
+        "situation": "Um contaminante contribui ao mesmo pico do analito.",
+        "observation": "A área pode superestimar a concentração alvo.",
+        "explanation": "Sem seletividade adicional, o detector soma respostas de espécies distintas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quanto vale Rs no cromatograma fornecido?",
+        "options": [
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "A fórmula com larguras de base inclui o fator dois no numerador."
+          },
+          {
+            "text": "4",
+            "correct": false,
+            "explanation": "Tempo de retenção do segundo pico não representa resolução."
+          },
+          {
+            "text": "2",
+            "correct": true,
+            "explanation": "Duas vezes a separação de 1 min dividida por 1 min de larguras resulta em 2."
+          }
+        ]
+      },
+      {
+        "question": "Como converter área 410 pela reta proposta?",
+        "options": [
+          {
+            "text": "Subtrair 10 e dividir por 200",
+            "correct": true,
+            "explanation": "A inversão da calibração fornece 2 mg/L e considera o fundo."
+          },
+          {
+            "text": "Dividir 410 por 200",
+            "correct": false,
+            "explanation": "Ignorar o intercepto gera 2,05 mg/L e superestima o resultado."
+          },
+          {
+            "text": "Usar 410 mg/L diretamente",
+            "correct": false,
+            "explanation": "A área possui escala instrumental distinta da concentração."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Agilent: HPLC separation principles",
+        "url": "https://www.agilent.com/cs/library/eseminars/public/Introduction-to-HPLC-Separation-Principles-for-Biomolecules-05112020.pdf"
+      }
+    ]
+  },
+  "sup_bioq_04": {
+    "context": "Um estudo fictício compara poses de ligantes em um receptor. O docking formula hipóteses de pesquisa sem demonstrar eficácia farmacológica ou uso clínico.",
+    "theory": "Docking explora posições e conformações mediante uma função aproximada de pontuação. Protonação, águas, flexibilidade e caixa de busca alteram as poses. Escores em kcal/mol não equivalem automaticamente a energias livres medidas ou Kd experimental. Redocking testa recuperação geométrica; atividade, seletividade e segurança exigem outras evidências.",
+    "workedExample": "Duas poses didáticas fornecidas têm escores −8 e −7 kcal/mol. A primeira é favorecida em 1 kcal/mol pela função usada. Não se converte essa diferença diretamente em Kd: solvente, entropia e erros da aproximação não foram estabelecidos. Nenhum solver foi executado neste caso.",
+    "investigation": [
+      "Inspecione protonação de receptor e ligante nas poses.",
+      "Compare colisões e contatos no sítio de interesse.",
+      "Planeje redocking e ensaio independente de ligação."
+    ],
+    "expectedEvidence": "A conclusão deve combinar plausibilidade geométrica e incerteza do escore, sem inferir tratamento a partir da ordenação.",
+    "reflection": "Uma protonação improvável pode favorecer artificialmente uma pose?",
+    "scenarios": [
+      {
+        "id": "sup_bioq_04_s0",
+        "label": "Caixa incorreta",
+        "situation": "A caixa de busca exclui o sítio pretendido.",
+        "observation": "A hipótese de ligação no sítio não foi testada.",
+        "explanation": "Uma boa pontuação em outra região não resolve a pergunta original do docking."
+      },
+      {
+        "id": "sup_bioq_04_s1",
+        "label": "Colisão",
+        "situation": "Dois átomos não ligados aparecem em sobreposição impossível.",
+        "observation": "A pose perde plausibilidade física.",
+        "explanation": "Inspeção geométrica pode revelar falhas apesar de uma pontuação favorável."
+      },
+      {
+        "id": "sup_bioq_04_s2",
+        "label": "Referência estrutural",
+        "situation": "Uma pose cristalográfica do ligante está disponível.",
+        "observation": "RMSD permite avaliar redocking.",
+        "explanation": "Recuperação da referência apoia aquele protocolo sem garantir acerto em outros ligantes."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que significa −8 frente a −7 na mesma função?",
+        "options": [
+          {
+            "text": "Eficácia terapêutica comprovada",
+            "correct": false,
+            "explanation": "Uma pontuação estrutural não mede desfechos de tratamento."
+          },
+          {
+            "text": "Kd medido conhecido",
+            "correct": false,
+            "explanation": "Nenhuma constante experimental de dissociação foi medida pelo escore."
+          },
+          {
+            "text": "Preferência aproximada pela primeira pose",
+            "correct": true,
+            "explanation": "A ordenação é relativa ao modelo e às condições de preparação usadas."
+          }
+        ]
+      },
+      {
+        "question": "Qual controle avalia recuperação de uma geometria conhecida?",
+        "options": [
+          {
+            "text": "Redocking do ligante de referência",
+            "correct": true,
+            "explanation": "A pose calculada é comparada à estrutura conhecida para avaliar o protocolo."
+          },
+          {
+            "text": "Escolher sempre o menor escore",
+            "correct": false,
+            "explanation": "Essa escolha não confronta a previsão com uma referência externa."
+          },
+          {
+            "text": "Recomendar a dose mais alta",
+            "correct": false,
+            "explanation": "Docking não sustenta decisões clínicas de dose ou administração."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "AutoDock Vina documentation",
+        "url": "https://autodock-vina.readthedocs.io/en/stable/vina.html"
+      }
+    ]
+  },
+  "sup_bioq_05": {
+    "context": "Uma mitocôndria fictícia é descrita por fluxos de elétrons e prótons. O exercício separa respiração, gradiente e produção de ATP por contabilidade energética.",
+    "theory": "A cadeia respiratória transfere elétrons para O2 e usa parte da energia para bombear H+. A ATP sintase aproveita a força próton-motriz elétrica e química. Complexo II não bombeia prótons. ATP/O depende do acoplamento e do transporte; fuga dissipa energia e pode aumentar respiração sem aumentar ATP.",
+    "workedExample": "Adote 10 H+ bombeados por NADH e custo efetivo pedagógico de 4 H+/ATP. O rendimento idealizado é 10/4=2,5 ATP por NADH. Se metade dos prótons retorna por fuga, restam 5 H+ úteis e o rendimento é 1,25. São hipóteses contábeis, não medidas celulares.",
+    "investigation": [
+      "Rastreie elétrons do NADH ao aceptor terminal no esquema.",
+      "Separe retorno de H+ pela sintase de retorno por fuga.",
+      "Compare bloqueio da cadeia e desacoplamento conceitualmente."
+    ],
+    "expectedEvidence": "A solução deve conservar o fluxo de prótons e explicar a redução de rendimento sem apresentar ATP/O como constante universal.",
+    "reflection": "Como consumo de oxigênio e ATP podem mudar em sentidos diferentes?",
+    "scenarios": [
+      {
+        "id": "sup_bioq_05_s0",
+        "label": "Desacoplamento",
+        "situation": "Uma via fictícia permite retorno de H+ fora da sintase.",
+        "observation": "O gradiente e a eficiência diminuem.",
+        "explanation": "Energia do fluxo pode dissipar-se em calor em vez de sustentar fosforilação."
+      },
+      {
+        "id": "sup_bioq_05_s1",
+        "label": "Falta de aceptor",
+        "situation": "Retire oxigênio do esquema de respiração aeróbia.",
+        "observation": "A transferência sustentada de elétrons cessa.",
+        "explanation": "Sem aceptor terminal a cadeia reduzida deixa de oxidar continuamente o NADH."
+      },
+      {
+        "id": "sup_bioq_05_s2",
+        "label": "Entrada alternativa",
+        "situation": "Elétrons de succinato entram pelo complexo II.",
+        "observation": "O bombeamento por par eletrônico é menor.",
+        "explanation": "Essa entrada contorna o complexo I e o complexo II não bombeia H+."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual rendimento segue de 10 H+ e custo de 4 H+/ATP?",
+        "options": [
+          {
+            "text": "40 ATP por NADH",
+            "correct": false,
+            "explanation": "Multiplicar as grandezas não respeita a contabilidade de prótons consumidos."
+          },
+          {
+            "text": "10 ATP por NADH",
+            "correct": false,
+            "explanation": "Cada ATP exige vários prótons no modelo e não apenas um."
+          },
+          {
+            "text": "2,5 ATP por NADH",
+            "correct": true,
+            "explanation": "Dividir prótons bombeados pelo custo por ATP fornece 2,5."
+          }
+        ]
+      },
+      {
+        "question": "Qual complexo mitocondrial usual não bombeia H+?",
+        "options": [
+          {
+            "text": "Complexo II",
+            "correct": true,
+            "explanation": "A transferência do succinato à ubiquinona não transloca prótons nesse complexo."
+          },
+          {
+            "text": "Complexo I",
+            "correct": false,
+            "explanation": "O complexo I contribui para o gradiente durante oxidação de NADH."
+          },
+          {
+            "text": "Complexo IV",
+            "correct": false,
+            "explanation": "A transferência terminal no complexo IV participa da geração do gradiente."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "The Cell: mechanism of oxidative phosphorylation",
+        "url": "https://www.ncbi.nlm.nih.gov/books/NBK9885/"
+      }
+    ]
+  },
+  "sup_bioq_06": {
+    "context": "Uma curva fictícia de concentração-efeito serve para separar potência de eficácia. O caso é pedagógico e não define dose nem conduta clínica.",
+    "theory": "O modelo E=E0+Emax C^h/(EC50^h+C^h) tem concentração de meia resposta EC50 e expoente de inclinação h. Emax é incremento máximo sobre o basal. Menor EC50 indica maior potência no mesmo ensaio, não maior segurança. Tempo, exposição no sítio e variabilidade limitam extrapolações para organismos.",
+    "workedExample": "Com E0=0, Emax=80 unidades, h=1 e EC50=4 µM, C=4 gera 40 unidades e C=12 gera 60. Um composto de EC50=2 µM com mesmo Emax é mais potente nesse ensaio, mas tem o mesmo teto de resposta.",
+    "investigation": [
+      "Calcule respostas em 0, 4 e 12 µM.",
+      "Compare mudança de EC50 com mudança de Emax.",
+      "Identifique dados ausentes para relacionar concentração e dose."
+    ],
+    "expectedEvidence": "Espera-se obter 40 e 60 unidades, separando potência, efeito máximo e ausência de informação sobre toxicidade.",
+    "reflection": "Um efeito máximo maior garante melhor relação entre benefício e risco?",
+    "scenarios": [
+      {
+        "id": "sup_bioq_06_s0",
+        "label": "Potência",
+        "situation": "Reduza EC50 para 2 µM com Emax fixo.",
+        "observation": "A curva desloca-se para a esquerda.",
+        "explanation": "A mesma fração do máximo é alcançada em menor concentração."
+      },
+      {
+        "id": "sup_bioq_06_s1",
+        "label": "Eficácia",
+        "situation": "Reduza Emax para 40 com EC50=4 µM.",
+        "observation": "A resposta em EC50 passa a 20.",
+        "explanation": "A meia resposta acompanha o teto do incremento, não um valor absoluto fixo."
+      },
+      {
+        "id": "sup_bioq_06_s2",
+        "label": "Cooperatividade aparente",
+        "situation": "Use h=2 mantendo os demais parâmetros.",
+        "observation": "Em EC50 o efeito continua 40.",
+        "explanation": "A inclinação muda, mas a definição de meia resposta permanece."
+      }
+    ],
+    "questions": [
+      {
+        "question": "EC50=4 µM significa o quê no modelo?",
+        "options": [
+          {
+            "text": "Dose segura de 4 mg",
+            "correct": false,
+            "explanation": "Dose e concentração são distintas e segurança não foi investigada."
+          },
+          {
+            "text": "Efeito máximo de 4 unidades",
+            "correct": false,
+            "explanation": "EC50 tem unidade de concentração, enquanto Emax descreve o efeito."
+          },
+          {
+            "text": "Concentração de meia resposta máxima",
+            "correct": true,
+            "explanation": "A fração saturável vale 1/2 quando C=EC50 para h positivo."
+          }
+        ]
+      },
+      {
+        "question": "Menor EC50 com Emax constante indica qual propriedade?",
+        "options": [
+          {
+            "text": "Maior potência relativa no ensaio",
+            "correct": true,
+            "explanation": "A concentração necessária para o mesmo efeito relativo diminui."
+          },
+          {
+            "text": "Maior eficácia máxima",
+            "correct": false,
+            "explanation": "O teto de resposta permaneceu igual por definição do cenário."
+          },
+          {
+            "text": "Ausência de toxicidade",
+            "correct": false,
+            "explanation": "A curva apresentada não caracteriza efeitos adversos ou segurança."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "FDA: exposure-response relationships",
+        "url": "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/exposure-response-relationships-study-design-data-analysis-and-regulatory-applications"
+      }
+    ]
+  },
+  "sup_bioq_07": {
+    "context": "Um ELISA sanduíche fictício quantifica proteína em pesquisa. Branco, padrões e diluições sustentam a leitura sem produzir diagnóstico clínico.",
+    "theory": "O antígeno é capturado por um anticorpo e detectado por outro com epítopo compatível. A reação enzimática gera sinal que exige calibração. Fundo, saturação, matriz e eventual efeito gancho limitam a relação entre absorbância e concentração. Réplicas avaliam precisão, mas não substituem especificidade e controles.",
+    "workedExample": "Na faixa linear didática A=0,02c+0,05, com c em ng/mL. Uma amostra diluída 1:10 tem A=0,25: c diluída=(0,25−0,05)/0,02=10 ng/mL. A original tem 100 ng/mL se a diluição preservar a comparabilidade com os padrões.",
+    "investigation": [
+      "Identifique branco e faixa da curva calibrada.",
+      "Interpole a absorbância e aplique o fator de diluição.",
+      "Planeje diluições seriadas para examinar interferência de matriz."
+    ],
+    "expectedEvidence": "O cálculo deve obter 100 ng/mL na amostra original e distinguir sinal bruto de concentração calibrada.",
+    "reflection": "Como diluições podem revelar interferência ou excesso de antígeno?",
+    "scenarios": [
+      {
+        "id": "sup_bioq_07_s0",
+        "label": "Fundo omitido",
+        "situation": "Divida 0,25 por 0,02 sem retirar o intercepto.",
+        "observation": "A concentração diluída vira 12,5 ng/mL.",
+        "explanation": "O fundo indevidamente atribuído ao antígeno superestima o valor em 25%."
+      },
+      {
+        "id": "sup_bioq_07_s1",
+        "label": "Saturação",
+        "situation": "A absorbância supera o maior padrão disponível.",
+        "observation": "Extrapolação deixa de ser sustentada.",
+        "explanation": "Nova diluição pode trazer o sinal à faixa de quantificação estabelecida."
+      },
+      {
+        "id": "sup_bioq_07_s2",
+        "label": "Epítopo bloqueado",
+        "situation": "Os dois anticorpos disputam um mesmo epítopo.",
+        "observation": "O sanduíche pode não se formar.",
+        "explanation": "Captura e detecção precisam reconhecer simultaneamente o antígeno."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual concentração original corresponde à amostra didática?",
+        "options": [
+          {
+            "text": "10 ng/mL",
+            "correct": false,
+            "explanation": "Esse valor ainda corresponde à diluição e precisa ser corrigido."
+          },
+          {
+            "text": "125 ng/mL",
+            "correct": false,
+            "explanation": "Esse número ignora o intercepto de fundo de 0,05."
+          },
+          {
+            "text": "100 ng/mL",
+            "correct": true,
+            "explanation": "A interpolação fornece 10 ng/mL diluídos, multiplicados por dez."
+          }
+        ]
+      },
+      {
+        "question": "Como tratar sinal acima da curva de padrões?",
+        "options": [
+          {
+            "text": "Diluir e reavaliar dentro da faixa validada",
+            "correct": true,
+            "explanation": "A calibração só sustenta quantificação nas condições e faixa verificadas."
+          },
+          {
+            "text": "Extrapolar sem restrição",
+            "correct": false,
+            "explanation": "Saturação e matriz podem quebrar a relação fora da faixa."
+          },
+          {
+            "text": "Emitir diagnóstico automaticamente",
+            "correct": false,
+            "explanation": "Este ensaio fictício não inclui validação nem critério clínico."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIH: enzyme-linked immunosorbent assay",
+        "url": "https://www.ncbi.nlm.nih.gov/books/NBK555922/"
+      }
+    ]
+  },
+  "sup_bioq_08": {
+    "context": "Uma proteína recombinante fictícia é produzida e purificada por afinidade. A atividade compara recuperação, enriquecimento funcional e qualidade do produto.",
+    "theory": "Expressão total não garante produto solúvel, corretamente dobrado ou ativo. Recuperação é a fração da atividade inicial preservada; atividade específica é atividade por massa de proteína total. Purificação costuma perder produto enquanto remove contaminantes. Gel mostra mobilidade e abundância aproximadas, mas identidade e função exigem testes adicionais.",
+    "workedExample": "Um extrato tem 100 mg de proteína e 500 U; a fração purificada tem 10 mg e 300 U. Recuperação=300/500=60%, atividade específica inicial=5 U/mg, final=30 U/mg e fator de purificação=30/5=6. São valores fictícios para balanço.",
+    "investigation": [
+      "Monte tabela de massa e atividade em cada etapa.",
+      "Calcule atividade específica e recuperação com denominadores corretos.",
+      "Proponha controles de solubilidade, identidade e função."
+    ],
+    "expectedEvidence": "A solução deve mostrar 60%, 30 U/mg e enriquecimento de seis vezes, separando massa total de produto funcional.",
+    "reflection": "Uma banda mais intensa sempre representa mais proteína útil?",
+    "scenarios": [
+      {
+        "id": "sup_bioq_08_s0",
+        "label": "Corpos de inclusão",
+        "situation": "A expressão cresce mas a fração insolúvel domina.",
+        "observation": "A recuperação solúvel pode cair.",
+        "explanation": "A abundância produzida não garante dobramento ou disponibilidade funcional."
+      },
+      {
+        "id": "sup_bioq_08_s1",
+        "label": "Contaminantes removidos",
+        "situation": "Uma etapa retira massa inativa preservando atividade alvo.",
+        "observation": "A atividade específica aumenta.",
+        "explanation": "A atividade é dividida por menor massa de proteína total após enriquecimento."
+      },
+      {
+        "id": "sup_bioq_08_s2",
+        "label": "Inativação",
+        "situation": "Uma eluição gera 10 mg com apenas 30 U.",
+        "observation": "A atividade específica é 3 U/mg.",
+        "explanation": "A preparação pode parecer pura e ainda perder função durante o processamento."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual fator de purificação foi obtido no balanço fictício?",
+        "options": [
+          {
+            "text": "Dez vezes",
+            "correct": false,
+            "explanation": "A razão de massas não representa enriquecimento funcional."
+          },
+          {
+            "text": "60 vezes",
+            "correct": false,
+            "explanation": "Sessenta por cento é a recuperação, não o fator de purificação."
+          },
+          {
+            "text": "Seis vezes",
+            "correct": true,
+            "explanation": "A razão entre atividades específicas final e inicial é 30/5."
+          }
+        ]
+      },
+      {
+        "question": "Qual informação comprova função além da massa?",
+        "options": [
+          {
+            "text": "Atividade em ensaio adequado",
+            "correct": true,
+            "explanation": "A função precisa ser medida por resposta específica ao produto."
+          },
+          {
+            "text": "Somente a banda no gel",
+            "correct": false,
+            "explanation": "Mobilidade e intensidade não demonstram função biológica."
+          },
+          {
+            "text": "Apenas volume da cultura",
+            "correct": false,
+            "explanation": "Volume não determina concentração, solubilidade ou atividade."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIH Assay Guidance Manual: activity assays",
+        "url": "https://www.ncbi.nlm.nih.gov/books/NBK92007/"
+      }
+    ]
+  },
+  "sup_bioq_09": {
+    "context": "Leituras NGS fictícias de um organismo de pesquisa são examinadas antes do alinhamento. O foco é distinguir qualidade de base, mapeamento e cobertura.",
+    "theory": "O escore Phred é Q=−10log10(p), onde p é erro previsto da base. Cobertura bruta é total de bases dividido pelo tamanho da referência. Filtragem, duplicatas e regiões repetitivas alteram informação útil. MAPQ avalia confiança de posicionamento e difere de qualidade da base: uma leitura confiável pode ter origem ambígua.",
+    "workedExample": "Um milhão de leituras de 150 bases para referência de 5 milhões de bases gera cobertura bruta 30×. Q30 equivale a p=0,001. Descartar 20% das bases reduz a cobertura bruta a 24×, sem garantir cobertura uniforme ou variantes verdadeiras.",
+    "investigation": [
+      "Calcule cobertura bruta antes e após o filtro.",
+      "Converta Q20 e Q30 em probabilidades previstas.",
+      "Investigue repetição e duplicação antes de interpretar variantes."
+    ],
+    "expectedEvidence": "A evidência deve incluir 30×, 24× e erro previsto de 0,1% para Q30, com limites de interpretação local.",
+    "reflection": "Por que cobertura média alta pode coexistir com regiões sem leitura?",
+    "scenarios": [
+      {
+        "id": "sup_bioq_09_s0",
+        "label": "Origem ambígua",
+        "situation": "Uma leitura perfeita coincide com duas regiões repetidas.",
+        "observation": "MAPQ pode permanecer baixo.",
+        "explanation": "A sequência confiável não permite decidir entre posições equivalentes na referência."
+      },
+      {
+        "id": "sup_bioq_09_s1",
+        "label": "Q20",
+        "situation": "Uma base recebe Q20 em vez de Q30.",
+        "observation": "O erro previsto sobe para 1%.",
+        "explanation": "A diferença de dez pontos na escala logarítmica representa dez vezes mais erro."
+      },
+      {
+        "id": "sup_bioq_09_s2",
+        "label": "Duplicatas",
+        "situation": "Muitas leituras derivam da mesma molécula de biblioteca.",
+        "observation": "A profundidade aparente exagera a independência.",
+        "explanation": "Repetir a molécula não fornece o mesmo suporte que observar moléculas distintas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual erro previsto corresponde a Q30?",
+        "options": [
+          {
+            "text": "30%",
+            "correct": false,
+            "explanation": "O escore não é uma porcentagem direta de erros."
+          },
+          {
+            "text": "3%",
+            "correct": false,
+            "explanation": "A escala logarítmica impede essa conversão linear."
+          },
+          {
+            "text": "0,1%",
+            "correct": true,
+            "explanation": "A inversão de Phred produz 10^(−3)=0,001."
+          }
+        ]
+      },
+      {
+        "question": "O que cobertura média de 30× assegura sozinha?",
+        "options": [
+          {
+            "text": "Apenas uma razão global de bases por referência",
+            "correct": true,
+            "explanation": "Bieses e mapeabilidade podem tornar a cobertura local desigual."
+          },
+          {
+            "text": "Trinta leituras em cada posição",
+            "correct": false,
+            "explanation": "Uma média não fixa o valor em todas as posições."
+          },
+          {
+            "text": "Validação de todas as variantes",
+            "correct": false,
+            "explanation": "Cobertura não elimina erros sistemáticos e alinhamentos incorretos."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Illumina: sequencing quality scores",
+        "url": "https://www.illumina.com/science/technology/next-generation-sequencing/plan-experiments/quality-scores.html"
+      }
+    ]
+  },
+  "sup_bioq_10": {
+    "context": "Um composto totalmente fictício segue modelo monocompartimental após entrada instantânea. O cálculo é pedagógico e não orienta doses ou atendimento.",
+    "theory": "Após bolus ideal com distribuição instantânea e eliminação linear, C(t)=(D/V)e^(−kt), k=CL/V, t½=ln2/k e AUC=D/CL. V é aparente, não um órgão anatômico. Absorção, saturação e distribuição lenta exigem modelos adicionais. Os parâmetros não podem ser inferidos clinicamente de um exercício sem dados validados.",
+    "workedExample": "Com D=100 mg, V=20 L e CL=2 L/h, C0=5 mg/L e k=0,1 h⁻¹. Em dez horas C=5e⁻¹≈1,84 mg/L; meia-vida=6,93 h e AUC=50 mg·h/L. Nenhum parâmetro foi medido em pessoa ou usado para prescrição.",
+    "investigation": [
+      "Calcule C0 e k com cancelamento das unidades.",
+      "Obtenha concentração em dez horas e meia-vida.",
+      "Identifique hipóteses quebradas por absorção oral ou saturação."
+    ],
+    "expectedEvidence": "São esperados 1,84 mg/L e 6,93 h, com distinção entre volume aparente, depuração e constante de eliminação.",
+    "reflection": "Como separar efeitos de volume e depuração na curva temporal?",
+    "scenarios": [
+      {
+        "id": "sup_bioq_10_s0",
+        "label": "Depuração menor",
+        "situation": "Reduza CL para 1 L/h com D e V fixos.",
+        "observation": "k cai a 0,05 h⁻¹ e AUC dobra.",
+        "explanation": "A entrada inicial permanece igual, mas a remoção linear fica mais lenta."
+      },
+      {
+        "id": "sup_bioq_10_s1",
+        "label": "Volume maior",
+        "situation": "Dobre V para 40 L com CL=2 L/h.",
+        "observation": "C0 cai à metade e meia-vida dobra.",
+        "explanation": "AUC permanece D/CL, pois a mudança temporal compensa a menor concentração inicial."
+      },
+      {
+        "id": "sup_bioq_10_s2",
+        "label": "Via oral",
+        "situation": "A entrada ocorre gradualmente com biodisponibilidade desconhecida.",
+        "observation": "A curva de bolus fica inadequada.",
+        "explanation": "Absorção e fração sistêmica precisam ser consideradas antes de usar essas expressões."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual k decorre de CL=2 L/h e V=20 L?",
+        "options": [
+          {
+            "text": "10 h",
+            "correct": false,
+            "explanation": "Esse é o inverso de k e tem dimensão de tempo."
+          },
+          {
+            "text": "40 L²/h",
+            "correct": false,
+            "explanation": "O produto não representa a constante de eliminação do modelo."
+          },
+          {
+            "text": "0,1 h⁻¹",
+            "correct": true,
+            "explanation": "A razão CL/V cancela litros e fornece uma constante por hora."
+          }
+        ]
+      },
+      {
+        "question": "Dobrar V com CL fixo altera a AUC de bolus como?",
+        "options": [
+          {
+            "text": "Permanece igual no modelo linear",
+            "correct": true,
+            "explanation": "A integral é D/CL e independe de V sob as hipóteses assumidas."
+          },
+          {
+            "text": "Dobra necessariamente",
+            "correct": false,
+            "explanation": "Volume muda C0 e meia-vida, mas não a integral com D e CL fixos."
+          },
+          {
+            "text": "Cai a zero",
+            "correct": false,
+            "explanation": "Distribuição maior não elimina instantaneamente a substância."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NIH: volume of distribution",
+        "url": "https://www.ncbi.nlm.nih.gov/books/NBK545280/"
+      }
+    ]
+  }
+}

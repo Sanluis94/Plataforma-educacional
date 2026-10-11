@@ -1,0 +1,832 @@
+{
+  "pos_ti_01": {
+    "context": "Uma fonte binária fictícia emite símbolos com probabilidades desiguais. O objetivo é separar limite médio e tamanho de uma mensagem específica.",
+    "theory": "A entropia H=−Σp log₂p mede incerteza média em bits por símbolo. Para uma fonte sem memória e códigos adequados em blocos, comprimentos médios podem se aproximar desse limite assintótico, com overhead e hipóteses declarados. Codificação aritmética representa sequências por intervalos e pode aproveitar probabilidades; não significa comprimir qualquer arquivo abaixo de seu tamanho nem conhecer probabilidades sem estimá-las.",
+    "workedExample": "Com P(0)=0,75 e P(1)=0,25, H=−0,75log₂0,75−0,25log₂0,25≈0,811 bit/símbolo. Para mil emissões independentes, o limite médio assintótico é cerca de 811 bits, antes de cabeçalhos e efeitos finitos.",
+    "investigation": [
+      "Calcule as duas parcelas de entropia em base dois.",
+      "Compare a fonte com uma distribuição binária uniforme.",
+      "Distinga limite médio, bloco finito e custo do cabeçalho."
+    ],
+    "expectedEvidence": "Informe 0,811 bit/símbolo e as hipóteses de independência e probabilidades, sem prometer 811 bits para toda sequência de mil símbolos.",
+    "reflection": "Por que sequências raras podem exigir mais bits que a média indicada pela entropia?",
+    "scenarios": [
+      {
+        "id": "uniforme",
+        "label": "Fonte equilibrada",
+        "situation": "Os dois símbolos possuem probabilidade meio.",
+        "observation": "A entropia vale um bit por símbolo.",
+        "explanation": "Essa é a maior entropia possível para uma distribuição binária."
+      },
+      {
+        "id": "deterministica",
+        "label": "Fonte certa",
+        "situation": "Um único símbolo possui probabilidade um.",
+        "observation": "A entropia é zero.",
+        "explanation": "Não há incerteza sobre o próximo símbolo sob o modelo conhecido."
+      },
+      {
+        "id": "cabecalho",
+        "label": "Bloco pequeno",
+        "situation": "A mensagem tem poucos símbolos e exige transmitir o modelo de probabilidades.",
+        "observation": "O overhead pode dominar o tamanho final.",
+        "explanation": "O limite assintótico não remove custos de representação em blocos curtos."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual entropia aproxima a fonte 0,75/0,25?",
+        "options": [
+          {
+            "text": "0,811 bit/símbolo",
+            "correct": true,
+            "explanation": "A soma dos dois termos de informação ponderada produz esse valor."
+          },
+          {
+            "text": "2 bits/símbolo",
+            "correct": false,
+            "explanation": "Uma fonte binária não excede um bit de entropia por símbolo."
+          },
+          {
+            "text": "0 bit/símbolo",
+            "correct": false,
+            "explanation": "Ambos os resultados são possíveis, logo existe incerteza."
+          }
+        ]
+      },
+      {
+        "question": "O que o limite de 811 bits representa no exemplo?",
+        "options": [
+          {
+            "text": "Uma referência média assintótica",
+            "correct": true,
+            "explanation": "O valor depende do modelo e não fixa o tamanho de toda mensagem finita."
+          },
+          {
+            "text": "Tamanho obrigatório de qualquer sequência",
+            "correct": false,
+            "explanation": "Probabilidade e conteúdo de sequências individuais variam."
+          },
+          {
+            "text": "Custo total incluindo qualquer cabeçalho",
+            "correct": false,
+            "explanation": "Cabeçalhos e representação finita foram explicitamente excluídos."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT — Information Theory",
+        "url": "https://www.ocw.mit.edu/courses/6-441-information-theory-spring-2016/resources/lecture-notes/"
+      }
+    ]
+  },
+  "pos_ti_02": {
+    "context": "Um canal AWGN idealizado relaciona banda e potência de sinal ao limite de comunicação confiável, sem medir uma rede real.",
+    "theory": "Shannon-Hartley dá C=B log₂(1+S/N) para o modelo de canal gaussiano de banda limitada e potência média definida. S/N na fórmula é razão linear; SNR em decibéis deve ser convertida por 10^(dB/10). Capacidade é um limite teórico assintótico sob hipóteses, não throughput garantido de um enlace com protocolos, interferência ou codificação finita.",
+    "workedExample": "Com B=1 MHz e SNR=10 dB, S/N=10. Assim C=10⁶log₂11≈3,459 Mbit/s e eficiência espectral≈3,459 bit/s/Hz. Inserir o valor dez dB diretamente só coincide numericamente por acaso nessa escolha.",
+    "investigation": [
+      "Converta SNR de dez e vinte decibéis para razão linear.",
+      "Calcule capacidade e eficiência espectral do cenário.",
+      "Liste limitações entre o canal ideal e uma aplicação de rede."
+    ],
+    "expectedEvidence": "Registre unidades, conversão logarítmica e hipóteses AWGN; capacidade não deve ser apresentada como velocidade observada ou garantida.",
+    "reflection": "Por que dobrar potência e dobrar banda não têm efeitos idênticos quando outras grandezas são fixadas?",
+    "scenarios": [
+      {
+        "id": "dez-db",
+        "label": "Razão dez",
+        "situation": "A SNR informada é dez decibéis.",
+        "observation": "A razão linear é dez.",
+        "explanation": "A conversão usa dez elevado a um, não uma soma de unidades."
+      },
+      {
+        "id": "vinte-db",
+        "label": "Razão cem",
+        "situation": "A SNR é aumentada para vinte decibéis.",
+        "observation": "A razão linear passa a cem.",
+        "explanation": "Dobrar o número em dB não dobra a razão de potências."
+      },
+      {
+        "id": "overhead",
+        "label": "Taxa útil",
+        "situation": "O enlace inclui cabeçalhos, retransmissões e codificação finita.",
+        "observation": "O throughput útil pode ser menor.",
+        "explanation": "Esses custos não aparecem diretamente na expressão ideal de capacidade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual razão linear corresponde a 20 dB?",
+        "options": [
+          {
+            "text": "100",
+            "correct": true,
+            "explanation": "Dez elevado a vinte dividido por dez resulta em cem."
+          },
+          {
+            "text": "20",
+            "correct": false,
+            "explanation": "Decibéis expressam um logaritmo, não a razão diretamente."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Esse valor não aplica a conversão de potência definida."
+          }
+        ]
+      },
+      {
+        "question": "Qual eficiência espectral corresponde ao exemplo de 10 dB?",
+        "options": [
+          {
+            "text": "log₂11≈3,459 bit/s/Hz",
+            "correct": true,
+            "explanation": "Divide-se a capacidade pela banda, restando o termo logarítmico."
+          },
+          {
+            "text": "10 bit/s/Hz",
+            "correct": false,
+            "explanation": "A razão sinal-ruído não é igual à eficiência espectral."
+          },
+          {
+            "text": "1 MHz",
+            "correct": false,
+            "explanation": "Essa é a banda e tem unidade de frequência."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT — Information and Entropy",
+        "url": "https://ocw.mit.edu/courses/6-050j-information-and-entropy-spring-2008/80c7258fd6bc5780797975eabb6fd747_MIT6_050JS08_textbook.pdf"
+      }
+    ]
+  },
+  "pos_ti_03": {
+    "context": "Um código binário sintético usa verificações de paridade esparsas para detectar inconsistências e orientar decodificação.",
+    "theory": "Em LDPC, a matriz de paridade H é esparsa e um código válido satisfaz Hc=0 em F2. O grafo de Tanner tem nós de variáveis e verificações. Propagação de crenças troca mensagens extrínsecas, evitando reutilizar imediatamente a mesma evidência; ciclos curtos podem correlacionar mensagens. Síndrome não nula detecta inconsistência, mas não identifica sempre um erro único nem garante convergência ao código correto.",
+    "workedExample": "Use verificações c1⊕c2=0 e c2⊕c3=0. O vetor 101 gera síndrome (1,1); trocar o bit central produz 111, com síndrome (0,0). Neste código de repetição, essa correção corresponde ao erro central, mas outra palavra válida também tem síndrome zero.",
+    "investigation": [
+      "Desenhe o grafo bipartido das duas verificações.",
+      "Calcule síndromes de 101, 111 e 000.",
+      "Separe validade de código de certeza sobre a mensagem transmitida."
+    ],
+    "expectedEvidence": "Mostre contas XOR e conexões do grafo; síndrome zero é condição de palavra válida, sem provar por si que a transmissão foi recuperada.",
+    "reflection": "Como um erro que transforma uma palavra válida em outra pode escapar da síndrome?",
+    "scenarios": [
+      {
+        "id": "sindrome",
+        "label": "Duas verificações",
+        "situation": "O vetor recebido é um,zero,um.",
+        "observation": "As duas paridades resultam em um.",
+        "explanation": "Cada par inclui bits diferentes e viola sua verificação."
+      },
+      {
+        "id": "correcao",
+        "label": "Bit central",
+        "situation": "O bit central é alterado de zero para um.",
+        "observation": "O vetor 111 satisfaz as paridades.",
+        "explanation": "As duas verificações ligadas ao bit central voltam a zero."
+      },
+      {
+        "id": "valido",
+        "label": "Outra palavra",
+        "situation": "O vetor 000 também satisfaz as duas equações.",
+        "observation": "A síndrome é zero.",
+        "explanation": "O código possui mais de uma palavra; validade não identifica qual foi enviada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual síndrome corresponde ao vetor 101?",
+        "options": [
+          {
+            "text": "(1,1)",
+            "correct": true,
+            "explanation": "Um XOR zero e zero XOR um produzem um em ambas as verificações."
+          },
+          {
+            "text": "(0,0)",
+            "correct": false,
+            "explanation": "Esse seria o resultado de uma palavra que satisfaz as paridades."
+          },
+          {
+            "text": "(1,0)",
+            "correct": false,
+            "explanation": "A segunda verificação também contém bits distintos."
+          }
+        ]
+      },
+      {
+        "question": "O que síndrome zero garante nesse exemplo?",
+        "options": [
+          {
+            "text": "Satisfação das equações de paridade",
+            "correct": true,
+            "explanation": "Ela confirma pertencimento ao código definido, não a história da transmissão."
+          },
+          {
+            "text": "Ausência de qualquer erro possível",
+            "correct": false,
+            "explanation": "Um erro pode levar a outra palavra válida do código."
+          },
+          {
+            "text": "Convergência universal do decodificador",
+            "correct": false,
+            "explanation": "A dinâmica iterativa depende de mensagens, canal e topologia."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "ETSI/3GPP TS 38.212",
+        "url": "https://www.etsi.org/deliver/etsi_ts/138200_138299/138212/18.04.00_60/ts_138212v180400p.pdf"
+      }
+    ]
+  },
+  "pos_ti_04": {
+    "context": "Um bloco OFDM fictício recebe uma cópia de sua cauda antes da transmissão, permitindo estudar multipercurso e eficiência.",
+    "theory": "OFDM distribui símbolos em subportadoras ortogonais. Um prefixo cíclico suficientemente longo, com sincronização e canal aproximadamente constante no bloco, permite tratar a convolução como circular no trecho útil e equalizar por subportadora. Ele não elimina todo ruído nem corrige desvio de frequência. O prefixo consome tempo sem adicionar novos símbolos úteis, criando uma troca entre proteção e eficiência.",
+    "workedExample": "Com 64 amostras úteis e prefixo de 16, o bloco transmitido tem 80 amostras e eficiência temporal 64/80=80%. Um canal com memória de dez amostras cabe nesse prefixo; memória de vinte ultrapassa a hipótese protetora.",
+    "investigation": [
+      "Copie simbolicamente as dezesseis amostras finais ao início.",
+      "Calcule eficiência e compare com um prefixo mais curto.",
+      "Verifique memória do canal e hipóteses de sincronização."
+    ],
+    "expectedEvidence": "Mostre oitenta amostras e eficiência de oitenta por cento, explicando que proteção depende do canal e não significa ausência de interferência em qualquer condição.",
+    "reflection": "Por que aumentar o prefixo pode melhorar robustez e reduzir a taxa útil?",
+    "scenarios": [
+      {
+        "id": "adequado",
+        "label": "Memória coberta",
+        "situation": "O canal tem memória de dez amostras e prefixo de dezesseis.",
+        "observation": "O prefixo cobre a memória no modelo.",
+        "explanation": "A condição ajuda a isolar o bloco útil quando as demais hipóteses valem."
+      },
+      {
+        "id": "curto",
+        "label": "Memória excedente",
+        "situation": "A memória do canal aumenta para vinte amostras.",
+        "observation": "O prefixo dezesseis fica insuficiente.",
+        "explanation": "Pode permanecer interferência entre blocos e perder-se a diagonalização ideal."
+      },
+      {
+        "id": "frequencia",
+        "label": "Desvio de oscilador",
+        "situation": "Há desvio de frequência entre transmissor e receptor.",
+        "observation": "A ortogonalidade pode ser prejudicada.",
+        "explanation": "Prefixo cíclico não substitui correção de frequência e sincronização."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual eficiência temporal tem o bloco 64+16?",
+        "options": [
+          {
+            "text": "80%",
+            "correct": true,
+            "explanation": "Sessenta e quatro amostras úteis divididas por oitenta totais dão 0,8."
+          },
+          {
+            "text": "25%",
+            "correct": false,
+            "explanation": "Esse valor é a razão do prefixo para o trecho útil, não a eficiência."
+          },
+          {
+            "text": "100%",
+            "correct": false,
+            "explanation": "As dezesseis amostras de prefixo consomem tempo sem novos dados."
+          }
+        ]
+      },
+      {
+        "question": "Qual condição é necessária para o efeito ideal do prefixo?",
+        "options": [
+          {
+            "text": "Cobrir a memória relevante do canal",
+            "correct": true,
+            "explanation": "O trecho de guarda precisa acomodar o espalhamento temporal modelado."
+          },
+          {
+            "text": "Tornar todo ruído igual a zero",
+            "correct": false,
+            "explanation": "O prefixo não remove ruído aditivo do canal."
+          },
+          {
+            "text": "Dispensar sincronização",
+            "correct": false,
+            "explanation": "Erros de tempo e frequência podem romper as condições de ortogonalidade."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT — Communication System Design",
+        "url": "https://ocw.mit.edu/courses/6-973-communication-system-design-spring-2006/pages/lecture-notes/"
+      }
+    ]
+  },
+  "pos_ti_05": {
+    "context": "Duas antenas e dois usuários fictícios permitem estudar pré-codificação sem atribuir ao exemplo os ganhos de uma rede massiva real.",
+    "theory": "No modelo y=Hx+n, Zero-Forcing escolhe uma pré-codificação que anula interferência entre fluxos quando o canal conhecido tem posto apropriado. A pseudoinversa e normalização de potência são essenciais; canais mal condicionados exigem potência alta e amplificam efeitos de erro. Muitas antenas podem oferecer diversidade e graus de liberdade, mas estimação imperfeita, correlação e contaminação limitam ganhos.",
+    "workedExample": "Para H=diag(1,2), use W=diag(1,0,5). Então HW=I e cada fluxo recupera seu símbolo sem interferência no modelo sem ruído. A energia transmitida para s=(1,1) é ||Ws||²=1,25, antes de qualquer normalização de potência.",
+    "investigation": [
+      "Multiplique H e W e confira a identidade.",
+      "Calcule energia transmitida para o vetor de símbolos.",
+      "Substitua um ganho por 0,01 e discuta condicionamento."
+    ],
+    "expectedEvidence": "Mostre a eliminação algébrica de interferência e o orçamento de potência, sem confundir uma matriz ideal de dois usuários com capacidade medida de Massive MIMO.",
+    "reflection": "Por que inverter um ganho muito pequeno pode tornar a pré-codificação impraticável?",
+    "scenarios": [
+      {
+        "id": "diagonal",
+        "label": "Canais separados",
+        "situation": "A matriz de canal tem ganhos um e dois na diagonal.",
+        "observation": "A inversa usa um e meio.",
+        "explanation": "A multiplicação compensa os ganhos no modelo ideal."
+      },
+      {
+        "id": "fraco",
+        "label": "Ganho quase zero",
+        "situation": "Um ganho de canal vale 0,01.",
+        "observation": "A inversa exige fator cem nesse eixo.",
+        "explanation": "Normalização e ruído tornam o custo dessa inversão relevante."
+      },
+      {
+        "id": "posto",
+        "label": "Usuários indistinguíveis",
+        "situation": "Duas linhas do canal são idênticas.",
+        "observation": "O posto é insuficiente para dois fluxos independentes.",
+        "explanation": "Zero-Forcing não pode criar separação espacial ausente na matriz."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual produto resulta de H=diag(1,2) e W=diag(1,0,5)?",
+        "options": [
+          {
+            "text": "A matriz identidade",
+            "correct": true,
+            "explanation": "Os produtos diagonais são um vezes um e dois vezes meio."
+          },
+          {
+            "text": "A matriz nula",
+            "correct": false,
+            "explanation": "Nenhum dos ganhos diagonais é anulado nessa multiplicação."
+          },
+          {
+            "text": "diag(1,4)",
+            "correct": false,
+            "explanation": "Esse resultado usaria fator dois em vez de meio."
+          }
+        ]
+      },
+      {
+        "question": "Que problema surge com linhas idênticas em H?",
+        "options": [
+          {
+            "text": "Falta de posto para separar os fluxos",
+            "correct": true,
+            "explanation": "As observações espaciais não fornecem duas direções independentes."
+          },
+          {
+            "text": "Potência ilimitada resolve sempre",
+            "correct": false,
+            "explanation": "Aumentar potência não cria independência linear."
+          },
+          {
+            "text": "Toda interferência some automaticamente",
+            "correct": false,
+            "explanation": "A separação depende justamente do posto e do conhecimento do canal."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Stanford — Wireless Communications",
+        "url": "https://web.stanford.edu/class/ee359/pdfs/lecture16.pdf"
+      }
+    ]
+  },
+  "pos_ti_06": {
+    "context": "Dois canais de apagamento sintéticos são combinados para revelar como a polarização cria confiabilidades diferentes.",
+    "theory": "Códigos polares transformam canais em subcanais de confiabilidades desiguais; posições ruins são congeladas e boas transportam informação. Para dois BEC independentes com apagamento ε, as transformações têm ε−=2ε−ε² e ε+=ε². Cancelamento sucessivo decide bits em sequência e pode propagar erros. No 5G NR, códigos polares e LDPC têm usos específicos; polarização não torna todo bloco finito perfeito.",
+    "workedExample": "Para ε=0,5, ε−=1−0,25=0,75 e ε+=0,25. A média permanece 0,5: um canal piorou e outro melhorou. O exemplo de duas posições explica o mecanismo, sem reproduzir interleaving, CRC ou rate matching do padrão.",
+    "investigation": [
+      "Calcule apagamento dos dois subcanais para ε=0,5.",
+      "Escolha qual posição reservar à informação nesse modelo.",
+      "Distinga construção polar de detalhes de implementação 5G."
+    ],
+    "expectedEvidence": "Apresente 0,75 e 0,25, mantendo o caso BEC e as hipóteses de independência explícitos, sem prometer confiabilidade de um sistema 5G real.",
+    "reflection": "Por que a média preservada ainda permite transmitir usando posições selecionadas?",
+    "scenarios": [
+      {
+        "id": "ruim",
+        "label": "Canal degradado",
+        "situation": "O subcanal menos confiável usa 2ε−ε².",
+        "observation": "Seu apagamento vale 0,75.",
+        "explanation": "Essa posição pode ser congelada conforme a construção e a taxa."
+      },
+      {
+        "id": "bom",
+        "label": "Canal melhorado",
+        "situation": "O subcanal mais confiável usa ε².",
+        "observation": "Seu apagamento vale 0,25.",
+        "explanation": "A informação é favorecida nas posições de menor probabilidade de erro."
+      },
+      {
+        "id": "sucessivo",
+        "label": "Erro anterior",
+        "situation": "Uma decisão inicial errada é usada em decisões posteriores.",
+        "observation": "O erro pode se propagar.",
+        "explanation": "Cancelamento sucessivo tem dependências que variantes de lista procuram tratar."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual apagamento tem o subcanal melhor para ε=0,5?",
+        "options": [
+          {
+            "text": "0,25",
+            "correct": true,
+            "explanation": "A fórmula do melhor subcanal BEC é epsilon ao quadrado."
+          },
+          {
+            "text": "0,75",
+            "correct": false,
+            "explanation": "Esse é o valor do subcanal degradado."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "Uma etapa pequena de polarização não elimina todo apagamento."
+          }
+        ]
+      },
+      {
+        "question": "Por que congelar algumas posições?",
+        "options": [
+          {
+            "text": "Para evitar usar subcanais menos confiáveis para informação",
+            "correct": true,
+            "explanation": "A construção seleciona onde inserir dados conforme confiabilidade estimada."
+          },
+          {
+            "text": "Para tornar o código sem redundância",
+            "correct": false,
+            "explanation": "Posições congeladas participam da estrutura redundante do código."
+          },
+          {
+            "text": "Para garantir bloco finito sem erro",
+            "correct": false,
+            "explanation": "Confiabilidade depende de canal, comprimento e decodificação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Arıkan — Channel Polarization",
+        "url": "https://arxiv.org/abs/0807.3917"
+      }
+    ]
+  },
+  "pos_ti_07": {
+    "context": "Um símbolo fictício atravessa um canal escalar com ganho fraco. Inverter o ganho e minimizar erro médio levam a pesos diferentes.",
+    "theory": "O equalizador linear MMSE equilibra distorção e amplificação de ruído. Para y=hx+n, com variâncias conhecidas e média zero, w=h*σx²/(|h|²σx²+σn²). Zero-Forcing usa 1/h no caso escalar não nulo, mas pode amplificar muito o ruído. A fórmula exige modelo estatístico; adaptação ao longo do tempo necessita estimar parâmetros e acompanhar variações.",
+    "workedExample": "Com h=0,5 real, σx²=1 e σn²=0,25, w=0,5/(0,25+0,25)=1. Zero-Forcing usaria 2. No MMSE, o ganho composto wh=0,5 aceita viés de amplitude para reduzir o custo do ruído.",
+    "investigation": [
+      "Substitua ganho e variâncias na fórmula MMSE.",
+      "Compare o peso com o inverso Zero-Forcing.",
+      "Recalcule para variância de ruído tendendo a zero."
+    ],
+    "expectedEvidence": "Mostre peso um e as hipóteses estatísticas, distinguindo minimização de erro médio de recuperação perfeita de cada realização.",
+    "reflection": "Por que aceitar alguma distorção pode reduzir o erro quadrático esperado total?",
+    "scenarios": [
+      {
+        "id": "ruido",
+        "label": "Regularização pelo ruído",
+        "situation": "A variância do ruído é igual a 0,25.",
+        "observation": "O denominador MMSE vale 0,5.",
+        "explanation": "O termo de ruído evita inverter o canal de forma irrestrita."
+      },
+      {
+        "id": "sem-ruido",
+        "label": "Limite ideal",
+        "situation": "A variância do ruído tende a zero com h=0,5.",
+        "observation": "O peso tende a dois.",
+        "explanation": "Sem penalidade de ruído, o MMSE escalar aproxima a inversão do canal."
+      },
+      {
+        "id": "canal-muda",
+        "label": "Estimativa desatualizada",
+        "situation": "O ganho muda, mas o receptor mantém o peso antigo.",
+        "observation": "O equalizador deixa de corresponder ao modelo atual.",
+        "explanation": "A adaptação precisa equilibrar acompanhamento do canal e ruído da estimação."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual peso MMSE resulta do cenário fornecido?",
+        "options": [
+          {
+            "text": "1",
+            "correct": true,
+            "explanation": "Meio dividido por meio resulta em um."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Dois é a inversão Zero-Forcing do ganho 0,5."
+          },
+          {
+            "text": "0,25",
+            "correct": false,
+            "explanation": "Esse valor é a variância de ruído, não o peso calculado."
+          }
+        ]
+      },
+      {
+        "question": "Qual trade-off o MMSE linear faz nesse modelo?",
+        "options": [
+          {
+            "text": "Distorção do sinal e amplificação de ruído",
+            "correct": true,
+            "explanation": "A solução minimiza a soma esperada dos efeitos no erro quadrático."
+          },
+          {
+            "text": "Ignorar completamente o ruído",
+            "correct": false,
+            "explanation": "A variância de ruído participa explicitamente do denominador."
+          },
+          {
+            "text": "Garantir erro zero em cada símbolo",
+            "correct": false,
+            "explanation": "Minimizar esperança não elimina toda realização de erro."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT — LMMSE Estimation",
+        "url": "https://ocw.mit.edu/courses/6-011-signals-systems-and-inference-spring-2018/resources/mit6_011s18lec14/"
+      }
+    ]
+  },
+  "pos_ti_08": {
+    "context": "Um protocolo BB84 idealizado permite estudar escolha de bases e detecção estatística de perturbação sem trocar fótons reais.",
+    "theory": "No BB84, transmissor e receptor usam bases e mantêm bits em bases compatíveis após discussão clássica. Comparar uma amostra estima a taxa de erro; erros não identificam automaticamente uma pessoa interceptora. Interceptar e reenviar todos os sinais em bases aleatórias induz 25% de erro na chave peneirada no modelo ideal. Segurança exige autenticar canal clássico, analisar dispositivos e fazer correção e amplificação de privacidade.",
+    "workedExample": "De cem sinais ideais com bases independentes uniformes, espera-se reter cerca de cinquenta após peneiramento. Em interceptação-reenvio total, a base errada ocorre em metade e causa erro em metade dessas vezes: 1/2×1/2=1/4 dos bits retidos.",
+    "investigation": [
+      "Monte uma tabela de bases compatíveis e incompatíveis.",
+      "Calcule tamanho esperado do conjunto peneirado.",
+      "Separe amostragem de erro de autenticação e pós-processamento."
+    ],
+    "expectedEvidence": "Mostre expectativas de cinquenta bits e 25% sob o modelo, sem usar “detecção imediata” ou afirmar que toda taxa de erro prova espionagem.",
+    "reflection": "Por que comparar uma amostra pequena não dá certeza absoluta sobre toda a chave?",
+    "scenarios": [
+      {
+        "id": "bases",
+        "label": "Bases coincidentes",
+        "situation": "As escolhas de base são independentes e uniformes.",
+        "observation": "Cerca de metade coincide em média.",
+        "explanation": "O número efetivo flutua em amostras finitas, mesmo no modelo ideal."
+      },
+      {
+        "id": "erro",
+        "label": "Perturbação ideal",
+        "situation": "Uma interceptação-reenvio usa a base errada em metade das vezes.",
+        "observation": "O erro esperado nos bits retidos é um quarto.",
+        "explanation": "A conta combina base errada e resultado incorreto, ambos com probabilidade meio."
+      },
+      {
+        "id": "autenticacao",
+        "label": "Canal clássico",
+        "situation": "As mensagens clássicas não têm autenticação.",
+        "observation": "Há uma lacuna essencial de segurança.",
+        "explanation": "A parte quântica não dispensa verificar a origem da discussão clássica."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual erro esperado no modelo ideal de interceptação-reenvio total?",
+        "options": [
+          {
+            "text": "25%",
+            "correct": true,
+            "explanation": "Metade de bases erradas vezes metade de resultados errados dá um quarto."
+          },
+          {
+            "text": "100%",
+            "correct": false,
+            "explanation": "Nem toda medição perturbada produz um bit divergente retido."
+          },
+          {
+            "text": "0%",
+            "correct": false,
+            "explanation": "O modelo prevê perturbação estatística nas bases incompatíveis."
+          }
+        ]
+      },
+      {
+        "question": "Qual conclusão é correta sobre observar erros?",
+        "options": [
+          {
+            "text": "É necessário avaliar estatisticamente e considerar ruído",
+            "correct": true,
+            "explanation": "Erros podem ter causas físicas e não identificam por si um interceptador."
+          },
+          {
+            "text": "Toda divergência prova espionagem específica",
+            "correct": false,
+            "explanation": "Ruído e imperfeições também podem produzir divergências."
+          },
+          {
+            "text": "Autenticação clássica se torna dispensável",
+            "correct": false,
+            "explanation": "Ela permanece requisito de segurança do protocolo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Bennett e Brassard — Quantum Cryptography",
+        "url": "https://arxiv.org/abs/2003.06557"
+      }
+    ]
+  },
+  "pos_ti_09": {
+    "context": "Uma fonte gaussiana idealizada aceita algum erro de reconstrução. A taxa mínima depende da distorção permitida e do modelo.",
+    "theory": "A função taxa-distorção limita a taxa necessária para uma distorção média sob uma fonte e medida definidas. Para fonte gaussiana sem memória de variância σ² e erro quadrático, R(D)=0,5log₂(σ²/D) quando 0<D<σ², e zero para D≥σ². É um resultado assintótico, não uma receita universal de compressor. Quantização vetorial procura representar blocos por códigos e depende de dimensão e distribuição.",
+    "workedExample": "Com σ²=4 e D=1, R=0,5log₂4=1 bit/amostra. Se D=4, uma reconstrução constante na média alcança essa distorção sem informação adicional no modelo. Quando D tende a zero, o limite gaussiano contínuo cresce sem limite finito.",
+    "investigation": [
+      "Declare fonte, variância e definição de distorção média.",
+      "Calcule a taxa para D um e quatro.",
+      "Compare o limite teórico com um quantizador finito."
+    ],
+    "expectedEvidence": "Mostre um bit por amostra no caso D=1 e explique a faixa de validade, sem extrapolar a fórmula gaussiana a qualquer imagem ou áudio.",
+    "reflection": "Por que permitir maior distorção pode diminuir a informação que precisa ser transmitida?",
+    "scenarios": [
+      {
+        "id": "d-um",
+        "label": "Erro limitado",
+        "situation": "A variância é quatro e a distorção permitida é um.",
+        "observation": "A taxa limite vale um bit por amostra.",
+        "explanation": "A razão quatro dentro do logaritmo fornece dois, multiplicado por meio."
+      },
+      {
+        "id": "d-quatro",
+        "label": "Reconstrução constante",
+        "situation": "A distorção permitida é igual à variância quatro.",
+        "observation": "A taxa mínima do modelo é zero.",
+        "explanation": "Reconstruir pela média já atinge esse erro esperado."
+      },
+      {
+        "id": "sem-perda",
+        "label": "Precisão exata",
+        "situation": "Pede-se D=0 para uma fonte gaussiana contínua.",
+        "observation": "O limite diverge.",
+        "explanation": "Representação exata de valores contínuos não cabe em uma taxa finita nesse modelo."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual R(D) resulta de variância quatro e D=1?",
+        "options": [
+          {
+            "text": "1 bit/amostra",
+            "correct": true,
+            "explanation": "Meio vezes logaritmo em base dois de quatro resulta em um."
+          },
+          {
+            "text": "2 bits/amostra",
+            "correct": false,
+            "explanation": "Esse valor esquece o fator um meio da fórmula gaussiana."
+          },
+          {
+            "text": "0 bit/amostra",
+            "correct": false,
+            "explanation": "Zero só vale a partir de distorção igual à variância no modelo."
+          }
+        ]
+      },
+      {
+        "question": "Qual informação é indispensável para interpretar taxa-distorção?",
+        "options": [
+          {
+            "text": "Modelo de fonte e medida de distorção",
+            "correct": true,
+            "explanation": "O limite depende da distribuição e de como o erro é quantificado."
+          },
+          {
+            "text": "Somente o nome do arquivo",
+            "correct": false,
+            "explanation": "A extensão não determina a distribuição nem a tolerância ao erro."
+          },
+          {
+            "text": "Uma taxa universal para todo conteúdo",
+            "correct": false,
+            "explanation": "Fontes e critérios diferentes produzem fronteiras diferentes."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "MIT — Rate-Distortion Theory",
+        "url": "https://www.ocw.mit.edu/courses/6-441-information-theory-spring-2016/resources/lecture-notes/"
+      }
+    ]
+  },
+  "pos_ti_10": {
+    "context": "Uma infraestrutura fictícia compartilha recursos entre tráfego de vídeo, controle e sensores. Dividir logicamente não cria capacidade física adicional.",
+    "theory": "Network slicing organiza redes lógicas com políticas e recursos para serviços distintos. Classes eMBB, URLLC e mMTC descrevem necessidades diferentes, mas cumprir latência, confiabilidade e escala exige dimensionamento, isolamento e medição. Reserva rígida favorece previsibilidade e pode ociosar capacidade; compartilhamento melhora uso com risco de contenção. O rótulo 6G não transforma propostas em garantias de um padrão concluído.",
+    "workedExample": "Um recurso de 100 unidades reserva 50 ao vídeo, 30 ao controle e 20 a sensores. As reservas somam 100. Se o controle pede 40 e reservas são rígidas, faltam 10 mesmo que o vídeo use só 20; emprestar capacidade exige política explícita de isolamento.",
+    "investigation": [
+      "Defina métricas e prioridades de cada serviço fictício.",
+      "Confira soma de reservas e demanda em pico.",
+      "Compare isolamento rígido com empréstimo controlado de recursos."
+    ],
+    "expectedEvidence": "Mostre o déficit dez e os critérios de empréstimo, sem prometer QoS apenas pela criação de nomes de slices ou por mencionar 5G/6G.",
+    "reflection": "Qual conflito surge entre utilização alta e garantia de recursos em períodos de pico?",
+    "scenarios": [
+      {
+        "id": "reserva",
+        "label": "Partilha inicial",
+        "situation": "As reservas são cinquenta, trinta e vinte unidades.",
+        "observation": "A soma ocupa cem unidades disponíveis.",
+        "explanation": "O orçamento físico deve limitar qualquer política de reserva."
+      },
+      {
+        "id": "deficit",
+        "label": "Controle em pico",
+        "situation": "Controle demanda quarenta com reserva rígida trinta.",
+        "observation": "Há déficit de dez unidades.",
+        "explanation": "Uma garantia insuficiente não é corrigida só pelo rótulo de baixa latência."
+      },
+      {
+        "id": "emprestimo",
+        "label": "Uso oportunista",
+        "situation": "Vídeo usa vinte e dispõe de cinquenta reservadas.",
+        "observation": "Trinta unidades podem estar ociosas.",
+        "explanation": "Permitir empréstimo exige regras para devolver capacidade quando o dono voltar a demandar."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual déficit tem o controle ao pedir 40 com reserva rígida 30?",
+        "options": [
+          {
+            "text": "10 unidades",
+            "correct": true,
+            "explanation": "A diferença entre demanda e reserva é quarenta menos trinta."
+          },
+          {
+            "text": "30 unidades",
+            "correct": false,
+            "explanation": "Trinta é a reserva disponível, não o déficit."
+          },
+          {
+            "text": "Zero automaticamente",
+            "correct": false,
+            "explanation": "Reserva rígida não transfere a capacidade ociosa de outro serviço."
+          }
+        ]
+      },
+      {
+        "question": "Qual elemento sustenta uma garantia de QoS?",
+        "options": [
+          {
+            "text": "Dimensionamento, isolamento e verificação das métricas",
+            "correct": true,
+            "explanation": "O resultado depende de recursos e políticas avaliados no serviço."
+          },
+          {
+            "text": "Somente dar um nome ao slice",
+            "correct": false,
+            "explanation": "Um identificador não fornece capacidade nem limita contenção."
+          },
+          {
+            "text": "Assumir que toda proposta 6G está consolidada",
+            "correct": false,
+            "explanation": "O exercício não depende de promessas de padronização futura."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "ITU-T Y.3112 — Network Slicing",
+        "url": "https://www.itu.int/rec/T-REC-Y.3112/en"
+      }
+    ]
+  }
+}

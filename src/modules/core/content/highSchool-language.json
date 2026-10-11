@@ -1,0 +1,1818 @@
+{
+  "em_red_01": {
+    "context": "O tema de uma redação é a dificuldade de acesso à aprendizagem digital. A turma precisa transformar uma observação ampla em uma tese discutível, delimitada e acompanhada de dois caminhos de argumentação.",
+    "theory": "Tema é o assunto delimitado pela proposta; tese é o ponto de vista que o texto se compromete a defender. Dizer que a tecnologia existe apenas apresenta um assunto. Afirmar que a desigualdade de infraestrutura e a falta de mediação pedagógica limitam a aprendizagem digital propõe uma interpretação que precisa ser demonstrada. Dois eixos podem organizar o desenvolvimento, mas não são uma fórmula obrigatória para todo texto. Cada eixo deve explicar um mecanismo, apresentar sustentação e voltar ao problema. Evite causas universais ou acusações sem evidência: uma tese é forte por sua precisão e capacidade de argumentação, não pelo tom absoluto.",
+    "workedExample": "Tese original: A ampliação da aprendizagem digital depende de enfrentar a conexão precária e de apoiar o uso pedagógico dos recursos. Eixo 1: dificuldades materiais de acesso. Eixo 2: formação e acompanhamento das atividades. Comprar equipamentos dialoga com o primeiro eixo, mas não resolve automaticamente o segundo; essa distinção prepara um desenvolvimento coerente.",
+    "investigation": [
+      "Sublinhe o recorte do tema e escreva uma frase que apenas apresente o assunto, sem defendê-la como tese.",
+      "Reescreva a frase como ponto de vista com dois eixos diferentes e indique o mecanismo de cada um.",
+      "Planeje uma evidência necessária para cada eixo e retire generalizações como todos os estudantes ou nenhuma escola quando não puder sustentá-las."
+    ],
+    "expectedEvidence": "Uma tese delimitada e dois planos de parágrafo que expliquem mecanismos diferentes, indiquem evidências a buscar e mantenham ligação com a aprendizagem digital.",
+    "reflection": "Se os dois parágrafos explicam exatamente a mesma causa com palavras diferentes, o que precisa ser revisto no projeto do texto?",
+    "scenarios": [
+      {
+        "id": "assunto",
+        "label": "Apresentar sem defender",
+        "situation": "Frase original: Há computadores e plataformas em muitas escolas.",
+        "observation": "A frase apresenta um cenário, mas não define o problema nem uma interpretação a defender.",
+        "explanation": "Transformá-la em tese exige um posicionamento ligado ao recorte da proposta."
+      },
+      {
+        "id": "eixos",
+        "label": "Separar mecanismos",
+        "situation": "O projeto distingue conexão precária de falta de mediação pedagógica.",
+        "observation": "Um eixo trata do acesso material; outro, das condições de uso para aprender.",
+        "explanation": "A diferença permite desenvolver argumentos complementares e avaliar soluções específicas."
+      },
+      {
+        "id": "absoluto",
+        "label": "Delimitar a afirmação",
+        "situation": "Um rascunho afirma que nenhuma escola sabe usar tecnologia.",
+        "observation": "A formulação exige uma prova universal que o texto não oferece.",
+        "explanation": "Delimitar grupos, condições e mecanismos torna a argumentação mais defensável."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual formulação funciona melhor como tese para o tema proposto?",
+        "options": [
+          {
+            "text": "A conexão precária e a ausência de apoio pedagógico limitam a aprendizagem digital.",
+            "correct": true,
+            "explanation": "A formulação assume um ponto de vista e distingue dois mecanismos a desenvolver."
+          },
+          {
+            "text": "A internet é um assunto muito atual.",
+            "correct": false,
+            "explanation": "A frase é ampla e não propõe uma interpretação do problema de aprendizagem digital."
+          },
+          {
+            "text": "Tecnologia, educação, futuro e juventude.",
+            "correct": false,
+            "explanation": "Uma lista de assuntos não estabelece uma tese nem a relação entre eles."
+          }
+        ]
+      },
+      {
+        "question": "O que fazer quando dois eixos repetem a mesma explicação?",
+        "options": [
+          {
+            "text": "Trocar somente os conectivos, mantendo o conteúdo repetido.",
+            "correct": false,
+            "explanation": "Conectivos não criam progressão quando o mecanismo argumentativo permanece idêntico."
+          },
+          {
+            "text": "Redefinir os eixos ou reorganizar o desenvolvimento para cada parte acrescentar uma análise.",
+            "correct": true,
+            "explanation": "A revisão deve atuar no projeto argumentativo e na contribuição de cada parágrafo."
+          },
+          {
+            "text": "Acrescentar uma citação sem relacioná-la ao tema.",
+            "correct": false,
+            "explanation": "A referência decorativa não resolve a falta de distinção entre os argumentos."
+          }
+        ]
+      }
+    ]
+  },
+  "em_red_02": {
+    "context": "Um rascunho sobre desperdício de água usa portanto em todas as passagens. O laboratório revê as relações entre ideias para escolher conectivos que indiquem adição, contraste, causa ou conclusão.",
+    "theory": "Coesão argumentativa é a articulação linguística que permite acompanhar as relações do texto. Conectivos não são enfeites intercambiáveis: além disso acrescenta; contudo opõe ou restringe uma expectativa; porque pode introduzir uma explicação causal; portanto sinaliza uma conclusão. A relação precisa existir entre as proposições antes de receber o marcador. Também há coesão por retomadas nominais, pronomes e elipses, sem começar todo parágrafo com uma expressão pronta. A passagem entre parágrafos deve retomar algo relevante e fazer a análise avançar. Variedade é útil quando acompanha precisão; substituir palavras ao acaso pode produzir contradição.",
+    "workedExample": "Texto original: A campanha ampliou o conhecimento sobre economia de água. Contudo, os vazamentos da escola persistiram. O contraste está entre informação disponível e problema material não resolvido. Se a continuação fosse A equipe também reparou as torneiras, além disso expressaria adição. Portanto exigiria uma conclusão sustentada pelo que veio antes.",
+    "investigation": [
+      "Identifique a relação entre campanha informativa e vazamentos persistentes antes de escolher o conectivo.",
+      "Escreva uma continuação aditiva e outra conclusiva para o mesmo primeiro período.",
+      "Una dois parágrafos curtos com uma retomada nominal e um marcador preciso, explicando por que a relação é coerente."
+    ],
+    "expectedEvidence": "Uma revisão que nomeie as relações lógicas, escolha conectivos compatíveis e demonstre progressão entre parágrafos por retomada e acréscimo de análise.",
+    "reflection": "Um texto com muitos conectivos pode continuar incoerente? Mostre como uma conclusão não sustentada exemplifica esse problema.",
+    "scenarios": [
+      {
+        "id": "contraste",
+        "label": "Expectativa contrariada",
+        "situation": "A escola fez uma campanha; contudo, os vazamentos continuaram.",
+        "observation": "A continuação limita a expectativa de que informar bastaria para resolver o problema.",
+        "explanation": "Contudo é adequado porque explicita o contraste entre campanha e persistência material."
+      },
+      {
+        "id": "adicao",
+        "label": "Outra medida",
+        "situation": "A escola fez uma campanha; além disso, reparou as torneiras.",
+        "observation": "O segundo trecho acrescenta uma medida distinta.",
+        "explanation": "Além disso coordena ações complementares, sem estabelecer obrigatoriamente uma causa."
+      },
+      {
+        "id": "conclusao",
+        "label": "Inferência sustentada",
+        "situation": "O desperdício vem de hábitos e vazamentos; portanto, a resposta precisa combinar orientação e manutenção.",
+        "observation": "A proposta reúne medidas ligadas às duas fontes apresentadas.",
+        "explanation": "Portanto introduz uma inferência que pode ser acompanhada a partir da análise anterior."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual conectivo explicita melhor o contraste em Houve campanha; ___, os vazamentos persistiram?",
+        "options": [
+          {
+            "text": "Além disso.",
+            "correct": false,
+            "explanation": "O marcador enfatizaria simples adição, enfraquecendo o contraste solicitado."
+          },
+          {
+            "text": "Contudo.",
+            "correct": true,
+            "explanation": "A persistência dos vazamentos contraria a expectativa de resolução associada à campanha."
+          },
+          {
+            "text": "Portanto, como conclusão necessária.",
+            "correct": false,
+            "explanation": "Fazer uma campanha não permite concluir necessariamente que os vazamentos persistirão."
+          }
+        ]
+      },
+      {
+        "question": "O que torna eficiente a coesão entre dois parágrafos?",
+        "options": [
+          {
+            "text": "Começar ambos com palavras diferentes, mesmo sem relação de sentido.",
+            "correct": false,
+            "explanation": "Variação lexical não substitui a ligação lógica entre as análises."
+          },
+          {
+            "text": "Repetir a tese inteira sem incluir nova análise.",
+            "correct": false,
+            "explanation": "A repetição pode manter o assunto, mas não produz o avanço argumentativo esperado."
+          },
+          {
+            "text": "Retomar uma ideia relevante e acrescentar um passo coerente ao argumento.",
+            "correct": true,
+            "explanation": "A articulação linguística precisa tornar visível a continuidade e a progressão do texto."
+          }
+        ]
+      }
+    ]
+  },
+  "em_red_03": {
+    "context": "Uma redação discute a pouca presença de estudantes em atividades culturais do bairro. A conclusão precisa propor uma intervenção relacionada às barreiras analisadas e tornar sua execução compreensível.",
+    "theory": "Uma proposta de intervenção deve responder ao problema desenvolvido, respeitando os direitos humanos. Para planejá-la, pergunte quem atua, o que faz, como realiza, para qual efeito e que informação detalha a execução ou algum elemento. Esses cinco componentes ajudam a conferir a proposta, mas não dispensam coerência: um agente deve ter condições de participar e o meio precisa contribuir para a ação. O detalhamento não é apenas um adjetivo como importante. Não se exige que todo texto use a mesma fórmula ou duas propostas completas. Uma lista de elementos sem ligação com as causas discutidas pode continuar vaga ou ineficaz.",
+    "workedExample": "Proposta original hipotética: A secretaria municipal de Cultura, em parceria com escolas e coletivos locais, deve organizar visitas mensais gratuitas aos espaços do bairro, por meio de calendário construído com os estudantes e transporte nos percursos necessários, para reduzir barreiras de acesso. A prioridade a turmas distantes dos equipamentos culturais detalha o atendimento; a execução precisaria de planejamento e recursos reais.",
+    "investigation": [
+      "Marque agente, ação, meio, efeito e detalhamento na proposta hipotética.",
+      "Relacione transporte à barreira de deslocamento e calendário participativo às necessidades dos estudantes.",
+      "Revise uma conclusão limitada a o governo deve resolver, tornando a ação concreta e conferindo respeito à dignidade e participação dos envolvidos."
+    ],
+    "expectedEvidence": "Uma intervenção com elementos identificáveis e articulados, agentes plausíveis e vínculo demonstrado com as barreiras discutidas, sem tratar pessoas como objeto de coerção ou exclusão.",
+    "reflection": "Por que indicar cinco elementos não basta se a medida proposta ignora a causa analisada nos parágrafos anteriores?",
+    "scenarios": [
+      {
+        "id": "vago",
+        "label": "Ação indefinida",
+        "situation": "Conclusão fictícia: As autoridades devem melhorar tudo rapidamente.",
+        "observation": "Não se sabe qual ação executar, por qual meio ou diante de qual barreira.",
+        "explanation": "A revisão precisa especificar a resposta ao problema, em vez de acumular expressões de urgência."
+      },
+      {
+        "id": "meio",
+        "label": "Relacionar meio e causa",
+        "situation": "O texto identifica distância e propõe transporte para visitas culturais.",
+        "observation": "Há uma ligação entre o obstáculo descrito e o meio sugerido.",
+        "explanation": "Essa correspondência torna a intervenção parte do argumento, com necessidade de planejamento viável."
+      },
+      {
+        "id": "detalhe",
+        "label": "Tornar a execução legível",
+        "situation": "A proposta define prioridade para escolas distantes e consulta sobre horários.",
+        "observation": "O leitor compreende melhor quem será atendido e como suas necessidades serão consideradas.",
+        "explanation": "Detalhar um elemento fornece informação operacional, diferente de apenas chamá-lo de eficiente."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual trecho funciona como meio na proposta de visitas culturais?",
+        "options": [
+          {
+            "text": "Reduzir barreiras de acesso.",
+            "correct": false,
+            "explanation": "Esse trecho indica o efeito pretendido, não o procedimento de execução."
+          },
+          {
+            "text": "A secretaria municipal de Cultura.",
+            "correct": false,
+            "explanation": "Esse é um agente proposto para a ação."
+          },
+          {
+            "text": "Por meio de calendário participativo e transporte nos percursos necessários.",
+            "correct": true,
+            "explanation": "O trecho explica recursos e procedimentos para realizar as visitas."
+          }
+        ]
+      },
+      {
+        "question": "Que revisão melhora o detalhamento de uma intervenção?",
+        "options": [
+          {
+            "text": "Especificar o público prioritário e como suas necessidades orientarão os horários.",
+            "correct": true,
+            "explanation": "A informação esclarece componentes da execução e sua relação com o problema."
+          },
+          {
+            "text": "Acrescentar apenas as palavras essencial e maravilhoso.",
+            "correct": false,
+            "explanation": "Adjetivos avaliativos não explicam como a proposta será implementada."
+          },
+          {
+            "text": "Apagar qualquer ligação com os argumentos anteriores.",
+            "correct": false,
+            "explanation": "A intervenção deve decorrer da discussão realizada no texto."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Inep — Enem 2026: cartilha da redação",
+        "url": "https://www.gov.br/inep/pt-br/centrais-de-conteudo/noticias/enem/enem-2026-cartilha-da-redacao-esta-disponivel"
+      },
+      {
+        "title": "Inep — A redação no Enem 2025: orientações e exemplos comentados",
+        "url": "https://download.inep.gov.br/publicacoes/institucionais/avaliacoes_e_exames_da_educacao_basica/a_redacao_no_enem_2025_cartilha_do_participante.pdf"
+      }
+    ]
+  },
+  "em_red_04": {
+    "context": "Um rascunho sobre desigualdade de acesso à cultura inclui o nome de um sociólogo e segue adiante sem explicá-lo. A turma transforma a referência decorativa em uma relação verificável com o argumento.",
+    "theory": "Repertório sociocultural pode incluir conceitos, acontecimentos, obras e conhecimentos de diferentes áreas. Seu uso produtivo exige precisão, pertinência e explicação: mencionar um autor não comprova a tese. Em sua análise sobre escola e cultura, Pierre Bourdieu discute como heranças culturais socialmente desiguais podem ser reconhecidas pela escola como se fossem talentos apenas individuais. O conceito pode ajudar a examinar acesso e familiaridade com práticas culturais, mas não autoriza afirmar que o destino de cada estudante é imutável. Evite frases supostamente famosas sem origem confirmada. Uma paráfrase honesta, com autoria e relação explicadas, vale mais do que uma citação inventada.",
+    "workedExample": "Parágrafo original, sem citação literal: A análise de Bourdieu sobre a distribuição desigual da familiaridade com a cultura ajuda a questionar por que uma visita ao museu é rotina para alguns estudantes e uma experiência inédita para outros. Assim, a escola pode ampliar oportunidades de acesso, em vez de interpretar toda diferença como falta de interesse individual.",
+    "investigation": [
+      "Identifique qual ideia foi atribuída a Bourdieu e a diferencie da aplicação feita pelo autor do parágrafo.",
+      "Explique a ponte entre desigualdade de familiaridade cultural e a situação hipotética da visita ao museu.",
+      "Reescreva uma referência que diga apenas como afirma Bourdieu, a cultura é importante, incluindo conceito, vínculo temático e limite da interpretação."
+    ],
+    "expectedEvidence": "Um parágrafo que apresente uma referência identificável, explique seu uso no problema e separe paráfrase de citação literal, evitando determinismo ou autoridade sem demonstração.",
+    "reflection": "O argumento continuaria compreensível se o leitor não conhecesse o nome do autor? O que você precisa explicar para que a referência trabalhe no texto?",
+    "scenarios": [
+      {
+        "id": "decoracao",
+        "label": "Nome sem análise",
+        "situation": "Rascunho original: Bourdieu foi um grande pensador. A cultura é importante.",
+        "observation": "Não há conceito definido nem relação demonstrada com o problema.",
+        "explanation": "O prestígio do nome não substitui a explicação que o parágrafo deve oferecer."
+      },
+      {
+        "id": "ponte",
+        "label": "Aplicação argumentada",
+        "situation": "O texto aproxima herança cultural desigual e familiaridade diferente com museus.",
+        "observation": "A referência participa da explicação do obstáculo de acesso.",
+        "explanation": "A aplicação é produtiva quando o texto mostra a relação, sem tratá-la como prova automática."
+      },
+      {
+        "id": "autoria",
+        "label": "Sem aspas inventadas",
+        "situation": "A estudante não consegue confirmar uma frase encontrada em uma imagem de rede social.",
+        "observation": "Ela retira as aspas e busca uma ideia documentada para parafrasear corretamente.",
+        "explanation": "Não conhecer a origem de uma frase impede atribuí-la com segurança como citação literal."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual uso do repertório contribui mais para o argumento?",
+        "options": [
+          {
+            "text": "Explicar um conceito e mostrar como ele ajuda a interpretar uma situação do tema.",
+            "correct": true,
+            "explanation": "A referência se torna parte do raciocínio quando sua contribuição é explicitada."
+          },
+          {
+            "text": "Citar vários nomes sem explicar nenhuma ideia.",
+            "correct": false,
+            "explanation": "O acúmulo de autoridades não demonstra relação com o problema discutido."
+          },
+          {
+            "text": "Inventar uma frase para que pareça mais impactante.",
+            "correct": false,
+            "explanation": "Atribuição fictícia prejudica a precisão e a confiabilidade do texto."
+          }
+        ]
+      },
+      {
+        "question": "Que limite deve acompanhar a aplicação proposta de Bourdieu?",
+        "options": [
+          {
+            "text": "Todos os estudantes têm exatamente as mesmas oportunidades culturais.",
+            "correct": false,
+            "explanation": "Essa afirmação elimina a desigualdade que o conceito ajuda a examinar."
+          },
+          {
+            "text": "O conceito esclarece mecanismos de desigualdade, mas não prova um destino individual fixo.",
+            "correct": true,
+            "explanation": "Distinguir processos sociais e trajetórias evita uma generalização determinista."
+          },
+          {
+            "text": "A origem social define de forma imutável cada trajetória individual.",
+            "correct": false,
+            "explanation": "A análise de mecanismos sociais não deve ser convertida numa sentença individual inevitável."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Pierre Bourdieu — L'école conservatrice (1966)",
+        "url": "https://www.persee.fr/doc/rfsoc_0035-2969_1966_num_7_3_2934"
+      }
+    ]
+  },
+  "em_red_05": {
+    "context": "Um texto afirma que o atraso de estudantes é causado apenas por desinteresse. A turma investiga hipóteses sobre transporte para construir relações de causa e efeito sem culpabilização ou salto lógico.",
+    "theory": "Um argumento causal precisa explicar como uma condição pode produzir ou favorecer um efeito. Observar dois fatos juntos não basta para provar causalidade: outros fatores podem influenciar ambos, e a direção da relação precisa ser examinada. Evidências, mecanismos e limites tornam a hipótese avaliável. Em temas sociais, causas costumam se combinar; transporte irregular, distância e horários podem afetar pontualidade de modos diferentes. Generalizações como todo atraso revela desinteresse ignoram alternativas. Exemplos ilustram mecanismos, mas um caso isolado não mede a frequência de um problema em toda a população. A redação deve distinguir dado, hipótese explicativa e conclusão.",
+    "workedExample": "Situação hipotética: numa escola, atrasos aumentam nos dias de interrupção do ônibus. Hipótese: a interrupção dificulta a chegada no horário. Mecanismo: estudantes dependentes da linha precisam de alternativas mais demoradas. A hipótese é plausível, mas seria necessário comparar registros, horários e outras condições antes de atribuir todos os atrasos a uma causa única.",
+    "investigation": [
+      "Desenhe a cadeia interrupção da linha → alternativa mais demorada → risco de atraso, explicando cada passagem.",
+      "Liste duas causas alternativas ou condições que poderiam mudar o resultado.",
+      "Escreva um parágrafo que identifique o exemplo como hipotético e diferencie a hipótese causal de uma conclusão generalizada sobre todos os estudantes."
+    ],
+    "expectedEvidence": "Uma cadeia causal explícita, pelo menos duas condições alternativas e um parágrafo que dimensione a evidência, sem converter associação ou exemplo isolado em prova universal.",
+    "reflection": "Que evidência poderia enfraquecer sua hipótese sobre transporte, e por que reconhecer isso torna a investigação melhor?",
+    "scenarios": [
+      {
+        "id": "mecanismo",
+        "label": "Explicar a passagem",
+        "situation": "Cenário fictício: a linha de ônibus para e a alternativa acrescenta trinta minutos ao trajeto.",
+        "observation": "A mudança de transporte aumenta o tempo necessário para chegar.",
+        "explanation": "O mecanismo conecta a interrupção ao risco de atraso, em vez de apenas listar dois fatos."
+      },
+      {
+        "id": "alternativa",
+        "label": "Examinar outras causas",
+        "situation": "Cenário fictício: o ônibus funciona, mas a escola antecipa o início da aula sem aviso suficiente.",
+        "observation": "A pontualidade pode ser afetada por uma condição diferente da interrupção da linha.",
+        "explanation": "Considerar alternativas impede concluir que um único fator explica todos os casos."
+      },
+      {
+        "id": "amostra",
+        "label": "Limite do exemplo",
+        "situation": "Um relato de atraso de uma estudante é usado para descrever todas as escolas do país.",
+        "observation": "A conclusão amplia muito o alcance da evidência apresentada.",
+        "explanation": "O caso pode ilustrar uma situação, mas não permite estimar sua frequência nacional."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que fortalece a hipótese de que uma interrupção do ônibus contribuiu para atrasos?",
+        "options": [
+          {
+            "text": "Repetir que transporte causa tudo, sem examinar condições.",
+            "correct": false,
+            "explanation": "A repetição absoluta não demonstra uma relação causal nem seus limites."
+          },
+          {
+            "text": "Explicar o aumento do tempo de trajeto e buscar registros compatíveis, considerando alternativas.",
+            "correct": true,
+            "explanation": "Mecanismo e evidência permitem avaliar a relação sem tratá-la como certeza universal."
+          },
+          {
+            "text": "Acusar todos os estudantes de desinteresse.",
+            "correct": false,
+            "explanation": "A acusação ignora a hipótese material e não se baseia nas evidências descritas."
+          }
+        ]
+      },
+      {
+        "question": "Que uso é adequado para um único exemplo de atraso?",
+        "options": [
+          {
+            "text": "Provar a porcentagem exata de atrasos em todo o país.",
+            "correct": false,
+            "explanation": "Um caso isolado não oferece amostragem para uma estimativa nacional."
+          },
+          {
+            "text": "Eliminar qualquer necessidade de investigar o contexto.",
+            "correct": false,
+            "explanation": "O contexto é necessário para saber quais condições participaram daquele caso."
+          },
+          {
+            "text": "Ilustrar um mecanismo possível, deixando claro que sua frequência exige outros dados.",
+            "correct": true,
+            "explanation": "A distinção entre ilustração e medição mantém o alcance da conclusão proporcional à evidência."
+          }
+        ]
+      }
+    ]
+  },
+  "em_red_06": {
+    "context": "Um relatório escolar diz A equipe organizaram os dados, e apresentou propostas de ampliar o horário e que os alunos participem. A turma revisa concordância, pontuação e paralelismo preservando o sentido.",
+    "theory": "Revisar a escrita formal exige observar a estrutura, e não apenas trocar palavras consideradas simples por palavras longas. O verbo normalmente concorda com o núcleo do sujeito: A equipe organizou. Uma vírgula não deve separar sujeito e verbo sem uma intercalação legítima. Paralelismo organiza elementos coordenados com formas compatíveis: ampliar o horário e garantir a participação mantém dois infinitivos. Marcas de oralidade podem ser adequadas em outros gêneros, mas um relatório argumentativo pede escolhas ajustadas à situação. A revisão precisa preservar o que o autor pretende dizer e evitar apagar sua voz ou corrigir como erro toda variedade linguística.",
+    "workedExample": "Versão revisada original: A equipe organizou os dados e apresentou propostas de ampliar o horário e garantir a participação dos alunos. Organizou concorda com equipe; a coordenação mantém o mesmo sujeito sem a vírgula desnecessária do rascunho; ampliar e garantir formam uma sequência paralela. Se o sujeito fosse As equipes, os verbos passariam ao plural.",
+    "investigation": [
+      "Localize o núcleo do sujeito no rascunho antes de decidir a flexão dos verbos.",
+      "Reescreva os dois objetivos com infinitivos paralelos, sem alterar o conteúdo essencial.",
+      "Compare uma mensagem informal à turma e uma versão de relatório, justificando ajustes de registro sem desqualificar a fala cotidiana."
+    ],
+    "expectedEvidence": "Uma revisão comentada que identifique o núcleo do sujeito, preserve relações sintáticas e sentido, construa paralelismo e explique a adequação do registro ao gênero.",
+    "reflection": "Por que substituir a gente por os estudantes não basta se os verbos e as referências seguintes continuam incompatíveis com o novo sujeito?",
+    "scenarios": [
+      {
+        "id": "concordancia",
+        "label": "Coletivo singular",
+        "situation": "Rascunho original: A equipe organizaram os dados.",
+        "observation": "Equipe é o núcleo singular e a flexão plural não corresponde à estrutura proposta.",
+        "explanation": "Na revisão formal desta oração, A equipe organizou mantém a concordância com o núcleo."
+      },
+      {
+        "id": "paralelismo",
+        "label": "Objetivos coordenados",
+        "situation": "A lista passa de ampliar o horário e que os alunos participem para ampliar o horário e garantir a participação.",
+        "observation": "Os dois objetivos passam a ser construídos com infinitivos.",
+        "explanation": "A organização paralela facilita a leitura sem exigir palavras artificiais ou alteração do propósito."
+      },
+      {
+        "id": "registro",
+        "label": "Ajustar à situação",
+        "situation": "Uma conversa diz a gente juntou tudo; o relatório informa a equipe reuniu os registros.",
+        "observation": "O relatório especifica agentes e materiais de modo adequado ao gênero.",
+        "explanation": "A adequação depende do contexto comunicativo e não torna a fala cotidiana inferior em todas as situações."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual revisão preserva a concordância da oração A equipe organizaram os dados?",
+        "options": [
+          {
+            "text": "A equipe, organizou os dados.",
+            "correct": false,
+            "explanation": "A flexão foi ajustada, mas a vírgula separa indevidamente sujeito e verbo."
+          },
+          {
+            "text": "A equipe organizar os dados.",
+            "correct": false,
+            "explanation": "O infinitivo não mantém a oração declarativa passada do rascunho."
+          },
+          {
+            "text": "A equipe organizou os dados.",
+            "correct": true,
+            "explanation": "O verbo concorda com equipe no singular e mantém a ação passada."
+          }
+        ]
+      },
+      {
+        "question": "Qual dupla de objetivos apresenta paralelismo claro?",
+        "options": [
+          {
+            "text": "Ampliar o horário e garantir a participação.",
+            "correct": true,
+            "explanation": "Os dois objetivos se organizam por verbos no infinitivo."
+          },
+          {
+            "text": "Ampliar o horário e que participassem.",
+            "correct": false,
+            "explanation": "A coordenação mistura infinitivo e oração sem esclarecer sua relação no contexto proposto."
+          },
+          {
+            "text": "O horário ampliar e participação a garantir.",
+            "correct": false,
+            "explanation": "A inversão desorganiza a sequência sem oferecer uma estrutura coordenada legível."
+          }
+        ]
+      }
+    ]
+  },
+  "em_red_07": {
+    "context": "Uma coletânea original reúne relatos sobre acesso à alimentação na escola. A turma seleciona problemas, compara perspectivas e planeja argumentos próprios sem copiar os trechos motivadores.",
+    "theory": "Textos motivadores oferecem recortes, dados ou perspectivas para compreender uma proposta, mas não substituem a tese e o desenvolvimento do participante. A leitura deve identificar tema, autoria, tipo de informação e alcance. Um relato individual não equivale a um levantamento representativo; uma tabela precisa de base e fonte para sustentar generalizações. Parafrasear não é trocar algumas palavras mantendo a mesma sequência: é reconstruir a ideia com compreensão e atribuição quando necessário. O recorte da frase temática deve orientar a seleção do material. Também é preciso perceber tensões entre textos, em vez de tratá-los como prova de uma única resposta obrigatória.",
+    "workedExample": "Coletânea fictícia: Texto A, relato de Lia: Chego cedo e a primeira refeição ajuda a acompanhar a aula. Texto B, comunicado da direção: A oferta precisa considerar turnos e restrições alimentares informadas pelas famílias. Síntese possível: acesso não é apenas quantidade; envolve horários e atendimento a necessidades diferentes. Os relatos não permitem estimar quantos estudantes do país passam pela situação.",
+    "investigation": [
+      "Identifique o problema comum e a perspectiva específica de cada texto da coletânea fictícia.",
+      "Escreva uma síntese com suas palavras, preservando a distinção entre relato e comunicado.",
+      "Formule uma tese sobre organização do acesso às refeições e planeje uma evidência adicional necessária, sem inventar estatísticas."
+    ],
+    "expectedEvidence": "Uma leitura que compare vozes e alcance, produza síntese autoral e desenvolva um projeto ligado ao recorte, distinguindo informações fornecidas de inferências e dados ainda necessários.",
+    "reflection": "Que erro ocorre quando um relato de uma pessoa é usado como se medisse automaticamente a experiência de toda uma população?",
+    "scenarios": [
+      {
+        "id": "relato",
+        "label": "Experiência individual",
+        "situation": "Texto fictício A apresenta a experiência de Lia com uma refeição antes da aula.",
+        "observation": "O relato ajuda a compreender uma necessidade possível de rotina.",
+        "explanation": "A experiência é relevante, mas não fornece por si só uma proporção nacional de estudantes."
+      },
+      {
+        "id": "comunicado",
+        "label": "Organização institucional",
+        "situation": "Texto fictício B menciona turnos e restrições alimentares.",
+        "observation": "A direção destaca aspectos de planejamento do atendimento.",
+        "explanation": "Essa perspectiva amplia a discussão para condições de oferta, sem invalidar o relato individual."
+      },
+      {
+        "id": "sintese",
+        "label": "Construção própria",
+        "situation": "A estudante escreve que horários e necessidades diversas também influenciam o acesso.",
+        "observation": "A frase relaciona os textos em uma interpretação própria.",
+        "explanation": "A síntese demonstra compreensão quando preserva o alcance das informações e acrescenta uma relação explicada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Que síntese respeita a coletânea fictícia sobre alimentação?",
+        "options": [
+          {
+            "text": "O atendimento envolve horários e necessidades diversas, além da existência de refeições.",
+            "correct": true,
+            "explanation": "A síntese articula a rotina de Lia e a preocupação institucional com diferentes condições."
+          },
+          {
+            "text": "Todos os estudantes brasileiros têm exatamente a mesma rotina de Lia.",
+            "correct": false,
+            "explanation": "O relato individual não sustenta essa generalização."
+          },
+          {
+            "text": "A direção provou uma porcentagem nacional de restrições alimentares.",
+            "correct": false,
+            "explanation": "O comunicado não apresenta levantamento ou porcentagem alguma."
+          }
+        ]
+      },
+      {
+        "question": "O que distingue uma síntese autoral de uma cópia disfarçada?",
+        "options": [
+          {
+            "text": "Substituir duas palavras e manter todo o encadeamento do texto inicial.",
+            "correct": false,
+            "explanation": "A troca superficial não demonstra reconstrução da ideia nem análise própria."
+          },
+          {
+            "text": "Reconstruir relações com compreensão, preservando o alcance e indicando a referência quando necessário.",
+            "correct": true,
+            "explanation": "A síntese organiza a leitura e assume responsabilidade pelas relações propostas."
+          },
+          {
+            "text": "Criar dados que tornem o argumento mais convincente.",
+            "correct": false,
+            "explanation": "Estatísticas inventadas não são uma forma legítima de desenvolver o material motivador."
+          }
+        ]
+      }
+    ]
+  },
+  "em_red_08": {
+    "context": "A turma testa três aberturas para uma redação sobre acesso à cultura: referência histórica, princípio constitucional e contraste entre expectativa e realidade. O impacto deve vir da ligação com o problema.",
+    "theory": "Uma introdução deve situar o recorte e conduzir ao ponto de vista, sem consumir o espaço com uma história desconectada. Alusão histórica exige precisão e explicação do vínculo, evitando comparar épocas como se fossem idênticas. Uma referência normativa pode estabelecer um princípio: o artigo 215 da Constituição brasileira trata do exercício dos direitos culturais e do acesso à cultura. A norma não prova que o direito se realiza igualmente na prática. A contraposição pode explorar essa distância, desde que as barreiras sejam explicadas no desenvolvimento. Nenhum tipo de abertura garante nota ou qualidade sozinho; definição do problema e continuidade do projeto importam mais que frases decoradas.",
+    "workedExample": "Introdução original: A Constituição de 1988 reconhece direitos culturais; sua realização, porém, depende de condições concretas de participação. A distância dos equipamentos e a inadequação de horários podem limitar o acesso de estudantes. O exemplo usa a referência normativa como ponto de partida e apresenta eixos, sem afirmar um dado estatístico não fornecido.",
+    "investigation": [
+      "Identifique a referência, a contraposição e o ponto de vista na introdução original.",
+      "Crie uma abertura alternativa por definição de acesso cultural, ligando-a aos mesmos eixos.",
+      "Compare as versões e corte qualquer informação que não ajude a preparar a análise, conferindo a precisão da referência constitucional."
+    ],
+    "expectedEvidence": "Duas introduções com recorte e ponto de vista reconhecíveis, vínculo explicado entre gancho e tema e uso preciso da referência, sem prometer resultados por fórmulas prontas.",
+    "reflection": "Uma introdução poderia ser transferida para qualquer tema sem alteração? Se sim, que ligação específica com o problema ainda falta construir?",
+    "scenarios": [
+      {
+        "id": "norma",
+        "label": "Princípio e realização",
+        "situation": "A abertura menciona direitos culturais e depois investiga barreiras de participação.",
+        "observation": "A norma fornece um princípio; as barreiras constituem o problema a discutir.",
+        "explanation": "Distinguir reconhecimento jurídico e realização concreta impede concluir que a existência do artigo resolveu tudo."
+      },
+      {
+        "id": "historia",
+        "label": "Alusão que precisa de ponte",
+        "situation": "Um rascunho narra um episódio histórico e muda de assunto sem explicação.",
+        "observation": "O leitor não encontra a relação entre o episódio e o acesso cultural discutido.",
+        "explanation": "A alusão precisa ser selecionada e ligada ao argumento, ou pode ser retirada."
+      },
+      {
+        "id": "contraponto",
+        "label": "Contraste produtivo",
+        "situation": "A redação contrasta oferta de atividades com horários incompatíveis com os turnos escolares.",
+        "observation": "Ter atividades disponíveis não assegura participação em qualquer condição.",
+        "explanation": "O contraste prepara uma análise concreta, diferente de uma oposição vaga entre teoria e realidade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Como usar uma referência constitucional na abertura proposta?",
+        "options": [
+          {
+            "text": "Como prova de que todas as pessoas já acessam cultura igualmente.",
+            "correct": false,
+            "explanation": "Reconhecimento de um direito não mede sua realização prática."
+          },
+          {
+            "text": "Como princípio ligado à investigação das condições concretas de participação.",
+            "correct": true,
+            "explanation": "Essa ponte integra o repertório ao recorte e ao ponto de vista da introdução."
+          },
+          {
+            "text": "Como substituto de qualquer argumento ou evidência no desenvolvimento.",
+            "correct": false,
+            "explanation": "A referência situa um princípio, mas as barreiras ainda precisam ser explicadas."
+          }
+        ]
+      },
+      {
+        "question": "Qual critério ajuda a escolher entre duas introduções?",
+        "options": [
+          {
+            "text": "A quantidade de palavras difíceis, independentemente do sentido.",
+            "correct": false,
+            "explanation": "Vocabulário artificial pode prejudicar a precisão sem melhorar a argumentação."
+          },
+          {
+            "text": "A possibilidade de copiar a abertura para qualquer tema sem adaptação.",
+            "correct": false,
+            "explanation": "A falta de especificidade pode indicar que o gancho não foi integrado ao problema."
+          },
+          {
+            "text": "A clareza do recorte, da tese e da relação entre o gancho e o problema.",
+            "correct": true,
+            "explanation": "Esses elementos permitem avaliar a função da abertura no projeto do texto."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Presidência da República — Constituição Federal, artigo 215",
+        "url": "https://www.planalto.gov.br/ccivil_03/constituicao/constituicaocompilado.htm"
+      }
+    ]
+  },
+  "em_red_09": {
+    "context": "Um texto sobre um projeto de leitura repete seus nomes várias vezes e usa ela de modo ambíguo. A turma cria retomadas e antecipações que tornem a referência clara sem apagar participantes.",
+    "theory": "A coesão referencial permite identificar de quem ou de que o texto fala. A anáfora retoma um elemento anterior: O clube começou ontem. A iniciativa reúne duas turmas. A catáfora antecipa uma informação que será apresentada: O problema era este: faltavam livros acessíveis. Pronomes, expressões nominais e elipses podem construir essas relações, mas a substituição não deve criar ambiguidade. Em A professora falou com a diretora quando ela saiu, ela pode apontar para duas pessoas; nomear a participante resolve a dúvida. Uma retomada nominal também interpreta: chamar um projeto de conquista ou de promessa muda o enquadramento e exige coerência.",
+    "workedExample": "Rascunho original: A biblioteca apresentou um clube. O clube terá encontros semanais. Revisão: A biblioteca apresentou um clube de leitura. A iniciativa terá encontros semanais. Iniciativa retoma o clube sem repetir seu nome. Já em O desafio é este: alcançar estudantes do turno noturno, este aponta para uma explicação posterior, exemplificando catáfora.",
+    "investigation": [
+      "Marque o antecedente de A iniciativa e a informação anunciada por este nos exemplos.",
+      "Reescreva A professora falou com a diretora quando ela saiu em duas versões, deixando claro quem saiu em cada uma.",
+      "Revise um parágrafo curto alternando nome e retomada sem gerar ambiguidade nem atribuir uma avaliação que o texto não sustenta."
+    ],
+    "expectedEvidence": "Um parágrafo com referentes identificáveis e duas revisões da frase ambígua, acompanhado da distinção entre retomada anafórica e antecipação catafórica.",
+    "reflection": "Que mudança de avaliação ocorre ao retomar o mesmo projeto por essa conquista ou por essa promessa ainda não cumprida?",
+    "scenarios": [
+      {
+        "id": "anafora",
+        "label": "Olhar para trás",
+        "situation": "O clube de leitura começou ontem. A iniciativa reúne duas turmas.",
+        "observation": "A iniciativa recupera o clube de leitura já mencionado.",
+        "explanation": "A retomada é anafórica porque depende de um referente apresentado antes."
+      },
+      {
+        "id": "catafora",
+        "label": "Anunciar o que vem",
+        "situation": "O desafio é este: garantir livros acessíveis aos participantes.",
+        "observation": "Este anuncia a informação depois dos dois-pontos.",
+        "explanation": "A relação é catafórica, orientando o leitor para uma explicação posterior."
+      },
+      {
+        "id": "ambiguidade",
+        "label": "Duas candidatas",
+        "situation": "A professora falou com a diretora quando ela saiu.",
+        "observation": "Ela pode ser interpretado como professora ou diretora.",
+        "explanation": "Nomear a pessoa que saiu elimina uma dúvida que a simples substituição pronominal criou."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual trecho exemplifica catáfora no contexto apresentado?",
+        "options": [
+          {
+            "text": "O clube começou. A iniciativa cresceu.",
+            "correct": false,
+            "explanation": "A iniciativa retoma uma informação anterior, numa relação anafórica."
+          },
+          {
+            "text": "A biblioteca abriu cedo.",
+            "correct": false,
+            "explanation": "A frase isolada não contém a antecipação referencial solicitada."
+          },
+          {
+            "text": "O desafio é este: garantir livros acessíveis.",
+            "correct": true,
+            "explanation": "Este aponta para a explicação que aparece depois dele."
+          }
+        ]
+      },
+      {
+        "question": "Como resolver a ambiguidade de ela na frase da professora e da diretora?",
+        "options": [
+          {
+            "text": "Repetir o nome da participante que saiu ou reorganizar a frase de modo inequívoco.",
+            "correct": true,
+            "explanation": "A revisão atua diretamente na identificação do referente."
+          },
+          {
+            "text": "Inserir qualquer conectivo antes do pronome.",
+            "correct": false,
+            "explanation": "Um conectivo não identifica necessariamente a pessoa retomada."
+          },
+          {
+            "text": "Trocar ela por esta sem analisar o contexto.",
+            "correct": false,
+            "explanation": "A troca mecânica pode manter a dúvida; é preciso conferir a referência efetiva."
+          }
+        ]
+      }
+    ]
+  },
+  "em_red_10": {
+    "context": "Este simulado propõe uma redação completa em sessenta minutos sobre fortalecimento de bibliotecas comunitárias. Toda a atividade pode ser feita offline, com papel ou editor e um relógio externo.",
+    "theory": "Neste simulado, planeje, escreva e revise uma redação em sessenta minutos, usando a coletânea e a rubrica manual. A avaliação do seu texto será feita por você, com possível leitura de um colega ou professor; não há correção automática nesta atividade. Tema: desafios para fortalecer bibliotecas comunitárias como espaços de acesso à leitura. Coletânea original fictícia: A — uma moradora relata que os encontros aproximaram leitores, mas o espaço abre apenas numa tarde; B — um coletivo informa que precisa organizar acervo, manutenção e voluntariado; C — uma estudante pede livros acessíveis e horários compatíveis com a escola. Os textos ajudam a delimitar barreiras, sem constituir pesquisa estatística. A revisão considera linguagem formal, compreensão do tema, argumento, coesão e intervenção respeitosa; não produz nota oficial do Enem.",
+    "workedExample": "Plano original: tese — continuidade das bibliotecas depende de condições materiais e organização participativa; argumento 1 — manutenção e acervo; argumento 2 — horários e acessibilidade; intervenção — parceria entre coletivo, escolas e órgão cultural para planejar apoio e atendimento. O plano é uma possibilidade, não um modelo para copiar. O estudante deve explicar suas relações e identificar como hipotética qualquer situação da coletânea.",
+    "investigation": [
+      "Minutos 0–10: leia o tema e a coletânea, anote os recortes e formule sua própria tese com um plano de argumentos.",
+      "Minutos 10–45: redija o texto completo em papel ou editor; use um relógio externo e desenvolva os mecanismos, sem inventar dados ou citações.",
+      "Minutos 45–55: revise cinco aspectos manualmente — registro, recorte temático, sustentação dos argumentos, relações coesivas e intervenção ligada ao problema.",
+      "Minutos 55–60: reescreva o ponto mais fraco, registre a alteração e, ao terminar, peça leitura de um colega ou professor quando possível; qualquer recurso de IA externo é opcional e exige conferência humana."
+    ],
+    "expectedEvidence": "Uma redação concluída, um plano anterior à escrita e um registro de revisão com trecho antes e depois, indicando ao menos uma mudança fundamentada a partir da leitura do próprio texto.",
+    "reflection": "Qual mudança feita nos últimos minutos tornou a tese ou seu desenvolvimento mais claro, e que evidência do próprio texto sustenta sua avaliação?",
+    "scenarios": [
+      {
+        "id": "sem-api",
+        "label": "Prática inteiramente offline",
+        "situation": "O estudante está sem internet, escreve no caderno e usa um relógio de parede.",
+        "observation": "Tema, coletânea, planejamento e rubrica estão disponíveis nesta atividade.",
+        "explanation": "A sessão pode ser concluída sem análise automatizada, porque a evidência é o texto e sua revisão manual."
+      },
+      {
+        "id": "desvio",
+        "label": "Voltar ao recorte",
+        "situation": "O rascunho discute apenas vantagens gerais de ler, sem abordar bibliotecas comunitárias.",
+        "observation": "A redação se afasta do espaço e do desafio indicados pelo tema.",
+        "explanation": "A revisão deve conectar as vantagens da leitura às condições específicas de fortalecimento dessas bibliotecas."
+      },
+      {
+        "id": "feedback",
+        "label": "Feedback verificável",
+        "situation": "Um colega aponta que a intervenção propõe horários, mas o desenvolvimento só discute manutenção.",
+        "observation": "Há uma ligação argumentativa ainda pouco explicada.",
+        "explanation": "O autor pode desenvolver a barreira de horários ou ajustar a proposta, justificando a revisão com passagens do texto."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que permite concluir este simulado quando você estuda sem conexão à internet?",
+        "options": [
+          {
+            "text": "Usar tema, coletânea, roteiro temporal e rubrica manual com um relógio externo.",
+            "correct": true,
+            "explanation": "Esses recursos fornecem uma prática completa sem depender de serviço externo."
+          },
+          {
+            "text": "Aguardar uma correção automática que o laboratório garante.",
+            "correct": false,
+            "explanation": "A atividade não oferece essa garantia e foi estruturada para revisão manual."
+          },
+          {
+            "text": "Produzir somente uma lista de palavras-chave e dispensar a redação.",
+            "correct": false,
+            "explanation": "A evidência pedida inclui texto completo, planejamento e revisão fundamentada."
+          }
+        ]
+      },
+      {
+        "question": "Qual revisão responde melhor ao desvio temático descrito?",
+        "options": [
+          {
+            "text": "Acrescentar a expressão bibliotecas comunitárias apenas no título.",
+            "correct": false,
+            "explanation": "A menção isolada não reorganiza o desenvolvimento para atender ao tema."
+          },
+          {
+            "text": "Relacionar o valor da leitura às condições concretas de funcionamento das bibliotecas comunitárias.",
+            "correct": true,
+            "explanation": "A alteração reconecta o argumento ao espaço e ao desafio delimitados na proposta."
+          },
+          {
+            "text": "Inventar uma porcentagem para parecer mais convincente.",
+            "correct": false,
+            "explanation": "Um dado fictício apresentado como real não resolve o recorte nem sustenta legitimamente o argumento."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Inep — Competências avaliadas na redação do Enem 2026",
+        "url": "https://www.gov.br/inep/pt-br/centrais-de-conteudo/noticias/enem/enem-2026-cartilha-da-redacao-esta-disponivel"
+      }
+    ]
+  },
+  "em_lit_01": {
+    "context": "Dois textos originais de exercício representam tensões diferentes: um sujeito dividido entre desejo e culpa; outro procura descanso numa paisagem idealizada. A turma compara procedimentos ligados ao Barroco e ao Arcadismo.",
+    "theory": "No Barroco, contrastes, instabilidade e conflitos entre dimensões espirituais e materiais podem organizar a escrita. O conceptismo explora relações de ideias e raciocínios persuasivos; não é sinônimo de qualquer palavra difícil. Gregório de Matos produziu poesia religiosa, lírica e satírica, não apenas um tema único. No Arcadismo, idealização da vida campestre, referências clássicas e busca de equilíbrio aparecem como convenções literárias, sem provar que o autor vivia a vida de um pastor. Cláudio Manuel da Costa se vincula ao lirismo árcade brasileiro, mas períodos não são caixas sem sobreposição. A comparação deve mostrar como recursos constroem sentido, em vez de decidir o estilo apenas pela presença de Deus ou de uma árvore.",
+    "workedExample": "Trechos inteiramente originais, não atribuídos aos autores: A — Desejo o que condeno; condeno o que desejo. B — Deixo o ruído e procuro junto ao rio uma tarde sem pressa. A organiza uma contradição íntima por inversão e repetição; B constrói um refúgio campestre idealizado. São exercícios de comparação, insuficientes para representar a totalidade de cada movimento.",
+    "investigation": [
+      "Marque repetição e oposição no trecho A e explique o conflito que elas organizam.",
+      "Identifique a escolha de paisagem e ritmo de vida no trecho B, distinguindo convenção poética de documento biográfico.",
+      "Escreva um comentário comparativo que associe procedimentos a tendências e reconheça o limite desses exemplos originais."
+    ],
+    "expectedEvidence": "Um comentário apoiado em recursos específicos dos trechos, que distinga conflito argumentativo e idealização campestre sem reduzir obras ou movimentos a palavras isoladas.",
+    "reflection": "Por que a presença de um campo num poema, sozinha, não prova que o texto é árcade ou que seu autor foi pastor?",
+    "scenarios": [
+      {
+        "id": "contradicao",
+        "label": "Ideias em tensão",
+        "situation": "Exercício original: Desejo o que condeno; condeno o que desejo.",
+        "observation": "A inversão dos verbos faz o sujeito retornar ao próprio impasse.",
+        "explanation": "O efeito depende da relação entre ideias, útil para investigar procedimentos conceptistas."
+      },
+      {
+        "id": "campo",
+        "label": "Refúgio idealizado",
+        "situation": "Exercício original: Ao rio entrego a pressa da cidade.",
+        "observation": "A paisagem funciona como contraponto a uma vida percebida como agitada.",
+        "explanation": "A idealização campestre é uma convenção possível, que deve ser examinada no conjunto do poema."
+      },
+      {
+        "id": "diversidade",
+        "label": "Além da etiqueta",
+        "situation": "Uma ficha descreve toda a produção de Gregório de Matos como exclusivamente religiosa.",
+        "observation": "A ficha exclui dimensões satíricas e líricas de sua produção.",
+        "explanation": "Reconhecer tendências de época não autoriza apagar a diversidade de um autor."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que sustenta a análise do conflito no trecho A?",
+        "options": [
+          {
+            "text": "A presença obrigatória de uma paisagem rural.",
+            "correct": false,
+            "explanation": "O trecho não apresenta paisagem; seu conflito se organiza entre desejo e condenação."
+          },
+          {
+            "text": "A inversão de ideias que aproxima desejo e condenação em um impasse.",
+            "correct": true,
+            "explanation": "A repetição invertida permite mostrar como a contradição é construída."
+          },
+          {
+            "text": "Uma prova biográfica de que Gregório escreveu a frase.",
+            "correct": false,
+            "explanation": "O trecho foi criado para o exercício e não deve ser atribuído ao autor."
+          }
+        ]
+      },
+      {
+        "question": "Como interpretar o cenário campestre em uma leitura do Arcadismo?",
+        "options": [
+          {
+            "text": "Como prova automática de que todo poeta viveu como pastor.",
+            "correct": false,
+            "explanation": "Uma convenção literária não equivale a um documento da profissão ou rotina do autor."
+          },
+          {
+            "text": "Como sinal suficiente para classificar qualquer poema de qualquer época.",
+            "correct": false,
+            "explanation": "A leitura de estilo exige um conjunto de procedimentos e contexto."
+          },
+          {
+            "text": "Como uma possível convenção de idealização, relacionada aos demais recursos do texto.",
+            "correct": true,
+            "explanation": "A interpretação articula paisagem e construção poética sem tratar uma palavra como diagnóstico completo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Academia Brasileira de Letras — Cláudio Manuel da Costa",
+        "url": "https://www2.academia.org.br/academicos/claudio-manoel-da-costa/biografia"
+      }
+    ]
+  },
+  "em_lit_02": {
+    "context": "A turma organiza uma mostra de poesia romântica e encontra três fichas: construção da nacionalidade, subjetividade melancólica e intervenção social. O desafio é reconhecer tendências sem confundir representação literária e realidade.",
+    "theory": "A divisão da poesia romântica brasileira em três gerações é um recurso de estudo, não uma sequência de grupos sem contato. A primeira costuma ser associada a nacionalismo e indianismo, com Gonçalves Dias entre seus representantes. O indígena idealizado por esse projeto literário não substitui a diversidade e as vozes dos povos indígenas. A segunda enfatiza subjetividade, melancolia, sonho e tensões amorosas, com Álvares de Azevedo, cuja escrita também inclui ironia. A terceira, ligada ao condoreirismo, amplia o tom público e causas sociais, como a crítica à escravidão em Castro Alves. Obras e autores podem combinar temas; classificar exige observar voz, imagens e finalidade do poema.",
+    "workedExample": "Versos originais do exercício, sem atribuição: A — No herói desenho a terra que desejo chamar minha. B — A noite cresce dentro do quarto vazio. C — Que a praça escute o grito de quem pede liberdade. A sugere um projeto de identidade; B, interioridade; C, apelo público. A associação é didática e não transforma os versos em obras históricas autênticas.",
+    "investigation": [
+      "Associe cada trecho original a uma tendência e sustente a escolha com uma marca textual.",
+      "Explique por que um indígena idealizado por um poeta não representa automaticamente todos os povos indígenas.",
+      "Crie uma legenda que apresente as três tendências como organização de estudo e reconheça a diversidade interna dos autores."
+    ],
+    "expectedEvidence": "Associações comentadas por marcas de voz e imagem, com distinção entre idealização nacionalista, interioridade e apelo social, sem transformar a periodização em regra rígida.",
+    "reflection": "Que diferença existe entre ler uma personagem indígena criada por um escritor romântico e ler uma obra de autoria indígena?",
+    "scenarios": [
+      {
+        "id": "nacao",
+        "label": "Herói e identidade",
+        "situation": "Trecho original A apresenta um herói como imagem de uma terra desejada.",
+        "observation": "O eu poético relaciona figura heroica e identidade coletiva.",
+        "explanation": "Essa construção permite discutir idealização nacionalista sem confundi-la com descrição neutra de um povo."
+      },
+      {
+        "id": "interior",
+        "label": "Noite subjetiva",
+        "situation": "Trecho original B faz a noite crescer dentro de um quarto vazio.",
+        "observation": "A paisagem interna sugere solidão ou melancolia.",
+        "explanation": "A interioridade se constrói por imagem, e não apenas pela menção de uma emoção."
+      },
+      {
+        "id": "publico",
+        "label": "Apelo à praça",
+        "situation": "Trecho original C convoca a praça a ouvir um pedido de liberdade.",
+        "observation": "A voz se dirige a uma coletividade e adquire tom público.",
+        "explanation": "A finalidade de mobilização aproxima o exercício de procedimentos associados à poesia social condoreira."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Que leitura evita um problema na análise do indianismo romântico?",
+        "options": [
+          {
+            "text": "Distinguir a personagem idealizada da diversidade histórica e das vozes dos povos indígenas.",
+            "correct": true,
+            "explanation": "A representação literária faz parte de um projeto autoral e não esgota a realidade representada."
+          },
+          {
+            "text": "Afirmar que todo indígena viveu exatamente como a personagem.",
+            "correct": false,
+            "explanation": "Essa generalização apaga diversidade cultural e construção literária."
+          },
+          {
+            "text": "Tratar qualquer obra de autoria indígena como parte da primeira geração romântica.",
+            "correct": false,
+            "explanation": "Autoria indígena e indianismo romântico não são categorias equivalentes."
+          }
+        ]
+      },
+      {
+        "question": "Qual marca favorece a associação do trecho C ao apelo social?",
+        "options": [
+          {
+            "text": "A descrição de uma rotina pastoril sem interlocutor.",
+            "correct": false,
+            "explanation": "O trecho convoca uma praça e trata de liberdade; não descreve essa rotina."
+          },
+          {
+            "text": "A convocação de uma coletividade para ouvir um pedido de liberdade.",
+            "correct": true,
+            "explanation": "Voz pública e mobilização sustentam a associação, sem depender só de uma etiqueta de época."
+          },
+          {
+            "text": "A ausência de qualquer destinatário ou causa.",
+            "correct": false,
+            "explanation": "Praça e liberdade tornam visíveis o destinatário coletivo e a causa evocada."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Academia Brasileira de Letras — Gonçalves Dias",
+        "url": "https://login.academia.org.br/academicos/goncalves-dias/biografia"
+      }
+    ]
+  },
+  "em_lit_03": {
+    "context": "Um narrador fictício se declara modesto enquanto enumera elogios a si mesmo. A turma investiga a distância entre o que uma voz afirma e o que sua maneira de contar permite perceber, aproximando a leitura de Machado de Assis.",
+    "theory": "Narrador é uma construção do texto e não deve ser confundido automaticamente com o autor. Em Dom Casmurro, Bento Santiago narra retrospectivamente sua história a partir de um ponto de vista interessado e limitado. Sua interpretação não equivale a uma prova neutra dos acontecimentos. Em Memórias Póstumas de Brás Cubas, o narrador se apresenta como morto que conta a própria vida, permitindo digressões e ironias. A ironia pode emergir do contraste entre autoimagem, ações e formulação narrativa. Ler criticamente exige observar omissões, justificativas, interlocução com o leitor e contradições, sem transformar uma suspeita do narrador em fato confirmado ou toda frase em mentira demonstrada.",
+    "workedExample": "Passagem inteiramente original: Nunca procurei elogios; guardei apenas os quarenta recortes em que falavam de mim, por puro desapego. O narrador diz desprezar reconhecimento, mas sua coleção e a expressão puro desapego criam tensão. O leitor pode questionar sua autoimagem, sem atribuir a passagem a Machado ou concluir que qualquer informação anterior é falsa.",
+    "investigation": [
+      "Separe a autoavaliação do narrador e o comportamento descrito na passagem original.",
+      "Explique como o contraste produz ironia e que inferência é possível fazer sobre sua vaidade.",
+      "Compare o papel de uma memória interessada e o de um narrador que se declara morto, usando as informações sobre os dois romances sem inventar episódios ou citações."
+    ],
+    "expectedEvidence": "Uma interpretação apoiada em contraste textual, que diferencie narrador e autor e apresente hipóteses sobre confiabilidade sem converter suspeita em prova definitiva.",
+    "reflection": "Quando o narrador pede que o leitor confie nele, por que o próprio pedido pode se tornar objeto de análise?",
+    "scenarios": [
+      {
+        "id": "autoimagem",
+        "label": "Modéstia declarada",
+        "situation": "Na passagem original, o narrador diz nunca procurar elogios.",
+        "observation": "Ele apresenta uma imagem favorável de si mesmo.",
+        "explanation": "A afirmação deve ser confrontada com o modo de narrar e com as ações que ele seleciona."
+      },
+      {
+        "id": "contradicao",
+        "label": "Coleção reveladora",
+        "situation": "O mesmo narrador original guarda quarenta recortes elogiosos por puro desapego.",
+        "observation": "A justificativa entra em tensão com o investimento na coleção.",
+        "explanation": "A ironia permite questionar a modéstia anunciada sem exigir uma declaração explícita de vaidade."
+      },
+      {
+        "id": "perspectiva",
+        "label": "Memória e interesse",
+        "situation": "Uma leitura de Dom Casmurro toma a interpretação de Bento como um relato onisciente.",
+        "observation": "A leitura elimina a limitação do narrador em primeira pessoa.",
+        "explanation": "Considerar o ponto de vista é essencial para avaliar a construção de suspeitas e de versões do passado."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Que efeito surge entre desapego e a coleção de recortes do exemplo?",
+        "options": [
+          {
+            "text": "Uma confirmação direta de que o narrador não valoriza elogios.",
+            "correct": false,
+            "explanation": "O cuidado com a coleção contraria a imagem de indiferença afirmada."
+          },
+          {
+            "text": "Uma prova de que Machado escreveu essa passagem.",
+            "correct": false,
+            "explanation": "A passagem é original do exercício e não pertence a uma obra do autor."
+          },
+          {
+            "text": "Uma tensão irônica que permite questionar a autoimagem de modéstia.",
+            "correct": true,
+            "explanation": "A distância entre avaliação e comportamento produz o efeito interpretativo."
+          }
+        ]
+      },
+      {
+        "question": "Como tratar a perspectiva de Bento Santiago em Dom Casmurro?",
+        "options": [
+          {
+            "text": "Como uma versão narrativa interessada, cujas interpretações exigem leitura crítica.",
+            "correct": true,
+            "explanation": "O narrador em primeira pessoa não oferece acesso neutro e total a todos os fatos e consciências."
+          },
+          {
+            "text": "Como voz idêntica à de Machado e prova automática de cada suspeita.",
+            "correct": false,
+            "explanation": "Autor e narrador são instâncias diferentes; suspeitas precisam ser analisadas como construções do relato."
+          },
+          {
+            "text": "Como demonstração de que todas as frases do romance são falsas.",
+            "correct": false,
+            "explanation": "Questionar confiabilidade não permite declarar falsa toda informação sem examinar o texto."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Academia Brasileira de Letras — Machado de Assis",
+        "url": "https://login.academia.org.br/academicos/machado-de-assis/biografia"
+      },
+      {
+        "title": "ABL — Discussão crítica sobre Dom Casmurro",
+        "url": "https://www2.academia.org.br/noticias/abl-na-midia-estadao-por-que-dom-casmurro-e-tao-genial-especialistas-analisam-obra-de"
+      }
+    ]
+  },
+  "em_lit_04": {
+    "context": "Uma descrição fictícia de habitação coletiva apresenta ruído, calor e comparação de moradores com animais. A turma examina procedimentos naturalistas e questiona o determinismo, sem aceitá-lo como verdade sobre pessoas.",
+    "theory": "O Naturalismo do século XIX dialogou com ideias que buscavam explicar comportamentos por hereditariedade, meio e condições sociais. Em O Cortiço, de Aluísio Azevedo, o espaço coletivo participa intensamente da construção das personagens e dos conflitos. A zoomorfização aproxima pessoas de animais e pode produzir efeitos de massa, instinto ou desumanização. Estudar essas escolhas não exige endossar os pressupostos deterministas ou estereótipos raciais e sociais presentes em discursos da época. A crítica deve distinguir o projeto do narrador, as relações representadas e os limites históricos de suas explicações. Condições materiais afetam a vida, mas não tornam moradores reais iguais, sem vontade ou destinos inevitáveis.",
+    "workedExample": "Descrição original, não retirada de O Cortiço: O corredor fervia; passos e vozes enxameavam junto às portas. Enxameavam aproxima o movimento humano de um conjunto de insetos; fervia intensifica a sensação de calor e agitação. A leitura analisa o efeito da linguagem, sem usar a comparação para afirmar que habitantes de moradias coletivas são inferiores.",
+    "investigation": [
+      "Marque as escolhas lexicais que aproximam ambiente, corpo e movimento na descrição original.",
+      "Explique o efeito de enxameavam e proponha uma versão que descreva as mesmas pessoas sem zoomorfização.",
+      "Escreva um comentário que reconheça influência do meio sem afirmar que pobreza ou hereditariedade determinam inevitavelmente o caráter."
+    ],
+    "expectedEvidence": "Uma leitura dos recursos de descrição e uma reescrita comparativa, acompanhadas da distinção entre análise de um projeto naturalista e adesão a explicações deterministas ou estigmatizantes.",
+    "reflection": "Que responsabilidades de leitura surgem quando uma narrativa transforma um grupo de pessoas em imagem de massa animalizada?",
+    "scenarios": [
+      {
+        "id": "ambiente",
+        "label": "Espaço ativo",
+        "situation": "A descrição original associa calor, corredor cheio e circulação de vozes.",
+        "observation": "O ambiente interfere na percepção dos corpos e das relações.",
+        "explanation": "Essa articulação permite examinar como o espaço participa da narrativa, além de servir como cenário."
+      },
+      {
+        "id": "zoomorfizacao",
+        "label": "Movimento animalizado",
+        "situation": "O texto original usa enxameavam para passos e vozes de moradores.",
+        "observation": "A escolha aproxima o coletivo humano da imagem de um enxame.",
+        "explanation": "O recurso deve ser interpretado criticamente, inclusive quanto ao possível efeito de desumanização."
+      },
+      {
+        "id": "limite",
+        "label": "Influência não é destino",
+        "situation": "Um comentário diz que todo morador pobre terá obrigatoriamente o mesmo comportamento.",
+        "observation": "A afirmação transforma condição social em destino individual fixo.",
+        "explanation": "A análise literária pode estudar determinismo histórico sem reproduzir essa generalização sobre pessoas reais."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que caracteriza a zoomorfização no exemplo original?",
+        "options": [
+          {
+            "text": "A comparação de movimento humano com um enxame, pelo verbo enxameavam.",
+            "correct": true,
+            "explanation": "A escolha lexical aproxima pessoas de uma imagem animal coletiva."
+          },
+          {
+            "text": "A prova científica de que os moradores perderam sua humanidade.",
+            "correct": false,
+            "explanation": "Um procedimento narrativo não é uma prova sobre a natureza ou o valor das pessoas."
+          },
+          {
+            "text": "O simples fato de a cena ocorrer num corredor.",
+            "correct": false,
+            "explanation": "Localizar uma cena não constitui, por si, aproximação de pessoas com animais."
+          }
+        ]
+      },
+      {
+        "question": "Que postura é adequada ao estudar pressupostos naturalistas?",
+        "options": [
+          {
+            "text": "Aceitar qualquer estereótipo do narrador como explicação científica atual.",
+            "correct": false,
+            "explanation": "A leitura precisa contextualizar e criticar ideias e preconceitos históricos."
+          },
+          {
+            "text": "Analisar seus efeitos e limites, sem transformar influência social em destino inevitável.",
+            "correct": true,
+            "explanation": "Essa distinção permite compreender a obra sem endossar determinismo ou estigmatização."
+          },
+          {
+            "text": "Ignorar completamente o ambiente porque ele nunca afeta uma narrativa.",
+            "correct": false,
+            "explanation": "O espaço tem papel relevante na construção de O Cortiço e de seus conflitos."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Universidade Federal do Paraná — Estudo comparativo do Naturalismo em O Cortiço",
+        "url": "https://acervodigital.ufpr.br/xmlui/handle/1884/24355"
+      }
+    ]
+  },
+  "em_lit_05": {
+    "context": "A turma monta um painel com as datas 1922 e 1928 e encontra a afirmação de que o Manifesto Antropófago foi publicado durante a Semana de Arte Moderna. O laboratório corrige a cronologia e investiga criação cultural crítica.",
+    "theory": "A Semana de Arte Moderna ocorreu em São Paulo em 1922 e tornou-se um marco de propostas de renovação estética, sem representar a origem única de toda arte moderna brasileira. O Manifesto Antropófago, de Oswald de Andrade, foi publicado em 1928, não durante a Semana. A antropofagia cultural propõe uma apropriação transformadora de referências, em vez de submissão por imitação: a metáfora não descreve uma prática alimentar literal do autor. Mário de Andrade também participou do modernismo, com pesquisas e produção próprias, mas não é coautor desse manifesto. A análise deve reconhecer pluralidade, contradições e limites dos projetos de representação do país.",
+    "workedExample": "Exercício original: uma estudante combina a forma de um anúncio estrangeiro com palavras e problemas do seu bairro, alterando a mensagem para criticar exclusão cultural. A transformação pode ajudar a discutir apropriação crítica. Copiar o anúncio inteiro e apenas trocar a assinatura manteria a dependência e apagaria a origem, sem demonstrar a operação criadora proposta.",
+    "investigation": [
+      "Organize 1922 e 1928 numa linha do tempo, relacionando cada data ao evento ou publicação corretos.",
+      "Explique a diferença entre apropriação transformadora e reprodução passiva no exemplo original.",
+      "Crie um pequeno texto autoral que transforme uma forma conhecida, indique a referência e justifique sua crítica sem atribuí-lo aos modernistas."
+    ],
+    "expectedEvidence": "Uma cronologia correta e uma produção original comentada que mostre transformação de referências, distinguindo Oswald e Mário e evitando leitura literal da antropofagia cultural.",
+    "reflection": "Quem fica representado ou excluído quando um grupo define o que seria a cultura de um país inteiro?",
+    "scenarios": [
+      {
+        "id": "cronologia",
+        "label": "Marcos diferentes",
+        "situation": "O painel situa a Semana em 1922 e a publicação do Manifesto Antropófago em 1928.",
+        "observation": "Os marcos se relacionam ao modernismo, mas não aconteceram no mesmo ano.",
+        "explanation": "A distinção impede fundir propostas e momentos diferentes numa única cerimônia."
+      },
+      {
+        "id": "transformacao",
+        "label": "Recriar criticamente",
+        "situation": "O anúncio fictício passa a discutir o acesso à cultura do bairro.",
+        "observation": "A referência formal é reconhecível, mas a finalidade e os sentidos se modificam.",
+        "explanation": "Essa operação permite investigar apropriação transformadora, sem reduzir criação a mera cópia."
+      },
+      {
+        "id": "autoria",
+        "label": "Distinguir os Andrades",
+        "situation": "Uma legenda atribui o Manifesto Antropófago a Mário e Oswald em coautoria.",
+        "observation": "A atribuição mistura trajetórias de dois autores distintos.",
+        "explanation": "O manifesto é de Oswald de Andrade; a participação de Mário no modernismo tem outras obras e contribuições."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual associação corrige a cronologia do painel?",
+        "options": [
+          {
+            "text": "Semana e Manifesto Antropófago foram publicados em 1922.",
+            "correct": false,
+            "explanation": "A Semana ocorreu em 1922; o manifesto foi publicado em 1928."
+          },
+          {
+            "text": "Mário publicou sozinho o Manifesto Antropófago em 1928.",
+            "correct": false,
+            "explanation": "A autoria do manifesto é de Oswald de Andrade."
+          },
+          {
+            "text": "Semana em 1922; Manifesto Antropófago de Oswald em 1928.",
+            "correct": true,
+            "explanation": "A formulação distingue os marcos e identifica a autoria correta."
+          }
+        ]
+      },
+      {
+        "question": "O que exemplifica uma apropriação cultural transformadora no exercício?",
+        "options": [
+          {
+            "text": "Usar uma referência e alterar seus sentidos para construir uma crítica própria, identificando o diálogo.",
+            "correct": true,
+            "explanation": "A operação recria a referência e explicita sua finalidade, sem simples imitação."
+          },
+          {
+            "text": "Copiar integralmente um texto e apresentar outra assinatura.",
+            "correct": false,
+            "explanation": "A cópia apaga a origem e não demonstra transformação crítica."
+          },
+          {
+            "text": "Interpretar antropofagia cultural exclusivamente como alimentação literal.",
+            "correct": false,
+            "explanation": "A proposta mobiliza uma metáfora de apropriação e recriação cultural."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Biblioteca Nacional — O Modernismo",
+        "url": "https://bndigital.bn.gov.br/dossies/rede-da-memoria-virtual-brasileira/artes/o-modernismo/"
+      }
+    ]
+  },
+  "em_lit_06": {
+    "context": "O painel da turma coloca Vidas Secas e Capitães da Areia sob a mesma etiqueta de romance rural. A atividade compara espaços, desigualdades e modos de narrar para substituir essa simplificação por uma análise social.",
+    "theory": "A prosa brasileira dos anos 1930 reúne diferentes projetos e frequentemente examina desigualdades e conflitos sociais. Vidas Secas, de Graciliano Ramos, acompanha uma família de retirantes e articula seca, trabalho e relações de poder; reduzir tudo a clima apaga a dimensão social. Capitães da Areia, de Jorge Amado, acompanha crianças e adolescentes em situação de rua em Salvador, portanto não é simplesmente um romance rural. As obras apresentam estratégias narrativas diferentes para construir interioridade, coletividade e crítica. Representar exclusão não significa que personagens sejam apenas exemplos sem singularidade. A leitura compara linguagem, perspectiva e situação, sem tomar a ficção como levantamento estatístico.",
+    "workedExample": "Microcenas originais, sem reproduzir os romances: A — A família encontra terra para trabalhar, mas não compreende as contas que diminuem seu pagamento. B — Um menino circula pela cidade, vê vitrines e procura onde dormir. A permite discutir trabalho e poder em deslocamento rural; B, exclusão urbana. A comparação aponta problemas sociais sem afirmar que as microcenas pertencem aos autores.",
+    "investigation": [
+      "Localize o espaço e a relação de poder nas duas microcenas originais.",
+      "Explique por que seca não basta para resumir Vidas Secas e por que Salvador impede classificar Capitães da Areia apenas como rural.",
+      "Escreva um parágrafo comparativo com uma aproximação social e uma diferença de espaço ou perspectiva, identificando os limites do resumo."
+    ],
+    "expectedEvidence": "Uma comparação que reconheça exclusão social nas duas obras e diferenças entre experiência de retirantes e vida urbana, sem confundir ficção, estatística e cena criada para exercício.",
+    "reflection": "O que se perde quando personagens em situação de pobreza são descritos somente por sua carência, sem seus desejos, relações e formas de agir?",
+    "scenarios": [
+      {
+        "id": "contas",
+        "label": "Trabalho e poder",
+        "situation": "Microcena original: contas incompreensíveis reduzem o pagamento da família.",
+        "observation": "A desigualdade passa por controle de informação e relações de trabalho.",
+        "explanation": "O conflito social não pode ser explicado apenas por uma condição climática."
+      },
+      {
+        "id": "cidade",
+        "label": "Exclusão urbana",
+        "situation": "Microcena original: o menino vê vitrines, mas procura abrigo para dormir.",
+        "observation": "Consumo visível e falta de moradia coexistem no espaço urbano.",
+        "explanation": "A leitura investiga contrastes da cidade e evita encaixar toda prosa social num único cenário rural."
+      },
+      {
+        "id": "ficcao",
+        "label": "Alcance da narrativa",
+        "situation": "Um comentário usa os romances como se fossem uma tabela de todas as famílias nordestinas.",
+        "observation": "O comentário confunde construção artística e medida representativa da população.",
+        "explanation": "A ficção permite investigar experiências e formas de representação, mas não fornece sozinha esse levantamento."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Que diferença corrige a etiqueta única de romance rural?",
+        "options": [
+          {
+            "text": "Vidas Secas acompanha retirantes; Capitães da Areia apresenta experiências urbanas em Salvador.",
+            "correct": true,
+            "explanation": "As obras podem dialogar pela crítica social sem compartilhar o mesmo espaço narrativo."
+          },
+          {
+            "text": "As duas obras se passam exclusivamente numa aldeia europeia.",
+            "correct": false,
+            "explanation": "A afirmação desloca os espaços brasileiros centrais à comparação."
+          },
+          {
+            "text": "Capitães da Areia não possui qualquer dimensão social porque ocorre numa cidade.",
+            "correct": false,
+            "explanation": "Exclusão e relações de poder também são problemas urbanos."
+          }
+        ]
+      },
+      {
+        "question": "Por que reduzir Vidas Secas somente ao clima é insuficiente?",
+        "options": [
+          {
+            "text": "Porque a obra não envolve deslocamentos ou condições materiais.",
+            "correct": false,
+            "explanation": "Essas dimensões participam da narrativa, mas precisam ser relacionadas a outras."
+          },
+          {
+            "text": "Porque trabalho, poder e desigualdade também participam das experiências narradas.",
+            "correct": true,
+            "explanation": "A dimensão social impede tratar a seca como explicação única do conflito."
+          },
+          {
+            "text": "Porque toda ficção deve ser lida como estatística nacional.",
+            "correct": false,
+            "explanation": "Construção narrativa e levantamento estatístico produzem evidências de naturezas diferentes."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Academia Brasileira de Letras — Bibliografia de Jorge Amado",
+        "url": "https://academia.org.br/academicos/jorge-amado/bibliografia"
+      },
+      {
+        "title": "Estudo acadêmico — Variações da alma (quase) selvagem",
+        "url": "https://www.scielo.br/j/nec/a/tt9NS8zHYj3Y6RWNsQdQx7B/?format=pdf&lang=pt"
+      }
+    ]
+  },
+  "em_lit_07": {
+    "context": "A turma recebe as mesmas quatro letras de CAIR para organizar numa folha. O laboratório investiga como posição, direção de leitura e espaço em branco podem participar do significado de um poema.",
+    "theory": "A poesia concreta explora articulações entre palavra, som e organização visual, fazendo do espaço um componente ativo da leitura. Augusto de Campos, Haroldo de Campos e Décio Pignatari participaram da formação do grupo Noigandres e da formulação do movimento no Brasil. Nem todo desenho feito com palavras pertence historicamente a esse movimento; é preciso distinguir procedimento visual e filiação artística. Quebras, proximidades, repetição e direção podem construir relações que uma transcrição corrida enfraquece. A interpretação deve mostrar como forma e sentido se articulam, em vez de tratar a disposição como decoração sem função. A descrição verbal da composição também amplia o acesso ao exercício.",
+    "workedExample": "Composição original para desenhar: escreva C na primeira linha, A na segunda um pouco à direita, I na terceira mais à direita e R na quarta. As letras de CAIR formam uma descida diagonal. Compare com CAIR numa única linha: o vocabulário é igual, mas a direção espacial passa a sugerir movimento de queda. O exercício não é atribuído aos poetas concretos.",
+    "investigation": [
+      "Desenhe as duas versões de CAIR e descreva em palavras suas posições para alguém que não vê a folha.",
+      "Explique que relação a diagonal estabelece com o significado do verbo, sem afirmar que ela esgota todas as leituras.",
+      "Crie outra composição original com SUBIR ou PARAR e justifique a função dos espaços e da direção de leitura."
+    ],
+    "expectedEvidence": "Duas composições e suas descrições acessíveis, com comentário que relacione posição e sentido e distinga exercício visual autoral de obra histórica do Concretismo.",
+    "reflection": "Que informação precisaria ser preservada ao publicar esse poema em outro formato para não eliminar sua organização de sentido?",
+    "scenarios": [
+      {
+        "id": "linha",
+        "label": "Palavra corrida",
+        "situation": "A versão original de comparação apresenta CAIR em uma única linha.",
+        "observation": "A leitura segue a direção habitual e depende sobretudo do sentido lexical.",
+        "explanation": "Essa versão fornece uma base para observar o que a mudança de disposição acrescenta."
+      },
+      {
+        "id": "diagonal",
+        "label": "Queda desenhada",
+        "situation": "A composição original coloca cada letra de CAIR numa linha, deslocando-a progressivamente à direita.",
+        "observation": "O olhar percorre uma descida diagonal.",
+        "explanation": "A direção espacial participa da sugestão de queda e conecta forma visual e verbo."
+      },
+      {
+        "id": "acesso",
+        "label": "Descrever o espaço",
+        "situation": "Uma colega recebe apenas o texto CAIR numa mensagem sem quebras ou descrição.",
+        "observation": "A organização diagonal desaparece da informação recebida.",
+        "explanation": "Registrar posições e direção em uma descrição ajuda a transmitir o procedimento visual em outro suporte."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que muda entre CAIR em linha e a composição diagonal do exercício?",
+        "options": [
+          {
+            "text": "O número de letras e o verbo representado obrigatoriamente mudam.",
+            "correct": false,
+            "explanation": "As quatro letras continuam formando o mesmo verbo; muda sua disposição."
+          },
+          {
+            "text": "Nada pode mudar, pois espaço nunca participa do sentido.",
+            "correct": false,
+            "explanation": "A direção visual acrescenta uma sugestão de movimento à palavra."
+          },
+          {
+            "text": "A disposição acrescenta uma relação visual de descida ao sentido lexical.",
+            "correct": true,
+            "explanation": "A comparação torna visível a função semântica da organização espacial."
+          }
+        ]
+      },
+      {
+        "question": "Que afirmação distingue procedimento e movimento histórico?",
+        "options": [
+          {
+            "text": "Um exercício visual pode usar espaço de modo significativo sem ser uma obra histórica do Concretismo.",
+            "correct": true,
+            "explanation": "O recurso formal, isoladamente, não determina autoria, contexto ou filiação artística."
+          },
+          {
+            "text": "Toda palavra colorida foi escrita pelos irmãos Campos.",
+            "correct": false,
+            "explanation": "A aparência não comprova autoria e o exercício é explicitamente original."
+          },
+          {
+            "text": "Qualquer desenho elimina a necessidade de interpretar a linguagem.",
+            "correct": false,
+            "explanation": "A análise precisa relacionar forma, palavra, som e sentido."
+          }
+        ]
+      }
+    ]
+  },
+  "em_lit_08": {
+    "context": "Uma personagem fictícia para diante de uma xícara e percebe que vinha vivendo no automático. A turma acompanha a passagem entre gesto cotidiano e reflexão, sem confundir toda introspecção com uma técnica única.",
+    "theory": "A prosa de Clarice Lispector explora questões de linguagem, percepção e existência por diferentes recursos narrativos. Introspecção acompanha a vida interior; fluxo de consciência pode aproximar a escrita do movimento associativo do pensamento, sem se reduzir a uma lista de emoções. A epifania costuma nomear uma mudança de percepção provocada por algo aparentemente cotidiano. Nem toda narrativa da autora funciona da mesma forma. Em A Hora da Estrela, o narrador Rodrigo S. M. reflete sobre o ato de narrar Macabéa, produzindo tensão entre quem conta e quem é representada; a obra não deve ser resumida como acesso direto e transparente à consciência dela. Narrador, personagem e autora são instâncias distintas.",
+    "workedExample": "Fragmento original, não escrito por Clarice: A xícara permanecia quente. Ela a segurou, pensou no ônibus, no recado, na manhã sempre igual; de repente, estranhou a própria pressa. A sequência associa percepções e pensamentos e termina numa mudança de olhar. É um exercício para identificar efeitos de interioridade, não uma imitação atribuída à escritora.",
+    "investigation": [
+      "Marque sensação, associação de pensamentos e mudança de percepção no fragmento original.",
+      "Reescreva o episódio como relato externo de ações e compare o que se perde da experiência interior.",
+      "Explique por que a mediação de Rodrigo S. M. em A Hora da Estrela exige distinguir quem narra e quem é narrada."
+    ],
+    "expectedEvidence": "Uma análise e uma reescrita que diferenciem ação externa e interioridade, indiquem a mudança de percepção e reconheçam a mediação narrativa sem atribuir o exercício à autora.",
+    "reflection": "O que muda quando uma personagem é apresentada por uma voz que também comenta sua própria dificuldade de narrá-la?",
+    "scenarios": [
+      {
+        "id": "sensacao",
+        "label": "Objeto cotidiano",
+        "situation": "O fragmento original começa pela temperatura de uma xícara.",
+        "observation": "Uma sensação simples funciona como ponto de partida da atenção.",
+        "explanation": "O objeto ganha função narrativa quando se relaciona ao movimento interior da personagem."
+      },
+      {
+        "id": "associacao",
+        "label": "Pensamento em percurso",
+        "situation": "O texto original encadeia ônibus, recado e repetição da manhã.",
+        "observation": "As ideias se ligam pelo fluxo de atenção da personagem.",
+        "explanation": "A sequência permite investigar associação de pensamentos, sem classificar automaticamente qualquer enumeração como fluxo de consciência."
+      },
+      {
+        "id": "mediacao",
+        "label": "Quem conta Macabéa?",
+        "situation": "Uma ficha de A Hora da Estrela apaga Rodrigo S. M. e afirma haver uma voz sem mediação.",
+        "observation": "A ficha perde uma tensão central entre narrador e personagem.",
+        "explanation": "O ato de narrar faz parte da construção do romance e deve integrar sua interpretação."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Que elemento sustenta a mudança de percepção no fragmento original?",
+        "options": [
+          {
+            "text": "O estranhamento da própria pressa após a sequência de sensações e pensamentos.",
+            "correct": true,
+            "explanation": "O fim desloca a personagem de uma rotina automática para uma atenção crítica à experiência."
+          },
+          {
+            "text": "A confirmação de que a xícara foi destruída numa ação externa.",
+            "correct": false,
+            "explanation": "O texto não narra destruição; seu movimento relevante é interior."
+          },
+          {
+            "text": "Uma citação comprovada de um conto de Clarice.",
+            "correct": false,
+            "explanation": "O fragmento foi criado para o laboratório e não pertence à autora."
+          }
+        ]
+      },
+      {
+        "question": "Por que considerar Rodrigo S. M. ao ler A Hora da Estrela?",
+        "options": [
+          {
+            "text": "Porque ele elimina qualquer diferença entre autora e personagem.",
+            "correct": false,
+            "explanation": "A obra exige justamente distinguir essas instâncias e suas relações."
+          },
+          {
+            "text": "Porque sua reflexão sobre narrar participa da representação de Macabéa.",
+            "correct": true,
+            "explanation": "A mediação narrativa compõe a tensão do romance, em vez de ser um detalhe dispensável."
+          },
+          {
+            "text": "Porque Macabéa é apresentada como autora de toda a obra.",
+            "correct": false,
+            "explanation": "Essa atribuição confunde funções narrativas distintas."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Instituto Moreira Salles — Perfil de Clarice Lispector",
+        "url": "https://correio.ims.com.br/perfil/clarice-lispector/"
+      },
+      {
+        "title": "IMS no Vestibular — A Hora da Estrela",
+        "url": "https://ims.com.br/por-dentro-acervo/ims-no-vestibular/"
+      }
+    ]
+  },
+  "em_lit_09": {
+    "context": "A turma cria a palavra esperamedo para uma personagem que deseja atravessar um rio e teme fazê-lo. O exercício investiga invenção linguística, oralidade elaborada e dilema existencial ao estudar Guimarães Rosa.",
+    "theory": "A linguagem de Guimarães Rosa articula pesquisa de fala, criação vocabular, ritmos, estruturas e referências variadas; não é mera transcrição de uma fala regional uniforme. Neologismos podem produzir sentidos pela combinação ou transformação de elementos conhecidos, mas precisam ser interpretados no contexto. Em Grande Sertão: Veredas, Riobaldo narra experiências e interroga escolhas, violência, amor e relações entre bem e mal, dirigindo-se a um interlocutor. O sertão é espaço histórico e também construção literária que participa de questões humanas amplas. Chamá-las universais não exige apagar o lugar e as relações concretas. Narrador e autor não se confundem, e dúvida narrativa não deve ser reduzida a uma resposta pronta.",
+    "workedExample": "Trecho original, sem atribuição a Rosa: Na margem nasceu nele uma esperamedo: vontade de chegar e receio do caminho. A palavra combina espera ou esperança com medo; a explicação seguinte delimita a interpretação neste exercício. A travessia é um deslocamento concreto e pode organizar uma pergunta sobre decisão, mas esse sentido precisa ser construído pelo texto.",
+    "investigation": [
+      "Proponha duas leituras iniciais de esperamedo e confira como a continuação orienta a escolha.",
+      "Separe o deslocamento físico e o dilema de decisão presentes no trecho original.",
+      "Crie um neologismo contextualizado e explique como a forma acrescenta sentido, sem imitar ou atribuir sua criação a Guimarães Rosa."
+    ],
+    "expectedEvidence": "Uma interpretação contextual do neologismo e uma criação comentada, que relacione linguagem, lugar e dilema sem reduzir o sertão a cenário vazio ou a fala regional a erro.",
+    "reflection": "Por que uma questão pode alcançar leitores de lugares diferentes e ainda depender profundamente de um espaço e de uma linguagem específicos?",
+    "scenarios": [
+      {
+        "id": "palavra",
+        "label": "Sentidos combinados",
+        "situation": "O exercício original cria esperamedo e depois explica vontade e receio.",
+        "observation": "A continuação orienta uma combinação de sentimentos na palavra inventada.",
+        "explanation": "Deduzir pelo contexto evita aceitar qualquer hipótese de formação como único sentido possível."
+      },
+      {
+        "id": "travessia",
+        "label": "Decisão e deslocamento",
+        "situation": "A personagem original precisa escolher se atravessa o rio.",
+        "observation": "Um gesto espacial concentra expectativa e temor.",
+        "explanation": "A leitura pode investigar uma travessia existencial quando o texto a articula ao dilema concreto."
+      },
+      {
+        "id": "linguagem",
+        "label": "Oralidade trabalhada",
+        "situation": "Uma ficha descreve a linguagem rosiana apenas como português errado do interior.",
+        "observation": "A ficha apaga elaboração artística e diversidade de recursos.",
+        "explanation": "Oralidade literária é construída; diferenças linguísticas não devem ser tratadas como inferioridade automática."
+      }
+    ],
+    "questions": [
+      {
+        "question": "O que permite interpretar esperamedo no exercício original?",
+        "options": [
+          {
+            "text": "A certeza de que a palavra aparece exatamente assim em Grande Sertão: Veredas.",
+            "correct": false,
+            "explanation": "A criação pertence ao exercício e não foi atribuída ao romance."
+          },
+          {
+            "text": "Uma regra de que todo neologismo tem sentido independente do contexto.",
+            "correct": false,
+            "explanation": "O contexto orienta quais relações de sentido funcionam naquela ocorrência."
+          },
+          {
+            "text": "A combinação sugerida pela forma e a explicação de vontade e receio na continuação.",
+            "correct": true,
+            "explanation": "Forma e contexto trabalham juntos para construir a leitura da palavra nova."
+          }
+        ]
+      },
+      {
+        "question": "Qual leitura evita apagar a especificidade do sertão rosiano?",
+        "options": [
+          {
+            "text": "Relacionar espaço e linguagem concretos a dilemas que podem alcançar outros leitores.",
+            "correct": true,
+            "explanation": "Amplitude humana e especificidade histórica podem se articular, sem eliminar uma à outra."
+          },
+          {
+            "text": "Afirmar que o lugar não importa porque a obra trata de escolhas.",
+            "correct": false,
+            "explanation": "Espaço, relações e linguagem participam da forma como as escolhas são narradas."
+          },
+          {
+            "text": "Reduzir toda a escrita a uma cópia sem elaboração de uma fala única.",
+            "correct": false,
+            "explanation": "A linguagem articula pesquisa, invenção e diferentes recursos de composição."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Academia Brasileira de Letras — Trecho de Grande Sertão: Veredas para consulta",
+        "url": "https://www2.academia.org.br/academicos/joao-guimaraes-rosa/textos-escolhidos"
+      },
+      {
+        "title": "Universidade Federal Fluminense — Geograficidade e pluralidade linguística em Grande Sertão: Veredas",
+        "url": "https://periodicos.uff.br/geograficidade/article/view/58756"
+      }
+    ]
+  },
+  "em_lit_10": {
+    "context": "Uma curadoria escolar reúne diário, poema de sarau e narrativa de bairro. A turma investiga autoria e circulação, evitando apresentar vozes periféricas apenas como documentos de sofrimento ou como um grupo sem diferenças.",
+    "theory": "Literaturas contemporâneas incluem projetos diversos, e literatura marginal ou periférica pode designar diferentes experiências históricas de produção e circulação. Saraus, editoras e coletivos ampliam espaços de autoria, mas não definem uma estética única. Carolina Maria de Jesus publicou Quarto de Despejo em 1960 e escreveu também poesia, romance e outros gêneros; sua produção não se resume ao diário nem pertence simplesmente à mesma geração dos coletivos atuais. Relacioná-la a debates sobre exclusão e direito à voz exige reconhecer seu trabalho literário, escolhas e imaginação. Narradores em primeira pessoa não representam automaticamente uma comunidade inteira; identidade social não dispensa análise de linguagem e forma.",
+    "workedExample": "Texto inteiramente original de uma voz fictícia, sem atribuição a Carolina: No ônibus eu ensaiava o poema; no sarau, o bairro devolveu minha voz com outras vozes. O paralelo entre ensaio individual e resposta coletiva constrói uma experiência de circulação. A leitura pode discutir pertencimento e autoria sem tratar o trecho como relato verdadeiro ou como fala de todos os moradores.",
+    "investigation": [
+      "Identifique a relação entre voz individual e coletiva no texto original, apoiando-se na repetição de voz.",
+      "Produza uma ficha de Carolina que inclua a data de Quarto de Despejo e a diversidade de gêneros, distinguindo sua trajetória de coletivos atuais.",
+      "Planeje uma curadoria de três produções fictícias por formas diferentes — diário, poema e narrativa — e justifique a atenção a escolhas estéticas, não somente à origem social."
+    ],
+    "expectedEvidence": "Uma ficha histórica precisa e uma proposta de curadoria que reconheça diversidade de gêneros, autoria e circulação, sem confundir uma voz com toda a periferia ou reduzir literatura a testemunho transparente.",
+    "reflection": "Que aspectos de criação ficam invisíveis quando a pergunta ao texto se limita a quanto sofrimento o autor viveu?",
+    "scenarios": [
+      {
+        "id": "generos",
+        "label": "Autoria ampla",
+        "situation": "Uma ficha de Carolina apresenta apenas o diário e omite poesia e ficção.",
+        "observation": "A ficha estreita uma produção literária mais diversa.",
+        "explanation": "Reconhecer diferentes gêneros permite estudar a autora para além de uma única imagem editorial."
+      },
+      {
+        "id": "sarau",
+        "label": "Circulação coletiva",
+        "situation": "O texto original articula ensaio no ônibus e resposta de outras vozes no sarau.",
+        "observation": "A circulação transforma uma prática individual em encontro coletivo.",
+        "explanation": "A leitura investiga relações de autoria e recepção sem afirmar que todo sarau ou bairro funciona igualmente."
+      },
+      {
+        "id": "singularidade",
+        "label": "Uma voz, não todas",
+        "situation": "Um comentário apresenta o narrador fictício como porta-voz obrigatório de todos os moradores.",
+        "observation": "A interpretação elimina diferenças de experiências e projetos.",
+        "explanation": "Uma voz situada pode dialogar com outras sem representar integralmente uma comunidade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual apresentação reconhece melhor a produção de Carolina Maria de Jesus?",
+        "options": [
+          {
+            "text": "Autora de diferentes gêneros, cuja trajetória não se resume a Quarto de Despejo.",
+            "correct": true,
+            "explanation": "O reconhecimento de poesia e ficção amplia a análise de seu trabalho literário."
+          },
+          {
+            "text": "Integrante obrigatória de todos os coletivos periféricos atuais.",
+            "correct": false,
+            "explanation": "A trajetória histórica da autora não se confunde com a composição de coletivos contemporâneos."
+          },
+          {
+            "text": "Uma pessoa sem escolhas estéticas que apenas registrou fatos.",
+            "correct": false,
+            "explanation": "A redução apaga autoria, linguagem e diversidade de sua criação."
+          }
+        ]
+      },
+      {
+        "question": "Que princípio deve orientar a curadoria de vozes periféricas?",
+        "options": [
+          {
+            "text": "Escolher apenas textos que confirmem um estereótipo de sofrimento.",
+            "correct": false,
+            "explanation": "Esse critério estreita a produção e ignora variedade de temas e formas."
+          },
+          {
+            "text": "Examinar linguagem, gênero e circulação, reconhecendo diferenças entre autores e comunidades.",
+            "correct": true,
+            "explanation": "A curadoria valoriza a diversidade e a elaboração artística sem apagar condições sociais."
+          },
+          {
+            "text": "Tratar qualquer primeira pessoa como opinião unânime do bairro.",
+            "correct": false,
+            "explanation": "Uma voz narrativa não comprova consenso nem representa automaticamente todos."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Instituto Moreira Salles — Obras de Carolina Maria de Jesus",
+        "url": "https://carolinamariadejesus.ims.com.br/obras/"
+      },
+      {
+        "title": "Instituto Moreira Salles — Carolina Maria de Jesus: outros livros",
+        "url": "https://carolinamariadejesus.ims.com.br/obra-mais-livros/"
+      }
+    ]
+  },
+  "em_ing_01": {
+    "context": "Um aviso original em inglês reúne mudanças de um centro cultural. A turma alterna leitura global e busca de detalhes conforme a pergunta, sem confundir horários de atividades diferentes.",
+    "theory": "Skimming prioriza o sentido geral, com atenção a título, organização e ideias centrais. Scanning busca uma informação específica, como horário ou condição. As estratégias se complementam e não garantem compreensão instantânea: um detalhe localizado pode exigir releitura do entorno. Palavras-chave e números são pistas, mas precisam ser associados à atividade correta. Primeiro identifique o objetivo da pergunta; depois confira a evidência. Distinguir informação explícita e inferência impede atribuir ao texto uma regra que ele não apresenta.",
+    "workedExample": "Aviso original: Community Arts Centre — New hours. The reading room opens at 8 a.m. Workshops begin at 10 a.m. Registration is required only for workshops. A leitura global identifica funcionamento e inscrição. Para responder quando abre a sala de leitura, associe reading room a 8 a.m.; 10 a.m. pertence às oficinas.",
+    "investigation": ["Resuma em português o propósito geral do aviso sem traduzir palavra por palavra.", "Localize abertura da sala, início das oficinas e atividade que exige inscrição.", "Justifique cada resposta com seu trecho e explique por que encontrar um número não basta para interpretá-lo."],
+    "expectedEvidence": "Uma síntese global e três respostas com trechos de apoio, distinguindo sala, oficinas e alcance da inscrição, sem ampliar condições que o aviso delimita.",
+    "reflection": "Como uma estratégia rápida pode localizar um detalhe e ainda exigir uma releitura cuidadosa para evitar confusão?",
+    "scenarios": [
+      {"id":"global","label":"Função do aviso","situation":"A pergunta pede o propósito do aviso original do centro cultural.","observation":"Título e conteúdo apresentam horários e inscrição.","explanation":"A leitura global recupera a função do conjunto, em vez de selecionar apenas um horário."},
+      {"id":"detail","label":"Horário da sala","situation":"A pergunta pede quando abre a reading room, não as workshops.","observation":"A sala está associada a 8 a.m.","explanation":"Scanning precisa ligar a palavra-chave à informação correspondente no contexto."},
+      {"id":"only","label":"Limite da regra","situation":"Registration is required only for workshops, informa o aviso original.","observation":"Only restringe a exigência às oficinas.","explanation":"Ignorar a restrição levaria a atribuir a todas as atividades uma condição não informada."}
+    ],
+    "questions": [
+      {"question":"No aviso original, qual atividade exige inscrição?","options":[{"text":"Qualquer entrada, sem exceção.","correct":false,"explanation":"O texto não estabelece uma regra geral; only limita seu alcance."},{"text":"As oficinas, conforme only for workshops.","correct":true,"explanation":"A expressão associa a exigência especificamente às oficinas."},{"text":"A sala de leitura, exclusivamente às 8h.","correct":false,"explanation":"O horário da sala e a inscrição das oficinas são informações diferentes."}]},
+      {"question":"Como encontrar corretamente a abertura da sala de leitura?","options":[{"text":"Escolher o último horário mencionado.","correct":false,"explanation":"A posição do número não determina a atividade à qual ele pertence."},{"text":"Usar apenas o título e dispensar o corpo do aviso.","correct":false,"explanation":"O título não informa sozinho o horário específico pedido."},{"text":"Localizar reading room e conferir o horário ligado a essa expressão.","correct":true,"explanation":"A busca direcionada deve ser confirmada pela relação contextual."}]}
+    ]
+  },
+  "em_ing_02": {
+    "context": "Um artigo original sobre uma horta escolar acrescenta necessidades e considera obstáculos. A turma investiga furthermore, however e nevertheless como orientadores do raciocínio.",
+    "theory": "Discourse markers tornam visíveis relações entre ideias. Furthermore acrescenta uma informação que reforça uma linha argumentativa. However pode indicar contraste ou restrição. Nevertheless destaca que uma afirmação se mantém apesar de uma dificuldade anterior. Therefore aponta uma inferência. Os marcadores não são sempre intercambiáveis nem produzem por si uma relação causal. É preciso compreender as proposições, a expectativa e o movimento do argumento antes de decidir a função de cada expressão.",
+    "workedExample": "Texto original: The garden needs regular care. Furthermore, it needs a holiday plan. Water is limited; nevertheless, a small project is possible. Furthermore soma outra necessidade; nevertheless mantém a possibilidade de começar apesar do obstáculo. A falta de água não é apresentada como causa automática da criação da horta.",
+    "investigation": ["Separe necessidades, obstáculo e resposta no artigo original.", "Explique a expectativa contrariada por nevertheless e a adição introduzida por furthermore.", "Escreva uma continuação com therefore e demonstre como sua conclusão decorre do planejamento discutido."],
+    "expectedEvidence": "Uma análise das relações discursivas e uma conclusão sustentada, distinguindo adição, concessão e inferência sem usar conectivos como simples decoração.",
+    "reflection": "Por que traduzir todos os conectivos como então pode apagar diferenças importantes na posição do autor?",
+    "scenarios": [
+      {"id":"addition","label":"Somar necessidade","situation":"The garden needs care. Furthermore, it needs a holiday plan.","observation":"Planejar as férias se soma ao cuidado regular.","explanation":"Furthermore reforça a linha de planejamento por adição, sem opor as necessidades."},
+      {"id":"concession","label":"Apesar do limite","situation":"Water is limited; nevertheless, a small project is possible.","observation":"O projeto permanece possível diante de um obstáculo.","explanation":"A concessão depende da expectativa de que a limitação pudesse impedir o início."},
+      {"id":"conclusion","label":"Inferência prática","situation":"The garden needs care during holidays; therefore, a rota is necessary.","observation":"A escala é apresentada como consequência da análise.","explanation":"Cuidado contínuo e organização se relacionam de maneira que o leitor pode acompanhar."}
+    ],
+    "questions": [
+      {"question":"Que função furthermore exerce no texto da horta?","options":[{"text":"Acrescenta outra necessidade de planejamento.","correct":true,"explanation":"O plano das férias complementa o cuidado regular mencionado antes."},{"text":"Nega que a horta precise de cuidado.","correct":false,"explanation":"A segunda necessidade amplia a primeira, sem cancelá-la."},{"text":"Comprova causalidade científica por si só.","correct":false,"explanation":"Um marcador organiza o discurso, mas não substitui evidências científicas."}]},
+      {"question":"O que nevertheless sinaliza diante da limitação de água?","options":[{"text":"A dificuldade deixou de existir.","correct":false,"explanation":"A limitação continua presente e constitui o obstáculo considerado."},{"text":"A possibilidade se mantém apesar da dificuldade.","correct":true,"explanation":"O valor concessivo liga o obstáculo a uma resposta ainda considerada possível."},{"text":"Não há relação entre as frases.","correct":false,"explanation":"A expectativa contrariada fornece uma relação discursiva identificável."}]}
+    ]
+  },
+  "em_ing_03": {
+    "context": "Uma charge original é apresentada por descrição acessível de dois quadros. A turma cruza falas e elementos visuais descritos para interpretar uma crítica à sobrecarga de notificações.",
+    "theory": "Leitura multimodal combina linguagem verbal e visual. Uma fala aparentemente elogiosa pode produzir crítica quando a imagem contraria sua expectativa. Enquadramento, expressão e repetição de objetos orientam sentidos. A ironia precisa dessa relação contextual; nem todo humor é trocadilho ou diz literalmente o contrário. A descrição deste laboratório é de um roteiro original, não de uma charge histórica existente. Apoie inferências nas marcas disponíveis e evite inventar detalhes ou transformar uma cena humorística em prova universal.",
+    "workedExample": "Roteiro original: quadro 1 — um estudante instala um app e diz This will save me time. Quadro 2 — balões Update now!, New badge! e One more task! cercam sua mesa enquanto ele olha o relógio. A promessa de economia contrasta com interrupções acumuladas. A crítica não demonstra que todo aplicativo seja inútil.",
+    "investigation": ["Liste a promessa verbal inicial e os elementos do segundo quadro que a tensionam.", "Explique a crítica possível apoiando-se na combinação entre fala e descrição visual.", "Crie uma legenda alternativa em inglês e compare como ela modifica o efeito de humor."],
+    "expectedEvidence": "Uma interpretação que cite fala e elementos visuais do roteiro, explique o contraste e limite sua conclusão à sobrecarga representada, sem generalização sobre toda tecnologia.",
+    "reflection": "Se você lesse apenas This will save me time, qual parte do humor deixaria de perceber e por quê?",
+    "scenarios": [
+      {"id":"promise","label":"Promessa inicial","situation":"O primeiro quadro original contém a fala This will save me time.","observation":"O estudante espera economizar tempo.","explanation":"A fala isolada não oferece o contraste necessário para reconhecer a crítica construída depois."},
+      {"id":"interruptions","label":"Interrupções visíveis","situation":"O segundo quadro original acumula avisos e mostra o olhar para o relógio.","observation":"Administrar o aplicativo parece ocupar o tempo prometido.","explanation":"Fala inicial e acúmulo visual trabalham juntos na produção da ironia."},
+      {"id":"scope","label":"Limitar a conclusão","situation":"Uma leitura afirma que a charge prova a inutilidade de todo recurso digital.","observation":"A conclusão ultrapassa a cena de sobrecarga descrita.","explanation":"Criticar um uso ou promessa não equivale a apresentar evidência universal contra a tecnologia."}
+    ],
+    "questions": [
+      {"question":"O que constrói o humor no roteiro dos aplicativos?","options":[{"text":"A comprovação de que o relógio está quebrado.","correct":false,"explanation":"Esse detalhe não foi apresentado e não pode ser inventado para explicar a cena."},{"text":"Um trocadilho obrigatório com dois sentidos de time.","correct":false,"explanation":"O efeito depende do contraste entre promessa e interrupções, sem exigir trocadilho."},{"text":"A promessa de economizar tempo diante de notificações que passam a ocupá-lo.","correct":true,"explanation":"A relação entre os quadros sustenta a interpretação irônica."}]},
+      {"question":"Qual interpretação respeita o alcance da charge original?","options":[{"text":"Ela questiona uma promessa de produtividade diante de interrupções.","correct":true,"explanation":"A interpretação se apoia no contraste específico representado no roteiro."},{"text":"Ela apresenta estatística de todos os aplicativos existentes.","correct":false,"explanation":"O roteiro humorístico não contém levantamento estatístico."},{"text":"Ela mostra que o estudante desligou o celular antes de instalar algo.","correct":false,"explanation":"O primeiro quadro informa instalação, sem apresentar o desligamento descrito na opção."}]}
+    ]
+  },
+  "em_ing_04": {
+    "context": "Um abstract inteiramente fictício relata uma pesquisa sobre leitura e visitas à biblioteca. A turma identifica método, resultado e limites, distinguindo associação observada e explicação causal.",
+    "theory": "Abstracts podem apresentar objetivo, método, resultados e conclusão, com organização variável entre áreas. Surveyed, compared e found ajudam a identificar ações; suggests e limited sinalizam cautela. A amostra e o desenho de pesquisa influenciam o alcance da interpretação. Um levantamento observacional não se torna experimento só por apresentar números. Associação não demonstra sozinha causalidade: outros fatores podem participar da diferença. Separe o que foi feito, o que foi observado e a conclusão permitida, preservando ressalvas do resumo.",
+    "workedExample": "Abstract fictício: We surveyed 40 students about reading habits and library visits. Frequent visitors reported more reading time. Visits were not assigned randomly. These findings suggest an association, not proof that visits caused the difference. Surveyed indica levantamento; reported informa que o tempo foi declarado; a ausência de distribuição aleatória limita a inferência causal.",
+    "investigation": ["Marque método, tamanho de amostra, resultado e limitação no resumo fictício.", "Explique por que a associação entre visitas e leitura não resolve sozinha a direção causal.", "Redija uma conclusão cautelosa em português e uma pergunta que a investigação apresentada não respondeu."],
+    "expectedEvidence": "Um resumo comentado que preserve amostra, natureza observacional e limitação causal, distinguindo resultado relatado de recomendações universais não demonstradas.",
+    "reflection": "Como apagar a ressalva not proof that visits caused the difference mudaria a interpretação do leitor?",
+    "scenarios": [
+      {"id":"method","label":"Método descrito","situation":"O abstract fictício informa We surveyed 40 students.","observation":"O cenário apresenta levantamento com quarenta participantes.","explanation":"A frase descreve método e amostra, sem pressupor um experimento aleatório."},
+      {"id":"finding","label":"Resultado relatado","situation":"Frequent visitors reported more reading time, afirma o resumo original.","observation":"Visitas e leitura declarada aparecem associadas.","explanation":"A associação não determina se as visitas causaram a diferença ou se outros fatores interferiram."},
+      {"id":"limit","label":"Limitação causal","situation":"Visits were not assigned randomly, ressalta o abstract fictício.","observation":"Os grupos podem diferir por outras condições.","explanation":"A ressalva impede tratar o resultado como prova isolada de um efeito causado pelas visitas."}
+    ],
+    "questions": [
+      {"question":"Que conclusão preserva o limite do abstract fictício?","options":[{"text":"Foi relatada uma associação, sem demonstrar isoladamente causalidade.","correct":true,"explanation":"A formulação conserva resultado e ressalva expressamente apresentados."},{"text":"A pesquisa prova o mesmo efeito em toda a população mundial.","correct":false,"explanation":"A amostra e o método não sustentam generalização universal."},{"text":"Os pesquisadores distribuíram visitas aleatoriamente.","correct":false,"explanation":"O resumo afirma que não houve essa distribuição."}]},
+      {"question":"O que surveyed informa na primeira frase do resumo?","options":[{"text":"Uma obrigação nacional de leitura.","correct":false,"explanation":"O trecho descreve ação de pesquisa, não uma regra para o país."},{"text":"A realização de um levantamento sobre os participantes.","correct":true,"explanation":"O verbo pertence à descrição metodológica do estudo fictício."},{"text":"A certeza de que uma intervenção foi testada.","correct":false,"explanation":"Levantamento não implica intervenção, e o texto não apresenta esse teste."}]}
+    ]
+  },
+  "em_ing_05": {
+    "context": "Um aviso fictício de teatro usa intend, pretend e novel, além de uma placa PUSH. A turma revê traduções baseadas em semelhança gráfica e sustenta os sentidos pelas ações descritas.",
+    "theory": "Intend indica intenção; pretend costuma significar fingir. We intend to rehearse apresenta um plano; We pretend to rehearse sugere fazer de conta. Novel pode nomear romance literário ou ser adjetivo relacionado à novidade; soap opera designa novela televisiva em usos comuns. Push orienta empurrar e pull, puxar. Palavras parecidas entre línguas oferecem hipóteses, mas ações, contrastes e gênero confirmam ou rejeitam a leitura. Conhecer uma tradução isolada não basta para interpretar finalidade, brincadeira ou instrução.",
+    "workedExample": "Aviso original: We intend to perform a scene from a novel. On stage, actors pretend to be strangers. Please PUSH the studio door. O grupo planeja a apresentação, os atores representam desconhecidos e a porta deve ser empurrada. Intenção de realizar e fingimento dentro da atuação coexistem, sem equivaler ao mesmo sentido.",
+    "investigation": ["Traduza intend e pretend, relacionando cada verbo aos agentes e às ações do aviso.", "Explique que pistas orientam novel como obra literária nessa ocorrência.", "Crie novos contextos para intend e pretend e associe PUSH e PULL a ações num desenho de porta."],
+    "expectedEvidence": "Uma tradução comentada e exemplos novos que distingam intenção, representação, gênero literário e movimento, com justificativas contextuais em vez de simples semelhança.",
+    "reflection": "Por que pretend parece fácil para um leitor brasileiro e pode justamente por isso induzir uma tradução inadequada?",
+    "scenarios": [
+      {"id":"plan","label":"Intenção do grupo","situation":"We intend to perform a scene next Friday.","observation":"O grupo apresenta um plano de realização futura.","explanation":"Intend não sugere por si fingimento; a ação planejada é a apresentação."},
+      {"id":"acting","label":"Representação teatral","situation":"The actors pretend to be strangers on stage.","observation":"Os atores fazem de conta que não se conhecem.","explanation":"O contexto teatral orienta pretend para fingir, sem afirmar um plano de se tornarem desconhecidos."},
+      {"id":"genre","label":"Romance e novela","situation":"The scene comes from a novel, not a soap opera.","observation":"O contraste distingue uma obra literária de um gênero televisivo.","explanation":"A semelhança de novel com novela não elimina a diferença explicitada pelo enunciado."}
+    ],
+    "questions": [
+      {"question":"Qual tradução preserva intend e pretend no aviso de teatro?","options":[{"text":"Ambos significam obrigatoriamente puxar.","correct":false,"explanation":"Puxar corresponde a pull; essa leitura não explica plano ou atuação."},{"text":"Intend significa fingir e pretend significa planejar.","correct":false,"explanation":"A opção inverte os sentidos presentes no contexto proposto."},{"text":"Intend indica o plano; pretend, o fingimento no papel teatral.","correct":true,"explanation":"As ações e seus contextos sustentam a diferença de sentido."}]},
+      {"question":"O contraste novel, not a soap opera informa que a cena vem...","options":[{"text":"de um romance literário, não de novela televisiva.","correct":true,"explanation":"O contraste de gêneros orienta o sentido de novel nesse caso."},{"text":"de um manual de portas, por causa da placa PUSH.","correct":false,"explanation":"A placa constitui outra informação e não define a origem da cena."},{"text":"de um programa televisivo chamado necessariamente Novel.","correct":false,"explanation":"O texto não fornece esse título e distingue a fonte de uma soap opera."}]}
+    ]
+  },
+  "em_ing_06": {
+    "context": "Duas chamadas jornalísticas originais descrevem uma biblioteca inaugurada por voluntários. A turma compara voz ativa e passiva, observando foco, tempo e presença ou ausência de responsável.",
+    "theory": "A passiva em inglês combina be e past participle, tornando sujeito o elemento afetado: The library was opened by volunteers. O auxiliar preserva tempo e concordância; particípios podem ser irregulares, como written e built. O agente com by pode aparecer ou ser omitido. A ausência não prova automaticamente manipulação: pode haver desconhecimento, informação presumida ou escolha de foco. Converter ativa em passiva deve preservar participantes e tempo, sem trocar quem age e quem recebe a ação. As chamadas deste exercício são fictícias, sem atribuição a veículos reais.",
+    "workedExample": "Chamadas originais: Local volunteers opened a library yesterday. A library was opened yesterday by local volunteers. A primeira começa pelo grupo; a segunda, pelo espaço. Will be opened mudaria o passado para futuro. Retirar by local volunteers conserva o evento, mas deixa de identificar o agente naquela frase.",
+    "investigation": ["Marque agente, elemento afetado e tempo nas chamadas originais.", "Transforme The team wrote the report em passiva, conferindo was written e o agente.", "Compare a passiva com e sem agente e formule uma pergunta sobre a informação ausente sem presumir intenção editorial."],
+    "expectedEvidence": "Transposições com participantes, tempo e particípio preservados, acompanhadas de análise do foco e da omissão de agente que reconheça os limites da evidência.",
+    "reflection": "Quando uma notícia informa The records were changed, que pergunta sobre responsabilidade continua aberta?",
+    "scenarios": [
+      {"id":"active","label":"Foco no grupo","situation":"Local volunteers opened a library yesterday, diz a chamada original.","observation":"Voluntários aparecem como sujeito e agente.","explanation":"A organização ativa destaca quem realizou a ação, sem mudar o evento narrado."},
+      {"id":"passive","label":"Foco na biblioteca","situation":"A library was opened yesterday by local volunteers.","observation":"A biblioteca passa a sujeito, com agente ainda explícito.","explanation":"Was opened mantém o passado, enquanto a ordem reorganiza o foco inicial."},
+      {"id":"missing-agent","label":"Responsável ausente","situation":"Uma chamada original isolada informa The records were changed.","observation":"A frase não identifica quem alterou os registros.","explanation":"A ausência pode motivar investigação, mas não demonstra sozinha por que o agente foi omitido."}
+    ],
+    "questions": [
+      {"question":"Qual passiva preserva The team wrote the report?","options":[{"text":"The report was written by the team.","correct":true,"explanation":"A frase mantém o passado, usa o particípio de write e conserva o agente."},{"text":"The team was written by the report.","correct":false,"explanation":"A opção inverte quem escreve e o que é escrito, alterando o acontecimento."},{"text":"The report will be written by the team.","correct":false,"explanation":"Will be written situa a ação no futuro, diferente de wrote."}]},
+      {"question":"O que se pode afirmar sobre The records were changed sem mais contexto?","options":[{"text":"O agente está identificado com total precisão.","correct":false,"explanation":"A frase apresentada não informa quem realizou a alteração."},{"text":"A ação está na passiva e o agente não foi explicitado.","correct":true,"explanation":"Essa análise descreve a estrutura sem inventar uma intenção para a omissão."},{"text":"Toda passiva constitui necessariamente uma fraude.","correct":false,"explanation":"A voz pode ter funções distintas; intenção exige evidências contextuais."}]}
+    ]
+  },
+  "em_ing_07": {
+    "context": "Numa sala fictícia, uma mochila, um bilhete recente e uma observação fornecem pistas diferentes. A turma formula deduções com must, might e can't conforme a força e a atualidade da evidência.",
+    "theory": "Em deduções, must pode expressar uma inferência forte; might apresenta possibilidade; can't pode indicar conclusão de impossibilidade. Esses sentidos diferem de must como obrigação e can't como incapacidade. Não há porcentagens fixas universais para os modais. Uma mochila na sala não prova sozinha presença atual de alguém. Pistas convergentes podem sustentar uma conclusão mais forte, ainda sujeita a mudança temporal. Para situação presente, modal mais verbo básico é comum; sobre o passado, pode ocorrer modal + have + particípio, como might have left.",
+    "workedExample": "Cenário fictício: um bilhete recente diz I am in Room 2 now e uma colega acabou de ver Ana entrar. Ana must be in Room 2 apresenta forte inferência naquele momento. Se existe apenas uma mochila, Ana might be nearby é mais cauteloso: ela pode ter deixado o objeto antes e saído. O modal não substitui a checagem.",
+    "investigation": ["Separe pistas diretas, indiretas e informações que podem estar desatualizadas.", "Crie uma dedução cautelosa e outra forte, justificando a evidência necessária para cada uma.", "Compare You must wear a badge com She must be nearby e explique obrigação versus dedução."],
+    "expectedEvidence": "Deduções justificadas pela força das pistas e pelo tempo, com distinção de sentidos dos modais e reconhecimento de hipóteses alternativas sem percentuais inventados.",
+    "reflection": "Que nova informação faria você substituir must por might ou abandonar sua dedução sobre a presença de Ana?",
+    "scenarios": [
+      {"id":"indirect","label":"Apenas a mochila","situation":"A mochila de Ana está na sala, mas ninguém a viu hoje.","observation":"O objeto é uma pista indireta sobre sua localização.","explanation":"Might permite uma hipótese possível sem excluir que ela tenha saído ou deixado o objeto antes."},
+      {"id":"convergent","label":"Pistas convergentes","situation":"Bilhete recente e observação independente indicam Ana na sala 2.","observation":"A convergência sustenta uma inferência mais forte naquele momento.","explanation":"Must pode expressar essa confiança sem tornar a conclusão eterna ou matematicamente garantida."},
+      {"id":"requirement","label":"Must como obrigação","situation":"Um regulamento fictício informa You must wear a badge.","observation":"O texto estabelece uma exigência de identificação.","explanation":"Aqui must expressa obrigação, e não uma conclusão sobre onde alguém está."}
+    ],
+    "questions": [
+      {"question":"Qual dedução é mais cautelosa diante apenas da mochila deixada?","options":[{"text":"Ana must be here; no other explanation is possible.","correct":false,"explanation":"A mochila pode permanecer sem Ana; a evidência não exclui alternativas."},{"text":"Ana can't exist because we did not see her.","correct":false,"explanation":"Não observar alguém não sustenta essa conclusão de impossibilidade."},{"text":"Ana might be nearby; other explanations for the bag are possible.","correct":true,"explanation":"A formulação mantém a hipótese proporcional à pista indireta."}]},
+      {"question":"Que diferença há entre You must wear a badge e She must be nearby?","options":[{"text":"A primeira expressa obrigação; a segunda pode expressar inferência.","correct":true,"explanation":"Contexto e construção orientam sentidos diferentes para o mesmo modal."},{"text":"As duas informam uma probabilidade numérica universal.","correct":false,"explanation":"Must não codifica uma porcentagem fixa, e a primeira frase é uma exigência."},{"text":"A segunda é necessariamente uma proibição.","correct":false,"explanation":"A leitura proposta deduz localização e não ordena uma proibição."}]}
+    ]
+  },
+  "em_ing_08": {
+    "context": "A comissão de uma feira fictícia compara regras de funcionamento, planos para amanhã e alternativas a uma falha de ontem. A turma escolhe conditionals pelo tempo e pelo sentido da hipótese.",
+    "theory": "Zero conditional costuma expressar regularidade: If the sensor gets wet, it stops. First conditional pode apresentar possibilidade futura: If it rains tomorrow, we will move indoors. Second conditional constrói hipótese mais remota no presente ou futuro: If we had a larger room, we would invite more people; had não indica necessariamente um fato passado. Third conditional imagina alternativa a um passado não realizado no contexto: If we had checked the cable, we would have found the fault. Os esquemas ajudam, sem esgotar usos reais nem permitir classificar apenas pela palavra if.",
+    "workedExample": "Plano fictício: If it rains tomorrow, we will move the exhibition indoors. Depois de uma falha: If we had moved it indoors, the posters would not have got wet. A primeira planeja uma possibilidade futura; a segunda imagina uma alternativa ao que ocorreu. A diferença depende da relação temporal e da hipótese, não apenas de traduzir if por se.",
+    "investigation": ["Classifique regra do sensor, plano de amanhã, sala imaginada e alternativa passada pelo sentido.", "Escreva um first conditional para a feira, usando presente na condição e will na consequência deste esquema.", "Formule um third conditional sobre uma falha fictícia de ontem e explique o que não ocorreu na condição imaginada."],
+    "expectedEvidence": "Classificações justificadas e duas frases autorais que diferenciem possibilidade futura e alternativa passada, sem confundir forma de passado com tempo cronológico em toda construção.",
+    "reflection": "Por que If we had a larger room pode tratar da sala que não temos agora, apesar da forma had?",
+    "scenarios": [
+      {"id":"future","label":"Plano possível","situation":"If it rains tomorrow, we will move indoors.","observation":"A condição futura é considerada possível.","explanation":"O esquema relaciona presente na oração com if e will na consequência planejada."},
+      {"id":"remote","label":"Sala imaginada","situation":"If we had a larger room, we would invite more people.","observation":"O grupo imagina uma condição que não possui no contexto.","explanation":"Had marca distância hipotética aqui, sem afirmar que a sala existiu ontem."},
+      {"id":"past","label":"Passado alternativo","situation":"If we had checked the cable, we would have found the fault.","observation":"A verificação imaginada não ocorreu no cenário.","explanation":"Past perfect e would have com particípio constroem a alternativa contrafactual passada."}
+    ],
+    "questions": [
+      {"question":"Qual frase apresenta um plano possível para chuva amanhã?","options":[{"text":"If it rains tomorrow, we will move indoors.","correct":true,"explanation":"O first conditional relaciona uma possibilidade futura à ação planejada."},{"text":"If it had rained yesterday, we would have moved indoors.","correct":false,"explanation":"A frase trata de uma alternativa passada, não do plano de amanhã."},{"text":"If we had a larger room, we would invite more people.","correct":false,"explanation":"A hipótese aborda espaço disponível e não a decisão diante da chuva proposta."}]},
+      {"question":"Como interpretar had em If we had a larger room, we would invite more people?","options":[{"text":"Como prova de que a sala existiu ontem.","correct":false,"explanation":"O esquema usa a forma passada para distância hipotética, não como relato obrigatório de ontem."},{"text":"Como parte de uma hipótese remota sobre condições presentes ou futuras.","correct":true,"explanation":"A sala maior é imaginada no contexto e sustenta a consequência com would."},{"text":"Como garantia de reforma concluída amanhã.","correct":false,"explanation":"A construção não promete que a ampliação ocorrerá."}]}
+    ]
+  },
+  "em_ing_09": {
+    "context": "Um texto original cita biology, telemedicine e international cooperation. A turma usa elementos gregos e latinos como pistas e confere o sentido pelas relações da frase, reconhecendo o limite da dedução.",
+    "theory": "Elementos de formação ajudam a formular hipóteses: bio, de origem grega, relaciona-se à vida; tele, à distância. Inter, de origem latina, sugere relação entre; al pode formar adjetivos. Biology, telemedicine e international mostram usos dessas peças. Elas não são tradução automática: combinações têm história e sentidos próprios. Nem todo elemento inglês é grego ou latino; un em unhappy tem outra origem. Contexto, gênero e consulta lexical confirmam hipóteses. Reconhecer uma parte não autoriza inventar especificações técnicas ou efeitos que o texto não apresenta.",
+    "workedExample": "Texto original fictício: An international team used telemedicine to connect a rural clinic with distant specialists. Inter sugere relação entre países; tele orienta distância. Connect, clinic e distant specialists confirmam essa leitura. A palavra não informa qual equipamento foi usado nem a qualidade do atendimento, que exigiriam outras evidências.",
+    "investigation": ["Separe pistas de formação nas três palavras e anote hipóteses iniciais de significado.", "Destaque no texto as expressões que confirmam o sentido de distância em telemedicine.", "Liste duas informações que não podem ser deduzidas e explique por que todos os prefixos ingleses não têm a mesma origem."],
+    "expectedEvidence": "Uma análise de partes e contexto com hipóteses sustentadas, reconhecimento de origens variadas e limites de inferência, sem transformar morfologia em definição técnica automática.",
+    "reflection": "Como reconhecer bio pode ajudar numa leitura sem autorizar concluir todos os efeitos de um produto com esse elemento no nome?",
+    "scenarios": [
+      {"id":"life","label":"Bio como pista","situation":"Uma ficha original associa biology a study of living things.","observation":"O contexto confirma a relação de bio com vida.","explanation":"A formação orienta a compreensão do campo, enquanto a expressão confirma o sentido empregado."},
+      {"id":"distance","label":"Tele confirmado","situation":"O texto original liga telemedicine a uma clínica e distant specialists.","observation":"A relação à distância aparece também nas demais palavras.","explanation":"A leitura resulta de pistas morfológicas e textuais convergentes, não de um elemento isolado."},
+      {"id":"origins","label":"Origens diversas","situation":"Um rascunho atribui todos os prefixos ingleses, inclusive un, ao latim.","observation":"A generalização mistura histórias linguísticas diferentes.","explanation":"O inglês reúne elementos gregos, latinos e de outras origens; um padrão não explica todos os casos."}
+    ],
+    "questions": [
+      {"question":"Qual leitura de telemedicine é sustentada pelo texto original?","options":[{"text":"O equipamento exato é deduzido automaticamente de tele.","correct":false,"explanation":"O elemento orienta distância, sem identificar aparelhos específicos."},{"text":"O atendimento ocorreu necessariamente com todos na mesma sala.","correct":false,"explanation":"Distant specialists e connect sustentam a relação à distância."},{"text":"Uma prática conecta atendimento e distância, confirmada por clínica e especialistas distantes.","correct":true,"explanation":"O contexto confirma a hipótese morfológica sem fornecer todos os detalhes técnicos."}]},
+      {"question":"Qual cuidado é adequado ao deduzir vocabulário pela formação?","options":[{"text":"Usar as partes como pistas e testar a hipótese no contexto.","correct":true,"explanation":"A combinação e o sentido de uso podem limitar uma dedução feita apenas por segmentos."},{"text":"Traduzir qualquer palavra longa sem ler a frase.","correct":false,"explanation":"Partes conhecidas não garantem que a combinação seja completamente transparente."},{"text":"Afirmar que todos os elementos ingleses vieram do grego.","correct":false,"explanation":"A língua reúne elementos de histórias e origens diversas."}]}
+    ]
+  },
+  "em_ing_10": {
+    "context": "Cinco questões inéditas de leitura em inglês, criadas para este laboratório, exploram serviço, campanha, ciência e humor. A prática pede evidências e revisão das escolhas, sem reproduzir itens oficiais.",
+    "theory": "Leia o comando, identifique o gênero e procure a relação que decide a resposta: finalidade, contraste, condição, resultado ou crítica. Não é preciso traduzir tudo para formular uma hipótese, mas a escolha deve ser conferida no texto. Alternativas podem exagerar com todos, trocar agentes, ignorar not e only ou transformar associação em causa. Se desejar, use relógio externo: vinte minutos para responder e dez para justificar. Esse tempo é sugestão de estudo. A pontuação do conjunto não constitui nota oficial nem estimativa de desempenho no Enem.",
+    "workedExample": "Aviso original de preparação: Bring your own cup. Water refills are free; bottled drinks are not included. Recargas de água são gratuitas; bebidas engarrafadas não entram no benefício. A conclusão todas as bebidas são gratuitas ignora not included. Explique o alcance e marque as expressões limitadoras antes dos cinco itens.",
+    "investigation": ["Responda aos cinco itens antes de ler os comentários e anote uma expressão de apoio para cada escolha.", "Elimine um distractor de cada item por erro preciso de agente, alcance, condição ou relação lógica.", "Confira as explicações e registre por que manteve ou mudou cada resposta, reformulando um comando com suas palavras."],
+    "expectedEvidence": "Cinco respostas com evidências textuais e registro de revisão, que expliquem os erros dos distractores e diferenciem o resultado do exercício de qualquer avaliação oficial.",
+    "reflection": "Em qual item uma palavra pequena, como only ou but, mudou o alcance da informação e eliminou uma alternativa?",
+    "scenarios": [
+      {"id":"restriction","label":"Ler a restrição","situation":"O aviso original de preparação oferece recarga de água e exclui bebidas engarrafadas.","observation":"O benefício não se estende a qualquer bebida.","explanation":"Negativas e delimitadores precisam participar da interpretação que sustenta a escolha."},
+      {"id":"textual-proof","label":"Preferência e evidência","situation":"Uma estudante escolhe uma alternativa socialmente desejável, sem apoio no texto.","observation":"Sua preferência substitui a tarefa de interpretação.","explanation":"Uma ideia pode ser boa fora do texto e ainda não responder à pergunta formulada."},
+      {"id":"review","label":"Revisão explicada","situation":"O estudante marca a expressão ignorada e reescreve o alcance da informação.","observation":"A revisão identifica um mecanismo concreto do erro.","explanation":"Explicar a mudança torna a prática formativa, além da contagem de respostas certas."}
+    ],
+    "questions": [
+      {"question":"1. Aviso original: The mobile library visits Hill Street on Tuesdays. Book returns are accepted at every stop, but new memberships are issued only at the main library. Onde se faz um novo cadastro?","options":[{"text":"Em qualquer parada, junto à devolução.","correct":false,"explanation":"Every stop refere-se às devoluções, enquanto only limita os cadastros."},{"text":"Apenas na biblioteca principal.","correct":true,"explanation":"Only at the main library delimita o local de novos cadastros."},{"text":"Na Hill Street todos os dias.","correct":false,"explanation":"A rua é uma parada às terças, sem ser indicada como local de cadastro."},{"text":"Em qualquer ônibus da cidade.","correct":false,"explanation":"O aviso trata de biblioteca móvel e não de todos os ônibus."},{"text":"Em nenhum lugar, pois o cadastro foi proibido.","correct":false,"explanation":"O texto informa um local permitido para novos cadastros."}]},
+      {"question":"2. Campanha original: Repair, share, repeat. A torn bag does not have to become waste. Join our Saturday workshop and learn a basic stitch. Qual é sua finalidade central?","options":[{"text":"Exigir que todas as bolsas usadas sejam descartadas.","correct":false,"explanation":"A campanha apresenta reparo como alternativa ao descarte."},{"text":"Obrigar a compra de uma marca específica.","correct":false,"explanation":"O texto não menciona marca nem exige compra."},{"text":"Proibir encontros aos sábados.","correct":false,"explanation":"Saturday workshop é um convite para encontro nesse dia."},{"text":"Incentivar reparo e convidar para aprender uma técnica básica.","correct":true,"explanation":"Repair e learn a basic stitch articulam propósito e participação na oficina."},{"text":"Garantir que qualquer tecido pode ser reparado sem conhecimento.","correct":false,"explanation":"O convite para aprender não garante resultado universal sobre tecidos."}]},
+      {"question":"3. Resumo fictício: In a survey of 50 residents, people who walked to work reported less stress. The study measured habits at one point in time and did not test an intervention. Que conclusão respeita o estudo?","options":[{"text":"Há uma associação relatada, sem prova isolada de que caminhar causou menor estresse.","correct":true,"explanation":"O levantamento num momento não testou intervenção, limitando a inferência causal."},{"text":"Todo habitante do mundo terá estresse zero ao caminhar.","correct":false,"explanation":"A opção inventa universalidade e eliminação de estresse, ausentes no resumo."},{"text":"Caminhadas foram distribuídas aleatoriamente como tratamento.","correct":false,"explanation":"O texto descreve survey e afirma não ter testado intervenção."},{"text":"Nenhum participante caminhava ao trabalho.","correct":false,"explanation":"O resultado refere-se justamente a pessoas que declararam caminhar."},{"text":"Caminhar aumenta necessariamente o estresse.","correct":false,"explanation":"A direção relatada é menor estresse, sem causalidade necessária demonstrada."}]},
+      {"question":"4. Charge original descrita: cercada de celulares, uma pessoa diz I finally found an app to manage all my apps. A tela responde Install three more tools to begin. Que crítica o contraste sugere?","options":[{"text":"A pessoa nunca usou um aplicativo.","correct":false,"explanation":"Fala e acúmulo de aparelhos sugerem o oposto dessa ausência de uso."},{"text":"Três ferramentas eliminam garantidamente todo trabalho.","correct":false,"explanation":"A exigência de mais instalações tensiona, em vez de garantir, a simplificação."},{"text":"Gerir ferramentas pode ampliar a sobrecarga que se pretendia resolver.","correct":true,"explanation":"A promessa de organização encontra a necessidade de acrescentar mais ferramentas."},{"text":"Uma pesquisa prova que nenhum aplicativo é útil.","correct":false,"explanation":"A charge não é uma pesquisa e não autoriza conclusão universal."},{"text":"A tela ordena descartar toda tecnologia imediatamente.","correct":false,"explanation":"A instrução descrita é instalar ferramentas, não descartar aparelhos."}]},
+      {"question":"5. Mensagem original: We planned an outdoor poetry reading. However, rain is likely, so the event will take place in the community hall. The starting time remains 6 p.m. O que mudou no plano?","options":[{"text":"Poesia foi substituída por competição esportiva.","correct":false,"explanation":"A mensagem não troca o tipo de evento; adapta o local."},{"text":"O horário passou para meia-noite.","correct":false,"explanation":"Remains 6 p.m. mantém expressamente as 18h."},{"text":"O encontro foi cancelado sem alternativa.","correct":false,"explanation":"Will take place confirma a realização em outro espaço."},{"text":"A possibilidade de chuva foi descartada.","correct":false,"explanation":"Rain is likely explica justamente a mudança do plano."},{"text":"O local passou para o salão comunitário, mantendo o horário.","correct":true,"explanation":"A continuação informa o novo espaço e preserva o início às 18h."}]}
+    ]
+  }
+}

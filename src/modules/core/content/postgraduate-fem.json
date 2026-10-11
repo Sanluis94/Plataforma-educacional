@@ -1,0 +1,832 @@
+{
+  "pos_fem_01": {
+    "context": "Uma barra fictícia é formulada por trabalho virtual. O exercício relaciona equilíbrio, vínculos essenciais e forças naturais.",
+    "theory": "A forma fraca iguala trabalho interno ∫EAu′v′dx ao externo para todo deslocamento virtual admissível v. Condições essenciais restringem u e v; trações entram no funcional de carga. Integração por partes reduz exigências de derivação e introduz termos de fronteira.",
+    "workedExample": "Para barra de 1 m, E=200 GPa, A=100 mm² e força axial 1000 N, u=FL/(EA)=0,00005 m=0,05 mm. A reação no apoio tem módulo 1000 N; dados são fictícios.",
+    "investigation": [
+      "Defina funções virtuais nulas no apoio.",
+      "Monte rigidez EA/L e vetor de forças.",
+      "Confira deslocamento e reação pelo equilíbrio."
+    ],
+    "expectedEvidence": "Devem aparecer 20 MN/m de rigidez e 0,05 mm de deslocamento, com apoio impondo deslocamento nulo.",
+    "reflection": "Por que remover o apoio produz um modo de corpo rígido?",
+    "scenarios": [
+      {
+        "id": "pos_fem_01_s0",
+        "label": "Área maior",
+        "situation": "Dobre a seção mantendo E, L e força.",
+        "observation": "O deslocamento cai para 0,025 mm.",
+        "explanation": "A rigidez axial cresce proporcionalmente à área."
+      },
+      {
+        "id": "pos_fem_01_s1",
+        "label": "Corpo livre",
+        "situation": "Retire o vínculo de deslocamento da barra e mantenha a força externa de 1000 N na extremidade.",
+        "observation": "Sem reação de apoio, a força resultante não é nula e não existe equilíbrio estático.",
+        "explanation": "A rigidez possui um modo de translação. Com cargas autoequilibradas, os deslocamentos seriam indeterminados até uma translação rígida; com a força externa não compensada deste caso, o equilíbrio é impossível."
+      },
+      {
+        "id": "pos_fem_01_s2",
+        "label": "Carga distribuída",
+        "situation": "Inclua força volumétrica ao longo da barra.",
+        "observation": "O trabalho externo ganha termo integral.",
+        "explanation": "A carga não deve ser representada apenas pela força na extremidade."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual é a rigidez axial da barra fornecida?",
+        "options": [
+          {
+            "text": "200 GN/m",
+            "correct": false,
+            "explanation": "Esse valor confunde módulo de elasticidade com rigidez estrutural."
+          },
+          {
+            "text": "1000 N/m",
+            "correct": false,
+            "explanation": "A força aplicada não define sozinha a rigidez."
+          },
+          {
+            "text": "20 MN/m",
+            "correct": true,
+            "explanation": "EA/L=200×10⁹×10⁻⁴/1=20×10⁶ N/m."
+          }
+        ]
+      },
+      {
+        "question": "Onde entra uma tração prescrita na forma fraca?",
+        "options": [
+          {
+            "text": "No trabalho externo de fronteira",
+            "correct": true,
+            "explanation": "A integração por partes gera o termo natural de tração."
+          },
+          {
+            "text": "Como deslocamento essencial sempre",
+            "correct": false,
+            "explanation": "Tração e deslocamento são condições distintas de fronteira."
+          },
+          {
+            "text": "Na densidade do material",
+            "correct": false,
+            "explanation": "Densidade participa de peso ou inércia e não substitui a tração."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "FEniCS: variational elasticity tutorial",
+        "url": "https://pub.fenicsproject.org/tutorial/pdf/fenics-tutorial-vol1.pdf"
+      }
+    ]
+  },
+  "pos_fem_02": {
+    "context": "Um elemento fictício usa coordenada natural e quadratura de Gauss. A atividade verifica mapeamento, Jacobiano e exatidão polinomial.",
+    "theory": "Elementos isoparamétricos interpolam geometria e campo com funções de forma. O Jacobiano transforma derivadas e medidas de integração. Gauss com dois pontos integra exatamente polinômios até grau três em [−1,1], mas distorção e integrandos não polinomiais mudam a exigência. Jacobiano nulo ou negativo indica problema geométrico.",
+    "workedExample": "Para ∫−1¹ ξ²dξ, pontos ±1/√3 e pesos 1 dão 1/3+1/3=2/3. Um ponto central daria zero, incorreto. O cálculo é manual, sem montagem de uma malha real.",
+    "investigation": [
+      "Escreva funções lineares no intervalo natural.",
+      "Calcule o Jacobiano de um segmento de 2 m.",
+      "Integre ξ² com um e dois pontos."
+    ],
+    "expectedEvidence": "Espera-se integral 2/3 e reconhecimento de que a regra de um ponto falha para esse integrando quadrático.",
+    "reflection": "Como um elemento distorcido altera o integrando mapeado?",
+    "scenarios": [
+      {
+        "id": "pos_fem_02_s0",
+        "label": "Constante",
+        "situation": "Integre função igual a um em [−1,1].",
+        "observation": "Um ponto com peso dois é exato.",
+        "explanation": "A regra reduzida integra a constante porque a área é dois."
+      },
+      {
+        "id": "pos_fem_02_s1",
+        "label": "Cúbica",
+        "situation": "Integre ξ³ em intervalo simétrico.",
+        "observation": "O resultado é zero.",
+        "explanation": "Contribuições opostas se cancelam na regra simétrica e na integral exata."
+      },
+      {
+        "id": "pos_fem_02_s2",
+        "label": "Inversão",
+        "situation": "O mapeamento produz Jacobiano negativo.",
+        "observation": "A conectividade ou orientação exige revisão.",
+        "explanation": "Uma geometria invertida não representa um elemento físico válido na convenção adotada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual integral exata tem ξ² entre −1 e 1?",
+        "options": [
+          {
+            "text": "Zero",
+            "correct": false,
+            "explanation": "O integrando é par e positivo, portanto não há cancelamento."
+          },
+          {
+            "text": "Dois",
+            "correct": false,
+            "explanation": "Esse é o comprimento do intervalo para integrando constante um."
+          },
+          {
+            "text": "2/3",
+            "correct": true,
+            "explanation": "A primitiva ξ³/3 produz 1/3−(−1/3)."
+          }
+        ]
+      },
+      {
+        "question": "Dois pontos de Gauss integram exatamente até qual grau?",
+        "options": [
+          {
+            "text": "Grau três",
+            "correct": true,
+            "explanation": "A regra de n pontos é exata até 2n−1 para polinômios."
+          },
+          {
+            "text": "Grau um apenas",
+            "correct": false,
+            "explanation": "Esse limite subestima a exatidão da quadratura de dois pontos."
+          },
+          {
+            "text": "Qualquer função",
+            "correct": false,
+            "explanation": "Exatidão polinomial limitada não garante exatidão universal."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "DIANA: integration schemes",
+        "url": "https://manuals.dianafea.com/d100/ElmLib/node595.html"
+      }
+    ]
+  },
+  "pos_fem_03": {
+    "context": "Uma estrutura fictícia possui resposta geométrica não linear. Newton-Raphson será aplicado ao equilíbrio sem confundir iteração e incremento de carga.",
+    "theory": "Newton resolve R(u)=Fint(u)−Fext=0 por KtΔu=−R, onde Kt é a tangente consistente. Não linearidade geométrica nasce da mudança de configuração, mesmo com material elástico. Incrementos menores e busca linear podem ajudar, mas pontos limite e bifurcações exigem técnicas específicas.",
+    "workedExample": "No modelo escalar fictício Fint=u+u³ e Fext=2 em unidades coerentes, u0=0,5 dá R=−1,375 e Kt=1,75. Δu=0,785714, então u1=1,285714; ainda é preciso recalcular resíduo. A solução exata é u=1.",
+    "investigation": [
+      "Defina resíduo e convenção de sinal.",
+      "Calcule tangente e primeira correção.",
+      "Teste convergência com resíduo e incremento."
+    ],
+    "expectedEvidence": "O aluno deve obter u1≈1,286 e não declarar convergência antes de reavaliar o equilíbrio.",
+    "reflection": "Por que uma tangente ruim pode reduzir a convergência?",
+    "scenarios": [
+      {
+        "id": "pos_fem_03_s0",
+        "label": "Solução exata",
+        "situation": "Inicie em u=1 para a mesma carga.",
+        "observation": "R já é zero.",
+        "explanation": "A força interna 1+1³ coincide com a externa 2."
+      },
+      {
+        "id": "pos_fem_03_s1",
+        "label": "Tangente fixa",
+        "situation": "Reutilize Kt inicial em todas as iterações.",
+        "observation": "O método torna-se Newton modificado.",
+        "explanation": "Economiza montagem mas pode convergir mais lentamente que tangente atualizada."
+      },
+      {
+        "id": "pos_fem_03_s2",
+        "label": "Ponto limite",
+        "situation": "A tangente estrutural aproxima-se de singularidade.",
+        "observation": "Controle de carga pode falhar.",
+        "explanation": "Trajetórias com retorno podem exigir controle de deslocamento ou comprimento de arco."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual tangente acompanha Fint=u+u³?",
+        "options": [
+          {
+            "text": "u+u³",
+            "correct": false,
+            "explanation": "Essa é a força, não sua derivada."
+          },
+          {
+            "text": "3u",
+            "correct": false,
+            "explanation": "Esse valor omite termos e deriva incorretamente o cúbico."
+          },
+          {
+            "text": "1+3u²",
+            "correct": true,
+            "explanation": "A derivada da força interna em relação a u fornece a tangente."
+          }
+        ]
+      },
+      {
+        "question": "Uma iteração de Newton equivale a qual processo?",
+        "options": [
+          {
+            "text": "Correção de equilíbrio na carga atual",
+            "correct": true,
+            "explanation": "Iterações reduzem resíduo dentro do incremento de carregamento."
+          },
+          {
+            "text": "Novo passo de tempo obrigatório",
+            "correct": false,
+            "explanation": "Newton também resolve problemas estáticos sem tempo físico."
+          },
+          {
+            "text": "Prova imediata de estabilidade",
+            "correct": false,
+            "explanation": "Convergência de equilíbrio não garante estabilidade da configuração."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "A. F. Bower: Applied Mechanics of Solids",
+        "url": "https://solidmechanics.org/contents.php"
+      }
+    ]
+  },
+  "pos_fem_04": {
+    "context": "Um material fictício é carregado além do escoamento uniaxial. O caso separa deformação elástica, plástica e endurecimento.",
+    "theory": "Plasticidade com encruamento linear usa σ=E(ε−εp) e tensão de escoamento crescente com deformação plástica acumulada. No caso monotônico uniaxial, o módulo tangente pós-escoamento é EH/(E+H). Descarregamento inicial segue E e pode deixar deformação residual; história de carga importa.",
+    "workedExample": "Com E=200 GPa, σy=200 MPa e H=10 GPa, εy=0,001 e Et≈9,524 GPa. A deformação total 0,002 gera σ≈209,52 MPa no ramo plástico monotônico; εp≈0,000952.",
+    "investigation": [
+      "Calcule a deformação de início de escoamento.",
+      "Obtenha o módulo tangente elastoplástico.",
+      "Descarregue elasticamente e estime deformação residual."
+    ],
+    "expectedEvidence": "Espera-se distinguir Et de E e obter tensão de 209,52 MPa, sem tratar toda deformação como elástica.",
+    "reflection": "Como o encruamento isotrópico difere de uma translação da superfície?",
+    "scenarios": [
+      {
+        "id": "pos_fem_04_s0",
+        "label": "Elástico",
+        "situation": "Aplique ε=0,0005 antes do escoamento.",
+        "observation": "A tensão é 100 MPa.",
+        "explanation": "A relação σ=Eε vale antes da condição de escoamento."
+      },
+      {
+        "id": "pos_fem_04_s1",
+        "label": "Sem endurecimento",
+        "situation": "Faça o módulo de encruamento H=0 no modelo.",
+        "observation": "Et pós-escoamento torna-se zero.",
+        "explanation": "O material ideal perfeitamente plástico mantém tensão em carregamento monotônico."
+      },
+      {
+        "id": "pos_fem_04_s2",
+        "label": "Descarregar",
+        "situation": "Retire tensão após atingir o ramo plástico.",
+        "observation": "Permanece deformação residual positiva.",
+        "explanation": "A parcela elástica recupera-se, mas a plástica permanece na idealização."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quanto vale εy para 200 MPa e E=200 GPa?",
+        "options": [
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "Ignorar a conversão entre GPa e MPa cria erro mil vezes maior."
+          },
+          {
+            "text": "0,2",
+            "correct": false,
+            "explanation": "Esse valor não resulta da razão tensão/módulo especificada."
+          },
+          {
+            "text": "0,001",
+            "correct": true,
+            "explanation": "As unidades coerentes dão 200/200000=0,001."
+          }
+        ]
+      },
+      {
+        "question": "Qual inclinação caracteriza o descarregamento elástico inicial?",
+        "options": [
+          {
+            "text": "E",
+            "correct": true,
+            "explanation": "A rigidez de descarregamento do modelo continua sendo o módulo elástico."
+          },
+          {
+            "text": "Et sempre",
+            "correct": false,
+            "explanation": "Et descreve o carregamento plástico monotônico neste caso."
+          },
+          {
+            "text": "Zero",
+            "correct": false,
+            "explanation": "Zero corresponde ao ramo perfeitamente plástico carregado, não ao descarregamento."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "A. F. Bower: Applied Mechanics of Solids",
+        "url": "https://solidmechanics.org/contents.php"
+      }
+    ]
+  },
+  "pos_fem_05": {
+    "context": "Uma estrutura fictícia vibra livremente em regime linear. O problema modal conecta massa, rigidez e frequências naturais.",
+    "theory": "Sem amortecimento, os modos satisfazem Kφ=ω²Mφ. Frequência em hertz é f=ω/(2π). Modos rígidos têm frequência nula quando vínculos são insuficientes. A normalização da amplitude modal é arbitrária e não representa deslocamento físico sob uma força específica.",
+    "workedExample": "Uma massa fictícia de 2 kg e mola de 200 N/m tem ω=√(200/2)=10 rad/s e f≈1,592 Hz. Dobrar somente a massa reduz a frequência por √2. Não houve cálculo de uma estrutura com vários elementos.",
+    "investigation": [
+      "Monte massa e rigidez do oscilador.",
+      "Converta frequência angular para hertz.",
+      "Discuta modos rígidos e normalização."
+    ],
+    "expectedEvidence": "Devem aparecer 10 rad/s e 1,592 Hz, diferenciando forma modal de amplitude forçada.",
+    "reflection": "Por que uma forma modal não fornece sozinha a resposta em milímetros?",
+    "scenarios": [
+      {
+        "id": "pos_fem_05_s0",
+        "label": "Rigidez quatro vezes",
+        "situation": "Aumente k para 800 N/m com massa fixa.",
+        "observation": "A frequência angular dobra.",
+        "explanation": "A frequência depende da raiz quadrada da rigidez."
+      },
+      {
+        "id": "pos_fem_05_s1",
+        "label": "Massa quatro vezes",
+        "situation": "Eleve a massa para 8 kg com mola original.",
+        "observation": "A frequência angular cai a 5 rad/s.",
+        "explanation": "Mais inércia diminui a frequência pela raiz da razão de massas."
+      },
+      {
+        "id": "pos_fem_05_s2",
+        "label": "Corpo livre",
+        "situation": "Remova rigidez em uma direção de translação.",
+        "observation": "Surge frequência zero nessa direção.",
+        "explanation": "Um movimento rígido não armazena energia elástica."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual frequência em hertz corresponde a 10 rad/s?",
+        "options": [
+          {
+            "text": "10 Hz",
+            "correct": false,
+            "explanation": "Frequência angular e frequência em ciclos não têm o mesmo valor."
+          },
+          {
+            "text": "62,83 Hz",
+            "correct": false,
+            "explanation": "Multiplicar por 2π faz a conversão no sentido errado."
+          },
+          {
+            "text": "1,592 Hz",
+            "correct": true,
+            "explanation": "Dividir por 2π converte radianos por segundo em ciclos por segundo."
+          }
+        ]
+      },
+      {
+        "question": "Dobrar massa com k fixo muda ω por qual fator?",
+        "options": [
+          {
+            "text": "1/√2",
+            "correct": true,
+            "explanation": "A razão k/m fica pela metade e a raiz governa ω."
+          },
+          {
+            "text": "Dois",
+            "correct": false,
+            "explanation": "Aumentar inércia não acelera a vibração livre."
+          },
+          {
+            "text": "Nenhum",
+            "correct": false,
+            "explanation": "Massa participa diretamente do problema de autovalores."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "A. F. Bower: Applied Mechanics of Solids",
+        "url": "https://solidmechanics.org/contents.php"
+      }
+    ]
+  },
+  "pos_fem_06": {
+    "context": "Um oscilador fictício é integrado no tempo com Newmark. O estudo separa estabilidade numérica de precisão temporal.",
+    "theory": "Newmark usa u1=u0+Δtv0+Δt²[(1/2−β)a0+βa1] e v1=v0+Δt[(1−γ)a0+γa1]. Para sistema linear, β=1/4 e γ=1/2 definem aceleração média incondicionalmente estável. Essa propriedade não garante precisão com passos grandes nem transfere automaticamente a todo problema não linear.",
+    "workedExample": "Com u0=v0=0, Δt=0,1 s e a0=a1=2 m/s² constantes, u1=0,01 m e v1=0,2 m/s. A atualização é cinemática com acelerações fornecidas; em dinâmica real a1 deve satisfazer equilíbrio.",
+    "investigation": [
+      "Escreva as duas atualizações de Newmark.",
+      "Calcule deslocamento e velocidade fornecidos.",
+      "Planeje reduzir Δt e comparar fase e amplitude."
+    ],
+    "expectedEvidence": "Espera-se 0,01 m e 0,2 m/s, sem concluir precisão apenas por estabilidade do esquema linear.",
+    "reflection": "Por que um passo estável pode representar mal a fase?",
+    "scenarios": [
+      {
+        "id": "pos_fem_06_s0",
+        "label": "Passo metade",
+        "situation": "Use Δt=0,05 s com a constante.",
+        "observation": "u1=0,0025 m e v1=0,1 m/s.",
+        "explanation": "O deslocamento cresce quadraticamente com o passo na aceleração constante."
+      },
+      {
+        "id": "pos_fem_06_s1",
+        "label": "Equilíbrio",
+        "situation": "A aceleração final é desconhecida em um sistema com mola.",
+        "observation": "É necessário resolver a equação dinâmica.",
+        "explanation": "A atualização cinemática deve ser combinada com massa, amortecimento e rigidez."
+      },
+      {
+        "id": "pos_fem_06_s2",
+        "label": "Passo grande",
+        "situation": "Use poucos passos por período natural.",
+        "observation": "O erro de fase pode ser elevado.",
+        "explanation": "Estabilidade evita divergência numérica, mas não garante resolução das oscilações."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Quais parâmetros definem a aceleração média clássica?",
+        "options": [
+          {
+            "text": "β=0 e γ=0",
+            "correct": false,
+            "explanation": "Essa escolha não é a aceleração média implícita descrita."
+          },
+          {
+            "text": "β=1 e γ=0",
+            "correct": false,
+            "explanation": "Os parâmetros não correspondem ao esquema clássico usado."
+          },
+          {
+            "text": "β=1/4 e γ=1/2",
+            "correct": true,
+            "explanation": "Essa escolha gera o esquema linear de aceleração média."
+          }
+        ]
+      },
+      {
+        "question": "Qual velocidade final resulta com a=2 e Δt=0,1 s?",
+        "options": [
+          {
+            "text": "0,2 m/s",
+            "correct": true,
+            "explanation": "A aceleração constante multiplica o passo e soma-se a v0=0."
+          },
+          {
+            "text": "0,01 m/s",
+            "correct": false,
+            "explanation": "Esse número corresponde ao deslocamento em metros, não à velocidade."
+          },
+          {
+            "text": "2 m/s",
+            "correct": false,
+            "explanation": "A aceleração precisa ser integrada pelo intervalo de tempo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "A. F. Bower: Applied Mechanics of Solids",
+        "url": "https://solidmechanics.org/contents.php"
+      }
+    ]
+  },
+  "pos_fem_07": {
+    "context": "Uma chapa fictícia com trinca central é analisada em elasticidade linear. O exercício conecta intensidade de tensão e liberação de energia.",
+    "theory": "Para modo I, KI=Yσ√(πa), com a definido pela geometria. Em elasticidade isotrópica, J=KI²/E′, onde E′=E em tensão plana e E/(1−ν²) em deformação plana. Validade requer pequena zona plástica e campo apropriado; K não é a tensão local no vértice e depende do fator geométrico.",
+    "workedExample": "Para Y=1, σ=100 MPa e a=0,01 m, KI≈17,72 MPa√m. Com E′=200 GPa, J≈1571 J/m². São dados fictícios em regime linear; não permitem declarar segurança sem tenacidade e geometria válidas.",
+    "investigation": [
+      "Defina a e o fator geométrico da trinca.",
+      "Calcule KI com unidade de raiz de comprimento.",
+      "Converta K para Pa√m antes de obter J."
+    ],
+    "expectedEvidence": "Devem aparecer 17,72 MPa√m e 1571 J/m², incluindo a hipótese de regime elástico e pequena plasticidade.",
+    "reflection": "Por que uma trinca maior não pode ser avaliada só pela tensão nominal?",
+    "scenarios": [
+      {
+        "id": "pos_fem_07_s0",
+        "label": "Trinca quadruplicada",
+        "situation": "Aumente a para 0,04 m com tensão fixa.",
+        "observation": "KI dobra e J quadruplica.",
+        "explanation": "K depende de √a enquanto J depende de K²."
+      },
+      {
+        "id": "pos_fem_07_s1",
+        "label": "Tensão metade",
+        "situation": "Reduza σ para 50 MPa com a fixo.",
+        "observation": "KI cai à metade e J a um quarto.",
+        "explanation": "O fator de intensidade é linear na tensão aplicada."
+      },
+      {
+        "id": "pos_fem_07_s2",
+        "label": "Plasticidade extensa",
+        "situation": "A zona plástica deixa de ser pequena frente à trinca.",
+        "observation": "A leitura LEFM pode ficar inadequada.",
+        "explanation": "A hipótese elástica de dominância de K precisa ser reavaliada."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual unidade corresponde a KI?",
+        "options": [
+          {
+            "text": "MPa/m",
+            "correct": false,
+            "explanation": "Dividir tensão por comprimento não representa intensidade de tensão."
+          },
+          {
+            "text": "J",
+            "correct": false,
+            "explanation": "J integral é energia por área, e K tem outra dimensão."
+          },
+          {
+            "text": "MPa√m",
+            "correct": true,
+            "explanation": "O produto tensão por raiz do comprimento define a unidade de K."
+          }
+        ]
+      },
+      {
+        "question": "Em deformação plana isotrópica, qual E′ usar?",
+        "options": [
+          {
+            "text": "E/(1−ν²)",
+            "correct": true,
+            "explanation": "A restrição fora do plano altera a relação entre K e J."
+          },
+          {
+            "text": "E(1−ν²)",
+            "correct": false,
+            "explanation": "Esse produto inverte o ajuste necessário à deformação plana."
+          },
+          {
+            "text": "Sempre E sem condição",
+            "correct": false,
+            "explanation": "E isolado corresponde à tensão plana nessa relação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "A. F. Bower: Applied Mechanics of Solids",
+        "url": "https://solidmechanics.org/contents.php"
+      }
+    ]
+  },
+  "pos_fem_08": {
+    "context": "Uma barra fictícia aquece enquanto suas extremidades impedem expansão. O exercício liga difusão térmica, deformação térmica e tensão.",
+    "theory": "A equação transiente ρcp∂T/∂t=∇·(k∇T)+q determina o campo térmico. Em pequenas deformações, ε=εel+αΔT. Acoplamento unidirecional fornece temperatura à mecânica quando o retorno mecânico é desprezível; restrições produzem tensões mesmo sem força externa aplicada.",
+    "workedExample": "Para barra uniaxial completamente impedida, E=200 GPa, α=10⁻⁵ K⁻¹ e ΔT=50 K, εtotal=0 e σ=−EαΔT=−100 MPa. O sinal negativo indica compressão; gradientes e plasticidade foram desprezados.",
+    "investigation": [
+      "Calcule deformação térmica livre.",
+      "Imponha deformação total nula na barra.",
+      "Compare aquecimento uniforme e gradiente transiente."
+    ],
+    "expectedEvidence": "Espera-se expansão livre de 0,0005 e tensão de −100 MPa, reconhecendo que o vínculo determina o esforço.",
+    "reflection": "Como gradiente térmico pode gerar flexão mesmo sem bloqueio axial?",
+    "scenarios": [
+      {
+        "id": "pos_fem_08_s0",
+        "label": "Livre",
+        "situation": "Retire o impedimento axial mantendo o aquecimento.",
+        "observation": "A tensão ideal cai a zero.",
+        "explanation": "A expansão térmica ocorre sem deformação elástica na barra uniforme livre."
+      },
+      {
+        "id": "pos_fem_08_s1",
+        "label": "Resfriamento",
+        "situation": "Use ΔT=−50 K mantendo os vínculos.",
+        "observation": "A tensão passa a +100 MPa.",
+        "explanation": "A contração impedida exige tração no modelo linear."
+      },
+      {
+        "id": "pos_fem_08_s2",
+        "label": "Gradiente",
+        "situation": "A face superior fica mais quente que a inferior.",
+        "observation": "Pode surgir curvatura térmica.",
+        "explanation": "Expansões diferenciais geram flexão além do caso axial uniforme."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual sinal tem a tensão na barra aquecida e impedida?",
+        "options": [
+          {
+            "text": "Trativo",
+            "correct": false,
+            "explanation": "Tração corresponderia à contração impedida no caso simplificado."
+          },
+          {
+            "text": "Sempre zero",
+            "correct": false,
+            "explanation": "Zero só vale para a expansão livre uniforme ideal."
+          },
+          {
+            "text": "Compressivo",
+            "correct": true,
+            "explanation": "O vínculo impede a expansão e exige deformação elástica negativa."
+          }
+        ]
+      },
+      {
+        "question": "Qual deformação térmica livre resulta de α e ΔT dados?",
+        "options": [
+          {
+            "text": "0,0005",
+            "correct": true,
+            "explanation": "Multiplicar 10⁻⁵ por 50 fornece 5×10⁻⁴."
+          },
+          {
+            "text": "50",
+            "correct": false,
+            "explanation": "A temperatura não é diretamente deformação sem o coeficiente."
+          },
+          {
+            "text": "100 MPa",
+            "correct": false,
+            "explanation": "Esse é módulo de tensão obtida com vínculo e E."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "A. F. Bower: Applied Mechanics of Solids",
+        "url": "https://solidmechanics.org/contents.php"
+      }
+    ]
+  },
+  "pos_fem_09": {
+    "context": "Dois corpos fictícios entram em contato unilateral sem atrito. A formulação deve impedir penetração e permitir separação sem força de tração.",
+    "theory": "Com gap g≥0 e pressão compressiva p≥0, contato ideal obedece gp=0. Multiplicadores de Lagrange impõem restrição introduzindo forças desconhecidas e um sistema de ponto de sela. Penalização permite pequena penetração e depende de parâmetro; contato é não linear porque a região ativa é desconhecida.",
+    "workedExample": "No exemplo fictício, g=0,2 mm e p=0 satisfazem separação; g=0 e p=3 MPa satisfazem contato ativo. Já g=0,2 mm com p=3 MPa viola complementaridade. Não houve solução de um par de superfícies.",
+    "investigation": [
+      "Defina convenções positivas de gap e pressão.",
+      "Teste três estados pela complementaridade.",
+      "Compare multiplicador e penalização na restrição."
+    ],
+    "expectedEvidence": "A classificação deve verificar separadamente não penetração, pressão compressiva e produto gp nulo.",
+    "reflection": "Por que uma penalidade excessiva pode piorar o condicionamento?",
+    "scenarios": [
+      {
+        "id": "pos_fem_09_s0",
+        "label": "Separado",
+        "situation": "O gap é positivo e não há adesão.",
+        "observation": "A pressão normal deve ser zero.",
+        "explanation": "Corpos sem contato não transmitem força normal no modelo unilateral."
+      },
+      {
+        "id": "pos_fem_09_s1",
+        "label": "Penetração",
+        "situation": "O algoritmo produz g negativo após uma iteração.",
+        "observation": "A admissibilidade exige correção.",
+        "explanation": "Gap negativo viola a restrição de não penetração na formulação ideal."
+      },
+      {
+        "id": "pos_fem_09_s2",
+        "label": "Penalidade",
+        "situation": "Aumente muito a rigidez da penalização.",
+        "observation": "A penetração cai, mas o sistema pode ficar mal condicionado.",
+        "explanation": "Escalas de rigidez muito diferentes dificultam a solução numérica."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual par satisfaz contato ativo ideal na convenção dada?",
+        "options": [
+          {
+            "text": "g=0,2 mm e p=3 MPa",
+            "correct": false,
+            "explanation": "Gap positivo com pressão não nula viola gp=0."
+          },
+          {
+            "text": "g=−0,2 mm e p=0",
+            "correct": false,
+            "explanation": "O gap negativo viola não penetração."
+          },
+          {
+            "text": "g=0 e p=3 MPa",
+            "correct": true,
+            "explanation": "Superfícies encostadas podem transmitir pressão compressiva."
+          }
+        ]
+      },
+      {
+        "question": "Qual papel exerce o multiplicador de Lagrange normal?",
+        "options": [
+          {
+            "text": "Representar a força de restrição",
+            "correct": true,
+            "explanation": "O multiplicador impõe a condição e participa como incógnita de contato."
+          },
+          {
+            "text": "Eliminar todas as incógnitas",
+            "correct": false,
+            "explanation": "A formulação acrescenta incógnitas ao sistema."
+          },
+          {
+            "text": "Permitir adesão automaticamente",
+            "correct": false,
+            "explanation": "Adesão é outra lei constitutiva e não decorre do contato unilateral."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "DIANA: contact elements",
+        "url": "https://manuals.dianafea.com/d103/Theory/Theorych34.html"
+      }
+    ]
+  },
+  "pos_fem_10": {
+    "context": "Uma viga fictícia tem material distribuído por SIMP. O problema procura rigidez com volume limitado, sem garantir uma peça diretamente fabricável.",
+    "theory": "SIMP interpola E(ρ)=Emin+ρ^p(E0−Emin), 0≤ρ≤1. Minimizar compliance Fᵀu com restrição de volume favorece rigidez global. Penalização p>1 desencoraja densidades intermediárias; filtros e comprimento mínimo ajudam controlar dependência de malha e padrões alternados. Densidade é variável de projeto, não porosidade física validada.",
+    "workedExample": "Desprezando Emin apenas na conta didática, com p=3 e ρ=0,5, E/E0=0,125. Para ρ=1, E/E0=1. Um solver real deve manter Emin>0 para evitar singularidade em regiões quase vazias.",
+    "investigation": [
+      "Calcule rigidez relativa para densidades dadas.",
+      "Defina compliance e limite de volume.",
+      "Discuta filtro e restrições de fabricação."
+    ],
+    "expectedEvidence": "Espera-se E/E0=0,125 e distinção entre objetivo de rigidez e resistência local ou fabricabilidade.",
+    "reflection": "Por que um padrão otimizado muda quando a malha é refinada sem filtro?",
+    "scenarios": [
+      {
+        "id": "pos_fem_10_s0",
+        "label": "Sem penalização",
+        "situation": "Use p=1 com ρ=0,5 e Emin desprezível.",
+        "observation": "A rigidez relativa é 0,5.",
+        "explanation": "A interpolação linear penaliza menos os estados intermediários."
+      },
+      {
+        "id": "pos_fem_10_s1",
+        "label": "Vazio exato",
+        "situation": "Faça Emin=0 em região desconectada sem material.",
+        "observation": "A matriz pode tornar-se singular.",
+        "explanation": "Rigidez residual pequena é um recurso numérico que requer interpretação."
+      },
+      {
+        "id": "pos_fem_10_s2",
+        "label": "Filtro",
+        "situation": "Imponha comprimento mínimo de projeto.",
+        "observation": "Detalhes menores são suprimidos.",
+        "explanation": "Regularização limita padrões dependentes da escala da malha."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual rigidez relativa resulta de ρ=0,5 e p=3?",
+        "options": [
+          {
+            "text": "0,5",
+            "correct": false,
+            "explanation": "Esse valor corresponde a p=1 na aproximação dada."
+          },
+          {
+            "text": "1,5",
+            "correct": false,
+            "explanation": "Multiplicar densidade pelo expoente não define SIMP."
+          },
+          {
+            "text": "0,125",
+            "correct": true,
+            "explanation": "A potência 0,5³ vale um oitavo."
+          }
+        ]
+      },
+      {
+        "question": "O que minimizar compliance procura no carregamento fixo?",
+        "options": [
+          {
+            "text": "Reduzir flexibilidade global",
+            "correct": true,
+            "explanation": "Fᵀu menor representa resposta global mais rígida sob a força definida."
+          },
+          {
+            "text": "Garantir toda tensão abaixo do limite",
+            "correct": false,
+            "explanation": "Restrições de tensão não são automaticamente satisfeitas pelo objetivo."
+          },
+          {
+            "text": "Eliminar necessidade de fabricar e testar",
+            "correct": false,
+            "explanation": "A otimização exige avaliação posterior das restrições reais."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Bleyer: computational mechanics with FEniCS",
+        "url": "https://gitlab.enpc.fr/jeremy.bleyer/comet-fenics/-/tree/master/doc"
+      }
+    ]
+  }
+}

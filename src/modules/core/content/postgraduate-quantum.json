@@ -1,0 +1,832 @@
+{
+  "pos_quant_01": {
+    "context": "Um qubit ideal é descrito por amplitudes complexas normalizadas. A análise em papel distingue superposição, fase e probabilidade de medida.",
+    "theory": "Um estado puro pode ser escrito cos(θ/2)|0⟩+e^(iφ)sin(θ/2)|1⟩, ignorando fase global. A esfera de Bloch representa estados puros na superfície e mistos no interior. As probabilidades na base computacional são módulos quadrados; fases relativas podem alterar interferência em outra base. Portas unitárias preservam norma e não revelam simultaneamente todas as amplitudes em uma única medida.",
+    "workedExample": "H|0⟩=(|0⟩+|1⟩)/√2, com probabilidades meio para cada resultado. Aplicar Z muda o sinal de |1⟩ sem mudar essas probabilidades. Aplicar H novamente distingue os estados: H|+⟩=|0⟩ e H|−⟩=|1⟩.",
+    "investigation": [
+      "Calcule amplitudes e probabilidades após Hadamard.",
+      "Aplique Z e compare medida computacional com medida após H.",
+      "Separe fase global de fase relativa no vetor de estado."
+    ],
+    "expectedEvidence": "Mostre normalização e interferência, sem tratar a esfera de Bloch como trajetória de uma partícula ou uma medida única como leitura das amplitudes.",
+    "reflection": "Por que dois estados com probabilidades iguais numa base ainda podem ser diferentes?",
+    "scenarios": [
+      {
+        "id": "hadamard",
+        "label": "Estado mais",
+        "situation": "Um qubit em zero recebe a porta H.",
+        "observation": "Os dois resultados têm probabilidade meio.",
+        "explanation": "As amplitudes iguais formam uma superposição coerente, não uma lista de bits lidos juntos."
+      },
+      {
+        "id": "fase-z",
+        "label": "Estado menos",
+        "situation": "A porta Z atua sobre o estado mais.",
+        "observation": "A amplitude de um troca de sinal.",
+        "explanation": "A fase relativa muda, embora as probabilidades computacionais permaneçam iguais."
+      },
+      {
+        "id": "interferencia",
+        "label": "Segunda Hadamard",
+        "situation": "H é aplicada ao estado menos.",
+        "observation": "A medida ideal resulta em um.",
+        "explanation": "A interferência converte a fase relativa numa diferença de probabilidades mensurável."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual probabilidade de medir um após H|0⟩?",
+        "options": [
+          {
+            "text": "1/2",
+            "correct": true,
+            "explanation": "O módulo quadrado de um sobre raiz de dois é meio."
+          },
+          {
+            "text": "1/√2",
+            "correct": false,
+            "explanation": "Esse valor é a amplitude, não sua probabilidade."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "A primeira Hadamard produz dois resultados igualmente prováveis."
+          }
+        ]
+      },
+      {
+        "question": "O que Z altera ao atuar em |+⟩?",
+        "options": [
+          {
+            "text": "A fase relativa entre as componentes",
+            "correct": true,
+            "explanation": "O sinal da componente um muda e afeta interferência em outra base."
+          },
+          {
+            "text": "A norma do estado para zero",
+            "correct": false,
+            "explanation": "Uma porta unitária preserva a normalização."
+          },
+          {
+            "text": "As probabilidades computacionais para 0 e 1",
+            "correct": false,
+            "explanation": "Os módulos quadrados continuam iguais a meio nesse caso."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "IBM — Basics of Quantum Information",
+        "url": "https://quantum.cloud.ibm.com/learning/en/courses/basics-of-quantum-information"
+      }
+    ]
+  },
+  "pos_quant_02": {
+    "context": "Dois qubits ideais são preparados num estado de Bell. Correlações de medida devem ser distinguidas de transmissão de informação.",
+    "theory": "H no primeiro qubit e CNOT com ele como controle transformam |00⟩ em (|00⟩+|11⟩)/√2. Esse estado não se fatoriza em produto de estados individuais e é emaranhado. Medidas computacionais mostram correlação, mas essa única base não prova violação de Bell. Testes CHSH precisam de escolhas de bases e análise estatística; emaranhamento não permite comunicação controlada mais rápida que a luz.",
+    "workedExample": "No estado de Bell proposto, P(00)=P(11)=0,5 e P(01)=P(10)=0. Cada qubit isolado tem probabilidade meio para zero ou um. Saber o resultado de um prevê o outro nessa base, sem controlar qual resultado aleatório aparece.",
+    "investigation": [
+      "Aplique H e CNOT simbolicamente ao estado inicial.",
+      "Calcule probabilidades conjuntas e marginais.",
+      "Explique quais medições adicionais um teste CHSH exigiria."
+    ],
+    "expectedEvidence": "Apresente correlações e marginais, evitando usar apenas resultados iguais em uma base como prova completa de não localidade.",
+    "reflection": "Por que correlação perfeita não significa enviar uma mensagem escolhendo o resultado da medida?",
+    "scenarios": [
+      {
+        "id": "bell",
+        "label": "Preparação conjunta",
+        "situation": "A entrada zero,zero recebe H no primeiro e CNOT.",
+        "observation": "O estado final contém somente 00 e 11.",
+        "explanation": "A porta controlada correlaciona os ramos da superposição."
+      },
+      {
+        "id": "marginal",
+        "label": "Observação local",
+        "situation": "Um observador mede apenas o primeiro qubit.",
+        "observation": "Ele vê zero e um com probabilidades iguais.",
+        "explanation": "A estatística local não depende de conhecer o resultado remoto."
+      },
+      {
+        "id": "base-unica",
+        "label": "Prova insuficiente",
+        "situation": "Um conjunto de medidas mostra apenas correlação na base Z.",
+        "observation": "Isso não basta para um teste de Bell.",
+        "explanation": "Também uma mistura clássica de 00 e 11 reproduz essa estatística específica."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual probabilidade de 01 no estado de Bell definido?",
+        "options": [
+          {
+            "text": "0",
+            "correct": true,
+            "explanation": "Não existe amplitude no ramo 01 nessa preparação ideal."
+          },
+          {
+            "text": "1/2",
+            "correct": false,
+            "explanation": "Meio pertence aos ramos 00 e 11."
+          },
+          {
+            "text": "1/4",
+            "correct": false,
+            "explanation": "Esse seria o peso de um resultado em uma distribuição uniforme de quatro estados."
+          }
+        ]
+      },
+      {
+        "question": "O que uma única base de correlação perfeita deixa de comprovar?",
+        "options": [
+          {
+            "text": "Violação de uma desigualdade de Bell",
+            "correct": true,
+            "explanation": "O teste exige medições em bases apropriadas e comparação de correlações."
+          },
+          {
+            "text": "Que 00 e 11 têm probabilidade meio no exemplo",
+            "correct": false,
+            "explanation": "Essa estatística foi derivada do estado fornecido."
+          },
+          {
+            "text": "Que cada marginal é equilibrada",
+            "correct": false,
+            "explanation": "As probabilidades locais são meio ao somar os resultados conjuntos."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "IBM — Basics of Quantum Information",
+        "url": "https://quantum.cloud.ibm.com/learning/en/courses/basics-of-quantum-information"
+      }
+    ]
+  },
+  "pos_quant_03": {
+    "context": "Um estado desconhecido ideal deve chegar a outro participante usando um par emaranhado e comunicação clássica, sem copiar o original.",
+    "theory": "Teletransporte quântico consome emaranhamento compartilhado e dois bits clássicos após uma medição de Bell. Esses bits indicam correções Pauli no qubit de destino segundo a convenção do circuito. Antes da informação clássica, o receptor não dispõe do estado utilizável; o protocolo não transmite mais rápido que a luz. A medição destrói a disponibilidade do original e não permite clonagem de um estado desconhecido.",
+    "workedExample": "Declare que resultados mZ e mX exigem correção Z^mZ X^mX, aplicada da direita para a esquerda. Para mZ=0,mX=1, aplica-se X. O receptor transforma o estado condicionado X|ψ⟩ de volta a |ψ⟩, pois X²=I.",
+    "investigation": [
+      "Identifique os três qubits e o par emaranhado inicial.",
+      "Relacione os dois bits clássicos às correções declaradas.",
+      "Explique o estado do receptor antes de receber os bits."
+    ],
+    "expectedEvidence": "Mostre a correção X no ramo fornecido e a necessidade da mensagem clássica, sem alegar teletransporte físico de matéria ou execução em hardware.",
+    "reflection": "O que impede usar esse protocolo para criar duas cópias intactas do estado desconhecido?",
+    "scenarios": [
+      {
+        "id": "ramo-x",
+        "label": "Correção de bit",
+        "situation": "O resultado clássico é mZ zero e mX um.",
+        "observation": "A correção necessária é X.",
+        "explanation": "Aplicar X duas vezes restaura o estado nesse ramo ideal."
+      },
+      {
+        "id": "sem-bits",
+        "label": "Informação ausente",
+        "situation": "O receptor ainda não recebeu os dois bits.",
+        "observation": "Ele não sabe qual correção executar.",
+        "explanation": "O emaranhamento sozinho não fornece o estado utilizável para comunicação controlada."
+      },
+      {
+        "id": "original",
+        "label": "Medição do emissor",
+        "situation": "O emissor realiza a medição conjunta do protocolo.",
+        "observation": "O estado original deixa de ficar disponível.",
+        "explanation": "A transferência não é clonagem de informação quântica desconhecida."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual correção é indicada para mZ=0 e mX=1?",
+        "options": [
+          {
+            "text": "X",
+            "correct": true,
+            "explanation": "A potência zero de Z é identidade e a potência um de X é X."
+          },
+          {
+            "text": "Z",
+            "correct": false,
+            "explanation": "Z seria indicada pelo bit mZ, que vale zero nesse ramo."
+          },
+          {
+            "text": "Nenhuma sempre",
+            "correct": false,
+            "explanation": "Ignorar a correção deixa alguns ramos condicionados diferentes do alvo."
+          }
+        ]
+      },
+      {
+        "question": "Qual recurso impede comunicação instantânea apenas pelo par emaranhado?",
+        "options": [
+          {
+            "text": "A necessidade de transmitir os bits clássicos",
+            "correct": true,
+            "explanation": "O receptor precisa conhecer os resultados para corrigir seu qubit."
+          },
+          {
+            "text": "Ausência de qualquer medida no protocolo",
+            "correct": false,
+            "explanation": "A medição de Bell é uma etapa central do teletransporte."
+          },
+          {
+            "text": "Possibilidade de escolher livremente o resultado",
+            "correct": false,
+            "explanation": "Os resultados de medição não são mensagens controladas pelo emissor."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "IBM — Quantum Teleportation",
+        "url": "https://quantum.cloud.ibm.com/learning/en/modules/computer-science/quantum-teleportation"
+      }
+    ]
+  },
+  "pos_quant_04": {
+    "context": "Um oráculo fictício obedece à promessa de função booleana constante ou balanceada. A interferência distingue essas duas classes.",
+    "theory": "Deutsch-Jozsa considera f:{0,1}ⁿ→{0,1} sob promessa: todos os valores iguais ou metade zeros e metade uns. Um oráculo coerente com ancilla em |−⟩ insere fase (−1)^f(x). Após Hadamards, a amplitude de |0…0⟩ é a média dessas fases. O ganho de uma consulta vale nesse modelo e promessa; não significa conhecer todos os valores de f nem resolver qualquer decisão com um oráculo arbitrário.",
+    "workedExample": "Para n=2 e f(x1,x2)=x1, os valores são 0,0,1,1. A amplitude final de 00 é (1+1−1−1)/4=0, logo a função é balanceada. Uma função constante teria amplitude +1 ou −1 nesse resultado.",
+    "investigation": [
+      "Liste os quatro valores da função prometida.",
+      "Converta valores em sinais de fase e calcule a média.",
+      "Compare o resultado com uma função que viola a promessa."
+    ],
+    "expectedEvidence": "Mostre cancelamento da amplitude 00 e explicite oráculo ideal e promessa, evitando afirmar leitura simultânea de toda a tabela.",
+    "reflection": "Por que a promessa sobre a função é essencial à interpretação determinística do resultado?",
+    "scenarios": [
+      {
+        "id": "balanceada",
+        "label": "Sinais cancelados",
+        "situation": "A tabela booleana é zero,zero,um,um.",
+        "observation": "As fases somam zero.",
+        "explanation": "Interferência cancela o resultado 00 no circuito ideal."
+      },
+      {
+        "id": "constante",
+        "label": "Mesma fase",
+        "situation": "A função vale um para todas as quatro entradas.",
+        "observation": "A amplitude de 00 é menos um.",
+        "explanation": "A fase global negativa ainda dá probabilidade um ao resultado 00."
+      },
+      {
+        "id": "fora-promessa",
+        "label": "Três contra um",
+        "situation": "Uma tabela tem três zeros e apenas um valor um.",
+        "observation": "A promessa não é satisfeita.",
+        "explanation": "O resultado não deve ser interpretado como solução garantida da classificação prometida."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual amplitude de 00 resulta de f(x1,x2)=x1?",
+        "options": [
+          {
+            "text": "0",
+            "correct": true,
+            "explanation": "As fases positivas e negativas aparecem em igual quantidade e se cancelam."
+          },
+          {
+            "text": "1/2",
+            "correct": false,
+            "explanation": "Esse valor não é a média dos quatro sinais fornecidos."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "Amplitude de magnitude um nesse ramo corresponde ao caso constante."
+          }
+        ]
+      },
+      {
+        "question": "Qual hipótese define a tarefa de Deutsch-Jozsa estudada?",
+        "options": [
+          {
+            "text": "A função é constante ou balanceada",
+            "correct": true,
+            "explanation": "O algoritmo resolve a decisão garantida por essa promessa."
+          },
+          {
+            "text": "Toda função booleana tem metade uns",
+            "correct": false,
+            "explanation": "Funções constantes e funções fora da promessa também existem."
+          },
+          {
+            "text": "O circuito entrega todos os valores individuais",
+            "correct": false,
+            "explanation": "A medida distingue uma propriedade, sem ler toda a tabela do oráculo."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "IBM — Fundamentals of Quantum Algorithms",
+        "url": "https://quantum.cloud.ibm.com/learning/en/courses/fundamentals-of-quantum-algorithms"
+      }
+    ]
+  },
+  "pos_quant_05": {
+    "context": "Uma busca idealizada possui quatro candidatos e um marcado. Uma rodada de amplificação revela como fases afetam probabilidades.",
+    "theory": "Grover alterna oráculo de fase que marca soluções e reflexão em torno da média das amplitudes. Para M soluções entre N, a quantidade adequada de iterações é da ordem de √(N/M); iterar demais pode reduzir sucesso. O ganho é de consultas ao oráculo e não dispensa o custo de construí-lo ou carregar dados. Medir uma superposição inicial não revela todos os candidatos de uma vez.",
+    "workedExample": "Com N=4 e uma solução, amplitudes iniciais são 1/2. O oráculo troca a marcada para −1/2, dando média 1/4. A reflexão a→2×média−a leva a amplitude marcada a 1 e as demais a 0. Uma rodada ideal resolve essa instância.",
+    "investigation": [
+      "Escreva as quatro amplitudes antes e depois do oráculo.",
+      "Calcule a média e aplique a reflexão a cada componente.",
+      "Discuta custo e disponibilidade do oráculo que reconhece soluções."
+    ],
+    "expectedEvidence": "Mostre normalização e probabilidade final um no caso de quatro itens, sem generalizar uma rodada a qualquer tamanho de busca.",
+    "reflection": "Por que o custo de reconhecer um candidato precisa entrar na comparação prática?",
+    "scenarios": [
+      {
+        "id": "fase-marcada",
+        "label": "Oráculo de fase",
+        "situation": "Uma amplitude meio troca para menos meio.",
+        "observation": "As probabilidades ainda são um quarto antes da reflexão.",
+        "explanation": "Trocar só o sinal altera fase, não o módulo quadrado imediatamente."
+      },
+      {
+        "id": "reflexao",
+        "label": "Inversão pela média",
+        "situation": "A média após marcação é um quarto.",
+        "observation": "A solução recebe amplitude um.",
+        "explanation": "A reflexão converte a diferença de fase em amplificação de probabilidade."
+      },
+      {
+        "id": "excesso",
+        "label": "Muitas rodadas",
+        "situation": "O procedimento continua além do número adequado.",
+        "observation": "A probabilidade pode oscilar e cair.",
+        "explanation": "Amplificação é uma rotação de amplitudes, não um crescimento ilimitado e monotônico."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual média das amplitudes após marcar um de quatro candidatos?",
+        "options": [
+          {
+            "text": "1/4",
+            "correct": true,
+            "explanation": "Três meios positivos e um meio negativo somam um; dividir por quatro dá um quarto."
+          },
+          {
+            "text": "1/2",
+            "correct": false,
+            "explanation": "Esse era o valor de cada amplitude antes da marcação."
+          },
+          {
+            "text": "0",
+            "correct": false,
+            "explanation": "Há três sinais positivos e somente um negativo, logo a soma não cancela."
+          }
+        ]
+      },
+      {
+        "question": "Que custo a vantagem de consultas não elimina?",
+        "options": [
+          {
+            "text": "Construção e avaliação do oráculo",
+            "correct": true,
+            "explanation": "Uma implementação precisa realizar fisicamente a verificação que marca soluções."
+          },
+          {
+            "text": "Qualquer necessidade de comparação de recursos",
+            "correct": false,
+            "explanation": "Consultas são uma métrica específica e não substituem todos os custos."
+          },
+          {
+            "text": "A regra de Born da medida",
+            "correct": false,
+            "explanation": "Probabilidades continuam sendo módulos quadrados das amplitudes."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Grover — Quantum Search",
+        "url": "https://arxiv.org/abs/quant-ph/9605043"
+      }
+    ]
+  },
+  "pos_quant_06": {
+    "context": "Uma transformada unitária ideal codifica índices em fases. A escolha de sinal e ordem dos qubits deve ser declarada antes da conta.",
+    "theory": "Adote QFT_N|x⟩=(1/√N)Σy exp(2πixy/N)|y⟩. Ela transforma amplitudes preservando norma e aparece em estimação de fase. Circuitos usam Hadamards, fases controladas e eventual reversão de ordem de bits. O fato de representar muitas fases não permite ler todo o espectro em uma medida. Estimação de fase exige estado próprio e potências controladas da unitária.",
+    "workedExample": "Para N=4 e x=1, QFT|1⟩=(|0⟩+i|1⟩−|2⟩−i|3⟩)/2. As quatro probabilidades são 1/4, embora as fases sejam diferentes. A soma dos módulos quadrados é um.",
+    "investigation": [
+      "Calcule as quatro potências de exp(2πi/4).",
+      "Confira normalização e probabilidades na base computacional.",
+      "Separe QFT de sua inversa e declare a ordem dos bits."
+    ],
+    "expectedEvidence": "Apresente [1,i,−1,−i]/2 e a convenção positiva, sem confundir amplitude complexa com probabilidade ou uma QFT isolada com estimação completa.",
+    "reflection": "Por que fases diferentes podem produzir as mesmas probabilidades nesta medida direta?",
+    "scenarios": [
+      {
+        "id": "fase-i",
+        "label": "Índice um",
+        "situation": "O termo y=1 recebe exp(2πi/4).",
+        "observation": "A fase correspondente é i.",
+        "explanation": "O fator global um meio fixa a normalização para quatro estados."
+      },
+      {
+        "id": "inversa",
+        "label": "Sinal oposto",
+        "situation": "A transformação inversa usa expoente negativo.",
+        "observation": "As fases complexas são conjugadas.",
+        "explanation": "Trocar o sinal da convenção muda a orientação das fases, mantendo unitariedade."
+      },
+      {
+        "id": "leitura",
+        "label": "Medida computacional",
+        "situation": "O estado transformado é medido diretamente nessa base.",
+        "observation": "Cada índice aparece com probabilidade um quarto.",
+        "explanation": "A medida não fornece simultaneamente todas as fases do vetor."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual amplitude corresponde a y=2 no exemplo?",
+        "options": [
+          {
+            "text": "−1/2",
+            "correct": true,
+            "explanation": "A fase exp(πi) é menos um e a normalização divide por dois."
+          },
+          {
+            "text": "1/4",
+            "correct": false,
+            "explanation": "Um quarto é a probabilidade, não a amplitude com sua fase."
+          },
+          {
+            "text": "i/2",
+            "correct": false,
+            "explanation": "Essa amplitude corresponde ao índice y igual a um."
+          }
+        ]
+      },
+      {
+        "question": "Qual condição pertence à estimação de fase padrão?",
+        "options": [
+          {
+            "text": "Preparar um estado próprio da unitária",
+            "correct": true,
+            "explanation": "As potências controladas codificam a fase associada a esse autovetor."
+          },
+          {
+            "text": "Medir todas as amplitudes em uma tentativa",
+            "correct": false,
+            "explanation": "Uma medida não lê o vetor inteiro de amplitudes."
+          },
+          {
+            "text": "Dispensar qualquer operação controlada",
+            "correct": false,
+            "explanation": "O procedimento padrão usa potências controladas da unitária."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "IBM — Fundamentals of Quantum Algorithms",
+        "url": "https://quantum.cloud.ibm.com/learning/en/courses/fundamentals-of-quantum-algorithms"
+      }
+    ]
+  },
+  "pos_quant_07": {
+    "context": "Fatorar o inteiro didático quinze ilustra como descobrir períodos pode produzir fatores, sem atacar chaves ou sistemas reais.",
+    "theory": "Shor reduz fatoração à busca de ordem modular e combina etapas clássicas e quânticas. Para a coprimo a N, procure o menor r positivo com a^r≡1 mod N. Se r é par e a^(r/2) não é −1 mod N, MDC(a^(r/2)±1,N) pode dar fatores não triviais. Sucesso e recursos dependem de escolhas, precisão e correção de erros; fatorar quinze em papel não demonstra quebra de RSA prático.",
+    "workedExample": "Para N=15 e a=2, potências módulo quinze são 2,4,8,1: r=4. Então a^(r/2)=4, MDC(4−1,15)=3 e MDC(4+1,15)=5. O produto 3×5 recupera o inteiro do exercício.",
+    "investigation": [
+      "Liste potências modulares até o primeiro retorno a um.",
+      "Confira as condições de paridade e valor intermediário.",
+      "Calcule os dois MDCs e discuta uma escolha que falhe."
+    ],
+    "expectedEvidence": "Mostre ordem quatro e fatores três e cinco, mantendo a análise exclusivamente no inteiro didático sem alegar acesso a hardware quântico.",
+    "reflection": "Por que algumas escolhas de base ou períodos exigem repetir etapas do algoritmo?",
+    "scenarios": [
+      {
+        "id": "ordem",
+        "label": "Retorno a um",
+        "situation": "A base dois é elevada sucessivamente módulo quinze.",
+        "observation": "A primeira potência igual a um ocorre em r quatro.",
+        "explanation": "Usar o menor período é parte da definição de ordem modular."
+      },
+      {
+        "id": "fatores",
+        "label": "MDCs úteis",
+        "situation": "O valor intermediário é quatro.",
+        "observation": "Os MDCs de três e cinco com quinze são não triviais.",
+        "explanation": "A diferença de quadrados liga o período aos divisores do inteiro."
+      },
+      {
+        "id": "falha-base",
+        "label": "Valor menos um",
+        "situation": "Uma escolha produz a^(r/2)≡−1 mod N.",
+        "observation": "Os MDCs podem ser triviais.",
+        "explanation": "O procedimento precisa outra escolha ou repetição, em vez de prometer sucesso de todo ramo."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual ordem de dois módulo quinze foi calculada?",
+        "options": [
+          {
+            "text": "4",
+            "correct": true,
+            "explanation": "Dois,quatro,oito e um formam o primeiro ciclo de potências."
+          },
+          {
+            "text": "2",
+            "correct": false,
+            "explanation": "Dois ao quadrado é quatro e ainda não retorna a um."
+          },
+          {
+            "text": "15",
+            "correct": false,
+            "explanation": "O módulo não é automaticamente a ordem da base."
+          }
+        ]
+      },
+      {
+        "question": "Quais fatores surgem dos MDCs do exemplo?",
+        "options": [
+          {
+            "text": "3 e 5",
+            "correct": true,
+            "explanation": "MDC de três e quinze é três; de cinco e quinze é cinco."
+          },
+          {
+            "text": "2 e 7",
+            "correct": false,
+            "explanation": "O produto desses números não é quinze."
+          },
+          {
+            "text": "1 e 15 apenas",
+            "correct": false,
+            "explanation": "As condições escolhidas produzem fatores não triviais neste caso."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Shor — Factoring and Discrete Logarithms",
+        "url": "https://arxiv.org/abs/quant-ph/9508027"
+      }
+    ]
+  },
+  "pos_quant_08": {
+    "context": "Um ansatz de um qubit idealizado estima energia. O laço clássico varia um parâmetro, mas não garante alcançar o estado fundamental.",
+    "theory": "VQE usa o princípio variacional: para estado normalizado e Hamiltoniano hermitiano, a energia esperada é pelo menos a energia fundamental. Medidas de termos e otimização clássica aproximam esse objetivo; ruído, número de amostras, ansatz e mínimos de otimização afetam resultados. O limite exato vale para expectativas físicas do Hamiltoniano; estimativas ruidosas e correções posteriores exigem cautela.",
+    "workedExample": "Para H=Z e |ψ(θ)⟩=cos(θ/2)|0⟩+sin(θ/2)|1⟩, E=cosθ. Em θ=0, E=1; em θ=π, E=−1, o menor autovalor. A conta é analítica e não uma estimativa feita num processador.",
+    "investigation": [
+      "Calcule as probabilidades do ansatz e a expectativa de Z.",
+      "Compare energias em zero,π/2 e π.",
+      "Separe limite variacional de erro de amostragem e ruído."
+    ],
+    "expectedEvidence": "Mostre E=cosθ e mínimo menos um dentro do ansatz, sem prometer otimização global ou energia química medida em hardware.",
+    "reflection": "Por que um ansatz restrito pode ficar acima da energia fundamental mesmo com otimização perfeita?",
+    "scenarios": [
+      {
+        "id": "zero",
+        "label": "Estado zero",
+        "situation": "O parâmetro do ansatz é zero.",
+        "observation": "A energia de Z vale um.",
+        "explanation": "O estado coincide com o autovetor de autovalor positivo."
+      },
+      {
+        "id": "pi",
+        "label": "Estado um",
+        "situation": "O parâmetro é π no ansatz real definido.",
+        "observation": "A energia vale menos um.",
+        "explanation": "O estado coincide com o autovetor fundamental desse Hamiltoniano simples."
+      },
+      {
+        "id": "amostras",
+        "label": "Estimativa finita",
+        "situation": "A energia é estimada a partir de poucas medidas.",
+        "observation": "Há incerteza estatística.",
+        "explanation": "A média amostral precisa de intervalo e não é a expectativa exata analítica."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual energia resulta de θ=π/2 no modelo?",
+        "options": [
+          {
+            "text": "0",
+            "correct": true,
+            "explanation": "O coseno de π/2 é zero e as probabilidades dos autovalores se equilibram."
+          },
+          {
+            "text": "1",
+            "correct": false,
+            "explanation": "Um corresponde ao estado em θ igual a zero."
+          },
+          {
+            "text": "−1",
+            "correct": false,
+            "explanation": "Menos um corresponde a θ igual a π."
+          }
+        ]
+      },
+      {
+        "question": "Qual limite é dado pelo princípio variacional ideal?",
+        "options": [
+          {
+            "text": "A energia esperada não fica abaixo da fundamental",
+            "correct": true,
+            "explanation": "O estado normalizado combina autovalores com pesos não negativos que somam um."
+          },
+          {
+            "text": "Todo otimizador encontra o mínimo global",
+            "correct": false,
+            "explanation": "O princípio limita valores, mas não resolve a otimização."
+          },
+          {
+            "text": "Uma medida finita fornece energia exata sempre",
+            "correct": false,
+            "explanation": "Amostragem e ruído produzem incerteza na estimativa."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Peruzzo et al. — Variational Eigenvalue Solver",
+        "url": "https://arxiv.org/abs/1304.3061"
+      }
+    ]
+  },
+  "pos_quant_09": {
+    "context": "Um código de repetição idealizado ilustra síndromes sem medir diretamente o valor lógico. Correção quântica completa trata mais tipos de erro.",
+    "theory": "O código de três qubits α|000⟩+β|111⟩ corrige um bit-flip por medidas de paridade Z1Z2 e Z2Z3. As síndromes identificam o local sob a hipótese de erro único, preservando amplitudes lógicas. Esse código não corrige por si phase-flip; o código de Shor combina proteção de bit e fase com nove qubits. Códigos de superfície usam verificações locais e exigem decodificação e recursos conforme ruído e distância.",
+    "workedExample": "Um X no qubit central leva os ramos a 010 e 101. Ambas as paridades adjacentes são ímpares, com autovalores (−1,−1). A correção X no centro restaura os ramos originais sem descobrir se o lógico era zero ou um.",
+    "investigation": [
+      "Calcule as paridades dos ramos após um X central.",
+      "Relacione cada síndrome a uma hipótese de bit-flip único.",
+      "Explique por que phase-flip exige proteção adicional."
+    ],
+    "expectedEvidence": "Mostre síndrome (−1,−1) e correção central, explicitando erro único e evitando confundir medição de síndrome com leitura do estado lógico.",
+    "reflection": "Por que medir diretamente todos os bits do código destruiria uma superposição lógica?",
+    "scenarios": [
+      {
+        "id": "central",
+        "label": "Erro no centro",
+        "situation": "O estado lógico sofre X no segundo qubit.",
+        "observation": "As duas verificações têm autovalor menos um.",
+        "explanation": "O padrão distingue o centro dos erros nas extremidades sob a hipótese única."
+      },
+      {
+        "id": "sem-erro",
+        "label": "Paridades pares",
+        "situation": "Os ramos são 000 e 111 antes de qualquer erro.",
+        "observation": "As verificações devolvem mais um,mais um.",
+        "explanation": "Ambos os ramos possuem paridade par em cada par adjacente."
+      },
+      {
+        "id": "fase",
+        "label": "Erro Z",
+        "situation": "Uma fase muda o sinal relativo dos ramos codificados.",
+        "observation": "As paridades Z adjacentes não detectam esse erro.",
+        "explanation": "O código de repetição de bit precisa ser combinado com outra proteção para fase."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual síndrome indica X no qubit central no modelo?",
+        "options": [
+          {
+            "text": "(−1,−1)",
+            "correct": true,
+            "explanation": "Os dois pares adjacentes ficam com bits diferentes em ambos os ramos."
+          },
+          {
+            "text": "(+1,+1)",
+            "correct": false,
+            "explanation": "Essa é a síndrome sem bit-flip sob as verificações definidas."
+          },
+          {
+            "text": "(+1,−1)",
+            "correct": false,
+            "explanation": "Esse padrão corresponde a uma extremidade, não ao centro."
+          }
+        ]
+      },
+      {
+        "question": "O que o código simples de três qubits deixa de corrigir por si?",
+        "options": [
+          {
+            "text": "Phase-flip",
+            "correct": true,
+            "explanation": "As verificações de paridade em Z não detectam a alteração relativa de fase."
+          },
+          {
+            "text": "Um bit-flip central",
+            "correct": false,
+            "explanation": "Esse é justamente o erro identificado e corrigido no exemplo."
+          },
+          {
+            "text": "Qualquer bit-flip único sempre",
+            "correct": false,
+            "explanation": "Sob as hipóteses ideais, o código distingue os três locais de erro único."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Shor — Reducing Decoherence",
+        "url": "https://doi.org/10.1103/PhysRevA.52.R2493"
+      }
+    ]
+  },
+  "pos_quant_10": {
+    "context": "Um circuito aleatório idealizado produz uma distribuição de resultados. Comparar amostragem clássica e quântica exige tarefas e recursos bem definidos.",
+    "theory": "Vantagem em amostragem é uma afirmação sobre uma tarefa específica, tamanho, qualidade estatística e comparação com métodos clássicos conhecidos. Não implica vantagem universal em aplicações. Simular n qubits por vetor de estado exige 2ⁿ amplitudes, mas estrutura do circuito e aproximações podem permitir outros métodos. Ruído aproxima distribuições de modelos mais simples e precisa entrar na comparação; resultados históricos não fixam para sempre a fronteira clássica.",
+    "workedExample": "Um vetor de vinte qubits tem 2²⁰=1.048.576 amplitudes. A dezesseis bytes complexos por amplitude, ocupa 16.777.216 bytes=16 MiB só para o vetor. Isso não inclui memória extra e não prova que todo circuito de vinte qubits é difícil.",
+    "investigation": [
+      "Calcule a memória do vetor para vinte e vinte e um qubits.",
+      "Declare distribuição alvo e critério de qualidade de amostragem.",
+      "Compare método exato, aproximação e efeito de ruído."
+    ],
+    "expectedEvidence": "Apresente 16 MiB e o crescimento ao dobrar amplitudes por qubit adicional, sem alegar supremacia comprovada por uma animação ou conta de memória.",
+    "reflection": "Por que atualizar algoritmos clássicos de comparação pode mudar uma alegação de vantagem?",
+    "scenarios": [
+      {
+        "id": "memoria",
+        "label": "Vetor de estado",
+        "situation": "O circuito tem vinte qubits e usa representação densa.",
+        "observation": "Há pouco mais de um milhão de amplitudes.",
+        "explanation": "O crescimento exponencial descreve esse método, não todos os métodos possíveis."
+      },
+      {
+        "id": "mais-um",
+        "label": "Qubit adicional",
+        "situation": "A representação passa de vinte para vinte e um qubits.",
+        "observation": "A memória do vetor dobra.",
+        "explanation": "Cada base anterior se divide em dois valores do qubit acrescentado."
+      },
+      {
+        "id": "ruido-circuito",
+        "label": "Distribuição alterada",
+        "situation": "O circuito experimental apresenta forte ruído.",
+        "observation": "A distribuição pode afastar-se do alvo ideal.",
+        "explanation": "A dificuldade comparada precisa especificar qual distribuição e fidelidade foram atingidas."
+      }
+    ],
+    "questions": [
+      {
+        "question": "Qual memória só do vetor resulta no cenário de vinte qubits?",
+        "options": [
+          {
+            "text": "16 MiB",
+            "correct": true,
+            "explanation": "Dois elevado a vinte amplitudes vezes dezesseis bytes dá dezesseis mebibytes."
+          },
+          {
+            "text": "20 bytes",
+            "correct": false,
+            "explanation": "O número de qubits não é a quantidade de amplitudes do vetor denso."
+          },
+          {
+            "text": "1 MiB",
+            "correct": false,
+            "explanation": "Esse valor contaria apenas um byte por amplitude."
+          }
+        ]
+      },
+      {
+        "question": "O que uma alegação de vantagem em amostragem deve especificar?",
+        "options": [
+          {
+            "text": "Tarefa, qualidade e comparação clássica",
+            "correct": true,
+            "explanation": "O resultado depende do problema e dos recursos e métodos utilizados."
+          },
+          {
+            "text": "Superioridade universal em toda computação",
+            "correct": false,
+            "explanation": "Uma tarefa específica não estabelece vantagem em todos os problemas."
+          },
+          {
+            "text": "Apenas quantidade de qubits",
+            "correct": false,
+            "explanation": "Estrutura, ruído e critérios de amostragem também determinam a comparação."
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Google Research — Random Circuit Sampling",
+        "url": "https://research.google/pubs/quantum-supremacy-using-a-programmable-superconducting-processor/"
+      }
+    ]
+  }
+}

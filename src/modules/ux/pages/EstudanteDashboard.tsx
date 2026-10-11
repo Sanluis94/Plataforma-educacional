@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
+import { getLabLearningContent } from '../../core/content/labLearningContent';
+import { LabLearningWorkspace } from '../components/labs/LabLearningWorkspace';
 import SoundEffects from '../../core/services/soundEffects';
 import { StudentLmsModules } from '../components/StudentLmsModules';
 import { 
@@ -558,7 +560,7 @@ export function EstudanteDashboard() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, margin: 0, fontFamily: 'var(--font-heading)' }}>
-                  Laboratórios de {currentSubjectModule.label} (Simuladores com Parâmetros Interativos)
+                  Laboratórios de {currentSubjectModule.label}
                 </h3>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                   6 experiências interativas dedicadas
@@ -571,6 +573,8 @@ export function EstudanteDashboard() {
                   return (
                     <div
                       key={lab.id}
+                      role="article"
+                      aria-label={lab.title}
                       className="glass-card"
                       style={{
                         padding: '1.5rem',
@@ -600,12 +604,8 @@ export function EstudanteDashboard() {
                           {lab.title}
                         </h4>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 1rem', lineHeight: 1.4 }}>
-                          Simulação dinâmica com controle de variáveis, visualizações científicas e validação imediata de conceitos.
+                          {getLabLearningContent(lab.id)?.context || 'Explore a bancada deste tópico, registre observações e confira seus resultados.'}
                         </p>
-
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginBottom: '1.25rem' }}>
-                          Parâmetros: mode="{lab.props?.mode || 'padrão'}"
-                        </div>
                       </div>
 
                       <button
@@ -649,6 +649,19 @@ export function EstudanteDashboard() {
           </div>
 
           <div className="glass-card" style={{ padding: '1rem', minHeight: '520px', borderRadius: 'var(--radius-lg, 14px)' }}>
+            <LabLearningWorkspace
+              key={activeLab.id}
+              labId={activeLab.id}
+              title={activeLab.title}
+              subject={ALL_MODULES.find(module => module.labs.some(lab => lab.id === activeLab.id))?.label || 'Laboratório'}
+              objective="Compare os casos e use as evidências para justificar suas respostas."
+              content={getLabLearningContent(activeLab.id)}
+              onComplete={async ({ score }) => {
+                await handleActivitySubmit({ id: activeLab.id, title: activeLab.title }, score * 10);
+                setShowConfetti(true);
+                SoundEffects.playSuccess();
+              }}
+            >
             <activeLab.component
               {...activeLab.props}
               labTitle={activeLab.title}
@@ -659,6 +672,7 @@ export function EstudanteDashboard() {
                 SoundEffects.playSuccess();
               }}
             />
+            </LabLearningWorkspace>
           </div>
         </div>
       )}

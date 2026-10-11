@@ -13,8 +13,9 @@ import {
   MASTER_LABS_CATALOG,
   searchLabsCatalog,
   resolveUniversalLab,
-  type CatalogLabItem
+  createGuidedLabConfig
 } from '../../core/constants/masterLabsCatalog';
+import type { StudioLab } from '../../core/services/labStudioService';
 import { SkillTreeExplorerModal } from '../components/labs/SkillTreeExplorerModal';
 import { LabStudioBuilderModal } from '../components/labs/LabStudioBuilderModal';
 import { CertificateModal } from '../components/labs/CertificateModal';
@@ -163,7 +164,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
   const [showStudio, setShowStudio] = useState(false);
   const [showCertModal, setShowCertModal] = useState(false);
   const [currentCertificate, setCurrentCertificate] = useState<LabCertificate | null>(null);
-  const [customLabs, setCustomLabs] = useState<CatalogLabItem[]>([]);
+  const [customLabs, setCustomLabs] = useState<StudioLab[]>([]);
+  const activeCustomLab = customLabs.find(lab => lab.id === activeTab);
 
   const handleOpenCertificate = async () => {
     const cert = await issueLabCertificate({
@@ -742,7 +744,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                 { id: 'fundamental_2', label: '🏫 Fundamental II (60 Labs)' },
                 { id: 'medio', label: '🎓 Ensino Médio / ENEM (100 Labs)' },
                 { id: 'graduacao', label: '🏛️ Graduação / Engenharias (160 Labs)' },
-                { id: 'pos_graduacao', label: '🔬 Pós-Graduação & Stricto Sensu (160 Labs)' },
+                { id: 'pos_graduacao', label: '🔬 Pós-Graduação & Stricto Sensu (170 Labs)' },
               ].map(levelItem => (
                 <button
                   key={levelItem.id}
@@ -766,7 +768,9 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
             {/* Grade de Resultados dos Laboratórios */}
             {(() => {
               const catalogResults = searchLabsCatalog(catalogSearch, catalogLevel === 'todos' ? undefined : catalogLevel);
-              const filtered = [...customLabs, ...catalogResults];
+              const search = catalogSearch.trim().toLocaleLowerCase('pt-BR');
+              const customResults = customLabs.filter(lab => (catalogLevel === 'todos' || lab.academicLevel === catalogLevel) && `${lab.id} ${lab.title} ${lab.subject} ${lab.topic}`.toLocaleLowerCase('pt-BR').includes(search));
+              const filtered = [...customResults, ...catalogResults];
               return (
                 <div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
@@ -781,7 +785,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                     overflowY: 'auto',
                     paddingRight: '0.5rem'
                   }}>
-                    {filtered.slice(0, 80).map(lab => (
+                    {filtered.map(lab => (
                       <div
                         key={lab.id}
                         style={{
@@ -801,7 +805,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                               {lab.id}
                             </span>
                             <span style={{ fontSize: '0.7rem', color: 'var(--color-verde-700, #293E24)', background: 'var(--color-verde-light, rgba(41, 62, 36, 0.12))', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
-                              {lab.simulatedHours}h
+                              {customLabs.some(custom => custom.id === lab.id) ? `${lab.simulatedHours}h estimadas` : 'Roteiro e avaliação'}
                             </span>
                           </div>
 
@@ -833,16 +837,11 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
                           }}
                         >
                           <Play style={{ width: '12px', height: '12px' }} />
-                          {activeTab === lab.id ? 'Em Execução' : 'Executar Simulação'}
+                          {activeTab === lab.id ? 'Em Execução' : 'Abrir laboratório'}
                         </button>
                       </div>
                     ))}
                   </div>
-                  {filtered.length > 80 && (
-                    <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.6rem' }}>
-                      Mostrando primeiros 80 resultados de {filtered.length}. Refine sua busca digitando termos específicos acima.
-                    </div>
-                  )}
                 </div>
               );
             })()}
@@ -1298,14 +1297,14 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
         <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
           <div>
             <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🧲 Eletromagnetismo — Força de Lorentz</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Uma partícula carregada sob um campo magnético constante B descreve movimento circular uniforme com raio r = mv / qB.</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Exemplo de elétron com velocidade perpendicular a um campo magnético uniforme: r = mv / (|q|B). A figura é esquemática, sem escala; se houver velocidade paralela ao campo, a trajetória pode ser helicoidal.</p>
             <div className="lab-canvas-container" style={{ width: '100%', height: '280px', background: '#FAF7EE', borderRadius: 'var(--radius-sm, 10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2D7C3', position: 'relative' }}>
               <svg width="300" height="220">
                 <circle cx="150" cy="110" r="70" fill="none" stroke="var(--color-secondary, #293E24)" strokeWidth="2.5" strokeDasharray="6 4" />
                 <circle cx="220" cy="110" r="11" fill="var(--color-primary, #E4683F)" />
-                <text x="220" y="114" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">q+</text>
+                <text x="220" y="114" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">e⁻</text>
                 <line x1="150" y1="110" x2="220" y2="110" stroke="var(--color-secondary, #293E24)" strokeWidth="2" />
-                <text x="185" y="102" fill="#172314" fontSize="12" fontWeight="bold">r = mv/qB</text>
+                <text x="185" y="102" fill="#172314" fontSize="12" fontWeight="bold">r = mv/(|q|B)</text>
               </svg>
             </div>
           </div>
@@ -1313,9 +1312,10 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
             <h4 style={{ color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>Variáveis Magnéticas</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
               <div>Campo Magnético (B): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>0.5 T</strong></div>
-              <div>Carga Elétrica (q): <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>1.6 × 10⁻¹⁹ C</strong></div>
+              <div>Carga Elétrica (q): <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>−1,6 × 10⁻¹⁹ C</strong></div>
               <div>Massa (m): <strong style={{ color: 'var(--text-main)' }}>9.1 × 10⁻³¹ kg</strong></div>
               <div>Velocidade (v): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>2.0 × 10⁶ m/s</strong></div>
+              <div>Raio calculado: <strong>2,28 × 10⁻⁵ m</strong></div>
             </div>
           </div>
         </div>
@@ -1345,7 +1345,8 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
               <div>Pressão (P): <strong style={{ color: 'var(--color-danger, #BC391F)' }}>1.5 atm</strong></div>
               <div>Volume (V): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>2.0 L</strong></div>
               <div>Temperatura (T): <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>300 K (27°C)</strong></div>
-              <div>Quantidade de Matéria (n): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>1.0 mol</strong></div>
+              <div>Quantidade de Matéria (n): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>≈ 0,122 mol</strong></div>
+              <div>n = PV/(RT), com R = 0,08206 L·atm/(mol·K).</div>
             </div>
           </div>
         </div>
@@ -1383,9 +1384,9 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
       )}
 
       {/* Renderização Dinâmica dos Laboratórios Avançados e Catálogo Master (UniversalLabContainer) */}
-      {(NEW_ADVANCED_LABS[activeTab] || MASTER_LABS_CATALOG.some(l => l.id === activeTab)) && (
+      {(activeCustomLab || NEW_ADVANCED_LABS[activeTab] || MASTER_LABS_CATALOG.some(l => l.id === activeTab)) && (
         <UniversalLabContainer
-          config={resolveUniversalLab(activeTab)}
+          config={activeCustomLab ? createGuidedLabConfig(activeCustomLab, activeCustomLab.learningContent) : resolveUniversalLab(activeTab)}
           onComplete={({ score }) => {
             if (onComplete) onComplete(score * 10);
           }}
@@ -1393,7 +1394,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
       )}
 
       {/* Mediação Ativa: Tutor Socrático e Freiriano (para labs legados) */}
-      {!NEW_ADVANCED_LABS[activeTab] && !MASTER_LABS_CATALOG.some(l => l.id === activeTab) && (
+      {!activeCustomLab && !NEW_ADVANCED_LABS[activeTab] && !MASTER_LABS_CATALOG.some(l => l.id === activeTab) && (
         <SocraticTutorWidget
           labTitle={`Laboratório de ${activeTab.toUpperCase()}`}
           subject="Ciências e Física Interativa"
@@ -1414,9 +1415,9 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, onComplete }) => {
       <LabStudioBuilderModal
         isOpen={showStudio}
         onClose={() => setShowStudio(false)}
+        existingLabs={customLabs}
         onSaveNewLab={(newLab) => {
           setCustomLabs(prev => [newLab, ...prev]);
-          MASTER_LABS_CATALOG.unshift(newLab);
           setActiveTab(newLab.id);
         }}
       />

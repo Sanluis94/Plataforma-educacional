@@ -19,6 +19,18 @@ const VOCABULARY = {
 
 const MODE_DATA: Record<string, Record<'english' | 'spanish', Array<{ word: string; translation: string; example: string; phonetic: string }>>> = {
   vocabulary: VOCABULARY,
+  conversation: {
+    english: [
+      { word: 'Could you repeat that, please?', translation: 'Você poderia repetir, por favor?', example: 'A: Could you repeat that, please? B: Sure. The meeting starts at nine.', phonetic: '' },
+      { word: 'Where is the library?', translation: 'Onde fica a biblioteca?', example: 'A: Where is the library? B: It is next to the main entrance.', phonetic: '' },
+      { word: 'Thank you for your help.', translation: 'Obrigado pela sua ajuda.', example: 'A: Thank you for your help. B: You are welcome.', phonetic: '' },
+    ],
+    spanish: [
+      { word: '¿Podrías repetirlo, por favor?', translation: 'Você poderia repetir, por favor?', example: 'A: ¿Podrías repetirlo, por favor? B: Claro. La reunión empieza a las nueve.', phonetic: '' },
+      { word: '¿Dónde está la biblioteca?', translation: 'Onde fica a biblioteca?', example: 'A: ¿Dónde está la biblioteca? B: Está al lado de la entrada principal.', phonetic: '' },
+      { word: 'Gracias por tu ayuda.', translation: 'Obrigado pela sua ajuda.', example: 'A: Gracias por tu ayuda. B: De nada.', phonetic: '' },
+    ],
+  },
   grammar: {
     english: [
       { word: 'Present Perfect', translation: 'Passado com Conexão no Presente', example: 'I have studied for 3 hours.', phonetic: '/ˈpreznt ˈpɜːfɪkt/' },
@@ -69,26 +81,30 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
   const [showTranslation, setShowTranslation] = useState(false);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState(false);
+  const [audioStatus, setAudioStatus] = useState('');
 
   const modeData = MODE_DATA[mode] || VOCABULARY;
   const words = modeData[lang] || VOCABULARY[lang];
   const current = words[currentIdx] || words[0];
 
   const speak = (text: string, language: string) => {
-    if ('speechSynthesis' in window) {
+    if ('speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined') {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = language;
       utterance.rate = 0.85;
+      utterance.onerror = () => setAudioStatus('O áudio está indisponível. Use a expressão e o exemplo escritos para continuar.');
+      setAudioStatus('Reproduzindo com a voz sintetizada do navegador.');
       window.speechSynthesis.speak(utterance);
-    }
+    } else setAudioStatus('O áudio está indisponível. Use a expressão e o exemplo escritos para continuar.');
   };
 
   const next = () => {
-    if (currentIdx < words.length - 1) {
+    if (answered && currentIdx < words.length) {
       setCurrentIdx(i => i + 1);
       setShowTranslation(false);
       setAnswered(false);
+      setAudioStatus('');
     }
   };
 
@@ -100,22 +116,23 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
     }
   };
 
-  const reset = () => { setCurrentIdx(0); setScore(0); setShowTranslation(false); setAnswered(false); };
+  const reset = () => { setCurrentIdx(0); setScore(0); setShowTranslation(false); setAnswered(false); setAudioStatus(''); };
 
-  // Generate multiple-choice options
-  const otherWords = words.filter((_, i) => i !== currentIdx);
-  const shuffled = [...otherWords].sort(() => Math.random() - 0.5).slice(0, 3);
-  const options = [...shuffled, current].sort(() => Math.random() - 0.5);
+  // Rotate a stable set of alternatives: unrelated re-renders must not move
+  // an answer under the pointer or keyboard focus.
+  const candidates = [current, ...words.filter(word => word !== current).slice(0, 3)];
+  const offset = currentIdx % candidates.length;
+  const options = [...candidates.slice(offset), ...candidates.slice(0, offset)];
 
   return (
     <div style={{ padding: '1.5rem' }}>
       <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🌐 {labTitle || 'Idiomas — Inglês & Espanhol'}</h2>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>Pratique vocabulário avançado com pronunciação nativa (Text-to-Speech).</p>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>{mode === 'conversation' ? 'Pratique falas de diálogos curtos para pedir informação, esclarecer e agradecer.' : 'Pratique palavras e expressões em inglês e espanhol.'} O áudio usa a voz sintetizada disponível no navegador; as frases escritas também servem de apoio.</p>
 
       {/* Lang selector */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
         {(['english', 'spanish'] as const).map(l => (
-          <button key={l} onClick={() => { setLang(l); reset(); }}
+          <button key={l} aria-pressed={lang === l} onClick={() => { setLang(l); reset(); }}
             style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
               background: lang === l ? 'var(--color-primary)' : 'var(--bg-secondary)',
               color: lang === l ? 'white' : 'var(--text-secondary)', fontWeight: lang === l ? 'bold' : 'normal' }}>
@@ -123,7 +140,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
           </button>
         ))}
         <div style={{ marginLeft: 'auto', color: 'var(--text-secondary)', fontSize: '0.85rem', alignSelf: 'center' }}>
-          Acertos: <strong style={{ color: 'var(--color-primary)' }}>{score}/{currentIdx}</strong>
+          Acertos: <strong style={{ color: 'var(--color-primary)' }}>{score}/{currentIdx + (answered ? 1 : 0)}</strong>
         </div>
       </div>
 
@@ -134,12 +151,13 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>
               {current.word}
             </div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>{current.phonetic}</div>
+            {current.phonetic && <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>{current.phonetic}</div>}
             
             <button onClick={() => speak(current.word, lang === 'english' ? 'en-US' : 'es-ES')}
               style={{ padding: '0.5rem 1.25rem', borderRadius: '25px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', color: 'var(--text-main)', cursor: 'pointer', marginBottom: '1rem', fontSize: '0.9rem' }}>
               🔊 Ouvir Pronúncia
             </button>
+            {audioStatus && <p role="status" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{audioStatus}</p>}
 
             {showTranslation && (
               <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(76,175,80,0.1)', borderRadius: '8px', border: '1px solid rgba(76,175,80,0.3)' }}>
@@ -156,7 +174,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
           {/* Multiple choice */}
           {!answered && (
             <div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>Qual é a tradução desta palavra?</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>Qual é a tradução desta palavra ou expressão?</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 {options.map((opt, i) => (
                   <button key={i} onClick={() => handleAnswer(opt.word === current.word)}
@@ -173,7 +191,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
             <div style={{ textAlign: 'center' }}>
               <button onClick={next}
                 style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
-                Próxima Palavra →
+                {currentIdx === words.length - 1 ? 'Ver resultado' : 'Próxima expressão →'}
               </button>
             </div>
           )}
@@ -189,7 +207,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
       )}
       {/* AI Pronunciation Box */}
       <div style={{ marginTop: '1.25rem', padding: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-subtle, #FAF7EE)', border: '1px solid var(--border-color, #E2D7C3)' }}>
-        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>🤖 Dica da IA linguística</div>
+        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>Orientação de pronúncia</div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
           {lang === 'english'
             ? 'Atenção aos padrões de acentuação tônica (syllable stress) em palavras polissilábicas.'
@@ -197,14 +215,14 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
         </p>
       </div>
 
-      {onComplete && (
+      {onComplete && currentIdx === words.length && (
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem', marginBottom: '1rem' }}>
           <button
-            onClick={() => onComplete(100)}
+            onClick={() => onComplete(Math.round(100 * score / words.length))}
             className="btn-gradient"
             style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
           >
-            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
+            Registrar resultado do módulo
           </button>
         </div>
       )}

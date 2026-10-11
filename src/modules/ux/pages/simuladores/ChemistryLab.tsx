@@ -29,11 +29,9 @@ function phToColor(ph: number): string {
 }
 
 function phLabel(ph: number): string {
-  if (ph < 4) return 'Ácido Forte';
-  if (ph < 6) return 'Ácido Fraco';
-  if (ph < 7.5) return 'Neutro';
-  if (ph < 10) return 'Base Fraca';
-  return 'Base Forte';
+  if (ph < 7) return 'Solução ácida';
+  if (ph > 7) return 'Solução básica';
+  return 'Solução neutra a 25 °C';
 }
 
 interface Tube {
@@ -77,13 +75,7 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
   const mixTube = (tubeId: number) => {
     setTubes(prev => prev.map(t => {
       if (t.id !== tubeId || t.reagents.length < 2) return t;
-      const avgPh = t.reagents.reduce((s, r) => s + r.ph, 0) / t.reagents.length;
-      const reaction = avgPh < 7 
-        ? 'Reação Ácida — observe a mudança de cor!'
-        : avgPh > 7.5 
-          ? 'Reação Básica — a solução fica alcalina.'
-          : 'Reação Neutra — equilíbrio químico alcançado!';
-      setInfo(`Tubo ${tubeId}: pH médio = ${avgPh.toFixed(1)}. ${reaction}`);
+      setInfo(`Tubo ${tubeId}: pH da mistura indeterminado neste modelo. Faltam volumes, concentrações e dados de equilíbrio; a média dos pHs não determina o pH final.`);
       return { ...t, mixed: true };
     }));
   };
@@ -93,10 +85,7 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
     setInfo(`Tubo ${tubeId} limpo.`);
   };
 
-  const getTubePh = (tube: Tube): number => {
-    if (!tube.reagents.length) return 7;
-    return tube.reagents.reduce((s, r) => s + r.ph, 0) / tube.reagents.length;
-  };
+  const getTubePh = (tube: Tube): number | undefined => tube.reagents.length === 1 ? tube.reagents[0].ph : undefined;
 
   const renderTubeLiquid = (tube: Tube, color: string) => {
     const count = tube.reagents.length;
@@ -157,34 +146,6 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
           <path d="M 0,10 Q 30,14 60,10 T 120,10 T 180,10 T 240,10 L 240,28 L 0,28 Z" />
         </svg>
 
-        {/* Bubbles on Mix */}
-        {tube.mixed && (
-          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-            {[...Array(6)].map((_, i) => {
-              const size = Math.floor(Math.random() * 3) + 2.5;
-              const left = Math.floor(Math.random() * 70) + 15;
-              const delay = (i * 0.4).toFixed(1);
-              const duration = (Math.random() * 1.5 + 1.2).toFixed(1);
-              return (
-                <span
-                  key={i}
-                  style={{
-                    position: 'absolute',
-                    bottom: '-6px',
-                    left: `${left}%`,
-                    width: `${size}px`,
-                    height: `${size}px`,
-                    borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.45)',
-                    boxShadow: '0 0 4px rgba(255,255,255,0.6)',
-                    animation: `chem-bubble ${duration}s ease-in infinite`,
-                    animationDelay: `${delay}s`,
-                  }}
-                />
-              );
-            })}
-          </div>
-        )}
       </div>
     );
   };
@@ -210,8 +171,8 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
       
       <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🧪 {labTitle || 'Laboratório de Química Virtual'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-        {_mode === 'ph_scale' ? 'Selecione reagentes e misture-os nos tubos de ensaio para observar reações e variações de pH.' :
-         _mode === 'titration' ? 'Curva de Titulação Ácido-Base com adição ponto a ponto de titulante.' :
+        {_mode === 'ph_scale' ? 'Compare valores exemplificativos de pH de soluções individuais a 25 °C. Cores são símbolos didáticos; misturas sem dados suficientes não recebem pH calculado.' :
+         _mode === 'titration' ? 'Exemplo calculado de titulação entre ácido forte e base forte a 25 °C.' :
          _mode === 'stoichiometry' ? 'Cálculos Estequiométricos e Conservação das Massas.' :
          _mode === 'organic' ? 'Construção de Cadeias Carbônicas e Grupos Funcionais.' :
          _mode === 'electrochemistry' ? 'Simulador de Pilhas Eletroquímicas e DDP.' :
@@ -221,7 +182,7 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
       {_mode === 'titration' && (
         <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
           <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>🫙 Titulação Ácido-Base</h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Adição ponto a ponto de titulante (NaOH 0,1M) em uma solução de Erlenmeyer de HCl com indicador Fenolftaleína.</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Exemplo ideal: 12,5 mL de HCl 0,10 mol/L recebem 12,5 mL de NaOH 0,10 mol/L. As quantidades de H⁺ e OH⁻ são iguais: 1,25 mmol de cada. A equivalência ocorre em pH 7 a 25 °C; a viragem da fenolftaleína em faixa básica não é a definição de equivalência.</p>
           <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
               <div style={{ fontSize: '0.8rem', color: 'var(--color-primary-accessible, #B8441F)', marginBottom: '0.25rem', fontWeight: 700 }}>Bureta Graduada</div>
@@ -230,7 +191,7 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
             </div>
             <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
               <div style={{ fontSize: '0.8rem', color: 'var(--color-verde-700, #293E24)', marginBottom: '0.25rem', fontWeight: 700 }}>Erlenmeyer (Indicador)</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-verde-700, #293E24)' }}>pH = 8.2 (Viragem Rosa)</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-verde-700, #293E24)' }}>pH = 7,0 (fenolftaleína incolor)</div>
               <div style={{ margin: '0.5rem 0', color: 'var(--text-muted)', fontSize: '0.78rem' }}>Ponto de Equivalência Atingido</div>
             </div>
           </div>
@@ -265,11 +226,11 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Simulação de transferência de elétrons do Ânodo (Oxidação do Zinco) para o Cátodo (Redução do Cobre).</p>
           <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
             <div style={{ padding: '1rem', background: 'rgba(188,57,31,0.1)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--color-danger, #BC391F)', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-danger, #BC391F)' }}>Ânodo (-) Oxidante</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-danger, #BC391F)' }}>Ânodo (−): oxidação — Zn é o agente redutor</div>
               <div style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Zn(s) → Zn²⁺(aq) + 2e⁻</div>
             </div>
             <div style={{ padding: '1rem', background: 'var(--color-verde-light, rgba(41,62,36,0.12))', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-verde-700, #293E24)' }}>Cátodo (+) Redutor</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-verde-700, #293E24)' }}>Cátodo (+): redução — Cu²⁺ é o agente oxidante</div>
               <div style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Cu²⁺(aq) + 2e⁻ → Cu(s)</div>
             </div>
           </div>
@@ -320,7 +281,7 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
       <div className="lab-canvas-container" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1.5rem', padding: '2rem 1.5rem', background: '#FAF7EE', borderRadius: '14px', border: '1px solid #E2D7C3' }}>
         {tubes.map(tube => {
           const ph = getTubePh(tube);
-          const color = tube.mixed ? phToColor(ph) : (tube.reagents[tube.reagents.length - 1]?.color || '#888');
+          const color = ph !== undefined ? phToColor(ph) : tube.mixed ? '#868c8c' : (tube.reagents[tube.reagents.length - 1]?.color || '#888');
           const hasLiquid = tube.reagents.length > 0;
 
           return (
@@ -334,7 +295,11 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
 
               {/* Visual tubo */}
               <div
+                role="button"
+                tabIndex={0}
+                aria-label={`Adicionar reagente ao tubo ${tube.id}`}
                 onClick={() => addToTube(tube.id)}
+                onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); addToTube(tube.id); } }}
                 style={{
                   width: '52px', height: '160px', cursor: 'pointer',
                   borderRadius: '0 0 30px 30px',
@@ -356,17 +321,17 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
                 <div style={{
                   padding: '0.25rem 0.5rem',
                   borderRadius: '6px',
-                  background: phToColor(ph) + '22',
-                  border: `1px solid ${phToColor(ph)}66`,
-                  color: phToColor(ph),
+                  background: color + '22',
+                  border: `1px solid ${color}66`,
+                  color,
                   fontSize: '0.75rem',
                   fontWeight: 'bold',
                   textAlign: 'center',
-                  boxShadow: `0 0 10px ${phToColor(ph)}33`,
+                  boxShadow: `0 0 10px ${color}33`,
                   transition: 'all 0.4s ease',
                 }}>
-                  pH {ph.toFixed(1)}<br/>
-                  <span style={{ fontWeight: 'normal' }}>{phLabel(ph)}</span>
+                  {ph === undefined ? 'pH indeterminado' : `pH ${ph.toFixed(1)}`}<br/>
+                  <span style={{ fontWeight: 'normal' }}>{ph === undefined ? 'Dados da mistura insuficientes' : phLabel(ph)}</span>
                 </div>
               )}
 
@@ -402,7 +367,7 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
         fontSize: '0.9rem',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.8rem', marginBottom: '0.4rem' }}>
-          <span>🤖 Assistente IA adaptativa de química</span>
+          <span>Observações da bancada</span>
         </div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
           💡 {info}

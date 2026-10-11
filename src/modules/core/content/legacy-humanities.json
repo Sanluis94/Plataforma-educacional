@@ -1,0 +1,395 @@
+{
+  "hist_1": {
+    "context": "Uma exposição precisa ligar acontecimentos brasileiros e mundiais sem transformar a linha do tempo em uma lista de causas automáticas. Você organizará marcos, intervalos e perguntas sobre o que os cartões deixam de mostrar.",
+    "theory": "Cronologia organiza acontecimentos segundo uma convenção de datas; periodização agrupa processos segundo um critério de análise. Um marco pode indicar mudança institucional sem apagar continuidades sociais. A Lei Áurea, de 13 de maio de 1888, extinguiu juridicamente a escravidão no Brasil, mas não eliminou o racismo nem assegurou por si só acesso à terra. Dois fatos próximos no desenho podem ter relações diferentes: anterioridade é necessária para uma causa antecedente, porém não basta para prová-la. Categorias como Brasil, política e ciência são escolhas de classificação, não compartimentos isolados da história.",
+    "workedExample": "Considere os cartões 1822, independência; 1888, abolição; 1889, República. A ordem é essa, com diferenças entre os números dos anos de 66 e 1. Não se pode concluir que a independência aboliu a escravidão: o cartão de 1888 mostra uma mudança jurídica posterior. Para explicar por que ela ocorreu, investigamos resistência de escravizados, mobilização abolicionista e disputas políticas, além da data da lei.",
+    "investigation": [
+      "Selecione três marcos brasileiros e escreva a ordem e a diferença entre os anos, indicando que dias e meses podem alterar a duração exata.",
+      "Use um filtro temático e identifique um acontecimento excluído que ainda pode ser relevante para compreender o tema selecionado.",
+      "Escolha dois eventos consecutivos e formule uma hipótese de relação, seguida de uma fonte que seria necessária para testá-la."
+    ],
+    "expectedEvidence": "Seu registro deve apresentar uma sequência temporal correta, um intervalo calculado e uma explicação que distinga o que a data demonstra da hipótese sobre causas e permanências.",
+    "reflection": "Que grupos e processos ficam invisíveis quando uma exposição apresenta apenas governantes, leis e batalhas?",
+    "scenarios": [
+      {"id": "abolicao-republica", "label": "Marcos próximos", "situation": "A exposição coloca 1888, abolição, antes de 1889, República. Um visitante conclui que a abolição só ocorreu depois do fim da monarquia.", "observation": "Os próprios anos contradizem a conclusão: 1888 antecede 1889.", "explanation": "Ordenar os cartões permite corrigir a sequência. A abolição jurídica ocorreu ainda no Império; explicar as relações entre abolição e crise monárquica exige outras evidências."},
+      {"id": "lua-politica", "label": "Filtro de ciência", "situation": "O filtro Ciência mostra a chegada de seres humanos à Lua em 1969 e oculta os cartões de conflitos políticos do mesmo século.", "observation": "O filtro altera a seleção visível, não transforma a missão em um evento sem contexto político.", "explanation": "A Apollo 11 pertence à história da ciência e também à competição internacional da época. Um rótulo único pode ser útil à navegação, mas não esgota as relações do acontecimento."},
+      {"id": "muro-unidade", "label": "Datas distintas", "situation": "Dois cartões adicionais registram a abertura do Muro de Berlim em 1989 e a reunificação alemã em 1990. A legenda os trata como o mesmo dia.", "observation": "Há dois marcos relacionados, separados por processos políticos e por datas diferentes.", "explanation": "A abertura das fronteiras em novembro de 1989 não foi a reunificação formal de outubro de 1990. A linha pode representar etapas de uma transformação, evitando comprimi-las em um único instante."}
+    ],
+    "questions": [
+      {"question": "O que a proximidade de dois pontos em uma linha do tempo demonstra diretamente?", "options": [
+        {"text": "Que o primeiro é necessariamente a causa exclusiva do segundo.", "correct": false, "explanation": "Proximidade temporal não identifica mecanismos nem elimina outras causas possíveis."},
+        {"text": "Que seus marcos temporais estão próximos na escala usada.", "correct": true, "explanation": "O desenho informa posição temporal; uma explicação causal requer análise de processos e fontes."},
+        {"text": "Que os dois acontecimentos afetaram igualmente todos os grupos.", "correct": false, "explanation": "Uma posição no eixo não contém informação sobre a distribuição social dos efeitos."}
+      ]},
+      {"question": "Como interpretar a abolição jurídica de 1888 sem confundir ruptura com solução de todos os problemas?", "options": [
+        {"text": "Como mudança legal decisiva, acompanhada de permanências e disputas sociais.", "correct": true, "explanation": "A extinção da escravidão deve ser reconhecida junto à investigação das desigualdades e lutas posteriores."},
+        {"text": "Como prova de que o racismo desapareceu naquela data.", "correct": false, "explanation": "O texto da lei extinguiu a escravidão; não demonstra o desaparecimento das práticas e estruturas racistas."},
+        {"text": "Como fato sem relação com a ação de pessoas escravizadas e abolicionistas.", "correct": false, "explanation": "Reduzir o marco à assinatura apaga mobilizações e resistências que precisam integrar a explicação histórica."}
+      ]}
+    ],
+    "sources": [
+      {"title": "Senado Federal — Lei nº 3.353, de 13 de maio de 1888", "url": "https://legis.senado.leg.br/norma/545155"},
+      {"title": "NASA — Apollo 11", "url": "https://www.nasa.gov/mission/apollo-11/"},
+      {"title": "Governo Federal alemão — Cronologia 1989/1990", "url": "https://www.bundesregierung.de/breg-de/schwerpunkte/deutsche-einheit/chronik-der-ereignisse-1989-1990"}
+    ]
+  },
+  "hist_2": {
+    "context": "O mapa de um porto colonial pode mostrar mercadorias e impostos e esconder quem produziu essa riqueza. Investigue relações entre território, comércio, trabalho compulsório e resistência no Brasil colonial.",
+    "theory": "A colonização portuguesa não começou em um território vazio: povos indígenas diversos já construíam modos de vida, conhecimentos e relações políticas. A economia colonial articulou produção para mercados externos e atividades de abastecimento interno. Engenhos de açúcar envolveram terra, equipamentos, comércio e exploração de trabalhadores escravizados indígenas e africanos, com variações regionais e temporais. Escravização foi violência e coerção, não contrato livre. Pessoas submetidas a ela resistiram por diferentes meios, inclusive fugas, formação de quilombos e negociação de espaços de autonomia. Grupos africanos e indígenas não formavam culturas únicas e homogêneas.",
+    "workedExample": "Um esquema didático, sem reproduzir um documento real, liga lavoura, engenho e porto por setas de açúcar. Acrescentar apenas a seta Portugal explicaria parte do comércio. Para analisar a sociedade, acrescentamos trabalho escravizado, roças de alimentos, circulação local e conflitos. O valor exportado não mede a liberdade nem a qualidade de vida de quem trabalhou; o fluxo comercial deve ser lido junto às relações de poder.",
+    "investigation": [
+      "Localize os marcos de capitanias, abertura dos portos e independência e separe administração colonial de mudanças posteriores.",
+      "Desenhe uma rede do açúcar com produção, transporte e destino, identificando quem controlava recursos e quem era submetido à coerção.",
+      "Inclua na rede uma forma de resistência e uma atividade de abastecimento interno para testar os limites de uma explicação só exportadora."
+    ],
+    "expectedEvidence": "A rede comentada precisa conectar economia e coerção, reconhecer a presença e a diversidade indígena e africana e mostrar resistência sem apresentar números inventados como estatísticas coloniais.",
+    "reflection": "Como muda a narrativa colonial quando pessoas escravizadas e povos indígenas aparecem como sujeitos históricos?",
+    "scenarios": [
+      {"id": "porto-sem-pessoas", "label": "Riqueza e coerção", "situation": "Uma maquete fictícia destaca o açúcar enviado ao porto, mas sua legenda afirma que todos os trabalhadores escolheram livremente trabalhar no engenho.", "observation": "A legenda apaga a escravização e confunde produção de riqueza com relações livres de trabalho.", "explanation": "O cultivo e o processamento de açúcar estiveram ligados à exploração de pessoas escravizadas. A circulação de uma mercadoria não autoriza concluir que produtores tinham liberdade de escolha."},
+      {"id": "quilombo-agencia", "label": "Resistência organizada", "situation": "Um roteiro menciona Palmares apenas como lugar para onde pessoas fugiam, sem discutir organização social, produção ou defesa.", "observation": "A descrição reconhece a fuga, mas reduz a complexidade das comunidades de resistência.", "explanation": "Quilombos também construíram relações sociais e estratégias de sobrevivência. Estudar Palmares permite analisar organização e enfrentamento à ordem escravista, sem supor que todos os quilombos foram idênticos."},
+      {"id": "independencia-escravidao", "label": "Permanência após 1822", "situation": "A linha contém 1822, independência política, e 1888, abolição. Um painel afirma que deixar de ser colônia extinguiu imediatamente o trabalho escravizado.", "observation": "Os marcos mostram que independência e abolição foram mudanças diferentes.", "explanation": "O Estado independente manteve a escravidão por décadas. Distinguir soberania política de liberdade das pessoas impede tratar o fim da condição colonial como emancipação social completa."}
+    ],
+    "questions": [
+      {"question": "Qual complemento torna mais adequada uma explicação da economia açucareira colonial?", "options": [
+        {"text": "Afirmar que havia apenas relações comerciais, sem violência ou conflito.", "correct": false, "explanation": "Essa leitura omite a escravização e a desigualdade de poder que sustentaram parte importante da produção."},
+        {"text": "Descrever indígenas e africanos como um único povo sem diferenças.", "correct": false, "explanation": "Os termos abrangem povos diversos; a generalização apaga línguas, experiências e formas de organização."},
+        {"text": "Relacionar comércio, exploração do trabalho, abastecimento e resistência.", "correct": true, "explanation": "Essas dimensões conectam a mercadoria às pessoas e às relações sociais que um mapa de exportações pode ocultar."}
+      ]},
+      {"question": "Por que a formação de quilombos ajuda a superar a imagem de pessoas escravizadas totalmente passivas?", "options": [
+        {"text": "Porque evidencia ações de resistência e construção de vida coletiva.", "correct": true, "explanation": "Fuga, organização e defesa mostram agência histórica mesmo sob coerção intensa."},
+        {"text": "Porque prova que a escravidão era uma escolha reversível sem riscos.", "correct": false, "explanation": "A repressão e os riscos da resistência contradizem a ideia de uma relação voluntária e facilmente abandonada."},
+        {"text": "Porque demonstra que não existia produção agrícola fora dos engenhos.", "correct": false, "explanation": "Comunidades e redes de abastecimento incluíam outras atividades; resistência não implica ausência de produção."}
+      ]}
+    ],
+    "sources": [
+      {"title": "Biblioteca Nacional — Escravidão e sociedade colonial", "url": "https://bndigital.bn.gov.br/dossies/rede-da-memoria-virtual-brasileira/escravidao-jose-roberto-pinto-de-goes/"},
+      {"title": "Biblioteca Nacional — Povos indígenas no Brasil", "url": "https://bndigital.bn.gov.br/dossies/rede-da-memoria-virtual-brasileira/alteridades/povos-indigenas-no-brasil/"},
+      {"title": "Fundação Cultural Palmares e Iphan — Dossiê Serra da Barriga", "url": "https://www.gov.br/palmares/pt-br/midias/dossieserradabarriga.pdf"}
+    ]
+  },
+  "hist_3": {
+    "context": "Uma fábrica pode produzir mais e continuar expondo trabalhadores a jornadas extensas. Compare mudanças de energia, organização do tempo e distribuição dos resultados durante a industrialização.",
+    "theory": "A Revolução Industrial começou na Grã-Bretanha e envolveu transformações técnicas, econômicas e sociais que ocorreram em ritmos diferentes entre setores e regiões. A mecanização combinou máquinas, fontes de energia, capital e concentração do trabalho em fábricas. A energia hidráulica e a energia a vapor coexistiram; Watt aperfeiçoou motores que já tinham antecedentes, não inventou sozinho toda a indústria. O relógio fabril e a divisão de tarefas alteraram o controle do ritmo de trabalho. Aumento da produção não demonstra automaticamente aumento dos salários, redução da jornada ou melhoria de saúde. Esses resultados dependem de relações de poder e de disputas sociais.",
+    "workedExample": "Em uma fábrica inteiramente fictícia, 20 pessoas produzem 80 peças em um turno de 8 horas; depois, as mesmas 20 produzem 160 no mesmo tempo. O produto por pessoa-turno sobe de 4 para 8. Sem conhecer salários, segurança e intensidade do trabalho, não concluímos que o bem-estar dobrou. Se o turno também dobrasse, o mesmo total de 160 não indicaria aumento de peças por hora trabalhada.",
+    "investigation": [
+      "Organize os marcos de vapor, movimentos de trabalhadores e linha de montagem, registrando que cada data resume um processo mais longo.",
+      "Compare uma oficina e uma fábrica hipotéticas quanto a fonte de energia, ritmo e decisão sobre as tarefas, sem presumir condições iguais para todos.",
+      "Calcule produção por pessoa e por hora nos dados do exemplo e liste informações necessárias para avaliar as condições de trabalho."
+    ],
+    "expectedEvidence": "A comparação deve separar produção total, produtividade e condições de vida, reconhecer a coexistência de tecnologias e explicar como o controle do tempo mudou nas fábricas.",
+    "reflection": "Quem decide como usar um ganho de produtividade, e que evidências mostrariam sua distribuição entre os envolvidos?",
+    "scenarios": [
+      {"id": "dois-turnos", "label": "Mais tempo, mesmo ritmo", "situation": "Dados fictícios: uma equipe passa de 60 peças em 6 horas a 120 peças em 12 horas, mantendo o mesmo número de pessoas.", "observation": "O total dobra, mas a produção da equipe por hora permanece em 10 peças.", "explanation": "O aumento veio da duração do trabalho nos dados apresentados. Atribuí-lo apenas a uma máquina mais eficiente confundiria produção acumulada com produtividade horária."},
+      {"id": "agua-vapor", "label": "Tecnologias coexistentes", "situation": "Uma reconstrução didática apresenta duas fábricas na mesma década: uma usa roda-d'água; outra, motor a vapor alimentado por carvão.", "observation": "A presença do vapor em uma unidade não elimina automaticamente a energia hidráulica da outra.", "explanation": "Investimento, localização, recursos e usos influenciam a adoção técnica. Industrialização é transformação desigual e gradual, não substituição simultânea de toda máquina em uma data única."},
+      {"id": "ritmo-esteira", "label": "Divisão de tarefas", "situation": "Em uma montagem fictícia, uma pessoa fazia um objeto completo; após a reorganização, cada trabalhador repete uma etapa conforme a passagem da esteira.", "observation": "A tarefa individual fica mais especializada e o ritmo passa a depender do fluxo coletivo da linha.", "explanation": "A reorganização pode acelerar a produção, mas também reduzir o controle individual sobre o ritmo. Para julgar seus efeitos, são necessários dados sobre pausas, jornada, segurança e remuneração."}
+    ],
+    "questions": [
+      {"question": "Uma equipe produz 90 unidades em 9 horas e depois 180 em 18 horas. O que os dados permitem afirmar?", "options": [
+        {"text": "A produção por hora da equipe dobrou.", "correct": false, "explanation": "As duas divisões resultam em 10 unidades por hora; dobrou a duração observada."},
+        {"text": "A produção total dobrou, mantendo 10 unidades por hora.", "correct": true, "explanation": "90/9 e 180/18 são iguais; distinguir total e taxa evita atribuir à técnica um efeito do tempo."},
+        {"text": "O salário de cada trabalhador necessariamente dobrou.", "correct": false, "explanation": "Nenhum valor salarial foi informado; produção não determina sozinha a remuneração."}
+      ]},
+      {"question": "Qual interpretação da máquina a vapor evita uma explicação baseada em um inventor isolado?", "options": [
+        {"text": "O motor tornou desnecessários combustíveis, investimento e trabalhadores.", "correct": false, "explanation": "Máquinas dependiam de recursos, financiamento, manutenção e trabalho para operar."},
+        {"text": "Todas as oficinas do mundo viraram fábricas no mesmo ano.", "correct": false, "explanation": "Setores e territórios adotaram tecnologias em ritmos diferentes, com coexistência de formas produtivas."},
+        {"text": "Aperfeiçoamentos técnicos se combinaram com recursos e novas relações de produção.", "correct": true, "explanation": "Essa interpretação situa a máquina em processos coletivos, econômicos e sociais da industrialização."}
+      ]}
+    ],
+    "sources": [
+      {"title": "Science Museum — In Pursuit of Power", "url": "https://blog.sciencemuseum.org.uk/a-new-age/"},
+      {"title": "Science Museum — James Watt, office equipment and high-street fashion", "url": "https://blog.sciencemuseum.org.uk/james-watt-high-street-fashion/"}
+    ]
+  },
+  "hist_4": {
+    "context": "Um museu quer comparar as duas guerras mundiais sem confundir seus contextos nem reduzir a experiência de milhões de pessoas a uma sequência de batalhas. Você revisará relações causais e impactos sobre civis.",
+    "theory": "A Primeira Guerra Mundial, de 1914 a 1918, envolveu rivalidades entre potências, nacionalismos, militarização e alianças; o assassinato em Sarajevo foi um estopim, não explicação suficiente de todo o conflito. A Segunda Guerra Mundial, de 1939 a 1945, teve contextos próprios de expansionismo, regimes autoritários e decisões políticas. O Tratado de Versalhes integra o período entre guerras, mas não tornou o nazismo inevitável. Ambos os conflitos mobilizaram economias e afetaram civis. Na Segunda Guerra, o Holocausto foi a perseguição e o assassinato sistemático de seis milhões de judeus pelo regime nazista e seus colaboradores; outros grupos também foram perseguidos. Genocídio e combate militar devem ser distinguidos na análise.",
+    "workedExample": "Uma atividade criada para estudo oferece os cartões 1914, início da Primeira Guerra; 1918, armistício; 1919, Versalhes; 1939, invasão alemã da Polônia. Ordená-los mostra que o tratado veio depois do encerramento dos combates em 1918. Para relacionar 1919 e 1939, acrescentamos crise econômica, propaganda e escolhas políticas; a distância entre datas não permite escrever que a segunda guerra estava automaticamente decidida em 1919.",
+    "investigation": [
+      "Monte duas sequências separadas para as guerras e marque um antecedente, um acontecimento e uma consequência de cada uma.",
+      "Reescreva uma explicação de causa única para incluir fatores de longa duração e decisões de atores, sem tratar o resultado como inevitável.",
+      "Compare combate, mobilização econômica e perseguição a civis, indicando por que são dimensões relacionadas, mas diferentes."
+    ],
+    "expectedEvidence": "A síntese precisa preservar as datas e os contextos das duas guerras, distinguir estopim de causas e reconhecer a especificidade do Holocausto sem transformar propaganda em descrição verdadeira dos perseguidos.",
+    "reflection": "O que uma narrativa centrada apenas em vitórias militares perde sobre civis, perseguição e responsabilidade política?",
+    "scenarios": [
+      {"id": "estopim-estrutura", "label": "Uma causa insuficiente", "situation": "Um painel afirma: sem rivalidades, alianças ou mobilização militar, o assassinato de Sarajevo por si só explica a guerra mundial de 1914.", "observation": "O painel transforma o estopim em uma explicação completa e omite a escalada política.", "explanation": "A análise histórica deve conectar o episódio às decisões de governos e às tensões anteriores. Explicar a ampliação do conflito exige mais que apontar o primeiro cartão cronológico."},
+      {"id": "versalhes-destino", "label": "Resultado inevitável?", "situation": "Uma ficha de debate diz que o tratado de 1919 obrigou todos os alemães a apoiar o nazismo e tornou 1939 inevitável.", "observation": "A ficha elimina divergências e escolhas de duas décadas e atribui apoio uniforme a uma população.", "explanation": "Condições do pós-guerra contribuíram para tensões, mas não explicam sozinhas a ascensão nazista. Instituições, organizações, crises e decisões precisam ser examinadas sem atribuição coletiva de uma vontade única."},
+      {"id": "civis-genocidio", "label": "Categorias de violência", "situation": "Uma tabela didática junta soldados em batalha e judeus deportados para extermínio sob a mesma legenda: todos eram combatentes de lados opostos.", "observation": "A tabela apaga a perseguição genocida e descreve vítimas civis como um exército adversário.", "explanation": "O Holocausto foi um projeto de perseguição e assassinato sistemático. Reconhecer sua especificidade é necessário para compreender a violência nazista, inclusive quando estudada no contexto mais amplo da guerra."}
+    ],
+    "questions": [
+      {"question": "Qual relação entre Sarajevo e a Primeira Guerra é historicamente mais adequada?", "options": [
+        {"text": "O atentado foi um estopim em um contexto de tensões e decisões políticas.", "correct": true, "explanation": "Essa formulação conecta o episódio à escalada internacional sem torná-lo a única causa do conflito."},
+        {"text": "O atentado explica sozinho todas as alianças formadas antes dele.", "correct": false, "explanation": "Um acontecimento posterior não explica por si só a formação anterior das alianças."},
+        {"text": "O atentado ocorreu durante a Segunda Guerra, em 1939.", "correct": false, "explanation": "Sarajevo se relaciona à crise de 1914; deslocá-lo para 1939 confunde os dois conflitos."}
+      ]},
+      {"question": "Por que não devemos classificar todas as vítimas do Holocausto como combatentes inimigos?", "options": [
+        {"text": "Porque nenhuma perseguição aconteceu durante a guerra.", "correct": false, "explanation": "Perseguição e guerra coexistiram; a questão é distinguir suas formas e responsabilidades."},
+        {"text": "Porque foram alvo de perseguição e extermínio, e não um exército definido por combater o regime.", "correct": true, "explanation": "A categorização nazista atingiu pessoas por identidade atribuída e fez parte de uma política genocida."},
+        {"text": "Porque toda violência política começou apenas depois de 1945.", "correct": false, "explanation": "A perseguição nazista já se desenvolvia antes e durante a Segunda Guerra Mundial."}
+      ]}
+    ],
+    "sources": [
+      {"title": "National Army Museum — First World War", "url": "https://www.nam.ac.uk/explore/first-world-war"},
+      {"title": "United States Holocaust Memorial Museum — World War II and the Holocaust", "url": "https://www.ushmm.org/learn/holocaust/world-war-ii-and-the-holocaust-1939-1945"},
+      {"title": "United States Holocaust Memorial Museum — Aftermath of World War I and the rise of Nazism", "url": "https://www.ushmm.org/learn/holocaust/aftermath-of-world-war-i-and-the-rise-of-nazism-1918-1933"}
+    ]
+  },
+  "hist_5": {
+    "context": "Democracia, república e império aparecem hoje em debates políticos, mas seus sentidos antigos não são idênticos aos atuais. Compare participação e poder em Atenas e Roma sem imaginar uma sociedade antiga uniforme.",
+    "theory": "O mundo grego reunia pólis com instituições diferentes; Atenas não representa automaticamente toda a Grécia. Na democracia ateniense clássica, a participação na assembleia estava reservada a homens adultos reconhecidos como cidadãos, excluindo mulheres, pessoas escravizadas e estrangeiros residentes dessa decisão política. Em Roma, a República combinava magistraturas, Senado e assembleias em uma sociedade desigual; não era uma democracia representativa moderna. A concentração de poder no principado de Augusto, a partir de 27 a.C., modificou o regime sem apagar de uma vez todas as instituições anteriores. O marco de 476 refere-se ao Império Romano do Ocidente; o Império do Oriente continuou existindo.",
+    "workedExample": "Um quadro inteiramente fictício representa uma pólis com 120 moradores, dos quais 30 têm direito de participar de sua assembleia. A proporção é 30/120 = 25%. O exercício mostra que participação direta dos cidadãos pode coexistir com exclusão de grande parte dos moradores. Esses números não são estimativa demográfica de Atenas: ilustram a diferença entre população total e corpo político.",
+    "investigation": [
+      "Coloque 508 a.C., 44 a.C., 27 a.C. e 476 d.C. em ordem, lembrando que números maiores antes de Cristo indicam datas mais antigas.",
+      "Compare quem participa das decisões na Atenas clássica e quem ocupa instituições da República Romana, sem transportar automaticamente o voto atual.",
+      "Explique uma continuidade e uma mudança entre República e Império e qual é o alcance geográfico do marco de 476."
+    ],
+    "expectedEvidence": "Sua comparação deve distinguir habitantes e participantes políticos, ordenar corretamente datas a.C. e limitar 476 ao Ocidente, reconhecendo diferenças entre Atenas, outras pólis e Roma.",
+    "reflection": "Por que elogiar a participação direta ateniense exige também perguntar quem era impedido de participar?",
+    "scenarios": [
+      {"id": "corpo-politico", "label": "Participação e exclusão", "situation": "No quadro fictício, 24 de 96 moradores podem deliberar diretamente. Um estudante afirma que decisão direta significa participação de toda a população.", "observation": "Somente 25% dos moradores do exemplo integram a assembleia, embora deliberem diretamente.", "explanation": "Direta descreve a forma de participação dos integrantes do corpo político, não a inclusão de todos os habitantes. A restrição de acesso é outra dimensão que precisa ser analisada."},
+      {"id": "antes-cristo", "label": "Sentido das datas", "situation": "Um visitante coloca 27 a.C. antes de 44 a.C. porque 27 é um número menor, lendo as datas antigas como anos d.C.", "observation": "A sequência está invertida: 44 a.C. é anterior a 27 a.C.", "explanation": "Os anos a.C. diminuem à medida que se aproximam da era comum. Também não existe ano zero na contagem histórica tradicional entre 1 a.C. e 1 d.C."},
+      {"id": "oriente-continua", "label": "O alcance de 476", "situation": "Um painel diz que em 476 todas as instituições e comunidades romanas desapareceram no Ocidente e no Oriente.", "observation": "O painel confunde um marco político ocidental com desaparecimento total e simultâneo.", "explanation": "O poder imperial romano do Oriente continuou a partir de Constantinopla. Mesmo no Ocidente, transformações políticas coexistiram com permanências culturais e sociais, em vez de um apagamento instantâneo."}
+    ],
+    "questions": [
+      {"question": "Qual afirmação distingue corretamente a democracia ateniense de uma cidadania universal?", "options": [
+        {"text": "Toda pessoa que morava em Atenas votava nas assembleias.", "correct": false, "explanation": "Residência não bastava para participação: mulheres, escravizados e estrangeiros residentes eram excluídos da assembleia."},
+        {"text": "Atenas tinha exatamente as mesmas instituições de todas as pólis gregas.", "correct": false, "explanation": "As cidades gregas possuíam arranjos políticos diversos; um caso não representa automaticamente todos."},
+        {"text": "Cidadãos habilitados deliberavam diretamente, mas grande parte dos habitantes era excluída.", "correct": true, "explanation": "A forma direta de decisão coexistia com critérios restritos de participação política."}
+      ]},
+      {"question": "Qual sequência ordena corretamente os três marcos antigos apresentados?", "options": [
+        {"text": "44 a.C., 27 a.C., 476 d.C.", "correct": true, "explanation": "44 a.C. vem antes de 27 a.C.; ambos antecedem 476 da era comum."},
+        {"text": "27 a.C., 44 a.C., 476 d.C.", "correct": false, "explanation": "A ordem dos dois anos a.C. foi invertida: 44 a.C. está mais distante do início da era comum."},
+        {"text": "476 d.C., 44 a.C., 27 a.C.", "correct": false, "explanation": "476 d.C. é posterior aos dois marcos antes de Cristo, e não o primeiro da sequência."}
+      ]}
+    ],
+    "sources": [
+      {"title": "American School of Classical Studies at Athens — Women in the Athenian Agora", "url": "https://www.ascsa.edu.gr/uploads/media/WomenInTheAthenianAgora.pdf"},
+      {"title": "The Metropolitan Museum of Art — The Roman Republic", "url": "https://www.metmuseum.org/de/essays/the-roman-republic"},
+      {"title": "The Metropolitan Museum of Art — Byzantium, ca. 330–1453", "url": "https://www.metmuseum.org/de/essays/byzantium-ca-330-1453"}
+    ]
+  },
+  "hist_6": {
+    "context": "Um noticiário sobre satélites pode ser simultaneamente registro científico e demonstração de prestígio político. Examine a Guerra Fria pela corrida espacial, pelos conflitos regionais e pelos diferentes marcos de seu encerramento.",
+    "theory": "A Guerra Fria envolveu competição entre Estados Unidos e União Soviética, alianças e projetos políticos, econômicos e militares. A ausência de guerra direta generalizada entre as superpotências não significou paz mundial: guerras como a da Coreia, entre 1950 e 1953, atingiram populações de outros territórios. A corrida espacial combinou pesquisa, demonstração tecnológica e propaganda. A União Soviética lançou o Sputnik em 1957; a missão norte-americana Apollo 11 realizou o primeiro pouso tripulado na Lua em 1969. Abertura do Muro em 1989, reunificação alemã em 1990 e dissolução soviética em 1991 são marcos distintos de transformações que não ocorreram em um único dia.",
+    "workedExample": "Uma curadoria seleciona Sputnik, 1957, e Apollo 11, 1969. O intervalo entre os números dos anos é de 12. Dizer que apenas um país produziu conhecimento é incompatível com a sequência, mas os dois cartões também não bastam para medir todo o investimento ou todas as aplicações científicas. Uma boa legenda distingue o feito técnico comprovado da mensagem política que governos associaram a ele.",
+    "investigation": [
+      "Selecione os marcos espaciais e identifique realizador, data e feito, sem concluir superioridade de toda uma sociedade a partir de uma missão.",
+      "Acrescente uma guerra regional à linha e explique por que o adjetivo fria não descreve a experiência de todos os povos.",
+      "Separe abertura do Muro, reunificação alemã e dissolução da URSS, construindo uma sequência que preserve as diferenças entre esses processos."
+    ],
+    "expectedEvidence": "A legenda final deve conectar ciência e disputa política, reconhecer violência fora do confronto direto entre superpotências e apresentar 1989, 1990 e 1991 como marcos diferentes.",
+    "reflection": "Como a escolha de quais países e experiências aparecem na linha muda a interpretação da expressão Guerra Fria?",
+    "scenarios": [
+      {"id": "satelite-prestigio", "label": "Técnica e propaganda", "situation": "Um cartaz didático anuncia o Sputnik de 1957 e conclui que um sucesso espacial prova a superioridade de todas as instituições de um país.", "observation": "O lançamento comprova uma realização tecnológica específica; a conclusão política é muito mais ampla que a evidência.", "explanation": "Um êxito científico pode ser usado como propaganda, mas não avalia sozinho liberdade, renda, cultura ou todas as capacidades técnicas de uma sociedade."},
+      {"id": "coreia-na-linha", "label": "Fria para quem?", "situation": "Uma exposição registra a Guerra da Coreia, 1950–1953, mas sua introdução declara que ninguém combateu durante a Guerra Fria.", "observation": "A própria guerra regional desmente a descrição de ausência universal de combates.", "explanation": "O termo aponta principalmente a rivalidade sem confronto militar direto generalizado entre EUA e URSS. Não apaga conflitos locais, intervenções nem o sofrimento de civis em outros territórios."},
+      {"id": "tres-encerramentos", "label": "Fim em etapas", "situation": "Os cartões são A: dissolução soviética, 1991; B: abertura do Muro, 1989; C: reunificação alemã, 1990.", "observation": "A ordem cronológica é B, C, A, e cada cartão nomeia uma transformação diferente.", "explanation": "A mudança de fronteiras e instituições alemãs não é idêntica ao fim da União Soviética. O encadeamento ajuda a estudar relações sem reunir todos os processos em 1989."}
+    ],
+    "questions": [
+      {"question": "Por que a Guerra da Coreia impede interpretar Guerra Fria como paz em todo o planeta?", "options": [
+        {"text": "Porque a rivalidade entre superpotências coexistiu com guerras regionais.", "correct": true, "explanation": "A ausência de confronto direto generalizado entre EUA e URSS não eliminou combates e intervenções em outros países."},
+        {"text": "Porque toda a Guerra Fria ocorreu antes de 1945.", "correct": false, "explanation": "A Guerra da Coreia pertence ao período posterior à Segunda Guerra, no início dos anos 1950."},
+        {"text": "Porque um conflito regional não produz efeitos sobre civis.", "correct": false, "explanation": "A escala regional não impede morte, deslocamento e destruição para as populações envolvidas."}
+      ]},
+      {"question": "Que conclusão é justificada ao comparar Sputnik em 1957 e Apollo 11 em 1969?", "options": [
+        {"text": "A missão de 1969 ocorreu antes do satélite de 1957.", "correct": false, "explanation": "A ordem temporal é a inversa; os números dos anos diferem em 12."},
+        {"text": "Um único lançamento resolveu definitivamente a disputa entre os regimes.", "correct": false, "explanation": "Um marco espacial não encerra automaticamente disputas econômicas, políticas e militares."},
+        {"text": "Houve feitos distintos, de países rivais, vinculados a competição e pesquisa.", "correct": true, "explanation": "Os cartões permitem reconhecer a diversidade dos marcos e investigar a associação entre tecnologia e prestígio."}
+      ]}
+    ],
+    "sources": [
+      {"title": "NASA — História do Sputnik", "url": "https://www.nasa.gov/wp-content/uploads/static/history/sputnik.html"},
+      {"title": "NASA — Apollo 11 e a corrida espacial", "url": "https://www.nasa.gov/mission/apollo-11/"},
+      {"title": "Office of the Historian — The Korean War", "url": "https://history.state.gov/milestones/1945-1952/korean-war"},
+      {"title": "Governo Federal alemão — A reunificação em 3 de outubro de 1990", "url": "https://www.bundesregierung.de/breg-de/schwerpunkte/deutsche-einheit/die-einheit-ist-wirklichkeit-432814"}
+    ]
+  },
+  "geo_1": {
+    "context": "O movimento das placas é lento na escala humana, enquanto a liberação de energia em um terremoto pode ser rápida. Relacione movimentos e formas do relevo sem transformar a animação em um relógio de previsão de desastres.",
+    "theory": "Placas litosféricas movem-se umas em relação às outras. Limites divergentes apresentam afastamento; convergentes, aproximação; transformantes, deslocamento lateral predominante. A convergência pode envolver subducção ou colisão continental, com resultados diferentes. Nos limites transformantes, o movimento não exige criar ou consumir crosta nem produzir vulcanismo. Atrito e deformação permitem acumular energia que pode ser liberada em terremotos. Uma velocidade média anual não revela a data de um futuro sismo. Há terremotos também no interior de placas; o mapa de limites ajuda a compreender padrões, mas não é um mapa de segurança absoluta.",
+    "workedExample": "Em um modelo hipotético, duas placas se afastam à taxa relativa constante de 3 cm por ano. Em 40 anos, o afastamento acumulado é 3 × 40 = 120 cm, ou 1,2 m. Esse cálculo não informa quando haverá ruptura em uma falha, pois deslocamento médio, deformação local e liberação sísmica são grandezas distintas. A animação acelerada serve para mostrar geometria, não duração real de cada terremoto.",
+    "investigation": [
+      "Observe as setas de cada limite e descreva o movimento relativo antes de associá-lo a uma forma de relevo.",
+      "Calcule o deslocamento de um modelo com taxa constante e converta centímetros em metros, registrando a hipótese de constância.",
+      "Compare o que o modelo mostra sobre tipos de limite com o que falta para analisar uma falha real, incluindo deformação e contexto geológico."
+    ],
+    "expectedEvidence": "Você deve classificar movimentos pelas setas, calcular corretamente um deslocamento hipotético e explicar por que taxa média e proximidade de um limite não permitem prever uma data de terremoto.",
+    "reflection": "Quais aspectos a aceleração da animação torna compreensíveis e quais ela pode fazer parecer instantâneos?",
+    "scenarios": [
+      {"id": "deslizamento-lateral", "label": "Movimento transformante", "situation": "Na animação A, dois blocos deslizam horizontalmente em sentidos relativos opostos, sem afastamento nem mergulho de um sob o outro.", "observation": "O movimento corresponde ao limite transformante idealizado.", "explanation": "O deslocamento lateral é o critério geométrico. Podem ocorrer terremotos por ruptura, mas não é necessário acrescentar vulcões a todo limite desse tipo."},
+      {"id": "taxa-sem-data", "label": "Taxa não é previsão", "situation": "Dados inventados: a taxa relativa média é 4 cm/ano. Um estudante calcula 40 cm em dez anos e afirma que haverá exatamente um sismo ao fim do décimo ano.", "observation": "O deslocamento médio foi calculado corretamente; a data do sismo não decorre desse cálculo.", "explanation": "A taxa não informa como a deformação se distribui, quais trechos estão travados nem quando ocorrerá ruptura. O modelo não fornece um calendário de terremotos."},
+      {"id": "interior-de-placa", "label": "Além das bordas", "situation": "Um mapa destaca limites de placas. Uma cidade longe dessas linhas é rotulada como incapaz de registrar qualquer terremoto.", "observation": "O rótulo transforma menor frequência típica em impossibilidade absoluta.", "explanation": "Falhas antigas podem ser reativadas no interior de placas. A análise de perigo sísmico exige informação geológica e registros locais, além da distância aos grandes limites."}
+    ],
+    "questions": [
+      {"question": "Em um modelo constante de afastamento relativo de 5 cm/ano, qual deslocamento se acumula em 20 anos?", "options": [
+        {"text": "100 metros.", "correct": false, "explanation": "O produto é 100 centímetros; converter para metros exige dividir por 100."},
+        {"text": "1 metro.", "correct": true, "explanation": "5 × 20 = 100 cm, equivalentes a 1 m sob a hipótese de taxa constante."},
+        {"text": "0,25 centímetro.", "correct": false, "explanation": "Dividir taxa pelo tempo não calcula deslocamento; é necessário multiplicar as duas grandezas."}
+      ]},
+      {"question": "O que caracteriza principalmente um limite transformante no modelo apresentado?", "options": [
+        {"text": "O deslizamento lateral relativo entre placas.", "correct": true, "explanation": "A geometria predominante é lateral, podendo haver deformação e ruptura sísmica."},
+        {"text": "A criação obrigatória de crosta por afastamento.", "correct": false, "explanation": "Afastamento e criação de crosta são associados a limites divergentes, não ao transformante ideal."},
+        {"text": "A ausência garantida de qualquer terremoto.", "correct": false, "explanation": "Limites transformantes podem acumular deformação e produzir terremotos."}
+      ]}
+    ],
+    "sources": [
+      {"title": "USGS — Understanding plate motions", "url": "https://pubs.usgs.gov/gip/dynamic/understanding.html"},
+      {"title": "USGS — Where earthquakes occur", "url": "https://pubs.usgs.gov/gip/earthq1/where.html"}
+    ]
+  },
+  "geo_2": {
+    "context": "Fragmentos soltos ao pé de uma rocha e areia acumulada após uma enxurrada registram etapas diferentes de transformação do relevo. Investigue alteração, remoção, transporte e deposição em vez de chamar tudo de erosão.",
+    "theory": "Agentes internos, como tectonismo e vulcanismo, e agentes externos atuam na formação e transformação do relevo. Intemperismo é alteração ou desagregação da rocha no lugar, por processos físicos, químicos e biológicos. Erosão envolve remoção e transporte de materiais pela água, vento, gelo e ação da gravidade. Quando a capacidade de transporte diminui, parte dos sedimentos se deposita. Cobertura vegetal pode reduzir impacto de gotas, favorecer infiltração e reter solo, mas seu efeito depende de declividade, solo e intensidade da chuva. A mesma paisagem pode registrar processos sucessivos e simultâneos; uma foto isolada nem sempre identifica sua duração.",
+    "workedExample": "Em um ensaio fictício, duas bandejas têm mesmo solo, inclinação e volume de chuva simulada. A bandeja descoberta perde 30 g de solo; a coberta, 8 g. A diferença de 22 g é evidência de menor perda no tratamento coberto nessas condições. Não demonstra que vegetação elimina qualquer erosão em todas as encostas. Fragmentar uma rocha sem mover seus pedaços, por sua vez, exemplifica intemperismo, não transporte.",
+    "investigation": [
+      "Classifique três observações como alteração no local, transporte ou deposição, justificando o movimento ou a ausência dele.",
+      "Compare bandejas hipotéticas mantendo solo, inclinação e chuva iguais para isolar o efeito da cobertura.",
+      "Construa uma sequência da rocha ao depósito e marque onde a observação disponível não permite estimar a velocidade do processo."
+    ],
+    "expectedEvidence": "O relatório deve diferenciar intemperismo, erosão e deposição e usar a comparação controlada como evidência limitada às condições do ensaio, sem prometer estabilidade universal de encostas.",
+    "reflection": "Por que observar apenas o lugar de onde o sedimento saiu é insuficiente para entender seus impactos?",
+    "scenarios": [
+      {"id": "fratura-sem-transporte", "label": "Rocha no mesmo lugar", "situation": "Uma rocha se parte em fragmentos que continuam sobre a mesma superfície; não há registro de remoção por água ou vento.", "observation": "Há desagregação no local, compatível com intemperismo físico.", "explanation": "O critério apresentado é a fragmentação sem transporte. Os pedaços podem ser erodidos depois, mas essa etapa não foi observada na situação descrita."},
+      {"id": "agua-lenta-deposito", "label": "Mudança de velocidade", "situation": "Num canal de teste fictício, água carregada de areia chega a um trecho mais largo e lento, onde parte da areia se acumula.", "observation": "O acúmulo indica deposição de parte do material antes transportado.", "explanation": "A redução da capacidade de transporte favorece sedimentação. A areia acumulada não foi criada naquele momento; pode ter vindo de alterações e remoções a montante."},
+      {"id": "comparacao-invalida", "label": "Muitas variáveis", "situation": "A bandeja A tem cobertura e pouca inclinação; B não tem cobertura e é muito inclinada. B perde mais solo sob a mesma chuva.", "observation": "A diferença não isola o efeito da cobertura, pois a inclinação também mudou.", "explanation": "Para atribuir a diferença principalmente à cobertura, seria preciso manter comparáveis outras condições relevantes. O resultado conjunto permite formular hipóteses, não separar sozinho os efeitos."}
+    ],
+    "questions": [
+      {"question": "Qual observação descreve deposição, em vez de apenas intemperismo no local?", "options": [
+        {"text": "Minerais de uma rocha se alteram onde ela está.", "correct": false, "explanation": "Alteração dos minerais no lugar caracteriza intemperismo químico, sem exigir transporte ou depósito."},
+        {"text": "Uma rocha se fragmenta e os pedaços permanecem no ponto original.", "correct": false, "explanation": "A situação descreve desagregação no local, ainda sem o acúmulo de material transportado."},
+        {"text": "Areia transportada se acumula onde a corrente perde capacidade de carregá-la.", "correct": true, "explanation": "O material deixa de ser transportado e forma um depósito no trecho de menor capacidade de transporte."}
+      ]},
+      {"question": "Como comparar melhor o efeito da cobertura vegetal sobre a perda de solo em bandejas?", "options": [
+        {"text": "Manter chuva, inclinação e solo comparáveis, variando a cobertura.", "correct": true, "explanation": "O controle dessas condições reduz explicações concorrentes para a diferença de perda de solo."},
+        {"text": "Usar chuva forte só na bandeja descoberta e declividades diferentes.", "correct": false, "explanation": "Chuva e inclinação também afetam a perda, impedindo atribuir a diferença apenas à cobertura."},
+        {"text": "Observar somente a cor das bandejas sem medir material perdido.", "correct": false, "explanation": "A cor do recipiente não fornece medida adequada do processo de remoção de solo."}
+      ]}
+    ],
+    "sources": [{"title": "Serviço Geológico do Brasil — Intemperismo e erosão", "url": "https://sgbeduca.sgb.gov.br/jovens_geociencias_intemperismo_erosao.html"}]
+  },
+  "geo_3": {
+    "context": "Duas cidades podem receber a mesma chuva anual e enfrentar estações secas muito diferentes. Leia distribuição mensal e amplitude térmica para interpretar tipos de clima sem usar um único dia como retrato de décadas.",
+    "theory": "Tempo meteorológico é a condição atmosférica em um período curto; clima envolve padrões estatísticos, variabilidade e extremos observados ao longo de períodos extensos. Normais climatológicas usam períodos padronizados de 30 anos para comparação. Temperatura média e chuva anual ajudam a caracterizar um clima, mas não substituem a distribuição sazonal. Latitude, altitude, circulação atmosférica, relevo e distância do mar interagem. A maritimidade tende a moderar variações térmicas, mas uma comparação de cidades exige considerar outros fatores. Uma classificação climática é um modelo baseado em critérios: não significa que todos os anos terão exatamente os mesmos valores.",
+    "workedExample": "Climogramas inteiramente hipotéticos: A tem 100 mm de chuva em cada um dos 12 meses; B tem 200 mm em seis meses e zero nos outros seis. Ambos somam 1.200 mm/ano, mas B tem forte concentração sazonal. Se as médias mensais de temperatura variam de 18 a 28 °C, a amplitude anual dessas médias é 10 °C. Isso não é a diferença entre máxima e mínima de um único dia.",
+    "investigation": [
+      "Separe informações de um boletim diário das médias mensais de uma série extensa, indicando qual pergunta cada conjunto responde.",
+      "Some a chuva mensal de dois climogramas e compare também quantos meses são secos, sem reduzir a leitura ao total anual.",
+      "Calcule a diferença entre maior e menor média mensal de temperatura e formule uma hipótese sobre fatores climáticos que exigiria comparação adicional."
+    ],
+    "expectedEvidence": "Sua análise deve apresentar total e distribuição da chuva, amplitude entre médias mensais e distinção entre tempo e clima, explicitando que os números didáticos não são medições de cidades reais.",
+    "reflection": "Por que uma média anual pode ocultar dificuldades sazonais para agricultura, abastecimento e vida urbana?",
+    "scenarios": [
+      {"id": "mesmo-total-secas", "label": "Chuvas concentradas", "situation": "Dados hipotéticos: local C recebe 50 mm em todos os meses; D recebe 100 mm por seis meses e zero nos outros seis.", "observation": "Os dois somam 600 mm por ano, mas D apresenta seis meses sem chuva no modelo.", "explanation": "Totais iguais não significam disponibilidade distribuída de modo igual. Armazenamento, evapotranspiração e demandas também precisam ser considerados para avaliar efeitos da estação seca."},
+      {"id": "frio-de-um-dia", "label": "Evento e padrão", "situation": "Após um dia excepcionalmente frio, alguém conclui que uma região deixou definitivamente de ter clima tropical.", "observation": "Um evento diário não substitui a análise de padrões e variabilidade em séries longas.", "explanation": "Um clima admite episódios que se afastam das médias. Alterações de classificação ou tendências exigem conjuntos consistentes de observações, critérios e períodos de comparação."},
+      {"id": "amplitude-mensal", "label": "Qual amplitude?", "situation": "Um climograma fictício apresenta menor média mensal de 16 °C e maior de 29 °C. A legenda informa amplitude anual de 45 °C.", "observation": "A amplitude das médias mensais é 29 − 16 = 13 °C.", "explanation": "Amplitude é diferença entre os extremos da série escolhida, não soma. Para comparar resultados, é necessário indicar se são médias mensais, máximas diárias ou outra medida."}
+    ],
+    "questions": [
+      {"question": "O que falta ao comparar dois locais apenas pelo mesmo total anual de precipitação?", "options": [
+        {"text": "Nada, pois chuva anual igual significa meses idênticos.", "correct": false, "explanation": "O mesmo total pode resultar de chuvas distribuídas ou concentradas em poucas estações."},
+        {"text": "Examinar como a chuva se distribui ao longo dos meses e varia entre anos.", "correct": true, "explanation": "Sazonalidade e variabilidade acrescentam informações que a soma anual não apresenta."},
+        {"text": "Somar temperaturas à chuva para produzir uma única unidade.", "correct": false, "explanation": "Temperatura e precipitação têm unidades diferentes e não devem ser somadas como grandezas equivalentes."}
+      ]},
+      {"question": "Uma série tem médias mensais de temperatura entre 20 e 27 °C. Qual é sua amplitude anual?", "options": [
+        {"text": "47 °C.", "correct": false, "explanation": "47 é a soma dos extremos; amplitude exige subtrair a menor média da maior."},
+        {"text": "27 °C.", "correct": false, "explanation": "27 é apenas a maior média mensal, não a diferença entre os extremos."},
+        {"text": "7 °C.", "correct": true, "explanation": "27 − 20 = 7 °C é a amplitude das médias mensais dessa série."}
+      ]}
+    ],
+    "sources": [{"title": "Organização Meteorológica Mundial — Normais climatológicas", "url": "https://wmo.int/wmo-climatological-normals"}]
+  },
+  "geo_4": {
+    "context": "Um mapa digital pode destacar o bairro com mais ocorrências ou aquele com a maior proporção de moradores afetados. Verifique escala, denominadores e camadas antes de usar cores como evidência para uma decisão.",
+    "theory": "Cartografia digital relaciona informações a localizações e permite combinar camadas em sistemas de informação geográfica. A precisão de uma tela depende dos dados, da escala, da data e da projeção; ampliar a imagem não cria novos detalhes confiáveis. Em mapas temáticos, números absolutos e taxas respondem a perguntas diferentes. A taxa relaciona ocorrências a uma população ou área de referência, desde que período e definição sejam compatíveis. A escala numérica indica a razão entre distâncias no mapa e no terreno em unidades iguais. Projeções têm deformações; rotas, áreas e distâncias devem usar procedimentos adequados ao objetivo e ao recorte espacial.",
+    "workedExample": "Dados fictícios no mesmo período: bairro A tem 100 ocorrências entre 10.000 moradores, taxa de 1%; B tem 20 entre 1.000, taxa de 2%. A concentra mais ocorrências; B tem maior proporção. Em um mapa impresso de escala 1:200.000, 3 cm correspondem a 600.000 cm, ou 6 km. Essa distância reta não substitui o comprimento de uma rota com curvas e desvios.",
+    "investigation": [
+      "Leia título, legenda, período, unidade e fonte de um mapa antes de identificar a área com maior valor.",
+      "Compare uma camada de contagens com uma de taxas, calculando o denominador e explicando a mudança de destaque.",
+      "Converta uma distância pela escala e verifique se ela é reta ou segue uma rota, indicando o limite de detalhe dos dados ao ampliar a tela."
+    ],
+    "expectedEvidence": "A interpretação deve escolher contagem ou taxa conforme a pergunta, manter períodos comparáveis, converter unidades corretamente e reconhecer que resolução e qualidade não aumentam apenas com o zoom.",
+    "reflection": "Como uma legenda correta pode evitar que o tamanho da população seja confundido com maior intensidade de um fenômeno?",
+    "scenarios": [
+      {"id": "contagem-taxa", "label": "O denominador muda a leitura", "situation": "No conjunto fictício, região X registra 60 ocorrências em 3.000 moradores; Y, 80 em 8.000, com mesma definição e período.", "observation": "Y tem mais ocorrências, enquanto X apresenta maior taxa: 2% contra 1%.", "explanation": "Contagens podem orientar volume de atendimento; taxas permitem comparar proporções. Uma camada não invalida a outra, pois cada uma responde a uma pergunta distinta."},
+      {"id": "zoom-sem-dados", "label": "Detalhe aparente", "situation": "Um mapa generalizado representa uma avenida por um traço. Ao ampliar cem vezes, o usuário tenta localizar cada porta de prédio a partir desse traço.", "observation": "O aumento visual não acrescenta coordenadas de portas ausentes na base.", "explanation": "Generalização e resolução limitam a informação disponível. É preciso outra base mais detalhada e verificada para responder a uma pergunta que o mapa original não foi feito para resolver."},
+      {"id": "reta-estrada", "label": "Distância e trajeto", "situation": "Num mapa fictício de 1:100.000, dois pontos estão a 4 cm em linha reta; a rota digital contornando um rio mede 7 km.", "observation": "A distância reta é 4 km, e o trajeto de 7 km pode ser maior sem haver contradição.", "explanation": "A escala converte o segmento medido. Uma rota acompanha a rede disponível e pode exigir desvios; distância reta e distância percorrida são medidas diferentes."}
+    ],
+    "questions": [
+      {"question": "Um bairro tem 30 ocorrências em 1.500 moradores e outro 40 em 4.000. Qual tem a maior proporção?", "options": [
+        {"text": "O primeiro, com 2%, contra 1% no segundo.", "correct": true, "explanation": "30/1.500 = 0,02 e 40/4.000 = 0,01; a contagem maior do segundo não implica taxa maior."},
+        {"text": "O segundo, porque 40 é maior que 30.", "correct": false, "explanation": "Essa comparação usa apenas contagens e ignora a população de referência solicitada."},
+        {"text": "Os dois têm a mesma taxa porque ambos são bairros.", "correct": false, "explanation": "A unidade territorial comum não iguala os quocientes entre ocorrências e moradores."}
+      ]},
+      {"question": "O que representa um segmento de 2 cm num mapa de escala 1:250.000?", "options": [
+        {"text": "500 quilômetros no terreno.", "correct": false, "explanation": "O produto resulta em 500.000 centímetros, que equivalem a 5 km, não a 500 km."},
+        {"text": "5 quilômetros no terreno.", "correct": true, "explanation": "2 × 250.000 = 500.000 cm; dividindo por 100.000, obtemos 5 km."},
+        {"text": "125 metros no terreno.", "correct": false, "explanation": "A escala multiplica a medida do mapa pelo denominador; esse valor não resulta da conversão correta."}
+      ]}
+    ],
+    "sources": [
+      {"title": "IBGE — Atlas Geográfico Escolar: escala", "url": "https://atlasescolar.ibge.gov.br/cartografia/21734-escala"},
+      {"title": "IBGE — Imagens corrigidas e referência à superfície terrestre", "url": "https://www.ibge.gov.br/geociencias/imagens-do-territorio/imagens-corrigidas.html"}
+    ]
+  },
+  "geo_5": {
+    "context": "Uma ação perto da nascente pode afetar usuários muito longe dali. Investigue a rede de drenagem e seus divisores para compreender por que a gestão de um rio frequentemente precisa atravessar limites municipais.",
+    "theory": "Bacia hidrográfica é uma área drenada para uma saída comum por uma rede de cursos d'água, delimitada por divisores de águas. Afluentes conectam partes da bacia ao rio principal; montante indica o sentido de suas origens e jusante o sentido da saída. Limites naturais de drenagem não precisam coincidir com fronteiras administrativas. Vazão é volume que passa por uma seção por unidade de tempo, como m³/s, e não a quantidade total armazenada. Sua variação depende de chuva, infiltração, evapotranspiração, armazenamento e usos. Num modelo de confluência em regime estável, sem retiradas ou armazenamento no trecho, as vazões de entrada se somam na saída.",
+    "workedExample": "Numa rede hipotética, afluentes chegam a uma confluência com 2 m³/s e 3 m³/s. Admitindo medições simultâneas, regime estável e ausência de perdas ou retiradas, a saída é 5 m³/s. Em 10 segundos, passam 50 m³ nessa seção. Se uma captação retira 1 m³/s antes da saída, mantendo as demais hipóteses, restam 4 m³/s. Nenhum desses números representa o volume de toda a bacia.",
+    "investigation": [
+      "Trace a rede até uma saída escolhida e identifique divisores, afluentes, montante e jusante no esquema.",
+      "Some vazões de entradas simultâneas sob hipóteses explícitas e depois inclua uma retirada para comparar a saída.",
+      "Sobreponha limites municipais à drenagem e explique um conflito ou necessidade de cooperação entre usuários conectados pelo rio."
+    ],
+    "expectedEvidence": "O esquema deve delimitar a bacia pela drenagem, usar corretamente montante e jusante e distinguir m³ de m³/s, apresentando as hipóteses necessárias à soma de vazões.",
+    "reflection": "Por que responsabilizar apenas o município da foz pode ocultar decisões tomadas em outras partes da bacia?",
+    "scenarios": [
+      {"id": "cidade-divisor", "label": "Dois tipos de limite", "situation": "Uma cidade fictícia fica dos dois lados de uma crista: a vertente leste drena para o rio A e a oeste para o rio B, com saídas diferentes.", "observation": "O mesmo município pode participar de duas bacias delimitadas pelo divisor natural.", "explanation": "Fronteiras administrativas organizam governo, enquanto divisores organizam caminhos da drenagem. Os dois recortes não precisam se sobrepor perfeitamente."},
+      {"id": "retirada-confluencia", "label": "Entradas e captação", "situation": "No modelo estável, entram 6 m³/s e 4 m³/s numa confluência. Uma retirada contínua de 2 m³/s ocorre antes da seção de saída, sem outras mudanças.", "observation": "A vazão calculada na saída é 8 m³/s.", "explanation": "A continuidade no modelo exige somar entradas e descontar a retirada: 6 + 4 − 2 = 8. Em um rio real, defasagens de medição e armazenamento também podem alterar a comparação."},
+      {"id": "poluicao-montante", "label": "Conexões a jusante", "situation": "Uma hipótese didática situa uma descarga no afluente a montante de dois municípios. A concentração só foi medida perto da descarga.", "observation": "A rede indica possível transporte a jusante, mas não fornece a concentração nem o tempo de chegada em cada cidade.", "explanation": "Diluição, reações, vazões e tempo de percurso afetam o transporte. O esquema justifica investigar usuários conectados, sem inventar resultados químicos ainda não medidos."}
+    ],
+    "questions": [
+      {"question": "Duas entradas estáveis de 3 e 5 m³/s se unem, sem retiradas ou armazenamento. Qual é a vazão de saída no modelo?", "options": [
+        {"text": "8 m³, sem unidade de tempo.", "correct": false, "explanation": "8 m³ é volume; o resultado da soma de vazões deve conservar a unidade m³/s."},
+        {"text": "15 m³/s, pelo produto das entradas.", "correct": false, "explanation": "A continuidade soma fluxos de entrada; multiplicá-los não fornece a vazão dessa confluência."},
+        {"text": "8 m³/s.", "correct": true, "explanation": "Sob as hipóteses dadas, 3 + 5 = 8 m³/s devem atravessar a seção de saída."}
+      ]},
+      {"question": "Qual critério define o limite de uma bacia hidrográfica no esquema de drenagem?", "options": [
+        {"text": "Os divisores de águas da área que drena para a saída considerada.", "correct": true, "explanation": "O caminho da drenagem até um exutório comum organiza o recorte natural da bacia."},
+        {"text": "A fronteira do município com maior população.", "correct": false, "explanation": "Limites municipais não são definidos necessariamente pela drenagem e podem atravessar bacias."},
+        {"text": "A margem direita de qualquer rio, ignorando afluentes.", "correct": false, "explanation": "A bacia abrange vertentes e toda a rede contribuinte, não apenas uma margem isolada."}
+      ]}
+    ],
+    "sources": [{"title": "IBGE e ANA — Bacias e Divisões Hidrográficas do Brasil", "url": "https://www.ibge.gov.br/geociencias/cartas-e-mapas/informacoes-ambientais/31653-bacias-e-divisoes-hidrograficas-do-brasil"}]
+  },
+  "geo_6": {
+    "context": "Um mapa de biomas e uma imagem da cobertura atual podem representar o mesmo lugar com legendas diferentes. Descubra por que uma área desmatada continua pertencendo a um contexto de bioma e por que campos nativos também merecem conservação.",
+    "theory": "Os seis biomas continentais brasileiros reconhecidos pelo IBGE são Amazônia, Cerrado, Mata Atlântica, Caatinga, Pantanal e Pampa. Bioma é um recorte regional que considera conjuntos de vegetação, condições geoclimáticas e história ambiental; não é a descrição exata de cada lote nem sinônimo de floresta. O Pampa possui extensas formações campestres, enquanto o Cerrado reúne formações variadas, incluindo savânicas. O Pantanal tem dinâmica ligada ao pulso de inundação. Limites cartográficos representam transições de acordo com escala e critérios. Cobertura atual, uso da terra e bioma são camadas diferentes: plantação de árvores, vegetação nativa e pastagem não são categorias equivalentes.",
+    "workedExample": "Em um município hipotético situado no recorte do Cerrado, uma tabela de 100 km² registra 35 km² de vegetação nativa, 45 de lavoura e 20 de área urbana e outros usos. A vegetação nativa corresponde a 35%, mas isso não significa que só 35% do município pertença ao bioma. O recorte regional e o mapa de uso atual respondem a perguntas diferentes. Os valores são didáticos, não dados de um município real.",
+    "investigation": [
+      "Compare as legendas de biomas e uso da terra, identificando em cada uma o que está sendo classificado.",
+      "Analise três paisagens de floresta, campo e área inundável e descreva sua diversidade sem ordenar conservação pela altura das árvores.",
+      "Calcule a parcela de vegetação nativa em uma área hipotética e explique por que esse percentual não redefine sozinho o limite regional do bioma."
+    ],
+    "expectedEvidence": "Sua leitura deve distinguir bioma, cobertura e uso atual, reconhecer campos nativos como vegetação e usar porcentagens apenas nos dados apresentados, respeitando escala e zonas de transição.",
+    "reflection": "Que decisões de conservação seriam prejudicadas se todo ambiente sem floresta alta fosse considerado degradado?",
+    "scenarios": [
+      {"id": "campo-nativo", "label": "Vegetação sem floresta", "situation": "Uma fotografia de campo nativo do Pampa é rotulada como área necessariamente destruída apenas porque não apresenta árvores altas.", "observation": "A ausência de floresta alta não demonstra degradação de uma formação campestre nativa.", "explanation": "A avaliação precisa considerar a vegetação própria do ambiente, espécies, usos e histórico. Transformar todo campo em floresta como ideal único apaga a diversidade dos biomas."},
+      {"id": "duas-camadas", "label": "Bioma e lavoura", "situation": "Uma área aparece dentro do recorte da Mata Atlântica no mapa regional e como lavoura num mapa recente de uso da terra.", "observation": "As duas representações podem ser compatíveis porque classificam dimensões distintas.", "explanation": "O recorte de bioma informa contexto regional; o mapa de uso mostra a ocupação observada em uma data. A conversão para lavoura não desloca automaticamente a área para outro bioma."},
+      {"id": "plantio-nao-nativo", "label": "Qual cobertura?", "situation": "Em uma área fictícia de 200 hectares, há 50 ha de vegetação nativa, 90 ha de plantação homogênea de árvores e 60 ha de outros usos.", "observation": "A vegetação nativa ocupa 25%; somá-la à plantação como se ambas fossem nativas produziria 70% indevidamente.", "explanation": "Cobertura por árvores e vegetação nativa não são sinônimos. Para avaliar conservação, é necessário preservar as categorias da legenda e investigar composição, estrutura e manejo."}
+    ],
+    "questions": [
+      {"question": "Como interpretar uma lavoura localizada dentro do recorte regional do Cerrado?", "options": [
+        {"text": "A lavoura faz o território mudar automaticamente para o bioma Pampa.", "correct": false, "explanation": "Uma alteração de uso local não implica mudança automática do recorte regional de bioma."},
+        {"text": "O bioma descreve o contexto regional e a lavoura, a cobertura ou uso atual.", "correct": true, "explanation": "Camadas distintas podem representar corretamente o mesmo local segundo critérios e datas diferentes."},
+        {"text": "O mapa de biomas prova que a área mantém toda a vegetação nativa.", "correct": false, "explanation": "A localização no recorte do Cerrado não informa sozinha o estado atual de conservação de cada parcela."}
+      ]},
+      {"question": "Uma área de 80 ha tem 20 ha de vegetação nativa. Qual proporção é nativa e o que ela informa?", "options": [
+        {"text": "25%, indicando a categoria de cobertura medida nessa área.", "correct": true, "explanation": "20/80 = 0,25; o resultado descreve a cobertura nativa informada, não toda a biodiversidade ou um novo limite de bioma."},
+        {"text": "60%, porque se subtrai 20 de 80.", "correct": false, "explanation": "A subtração fornece 60 hectares de outras categorias; porcentagem exige dividir a parte pelo total."},
+        {"text": "400%, indicando que a vegetação ultrapassa a área total.", "correct": false, "explanation": "Dividir o total pela parte inverte a razão solicitada; a parte nativa é menor que o total."}
+      ]}
+    ],
+    "sources": [
+      {"title": "IBGE — Biomas e Sistema Costeiro-Marinho", "url": "https://www.ibge.gov.br/geociencias/informacoes-ambientais/vegetacao/15842-biomas.html?lang=pt-BR"},
+      {"title": "IBGE Educa — Biomas brasileiros", "url": "https://educa.ibge.gov.br/jovens/conheca-o-brasil/territorio/19635-ecossistemas.html"}
+    ]
+  }
+}
