@@ -147,6 +147,7 @@ export function EstudanteDashboard() {
     studentClasses,
     joinClass,
     handleActivitySubmit,
+    handleLabComplete, labSaveError, labSaving, retryLabCompletion,
     modules,
     gradeLevel,
   } = useStudentDashboard(selectedLevel);
@@ -674,6 +675,8 @@ export function EstudanteDashboard() {
       )}
 
       {/* ── INTERACTIVE LAB RUNNER VIEW ── */}
+      {labSaving && <p role="status">Salvando progresso do laboratório…</p>}
+      {labSaveError && <div role="alert">Não foi possível salvar seu progresso. Suas respostas continuam disponíveis. <button type="button" onClick={retryLabCompletion} disabled={labSaving}>Tentar salvar progresso</button></div>}
       {activeTab === 'labs' && activeLab && (
         <div className="fade-in">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
@@ -699,9 +702,10 @@ export function EstudanteDashboard() {
               objective="Compare os casos e use as evidências para justificar suas respostas."
               content={getLabLearningContent(activeLab.id)}
               onComplete={async ({ score }) => {
-                await handleActivitySubmit({ id: activeLab.id, title: activeLab.title }, score * 10);
-                setShowConfetti(true);
-                SoundEffects.playSuccess();
+                if (await handleLabComplete({ id: activeLab.id, title: activeLab.title }, score * 10)) {
+                  setShowConfetti(true);
+                  SoundEffects.playSuccess();
+                }
               }}
             >
             <activeLab.component
@@ -709,9 +713,10 @@ export function EstudanteDashboard() {
               labTitle={activeLab.title}
               labId={activeLab.id}
               onComplete={async (score: number) => {
-                await handleActivitySubmit({ id: activeLab.id, title: activeLab.title }, score);
-                setShowConfetti(true);
-                SoundEffects.playSuccess();
+                if (await handleLabComplete({ id: activeLab.id, title: activeLab.title }, score)) {
+                  setShowConfetti(true);
+                  SoundEffects.playSuccess();
+                }
               }}
             />
             </LabLearningWorkspace>

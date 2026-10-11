@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { verifyPreview } from './browser-fixture.mjs';
+import { verifyPreview, isolateBrowserData } from './browser-fixture.mjs';
 
 // Serve the local build-browser-preview.mjs artifact on this origin. Hashes reject an old build or
 // another checkout before a successful QA report can be written.
@@ -38,12 +38,7 @@ await mkdir(output, { recursive: true });
 await writeFile(new URL('studio-result.json', output), JSON.stringify({ status: 'running', checkedAt: new Date().toISOString(), origin }, null, 2));
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, serviceWorkers: 'block' });
-await context.route('**/*', route => {
-  const requested = new URL(route.request().url());
-  if (requested.origin === origin) return route.continue();
-  blockedOrigins.add(requested.origin);
-  return route.abort();
-});
+await isolateBrowserData(context, origin => blockedOrigins.add(origin));
 const page = await context.newPage();
 page.setDefaultTimeout(15_000);
 page.on('pageerror', error => errors.push(error.message));

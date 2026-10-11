@@ -17,11 +17,14 @@ import { evaluateAchievements } from '../services/achievementService';
 import type { Achievement } from '../services/achievementService';
 import type { ProgressData } from '../../data/types';
 import SoundEffects from '../services/soundEffects';
+import { useStudentLabCompletion } from './useStudentLabCompletion';
+import type { CompletedLearningLab } from '../services/studentLabService';
 
 export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
   const { currentUser, userData } = useAuth();
   const gradeLevel = normalizeLearningLevel(requestedLevel, normalizeLearningLevel(userData?.gradeLevel));
   const uid = currentUser?.uid;
+  const { completeLab } = useStudentLabCompletion();
 
   const [progress, setProgress] = useState({ level: 1, xp: 0, coins: 0 });
   const [completedModules, setCompletedModules] = useState<string[]>([]);
@@ -35,6 +38,35 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
   const [loading, setLoading] = useState(true);
   const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
   const prevProgressRef = useRef<ProgressData | null>(null);
+  const [labSaveError, setLabSaveError] = useState(false);
+  const [labSaving, setLabSaving] = useState(false);
+  const retryLabRef = useRef<{ lab: CompletedLearningLab; score: number } | null>(null);
+
+  const handleLabComplete = useCallback(async (lab: CompletedLearningLab, score: number) => {
+    setLabSaving(true);
+    setLabSaveError(false);
+    try {
+      const result = await completeLab(lab, score);
+      if (result) {
+        setProgress({ level: result.progress.level, xp: result.progress.xp, coins: result.progress.coins });
+        setCompletedModules(result.progress.completedModules);
+        setPurchasedItems(result.progress.purchasedItems);
+      }
+      retryLabRef.current = null;
+      return result !== null;
+    } catch {
+      retryLabRef.current = { lab, score };
+      setLabSaveError(true);
+      return false;
+    } finally {
+      setLabSaving(false);
+    }
+  }, [completeLab]);
+
+  const retryLabCompletion = useCallback(() => {
+    const pending = retryLabRef.current;
+    if (pending) return handleLabComplete(pending.lab, pending.score);
+  }, [handleLabComplete]);
 
   // Full progress data for achievement evaluation
   const fullProgress: ProgressData = useMemo(() => ({
@@ -254,6 +286,7 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
     modules,
     handleModuleComplete,
     handleActivitySubmit,
+    handleLabComplete, labSaveError, labSaving, retryLabCompletion,
     buyItem,
     gradeLevel,
     loading,

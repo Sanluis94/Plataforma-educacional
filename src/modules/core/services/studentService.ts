@@ -10,6 +10,7 @@ import {
   addPurchasedItem,
 } from '../../data/repositories/studentRepository';
 import { writeLog } from '../../data/repositories/logRepository';
+import { calculateModuleRewards } from './studentProgressRewards';
 
 /**
  * Solicita recomendação adaptativa da IA (Gemini).
@@ -30,19 +31,8 @@ export const processModuleCompletion = async (
   currentLevel: number,
   currentCoins: number
 ) => {
-  const earnedXP = Math.floor(score * 0.8);
-  const earnedCoins = Math.floor(score * 0.3);
-
-  let newXP = currentXP + earnedXP;
-  let newLevel = currentLevel;
-  const newCoins = currentCoins + earnedCoins;
-
-  // Level up a cada 500 XP por nível
-  if (newXP >= newLevel * 500) {
-    newLevel += 1;
-  }
-
-  const updatedProgress = { xp: newXP, level: newLevel, coins: newCoins };
+  const { xp, level, coins, earnedXP, earnedCoins } = calculateModuleRewards(score, currentXP, currentLevel, currentCoins);
+  const updatedProgress = { xp, level, coins };
 
   // Persistir no Firestore
   await saveStudentProgress(uid, updatedProgress);

@@ -30,6 +30,8 @@ export interface Turma {
   professorName?: string;
   code?: string;
   createdAt?: string;
+  gradeLevel?: string;
+  academicLevel?: string;
 }
 
 const COLLECTION = 'classes';
@@ -73,6 +75,8 @@ export const getProfessorClasses = async (professorId?: string): Promise<Turma[]
         studentsCount: data.studentsCount || 0,
         code: data.code || docSnap.id.slice(0, 6).toUpperCase(),
         createdAt: data.createdAt || '',
+        gradeLevel: data.gradeLevel,
+        academicLevel: data.academicLevel,
       };
     });
     
@@ -107,6 +111,8 @@ export const getStudentClasses = async (studentId: string): Promise<Turma[]> => 
         name: data.name,
         studentsCount: data.studentsCount || 0,
         professorName: data.professorName || 'Professor',
+        gradeLevel: data.gradeLevel,
+        academicLevel: data.academicLevel,
         code: data.code || docSnap.id.slice(0, 6).toUpperCase(),
         createdAt: data.createdAt || '',
       };
@@ -742,4 +748,3 @@ export const deleteEnhancedMaterial = async (classId: string, materialId: string
     console.warn('[ClassRepository] Erro ao deletar material no Firestore:', err);
   }
 };
-

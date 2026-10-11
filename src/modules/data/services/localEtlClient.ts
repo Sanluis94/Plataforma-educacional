@@ -180,7 +180,9 @@ export const getLocalEtlClassesByProfessor = async (professorId?: string) => {
       name: classData.name,
       code: classData.code || classData.id?.slice(0, 6).toUpperCase(),
       studentsCount: classData.studentIds?.length || 0,
-      studentIds: classData.studentIds || []
+      studentIds: classData.studentIds || [],
+      gradeLevel: classData.gradeLevel,
+      academicLevel: classData.academicLevel,
     }));
 };
 
@@ -193,7 +195,9 @@ export const getLocalStudentClasses = async (studentId: string): Promise<any[]> 
       name: classData.name,
       code: classData.code || classData.id?.slice(0, 6).toUpperCase(),
       studentsCount: classData.studentIds?.length || 0,
-      professorName: classData.professorName || 'Professor'
+      professorName: classData.professorName || 'Professor',
+      gradeLevel: classData.gradeLevel,
+      academicLevel: classData.academicLevel,
     }));
 };
 

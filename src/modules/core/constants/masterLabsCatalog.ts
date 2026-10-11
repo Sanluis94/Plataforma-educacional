@@ -32737,7 +32737,7 @@ export function resolveUniversalLab(labId: string): UniversalLabConfig {
     return { ...advanced, title: item.title, academicLevel: item.academicLevel,
       subject: item.subject, topic: item.topic, objective: item.objective,
       learningContent: content, questions: content.questions,
-      theoreticalBackground: `${content.theory}\n\nExemplo explicado\n${content.workedExample}` };
+      theoreticalBackground: `${advanced.theoreticalBackground}\n\nRoteiro de aprendizagem\n${content.theory}\n\nExemplo explicado\n${content.workedExample}` };
   }
 
   return createGuidedLabConfig(item, content);

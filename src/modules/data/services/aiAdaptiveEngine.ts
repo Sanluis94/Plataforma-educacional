@@ -1,13 +1,25 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getEffectiveGeminiApiKey, GEMINI_TEXT_MODEL } from "../../core/services/geminiService";
 
-const apiKey = import.meta.env.VITE_DISABLE_AI === 'true' ? undefined : import.meta.env.VITE_GEMINI_API_KEY;
-
-// Inicializa o SDK do Gemini apenas se a chave estiver configurada
-export const genAI = (apiKey && apiKey !== "COLE_AQUI" && apiKey.trim() !== "") ? new GoogleGenerativeAI(apiKey) : null;
+// A chave pode ser configurada, trocada ou removida sem recarregar o painel.
+export let genAI: GoogleGenerativeAI | null = null;
+let activeApiKey: string | null = null;
 
 // Sistema de Cache Local em Memória
 const recommendationCache = new Map<string, {data: AIRecommendation, timestamp: number}>();
 const CACHE_TTL_MS = 1000 * 60 * 10; // 10 minutos de cache
+
+function getGeminiClient(): GoogleGenerativeAI | null {
+  const effectiveKey = getEffectiveGeminiApiKey();
+  const apiKey = effectiveKey === "COLE_AQUI" ? null : effectiveKey;
+  if (apiKey !== activeApiKey) {
+    activeApiKey = apiKey;
+    genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+    // Não reutilize respostas de outra chave nem heurísticas após ativar a IA.
+    recommendationCache.clear();
+  }
+  return genAI;
+}
 
 export interface StudentContext {
   xp: number;
@@ -111,7 +123,14 @@ export function getOfflineRecommendation(context: StudentContext): AIRecommendat
  * Solicita recomendação dinâmica. Se a API estiver offline ou sem chave, cai no motor de regras local.
  */
 export async function getAdaptiveRecommendation(studentContext: StudentContext): Promise<AIRecommendation> {
-  const cacheKey = `${studentContext.level}-${studentContext.xp}-${(studentContext.completedModules || []).join(',')}-${(studentContext.enrolledClasses || []).join(',')}`;
+  const client = getGeminiClient();
+  const cacheKey = JSON.stringify([
+    studentContext.level,
+    studentContext.xp,
+    studentContext.completedModules || [],
+    studentContext.enrolledClasses || [],
+    studentContext.recentModules || [],
+  ]);
   
   if (recommendationCache.has(cacheKey)) {
     const cached = recommendationCache.get(cacheKey)!;
@@ -120,14 +139,14 @@ export async function getAdaptiveRecommendation(studentContext: StudentContext):
     }
   }
 
-  if (!genAI) {
+  if (!client) {
     const offlineRec = getOfflineRecommendation(studentContext);
     recommendationCache.set(cacheKey, { data: offlineRec, timestamp: Date.now() });
     return offlineRec;
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = client.getGenerativeModel({ model: GEMINI_TEXT_MODEL });
 
     const prompt = `
     Você é o Motor de IA Adaptativo de uma plataforma educacional (Edu-Interact).
@@ -159,12 +178,16 @@ export async function getAdaptiveRecommendation(studentContext: StudentContext):
     const cleanJson = textResult.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
     const recommendation = JSON.parse(cleanJson) as AIRecommendation;
 
-    recommendationCache.set(cacheKey, { data: recommendation, timestamp: Date.now() });
+    if (client === genAI) {
+      recommendationCache.set(cacheKey, { data: recommendation, timestamp: Date.now() });
+    }
     return recommendation;
-  } catch (error) {
-    console.warn("[aiAdaptiveEngine] Erro ao obter recomendação da API Gemini, usando motor de regras local:", error);
+  } catch {
+    console.warn("[aiAdaptiveEngine] Erro ao obter recomendação da API Gemini, usando motor de regras local.");
     const offlineRec = getOfflineRecommendation(studentContext);
-    recommendationCache.set(cacheKey, { data: offlineRec, timestamp: Date.now() });
+    if (client === genAI) {
+      recommendationCache.set(cacheKey, { data: offlineRec, timestamp: Date.now() });
+    }
     return offlineRec;
   }
 }

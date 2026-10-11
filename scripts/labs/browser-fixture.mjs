@@ -14,6 +14,24 @@ export const levels = [
 ];
 export const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 
+// Browser checks must never read the private ETL export in public/local-data.
+export async function isolateBrowserData(surface, onBlocked = () => {}) {
+  await surface.route('**/*', route => {
+    const url = new URL(route.request().url());
+    if (url.origin === origin && !url.pathname.startsWith('/local-data/')) return route.continue();
+    onBlocked(url.origin);
+    return route.abort();
+  });
+  await surface.addInitScript(() => {
+    if (localStorage.getItem('edu_local_db')) return;
+    const users = ['estudante', 'professor', 'coordenador', 'admin'].map(role => ({
+      id: `qa-${role}`, name: `Perfil de teste ${role}`, email: `${role}@example.test`,
+      role, gradeLevel: 'medio', createdAt: '2026-10-11T00:00:00Z',
+    }));
+    localStorage.setItem('edu_local_db', JSON.stringify({ users, classes: [], activities: [], progress: {}, systemLogs: [], learningEvents: [], complementaryMaterials: {}, messages: {} }));
+  });
+}
+
 export async function readCatalog() {
   const source = await readFile(new URL('src/modules/core/constants/masterLabsCatalog.ts', root), 'utf8');
   const master = JSON.parse(source.match(/export const MASTER_LABS_CATALOG: CatalogLabItem\[\] = (\[[\s\S]*?\]);/)[1]);
