@@ -36,6 +36,7 @@ export interface ClassData {
   professorId: string;
   professorName: string;
   gradeLevel?: string;
+  academicLevel?: string;
   studentsCount: number;
   studentIds: string[];
   createdAt: string;

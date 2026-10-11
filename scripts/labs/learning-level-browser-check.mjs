@@ -2,14 +2,14 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { root, origin, levels, readCatalog, verifyPreview } from './browser-fixture.mjs';
+import { root, origin, levels, readCatalog, verifyPreview, isolateBrowserData } from './browser-fixture.mjs';
 
 const catalog = await readCatalog();
 const output = new URL('.local/labs/browser/', root);
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, serviceWorkers: 'block' });
-await context.route('**/*', route => new URL(route.request().url()).origin === origin ? route.continue() : route.abort());
+await isolateBrowserData(context);
 const page = await context.newPage();
 page.setDefaultTimeout(15_000);
 const errors = [];

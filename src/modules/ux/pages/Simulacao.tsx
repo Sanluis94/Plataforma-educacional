@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
+import { useStudentLabCompletion } from '../../core/hooks/useStudentLabCompletion';
 import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
 import { UniversalLabContainer } from '../components/UniversalLabContainer';
 import { NEW_ADVANCED_LABS } from '../../core/constants/advancedLabsRegistry';
@@ -23,6 +24,10 @@ import { issueLabCertificate, type LabCertificate } from '../../core/services/ce
 import { GitBranch, PlusCircle, Award } from 'lucide-react';
 
 const LegacyLabRunner = lazy(() => import('../components/labs/LegacyLabRunner'));
+const PHYSICS_MODES_BY_LAB_ID: Record<string, string> = {
+  fis_1: 'pendulum', fis_2: 'collisions', fis_3: 'optics',
+  fis_4: 'electromagnetism', fis_5: 'thermodynamics', fis_6: 'modern_physics',
+};
 
 interface LabMission {
   id: string;
@@ -145,11 +150,15 @@ interface SimulacaoProps {
 
 export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onComplete }) => {
   const { currentUser, userData } = useAuth();
+  const { completeLab } = useStudentLabCompletion();
+  const [labSaving, setLabSaving] = useState(false);
+  const [failedCompletion, setFailedCompletion] = useState<{ lab: LearningLab | StudioLab; score: number } | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const embedded = mode !== undefined || labId !== undefined;
   const [customLabs, setCustomLabs] = useState<StudioLab[]>([]);
   const requestedLab = getLearningLab(searchParams.get('lab') || '') ?? customLabs.find(lab => lab.id === searchParams.get('lab'));
-  const activeTab = embedded ? mode || 'pendulum' : requestedLab?.id || '';
+  const embeddedTarget = labId ?? mode ?? 'pendulum';
+  const activeTab = embedded ? PHYSICS_MODES_BY_LAB_ID[embeddedTarget] ?? embeddedTarget : requestedLab?.id || '';
   const catalogLevel = requestedLab?.academicLevel ?? normalizeLearningLevel(searchParams.get('level'), normalizeLearningLevel(userData?.gradeLevel));
   const [showMission, setShowMission] = useState(true);
   const [selectedMissionOption, setSelectedMissionOption] = useState<number | null>(null);
@@ -190,9 +199,22 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
     setShowCatalogExplorer(false);
   }
 
+  async function saveLabCompletion(lab: LearningLab | StudioLab, score: number) {
+    setLabSaving(true);
+    setFailedCompletion(null);
+    try {
+      await completeLab(lab, score * 10);
+      setCompletedActivities(previous => previous.some(item => item.id === lab.id) ? previous : [...previous, { id: lab.id, academicLevel: lab.academicLevel }]);
+      onComplete?.(score * 10);
+    } catch {
+      setFailedCompletion({ lab, score });
+    } finally {
+      setLabSaving(false);
+    }
+  }
+
   function completeSelectedLab(score: number) {
-    if (selectedLab) setCompletedActivities(previous => previous.some(item => item.id === selectedLab.id) ? previous : [...previous, { id: selectedLab.id, academicLevel: selectedLab.academicLevel }]);
-    onComplete?.(score * 10);
+    if (selectedLab) void saveLabCompletion(selectedLab, score);
   }
 
   const handleOpenCertificate = async () => {
@@ -510,8 +532,11 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
         </section>
         {searchParams.get('lab') && !selectedLab && <p role="alert">Laboratório não encontrado. Escolha uma atividade no catálogo.</p>}
         {selectedLab && <p style={{ color: 'var(--text-secondary)' }}>{learningLevelLabel(selectedLab.academicLevel)} › {selectedLab.subject} › {selectedLab.title}</p>}
+        {labSaving && <p role="status">Salvando progresso do laboratório…</p>}
+        {failedCompletion && <div role="alert">Não foi possível salvar o progresso de {failedCompletion.lab.title}. Suas respostas continuam disponíveis. <button type="button" disabled={labSaving} onClick={() => void saveLabCompletion(failedCompletion.lab, failedCompletion.score)}>Tentar salvar progresso</button></div>}
       </>}
       {embedded && <h2 style={{ color: 'var(--text-main)' }}>Bancada: {labTitle || LAB_MISSIONS[activeTab]?.title || 'Física'}</h2>}
+      {embedded && !LAB_MISSIONS[activeTab] && !MASTER_LABS_CATALOG.some(lab => lab.id === activeTab) && <p role="alert">Laboratório não encontrado. Confira o código da atividade.</p>}
 
       {/* ── PAINEL DE MISSÃO EXPERIMENTAL GUIADA ── */}
       {LAB_MISSIONS[activeTab] && (
@@ -1051,10 +1076,10 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
       {!embedded && getLearningLab(activeTab)?.source === 'legacy' && <Suspense fallback={<p role="status">Carregando bancada…</p>}>
         <LegacyLabRunner key={activeTab} labId={activeTab} onComplete={({ score }) => completeSelectedLab(score)} />
       </Suspense>}
-      {!embedded && (activeCustomLab || NEW_ADVANCED_LABS[activeTab] || MASTER_LABS_CATALOG.some(l => l.id === activeTab)) && (
+      {(activeCustomLab || NEW_ADVANCED_LABS[activeTab] || MASTER_LABS_CATALOG.some(l => l.id === activeTab)) && (
         <UniversalLabContainer
           config={activeCustomLab ? createGuidedLabConfig(activeCustomLab, activeCustomLab.learningContent) : resolveUniversalLab(activeTab)}
-          onComplete={({ score }) => completeSelectedLab(score)}
+          onComplete={({ score }) => embedded ? onComplete?.(score * 10) : completeSelectedLab(score)}
         />
       )}
 

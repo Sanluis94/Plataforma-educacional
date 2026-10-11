@@ -3,11 +3,12 @@
  * Coleção: progress/{uid}
  * Gerencia XP, nível, moedas, módulos completados e itens comprados (gamificação).
  */
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, runTransaction } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import { getLocalEtlProgress, saveLocalProgress } from '../services/localEtlClient';
 import { DEFAULT_PROGRESS } from '../types';
 import type { ProgressData } from '../types';
+import { calculateModuleRewards } from '../../core/services/studentProgressRewards';
 
 // Manter interface legada para compatibilidade com UI
 export interface StudentProgress {
@@ -17,6 +18,57 @@ export interface StudentProgress {
 }
 
 const COLLECTION = 'progress';
+
+export interface StudentLabCompletion {
+  progress: ProgressData;
+  alreadyCompleted: boolean;
+}
+
+// Serialize local writes for the same student, including different labs. Remote
+// writes additionally use Firestore transactions to protect other tabs/devices.
+const laboratoryWrites = new Map<string, Promise<unknown>>();
+
+/** Records the completion and its reward together; failures reach the caller. */
+export async function completeStudentLabProgress(uid: string, labId: string, score: number): Promise<StudentLabCompletion> {
+  if (!uid || !labId || !Number.isFinite(score) || score < 0 || score > 100) {
+    throw new Error('Estudante, laboratório ou pontuação inválidos.');
+  }
+  const previousWrite = laboratoryWrites.get(uid) ?? Promise.resolve();
+  const operation = previousWrite.catch(() => undefined).then(async () => {
+    function update(current: ProgressData): StudentLabCompletion {
+      if (current.completedModules?.includes(labId)) return { progress: current, alreadyCompleted: true };
+      const { xp, level, coins } = calculateModuleRewards(score, current.xp, current.level, current.coins);
+      return {
+        progress: { ...current, xp, level, coins, completedModules: [...(current.completedModules ?? []), labId], updatedAt: new Date().toISOString() },
+        alreadyCompleted: false,
+      };
+    }
+
+    if (!db) {
+      const current = await getLocalEtlProgress(uid) ?? { ...DEFAULT_PROGRESS, completedModules: [], purchasedItems: [] };
+      const completion = update(current);
+      if (!completion.alreadyCompleted) await saveLocalProgress(uid, completion.progress);
+      return completion;
+    }
+
+    const progressRef = doc(db, COLLECTION, uid);
+    return runTransaction(db, async transaction => {
+      const snapshot = await transaction.get(progressRef);
+      const current = snapshot.exists()
+        ? { ...DEFAULT_PROGRESS, ...snapshot.data() } as ProgressData
+        : { ...DEFAULT_PROGRESS, completedModules: [], purchasedItems: [] };
+      const completion = update(current);
+      if (!completion.alreadyCompleted) transaction.set(progressRef, completion.progress, { merge: true });
+      return completion;
+    });
+  });
+  laboratoryWrites.set(uid, operation);
+  try {
+    return await operation;
+  } finally {
+    if (laboratoryWrites.get(uid) === operation) laboratoryWrites.delete(uid);
+  }
+}
 
 /**
  * Busca o progresso do estudante. Cria documento default se não existir.

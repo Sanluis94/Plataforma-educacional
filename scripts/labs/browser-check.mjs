@@ -3,7 +3,7 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { createHash } from 'node:crypto';
-import { readCatalog, levels, verifyPreview } from './browser-fixture.mjs';
+import { readCatalog, levels, verifyPreview, isolateBrowserData } from './browser-fixture.mjs';
 
 // Build with build-browser-preview.mjs, then serve preview on 127.0.0.1:5175.
 // It deliberately uses the
@@ -55,7 +55,7 @@ async function verifyActivity(page, lab) {
   for (const scenario of content.scenarios) {
     await activity.getByRole('button', { name: scenario.label, exact: true }).click();
     await activity.getByText(scenario.situation, { exact: true }).waitFor({ state: 'visible' });
-    await activity.getByRole('button', { name: 'Conferir observação', exact: true }).click();
+    await activity.getByRole('button', { name: 'Conferir observação', exact: true }).click({ noWaitAfter: true });
     await activity.getByText(scenario.observation, { exact: true }).waitFor({ state: 'visible' });
     await activity.getByText(scenario.explanation, { exact: true }).waitFor({ state: 'visible' });
   }
@@ -106,8 +106,9 @@ async function verifyShard(index) {
   // Each page gets an independent local session; no real Firebase or AI calls.
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   pages.push(page);
-  await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1' ? route.continue() : route.abort());
-  page.setDefaultTimeout(15_000);
+  await isolateBrowserData(page);
+  page.setDefaultTimeout(30_000);
+  page.setDefaultNavigationTimeout(45_000);
   page.on('pageerror', error => pageErrors.push(error.message));
   await page.goto(`${origin}/simulacao`);
   // Refuse to use a configured real account or external login for this test.

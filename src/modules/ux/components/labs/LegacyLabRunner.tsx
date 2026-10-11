@@ -16,6 +16,6 @@ export default function LegacyLabRunner({ labId, onComplete }: LegacyLabRunnerPr
   if (!lab || !descriptor || descriptor.source !== 'legacy') return <p role="alert">Bancada não encontrada.</p>;
   const Bench = lab.component as ComponentType<{ labId: string; labTitle: string; onComplete: (score: number) => void }>;
   return <LabLearningWorkspace key={labId} labId={labId} title={descriptor.title} subject={descriptor.subject} objective={descriptor.objective} academicLevel={descriptor.academicLevel} content={getLabLearningContent(labId)} onComplete={onComplete}>
-    <Bench {...lab.props} labId={labId} labTitle={descriptor.title} onComplete={score => onComplete?.({ score: Math.round(score / 10), telemetryRows: 0 })} />
+    <Bench {...lab.props} labId={labId} labTitle={descriptor.title} onComplete={score => onComplete?.({ score: score / 10, telemetryRows: 0 })} />
   </LabLearningWorkspace>;
 }

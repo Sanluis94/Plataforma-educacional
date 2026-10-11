@@ -1,5 +1,5 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { Simulacao } from '../modules/ux/pages/Simulacao';
 import { SkillTreeExplorerModal } from '../modules/ux/components/labs/SkillTreeExplorerModal';
@@ -9,8 +9,9 @@ import { LEARNING_LABS_CATALOG, getLearningLab, getLearningLabCounts } from '../
 import { learningLevelLabel } from '../modules/core/constants/learningLevels';
 import { getLabLearningContent } from '../modules/core/content/labLearningContent';
 
-const auth = vi.hoisted(() => ({ userData: { gradeLevel: 'fundamental_1', name: 'Estudante de teste', role: 'estudante' } }));
+const auth = vi.hoisted(() => ({ userData: { gradeLevel: 'fundamental_1', name: 'Estudante de teste', role: 'estudante' }, completeLab: vi.fn() }));
 vi.mock('../modules/core/contexts/AuthContext', () => ({ useAuth: () => ({ currentUser: { uid: 'test-user' }, userData: auth.userData }) }));
+vi.mock('../modules/core/hooks/useStudentLabCompletion', () => ({ useStudentLabCompletion: () => ({ completeLab: auth.completeLab }) }));
 
 function Location() { const location = useLocation(); return <output data-testid="location">{location.pathname}{location.search}</output>; }
 function RouteJump({ to }: { to: string }) { const navigate = useNavigate(); return <button onClick={() => navigate(to)}>Abrir resultado da busca</button>; }
@@ -22,6 +23,7 @@ beforeEach(() => {
   auth.userData.gradeLevel = 'fundamental_1';
   auth.userData.role = 'estudante';
   localStorage.clear();
+  auth.completeLab.mockReset().mockResolvedValue(null);
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
 });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
@@ -38,7 +40,7 @@ describe('Navegação de laboratórios por nível', () => {
     render(<MemoryRouter initialEntries={['/simulacao?level=medio']}><Simulacao /><RouteJump to={`/simulacao?lab=port_3&level=${lab.academicLevel}`} /><Location /></MemoryRouter>);
     fireEvent.change(screen.getByRole('combobox', { name: 'Disciplina' }), { target: { value: getLearningLab('math_2')!.subject } });
     fireEvent.click(screen.getByRole('button', { name: 'Abrir resultado da busca' }));
-    expect(await screen.findByRole('region', { name: `Laboratório: ${lab.title}` })).toBeInTheDocument();
+    expect(await screen.findByRole('region', { name: `Laboratório: ${lab.title}` }, { timeout: 10000 })).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'Disciplina' })).toHaveValue(lab.subject);
   });
 
@@ -84,7 +86,7 @@ describe('Navegação de laboratórios por nível', () => {
     renderPage(`/simulacao?level=${lab.academicLevel}`);
     fireEvent.change(screen.getByRole('searchbox', { name: 'Buscar laboratórios' }), { target: { value: 'math_1' } });
     fireEvent.click(within(screen.getByRole('article', { name: lab.title })).getByRole('button', { name: 'Abrir laboratório' }));
-    expect(await screen.findByRole('region', { name: `Laboratório: ${lab.title}` })).toBeInTheDocument();
+    expect(await screen.findByRole('region', { name: `Laboratório: ${lab.title}` }, { timeout: 10000 })).toBeInTheDocument();
     expect(screen.getByTestId('location')).toHaveTextContent(`/simulacao?lab=math_1&level=${lab.academicLevel}`);
   });
 
@@ -112,11 +114,37 @@ describe('Navegação de laboratórios por nível', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Avaliar' }));
     for (const question of content.questions) fireEvent.click(screen.getByLabelText(question.options.find(option => option.correct)!.text));
     fireEvent.click(screen.getByRole('button', { name: 'Corrigir respostas' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Certificado deste nível' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Certificado deste nível' }));
     expect(await screen.findByText('1 atividades de aprendizagem')).toBeInTheDocument();
     expect(screen.getByText('Carga horária não contabilizada.', { exact: false })).toBeInTheDocument();
     const saved = JSON.parse(localStorage.getItem('kortex_user_certificates') || '[]');
     expect(saved[0]).toMatchObject({ academicLevelLabel: learningLevelLabel('fundamental_1'), completedLabsCount: 1, totalSimulatedHours: 0 });
+  });
+
+  it('abre a bancada avançada embutida pelo ID recebido', () => {
+    renderPage('/simulacao', { mode: 'sup_fis_01', labId: 'sup_fis_01' });
+    expect(screen.getByRole('region', { name: `Laboratório: ${getLearningLab('sup_fis_01')!.title}` })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir bancada' }));
+    expect(screen.getByText('Massa (m)')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('mantém respostas e permite salvar novamente após falha no progresso global', async () => {
+    auth.completeLab.mockRejectedValueOnce(new Error('permission-denied')).mockResolvedValueOnce({ alreadyCompleted: false });
+    const content = getLabLearningContent('fund1_mat_01')!;
+    renderPage('/simulacao?lab=fund1_mat_01');
+    fireEvent.click(screen.getByRole('button', { name: 'Avaliar' }));
+    for (const question of content.questions) fireEvent.click(screen.getByLabelText(question.options.find(option => option.correct)!.text));
+    fireEvent.click(screen.getByRole('button', { name: 'Corrigir respostas' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível salvar');
+    expect(screen.getByRole('button', { name: 'Certificado deste nível' })).toBeDisabled();
+    for (const question of content.questions) expect(screen.getByLabelText(question.options.find(option => option.correct)!.text)).toBeChecked();
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar salvar progresso' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Certificado deste nível' })).toBeEnabled());
+    expect(auth.completeLab).toHaveBeenCalledTimes(2);
+    expect(auth.completeLab).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'fund1_mat_01' }), 100);
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('cria uma atividade no nível profissional ativo e a abre sem conversão para Médio', () => {

@@ -3,6 +3,9 @@
  * Suporta priorização da chave inserida no navegador (localStorage) e chave padrão de ambiente (VITE_GEMINI_API_KEY).
  */
 
+// Modelo estável recomendado para novos projetos na revisão de outubro/2026.
+export const GEMINI_TEXT_MODEL = 'gemini-3.5-flash-lite';
+
 export const getEffectiveGeminiApiKey = (): string | null => {
   if (import.meta.env.VITE_DISABLE_AI === 'true') return null;
   const localKey = typeof window !== 'undefined' ? localStorage.getItem('gemini_api_key') : null;
@@ -29,7 +32,7 @@ export const analyzeEssayWithGemini = async (
   if (apiKey) {
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -125,7 +128,7 @@ export const generatePedagogicalDiagnosis = async (
   if (apiKey) {
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -275,7 +278,7 @@ Forneça um JSON estrito no seguinte formato:
 }`;
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -364,7 +367,7 @@ export const callGeminiWithKey = async (apiKey: string, prompt: string): Promise
   }
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent?key=${apiKey.trim()}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
