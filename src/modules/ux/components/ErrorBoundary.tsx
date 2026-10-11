@@ -79,10 +79,10 @@ export class ErrorBoundary extends Component<Props, State> {
             </h2>
             
             <p style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.5' }}>
-              Ocorreu um erro temporário no carregamento do módulo. Não se preocupe, seu progresso recente foi salvo localmente.
+              Não foi possível carregar esta tela. Tente recarregar ou volte à página inicial para continuar.
             </p>
 
-            {this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <div style={{
                 padding: '0.75rem',
                 borderRadius: '0.5rem',
@@ -100,7 +100,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button
                 onClick={this.handleReload}
                 className="btn-gradient"

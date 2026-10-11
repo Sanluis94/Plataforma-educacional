@@ -2,7 +2,7 @@
  * useProfessorDashboard — Hook para o painel do professor.
  * Conecta o professor autenticado com suas turmas, atividades e relatórios.
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Turma } from '../../data/repositories/classRepository';
 import { getProfessorClasses } from '../../data/repositories/classRepository';
 import { getActivitiesByProfessor, deleteActivity } from '../../data/repositories/activityRepository';
@@ -13,16 +13,22 @@ import { createNewClass, validateClassName, publishActivity } from '../services/
 import { useAuth } from '../contexts/AuthContext';
 import type { ActivityData } from '../../data/types';
 
-export const useProfessorDashboard = () => {
+export const useProfessorDashboard = (navigation?: { activeTab: string; classId: string | null }) => {
   const { currentUser, userData } = useAuth();
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [activities, setActivities] = useState<ActivityData[]>([]);
   const [isCreatingClass, setIsCreatingClass] = useState(false);
   const [newClassName, setNewClassName] = useState('');
   const [activeTab, setActiveTab] = useState<'classes' | 'activityBuilder' | 'reports' | 'activities'>('classes');
-  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [storedClassId, setSelectedClassId] = useState<string | null>(null);
+  const selectedClassId = navigation
+    ? turmas.find(turma => turma.id === navigation.classId)?.id ?? turmas[0]?.id ?? null
+    : storedClassId;
+  const currentTab = navigation?.activeTab ?? activeTab;
   const [classReport, setClassReport] = useState<LocalClassReport | null>(null);
   const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
+  const reportRequest = useRef(0);
   const [builderStep, setBuilderStep] = useState(1);
   const [activityConfig, setActivityConfig] = useState<any>({ type: 'quiz', title: '', module: '', config: {} });
   const [loading, setLoading] = useState(true);
@@ -81,35 +87,36 @@ export const useProfessorDashboard = () => {
     loadActivitiesAndStats();
   }, [currentUser?.uid, turmas]);
 
-  // Carrega relatório quando tab 'reports' está ativa
-  useEffect(() => {
-    if (activeTab !== 'reports') return;
-
-    const classId = selectedClassId ?? turmas[0]?.id;
+  const refreshReport = useCallback(async () => {
+    const classId = selectedClassId;
+    const request = ++reportRequest.current;
+    setReportError(null);
     if (!classId) {
       setClassReport(null);
+      setReportLoading(false);
       return;
     }
-
-    if (!selectedClassId) {
-      setSelectedClassId(classId);
-    }
-
-    const loadReport = async () => {
-      setReportLoading(true);
-      try {
-        const report = await getLiveClassReport(classId);
-        setClassReport(report);
-      } catch (error) {
-        console.error('[useProfessorDashboard] Erro ao carregar relatório da turma:', error);
+    setReportLoading(true);
+    setClassReport(null);
+    try {
+      const report = await getLiveClassReport(classId);
+      if (request === reportRequest.current) setClassReport(report);
+    } catch (error) {
+      console.error('[useProfessorDashboard] Erro ao carregar relatório da turma:', error);
+      if (request === reportRequest.current) {
         setClassReport(null);
-      } finally {
-        setReportLoading(false);
+        setReportError('Não foi possível carregar o relatório. Tente atualizar novamente.');
       }
-    };
+    } finally {
+      if (request === reportRequest.current) setReportLoading(false);
+    }
+  }, [selectedClassId]);
 
-    loadReport();
-  }, [activeTab, selectedClassId, turmas]);
+  const cancelReportRequests = useCallback(() => { reportRequest.current++; }, []);
+  useEffect(() => {
+    if (currentTab === 'reports') void refreshReport();
+    return cancelReportRequests;
+  }, [currentTab, refreshReport, cancelReportRequests]);
 
   // Cria turma vinculada ao professor autenticado
   const handleCreateClass = async (e: React.FormEvent) => {
@@ -126,6 +133,7 @@ export const useProfessorDashboard = () => {
       setSelectedClassId(novaTurma.id);
       setNewClassName('');
       setIsCreatingClass(false);
+      return novaTurma;
     } catch (error) {
       console.error('[useProfessorDashboard] Erro ao criar turma:', error);
     }
@@ -225,6 +233,8 @@ export const useProfessorDashboard = () => {
     setSelectedClassId,
     classReport,
     reportLoading,
+    reportError,
+    refreshReport,
     builderStep,
     setBuilderStep,
     activityConfig,

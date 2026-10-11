@@ -1,22 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { ProfessorDashboard } from '../modules/ux/pages/ProfessorDashboard';
 import { searchLearningLabs } from '../modules/core/constants/learningCatalog';
 
 const fixtures = vi.hoisted(() => ({
   turma: { id: 'class-level-test', name: 'Turma de teste', studentsCount: 1, academicLevel: undefined as string | undefined },
   savePlan: vi.fn(async (data: Record<string, unknown>) => ({ ...data, id: 'plan-level-test' })),
+  refreshReport: vi.fn(async () => {}),
 }));
 vi.mock('../modules/core/contexts/AuthContext', () => ({
-  useAuth: () => ({ currentUser: { uid: 'professor-level-test' }, userData: { gradeLevel: 'medio', name: 'Professora' } }),
+  useAuth: () => ({ currentUser: { uid: 'professor-level-test' }, userData: { role: 'professor', gradeLevel: 'medio', name: 'Professora' } }),
 }));
 vi.mock('../modules/core/hooks/useProfessorDashboard', () => ({
-  useProfessorDashboard: () => ({
-    turmas: [fixtures.turma], selectedClassId: fixtures.turma.id,
+  useProfessorDashboard: (navigation: { classId: string | null }) => ({
+    turmas: [fixtures.turma, { id: 'class-b', name: 'Outra turma', studentsCount: 2 }], selectedClassId: navigation.classId === 'class-b' ? 'class-b' : fixtures.turma.id,
     isCreatingClass: false, newClassName: '', classReport: null, reportLoading: false,
     globalStats: { completionRate: 0, engagement: 0 }, setIsCreatingClass: vi.fn(), setNewClassName: vi.fn(),
     setSelectedClassId: vi.fn(), handleCreateClass: vi.fn(), handleViewClassReport: vi.fn(), exportReportCSV: vi.fn(),
+    refreshReport: fixtures.refreshReport,
   }),
 }));
 vi.mock('../modules/core/constants/dashboardConstants', () => ({ ALL_MODULES: [] }));
@@ -38,8 +40,18 @@ vi.mock('../modules/data/repositories/lessonPlanRepository', () => ({
 vi.mock('../modules/ux/components/ProfessorLmsModules', () => ({ ProfessorLmsModules: () => null }));
 vi.mock('../modules/ux/components/labs/BatchClassManagerModal', () => ({ BatchClassManagerModal: () => null }));
 
+function HistoryControls() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  return <><button onClick={() => navigate(-1)}>Histórico anterior</button><output data-testid="panel-url">{location.pathname}{location.search}</output></>;
+}
+
+function renderDashboard(url = '/professor') {
+  render(<MemoryRouter initialEntries={[url]}><HistoryControls /><ProfessorDashboard /></MemoryRouter>);
+}
+
 function renderPlanner() {
-  render(<MemoryRouter><ProfessorDashboard /></MemoryRouter>);
+  renderDashboard();
   fireEvent.click(screen.getByRole('button', { name: /Plano de Aulas Bimestral/ }));
 }
 
@@ -47,6 +59,7 @@ beforeEach(() => {
   cleanup();
   fixtures.turma.academicLevel = undefined;
   fixtures.savePlan.mockClear();
+  fixtures.refreshReport.mockClear();
 });
 
 describe('catálogo e planejamento do professor por nível', () => {
@@ -82,5 +95,31 @@ describe('catálogo e planejamento do professor por nível', () => {
     await waitFor(() => expect(screen.getByRole('combobox', { name: 'Nível dos laboratórios' })).toHaveValue('pos_graduacao'));
     fireEvent.change(screen.getByRole('combobox', { name: 'Nível dos laboratórios' }), { target: { value: 'profissional' } });
     expect(fixtures.turma.academicLevel).toBe('pos_graduacao');
+  });
+
+  it('retoma aba, turma e bimestre da URL e inclui o contexto no retorno do ENEM', () => {
+    renderDashboard('/professor?tab=lesson_plans&class=class-b&bimester=3%C2%BA+Bimestre&level=graduacao');
+    expect(screen.getByRole('combobox', { name: 'Turma selecionada' })).toHaveValue('class-b');
+    expect(screen.getByRole('combobox', { name: 'Nível dos laboratórios' })).toHaveValue('graduacao');
+    expect(screen.getByText(/Cronograma de Aulas — 3º Bimestre/)).toBeInTheDocument();
+    const link = new URL(screen.getByRole('link', { name: /Simulado ENEM/ }).getAttribute('href')!, 'https://test.local');
+    expect(link.searchParams.get('returnTo')).toBe('/professor?tab=lesson_plans&class=class-b&bimester=3%C2%BA+Bimestre&level=graduacao');
+    expect(screen.queryByRole('link', { name: /Coordenação/ })).not.toBeInTheDocument();
+  });
+
+  it('aplica os padrões para parâmetros inválidos e retorna à aba de turmas pelo histórico', () => {
+    renderDashboard('/professor?tab=invalida&class=inexistente&bimester=invalido');
+    expect(screen.getByRole('combobox', { name: 'Turma selecionada' })).toHaveValue(fixtures.turma.id);
+    fireEvent.click(screen.getByRole('button', { name: /Plano de Aulas Bimestral/ }));
+    expect(screen.getByText(/Cronograma de Aulas — 1º Bimestre/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Histórico anterior' }));
+    expect(screen.queryByText(/Cronograma de Aulas/)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Minhas Turmas/ })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('aciona a busca explícita ao atualizar o relatório', async () => {
+    renderDashboard('/professor?tab=reports&class=class-b');
+    fireEvent.click(screen.getByRole('button', { name: 'Atualizar' }));
+    await waitFor(() => expect(fixtures.refreshReport).toHaveBeenCalledOnce());
   });
 });

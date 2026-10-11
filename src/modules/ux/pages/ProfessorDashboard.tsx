@@ -1,5 +1,6 @@
+import { useNavigationParams } from '../hooks/useNavigationParams';
 import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
@@ -50,6 +51,11 @@ import {
 import { BatchClassManagerModal } from '../components/labs/BatchClassManagerModal';
 import { generateClassRetentionReport } from '../../core/services/earlyWarningService';
 import { FileSpreadsheet, ShieldAlert } from 'lucide-react';
+import { canAccessPath, withReturnTo } from '../../core/utils/navigation';
+
+const PROFESSOR_TABS = ['classes', 'lesson_plans', 'exams', 'materials', 'labs_overview', 'reports', 'messages', 'lms_gradebook'] as const;
+type ProfessorTab = typeof PROFESSOR_TABS[number];
+const PLAN_PERIODS: BimesterPeriod[] = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre', '1º Semestre', '2º Semestre'];
 
 const SUBJECT_COLORS = [
   '#293E24', '#B8441F', '#E4683F', '#3D5B36', '#F59C7B', '#172314',
@@ -57,6 +63,16 @@ const SUBJECT_COLORS = [
 ];
 
 export function ProfessorDashboard() {
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useNavigationParams();
+  const tabParam = searchParams.get('tab');
+  const dashboardTab: ProfessorTab = PROFESSOR_TABS.includes(tabParam as ProfessorTab) ? tabParam as ProfessorTab : 'classes';
+  const panelLocation = location.pathname + location.search;
+  const setDashboardTab = (tab: ProfessorTab) => setSearchParams(previous => {
+    const next = new URLSearchParams(previous);
+    next.set('tab', tab);
+    return next;
+  });
   const {
     turmas,
     isCreatingClass,
@@ -64,29 +80,26 @@ export function ProfessorDashboard() {
     newClassName,
     setNewClassName,
     selectedClassId,
-    setSelectedClassId,
     classReport,
     reportLoading,
+    reportError,
+    refreshReport,
     handleCreateClass,
-    handleViewClassReport,
     exportReportCSV,
     globalStats,
-  } = useProfessorDashboard();
-
-  // Active view tab
-  const [dashboardTab, setDashboardTab] = useState<
-    'classes' | 'lesson_plans' | 'exams' | 'materials' | 'labs_overview' | 'reports' | 'messages' | 'lms_gradebook'
-  >('classes');
-
-  // Sync tab with query parameters if present
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tabParam = params.get('tab');
-    const validTabs = ['classes', 'lesson_plans', 'exams', 'materials', 'labs_overview', 'reports', 'messages', 'lms_gradebook'];
-    if (tabParam && validTabs.includes(tabParam)) {
-      setDashboardTab(tabParam as any);
-    }
-  }, []);
+  } = useProfessorDashboard({ activeTab: dashboardTab, classId: searchParams.get('class') });
+  const setSelectedClassId = (classId: string) => setSearchParams(previous => {
+    const next = new URLSearchParams(previous);
+    next.set('class', classId);
+    next.delete('level');
+    return next;
+  });
+  const handleViewClassReport = (classId: string) => setSearchParams(previous => {
+    const next = new URLSearchParams(previous);
+    next.set('class', classId);
+    next.set('tab', 'reports');
+    return next;
+  });
 
   // State to track copied class code
   const [copiedClassCode, setCopiedClassCode] = useState<string | null>(null);
@@ -112,7 +125,13 @@ export function ProfessorDashboard() {
 
   // State for Lesson Plans (Bimestral / Semestral)
   const [classLessonPlans, setClassLessonPlans] = useState<LessonPlanItem[]>([]);
-  const [selectedBimester, setSelectedBimester] = useState<BimesterPeriod>('1º Bimestre');
+  const periodParam = searchParams.get('bimester');
+  const selectedBimester: BimesterPeriod = PLAN_PERIODS.includes(periodParam as BimesterPeriod) ? periodParam as BimesterPeriod : '1º Bimestre';
+  const setSelectedBimester = (period: BimesterPeriod) => setSearchParams(previous => {
+    const next = new URLSearchParams(previous);
+    next.set('bimester', period);
+    return next;
+  });
   const [newPlanTopic, setNewPlanTopic] = useState('');
   const [newPlanBNCC, setNewPlanBNCC] = useState('');
   const [newPlanMethodology, setNewPlanMethodology] = useState('');
@@ -180,9 +199,14 @@ export function ProfessorDashboard() {
 
   // Auth user data
   const { currentUser, userData } = useAuth();
-  const [catalogueLevel, setCatalogueLevel] = useState(() => normalizeLearningLevel(userData?.gradeLevel));
   const selectedClass = turmas.find(turma => turma.id === selectedClassId) as (typeof turmas[number] & { gradeLevel?: unknown; academicLevel?: unknown }) | undefined;
   const classLevel = normalizeLearningLevel(selectedClass?.gradeLevel, normalizeLearningLevel(selectedClass?.academicLevel, normalizeLearningLevel(userData?.gradeLevel)));
+  const catalogueLevel = normalizeLearningLevel(searchParams.get('level'), classLevel);
+  const setCatalogueLevel = (level: string) => setSearchParams(previous => {
+    const next = new URLSearchParams(previous);
+    next.set('level', level);
+    return next;
+  });
   const catalogueModules = useMemo(() => {
     const labs = searchLearningLabs({ academicLevel: catalogueLevel });
     return [...new Set(labs.map(lab => lab.subject))].map(subject => ({
@@ -191,10 +215,6 @@ export function ProfessorDashboard() {
       labs: labs.filter(lab => lab.subject === subject),
     }));
   }, [catalogueLevel]);
-
-  useEffect(() => {
-    setCatalogueLevel(classLevel);
-  }, [selectedClassId, classLevel]);
 
   useEffect(() => {
     if (newPlanLabId && getLearningLab(newPlanLabId)?.academicLevel !== catalogueLevel) setNewPlanLabId('');
@@ -227,12 +247,16 @@ export function ProfessorDashboard() {
     }, 4500);
   };
 
-  // Sync selected class with first available if none selected
+  // Record the validated class context for reloads and return links.
   useEffect(() => {
-    if (!selectedClassId && turmas.length > 0) {
-      setSelectedClassId(turmas[0].id);
+    if (selectedClassId && searchParams.get('class') !== selectedClassId) {
+      setSearchParams(previous => {
+        const next = new URLSearchParams(previous);
+        next.set('class', selectedClassId);
+        return next;
+      }, { replace: true });
     }
-  }, [turmas, selectedClassId, setSelectedClassId]);
+  }, [selectedClassId, searchParams, setSearchParams]);
 
   // Modal Escape key listener
   useEffect(() => {
@@ -768,22 +792,24 @@ export function ProfessorDashboard() {
           className="hover:scale-102"
         >
           <HomeIcon style={{ width: '1rem', height: '1rem' }} />
-          ← Voltar ao Hub Inicial
+          ← Página inicial
         </Link>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', minWidth: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
           <span style={{ color: 'var(--text-secondary)' }}>Acesso rápido:</span>
-          <Link to="/simulacao" style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            🔬 Catálogo de 72 Labs
+          <Link to={withReturnTo(`/simulacao?level=${catalogueLevel}`, panelLocation)} style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            🔬 Catálogo de Laboratórios
           </Link>
           <span>•</span>
-          <Link to="/enem" style={{ color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            📝 Simulado ENEM TRI
+          <Link to={withReturnTo('/enem', panelLocation)} style={{ color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            📝 Simulado ENEM
           </Link>
-          <span>•</span>
-          <Link to="/coordenacao" style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            🏛️ Coordenação
-          </Link>
+          {canAccessPath(userData?.role, '/coordenacao') && <>
+            <span>•</span>
+            <Link to={withReturnTo('/coordenacao', panelLocation)} style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              🏛️ Coordenação
+            </Link>
+          </>}
         </div>
       </div>
 
@@ -793,11 +819,11 @@ export function ProfessorDashboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
             <span style={{ fontSize: '1.75rem' }}>👨‍🏫</span>
             <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.5px', fontFamily: 'var(--font-heading)' }}>
-              Painel Docente & Gestão Escolar
+              Painel do Professor
             </h1>
           </div>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
-            Planejamento curricular bimestral, provas com correção automática, upload de materiais e laboratórios integrados.
+            Organize suas turmas, planeje aulas, crie provas e compartilhe materiais.
           </p>
         </div>
 
@@ -928,21 +954,32 @@ export function ProfessorDashboard() {
         })}
       </div>
 
+      {turmas.length > 0 && (
+        <label style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem', color: 'var(--text-main)', fontWeight: 600 }}>
+          Turma selecionada
+          <select aria-label="Turma selecionada" value={selectedClassId || ''} onChange={event => setSelectedClassId(event.target.value)} style={{ padding: '0.65rem', borderRadius: '8px', background: 'var(--color-bg-card, #FAF7EE)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}>
+            {turmas.map(turma => <option key={turma.id} value={turma.id}>{turma.name}</option>)}
+          </select>
+          <span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--text-secondary)' }}>Esta turma será usada nos planos, materiais, avisos e relatórios.</span>
+        </label>
+      )}
+
       {/* Reorganized Top Navigation Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--border-color)' }}>
         {[
           { id: 'classes', label: '🏫 Minhas Turmas & Mural', icon: BookOpen },
-          { id: 'lms_gradebook', label: '📚 Diário, Notas & Fórum LMS', icon: Award },
+          { id: 'lms_gradebook', label: '📚 Diário, Notas e Fórum', icon: Award },
           { id: 'lesson_plans', label: '📅 Plano de Aulas Bimestral', icon: Calendar },
           { id: 'exams', label: `📝 Provas & Avaliações (${examsList.length})`, icon: FileText },
-          { id: 'materials', label: `📁 Materiais & Uploads (${enhancedMaterials.length})`, icon: Upload },
-          { id: 'labs_overview', label: `🔬 Catálogo ${LEARNING_LABS_CATALOG.length} Labs`, icon: Layers },
-          { id: 'reports', label: '📊 Analytics & Diagnóstico IA', icon: BarChartIcon },
+          { id: 'materials', label: `📁 Materiais da Turma (${enhancedMaterials.length})`, icon: Upload },
+          { id: 'labs_overview', label: `🔬 Catálogo de Laboratórios`, icon: Layers },
+          { id: 'reports', label: '📊 Relatórios da Turma', icon: BarChartIcon },
           { id: 'messages', label: `💬 Dúvidas (${profMessages.filter(m => !m.replied).length})`, icon: MessageCircle },
         ].map(tab => (
           <button
             key={tab.id}
-            onClick={() => setDashboardTab(tab.id as any)}
+            onClick={() => setDashboardTab(tab.id as ProfessorTab)}
+            aria-pressed={dashboardTab === tab.id}
             style={{
               padding: '0.65rem 1.25rem',
               borderRadius: 'var(--radius-sm, 10px) var(--radius-sm, 10px) 0 0',
@@ -976,7 +1013,10 @@ export function ProfessorDashboard() {
                 <PlusCircle style={{ width: '1.2rem', height: '1.2rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
                 Cadastrar Nova Turma
               </h3>
-              <form onSubmit={handleCreateClass} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+              <form onSubmit={async event => {
+                const turma = await handleCreateClass(event);
+                if (turma) setSelectedClassId(turma.id);
+              }} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                 <div style={{ flex: 1, minWidth: '220px' }}>
                   <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Nome da Turma</label>
                   <input
@@ -1093,9 +1133,7 @@ export function ProfessorDashboard() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedClassId(turma.id);
                         handleViewClassReport(turma.id);
-                        setDashboardTab('reports');
                       }}
                       className="btn-outline"
                       style={{ flex: 1, padding: '0.45rem', fontSize: '0.8rem' }}
@@ -1105,8 +1143,13 @@ export function ProfessorDashboard() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedClassId(turma.id);
-                        setDashboardTab('lesson_plans');
+                        setSearchParams(previous => {
+                          const next = new URLSearchParams(previous);
+                          next.set('class', turma.id);
+                          next.set('tab', 'lesson_plans');
+                          next.delete('level');
+                          return next;
+                        });
                       }}
                       className="btn-gradient"
                       style={{ flex: 1, padding: '0.45rem', fontSize: '0.8rem' }}
@@ -2021,7 +2064,7 @@ export function ProfessorDashboard() {
           <div className="glass-card mb-4" style={{ padding: '1.75rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Upload style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
-              Upload & compartilhamento de materiais de apoio
+              Compartilhar materiais de estudo
             </h3>
 
             {/* Class Selector for Materials */}
@@ -2411,7 +2454,8 @@ export function ProfessorDashboard() {
 
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
-                onClick={() => selectedClassId && handleViewClassReport(selectedClassId)}
+                onClick={() => void refreshReport()}
+                disabled={reportLoading || !selectedClassId}
                 className="btn-outline"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem' }}
               >
@@ -2419,6 +2463,7 @@ export function ProfessorDashboard() {
               </button>
               <button
                 onClick={exportReportCSV}
+                disabled={!classReport || reportLoading}
                 className="btn-gradient"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600 }}
               >
@@ -2427,10 +2472,11 @@ export function ProfessorDashboard() {
             </div>
           </div>
 
+          {reportError && <div role="alert" style={{ marginBottom: '1rem', color: 'var(--color-vermelho, #BC391F)' }}>{reportError}</div>}
           {reportLoading ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
               <RefreshCw className="animate-spin" style={{ width: '2rem', height: '2rem', margin: '0 auto 1rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
-              <p>Carregando analytics...</p>
+              <p>Carregando relatório da turma...</p>
             </div>
           ) : classReport ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>

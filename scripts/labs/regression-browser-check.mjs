@@ -85,11 +85,13 @@ try {
   }
 
   await page.goto(`${origin}/enem`);
-  await page.getByRole('button', { name: /^A / }).first().click();
-  await page.getByRole('button', { name: /Finalizar e Obter Nota TRI/ }).click();
-  await page.getByRole('button', { name: 'Fazer Outro Simulado', exact: true }).waitFor();
-  await page.getByRole('button', { name: 'Fazer Outro Simulado', exact: true }).click();
-  await page.getByRole('button', { name: /^A / }).first().waitFor();
+  await page.getByRole('button', { name: 'Começar simulado', exact: true }).click();
+  await page.getByRole('radio', { name: /^A\./ }).first().check();
+  await page.getByRole('button', { name: 'Finalizar simulado', exact: true }).click();
+  await page.getByRole('button', { name: 'Entregar mesmo assim', exact: true }).click();
+  await page.getByRole('button', { name: 'Fazer outro simulado', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Fazer outro simulado', exact: true }).click();
+  await page.getByRole('button', { name: 'Começar simulado', exact: true }).waitFor();
   checks.push('ENEM: responder, calcular TRI e reiniciar');
 
   await page.evaluate(() => {
@@ -99,11 +101,11 @@ try {
   });
   await role('professor');
   await page.goto(`${origin}/professor`);
-  for (const name of ['Minhas Turmas & Mural', 'Diário, Notas & Fórum LMS', 'Plano de Aulas Bimestral', 'Provas & Avaliações', 'Materiais & Uploads', 'Catálogo 582 Labs', 'Analytics & Diagnóstico IA', 'Dúvidas']) {
+  for (const name of ['Minhas Turmas & Mural', 'Diário, Notas e Fórum', 'Plano de Aulas Bimestral', 'Provas & Avaliações', 'Materiais da Turma', 'Catálogo de Laboratórios', 'Relatórios da Turma', 'Dúvidas']) {
     await page.getByRole('button', { name: new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }).click();
     checks.push(`Professor: aba ${name} renderiza`);
   }
-  await page.getByRole('button', { name: /Catálogo 582 Labs/ }).click();
+  await page.getByRole('button', { name: /Catálogo de Laboratórios/ }).click();
   await page.waitForFunction(() => document.querySelector('[aria-label="Nível dos laboratórios"]')?.value === 'fundamental_2');
   checks.push('Professor: nível do catálogo acompanha a turma através do repositório real');
   await role('coordenador');

@@ -4,40 +4,48 @@ import type { GradeLevel } from '../../core/contexts/AuthContext';
 import { GRADE_LABELS } from '../../core/contexts/AuthContext';
 import { X } from 'lucide-react';
 import { Logo } from './Logo';
+import { useDialogAccessibility } from '../hooks/useDialogAccessibility';
 
 interface LoginModalProps {
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export function LoginModal({ onClose }: LoginModalProps) {
+export function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   const { isLocalAuthMode, loginWithGoogle } = useAuth();
   const [selectedRole, setSelectedRole] = useState<'estudante' | 'professor' | 'coordenador' | 'admin'>('estudante');
   const [selectedGrade, setSelectedGrade] = useState<GradeLevel>('medio');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const requestClose = () => { if (!loading) onClose(); };
+  const dialogRef = useDialogAccessibility(true, requestClose);
 
   const handleLogin = async () => {
     setLoading(true);
     setError(null);
     try {
       await loginWithGoogle(selectedRole, selectedGrade);
-      onClose();
+      (onSuccess ?? onClose)();
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code || '';
       if (code === 'auth/admin-local-only') {
         setError('Login como administrador só está disponível no modo local.');
       } else if (code === 'auth/not-configured') {
-        setError('Firebase não está configurado. Crie um arquivo .env na raiz do projeto com as chaves do Firebase. Consulte .env.example para referência.');
+        setError('O acesso está indisponível no momento. Tente novamente mais tarde.');
       } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
         setError('Login cancelado. Tente novamente e conclua o processo na janela do Google.');
       } else if (code === 'auth/unauthorized-domain') {
-        setError('Domínio não autorizado. Adicione "localhost" nos Authorized Domains no Firebase Console → Authentication → Settings.');
+        setError('Não foi possível entrar por este endereço. Acesse o endereço publicado da plataforma.');
       } else if (code === 'auth/operation-not-allowed') {
-        setError('Google Sign-In não está ativado. Acesse Firebase Console → Authentication → Sign-in method → Google → Ativar.');
+        setError('O acesso com Google está indisponível no momento. Tente novamente mais tarde.');
+      } else if (code === 'auth/popup-blocked') {
+        setError('O navegador bloqueou a janela do Google. Permita janelas para este site e tente novamente.');
+      } else if (code === 'auth/network-request-failed') {
+        setError('Não foi possível conectar. Confira sua conexão e tente novamente.');
       } else if (code === 'auth/invalid-api-key' || !code) {
-        setError('Firebase não está configurado ou a chave da API é inválida. Verifique o arquivo .env.');
+        setError('Não foi possível entrar agora. Tente novamente mais tarde.');
       } else {
-        setError(`Erro ao fazer login: ${code}`);
+        setError('Não foi possível entrar. Tente novamente.');
       }
       setLoading(false);
     }
@@ -51,9 +59,14 @@ export function LoginModal({ onClose }: LoginModalProps) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '1rem',
       }}
-      onClick={onClose}
+      onClick={requestClose}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-title"
+        tabIndex={-1}
         onClick={e => e.stopPropagation()}
         className="fade-in card"
         style={{
@@ -61,6 +74,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
           borderRadius: '14px',
           border: '1px solid var(--border-color)',
           background: 'var(--bg-card)',
+          maxHeight: 'calc(100dvh - 2rem)', overflowY: 'auto',
         }}
       >
         {/* Header */}
@@ -69,7 +83,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
             <div style={{ marginBottom: '0.5rem' }}>
               <Logo symbolSize={26} />
             </div>
-            <h2 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.35rem', fontWeight: 700 }}>
+            <h2 id="login-title" style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.35rem', fontWeight: 700 }}>
               Entrar na plataforma
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
@@ -77,7 +91,9 @@ export function LoginModal({ onClose }: LoginModalProps) {
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={requestClose}
+            aria-label="Fechar acesso"
+            disabled={loading}
             style={{
               background: 'none', border: '1px solid var(--border-color)',
               borderRadius: '10px', padding: '0.35rem',
@@ -95,6 +111,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
           {(['estudante', 'professor', 'coordenador', ...(isLocalAuthMode ? ['admin' as const] : [])] as const).map(role => (
             <button
               key={role}
+              aria-pressed={selectedRole === role}
               onClick={() => setSelectedRole(role)}
               style={{
                 padding: '0.85rem 0.35rem', borderRadius: '10px', cursor: 'pointer',
@@ -124,12 +141,13 @@ export function LoginModal({ onClose }: LoginModalProps) {
             color: 'var(--text-secondary)', fontSize: '0.82rem',
             display: 'block', marginBottom: '0.5rem',
           }}>
-            {selectedRole === 'estudante' ? 'Minha turma pertence a:' : 'Vou lecionar para:'}
+            {selectedRole === 'estudante' ? 'Em qual nível você estuda?' : 'Nível de ensino para começar'}
           </label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             {(Object.entries(GRADE_LABELS) as [GradeLevel, string][]).map(([key, label]) => (
               <button
                 key={key}
+                aria-pressed={selectedGrade === key}
                 onClick={() => setSelectedGrade(key)}
                 style={{
                   textAlign: 'left', padding: '0.65rem 0.9rem', borderRadius: '10px', cursor: 'pointer',
@@ -165,7 +183,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
 
         {/* Error */}
         {error && (
-          <div style={{
+          <div role="alert" style={{
             marginTop: '0.75rem', padding: '0.75rem', borderRadius: '10px',
             background: 'var(--color-vermelho-bg)', border: '1px solid var(--color-vermelho-border)',
             color: 'var(--color-vermelho)', fontSize: '0.8rem', lineHeight: 1.5,
@@ -175,7 +193,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
         )}
 
         <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.75rem' }}>
-          {isLocalAuthMode ? 'Modo local ativo para testes neste clone.' : 'Seus dados são armazenados com segurança no Firebase.'}
+          {isLocalAuthMode ? 'Modo local ativo para testes neste clone.' : 'Use sua conta Google. Se você já tem cadastro, seu perfil será mantido.'}
         </p>
       </div>
     </div>

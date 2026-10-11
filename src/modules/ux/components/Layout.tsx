@@ -1,7 +1,8 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Home as HomeIcon, BookOpen, Users, Settings, Beaker, LogOut, Sun, Moon, GraduationCap, Building2, Sparkles, Heart, Search } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Menu, X, Home, BookOpen, Users, Settings, Beaker, LogOut, Sun, Moon, GraduationCap, Building2, Search } from 'lucide-react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useAuth } from '../../core/contexts/AuthContext';
+import { getRoleHome, ROLE_LABELS, withReturnTo, type NavigationRole } from '../../core/utils/navigation';
 import { AccessibilityToolbar } from './AccessibilityToolbar';
 import { PricingModal } from './PricingModal';
 import { ParentBridgeModal } from './ParentBridgeModal';
@@ -9,403 +10,83 @@ import { Logo } from './Logo';
 import { ConnectivityBadge } from './common/ConnectivityBadge';
 import { CommandPaletteModal } from './common/CommandPaletteModal';
 
-interface LayoutProps {
-  theme: 'dark' | 'light';
-  onThemeToggle: () => void;
-  onLoginOpen: () => void;
-}
-
+interface LayoutProps { theme: 'dark' | 'light'; onThemeToggle: () => void; onLoginOpen: () => void; }
 export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [pricingModalOpen, setPricingModalOpen] = useState(false);
-  const [parentBridgeOpen, setParentBridgeOpen] = useState(false);
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [pricingOpen, setPricingOpen] = useState(false);
+  const [familyOpen, setFamilyOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, userData, logout } = useAuth();
-
+  const role = userData?.role;
+  const origin = location.pathname + location.search;
+  const home = getRoleHome(role);
+  const panelIcon = role === 'professor' ? Users : role === 'coordenador' ? Building2 : role === 'admin' ? Settings : BookOpen;
+  const panelLabel = role === 'professor' ? 'Minhas turmas' : role === 'coordenador' ? 'Coordenação' : role === 'admin' ? 'Administração' : 'Meu aprendizado';
+  const navigation = [{ name: 'Início', href: '/', icon: Home }, ...(currentUser && userData ? [
+    { name: panelLabel, href: home, icon: panelIcon }, { name: 'Laboratórios', href: '/simulacao', icon: Beaker }, { name: 'Simulado ENEM', href: '/enem', icon: GraduationCap },
+  ] : [])];
+  const destination = (href: string) => ['/simulacao', '/enem'].includes(href) && !['/simulacao', '/enem'].includes(location.pathname) ? withReturnTo(href, origin) : href;
+  useEffect(() => { if (!document.querySelector('[role="dialog"]')) mainRef.current?.focus({ preventScroll: true }); window.scrollTo(0, 0); }, [location.pathname]);
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setCommandPaletteOpen(prev => !prev);
-      }
+    const keydown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); setSearchOpen(value => !value); }
+      if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuButton.current?.focus(); }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Dynamic navigation based on auth state and role
-  const getNavigation = () => {
-    if (!currentUser || !userData) {
-      return [
-        { name: 'Início', href: '/', icon: HomeIcon },
-      ];
-    }
-
-    if (userData.role === 'professor') {
-      return [
-        { name: 'Início', href: '/', icon: HomeIcon },
-        { name: 'Minhas Turmas', href: '/professor', icon: Users },
-        { name: 'Coordenação', href: '/coordenacao', icon: Building2 },
-        { name: 'Laboratórios', href: '/simulacao', icon: Beaker },
-        { name: 'Simulado ENEM', href: '/enem', icon: GraduationCap },
-      ];
-    }
-
-    if (userData.role === 'admin') {
-      return [
-        { name: 'Início', href: '/', icon: HomeIcon },
-        { name: 'Coordenação', href: '/coordenacao', icon: Building2 },
-        { name: 'Laboratórios', href: '/simulacao', icon: Beaker },
-        { name: 'Simulado ENEM', href: '/enem', icon: GraduationCap },
-        { name: 'Admin', href: '/admin', icon: Settings },
-      ];
-    }
-
-    // Estudante
-    return [
-      { name: 'Início', href: '/', icon: HomeIcon },
-      { name: 'Meu Aprendizado', href: '/estudante', icon: BookOpen },
-      { name: 'Laboratórios', href: '/simulacao', icon: Beaker },
-      { name: 'Simulado ENEM', href: '/enem', icon: GraduationCap },
-    ];
-  };
-
-  const navigation = getNavigation();
-
-  const isActive = (href: string) => {
-    if (href === '/') return location.pathname === '/';
-    return location.pathname.startsWith(href);
-  };
-
+    window.addEventListener('keydown', keydown);
+    return () => window.removeEventListener('keydown', keydown);
+  }, [menuOpen]);
   const handleLogout = async () => {
-    await logout();
-    navigate('/');
+    try { await logout(); setMenuOpen(false); navigate('/'); }
+    catch { setLogoutError('Não foi possível sair. Tente novamente.'); }
   };
-
-  return (
-    <div className="app-container" style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
-      {/* Header com borda fina de 1px Nude 300 e sem sombras projetadas */}
-      <header style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-        borderBottom: '1px solid var(--border-color)',
-        background: 'var(--bg-surface)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-      }}>
-        <div style={{
-          maxWidth: '80rem', margin: '0 auto',
-          padding: '0 1.25rem', display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', height: '4rem',
-        }}>
-          {/* Logo Oficial Edu-Interact */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            <Link
-              to="/"
-              style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-              title="Edu-Interact — Onde a raiz encontra o circuito"
-            >
-              <Logo colorMode={theme === 'dark' ? 'negative' : 'default'} symbolSize={28} />
-            </Link>
-
-            {location.pathname !== '/' && (
-              <Link
-                to="/"
-                className="desktop-nav"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  padding: '0.3rem 0.7rem',
-                  borderRadius: '10px',
-                  background: 'rgba(228, 104, 63, 0.1)',
-                  border: '1px solid rgba(184, 68, 31, 0.3)',
-                  color: 'var(--color-primary-accessible, #B8441F)',
-                  textDecoration: 'none',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  transition: 'all 0.2s'
-                }}
-                title="Voltar para a Página Inicial (Hub Central)"
-              >
-                <HomeIcon style={{ width: '0.85rem', height: '0.85rem' }} />
-                <span>Hub Inicial</span>
-              </Link>
-            )}
-          </div>
-
-          {/* Desktop Navigation */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} className="desktop-nav">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    padding: '0.5rem 0.9rem', borderRadius: '10px',
-                    fontSize: '0.875rem', textDecoration: 'none',
-                    transition: 'all 0.2s',
-                    ...(isActive(item.href) ? {
-                      background: theme === 'dark' ? 'rgba(228, 104, 63, 0.16)' : 'rgba(228, 104, 63, 0.1)',
-                      color: theme === 'dark' ? '#F59C7B' : '#B8441F',
-                      border: theme === 'dark' ? '1px solid rgba(245, 156, 123, 0.4)' : '1px solid rgba(184, 68, 31, 0.3)',
-                      fontWeight: 700,
-                    } : {
-                      color: 'var(--text-secondary)',
-                      border: '1px solid transparent',
-                    }),
-                  }}
-                >
-                  <Icon style={{ width: '1rem', height: '1rem' }} />
-                  {item.name}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Right Controls */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            {/* Indicador de Conexão & Sincronização Offline */}
-            <ConnectivityBadge />
-
-            {/* Botão de Busca / Command Palette (Ctrl + K) */}
-            <button
-              onClick={() => setCommandPaletteOpen(true)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.4rem',
-                padding: '0.45rem 0.75rem', borderRadius: '10px',
-                background: 'none', border: '1px solid var(--border-color)',
-                color: 'var(--text-secondary)', cursor: 'pointer',
-                fontSize: '0.8rem', fontWeight: 600,
-                transition: 'all 0.2s',
-              }}
-              title="Buscar laboratórios e ações rápidas (Ctrl + K)"
-            >
-              <Search style={{ width: '0.85rem', height: '0.85rem', color: 'var(--color-primary, #E4683F)' }} />
-              <span className="desktop-nav">Buscar</span>
-              <kbd className="desktop-nav" style={{
-                fontSize: '0.65rem',
-                padding: '0.1rem 0.35rem',
-                borderRadius: '4px',
-                background: 'rgba(0,0,0,0.06)',
-                border: '1px solid var(--border-color)',
-                fontFamily: 'monospace',
-                color: 'var(--text-muted)'
-              }}>Ctrl+K</kbd>
-            </button>
-            {/* SaaS Pricing Button */}
-            <button
-              onClick={() => setPricingModalOpen(true)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.35rem',
-                padding: '0.45rem 0.75rem', borderRadius: '10px',
-                background: 'rgba(228, 104, 63, 0.08)',
-                border: '1px solid rgba(184, 68, 31, 0.25)',
-                color: 'var(--color-primary-accessible, #B8441F)', cursor: 'pointer',
-                fontSize: '0.8rem', fontWeight: 700,
-                transition: 'all 0.2s',
-              }}
-              title="Planos Comerciais & Assinatura SaaS"
-            >
-              <Sparkles style={{ width: '0.85rem', height: '0.85rem' }} />
-              <span className="desktop-nav">Planos</span>
-            </button>
-
-            {/* Parent Bridge Modal Button */}
-            <button
-              onClick={() => setParentBridgeOpen(true)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.35rem',
-                padding: '0.45rem 0.75rem', borderRadius: '10px',
-                background: 'none', border: '1px solid var(--border-color)',
-                color: 'var(--color-primary-accessible, #B8441F)', cursor: 'pointer',
-                fontSize: '0.8rem', fontWeight: 700,
-                transition: 'all 0.2s',
-              }}
-              title="Portal da Família & Notificações"
-            >
-              <Heart style={{ width: '0.85rem', height: '0.85rem' }} />
-              <span className="desktop-nav">Família</span>
-            </button>
-
-            {/* DUA Accessibility Toolbar */}
-            <AccessibilityToolbar />
-
-            {/* Theme Toggle */}
-            <button
-              onClick={onThemeToggle}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '0.5rem', borderRadius: '10px',
-                background: 'none', border: '1px solid var(--border-color)',
-                color: 'var(--text-secondary)', cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-              title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
-            >
-              {theme === 'dark' ? <Sun style={{ width: '1.1rem', height: '1.1rem' }} /> : <Moon style={{ width: '1.1rem', height: '1.1rem' }} />}
-            </button>
-
-            {currentUser && userData ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                {/* User info - desktop only */}
-                <div className="desktop-nav" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: 600 }}>
-                    {userData.name?.split(' ')[0] || 'Usuário'}
-                  </span>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                    {userData.role === 'professor' ? 'Professor' : userData.role === 'admin' ? 'Admin' : 'Estudante'}
-                  </span>
-                </div>
-                {currentUser.photoURL && (
-                  <img
-                    src={currentUser.photoURL}
-                    alt="avatar"
-                    style={{
-                      width: '2rem', height: '2rem', borderRadius: '50%',
-                      border: '2px solid var(--color-primary)',
-                    }}
-                  />
-                )}
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '0.35rem',
-                    padding: '0.4rem 0.75rem', borderRadius: '10px',
-                    background: 'none', border: '1px solid var(--border-color)',
-                    color: 'var(--text-secondary)', cursor: 'pointer',
-                    fontSize: '0.8rem', transition: 'all 0.2s',
-                  }}
-                  className="desktop-nav"
-                >
-                  <LogOut style={{ width: '0.85rem', height: '0.85rem' }} />
-                  Sair
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={onLoginOpen}
-                className="btn-primary"
-                style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
-              >
-                Entrar
-              </button>
-            )}
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="mobile-only"
-              style={{
-                display: 'none',
-                padding: '0.5rem', borderRadius: '10px',
-                background: 'none', border: 'none',
-                color: 'var(--text-secondary)', cursor: 'pointer',
-              }}
-            >
-              {mobileMenuOpen ? <X style={{ width: '1.5rem', height: '1.5rem' }} /> : <Menu style={{ width: '1.5rem', height: '1.5rem' }} />}
-            </button>
-          </div>
+  const navLinks = (mobile = false) => navigation.map(item => {
+    const Icon = item.icon;
+    const active = location.pathname === item.href;
+    return <Link key={item.href} to={destination(item.href)} aria-current={active ? 'page' : undefined} onClick={() => setMenuOpen(false)} className={active ? 'btn-primary' : 'btn-outline'} style={{ textDecoration: 'none', padding: mobile ? '0.8rem' : '0.5rem 0.7rem', justifyContent: mobile ? 'flex-start' : 'center', fontSize: '0.85rem' }}><Icon size={16} aria-hidden="true" />{item.name}</Link>;
+  });
+  return <div className="app-container" style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
+    <a href="#main-content" className="skip-content">Ir para o conteúdo</a>
+    <header className="app-header" style={{ position: 'fixed', inset: '0 0 auto 0', zIndex: 50, background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)' }}>
+      <div style={{ maxWidth: '90rem', margin: 'auto', height: '4rem', padding: '0 0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+        <Link to="/" aria-label="Edu-Interact — página inicial" className="header-logo" onClick={() => setMenuOpen(false)}><Logo colorMode={theme === 'dark' ? 'negative' : 'default'} symbolSize={28} /></Link>
+        <nav aria-label="Navegação principal" className="header-desktop" style={{ display: 'flex', gap: '0.35rem' }}>{navLinks()}</nav>
+        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+          <span className="header-status"><ConnectivityBadge /></span>
+          <button className="btn-outline header-icon" aria-label="Buscar páginas e laboratórios" title="Buscar (Ctrl+K)" onClick={() => setSearchOpen(true)}><Search size={18} /></button>
+          <AccessibilityToolbar />
+          <button className="btn-outline header-icon" aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'} title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'} onClick={onThemeToggle}>{theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}</button>
+          {!currentUser && <button className="btn-primary" onClick={onLoginOpen} style={{ padding: '0.5rem 0.7rem' }}>Entrar</button>}
+          <button ref={menuButton} className="btn-outline header-icon" aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menuOpen} aria-controls="navigation-menu" onClick={() => setMenuOpen(value => !value)}>{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
         </div>
-
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <div className="slide-down" style={{
-            borderTop: '1px solid var(--border-color)',
-            background: 'var(--bg-surface)',
-            backdropFilter: 'blur(20px)',
-            padding: '1rem',
-          }}>
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {navigation.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '0.75rem',
-                      padding: '0.75rem 1rem', borderRadius: '10px',
-                      fontSize: '0.9rem', textDecoration: 'none',
-                      transition: 'all 0.2s',
-                      ...(isActive(item.href) ? {
-                        background: 'rgba(41, 62, 36, 0.08)',
-                        color: 'var(--color-secondary)',
-                        border: '1px solid rgba(41, 62, 36, 0.2)',
-                        fontWeight: 600,
-                      } : {
-                        color: 'var(--text-secondary)',
-                        border: '1px solid transparent',
-                      }),
-                    }}
-                  >
-                    <Icon style={{ width: '1.25rem', height: '1.25rem' }} />
-                    {item.name}
-                  </Link>
-                );
-              })}
-              {currentUser && (
-                <button
-                  onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '0.75rem',
-                    padding: '0.75rem 1rem', borderRadius: '10px',
-                    background: 'none', border: '1px solid rgba(188, 57, 31, 0.3)',
-                    color: 'var(--color-vermelho, #BC391F)', cursor: 'pointer', fontSize: '0.9rem',
-                    textAlign: 'left', width: '100%',
-                  }}
-                >
-                  <LogOut style={{ width: '1.25rem', height: '1.25rem' }} />
-                  Sair
-                </button>
-              )}
-            </nav>
-          </div>
-        )}
-      </header>
-
-      {/* Main Content */}
-      <main style={{ paddingTop: '4rem', minHeight: '100vh', flex: 1 }}>
-        <Outlet />
-
-        {/* Modais Globais de Produto */}
-        {pricingModalOpen && (
-          <PricingModal onClose={() => setPricingModalOpen(false)} />
-        )}
-
-        {parentBridgeOpen && (
-          <ParentBridgeModal
-            studentName={userData?.name || 'Estudante'}
-            onClose={() => setParentBridgeOpen(false)}
-          />
-        )}
-
-        <CommandPaletteModal
-          isOpen={commandPaletteOpen}
-          onClose={() => setCommandPaletteOpen(false)}
-          theme={theme}
-          onThemeToggle={onThemeToggle}
-          onOpenPricing={() => setPricingModalOpen(true)}
-          onOpenParentBridge={() => setParentBridgeOpen(true)}
-        />
-      </main>
-
-      {/* Responsive styles */}
-      <style>{`
-        @media (max-width: 768px) {
-          .desktop-nav { display: none !important; }
-          .mobile-only { display: flex !important; }
-        }
-        @media (min-width: 769px) {
-          .mobile-only { display: none !important; }
-        }
-      `}</style>
-    </div>
-  );
+      </div>
+      {menuOpen && <div id="navigation-menu" style={{ padding: '1rem', borderTop: '1px solid var(--border-color)', maxHeight: 'calc(100dvh - 4rem)', overflowY: 'auto' }}>
+        {userData && <p style={{ marginBottom: '0.75rem' }}>{userData.name} · {ROLE_LABELS[role as NavigationRole]}</p>}
+        <nav aria-label="Menu de páginas" style={{ display: 'grid', gap: '0.5rem', maxWidth: '35rem' }}>{navLinks(true)}</nav>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem' }}>
+          <button className="btn-outline" onClick={() => { menuButton.current?.focus(); setMenuOpen(false); setPricingOpen(true); }}>Conhecer planos (demonstração)</button>
+          <button className="btn-outline" onClick={() => { menuButton.current?.focus(); setMenuOpen(false); setFamilyOpen(true); }}>Portal da família (demonstração)</button>
+          {currentUser && <button className="btn-outline" onClick={() => void handleLogout()}><LogOut size={16} /> Sair da conta</button>}
+        </div>
+        {logoutError && <p role="alert">{logoutError}</p>}
+      </div>}
+    </header>
+    <main id="main-content" ref={mainRef} tabIndex={-1} style={{ paddingTop: '4rem', minHeight: '100vh', flex: 1, outline: 'none' }}><Suspense fallback={<p role="status" style={{ padding: '2rem' }}>Carregando tela…</p>}><Outlet /></Suspense></main>
+    {pricingOpen && <PricingModal onClose={() => setPricingOpen(false)} />}
+    {familyOpen && <ParentBridgeModal studentName={userData?.name || 'Estudante'} onClose={() => setFamilyOpen(false)} />}
+    {searchOpen && <CommandPaletteModal isOpen onClose={() => setSearchOpen(false)} theme={theme} onThemeToggle={onThemeToggle} onOpenPricing={() => setPricingOpen(true)} onOpenParentBridge={() => setFamilyOpen(true)} />}
+    <style>{`
+      .header-icon { padding: 0.5rem; min-width: 2.25rem; min-height: 2.25rem; }
+      .skip-content { position: fixed; top: -5rem; left: 1rem; z-index: 2000; padding: 0.7rem 1rem; background: var(--bg-card); color: var(--text-main); border: 2px solid var(--color-primary); }
+      .skip-content:focus { top: 0.5rem; }
+      @media (max-width: 768px) { .desktop-nav { display: none !important; } .mobile-only { display: flex !important; } }
+      @media (min-width: 769px) { .mobile-only { display: none !important; } }
+      @media (max-width: 1279px) { .header-desktop { display: none !important; } }
+      @media (max-width: 480px) { .header-logo .edu-interact-wordmark, .header-status { display: none; } .header-logo { max-width: 2rem; overflow: hidden; } }
+    `}</style>
+  </div>;
 }
-
-export default Layout;

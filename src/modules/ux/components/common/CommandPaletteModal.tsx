@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -17,6 +18,10 @@ import {
 } from 'lucide-react';
 import { LEARNING_LABS_CATALOG, searchLearningLabs } from '../../../core/constants/learningCatalog';
 import { learningLevelLabel } from '../../../core/constants/learningLevels';
+import { useAuth } from '../../../core/contexts/AuthContext';
+import { canAccessPath, withReturnTo } from '../../../core/utils/navigation';
+import { useLocation } from 'react-router-dom';
+import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
 
 interface CommandPaletteModalProps {
   isOpen: boolean;
@@ -32,7 +37,7 @@ interface PaletteAction {
   title: string;
   subtitle: string;
   category: 'Navegação' | 'Laboratórios' | 'Ações Rápidas';
-  icon: any;
+  icon: LucideIcon;
   onSelect: () => void;
   badge?: string;
 }
@@ -50,38 +55,16 @@ export function CommandPaletteModal({
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
-  // Scroll lock and focus
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      setTimeout(() => inputRef.current?.focus(), 50);
-      setQuery('');
-      setSelectedIndex(0);
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  // Global escape listener
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  const location = useLocation();
+  const { userData } = useAuth();
+  const dialogRef = useDialogAccessibility(isOpen, onClose);
+  const returnTo = location.pathname + location.search;
 
   // Navigation base items
   const baseNavigationActions: PaletteAction[] = useMemo(() => [
     {
       id: 'nav-home',
-      title: 'Hub Inicial Edu-Interact',
+      title: 'Página inicial',
       subtitle: 'Página inicial, visão geral da plataforma e recursos',
       category: 'Navegação',
       icon: BookOpen,
@@ -94,12 +77,12 @@ export function CommandPaletteModal({
       category: 'Navegação',
       icon: Beaker,
       badge: `${LEARNING_LABS_CATALOG.length} atividades`,
-      onSelect: () => { navigate('/simulacao'); onClose(); }
+      onSelect: () => { navigate(withReturnTo('/simulacao', returnTo)); onClose(); }
     },
     {
       id: 'nav-professor',
       title: 'Minhas Turmas & Diário de Classe',
-      subtitle: 'Painel docente, SpeedGrader, rubricas e provas A4',
+      subtitle: 'Turmas, provas, notas e relatórios',
       category: 'Navegação',
       icon: Users,
       badge: 'Docente',
@@ -108,7 +91,7 @@ export function CommandPaletteModal({
     {
       id: 'nav-estudante',
       title: 'Meu Aprendizado & Matrículas',
-      subtitle: 'Painel do aluno, turmas ativas e submissões com telemetria',
+      subtitle: 'Minhas turmas, atividades e progresso',
       category: 'Navegação',
       icon: BookOpen,
       badge: 'Aluno',
@@ -116,15 +99,15 @@ export function CommandPaletteModal({
     },
     {
       id: 'nav-enem',
-      title: 'Simulado ENEM & Teoria de Resposta ao Item (TRI)',
-      subtitle: 'Provas oficiais, cronômetro e análise de proficiência',
+      title: 'Simulado ENEM para praticar',
+      subtitle: 'Questões, cronômetro e nota estimada',
       category: 'Navegação',
       icon: GraduationCap,
-      onSelect: () => { navigate('/enem'); onClose(); }
+      onSelect: () => { navigate(withReturnTo('/enem', returnTo)); onClose(); }
     },
     {
       id: 'nav-coordenacao',
-      title: 'Painel de Coordenação & Analytics Institucional',
+      title: 'Coordenação escolar',
       subtitle: 'Métricas de engajamento, retenção e taxas de sucesso',
       category: 'Navegação',
       icon: Building2,
@@ -140,22 +123,25 @@ export function CommandPaletteModal({
     },
     {
       id: 'action-pricing',
-      title: 'Planos Comerciais & Assinatura SaaS',
+      title: 'Conhecer planos (demonstração)',
       subtitle: 'Planos Estudante Pro, Escola Conectada e Campus Universitário',
       category: 'Ações Rápidas',
       icon: Sparkles,
-      badge: 'SaaS',
+      badge: 'Demonstração',
       onSelect: () => { onClose(); onOpenPricing(); }
     },
     {
       id: 'action-family',
-      title: 'Portal da Família (Parent Bridge)',
-      subtitle: 'Relatórios quinzenais e boletins de engajamento familiar',
+      title: 'Portal da família (demonstração)',
+      subtitle: 'Conheça a proposta de acompanhamento familiar',
       category: 'Ações Rápidas',
       icon: Heart,
       onSelect: () => { onClose(); onOpenParentBridge(); }
     }
-  ], [navigate, onClose, theme, onThemeToggle, onOpenPricing, onOpenParentBridge]);
+  ].filter(action => {
+    const paths: Record<string, string> = { 'nav-home': '/', 'nav-professor': '/professor', 'nav-estudante': '/estudante', 'nav-coordenacao': '/coordenacao' };
+    return !paths[action.id] || canAccessPath(userData?.role, paths[action.id]);
+  }) as PaletteAction[], [navigate, onClose, theme, onThemeToggle, onOpenPricing, onOpenParentBridge, userData?.role, returnTo]);
 
   // Dynamic search on masterLabsCatalog
   const filteredActions = useMemo(() => {
@@ -180,18 +166,13 @@ export function CommandPaletteModal({
       icon: Beaker,
       badge: learningLevelLabel(lab.academicLevel),
       onSelect: () => {
-        navigate(`/simulacao?lab=${encodeURIComponent(lab.id)}&level=${lab.academicLevel}`);
+        navigate(withReturnTo(`/simulacao?lab=${encodeURIComponent(lab.id)}&level=${lab.academicLevel}`, returnTo));
         onClose();
       }
     }));
 
     return [...matchedBase, ...matchedLabs];
-  }, [query, baseNavigationActions, navigate, onClose]);
-
-  // Reset index on filtered changes
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [filteredActions.length]);
+  }, [query, baseNavigationActions, navigate, onClose, returnTo]);
 
   // Keyboard navigation inside list
   const handleInputKeyDown = (e: React.KeyboardEvent) => {
@@ -213,9 +194,6 @@ export function CommandPaletteModal({
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="command-palette-title"
       onClick={onClose}
       style={{
         position: 'fixed',
@@ -232,6 +210,11 @@ export function CommandPaletteModal({
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Buscar na plataforma"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -260,11 +243,13 @@ export function CommandPaletteModal({
           <Search style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary, #E4683F)' }} />
           <input
             ref={inputRef}
+            data-dialog-autofocus
+            aria-label="Buscar páginas e laboratórios"
             id="command-palette-title"
             type="text"
             placeholder="Buscar laboratórios, turmas, páginas ou comandos... (ex: Pêndulo, Termodinâmica)"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
             onKeyDown={handleInputKeyDown}
             style={{
               flex: 1,
@@ -278,7 +263,8 @@ export function CommandPaletteModal({
           />
           {query ? (
             <button
-              onClick={() => setQuery('')}
+              aria-label="Limpar busca"
+              onClick={() => { setQuery(''); setSelectedIndex(0); }}
               style={{
                 background: 'none',
                 border: 'none',
@@ -332,12 +318,13 @@ export function CommandPaletteModal({
               const isSelected = idx === selectedIndex;
               const Icon = action.icon;
               return (
-                <div
+                <button type="button"
                   key={action.id}
                   onClick={() => action.onSelect()}
                   onMouseEnter={() => setSelectedIndex(idx)}
                   style={{
                     display: 'flex',
+                    textAlign: 'left', width: '100%', font: 'inherit',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '0.75rem 1rem',
@@ -433,7 +420,7 @@ export function CommandPaletteModal({
                       }}
                     />
                   </div>
-                </div>
+                </button>
               );
             })
           )}
@@ -459,7 +446,7 @@ export function CommandPaletteModal({
             <span><kbd style={{ padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(0,0,0,0.06)' }}>↵</kbd> selecionar</span>
             <span><kbd style={{ padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(0,0,0,0.06)' }}>esc</kbd> fechar</span>
           </div>
-          <span style={{ fontWeight: 600 }}>Kortex Command Palette v1.0</span>
+          <span style={{ fontWeight: 600 }}>Busca da plataforma</span>
         </div>
       </div>
     </div>

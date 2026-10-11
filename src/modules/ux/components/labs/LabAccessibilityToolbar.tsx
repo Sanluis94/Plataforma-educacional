@@ -25,9 +25,11 @@ export const LabAccessibilityToolbar: React.FC<LabAccessibilityToolbarProps> = (
   // Escuta atalhos de teclado globais no laboratório
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignora se estiver digitando em um input ou textarea
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+      const target = e.target;
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.repeat) return;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.closest('input, textarea, select, button, a, [contenteditable]:not([contenteditable="false"]), [role="dialog"], [role="button"], [role="textbox"], [role="combobox"]')) return;
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) return;
 
       if (e.code === 'Space') {
         e.preventDefault();
@@ -50,18 +52,20 @@ export const LabAccessibilityToolbar: React.FC<LabAccessibilityToolbarProps> = (
   return (
     <div className="flex items-center space-x-1.5 p-1 bg-slate-900/90 border border-slate-700/80 rounded-lg text-xs shadow-sm">
       <span className="text-[10px] font-bold uppercase text-slate-400 px-1 hidden sm:inline">
-        Acessibilidade AAA:
+        Acessibilidade:
       </span>
 
       {/* Alto Contraste */}
       <button
         onClick={() => onToggleHighContrast(!isHighContrast)}
+        aria-label="Alto contraste"
+        aria-pressed={isHighContrast}
         className={`px-2 py-1 rounded flex items-center space-x-1 transition-colors ${
           isHighContrast
             ? 'bg-yellow-400 text-black font-bold shadow'
             : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700'
         }`}
-        title="Alternar Modo Alto Contraste (WCAG 2.2 AAA)"
+        title="Alternar alto contraste"
       >
         <Sun className="w-3.5 h-3.5" />
         <span className="hidden md:inline">Contraste</span>
@@ -70,6 +74,8 @@ export const LabAccessibilityToolbar: React.FC<LabAccessibilityToolbarProps> = (
       {/* Fonte Dislexia */}
       <button
         onClick={() => onToggleDyslexicFont(!isDyslexicFont)}
+        aria-label="Fonte para leitura"
+        aria-pressed={isDyslexicFont}
         className={`px-2 py-1 rounded flex items-center space-x-1 transition-colors ${
           isDyslexicFont
             ? 'bg-emerald-600 text-white font-bold'
@@ -84,6 +90,8 @@ export const LabAccessibilityToolbar: React.FC<LabAccessibilityToolbarProps> = (
       {/* Som / Sonificação */}
       <button
         onClick={onToggleSound}
+        aria-label={isSoundMuted ? 'Ativar sons do experimento' : 'Silenciar sons do experimento'}
+        aria-pressed={!isSoundMuted}
         className={`px-2 py-1 rounded flex items-center space-x-1 transition-colors ${
           !isSoundMuted
             ? 'bg-sky-600 text-white font-bold'
@@ -99,6 +107,8 @@ export const LabAccessibilityToolbar: React.FC<LabAccessibilityToolbarProps> = (
       <div className="relative">
         <button
           onClick={() => setShowKeyHelp(!showKeyHelp)}
+          aria-label="Atalhos de teclado"
+          aria-expanded={showKeyHelp}
           className="p-1 rounded bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
           title="Atalhos de Teclado Disponíveis"
         >
@@ -109,7 +119,6 @@ export const LabAccessibilityToolbar: React.FC<LabAccessibilityToolbarProps> = (
           <div className="absolute right-0 bottom-8 w-60 p-3 bg-slate-950 border border-slate-700 rounded-lg shadow-2xl z-50 text-[11px] text-slate-300 space-y-1.5">
             <div className="font-bold text-white border-b border-slate-800 pb-1 mb-1.5 flex items-center justify-between">
               <span>Atalhos de Teclado</span>
-              <span className="text-[10px] text-[#E4683F]">WCAG AAA</span>
             </div>
             <div className="flex justify-between"><span>Espaço</span><span className="font-mono text-slate-400">Pausar / Rodar</span></div>
             <div className="flex justify-between"><span>Tecla R</span><span className="font-mono text-slate-400">Reiniciar Simulação</span></div>

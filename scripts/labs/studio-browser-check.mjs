@@ -191,6 +191,7 @@ async function verifySearchAndReopen(fixture, id) {
     await activity.getByText(`${fixture.label} · ${fixture.subject} · Exploração de cenários`, { exact: true }).waitFor();
   }
   await catalog.getByLabel('Buscar laboratórios', { exact: true }).fill('fund1_mat_01');
+  await catalog.getByRole('article', { name: fixture.title, exact: true }).waitFor({ state: 'hidden' });
   assert.equal(await catalog.getByRole('article', { name: fixture.title, exact: true }).count(), 0,
     'A busca deve filtrar também atividades criadas na sessão.');
 }

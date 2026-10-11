@@ -44,6 +44,9 @@ async function verifyPartition(route) {
       await page.getByRole('navigation', { name: 'Níveis de aprendizagem', exact: true })
         .getByRole('button', { name: `${level.label} (${level.count})`, exact: true }).click();
       await catalogRegion.getByLabel('Buscar laboratórios', { exact: true }).fill('');
+      await page.getByRole('navigation', { name: 'Níveis de aprendizagem', exact: true })
+        .getByRole('button', { name: `${level.label} (${level.count})`, exact: true })
+        .and(page.locator('[aria-pressed="true"]')).waitFor();
     }
     const subjectSelect = page.getByRole('combobox', { name: 'Disciplina', exact: true });
     const subjects = await subjectSelect.locator('option').evaluateAll(options => options.map(option => option.value).filter(Boolean));
@@ -118,7 +121,7 @@ try {
     await profile('profissional', role);
     await page.goto(`${origin}/simulacao?lab=hard_1&level=medio`);
     await page.getByRole('region', { name: `Laboratório: ${catalog.find(lab => lab.id === 'hard_1').title}`, exact: true }).waitFor();
-    assert.equal(await page.getByRole('link', { name: 'Meu aprendizado', exact: true }).getAttribute('href'), dashboard);
+    assert.equal(await page.getByRole('navigation', { name: 'Navegação dos laboratórios', exact: true }).getByRole('link', { name: role === 'estudante' ? 'Meu aprendizado' : 'Voltar ao meu painel', exact: true }).getAttribute('href'), dashboard);
     assert.equal(await page.getByText('Acesso Restrito', { exact: true }).count(), 0);
   }
   checks.push({ check: 'legado profissional abre para os quatro perfis e retorna ao painel correto' });

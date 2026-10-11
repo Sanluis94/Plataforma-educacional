@@ -32,7 +32,7 @@ describe('Navegação de laboratórios por nível', () => {
   it.each([['professor', '/professor'], ['coordenador', '/coordenacao'], ['admin', '/admin'], ['estudante', '/estudante']])('retorna %s ao painel autorizado', (role, path) => {
     auth.userData.role = role;
     renderPage();
-    expect(screen.getByRole('link', { name: 'Meu aprendizado' })).toHaveAttribute('href', path);
+    expect(screen.getByRole('link', { name: role === 'estudante' ? 'Meu aprendizado' : 'Voltar ao meu painel' })).toHaveAttribute('href', path);
   });
 
   it('reconcilia a disciplina quando outra atividade chega pela busca global', async () => {
@@ -87,7 +87,11 @@ describe('Navegação de laboratórios por nível', () => {
     fireEvent.change(screen.getByRole('searchbox', { name: 'Buscar laboratórios' }), { target: { value: 'math_1' } });
     fireEvent.click(within(screen.getByRole('article', { name: lab.title })).getByRole('button', { name: 'Abrir laboratório' }));
     expect(await screen.findByRole('region', { name: `Laboratório: ${lab.title}` }, { timeout: 10000 })).toBeInTheDocument();
-    expect(screen.getByTestId('location')).toHaveTextContent(`/simulacao?lab=math_1&level=${lab.academicLevel}`);
+    const url = new URL(screen.getByTestId('location').textContent!, 'https://test.invalid');
+    expect(url.pathname).toBe('/simulacao');
+    expect(url.searchParams.get('lab')).toBe('math_1');
+    expect(url.searchParams.get('level')).toBe(lab.academicLevel);
+    expect(url.searchParams.get('q')).toBe('math_1');
   });
 
   it('mantém a bancada de Física embutida no ID recebido e conclui seu próprio desafio', () => {
@@ -184,7 +188,10 @@ describe('Navegação de laboratórios por nível', () => {
     fireEvent.click(dialog.getByRole('button', { name: 'Adicionar à sessão' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Oficina profissional da turma de teste' })).toBeInTheDocument();
-    expect(screen.getByTestId('location').textContent).toMatch(/^\/simulacao\?lab=custom_.+&level=profissional$/);
+    const url = new URL(screen.getByTestId('location').textContent!, 'https://test.invalid');
+    expect(url.pathname).toBe('/simulacao');
+    expect(url.searchParams.get('lab')).toMatch(/^custom_/);
+    expect(url.searchParams.get('level')).toBe('profissional');
     expect(screen.getByText(/Formação Profissional · Tecnologia profissional · Exploração de cenários/)).toBeInTheDocument();
   });
 });

@@ -10,12 +10,12 @@ export default function NotFound() {
       <div style={{ textAlign: 'center' }}>
         <h1
           className="gradient-text"
-          style={{ fontSize: '8rem', fontWeight: 800, lineHeight: 1, marginBottom: '1rem' }}
+          style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '1rem' }}
         >
-          404
+          Página não encontrada
         </h1>
         <p style={{ fontSize: '1.5rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-          Página não encontrada
+          O endereço pode ter mudado. Volte à página inicial e escolha o que deseja fazer.
         </p>
         <Link to="/" className="btn-gradient" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}>
           <Home style={{ width: '1.25rem', height: '1.25rem' }} />

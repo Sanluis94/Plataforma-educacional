@@ -1,10 +1,11 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { useState, useEffect, useCallback, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './modules/core/contexts/AuthContext';
 import { Layout } from './modules/ux/components/Layout';
 import { LoginModal } from './modules/ux/components/LoginModal';
 import { ProtectedRoute } from './modules/ux/components/ProtectedRoute';
 import { ErrorBoundary } from './modules/ux/components/ErrorBoundary';
+import { getReturnDestination, ROUTE_ROLES } from './modules/core/utils/navigation';
 import './index.css';
 
 // Lazy load pages from modules
@@ -17,43 +18,47 @@ const EnemSimuladoView = lazy(() => import('./modules/ux/pages/EnemSimuladoView'
 const Home = lazy(() => import('./modules/ux/pages/Home').then(m => ({ default: m.Home })));
 const NotFound = lazy(() => import('./modules/ux/pages/NotFound'));
 
-const LoadingFallback = () => (
-  <div style={{
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    background: 'var(--bg-base, #0b0f19)',
-    gap: '1.25rem'
-  }}>
-    <div className="premium-loader" style={{ width: '3.5rem', height: '3.5rem' }}></div>
-    <div style={{
-      color: 'var(--text-secondary, #94a3b8)',
-      fontSize: '0.9rem',
-      fontWeight: 500,
-      letterSpacing: '0.5px',
-      animation: 'pulse 1.5s infinite ease-in-out'
-    }}>
-      Carregando ambiente de aprendizagem...
-    </div>
-  </div>
-);
-
-function AuthRequirementHandler({ onOpenLogin, isAuthenticated }: { onOpenLogin: () => void; isAuthenticated: boolean }) {
+function LoginFlow({ loginOpen, openLogin, closeLogin }: { loginOpen: boolean; openLogin: () => void; closeLogin: () => void }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { userData } = useAuth();
   useEffect(() => {
-    if (location.state?.requiresAuth && !isAuthenticated) {
-      onOpenLogin();
+    if (location.state?.requiresAuth && !userData) {
+      openLogin();
     }
-  }, [location.state, isAuthenticated, onOpenLogin]);
-  return null;
+  }, [location.state, userData, openLogin]);
+  const cancelLogin = () => {
+    navigate(location.pathname + location.search + location.hash, { replace: true, state: null });
+    closeLogin();
+  };
+  if (!loginOpen) return null;
+  return <LoginSession destination={typeof location.state?.from === 'string' ? location.state.from : null} onCancel={cancelLogin} onComplete={closeLogin} />;
+}
+
+function LoginSession({ destination, onCancel, onComplete }: { destination: string | null; onCancel: () => void; onComplete: () => void }) {
+  const { userData } = useAuth();
+  const [loginCompleted, setLoginCompleted] = useState(false);
+  if (loginCompleted && userData) return <LoginDestination destination={getReturnDestination(userData.role, destination)} onComplete={onComplete} />;
+  return <LoginModal onClose={onCancel} onSuccess={() => setLoginCompleted(true)} />;
+}
+
+function LoginDestination({ destination, onComplete }: { destination: string; onComplete: () => void }) {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate(destination, { replace: true, state: null });
+    onComplete();
+  }, [destination, navigate, onComplete]);
+  return <p role="status">Abrindo sua página…</p>;
 }
 
 function App() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try { return localStorage.getItem('edu-theme') === 'light' ? 'light' : 'dark'; } catch { return 'dark'; }
+  });
   const [loginOpen, setLoginOpen] = useState(false);
-  const { currentUser } = useAuth();
+  const openLogin = useCallback(() => setLoginOpen(true), []);
+  const closeLogin = useCallback(() => setLoginOpen(false), []);
+  useEffect(() => { try { localStorage.setItem('edu-theme', theme); } catch { /* theme still works in memory */ } }, [theme]);
 
   const toggleTheme = () => {
     setTheme(t => t === 'light' ? 'dark' : 'light');
@@ -65,57 +70,50 @@ function App() {
     <ErrorBoundary>
       <Router>
         <div className={`app-container ${themeClass}`}>
-          <AuthRequirementHandler
-            onOpenLogin={() => setLoginOpen(true)}
-            isAuthenticated={!!currentUser}
-          />
-
-          {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}
-
-          <Suspense fallback={<LoadingFallback />}>
+          <LoginFlow loginOpen={loginOpen} openLogin={openLogin} closeLogin={closeLogin} />
             <Routes>
               <Route element={
                 <Layout
                   theme={theme}
                   onThemeToggle={toggleTheme}
-                  onLoginOpen={() => setLoginOpen(true)}
+                  onLoginOpen={openLogin}
                 />
               }>
-                <Route path="/" element={<Home onLoginOpen={() => setLoginOpen(true)} />} />
+                <Route path="/" element={<Home onLoginOpen={openLogin} />} />
 
                 {/* Rotas protegidas por role com segregação estrita */}
                 <Route path="/professor" element={
-                  <ProtectedRoute allowedRoles={['professor', 'coordenador', 'admin']}>
+                  <ProtectedRoute allowedRoles={ROUTE_ROLES['/professor']}>
                     <ProfessorDashboard />
                   </ProtectedRoute>
                 } />
 
                 <Route path="/estudante" element={
-                  <ProtectedRoute allowedRoles={['estudante', 'admin']}>
+                  <ProtectedRoute allowedRoles={ROUTE_ROLES['/estudante']}>
                     <EstudanteDashboard />
                   </ProtectedRoute>
                 } />
 
                 <Route path="/simulacao" element={
-                  <ProtectedRoute allowedRoles={['estudante', 'professor', 'coordenador', 'admin']}>
+                  <ProtectedRoute allowedRoles={ROUTE_ROLES['/simulacao']}>
                     <Simulacao />
                   </ProtectedRoute>
                 } />
 
                 <Route path="/enem" element={
-                  <ProtectedRoute allowedRoles={['estudante', 'professor', 'coordenador', 'admin']}>
+                  <ProtectedRoute allowedRoles={ROUTE_ROLES['/enem']}>
                     <EnemSimuladoView />
                   </ProtectedRoute>
                 } />
 
                 <Route path="/coordenacao" element={
-                  <ProtectedRoute allowedRoles={['coordenador', 'admin']}>
+                  <ProtectedRoute allowedRoles={ROUTE_ROLES['/coordenacao']}>
                     <CoordenacaoDashboard />
                   </ProtectedRoute>
                 } />
 
                 <Route path="/admin" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
+                  <ProtectedRoute allowedRoles={ROUTE_ROLES['/admin']}>
                     <AdminPanel />
                   </ProtectedRoute>
                 } />
@@ -123,7 +121,6 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
-          </Suspense>
         </div>
       </Router>
     </ErrorBoundary>

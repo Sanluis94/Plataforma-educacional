@@ -1,11 +1,13 @@
+import { useNavigationParams } from '../hooks/useNavigationParams';
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import {
   Play, Pause, RotateCcw, ArrowLeft, Home as HomeIcon,
   ChevronDown, ChevronUp, HelpCircle, Settings2
 } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { useStudentLabCompletion } from '../../core/hooks/useStudentLabCompletion';
+import { getReturnDestination } from '../../core/utils/navigation';
 import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
 import { UniversalLabContainer } from '../components/UniversalLabContainer';
 import { NEW_ADVANCED_LABS } from '../../core/constants/advancedLabsRegistry';
@@ -153,7 +155,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
   const { completeLab } = useStudentLabCompletion();
   const [labSaving, setLabSaving] = useState(false);
   const [failedCompletion, setFailedCompletion] = useState<{ lab: LearningLab | StudioLab; score: number } | null>(null);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useNavigationParams();
   const embedded = mode !== undefined || labId !== undefined;
   const [customLabs, setCustomLabs] = useState<StudioLab[]>([]);
   const requestedLab = getLearningLab(searchParams.get('lab') || '') ?? customLabs.find(lab => lab.id === searchParams.get('lab'));
@@ -166,8 +168,13 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
   const [missionFeedback, setMissionFeedback] = useState<string | null>(null);
   const [catalogExpanded, setShowCatalogExplorer] = useState(false);
   const showCatalogExplorer = !activeTab || catalogExpanded;
-  const [catalogSearch, setCatalogSearch] = useState('');
-  const [subjectSelection, setSubjectSelection] = useState({ labId: activeTab, value: requestedLab?.subject || '' });
+  const catalogSearch = searchParams.get('q') || '';
+  const setCatalogSearch = (value: string) => setSearchParams(previous => { const next = new URLSearchParams(previous); if (value) next.set('q', value); else next.delete('q'); return next; }, { replace: true });
+  const activityHeadingRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (!embedded && activeTab) activityHeadingRef.current?.focus();
+    if (!activeTab) setShowCatalogExplorer(true);
+  }, [activeTab, embedded]);
   const [completedActivities, setCompletedActivities] = useState<{ id: string; academicLevel: LearningLevel }[]>([]);
   const counts = getLearningLabCounts();
 
@@ -184,18 +191,18 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
     ...searchLearningLabs({ academicLevel: catalogLevel }).map(lab => lab.subject),
     ...customLabs.filter(lab => lab.academicLevel === catalogLevel).map(lab => lab.subject),
   ])].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  const selectedSubject = subjectSelection.labId === activeTab ? subjectSelection.value : selectedLab?.subject || '';
+  const selectedSubject = searchParams.get('subject') ?? selectedLab?.subject ?? '';
   const catalogSubject = subjects.includes(selectedSubject) ? selectedSubject : '';
   const filteredLabs = searchLearningLabs({ query: catalogSearch, academicLevel: catalogLevel, subject: catalogSubject || undefined });
   const query = catalogSearch.trim().toLocaleLowerCase('pt-BR');
   const customResults = customLabs.filter(lab => lab.academicLevel === catalogLevel && (!catalogSubject || lab.subject === catalogSubject) && `${lab.title} ${lab.subject} ${lab.topic}`.toLocaleLowerCase('pt-BR').includes(query));
 
   function setCatalogSubject(value: string) {
-    setSubjectSelection({ labId: activeTab, value });
+    setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('subject', value); return next; });
   }
 
   function openLab(lab: LearningLab | StudioLab) {
-    setSearchParams({ lab: lab.id, level: lab.academicLevel });
+    setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('lab', lab.id); next.set('level', lab.academicLevel); return next; });
     setShowCatalogExplorer(false);
   }
 
@@ -487,8 +494,9 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
     <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '80rem', margin: '0 auto' }}>
       {!embedded && <>
         <nav aria-label="Navegação dos laboratórios" style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-          <Link to="/" className="btn-outline"><HomeIcon size={16} /> Hub inicial</Link>
-          <Link to={userData?.role === 'professor' ? '/professor' : userData?.role === 'coordenador' ? '/coordenacao' : userData?.role === 'admin' ? '/admin' : '/estudante'} className="btn-outline"><ArrowLeft size={16} /> Meu aprendizado</Link>
+          <Link to="/" className="btn-outline"><HomeIcon size={16} /> Página inicial</Link>
+          <Link to={getReturnDestination(userData?.role, searchParams.get('returnTo'))} className="btn-outline"><ArrowLeft size={16} /> {searchParams.get('returnTo') ? 'Voltar à tela anterior' : userData?.role === 'estudante' ? 'Meu aprendizado' : 'Voltar ao meu painel'}</Link>
+          {selectedLab && <button type="button" className="btn-outline" onClick={() => setSearchParams(previous => { const next = new URLSearchParams(previous); next.delete('lab'); return next; })}>Voltar ao catálogo</button>}
         </nav>
         <header style={{ marginBottom: '1.25rem' }}>
           <h1 style={{ color: 'var(--text-main)', marginBottom: '0.4rem' }}>Laboratórios por nível de aprendizagem</h1>
@@ -497,8 +505,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
         <section aria-label="Catálogo de laboratórios" className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
           <nav aria-label="Níveis de aprendizagem" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
             {LEARNING_LEVELS.map(level => <button key={level.id} type="button" aria-pressed={catalogLevel === level.id} className={catalogLevel === level.id ? 'btn-primary' : 'btn-outline'} onClick={() => {
-              setCatalogSubject('');
-              setSearchParams({ level: level.id });
+              setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('level', level.id); next.delete('lab'); next.delete('subject'); next.delete('q'); return next; });
             }}>{level.label} ({counts[level.id]})</button>)}
           </nav>
           <p style={{ color: 'var(--text-secondary)', margin: '0.85rem 0' }}>{LEARNING_LEVELS.find(level => level.id === catalogLevel)?.description}</p>
@@ -519,7 +526,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
           {activeTab && <button type="button" className="btn-outline" style={{ marginTop: '1rem' }} onClick={() => setShowCatalogExplorer(previous => !previous)}>{showCatalogExplorer ? 'Recolher atividades' : 'Explorar atividades deste nível'}</button>}
           {showCatalogExplorer && <>
             <p role="status" style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>{filteredLabs.length + customResults.length} atividades em {learningLevelLabel(catalogLevel)}.</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: '0.85rem', maxHeight: '500px', overflowY: 'auto', padding: '0.2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 270px), 1fr))', gap: '0.85rem', maxHeight: '500px', overflowY: 'auto', padding: '0.2rem' }}>
               {[...customResults, ...filteredLabs].map(lab => <article key={lab.id} aria-label={lab.title} data-lab-id={lab.id} data-academic-level={lab.academicLevel} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                 <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{learningLevelLabel(lab.academicLevel)} · {lab.subject}</span>
                 <h2 style={{ fontSize: '1rem', margin: 0 }}>{lab.icon} {lab.title}</h2>
@@ -531,7 +538,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
           </>}
         </section>
         {searchParams.get('lab') && !selectedLab && <p role="alert">Laboratório não encontrado. Escolha uma atividade no catálogo.</p>}
-        {selectedLab && <p style={{ color: 'var(--text-secondary)' }}>{learningLevelLabel(selectedLab.academicLevel)} › {selectedLab.subject} › {selectedLab.title}</p>}
+        {selectedLab && <p ref={activityHeadingRef} tabIndex={-1} style={{ color: 'var(--text-secondary)', scrollMarginTop: '5rem' }}>{learningLevelLabel(selectedLab.academicLevel)} › {selectedLab.subject} › {selectedLab.title}</p>}
         {labSaving && <p role="status">Salvando progresso do laboratório…</p>}
         {failedCompletion && <div role="alert">Não foi possível salvar o progresso de {failedCompletion.lab.title}. Suas respostas continuam disponíveis. <button type="button" disabled={labSaving} onClick={() => void saveLabCompletion(failedCompletion.lab, failedCompletion.score)}>Tentar salvar progresso</button></div>}
       </>}
