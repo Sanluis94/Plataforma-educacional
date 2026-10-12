@@ -109,43 +109,87 @@ Responda APENAS em formato JSON válido no seguinte esquema:
   return { score: total, comments };
 };
 
-/**
- * Gera um diagnóstico pedagógico assistido por IA para o professor
- * com base nos dados reais de desempenho da turma e dos laboratórios.
- */
-export const generatePedagogicalDiagnosis = async (
-  reportData: {
-    className: string;
-    studentsCount: number;
-    completionRate: number;
-    averageScore: number;
-    atRiskStudents: string[];
-    topModules: { module: string; averageScore: number; count: number }[];
-  }
-): Promise<{ summary: string; strengths: string[]; recommendations: string[]; priorityActions: string[] }> => {
+export interface PedagogicalReportData {
+  className: string;
+  studentsCount: number;
+  completionRate: number | null;
+  averageScore: number | null;
+  studentsWithEvidence?: number;
+  scoredRecordsCount?: number;
+  completedActivitiesCount?: number;
+  expectedCompletions?: number;
+  supportStudentsCount?: number;
+  /** Compatibilidade com relatórios anteriores. Os nomes nunca são enviados à IA. */
+  atRiskStudents?: string[];
+  topModules: { module: string; averageScore: number | null; count: number }[];
+}
+
+export interface PedagogicalDiagnosis {
+  source: 'rules' | 'gemini';
+  summary: string;
+  strengths: string[];
+  recommendations: string[];
+  priorityActions: string[];
+  notice?: string;
+}
+
+/** Panorama determinístico: cada afirmação corresponde a um número recebido. */
+export function buildPedagogicalSummary(data: PedagogicalReportData): PedagogicalDiagnosis {
+  const support = data.supportStudentsCount ?? data.atRiskStudents?.length ?? 0;
+  const observed = data.studentsWithEvidence;
+  const hasEvidence = observed === undefined ? data.averageScore !== null : observed > 0;
+  const scoreText = data.averageScore === null ? 'Ainda não há notas válidas para calcular a média.' : `A média das entregas com nota é ${data.averageScore}%${data.scoredRecordsCount !== undefined ? `, baseada em ${data.scoredRecordsCount} resultados` : ''}.`;
+  const completionText = data.completionRate === null ? 'A conclusão ainda não pode ser calculada sem atividades atribuídas e alunos matriculados.' : `${data.completionRate}% das entregas esperadas foram concluídas${data.expectedCompletions !== undefined ? ` (${data.completedActivitiesCount ?? 0} de ${data.expectedCompletions})` : ''}.`;
+  const strengths = [observed !== undefined ? `${observed} de ${data.studentsCount} alunos possuem evidências registradas.` : `${data.studentsCount} alunos compõem a turma.`, scoreText, completionText];
+  const recommendations = !hasEvidence
+    ? ['Conferir a matrícula e as atividades atribuídas.', 'Combinar com os alunos uma primeira entrega; ausência de registro ainda não permite avaliar aprendizagem.']
+    : [support > 0 ? `Conferir as evidências de ${support} ${support === 1 ? 'aluno indicado' : 'alunos indicados'} para apoio e combinar uma retomada.` : 'Revisar também os alunos sem evidências antes de planejar o próximo passo.',
+      data.topModules.some(module => module.averageScore !== null && module.averageScore < 70) ? 'Retomar as atividades com média abaixo de 70% e observar as questões com menor acerto.' : 'Conferir as respostas e reflexões antes de escolher os próximos desafios.',
+      'Usar o acompanhamento por aluno para oferecer uma orientação específica.'];
+  return { source: 'rules', summary: hasEvidence ? `${scoreText} ${completionText} Os registros orientam o acompanhamento; não medem presença nem preveem evasão.` : 'Ainda não há evidências suficientes para descrever a aprendizagem da turma.', strengths, recommendations, priorityActions: recommendations.slice(0, 2) };
+}
+
+function readDiagnosis(value: unknown): Omit<PedagogicalDiagnosis, 'source'> | null {
+  if (!value || typeof value !== 'object') return null;
+  const data = value as Record<string, unknown>;
+  if (typeof data.summary !== 'string' || !data.summary.trim() || data.summary.length > 3000) return null;
+  const lists = ['strengths', 'recommendations', 'priorityActions'] as const;
+  if (lists.some(key => !Array.isArray(data[key]) || (data[key] as unknown[]).length > 8 || (data[key] as unknown[]).some(item => typeof item !== 'string' || !item.trim() || item.length > 1000))) return null;
+  return { summary: data.summary.trim(), strengths: (data.strengths as string[]).map(item => item.trim()), recommendations: (data.recommendations as string[]).map(item => item.trim()), priorityActions: (data.priorityActions as string[]).map(item => item.trim()) };
+}
+
+/** Acionada explicitamente pelo professor. Envia somente agregados numéricos. */
+export const generatePedagogicalDiagnosis = async (reportData: PedagogicalReportData): Promise<PedagogicalDiagnosis> => {
+  const fallback = buildPedagogicalSummary(reportData);
   const apiKey = getEffectiveGeminiApiKey();
 
   if (apiKey) {
     try {
+      const aggregate = {
+        matriculados: reportData.studentsCount,
+        alunosComEvidencias: reportData.studentsWithEvidence ?? null,
+        resultadosComNota: reportData.scoredRecordsCount ?? null,
+        conclusaoPercentual: reportData.completionRate,
+        mediaPercentual: reportData.averageScore,
+        entregasConcluidas: reportData.completedActivitiesCount ?? null,
+        entregasEsperadas: reportData.expectedCompletions ?? null,
+        alunosIndicadosParaApoio: reportData.supportStudentsCount ?? reportData.atRiskStudents?.length ?? 0,
+        gruposDeAtividades: reportData.topModules.map(module => ({ mediaPercentual: module.averageScore, entregas: module.count })),
+      };
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent?key=${apiKey}`,
         {
           method: 'POST',
+          signal: AbortSignal.timeout(15000),
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [
               {
                 parts: [
                   {
-                    text: `Você é um coordenador pedagógico e especialista em dados educacionais. Analise os dados da turma:
-Turma: ${reportData.className}
-Qtd Alunos: ${reportData.studentsCount}
-Taxa de Conclusão: ${reportData.completionRate}%
-Média Geral da Turma: ${reportData.averageScore}%
-Alunos em Risco Pedagógico: ${reportData.atRiskStudents.join(', ') || 'Nenhum'}
-Módulos mais cursados: ${reportData.topModules.map(m => `${m.module} (${m.averageScore}%, ${m.count} entregas)`).join(', ')}
-
-Gere um diagnóstico pedagógico formatado em JSON estrito com o seguinte formato:
+                    text: `Você auxilia um professor a planejar o acompanhamento a partir de agregados anônimos.
+Dados: ${JSON.stringify(aggregate)}
+Use apenas estes números. Null significa ausência de informação; nunca zero. Não infira pontualidade, frequência, causas, dedicação, diagnósticos pessoais, evasão, comparação com outras turmas ou referência externa. Indicação para apoio usa critérios de acompanhamento e precisa de revisão docente. Expresse sugestões como possibilidades, não conclusões. Se faltam evidências, explique a limitação. Não invente nomes, disciplinas ou dados. Gere JSON estrito com todas as listas:
 {
   "summary": "Resumo analítico do panorama da turma...",
   "strengths": ["Ponto forte 1", "Ponto forte 2"],
@@ -165,42 +209,16 @@ Gere um diagnóstico pedagógico formatado em JSON estrito com o seguinte format
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
         const jsonMatch = rawText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (parsed.summary && Array.isArray(parsed.recommendations)) {
-            return parsed;
-          }
+          const parsed = readDiagnosis(JSON.parse(jsonMatch[0]));
+          if (parsed) return { ...parsed, source: 'gemini' };
         }
       }
     } catch (err) {
-      console.warn('[GeminiService] Falha na IA pedagógica, usando fallback:', err);
+      console.warn('[GeminiService] Resumo por IA indisponível; mantido o resumo por critérios.', err);
     }
   }
 
-  // Fallback Inteligente baseado em regras pedagógicas
-  const isHealthy = reportData.averageScore >= 75 && reportData.completionRate >= 60;
-  const hasAtRisk = reportData.atRiskStudents.length > 0;
-
-  return {
-    summary: isHealthy
-      ? `A turma ${reportData.className} apresenta excelente ritmo de engajamento (${reportData.completionRate}% de conclusão) com média consolidada de ${reportData.averageScore}%. O aproveitamento nos laboratórios práticos está acima da média de referência.`
-      : `A turma ${reportData.className} demonstra ritmo moderado de entregas (${reportData.completionRate}% de conclusão). Recomenda-se reforçar a aplicação de laboratórios virtuais e exercícios de fixação para alavancar a média de ${reportData.averageScore}%.`,
-    strengths: [
-      `Participação ativa nos módulos com média superior a 70% de acerto.`,
-      reportData.completionRate > 50 ? 'Bom índice de pontualidade nas entregas de laboratório.' : 'Constância na realização de atividades complementares.',
-      'Adoção positiva das metodologias ativas e gamificação (XP e badges).'
-    ],
-    recommendations: [
-      hasAtRisk
-        ? `Agendar plantão ou enviar material de reforço para os alunos que precisam de apoio: ${reportData.atRiskStudents.join(', ')}.`
-        : 'Manter a cadência de novos desafios interativos e missões semanais.',
-      'Utilizar os simuladores práticos de Física, Química e Matemática antes de avaliações somativas.',
-      'Explorar atividades de redação e argumentação com feedback em tempo real da IA.'
-    ],
-    priorityActions: [
-      hasAtRisk ? 'Criar lista de exercícios de nivelamento no Construtor de Aulas.' : 'Publicar novos desafios avançados para manter o engajamento.',
-      'Recompensar os alunos destaques com bônus de moedas e feedbacks personalizados na caixa de mensagens.'
-    ]
-  };
+  return { ...fallback, notice: apiKey ? 'Não foi possível obter um resumo válido com IA. O resumo pelos critérios da plataforma foi mantido.' : 'A IA não está configurada neste ambiente. O resumo pelos critérios da plataforma foi mantido.' };
 };
 
 export interface GeneratedLessonPayload {

@@ -3,12 +3,13 @@
  * Inspirado na arquitetura do Edu-Interact-v2 (Questionários, Questões, Aplicações e Tentativas).
  */
 import {
-  collection, addDoc, query, where, getDocs, doc, updateDoc, deleteDoc, onSnapshot
+  collection, addDoc, query, where, getDocs, doc, updateDoc, deleteDoc, onSnapshot, setDoc, getDoc
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import type { ExamData, ExamAttempt } from '../types';
 
 import { sanitizeForFirestore } from '../../core/services/firestoreUtils';
+import { learningDocumentId } from '../services/learningCapture';
 
 const EXAMS_COLLECTION = 'exams';
 const ATTEMPTS_COLLECTION = 'exam_attempts';
@@ -47,6 +48,7 @@ function saveLocalAttempts(attempts: ExamAttempt[]) {
     localStorage.setItem(LOCAL_ATTEMPTS_KEY, JSON.stringify(attempts));
   } catch (err) {
     console.error('Erro ao salvar tentativas locais:', err);
+    throw new Error('Não foi possível guardar a prova neste dispositivo. Tente novamente antes de sair.');
   }
 }
 
@@ -204,14 +206,29 @@ export const subscribeExamsByClass = (
  * Salva tentativa / resolução de prova de um aluno com correção automática.
  */
 export const saveExamAttempt = async (attempt: Omit<ExamAttempt, 'id'>): Promise<ExamAttempt> => {
+  if (!attempt.alunoId || !attempt.examId || !Number.isFinite(attempt.porcentagemAproveitamento) || attempt.porcentagemAproveitamento < 0 || attempt.porcentagemAproveitamento > 100) throw new Error('Tentativa de prova inválida.');
+  const stableId = attempt.evidence?.sessionId ? learningDocumentId(attempt.alunoId, attempt.evidence.sessionId, `exam-${attempt.turmaId}`) : undefined;
   if (!db) {
     const attempts = getLocalAttempts();
-    const newAttempt: ExamAttempt = { id: `attempt_${Date.now()}`, ...attempt };
+    const existing = stableId && attempts.find(entry => entry.id === stableId);
+    if (existing) return existing;
+    const newAttempt: ExamAttempt = { id: stableId ?? `attempt_${Date.now()}`, ...attempt };
     attempts.unshift(newAttempt);
     saveLocalAttempts(attempts);
     return newAttempt;
   }
 
+  if (stableId) {
+    const reference = doc(db, ATTEMPTS_COLLECTION, stableId);
+    try { await setDoc(reference, sanitizeForFirestore(attempt)); }
+    catch (error) {
+      const existing = await getDoc(reference).catch(() => null);
+      const data = existing?.exists() ? existing.data() as Omit<ExamAttempt, 'id'> : null;
+      if (data?.alunoId === attempt.alunoId && data.examId === attempt.examId && data.turmaId === attempt.turmaId && data.evidence?.sessionId === attempt.evidence?.sessionId) return { ...data, id: stableId };
+      throw error;
+    }
+    return { ...attempt, id: stableId };
+  }
   const docRef = await addDoc(collection(db, ATTEMPTS_COLLECTION), attempt);
   return { id: docRef.id, ...attempt };
 };

@@ -6,8 +6,8 @@ const projectDir = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const mode = process.argv[2];
 const cliPath = join(projectDir, 'node_modules/firebase-tools/lib/bin/firebase.js');
 
-if (!['start', 'check'].includes(mode) || process.argv.length > 3) {
-  console.error('Uso: node scripts/dev/emulators.mjs <start|check>');
+if (!['start', 'check', 'learning-check'].includes(mode) || process.argv.length > 3) {
+  console.error('Uso: node scripts/dev/emulators.mjs <start|check|learning-check>');
   process.exitCode = 2;
 } else if (!existsSync(cliPath)) {
   console.error('Firebase CLI local ausente. Execute npm ci.');
@@ -17,13 +17,14 @@ if (!['start', 'check'].includes(mode) || process.argv.length > 3) {
   // Neither command exports data, deploys resources, or accepts a project override.
   const args = [
     cliPath,
-    mode === 'check' ? 'emulators:exec' : 'emulators:start',
+    mode === 'start' ? 'emulators:start' : 'emulators:exec',
     '--project', 'demo-kortex',
     '--only', 'auth,firestore',
     '--config', join(projectDir, 'firebase.json'),
     '--non-interactive',
   ];
   if (mode === 'check') args.push('node scripts/dev/emulator-smoke.mjs');
+  if (mode === 'learning-check') args.push('node scripts/dev/learning-emulator-check.mjs');
 
   process.env.GCLOUD_PROJECT = 'demo-kortex';
   process.env.GOOGLE_CLOUD_PROJECT = 'demo-kortex';

@@ -7,6 +7,8 @@ import {
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { useStudentLabCompletion } from '../../core/hooks/useStudentLabCompletion';
+import type { LabCompletionReport } from '../../data/services/learningCapture';
+import { offlineSyncService } from '../../core/services/offlineSyncService';
 import { getReturnDestination } from '../../core/utils/navigation';
 import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
 import { UniversalLabContainer } from '../components/UniversalLabContainer';
@@ -154,7 +156,11 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
   const { currentUser, userData } = useAuth();
   const { completeLab } = useStudentLabCompletion();
   const [labSaving, setLabSaving] = useState(false);
-  const [failedCompletion, setFailedCompletion] = useState<{ lab: LearningLab | StudioLab; score: number } | null>(null);
+  const [failedCompletion, setFailedCompletion] = useState<{ lab: LearningLab | StudioLab; report: LabCompletionReport } | null>(null);
+  const [deliveryPending, setDeliveryPending] = useState(false);
+  useEffect(() => offlineSyncService.subscribeStatus(() => {
+    try { if (offlineSyncService.getPendingSubmissions(currentUser?.uid ?? null).length === 0) setDeliveryPending(false); } catch { /* Preserve the pending message. */ }
+  }), [currentUser?.uid]);
   const [searchParams, setSearchParams] = useNavigationParams();
   const embedded = mode !== undefined || labId !== undefined;
   const [customLabs, setCustomLabs] = useState<StudioLab[]>([]);
@@ -202,26 +208,28 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
   }
 
   function openLab(lab: LearningLab | StudioLab) {
-    setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('lab', lab.id); next.set('level', lab.academicLevel); return next; });
+    setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('lab', lab.id); next.set('level', lab.academicLevel); next.delete('class'); next.delete('lessonPlan'); return next; });
     setShowCatalogExplorer(false);
   }
 
-  async function saveLabCompletion(lab: LearningLab | StudioLab, score: number) {
+  async function saveLabCompletion(lab: LearningLab | StudioLab, report: LabCompletionReport) {
     setLabSaving(true);
     setFailedCompletion(null);
     try {
-      await completeLab(lab, score * 10);
-      setCompletedActivities(previous => previous.some(item => item.id === lab.id) ? previous : [...previous, { id: lab.id, academicLevel: lab.academicLevel }]);
-      onComplete?.(score * 10);
+      const result = await completeLab({ id: lab.id, title: lab.title, classId: searchParams.get('class') || undefined, lessonPlanId: searchParams.get('lessonPlan') || undefined }, report.score, report.evidence);
+      setDeliveryPending(result?.queued ?? false);
+      if (result && !result.queued && report.evidence.stage === 'assessment') setCompletedActivities(previous => previous.some(item => item.id === lab.id) ? previous : [...previous, { id: lab.id, academicLevel: lab.academicLevel }]);
+      return true;
     } catch {
-      setFailedCompletion({ lab, score });
+      setFailedCompletion({ lab, report });
+      return false;
     } finally {
       setLabSaving(false);
     }
   }
 
-  function completeSelectedLab(score: number) {
-    if (selectedLab) void saveLabCompletion(selectedLab, score);
+  function completeSelectedLab(report: LabCompletionReport) {
+    if (selectedLab) return saveLabCompletion(selectedLab, report);
   }
 
   const handleOpenCertificate = async () => {
@@ -540,7 +548,9 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
         {searchParams.get('lab') && !selectedLab && <p role="alert">Laboratório não encontrado. Escolha uma atividade no catálogo.</p>}
         {selectedLab && <p ref={activityHeadingRef} tabIndex={-1} style={{ color: 'var(--text-secondary)', scrollMarginTop: '5rem' }}>{learningLevelLabel(selectedLab.academicLevel)} › {selectedLab.subject} › {selectedLab.title}</p>}
         {labSaving && <p role="status">Salvando progresso do laboratório…</p>}
-        {failedCompletion && <div role="alert">Não foi possível salvar o progresso de {failedCompletion.lab.title}. Suas respostas continuam disponíveis. <button type="button" disabled={labSaving} onClick={() => void saveLabCompletion(failedCompletion.lab, failedCompletion.score)}>Tentar salvar progresso</button></div>}
+        {failedCompletion && !failedCompletion.report.handlesDeliveryFeedback && <div role="alert">Não foi possível guardar a tentativa de {failedCompletion.lab.title}. Suas respostas continuam disponíveis. <button type="button" disabled={labSaving} onClick={() => void saveLabCompletion(failedCompletion.lab, failedCompletion.report)}>Tentar salvar progresso</button></div>}
+        {deliveryPending && <p role="status">Tentativa guardada neste dispositivo, aguardando confirmação de envio. Reconecte com este mesmo perfil para concluir a entrega.</p>}
+        {searchParams.get('lessonPlan') && <p>Atividade vinculada à aula. A entrega será enviada somente para a turma desta aula.</p>}
       </>}
       {embedded && <h2 style={{ color: 'var(--text-main)' }}>Bancada: {labTitle || LAB_MISSIONS[activeTab]?.title || 'Física'}</h2>}
       {embedded && !LAB_MISSIONS[activeTab] && !MASTER_LABS_CATALOG.some(lab => lab.id === activeTab) && <p role="alert">Laboratório não encontrado. Confira o código da atividade.</p>}
@@ -1081,12 +1091,12 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
 
       {/* Renderização Dinâmica dos Laboratórios Avançados e Catálogo Master (UniversalLabContainer) */}
       {!embedded && getLearningLab(activeTab)?.source === 'legacy' && <Suspense fallback={<p role="status">Carregando bancada…</p>}>
-        <LegacyLabRunner key={activeTab} labId={activeTab} onComplete={({ score }) => completeSelectedLab(score)} />
+        <LegacyLabRunner key={activeTab} labId={activeTab} onComplete={completeSelectedLab} />
       </Suspense>}
       {(activeCustomLab || NEW_ADVANCED_LABS[activeTab] || MASTER_LABS_CATALOG.some(l => l.id === activeTab)) && (
         <UniversalLabContainer
           config={activeCustomLab ? createGuidedLabConfig(activeCustomLab, activeCustomLab.learningContent) : resolveUniversalLab(activeTab)}
-          onComplete={({ score }) => embedded ? onComplete?.(score * 10) : completeSelectedLab(score)}
+          onComplete={report => embedded ? onComplete?.(report.score) : completeSelectedLab(report)}
         />
       )}
 

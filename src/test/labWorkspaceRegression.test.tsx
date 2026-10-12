@@ -43,12 +43,12 @@ describe('Regressões na integração das bancadas', () => {
     expect(screen.getByLabelText('Dados de teste')).toHaveTextContent('6');
   });
 
-  it('preserva a nota 67 da bancada no contrato de relatório de 0 a 10', () => {
+  it('não transforma conclusão isolada de bancada em nota sem questões avaliadas', () => {
     const complete = vi.fn();
     render(<MemoryRouter><LegacyLabRunner labId="math_1" onComplete={complete} /></MemoryRouter>);
     fireEvent.click(screen.getByRole('button', { name: 'Abrir bancada' }));
     fireEvent.click(screen.getByRole('button', { name: 'Concluir bancada com 67' }));
-    expect(complete).toHaveBeenCalledExactlyOnceWith({ score: 6.7, telemetryRows: 0 });
+    expect(complete).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ score: 0, telemetryRows: 0, evidence: expect.objectContaining({ source: 'lab', stage: 'exploration' }) }));
   });
 
   it.each(Object.keys(NEW_ADVANCED_LABS))('mantém teoria e equações originais de %s junto ao roteiro novo', id => {

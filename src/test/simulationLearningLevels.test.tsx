@@ -23,7 +23,7 @@ beforeEach(() => {
   auth.userData.gradeLevel = 'fundamental_1';
   auth.userData.role = 'estudante';
   localStorage.clear();
-  auth.completeLab.mockReset().mockResolvedValue(null);
+  auth.completeLab.mockReset().mockResolvedValue({ alreadyCompleted: false, queued: false });
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
 });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
@@ -141,13 +141,13 @@ describe('Navegação de laboratórios por nível', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Avaliar' }));
     for (const question of content.questions) fireEvent.click(screen.getByLabelText(question.options.find(option => option.correct)!.text));
     fireEvent.click(screen.getByRole('button', { name: 'Corrigir respostas' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível salvar');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível guardar');
     expect(screen.getByRole('button', { name: 'Certificado deste nível' })).toBeDisabled();
     for (const question of content.questions) expect(screen.getByLabelText(question.options.find(option => option.correct)!.text)).toBeChecked();
-    fireEvent.click(screen.getByRole('button', { name: 'Tentar salvar progresso' }));
+    fireEvent.click(screen.getByRole('button', { name: 'tente salvar novamente' }));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Certificado deste nível' })).toBeEnabled());
     expect(auth.completeLab).toHaveBeenCalledTimes(2);
-    expect(auth.completeLab).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'fund1_mat_01' }), 100);
+    expect(auth.completeLab).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'fund1_mat_01' }), 100, expect.objectContaining({ stage: 'assessment', questions: expect.any(Array) }));
     expect(screen.queryByRole('alert')).toBeNull();
   });
 

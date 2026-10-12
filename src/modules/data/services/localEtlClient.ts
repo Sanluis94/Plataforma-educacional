@@ -1,4 +1,7 @@
-import type { ActivityData, ClassData, LogType, ProgressData, SystemLog, UserData, UserRole, SubmissionData } from '../types';
+import type { ActivityData, ClassData, LogType, ProgressData, SystemLog, UserData, UserRole, SubmissionData, ExamData, ExamAttempt, LessonPlanItem } from '../types';
+import { buildClassLearningReport } from './learningAnalytics';
+import type { ClassLearningReport } from '../learningAnalyticsTypes';
+import { learningDocumentId, newLearningSessionId } from './learningCapture';
 
 const LOCAL_ETL_BASE_URL = '/local-data/etl';
 const LOCAL_DB_KEY = 'edu_local_db';
@@ -37,6 +40,10 @@ type LocalCollections = {
   progress: Record<string, ProgressData>;
   systemLogs: SystemLog[];
   learningEvents: LocalLearningEvent[];
+  submissions?: SubmissionData[];
+  exams?: ExamData[];
+  examAttempts?: ExamAttempt[];
+  lessonPlans?: LessonPlanItem[];
 };
 
 type LocalEtlSnapshot = {
@@ -86,36 +93,7 @@ export type LocalStudentMessage = {
   repliedAt?: string;
 };
 
-export type LocalClassReport = {
-  classId: string;
-  className: string;
-  professorName: string;
-  studentsCount: number;
-  activitiesCount: number;
-  completedActivitiesCount: number;
-  averageScore: number;
-  averageTimeSpentMinutes: number;
-  completionRate: number;
-  topModule: string;
-  atRiskStudents: string[];
-  modules: {
-    module: string;
-    eventsCount: number;
-    averageScore: number;
-    totalTimeSpentMinutes: number;
-  }[];
-  students: {
-    studentId: string;
-    studentName: string;
-    level: number;
-    xp: number;
-    coins: number;
-    completedModulesCount: number;
-    averageScore: number;
-    lastActive: string;
-    status: 'em_destaque' | 'regular' | 'precisa_apoio';
-  }[];
-};
+export type LocalClassReport = ClassLearningReport;
 
 // ─── LÓGICA DE PERSISTÊNCIA EM LOCALSTORAGE ─────────────────────────
 
@@ -130,6 +108,10 @@ const getLocalDb = async (): Promise<any> => {
       progress: snapshot?.collections?.progress ?? {},
       systemLogs: snapshot?.collections?.systemLogs ?? [],
       learningEvents: snapshot?.collections?.learningEvents ?? [],
+      submissions: snapshot?.collections?.submissions ?? [],
+      exams: snapshot?.collections?.exams ?? [],
+      examAttempts: snapshot?.collections?.examAttempts ?? [],
+      lessonPlans: snapshot?.collections?.lessonPlans ?? [],
       complementaryMaterials: {} as Record<string, LocalComplementaryMaterial[]>,
       messages: {} as Record<string, LocalStudentMessage[]>
     };
@@ -217,49 +199,34 @@ export const getLocalEtlProgress = async (studentId?: string): Promise<ProgressD
   return db.progress[studentId] ?? null;
 };
 
+function cachedRecords<T extends { id?: string }>(key: string, seeded: T[] = []): T[] {
+  const value = localStorage.getItem(key);
+  const cached = value ? JSON.parse(value) : [];
+  if (!Array.isArray(cached)) throw new Error('Dados locais de aprendizagem inválidos.');
+  return [...new Map([...seeded, ...cached].map(item => [item.id, item])).values()] as T[];
+}
+
 export const getLocalEtlClassReport = async (classId: string): Promise<LocalClassReport | null> => {
-  const db = await getLocalDb();
-  const classData = db.classes.find((entry: ClassData) => entry.id === classId);
+  const database = await getLocalDb();
+  const classData = database.classes.find((entry: ClassData) => entry.id === classId);
   if (!classData) return null;
-
-  const users = db.users;
-  const progress = db.progress;
-  const activities = db.activities.filter((activity: ActivityData) => activity.classId === classId);
-  const activityIds = new Set(activities.map((activity: ActivityData) => activity.id).filter(Boolean));
-  
-  const events = db.learningEvents.filter((event: LocalLearningEvent) => (
-    event.classId === classId || activityIds.has(event.activityId)
-  ));
-  
-  const studentIds: string[] = classData.studentIds || [];
-  const students = studentIds
-    .map((studentId) => users.find((user: UserData) => user.id === studentId))
-    .filter((user: any): user is Required<UserData> => Boolean(user));
-    
-  const professor = users.find((user: UserData) => user.id === classData.professorId);
-  const modules = buildModuleMetrics(events);
-  const studentReports = students.map((student) => buildStudentClassReport(student, progress[student.id], events));
-  const averageScore = average(events.map((event: any) => event.score));
-  const completedActivitiesCount = events.filter((event: any) => event.status === 'completed').length;
-  const expectedCompletions = Math.max(students.length * activities.filter((activity: any) => activity.status === 'published').length, 1);
-
-  return {
-    classId: classData.id!,
-    className: classData.name,
-    professorName: professor?.name ?? classData.professorName,
-    studentsCount: students.length,
-    activitiesCount: activities.length,
-    completedActivitiesCount,
-    averageScore,
-    averageTimeSpentMinutes: average(events.map((event: any) => event.timeSpentMinutes)),
-    completionRate: round((completedActivitiesCount / expectedCompletions) * 100),
-    topModule: modules[0]?.module ?? 'Sem dados',
-    atRiskStudents: studentReports
-      .filter((student) => student.status === 'precisa_apoio')
-      .map((student) => student.studentName),
-    modules,
-    students: studentReports,
-  };
+  const submissions: SubmissionData[] = database.submissions ?? [];
+  const savedIds = new Set(submissions.map(submission => submission.id));
+  const legacy = (database.learningEvents ?? []).filter((event: LocalLearningEvent) => !savedIds.has(event.id)).map((event: LocalLearningEvent) => ({
+    id: event.id, activityId: event.activityId, activityTitle: event.module,
+    classId: event.classId || '', studentId: event.studentId,
+    studentName: database.users.find((user: UserData) => user.id === event.studentId)?.name || '',
+    score: event.score, status: event.status === 'completed' ? 'completed' as const : 'pending' as const,
+    submittedAt: event.completedAt,
+  }));
+  return buildClassLearningReport({
+    classData, users: database.users, progress: database.progress, activities: database.activities,
+    submissions: [...submissions, ...legacy],
+    exams: cachedRecords<ExamData>('edu_local_exams', database.exams),
+    examAttempts: cachedRecords<ExamAttempt>('edu_local_exam_attempts', database.examAttempts),
+    lessonPlans: cachedRecords<LessonPlanItem>('edu_local_lesson_plans', database.lessonPlans),
+    source: 'local',
+  });
 };
 
 export const getLocalEtlLogs = async (maxResults = 50): Promise<LocalLogEntry[]> => {
@@ -360,86 +327,44 @@ export const saveLocalSubmission = async (
   submission: Omit<SubmissionData, 'id'>
 ): Promise<SubmissionData> => {
   const db = await getLocalDb();
+  db.submissions ??= [];
+  const id = submission.evidence?.sessionId
+    ? learningDocumentId(submission.studentId, submission.evidence.sessionId, `${submission.classId}-${submission.evidence.stage ?? 'assessment'}`)
+    : `local-sub-${newLearningSessionId()}`;
+  const existing = db.submissions.find((entry: SubmissionData) => entry.id === id);
+  if (existing) return existing;
   const newSub: SubmissionData = {
     ...submission,
-    id: `local-sub-${Date.now()}`
+    id,
   };
-  
-  // Registrar em learningEvents para atualizar relatórios
-  const newEvent: LocalLearningEvent = {
-    id: newSub.id!,
-    activityId: newSub.activityId,
-    studentId: newSub.studentId,
-    professorId: 'local-prof',
-    classId: newSub.classId || null,
-    module: newSub.activityTitle,
-    score: newSub.score,
-    status: 'completed',
-    timeSpentMinutes: Math.floor(Math.random() * 8) + 4,
-    completedAt: newSub.submittedAt
-  };
-  db.learningEvents.push(newEvent);
-  
-  // Atualizar moedas e XP no progresso local do estudante
-  const studProgress = db.progress[newSub.studentId] || {
-    level: 1,
-    xp: 0,
-    coins: 0,
-    completedModules: [],
-    purchasedItems: [],
-    enrolledClasses: [],
-    updatedAt: new Date().toISOString()
-  };
-  
-  studProgress.xp += 100;
-  studProgress.coins += 25;
-  if (!studProgress.completedModules.includes(newSub.activityId)) {
-    studProgress.completedModules.push(newSub.activityId);
-  }
-  studProgress.level = Math.floor(studProgress.xp / 500) + 1;
-  studProgress.updatedAt = new Date().toISOString();
-  db.progress[newSub.studentId] = studProgress;
-
+  // Preserve the actual evidence. Rewards are recorded separately and once.
+  db.submissions.push(newSub);
   saveLocalDb(db);
   return newSub;
 };
 
 export const getLocalSubmissionsByStudent = async (studentId: string): Promise<SubmissionData[]> => {
   const db = await getLocalDb();
-  return db.learningEvents
-    .filter((event: LocalLearningEvent) => event.studentId === studentId)
+  const current: SubmissionData[] = (db.submissions ?? []).filter((entry: SubmissionData) => !studentId || entry.studentId === studentId);
+  const currentIds = new Set(current.map(entry => entry.id));
+  const legacy = db.learningEvents
+    .filter((event: LocalLearningEvent) => (!studentId || event.studentId === studentId) && !currentIds.has(event.id))
     .map((event: LocalLearningEvent) => ({
       id: event.id,
       activityId: event.activityId,
       activityTitle: event.module,
-      classId: event.classId || 'local-class',
+      classId: event.classId || '',
       studentId: event.studentId,
       studentName: 'Estudante',
       score: event.score,
       submittedAt: event.completedAt,
-      status: 'completed'
+      status: event.status === 'completed' ? 'completed' : 'pending',
     }));
+  return [...current, ...legacy].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
 };
 
 export const getLocalSubmissionsByClass = async (classId: string): Promise<SubmissionData[]> => {
-  const db = await getLocalDb();
-  const users = db.users;
-  return db.learningEvents
-    .filter((event: LocalLearningEvent) => event.classId === classId)
-    .map((event: LocalLearningEvent) => {
-      const student = users.find((u: UserData) => u.id === event.studentId);
-      return {
-        id: event.id,
-        activityId: event.activityId,
-        activityTitle: event.module,
-        classId: event.classId || classId,
-        studentId: event.studentId,
-        studentName: student?.name || 'Estudante',
-        score: event.score,
-        submittedAt: event.completedAt,
-        status: 'completed'
-      };
-    });
+  return (await getLocalSubmissionsByStudent('')).filter(entry => entry.classId === classId);
 };
 
 export const saveLocalProgress = async (
@@ -613,71 +538,4 @@ function formatTime(timestamp: string): string {
     minute: '2-digit',
     second: '2-digit',
   });
-}
-
-function buildStudentClassReport(
-  student: Required<UserData>,
-  progress: ProgressData | undefined,
-  events: LocalLearningEvent[],
-): LocalClassReport['students'][number] {
-  const studentEvents = events.filter((event) => event.studentId === student.id);
-  const averageScore = average(studentEvents.map((event) => event.score));
-  const status = averageScore >= 85
-    ? 'em_destaque'
-    : averageScore > 0 && averageScore < 70
-      ? 'precisa_apoio'
-      : 'regular';
-
-  return {
-    studentId: student.id,
-    studentName: student.name,
-    level: progress?.level ?? 1,
-    xp: progress?.xp ?? 0,
-    coins: progress?.coins ?? 0,
-    completedModulesCount: progress?.completedModules?.length ?? 0,
-    averageScore,
-    lastActive: latestDate(studentEvents.map((event) => event.completedAt), progress?.updatedAt),
-    status,
-  };
-}
-
-function buildModuleMetrics(events: LocalLearningEvent[]): LocalClassReport['modules'] {
-  const groups = events.reduce((accumulator, event) => {
-    const current = accumulator.get(event.module) ?? [];
-    current.push(event);
-    accumulator.set(event.module, current);
-    return accumulator;
-  }, new Map<string, LocalLearningEvent[]>());
-
-  return [...groups.entries()]
-    .map(([module, moduleEvents]) => ({
-      module,
-      eventsCount: moduleEvents.length,
-      averageScore: average(moduleEvents.map((event) => event.score)),
-      totalTimeSpentMinutes: moduleEvents.reduce((total, event) => total + event.timeSpentMinutes, 0),
-    }))
-    .sort((a, b) => b.eventsCount - a.eventsCount);
-}
-
-function average(values: number[]): number {
-  const validValues = values.filter((value) => Number.isFinite(value));
-
-  if (validValues.length === 0) {
-    return 0;
-  }
-
-  return round(validValues.reduce((total, value) => total + value, 0) / validValues.length);
-}
-
-function latestDate(values: (string | undefined)[], fallback?: string): string {
-  const latest = values
-    .map((value) => new Date(value ?? ''))
-    .filter((date) => !Number.isNaN(date.getTime()))
-    .sort((a, b) => b.getTime() - a.getTime())[0];
-
-  return latest?.toISOString() ?? fallback ?? '';
-}
-
-function round(value: number): number {
-  return Math.round(value * 100) / 100;
 }

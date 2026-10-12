@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { useProfessorDashboard } from '../modules/core/hooks/useProfessorDashboard';
 import type { LocalClassReport } from '../modules/data/services/localEtlClient';
+import { buildClassLearningReport } from '../modules/data/services/learningAnalytics';
 
 const fixtures = vi.hoisted(() => ({
   classes: [{ id: 'class-a', name: 'Turma A', studentsCount: 1 }, { id: 'class-b', name: 'Turma B', studentsCount: 1 }],
@@ -11,11 +12,11 @@ vi.mock('../modules/core/contexts/AuthContext', () => ({ useAuth: () => ({ curre
 vi.mock('../modules/data/repositories/classRepository', () => ({ getProfessorClasses: vi.fn(async () => fixtures.classes) }));
 vi.mock('../modules/data/repositories/activityRepository', () => ({ getActivitiesByProfessor: vi.fn(async () => []), deleteActivity: vi.fn() }));
 vi.mock('../modules/data/repositories/submissionRepository', () => ({ getSubmissionsByClass: vi.fn(async () => []) }));
-vi.mock('../modules/data/repositories/reportRepository', () => ({ getLiveClassReport: fixtures.getReport }));
+vi.mock('../modules/data/repositories/reportRepository', () => ({ getLiveClassReport: fixtures.getReport, getProfessorLearningOverview: vi.fn(async () => ({ completionRate: null, engagement: null })) }));
 vi.mock('../modules/core/services/professorService', () => ({ createNewClass: vi.fn(), validateClassName: vi.fn(), publishActivity: vi.fn() }));
 
 function report(classId: string): LocalClassReport {
-  return { classId, className: classId, professorName: 'Professor', studentsCount: 1, activitiesCount: 0, completedActivitiesCount: 0, averageScore: 0, averageTimeSpentMinutes: 0, completionRate: 0, topModule: '', atRiskStudents: [], modules: [], students: [] };
+  return buildClassLearningReport({ classData: { id: classId, name: classId, professorId: 'professor-test', professorName: 'Professor', studentIds: [], studentsCount: 0, createdAt: '2026-10-11T00:00:00Z', updatedAt: '2026-10-11T00:00:00Z' }, users: [], activities: [], submissions: [], source: 'local' });
 }
 
 beforeEach(() => {

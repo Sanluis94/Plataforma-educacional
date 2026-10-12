@@ -8,6 +8,10 @@ import {
   createEnemAttempt, ENEM_DURATION_SECONDS, finishEnemAttempt, readEnemAttempt, saveEnemAttempt, type EnemAttempt,
 } from '../../data/services/enemAttemptSession';
 import { useDialogAccessibility } from '../hooks/useDialogAccessibility';
+import { useLearningCapture } from '../hooks/useLearningCapture';
+import { deliverEnemLearning } from '../../core/services/enemLearningDelivery';
+import { getStudentClasses, type Turma } from '../../data/repositories/classRepository';
+import { offlineSyncService } from '../../core/services/offlineSyncService';
 
 const cardStyle: CSSProperties = { padding: 'clamp(1rem, 3vw, 2rem)', borderRadius: 'var(--radius-lg, 14px)', minWidth: 0 };
 const actionStyle: CSSProperties = { padding: '0.75rem 1.25rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' };
@@ -30,27 +34,73 @@ export function EnemSimuladoView() {
   const requestedDestination = getReturnDestination(userData?.role, returnTo);
   const destination = requestedDestination.split(/[?#]/)[0] === '/enem' ? roleHome : requestedDestination;
   // A change of account replaces all state before reading that account's attempt.
-  return <EnemSimuladoSession key={currentUser?.uid ?? 'guest'} userId={currentUser?.uid ?? null} destination={destination} roleHome={roleHome} />;
+  return <EnemSimuladoSession key={currentUser?.uid ?? 'guest'} userId={currentUser?.uid ?? null} isStudent={userData?.role === 'estudante'} studentName={userData?.name ?? currentUser?.displayName ?? 'Estudante'} destination={destination} roleHome={roleHome} />;
 }
 
-function EnemSimuladoSession({ userId, destination, roleHome }: { userId: string | null; destination: string; roleHome: string }) {
+function EnemSimuladoSession({ userId, isStudent, studentName, destination, roleHome }: { userId: string | null; isStudent: boolean; studentName: string; destination: string; roleHome: string }) {
   const [attempt, setAttempt] = useState(() => readEnemAttempt(userId));
+  const capture = useLearningCapture({ activeSeconds: attempt.activeSeconds });
+  const [readActiveSeconds] = useState(() => () => capture.current.activeSeconds);
   const attemptRef = useRef(attempt);
   const [timeRemaining, setTimeRemaining] = useState(() => remainingSeconds(attempt));
   const [savingFailed, setSavingFailed] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [studentClasses, setStudentClasses] = useState<Turma[]>([]);
+  const [shareClassId, setShareClassId] = useState('');
+  const [personalDelivery, setPersonalDelivery] = useState<'saving' | 'saved' | 'queued' | 'error' | null>(null);
+  const [sharedDelivery, setSharedDelivery] = useState<'saving' | 'saved' | 'queued' | null>(null);
+  const [shareError, setShareError] = useState('');
   const resultHeadingRef = useRef<HTMLHeadingElement>(null);
   const closeConfirmation = useCallback(() => setShowConfirmation(false), []);
   const dialogRef = useDialogAccessibility(showConfirmation, closeConfirmation);
 
   const commitAttempt = useCallback((next: EnemAttempt) => {
+    if (next.status !== 'finished' && attemptRef.current.status === 'finished') {
+      setPersonalDelivery(null); setSharedDelivery(null); setShareClassId(''); setShareError('');
+    }
+    if (next.status === 'active' || (next.status === 'finished' && attemptRef.current.status === 'active')) next = { ...next, activeSeconds: Math.min(ENEM_DURATION_SECONDS, readActiveSeconds()) };
     attemptRef.current = next;
     setAttempt(next);
     setTimeRemaining(remainingSeconds(next));
     setSavingFailed(!saveEnemAttempt(userId, next));
-  }, [userId]);
+  }, [userId, readActiveSeconds]);
 
   useEffect(() => {
+    if (!userId || !isStudent) return;
+    let active = true;
+    void getStudentClasses(userId).then(classes => { if (active) setStudentClasses(classes); }).catch(() => { if (active) setShareError('Não foi possível carregar suas turmas. Tente recarregar antes de compartilhar.'); });
+    return () => { active = false; };
+  }, [userId, isStudent]);
+
+  useEffect(() => {
+    if (attempt.status !== 'finished' || !userId || !isStudent) return;
+    let active = true;
+    void deliverEnemLearning(userId, studentName, attemptRef.current).then(result => { if (active) setPersonalDelivery(result.queued ? 'queued' : 'saved'); }).catch(() => { if (active) setPersonalDelivery('error'); });
+    return () => { active = false; };
+  }, [attempt.status, attempt.startedAt, userId, isStudent, studentName]);
+
+  useEffect(() => offlineSyncService.subscribeStatus(() => {
+    if (!userId || attempt.startedAt === null) return;
+    try {
+      const pending = offlineSyncService.getPendingSubmissions(userId);
+      const matches = (classId: string) => pending.some(item => item.kind === 'submission' && item.submission.evidence?.sessionId === `enem-${attempt.startedAt}` && item.submission.classId === classId);
+      if (personalDelivery === 'queued' && !matches('')) setPersonalDelivery('saved');
+      if (sharedDelivery === 'queued' && !matches(shareClassId)) setSharedDelivery('saved');
+    } catch { /* Keep delivery status until its acknowledgement can be checked. */ }
+  }), [userId, attempt.startedAt, personalDelivery, sharedDelivery, shareClassId]);
+
+  async function shareResult(personalOnly = false) {
+    if (!userId || !isStudent || (!personalOnly && !shareClassId)) return;
+    if (personalOnly) setPersonalDelivery('saving'); else setSharedDelivery('saving');
+    setShareError('');
+    try {
+      const result = await deliverEnemLearning(userId, studentName, attemptRef.current, personalOnly ? '' : shareClassId);
+      if (personalOnly) setPersonalDelivery(result.queued ? 'queued' : 'saved'); else setSharedDelivery(result.queued ? 'queued' : 'saved');
+    } catch (error) { if (personalOnly) setPersonalDelivery('error'); else setSharedDelivery(null); setShareError(error instanceof Error ? error.message : 'Não foi possível guardar o resultado. Tente novamente.'); }
+  }
+
+  useEffect(() => {
+    const activeCapture = capture.current;
     if (attempt.status !== 'active') return;
     const tick = () => {
       const current = attemptRef.current;
@@ -60,24 +110,26 @@ function EnemSimuladoSession({ userId, destination, roleHome }: { userId: string
       if (remaining === 0) {
         setShowConfirmation(false);
         commitAttempt(finishEnemAttempt(current, 'expired'));
-      }
+      } else if (remaining % 5 === 0) commitAttempt(current);
     };
     const interval = window.setInterval(tick, 1000);
     const onVisibility = () => { if (document.visibilityState === 'visible') tick(); };
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('focus', tick);
     return () => {
+      if (attemptRef.current.status === 'active') saveEnemAttempt(userId, { ...attemptRef.current, activeSeconds: Math.min(ENEM_DURATION_SECONDS, activeCapture.activeSeconds) });
       window.clearInterval(interval);
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('focus', tick);
     };
-  }, [attempt.status, commitAttempt]);
+  }, [attempt.status, commitAttempt, userId, capture]);
 
   useEffect(() => {
     if (attempt.status === 'finished') resultHeadingRef.current?.focus();
   }, [attempt.status]);
 
   const start = () => {
+    capture.current.reset();
     const now = Date.now();
     commitAttempt({ ...createEnemAttempt(), status: 'active', startedAt: now, deadlineAt: now + ENEM_DURATION_SECONDS * 1000 });
   };
@@ -136,7 +188,8 @@ function EnemSimuladoSession({ userId, destination, roleHome }: { userId: string
           <ul style={mutedStyle}>
             <li>O tempo começa quando você selecionar “Começar simulado”.</li>
             <li>Você pode navegar entre as questões e alterar as respostas antes da entrega.</li>
-            <li>A tentativa é salva nesta aba para seu perfil. Ao sair ou atualizar a página, o prazo continua correndo; fechar a aba pode apagar a tentativa.</li>
+            <li>A tentativa em andamento é salva nesta aba para seu perfil. Ao sair ou atualizar a página, o prazo continua correndo; fechar a aba pode apagar a tentativa.</li>
+            {isStudent && <li>O resultado concluído fica no seu histórico. Você decide se deseja compartilhá-lo com o professor de uma turma.</li>}
             <li>Ao terminar o tempo, as respostas já marcadas serão entregues. Questões em branco contam como não respondidas.</li>
           </ul>
           <button type="button" className="btn-gradient" onClick={start} style={actionStyle}>Começar simulado <ChevronRight size={18} aria-hidden="true" /></button>
@@ -208,6 +261,21 @@ function EnemSimuladoSession({ userId, destination, roleHome }: { userId: string
               <p>Detalhes do modelo: TRI de três parâmetros (3PL); proficiência estimada (θ): {result.thetaEstimado}; índice de consistência do modelo: {result.indiceCoerenciaPedagogica}%. Esses parâmetros são usados para este treino e não reproduzem a calibração oficial.</p>
             </details>
           </section>
+          {isStudent && <section className="glass-card" style={cardStyle} aria-labelledby="enem-delivery-title">
+            <h2 id="enem-delivery-title">Meu histórico e compartilhamento</h2>
+            {(personalDelivery === null || personalDelivery === 'saving') && <p role="status">Guardando resultado no seu histórico…</p>}
+            {personalDelivery === 'saved' && <p role="status">Resultado salvo no seu histórico pessoal.</p>}
+            {personalDelivery === 'queued' && <p role="status">Resultado guardado neste dispositivo. O envio ao seu histórico aguarda confirmação; reconecte com este mesmo perfil.</p>}
+            {personalDelivery === 'error' && <p role="alert">Não foi possível guardar o resultado no seu histórico. <button type="button" onClick={() => void shareResult(true)}>Tentar salvar resultado</button></p>}
+            <p style={mutedStyle}>Compartilhe somente se desejar. O professor da turma escolhida recebe suas respostas, o percentual de acertos e o tempo de uso registrado. A nota estimada aparece como treino, separada das notas escolares.</p>
+            {studentClasses.length ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
+              <label>Turma para compartilhar <select aria-label="Turma para compartilhar" value={shareClassId} onChange={event => { setShareClassId(event.target.value); setSharedDelivery(null); setShareError(''); }} disabled={sharedDelivery === 'saving'} style={{ maxWidth: '100%', padding: '0.65rem', background: 'var(--bg-card)', color: 'var(--text-main)' }}><option value="">Escolha uma turma</option>{studentClasses.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+              <button type="button" className="btn-outline" disabled={!shareClassId || sharedDelivery === 'saving' || sharedDelivery === 'saved' || sharedDelivery === 'queued'} onClick={() => void shareResult()} style={actionStyle}>{sharedDelivery === 'saving' ? 'Guardando compartilhamento…' : 'Compartilhar resultado com professor'}</button>
+            </div> : <p style={mutedStyle}>Entre em uma turma para compartilhar com um professor. O resultado continua no seu histórico pessoal.</p>}
+            {sharedDelivery === 'saved' && <p role="status">Resultado compartilhado com o professor da turma escolhida.</p>}
+            {sharedDelivery === 'queued' && <p role="status">Compartilhamento guardado neste dispositivo, aguardando confirmação de envio.</p>}
+            {shareError && <p role="alert">{shareError}</p>}
+          </section>}
           <section className="glass-card" style={cardStyle} aria-labelledby="enem-guidance-title">
             <h2 id="enem-guidance-title" style={{ fontSize: '1.15rem', marginTop: 0, color: 'var(--text-main)' }}>Próximos passos para estudar</h2>
             {result.recomendacoesPedagogicas.map((recommendation, index) => <p key={index} style={mutedStyle}>{recommendation}</p>)}

@@ -10,13 +10,17 @@ import type {
   ForumTopic,
   GradebookWeights,
   StudentGradeReport,
-  DigitalCertificate
+  DigitalCertificate,
+  ExamAttempt,
+  ExamData,
+  ActivityData
 } from '../../data/types';
 import {
   saveAttendanceRecord,
   getAttendanceByClass,
   calculateStudentAttendanceRate,
   calculateClassGradebook,
+  calculateSemesterGrade,
   DEFAULT_WEIGHTS,
   saveForumTopic,
   subscribeForumTopicsByClass,
@@ -34,6 +38,10 @@ import {
   saveSubmissionReview
 } from '../../data/repositories/submissionRepository';
 import type { SubmissionData } from '../../data/types';
+import { getExamAttemptsByClass, getExamsByClass } from '../../data/repositories/examRepository';
+import { getLiveClassReport } from '../../data/repositories/reportRepository';
+import { useAuth } from '../../core/contexts/AuthContext';
+import { getActivitiesByClass } from '../../data/repositories/activityRepository';
 
 interface ProfessorLmsModulesProps {
   turmas: Turma[];
@@ -42,15 +50,8 @@ interface ProfessorLmsModulesProps {
   professorName: string;
 }
 
-// Roster de alunos padrão para demonstração caso a turma ainda não tenha alunos reais no Firestore
-const DEFAULT_DEMO_STUDENTS = [
-  { id: 'std_01', name: 'Ana Clara Silva' },
-  { id: 'std_02', name: 'Bruno Henrique Santos' },
-  { id: 'std_03', name: 'Camila Duarte Souza' },
-  { id: 'std_04', name: 'Diego Ferreira Lima' },
-  { id: 'std_05', name: 'Elena Souza Ramos' },
-  { id: 'std_06', name: 'Felipe Augusto Rocha' }
-];
+const formatGrade = (grade: number | null | undefined) => grade == null ? 'Sem dados' : grade.toFixed(1);
+const csvCell = (value: unknown) => `"${String(value ?? '').replace(/^[\s]*[=+@-]/, "'$&").replace(/"/g, '""')}"`;
 
 export function ProfessorLmsModules({
   turmas,
@@ -62,6 +63,18 @@ export function ProfessorLmsModules({
 
   const activeClassId = selectedClassId || turmas[0]?.id || '';
   const currentTurma = turmas.find(t => t.id === activeClassId);
+  const { currentUser } = useAuth();
+  const [roster, setRoster] = useState<{ id: string; name: string }[]>([]);
+  const [realSubmissions, setRealSubmissions] = useState<SubmissionData[]>([]);
+  const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
+  const [classExams, setClassExams] = useState<ExamData[]>([]);
+  const [classActivities, setClassActivities] = useState<ActivityData[]>([]);
+  const [acceptedRecordIds, setAcceptedRecordIds] = useState<string[]>([]);
+  const [evidenceLoading, setEvidenceLoading] = useState(false);
+  const [evidenceError, setEvidenceError] = useState<string | null>(null);
+  const [participationScores, setParticipationScores] = useState<Record<string, number>>({});
+  const [p1ExamId, setP1ExamId] = useState('');
+  const [p2ExamId, setP2ExamId] = useState('');
 
   // ─────────────────────────────────────────────────────────────
   // 1. ESTADO DE FREQUÊNCIA (ATTENDANCE)
@@ -75,33 +88,33 @@ export function ProfessorLmsModules({
 
   // Carrega histórico de frequência da turma
   useEffect(() => {
+    let alive = true;
+    setAttendanceRecords([]);
     if (!activeClassId) return;
     const fetchAttendance = async () => {
       const records = await getAttendanceByClass(activeClassId);
-      setAttendanceRecords(records);
+      if (alive) setAttendanceRecords(records);
     };
     fetchAttendance();
+    return () => { alive = false; };
   }, [activeClassId]);
 
-  // Inicializa mapa de presença com todos presentes
+  // A chamada é preenchida pelo professor para os estudantes matriculados.
   const handleOpenAttendanceModal = () => {
     const initial: Record<string, 'presente' | 'falta' | 'justificada'> = {};
-    DEFAULT_DEMO_STUDENTS.forEach(s => {
-      initial[s.id] = 'presente';
-    });
     setAttendanceStatusMap(initial);
     setAttendanceContent('Aula Prática em Laboratório Virtual & Resolução de Problemas');
     setIsRecordingAttendance(true);
   };
 
   const handleSaveAttendance = async () => {
-    if (!activeClassId || !attendanceContent.trim()) return;
+    if (!activeClassId || !attendanceContent.trim() || !roster.length || roster.some(student => !attendanceStatusMap[student.id])) return;
     setSavingAttendance(true);
     try {
-      const registros = DEFAULT_DEMO_STUDENTS.map(s => ({
+      const registros = roster.map(s => ({
         studentId: s.id,
         studentName: s.name,
-        status: attendanceStatusMap[s.id] || 'presente'
+        status: attendanceStatusMap[s.id]
       }));
 
       const saved = await saveAttendanceRecord({
@@ -136,11 +149,12 @@ export function ProfessorLmsModules({
 
     // Constrói relatório ponderado integrando frequência
     const reports = calculateClassGradebook(
-      DEFAULT_DEMO_STUDENTS,
+      roster,
       activeClassId,
-      [], // submissions
-      [], // exam attempts
-      weights
+      realSubmissions,
+      examAttempts,
+      weights,
+      { attendanceRecords, activities: classActivities, acceptedRecordIds, participationScores, p1ExamId, p2ExamId }
     );
 
     // Mescla com taxas reais de presença
@@ -154,16 +168,15 @@ export function ProfessorLmsModules({
     });
 
     setGradeReports(enriched);
-  }, [activeClassId, weights, attendanceRecords]);
+  }, [activeClassId, weights, attendanceRecords, roster, realSubmissions, examAttempts, participationScores, p1ExamId, p2ExamId, classActivities, acceptedRecordIds]);
 
   // Exportar Boletim em CSV
   const handleExportGradebookCSV = () => {
-    const headers = 'ID Aluno,Nome Aluno,Provas (40%),Labs (30%),Atividades (20%),Participacao (10%),Media Final,Situacao,Frequencia %,Alerta LDB\n';
-    const rows = gradeReports.map(r => 
-      `"${r.studentId}","${r.studentName}",${r.notaProvas},${r.notaLabs},${r.notaAtividades},${r.notaParticipacao},${r.mediaFinal},"${r.situacao}",${r.frequenciaPercentual}%,"${r.alertaFrequencia ? 'ALERTA LDB (<75%)' : 'REGULAR'}"`
-    ).join('\n');
+    const headers = isUniversityGradeMode ? ['ID Aluno', 'Nome Aluno', `P1 (${univWeights.p1}%)`, `P2 (${univWeights.p2}%)`, `Labs (${univWeights.labs}%)`, 'Média semestral do modelo', 'Situação no modelo', 'Frequência %', 'Prova P1', 'Prova P2'] : ['ID Aluno', 'Nome Aluno', `Provas (${weights.pesoProvas}%)`, `Labs (${weights.pesoLabs}%)`, `Atividades (${weights.pesoAtividades}%)`, `Participação (${weights.pesoParticipacao}%)`, 'Média Final', 'Situação', 'Frequência %', 'Categorias sem evidência', 'Cobertura dos pesos %'];
+    const rows = gradeReports.map(r => isUniversityGradeMode ? [r.studentId, r.studentName, r.notaP1, p1ExamId === p2ExamId ? null : r.notaP2, r.notaLabs, semesterFor(r).mediaSemestre, semesterFor(r).statusUniv, r.frequenciaPercentual, p1ExamId, p2ExamId] : [r.studentId, r.studentName, r.notaProvas, r.notaLabs, r.notaAtividades, r.notaParticipacao, r.mediaFinal, r.situacao, r.frequenciaPercentual, r.missingCategories.join('; '), r.coveragePercent]);
+    const csv = '\uFEFF' + [headers, ...rows].map(row => row.map(csvCell).join(',')).join('\n');
 
-    const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -171,6 +184,7 @@ export function ProfessorLmsModules({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   // ─────────────────────────────────────────────────────────────
@@ -184,75 +198,67 @@ export function ProfessorLmsModules({
     minPassDireta: 7.0,
     minExameFinal: 4.0
   });
+  const semesterFor = (report: StudentGradeReport) => calculateSemesterGrade({ p1: report.notaP1 ?? null, p2: p1ExamId && p1ExamId === p2ExamId ? null : report.notaP2 ?? null, labs: report.notaLabs }, univWeights);
 
   // SpeedGrader Submissões e Rubricas Interativas
-  const [realSubmissions, setRealSubmissions] = useState<SubmissionData[]>([]);
   const [selectedSubIndex, setSelectedSubIndex] = useState(0);
-  const [rubricScores, setRubricScores] = useState<Record<string, number>>({
-    crit_1: 4.0,
-    crit_2: 2.5,
-    crit_3: 3.0
-  });
-  const [docenteFeedback, setDocenteFeedback] = useState(
-    'Excelente precisão nos cálculos e rigor científico. O laudo demonstra pleno domínio do ciclo experimental.'
-  );
+  const [rubricScores, setRubricScores] = useState<Record<string, number>>({});
+  const [docenteFeedback, setDocenteFeedback] = useState('');
   const [speedGraderToast, setSpeedGraderToast] = useState<string | null>(null);
   const [savingReview, setSavingReview] = useState(false);
 
   useEffect(() => {
+    let alive = true;
+    setRoster([]);
+    setRealSubmissions([]);
+    setExamAttempts([]);
+    setClassExams([]);
+    setClassActivities([]);
+    setAcceptedRecordIds([]);
+    setParticipationScores({});
+    setP1ExamId('');
+    setP2ExamId('');
+    setEvidenceError(null);
     if (!activeClassId) return;
-    const loadSubmissions = async () => {
+    setEvidenceLoading(true);
+    const loadEvidence = async () => {
       try {
-        const subs = await getSubmissionsByClass(activeClassId);
+        const [report, subs, attempts, exams, activities] = await Promise.all([getLiveClassReport(activeClassId), getSubmissionsByClass(activeClassId), getExamAttemptsByClass(activeClassId), getExamsByClass(activeClassId), getActivitiesByClass(activeClassId)]);
+        if (!alive) return;
+        if (!report) throw new Error('Turma indisponível.');
+        setRoster(report.students.map(student => ({ id: student.studentId, name: student.studentName })));
         setRealSubmissions(subs);
+        setExamAttempts(attempts);
+        setClassExams(exams);
+        setClassActivities(activities);
+        setAcceptedRecordIds(report.students.flatMap(student => student.records.map(record => record.id)));
       } catch (e) {
-        console.warn('Erro ao carregar submissões reais:', e);
+        if (alive) setEvidenceError('Não foi possível carregar os registros da turma. Troque de turma ou recarregue para tentar novamente.');
+        console.warn('Erro ao carregar evidências da turma:', e);
+      } finally {
+        if (alive) setEvidenceLoading(false);
       }
     };
-    loadSubmissions();
+    void loadEvidence();
+    return () => { alive = false; };
   }, [activeClassId]);
 
-  const demoSubmissionsList = realSubmissions.length > 0 ? realSubmissions.map((s, idx) => ({
+  const submissionsList = realSubmissions.filter(submission => submission.id && acceptedRecordIds.includes(submission.id)).map((s, idx) => ({
     id: s.id || `sub_real_${idx}`,
     activityTitle: s.activityTitle || 'Atividade Prática de Laboratório',
     studentName: s.studentName || 'Estudante',
-    score: s.score || 90,
-    submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '14:32',
-    hypothesis: 'Hipótese investigativa validada com coleta numérica de dados no motor de física Kortex.',
-    telemetry: s.answers && typeof s.answers === 'object' ? (s.answers as Record<string, any>) : { 'Status': 'Concluído', 'Pontos': s.score }
-  })) : [
-    {
-      id: 'sub_demo_01',
-      activityTitle: 'Laboratório de Oscilações Forçadas e Ressonância',
-      studentName: 'Ana Clara Silva',
-      score: 95,
-      submittedAt: 'Hoje às 14:32',
-      hypothesis: 'Ao aproximar a frequência de excitação da frequência natural de 6.3 rad/s, observou-se que a amplitude aumentou 4x devido ao acoplamento de energia mecânica mínima no amortecimento.',
-      telemetry: { 'Amplitude Máxima': '2.85 m', 'Freq. Natural': '6.32 rad/s', 'Passos Euler': '84 pontos' }
-    },
-    {
-      id: 'sub_demo_02',
-      activityTitle: 'Cinética Química & Equação de Arrhenius',
-      studentName: 'Bruno Henrique Santos',
-      score: 88,
-      submittedAt: 'Hoje às 15:10',
-      hypothesis: 'A introdução de catalisador abaixou a barreira de ativação de 60 para 35 kJ/mol, acelerando a velocidade de consumo do reagente A em 3.2x.',
-      telemetry: { 'Constante k': '1.82 s⁻¹', 'Temperatura': '315 K', 'Ea Efetiva': '35 kJ/mol' }
-    },
-    {
-      id: 'sub_demo_03',
-      activityTitle: 'Circuito RLC Transiente e Osciloscópio Digital',
-      studentName: 'Camila Duarte Souza',
-      score: 92,
-      submittedAt: 'Hoje às 16:05',
-      hypothesis: 'O regime criticamente amortecido foi atingido exatamente quando R = 2√(L/C), eliminando o overshoot e retornando de forma otimizada ao repouso.',
-      telemetry: { 'Regime': 'Crítico', 'Resistência': '89.4 Ω', 'Indutância': '100 mH' }
-    }
-  ];
+    score: s.evidence?.stage === 'exploration' ? null : Number.isFinite(s.score) && s.score >= 0 && s.score <= 100 ? s.score : null,
+    status: s.status,
+    submittedAt: Number.isFinite(Date.parse(s.submittedAt)) ? new Date(s.submittedAt).toLocaleString('pt-BR') : 'Data não informada',
+    hypothesis: s.evidence?.observations?.map(observation => observation.hypothesis).filter(Boolean).join('\n') || s.evidence?.reflection || 'Não informada pelo estudante.',
+    telemetry: s.evidence?.experiment ? { ...s.evidence.experiment.parameters, ...s.evidence.experiment.telemetry, 'Amostras registradas': s.evidence.experiment.samples } : s.answers ?? {},
+    activeSeconds: s.evidence?.activeSeconds ?? null,
+    questions: s.evidence?.questions ?? []
+  }));
 
   // Atalhos de teclado ergonômicos no SpeedGrader: J (próximo aluno) e K (aluno anterior)
   useEffect(() => {
-    if (subTab !== 'speedgrader') return;
+    if (subTab !== 'speedgrader' || !submissionsList.length) return;
 
     const handleKeyNavigation = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
@@ -260,7 +266,7 @@ export function ProfessorLmsModules({
 
       if (e.key.toLowerCase() === 'j') {
         e.preventDefault();
-        setSelectedSubIndex(prev => Math.min(demoSubmissionsList.length - 1, prev + 1));
+        setSelectedSubIndex(prev => Math.min(submissionsList.length - 1, prev + 1));
       } else if (e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setSelectedSubIndex(prev => Math.max(0, prev - 1));
@@ -269,27 +275,13 @@ export function ProfessorLmsModules({
 
     window.addEventListener('keydown', handleKeyNavigation);
     return () => window.removeEventListener('keydown', handleKeyNavigation);
-  }, [subTab, demoSubmissionsList.length]);
+  }, [subTab, submissionsList.length]);
 
-  // Replay da Caixa Preta de Telemetria
-  const [replayTime, setReplayTime] = useState(6.5);
-  const [isPlayingReplay, setIsPlayingReplay] = useState(false);
-
+  const selectedSubmissionId = submissionsList[selectedSubIndex]?.id ?? submissionsList[0]?.id;
   useEffect(() => {
-    let interval: any;
-    if (isPlayingReplay) {
-      interval = setInterval(() => {
-        setReplayTime(prev => {
-          if (prev >= 10.0) {
-            setIsPlayingReplay(false);
-            return 10.0;
-          }
-          return Number((prev + 0.2).toFixed(1));
-        });
-      }, 100);
-    }
-    return () => clearInterval(interval);
-  }, [isPlayingReplay]);
+    setRubricScores({});
+    setDocenteFeedback('');
+  }, [selectedSubmissionId]);
 
   // AI Lab Studio (Gerador Zero-Code de Laboratórios)
   const [studioPrompt, setStudioPrompt] = useState('Transferência de Calor e Condução em Barras Metálicas (Lei de Fourier)');
@@ -499,7 +491,7 @@ export function ProfessorLmsModules({
   // ─────────────────────────────────────────────────────────────
   // 4. ESTADO DE CERTIFICADOS DIGITAIS & VALIDAÇÃO
   // ─────────────────────────────────────────────────────────────
-  const [certStudentName, setCertStudentName] = useState(DEFAULT_DEMO_STUDENTS[0].name);
+  const [certStudentName, setCertStudentName] = useState('');
   const [certSubject, setCertSubject] = useState('Ciências da Natureza & Física Experimental');
   const [certHours, setCertHours] = useState(40);
   const [issuedCert, setIssuedCert] = useState<DigitalCertificate | null>(null);
@@ -507,7 +499,8 @@ export function ProfessorLmsModules({
   const [validatedResult, setValidatedResult] = useState<{ cert: DigitalCertificate | null; searched: boolean }>({ cert: null, searched: false });
 
   const handleIssueCertificate = () => {
-    const student = DEFAULT_DEMO_STUDENTS.find(s => s.name === certStudentName) || DEFAULT_DEMO_STUDENTS[0];
+    const student = roster.find(s => s.name === certStudentName);
+    if (!student) return;
     const cert = issueCertificate(student.id, student.name, certSubject, certHours);
     setIssuedCert(cert);
   };
@@ -520,6 +513,8 @@ export function ProfessorLmsModules({
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {evidenceError && <p role="alert">{evidenceError}</p>}
+      {evidenceLoading ? <p role="status">Carregando estudantes e entregas da turma…</p> : !roster.length && <p role="status">Esta turma ainda não tem estudantes matriculados. Os registros aparecerão depois da matrícula e do envio das atividades.</p>}
       {/* Seletor de Turma & Sub-navegação do Módulo LMS */}
       <div className="glass-card" style={{ padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
@@ -539,7 +534,7 @@ export function ProfessorLmsModules({
           >
             {turmas.map(t => (
               <option key={t.id} value={t.id} style={{ background: 'var(--color-neutral-500, #F1EAD9)', color: 'var(--color-secondary-dark, #172314)' }}>
-                {t.name} (Código: {(t as any).code || t.id.slice(0, 6)})
+                {t.name} (Código: {t.code || t.id.slice(0, 6)})
               </option>
             ))}
           </select>
@@ -557,7 +552,7 @@ export function ProfessorLmsModules({
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setSubTab(tab.id as any)}
+              onClick={() => setSubTab(tab.id as typeof subTab)}
               style={{
                 padding: '0.5rem 0.9rem',
                 borderRadius: 'var(--radius-sm, 10px)',
@@ -597,6 +592,7 @@ export function ProfessorLmsModules({
             </div>
             <button
               onClick={handleOpenAttendanceModal}
+              disabled={evidenceLoading || !roster.length}
               className="btn-gradient"
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.25rem', fontWeight: 700 }}
             >
@@ -616,7 +612,7 @@ export function ProfessorLmsModules({
                   <button
                     onClick={() => {
                       const allPres: Record<string, 'presente' | 'falta' | 'justificada'> = {};
-                      DEFAULT_DEMO_STUDENTS.forEach(s => { allPres[s.id] = 'presente'; });
+                      roster.forEach(s => { allPres[s.id] = 'presente'; });
                       setAttendanceStatusMap(allPres);
                     }}
                     style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.78rem', background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', cursor: 'pointer', fontWeight: 700 }}
@@ -657,8 +653,8 @@ export function ProfessorLmsModules({
               {/* Roster de Chamada Rápida */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
                 <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Lista de Alunos da Turma:</div>
-                {DEFAULT_DEMO_STUDENTS.map(student => {
-                  const currentStatus = attendanceStatusMap[student.id] || 'presente';
+                {roster.map(student => {
+                  const currentStatus = attendanceStatusMap[student.id];
                   return (
                     <div
                       key={student.id}
@@ -742,7 +738,7 @@ export function ProfessorLmsModules({
                 <button
                   type="button"
                   onClick={handleSaveAttendance}
-                  disabled={savingAttendance}
+                  disabled={savingAttendance || !roster.length || roster.some(student => !attendanceStatusMap[student.id])}
                   className="btn-gradient"
                   style={{ padding: '0.6rem 1.75rem', fontWeight: 800 }}
                 >
@@ -768,11 +764,11 @@ export function ProfessorLmsModules({
                     <th style={{ padding: '0.75rem 0.5rem' }}>Presenças</th>
                     <th style={{ padding: '0.75rem 0.5rem' }}>Faltas</th>
                     <th style={{ padding: '0.75rem 0.5rem' }}>Frequência</th>
-                    <th style={{ padding: '0.75rem 0.5rem' }}>Conformidade LDB</th>
+                    <th style={{ padding: '0.75rem 0.5rem' }}>Frequência registrada</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {DEFAULT_DEMO_STUDENTS.map(student => {
+                  {roster.map(student => {
                     const stats = calculateStudentAttendanceRate(student.id, attendanceRecords);
                     return (
                       <tr key={student.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
@@ -791,18 +787,18 @@ export function ProfessorLmsModules({
                         <td style={{ padding: '0.85rem 0.5rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ width: '60px', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '9999px', overflow: 'hidden' }}>
-                              <div style={{ width: `${stats.taxaPercentual}%`, height: '100%', background: stats.alertaLDB ? '#ef4444' : '#10b981' }} />
+                              <div style={{ width: `${stats.taxaPercentual ?? 0}%`, height: '100%', background: stats.alertaLDB ? '#ef4444' : '#10b981' }} />
                             </div>
                             <span style={{ fontWeight: 800, color: stats.alertaLDB ? '#ef4444' : '#10b981' }}>
-                              {stats.taxaPercentual}%
+                              {stats.taxaPercentual === null ? 'Sem chamada' : `${stats.taxaPercentual ?? 0}%`}
                             </span>
                           </div>
                         </td>
                         <td style={{ padding: '0.85rem 0.5rem' }}>
-                          {stats.alertaLDB ? (
+                          {stats.taxaPercentual === null ? <span>Sem chamada registrada</span> : stats.alertaLDB ? (
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.2rem 0.6rem', borderRadius: '6px', background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
                               <AlertTriangle style={{ width: '0.85rem', height: '0.85rem' }} />
-                              Risco de Reprovação (&lt; 75%)
+                              Atenção: abaixo de 75%
                             </span>
                           ) : (
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.2rem 0.6rem', borderRadius: '6px', background: 'rgba(16,185,129,0.15)', color: '#10b981', fontSize: '0.78rem', fontWeight: 700 }}>
@@ -869,11 +865,12 @@ export function ProfessorLmsModules({
                 Livro de notas & boletim ponderado (Gradebook)
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
-                Ponderação automática com Provas (40%), Labs (30%), Atividades (20%) e Participação (10%). Média para aprovação: 6.0.
+                Notas de 0 a 10 a partir das entregas avaliadas. A média final aparece quando todas as categorias com peso têm evidência. Os pesos e a participação configurados aqui valem para esta consulta e exportação.
               </p>
             </div>
             <button
               onClick={handleExportGradebookCSV}
+              disabled={evidenceLoading || !gradeReports.length}
               className="btn-outline"
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.25rem', fontWeight: 700 }}
             >
@@ -912,7 +909,7 @@ export function ProfessorLmsModules({
                 cursor: 'pointer'
               }}
             >
-              🎓 Ensino Superior / MEC (P1 + P2 + Labs · Média 7.0)
+              🎓 Modelo semestral (P1 + P2 + Labs)
             </button>
           </div>
 
@@ -962,6 +959,8 @@ export function ProfessorLmsModules({
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+                <div><label htmlFor="gradebook-p1">Prova usada como P1</label><select id="gradebook-p1" value={p1ExamId} onChange={event => setP1ExamId(event.target.value)}><option value="">Selecione uma prova</option>{classExams.map(exam => <option key={exam.id} value={exam.id}>{exam.titulo}</option>)}</select></div>
+                <div><label htmlFor="gradebook-p2">Prova usada como P2</label><select id="gradebook-p2" value={p2ExamId} onChange={event => setP2ExamId(event.target.value)}><option value="">Selecione outra prova</option>{classExams.map(exam => <option key={exam.id} value={exam.id} disabled={exam.id === p1ExamId}>{exam.titulo}</option>)}</select></div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📚 Prova Teórica 1 (P1)</label>
                   <input
@@ -1041,19 +1040,19 @@ export function ProfessorLmsModules({
                             {rep.studentName}
                           </td>
                           <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
-                            {rep.notaProvas.toFixed(1)}
+                            {formatGrade(rep.notaProvas)}
                           </td>
                           <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700 }}>
-                            {rep.notaLabs.toFixed(1)}
+                            {formatGrade(rep.notaLabs)}
                           </td>
                           <td style={{ padding: '0.85rem 0.5rem', color: '#10b981', fontWeight: 700 }}>
-                            {rep.notaAtividades.toFixed(1)}
+                            {formatGrade(rep.notaAtividades)}
                           </td>
                           <td style={{ padding: '0.85rem 0.5rem', color: '#f59e0b', fontWeight: 700 }}>
-                            {rep.notaParticipacao.toFixed(1)}
+                            <input type="number" min="0" max="10" step="0.5" aria-label={`Nota de participação de ${rep.studentName}`} value={participationScores[rep.studentId] ?? ''} placeholder="Sem nota" style={{ width: '90px' }} onChange={event => setParticipationScores(previous => { const next = { ...previous }; if (event.target.value === '') delete next[rep.studentId]; else next[rep.studentId] = Number(event.target.value); return next; })} />
                           </td>
-                          <td style={{ padding: '0.85rem 0.5rem', fontSize: '1rem', fontWeight: 900, color: rep.mediaFinal >= 6.0 ? '#10b981' : rep.mediaFinal >= 4.0 ? '#f59e0b' : '#ef4444' }}>
-                            {rep.mediaFinal.toFixed(1)}
+                          <td style={{ padding: '0.85rem 0.5rem', fontSize: '1rem', fontWeight: 900, color: rep.mediaFinal === null ? 'var(--text-muted)' : rep.mediaFinal >= 6.0 ? '#10b981' : rep.mediaFinal >= 4.0 ? '#f59e0b' : '#ef4444' }}>
+                            {formatGrade(rep.mediaFinal)}
                           </td>
                           <td style={{ padding: '0.85rem 0.5rem' }}>
                             <span
@@ -1068,10 +1067,11 @@ export function ProfessorLmsModules({
                             >
                               {rep.situacao}
                             </span>
+                            {rep.missingCategories.length > 0 && <small style={{ display: 'block', color: 'var(--text-secondary)' }}>Aguardando: {rep.missingCategories.join(', ')}. Cobertura: {rep.coveragePercent}% dos pesos.</small>}
                           </td>
                           <td style={{ padding: '0.85rem 0.5rem' }}>
                             <span style={{ fontWeight: 700, color: rep.alertaFrequencia ? '#ef4444' : 'var(--text-secondary)' }}>
-                              {rep.frequenciaPercentual}%
+                              {rep.frequenciaPercentual === null ? 'Sem chamada' : `${rep.frequenciaPercentual}%`}
                             </span>
                           </td>
                         </tr>
@@ -1079,24 +1079,10 @@ export function ProfessorLmsModules({
                     }
 
                     // Cálculo da Média Ponderada Universitária
-                    const p1 = rep.notaProvas;
-                    const p2 = Math.min(10, rep.notaProvas * 0.95 + rep.notaAtividades * 0.1);
+                    const p1 = rep.notaP1 ?? null;
+                    const p2 = p1ExamId && p1ExamId === p2ExamId ? null : rep.notaP2 ?? null;
                     const labs = rep.notaLabs;
-                    const totalUnivWeight = univWeights.p1 + univWeights.p2 + univWeights.labs;
-                    const mediaSemestre = totalUnivWeight > 0
-                      ? Number(((p1 * univWeights.p1 + p2 * univWeights.p2 + labs * univWeights.labs) / totalUnivWeight).toFixed(1))
-                      : 0;
-
-                    let statusUniv = 'Reprovado Direto';
-                    let notaExameNecessaria = '-';
-
-                    if (mediaSemestre >= univWeights.minPassDireta) {
-                      statusUniv = 'Aprovado Direto';
-                    } else if (mediaSemestre >= univWeights.minExameFinal) {
-                      statusUniv = 'Exame Final';
-                      // Regra universitária clássica: (Média + Exame) / 2 >= 5.0 => Exame >= 10 - Média
-                      notaExameNecessaria = Math.max(0, Number((10 - mediaSemestre).toFixed(1))).toString();
-                    }
+                    const { mediaSemestre, statusUniv, notaExameNecessaria } = semesterFor(rep);
 
                     return (
                       <tr key={rep.studentId} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
@@ -1104,19 +1090,19 @@ export function ProfessorLmsModules({
                           {rep.studentName}
                         </td>
                         <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
-                          {p1.toFixed(1)}
+                          {formatGrade(p1)}
                         </td>
                         <td style={{ padding: '0.85rem 0.5rem', color: '#38bdf8', fontWeight: 700 }}>
-                          {p2.toFixed(1)}
+                          {formatGrade(p2)}
                         </td>
                         <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700 }}>
-                          {labs.toFixed(1)}
+                          {formatGrade(labs)}
                         </td>
-                        <td style={{ padding: '0.85rem 0.5rem', fontSize: '1rem', fontWeight: 900, color: mediaSemestre >= 7.0 ? '#10b981' : mediaSemestre >= 4.0 ? '#f59e0b' : '#ef4444' }}>
-                          {mediaSemestre.toFixed(1)}
+                        <td style={{ padding: '0.85rem 0.5rem', fontSize: '1rem', fontWeight: 900, color: mediaSemestre === null ? 'var(--text-muted)' : mediaSemestre >= 7.0 ? '#10b981' : mediaSemestre >= 4.0 ? '#f59e0b' : '#ef4444' }}>
+                          {formatGrade(mediaSemestre)}
                         </td>
                         <td style={{ padding: '0.85rem 0.5rem', fontWeight: 700, color: notaExameNecessaria === '-' ? 'var(--text-muted)' : '#f59e0b' }}>
-                          {notaExameNecessaria !== '-' ? `Nota ≥ ${notaExameNecessaria}` : 'Dispensado'}
+                          {mediaSemestre === null ? 'Aguardando notas' : notaExameNecessaria !== '-' ? `Nota ≥ ${notaExameNecessaria}` : statusUniv === 'Aprovado no modelo' ? 'Dispensado' : '—'}
                         </td>
                         <td style={{ padding: '0.85rem 0.5rem' }}>
                           <span
@@ -1125,8 +1111,8 @@ export function ProfessorLmsModules({
                               borderRadius: '6px',
                               fontSize: '0.78rem',
                               fontWeight: 700,
-                              background: statusUniv === 'Aprovado Direto' ? 'rgba(16,185,129,0.15)' : statusUniv === 'Exame Final' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
-                              color: statusUniv === 'Aprovado Direto' ? '#10b981' : statusUniv === 'Exame Final' ? '#f59e0b' : '#ef4444'
+                              background: statusUniv === 'Aprovado no modelo' ? 'rgba(16,185,129,0.15)' : statusUniv === 'Exame final no modelo' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                              color: statusUniv === 'Aprovado no modelo' ? '#10b981' : statusUniv === 'Exame final no modelo' ? '#f59e0b' : '#ef4444'
                             }}
                           >
                             {statusUniv}
@@ -1134,7 +1120,7 @@ export function ProfessorLmsModules({
                         </td>
                         <td style={{ padding: '0.85rem 0.5rem' }}>
                           <span style={{ fontWeight: 700, color: rep.alertaFrequencia ? '#ef4444' : 'var(--text-secondary)' }}>
-                            {rep.frequenciaPercentual}%
+                            {rep.frequenciaPercentual === null ? 'Sem chamada' : `${rep.frequenciaPercentual}%`}
                           </span>
                         </td>
                       </tr>
@@ -1603,7 +1589,8 @@ export function ProfessorLmsModules({
                     onChange={(e) => setCertStudentName(e.target.value)}
                     style={{ width: '100%', padding: '0.55rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: '#fff', fontSize: '0.9rem' }}
                   >
-                    {DEFAULT_DEMO_STUDENTS.map(s => (
+                    <option value="">Selecione um estudante matriculado</option>
+                    {roster.map(s => (
                       <option key={s.id} value={s.name}>{s.name}</option>
                     ))}
                   </select>
@@ -1712,7 +1699,8 @@ export function ProfessorLmsModules({
           SPEEDGRADER & RUBRICAS KORTEX (TELA DIVIDIDA ESTILO CANVAS LMS)
           ───────────────────────────────────────────────────────────── */}
       {subTab === 'speedgrader' && (() => {
-        const currentSub = demoSubmissionsList[selectedSubIndex] || demoSubmissionsList[0];
+        const currentSub = submissionsList[selectedSubIndex] || submissionsList[0];
+        if (!currentSub) return <div className="glass-card" role="status" style={{ padding: '1.5rem' }}>Nenhuma entrega registrada nesta turma. As respostas dos estudantes aparecerão aqui após o envio.</div>;
         const totalRubricScore = Number((
           (rubricScores['crit_1'] || 0) +
           (rubricScores['crit_2'] || 0) +
@@ -1720,18 +1708,18 @@ export function ProfessorLmsModules({
         ).toFixed(1));
 
         const handleSaveReview = async () => {
-          if (savingReview) return;
+          if (savingReview || !currentUser?.uid || Object.keys(rubricScores).length < 3) return;
           setSavingReview(true);
           try {
             await saveSubmissionReview({
               submissionId: currentSub.id,
-              professorId: 'prof_current',
+              professorId: currentUser?.uid ?? '',
               rubricScores,
               totalScore: totalRubricScore,
               generalFeedback: docenteFeedback,
               gradedAt: new Date().toISOString()
             });
-            setSpeedGraderToast(`✓ Nota ${totalRubricScore} e rubricas de ${currentSub.studentName} registradas no Diário de Classe!`);
+            setSpeedGraderToast(`Parecer de ${currentSub.studentName} guardado. A rubrica é uma avaliação separada da nota automática do boletim.`);
             setTimeout(() => setSpeedGraderToast(null), 4000);
           } catch (err) {
             console.error('Erro ao salvar review:', err);
@@ -1744,17 +1732,17 @@ export function ProfessorLmsModules({
 
         const handleExportSpeedGraderCsv = () => {
           const headers = ['ID_Submissao', 'Estudante', 'Atividade', 'Turma', 'Data_Entrega', 'Nota', 'Status', 'Hipotese_Investigativa'];
-          const rows = demoSubmissionsList.map(s => [
+          const rows = submissionsList.map(s => [
             s.id,
-            `"${s.studentName.replace(/"/g, '""')}"`,
-            `"${s.activityTitle.replace(/"/g, '""')}"`,
-            `"${(currentTurma?.name || 'Turma A').replace(/"/g, '""')}"`,
+            s.studentName,
+            s.activityTitle,
+            currentTurma?.name ?? '',
             s.submittedAt,
             s.score,
-            'Concluido',
-            `"${(s.hypothesis || '').replace(/"/g, '""')}"`
+            s.status,
+            s.hypothesis
           ]);
-          const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+          const csvContent = '\uFEFF' + [headers, ...rows].map(row => row.map(csvCell).join(';')).join('\n');
           const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');
@@ -1793,10 +1781,10 @@ export function ProfessorLmsModules({
             <div className="glass-card" style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                  Fila de Submissões ({demoSubmissionsList.length}):
+                  Fila de Submissões ({submissionsList.length}):
                 </span>
                 <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                  {demoSubmissionsList.map((sub, sIdx) => (
+                  {submissionsList.map((sub, sIdx) => (
                     <button
                       key={sub.id}
                       onClick={() => setSelectedSubIndex(sIdx)}
@@ -1811,7 +1799,7 @@ export function ProfessorLmsModules({
                         cursor: 'pointer'
                       }}
                     >
-                      {sub.studentName} ({sub.score} pts)
+                      {sub.studentName} ({sub.score === null ? 'sem nota' : `${sub.score} pts`})
                     </button>
                   ))}
                 </div>
@@ -1860,7 +1848,7 @@ export function ProfessorLmsModules({
                       </span>
                     </div>
                     <span style={{ background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', padding: '0.25rem 0.65rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 700 }}>
-                      ✓ Concluído com Telemetria
+                      {currentSub.status === 'completed' ? 'Entrega concluída' : 'Entrega pendente'}
                     </span>
                   </div>
 
@@ -1874,77 +1862,16 @@ export function ProfessorLmsModules({
                     </p>
                     <div style={{ background: 'var(--bg-card)', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem', fontSize: '0.78rem', fontFamily: 'monospace' }}>
                       {Object.entries(currentSub.telemetry).map(([k, v]) => (
-                        <div key={k}>{k}: <strong>{String(v)}</strong></div>
+                        <div key={k}>{k}: <strong>{typeof v === 'object' ? JSON.stringify(v) : String(v)}</strong></div>
                       ))}
                     </div>
                   </div>
 
-                  {/* Caixa Preta de Telemetria (Replay da Sessão do Aluno) */}
-                  <div style={{ marginTop: '1rem', background: 'var(--bg-card)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span style={{ fontSize: '1rem' }}>📼</span>
-                        <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
-                          Caixa Preta de Telemetria — Replay do Experimento
-                        </strong>
-                      </div>
-                      <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
-                        t = {replayTime.toFixed(1)}s / 10.0s
-                      </span>
-                    </div>
-
-                    {/* Controles de Replay */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                      <button
-                        onClick={() => setIsPlayingReplay(!isPlayingReplay)}
-                        style={{
-                          padding: '0.35rem 0.75rem',
-                          borderRadius: '6px',
-                          border: 'none',
-                          background: isPlayingReplay ? '#ef4444' : 'var(--color-verde-700, #293E24)',
-                          color: '#fff',
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {isPlayingReplay ? '⏸ Pausar Replay' : '▶ Reproduzir Sessão'}
-                      </button>
-                      <input
-                        type="range"
-                        min="0"
-                        max="10"
-                        step="0.1"
-                        value={replayTime}
-                        onChange={(e) => setReplayTime(Number(e.target.value))}
-                        style={{ flex: 1, accentColor: 'var(--color-primary, #E4683F)' }}
-                      />
-                    </div>
-
-                    {/* Snapshot dinâmico no instante t */}
-                    <div style={{ background: 'var(--bg-surface)', padding: '0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-secondary)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem' }}>
-                      <div>Taxa Amostragem: <strong>60 Hz</strong></div>
-                      <div>Eventos Slider: <strong>{(replayTime * 4.2).toFixed(0)} ações</strong></div>
-                      <div>Convergência: <strong style={{ color: '#22c55e' }}>Euler O(Δt²)</strong></div>
-                    </div>
-                  </div>
-
-                  {/* Auditoria de Integridade Acadêmica & Anti-Plágio Kortex */}
-                  <div style={{ marginTop: '0.75rem', background: 'rgba(34, 197, 94, 0.05)', padding: '0.85rem', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.25)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <CheckCircle style={{ width: '1.1rem', height: '1.1rem', color: '#22c55e' }} />
-                      <div>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                          Integridade Acadêmica & AST Telemetry Fingerprint
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                          Similaridade textual: <strong style={{ color: '#22c55e' }}>2.1% (Trabalho 100% Autoral)</strong> · Assinatura de telemetria única
-                        </div>
-                      </div>
-                    </div>
-                    <span style={{ fontSize: '0.72rem', background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 700 }}>
-                      ✓ Certificado Autêntico
-                    </span>
+                  <div style={{ marginTop: '1rem', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '10px' }}>
+                    <h4 style={{ margin: '0 0 0.5rem' }}>Evidências registradas no envio</h4>
+                    <p>Tempo ativo: {currentSub.activeSeconds === null ? 'Não medido' : `${Math.round(currentSub.activeSeconds)} segundos`}.</p>
+                    {currentSub.questions.length ? currentSub.questions.map(question => <div key={question.questionId} style={{ marginBottom: '0.5rem' }}><strong>{question.question}</strong><br />Resposta: {question.selectedOption === null ? 'Não respondida' : question.selectedOption + 1} · {question.correct === null ? 'Sem correção' : question.correct ? 'Correta' : 'Rever conteúdo'}</div>) : <p>Nenhuma resposta por questão foi registrada neste envio.</p>}
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Parâmetros e medidas acima representam o estado guardado pelo estudante ao enviar a atividade.</p>
                   </div>
                 </div>
               </div>
@@ -1954,10 +1881,10 @@ export function ProfessorLmsModules({
                 <div className="glass-card" style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                      Rubrica de Critérios DCN / MEC
+                      Rubrica de avaliação docente
                     </h4>
                     <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--color-primary-accessible, #B8441F)' }}>
-                      Nota: {totalRubricScore} / 10
+                      {Object.keys(rubricScores).length < 3 ? 'Preencha os três critérios' : `Prévia: ${totalRubricScore} / 10`}
                     </div>
                   </div>
 
@@ -2044,7 +1971,7 @@ export function ProfessorLmsModules({
 
                     <button
                       onClick={handleSaveReview}
-                      disabled={savingReview}
+                      disabled={savingReview || Object.keys(rubricScores).length < 3 || !currentUser?.uid}
                       className="btn-primary"
                       style={{ padding: '0.65rem 1rem', fontSize: '0.85rem', fontWeight: 700, borderRadius: '8px', cursor: 'pointer', border: 'none', background: 'var(--color-verde-700, #293E24)', color: '#fff', marginTop: '0.25rem' }}
                     >

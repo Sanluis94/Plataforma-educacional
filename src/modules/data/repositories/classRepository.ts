@@ -72,7 +72,7 @@ export const getProfessorClasses = async (professorId?: string): Promise<Turma[]
       return {
         id: docSnap.id,
         name: data.name,
-        studentsCount: data.studentsCount || 0,
+        studentsCount: Array.isArray(data.studentIds) ? new Set(data.studentIds.filter((id: unknown) => typeof id === 'string' && id.trim())).size : 0,
         code: data.code || docSnap.id.slice(0, 6).toUpperCase(),
         createdAt: data.createdAt || '',
         gradeLevel: data.gradeLevel,

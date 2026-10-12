@@ -16,6 +16,7 @@ export interface EnemAttempt {
   deadlineAt: number | null;
   completionReason: 'submitted' | 'expired' | null;
   result: TriResult | null;
+  activeSeconds?: number;
 }
 
 export function enemAttemptStorageKey(userId: string): string {
@@ -95,6 +96,7 @@ export function readEnemAttempt(userId: string | null, now = Date.now()): EnemAt
       status: 'active',
       startedAt: candidate.startedAt,
       deadlineAt: candidate.deadlineAt,
+      ...(typeof candidate.activeSeconds === 'number' && Number.isFinite(candidate.activeSeconds) && candidate.activeSeconds >= 0 && candidate.activeSeconds <= ENEM_DURATION_SECONDS ? { activeSeconds: candidate.activeSeconds } : {}),
       currentIndex: typeof candidate.currentIndex === 'number' && Number.isInteger(candidate.currentIndex)
         ? Math.max(0, Math.min(empty.itemIds.length - 1, candidate.currentIndex)) : 0,
     };

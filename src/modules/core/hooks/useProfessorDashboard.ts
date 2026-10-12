@@ -6,12 +6,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Turma } from '../../data/repositories/classRepository';
 import { getProfessorClasses } from '../../data/repositories/classRepository';
 import { getActivitiesByProfessor, deleteActivity } from '../../data/repositories/activityRepository';
-import { getSubmissionsByClass } from '../../data/repositories/submissionRepository';
-import { getLiveClassReport } from '../../data/repositories/reportRepository';
+import { getLiveClassReport, getProfessorLearningOverview } from '../../data/repositories/reportRepository';
 import type { LocalClassReport } from '../../data/services/localEtlClient';
 import { createNewClass, validateClassName, publishActivity } from '../services/professorService';
 import { useAuth } from '../contexts/AuthContext';
 import type { ActivityData } from '../../data/types';
+import { buildClassLearningReportCSV } from '../../data/services/learningReportExport';
 
 export const useProfessorDashboard = (navigation?: { activeTab: string; classId: string | null }) => {
   const { currentUser, userData } = useAuth();
@@ -32,7 +32,8 @@ export const useProfessorDashboard = (navigation?: { activeTab: string; classId:
   const [builderStep, setBuilderStep] = useState(1);
   const [activityConfig, setActivityConfig] = useState<any>({ type: 'quiz', title: '', module: '', config: {} });
   const [loading, setLoading] = useState(true);
-  const [globalStats, setGlobalStats] = useState({ completionRate: 0, engagement: 0 });
+  const [globalStats, setGlobalStats] = useState<{ completionRate: number | null; engagement: number | null }>({ completionRate: null, engagement: null });
+  const [statsError, setStatsError] = useState<string | null>(null);
 
   // Carrega turmas do professor autenticado
   useEffect(() => {
@@ -58,33 +59,25 @@ export const useProfessorDashboard = (navigation?: { activeTab: string; classId:
 
   // Carrega atividades do professor
   useEffect(() => {
+    let cancelled = false;
     const loadActivitiesAndStats = async () => {
       if (!currentUser?.uid) return;
+      setGlobalStats({ completionRate: null, engagement: null });
+      setStatsError(null);
       try {
         const data = await getActivitiesByProfessor(currentUser.uid);
+        if (cancelled) return;
         setActivities(data);
-
-        // Load submissions for all classes to calculate global stats
-        if (turmas.length > 0 && data.length > 0) {
-          let totalSubmissions = 0;
-          for (const turma of turmas) {
-            const subs = await getSubmissionsByClass(turma.id);
-            totalSubmissions += subs.length;
-          }
-          
-          const totalExpectedSubmissions = turmas.reduce((acc, t) => acc + (t.studentsCount || 0), 0) * data.length;
-          const rate = totalExpectedSubmissions > 0 ? Math.min(100, Math.round((totalSubmissions / totalExpectedSubmissions) * 100)) : 0;
-          
-          // Simple mock for engagement correlated to completion
-          const engagement = Math.max(0, rate - Math.floor(Math.random() * 20));
-          
-          setGlobalStats({ completionRate: rate, engagement });
-        }
+        const overview = await getProfessorLearningOverview(turmas.map(turma => turma.id));
+        if (cancelled) return;
+        setGlobalStats(overview);
       } catch (error) {
         console.error('[useProfessorDashboard] Erro ao carregar atividades/stats:', error);
+        if (!cancelled) setStatsError('Não foi possível atualizar os indicadores. Abra o relatório da turma e tente novamente.');
       }
     };
     loadActivitiesAndStats();
+    return () => { cancelled = true; };
   }, [currentUser?.uid, turmas]);
 
   const refreshReport = useCallback(async () => {
@@ -100,7 +93,15 @@ export const useProfessorDashboard = (navigation?: { activeTab: string; classId:
     setClassReport(null);
     try {
       const report = await getLiveClassReport(classId);
-      if (request === reportRequest.current) setClassReport(report);
+      if (request === reportRequest.current) {
+        setClassReport(report);
+        try {
+          const overview = await getProfessorLearningOverview(turmas.map(turma => turma.id));
+          if (request === reportRequest.current) { setGlobalStats(overview); setStatsError(null); }
+        } catch {
+          if (request === reportRequest.current) setStatsError('Os indicadores gerais não foram atualizados. O relatório desta turma continua disponível.');
+        }
+      }
     } catch (error) {
       console.error('[useProfessorDashboard] Erro ao carregar relatório da turma:', error);
       if (request === reportRequest.current) {
@@ -110,7 +111,7 @@ export const useProfessorDashboard = (navigation?: { activeTab: string; classId:
     } finally {
       if (request === reportRequest.current) setReportLoading(false);
     }
-  }, [selectedClassId]);
+  }, [selectedClassId, turmas]);
 
   const cancelReportRequests = useCallback(() => { reportRequest.current++; }, []);
   useEffect(() => {
@@ -194,28 +195,11 @@ export const useProfessorDashboard = (navigation?: { activeTab: string; classId:
   const exportReportCSV = useCallback(() => {
     if (!classReport) return;
 
-    const headers = ['Aluno', 'Nível', 'Média (%)', 'Status'];
-    const rows = classReport.students.map(s => [
-      s.studentName,
-      String(s.level),
-      String(s.averageScore),
-      s.status === 'precisa_apoio' ? 'Precisa de Apoio' : s.status === 'em_destaque' ? 'Destaque' : 'Regular',
-    ]);
-
-    const csvContent = [
-      `Relatório: ${classReport.className}`,
-      `Professor: ${classReport.professorName}`,
-      `Alunos: ${classReport.studentsCount} | Média Geral: ${classReport.averageScore}% | Conclusão: ${classReport.completionRate}%`,
-      '',
-      headers.join(','),
-      ...rows.map(r => r.join(',')),
-    ].join('\n');
-
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([buildClassLearningReportCSV(classReport)], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `relatorio_${classReport.className.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `relatorio_${classReport.className.replace(/[^\p{L}\p{N}_-]+/gu, '_')}_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }, [classReport]);
@@ -245,6 +229,7 @@ export const useProfessorDashboard = (navigation?: { activeTab: string; classId:
     handleDeleteActivity,
     exportReportCSV,
     globalStats,
+    statsError,
     loading,
   };
 };

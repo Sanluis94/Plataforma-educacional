@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { GuidedLabActivity } from '../modules/ux/components/labs/GuidedLabActivity';
 import { UniversalLabContainer } from '../modules/ux/components/UniversalLabContainer';
 import { LabLearningWorkspace } from '../modules/ux/components/labs/LabLearningWorkspace';
@@ -51,7 +51,7 @@ describe('Atividade guiada na bancada', () => {
     expect(screen.getByText(content.scenarios[0].explanation)).toBeInTheDocument();
   });
 
-  it('corrige somente após todas as respostas e fornece explicações específicas', () => {
+  it('corrige somente após todas as respostas e fornece explicações específicas', async () => {
     const onComplete = vi.fn();
     render(<GuidedLabActivity {...props} onComplete={onComplete} />);
     fireEvent.click(screen.getByRole('button', { name: 'Avaliar' }));
@@ -60,10 +60,11 @@ describe('Atividade guiada na bancada', () => {
       fireEvent.click(screen.getByLabelText(question.options.find(option => option.correct)!.text));
     }
     fireEvent.click(screen.getByRole('button', { name: 'Corrigir respostas' }));
-    expect(onComplete).toHaveBeenCalledExactlyOnceWith({ score: 10, telemetryRows: 0 });
+    expect(onComplete).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ score: 100, telemetryRows: 0, evidence: expect.objectContaining({ source: 'lab', stage: 'assessment', questions: expect.arrayContaining([expect.objectContaining({ question: content.questions[0].question, selectedText: content.questions[0].options.find(option => option.correct)!.text, correct: true })]) }) }));
     expect(screen.getByRole('status')).toHaveTextContent(`Você acertou ${content.questions.length} de ${content.questions.length} questões.`);
     expect(screen.getAllByText(content.questions[0].options[0].explanation).length).toBeGreaterThan(0);
     expect(screen.queryByRole('button', { name: 'Corrigir respostas' })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
     expect(screen.getByRole('button', { name: 'Corrigir respostas' })).toBeDisabled();
   });

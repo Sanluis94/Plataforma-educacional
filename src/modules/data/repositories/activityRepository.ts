@@ -4,7 +4,8 @@
  */
 import { collection, addDoc, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
-import { getLocalEtlActivitiesByClass, getLocalEtlActivitiesByProfessor } from '../services/localEtlClient';
+import { getLocalEtlActivitiesByClass, getLocalEtlActivitiesByProfessor, saveLocalActivity, updateLocalActivity, deleteLocalActivity } from '../services/localEtlClient';
+import { sanitizeForFirestore } from '../../core/services/firestoreUtils';
 import type { ActivityData } from '../types';
 
 const COLLECTION = 'activities';
@@ -14,11 +15,10 @@ const COLLECTION = 'activities';
  */
 export const saveActivity = async (activity: Omit<ActivityData, 'id'>): Promise<ActivityData> => {
   if (!db) {
-    console.warn('[ActivityRepository] Firestore não inicializado.');
-    return { ...activity, id: `local-${Date.now()}` };
+    return saveLocalActivity(activity);
   }
 
-  const docRef = await addDoc(collection(db, COLLECTION), activity);
+  const docRef = await addDoc(collection(db, COLLECTION), sanitizeForFirestore(activity));
   return { ...activity, id: docRef.id };
 };
 
@@ -65,10 +65,11 @@ export const getActivitiesByClass = async (classId: string): Promise<ActivityDat
  */
 export const subscribeActivitiesByClass = (
   classId: string,
-  callback: (activities: ActivityData[]) => void
+  callback: (activities: ActivityData[]) => void,
+  onError?: (error: unknown) => void
 ): (() => void) => {
   if (!db) {
-    getLocalEtlActivitiesByClass(classId).then(callback);
+    getLocalEtlActivitiesByClass(classId).then(callback).catch(error => onError?.(error));
     return () => {};
   }
 
@@ -86,6 +87,7 @@ export const subscribeActivitiesByClass = (
     callback(data);
   }, (error) => {
     console.error('[ActivityRepository] Erro no listener de atividades:', error);
+    onError?.(error);
   });
 };
 
@@ -94,11 +96,10 @@ export const subscribeActivitiesByClass = (
  */
 export const updateActivity = async (id: string, data: Partial<Omit<ActivityData, 'id'>>): Promise<void> => {
   if (!db) {
-    console.warn('[ActivityRepository] Firestore não inicializado.');
-    return;
+    return updateLocalActivity(id, data);
   }
   const docRef = doc(db, COLLECTION, id);
-  await updateDoc(docRef, data);
+  await updateDoc(docRef, sanitizeForFirestore(data));
 };
 
 /**
@@ -106,8 +107,7 @@ export const updateActivity = async (id: string, data: Partial<Omit<ActivityData
  */
 export const deleteActivity = async (id: string): Promise<void> => {
   if (!db) {
-    console.warn('[ActivityRepository] Firestore não inicializado.');
-    return;
+    return deleteLocalActivity(id);
   }
   const docRef = doc(db, COLLECTION, id);
   await deleteDoc(docRef);

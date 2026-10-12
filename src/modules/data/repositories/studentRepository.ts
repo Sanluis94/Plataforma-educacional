@@ -96,7 +96,7 @@ export const getStudentProgress = async (uid?: string): Promise<ProgressData> =>
     return defaultData;
   } catch (error) {
     console.error('[StudentRepository] Erro ao buscar progresso:', error);
-    return await getLocalEtlProgress(uid) ?? { ...DEFAULT_PROGRESS };
+    throw error;
   }
 };
 
@@ -123,6 +123,7 @@ export const saveStudentProgress = async (
     }, { merge: true });
   } catch (error) {
     console.error('[StudentRepository] Erro ao salvar progresso:', error);
+    throw error;
   }
 };
 
@@ -140,6 +141,7 @@ export const addCompletedModule = async (uid: string, moduleId: string): Promise
     });
   } catch (error) {
     console.error('[StudentRepository] Erro ao registrar módulo:', error);
+    throw error;
   }
 };
 
@@ -156,6 +158,7 @@ export const addPurchasedItem = async (uid: string, itemId: string): Promise<voi
     });
   } catch (error) {
     console.error('[StudentRepository] Erro ao registrar compra:', error);
+    throw error;
   }
 };
 

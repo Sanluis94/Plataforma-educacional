@@ -3,10 +3,12 @@
  * Conecta o trabalho do aluno com a visão do professor.
  */
 import {
-  collection, addDoc, query, where, getDocs
+  collection, addDoc, query, where, getDocs, doc, setDoc, getDoc
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import type { SubmissionData } from '../types';
+import { learningDocumentId } from '../services/learningCapture';
+import { sanitizeForFirestore } from '../../core/services/firestoreUtils';
 import { 
   saveLocalSubmission, 
   getLocalSubmissionsByStudent, 
@@ -21,11 +23,27 @@ const COLLECTION = 'submissions';
 export const saveSubmission = async (
   submission: Omit<SubmissionData, 'id'>
 ): Promise<SubmissionData> => {
+  if (!submission.studentId || !submission.activityId || !Number.isFinite(submission.score) || submission.score < 0 || submission.score > 100) {
+    throw new Error('Aluno, atividade ou pontuação inválidos.');
+  }
   if (!db) {
-    console.warn('[SubmissionRepository] Firestore não inicializado. Salvando no LocalStorage.');
     return saveLocalSubmission(submission);
   }
 
+  if (submission.evidence?.sessionId) {
+    const id = learningDocumentId(submission.studentId, submission.evidence.sessionId, `${submission.classId}-${submission.evidence.stage ?? 'assessment'}`);
+    const reference = doc(db, COLLECTION, id);
+    try { await setDoc(reference, sanitizeForFirestore(submission)); }
+    catch (error) {
+      // Current rules allow creation and forbid updates. A confirmed existing
+      // attempt is an acknowledgement of a retried delivery, not another grade.
+      const existing = await getDoc(reference).catch(() => null);
+      const data = existing?.exists() ? existing.data() as Omit<SubmissionData, 'id'> : null;
+      if (data?.studentId === submission.studentId && data.classId === submission.classId && data.activityId === submission.activityId && data.evidence?.sessionId === submission.evidence.sessionId) return { ...data, id };
+      throw error;
+    }
+    return { ...submission, id };
+  }
   const docRef = await addDoc(collection(db, COLLECTION), submission);
   return { ...submission, id: docRef.id };
 };
@@ -36,7 +54,7 @@ export const saveSubmission = async (
 export const getSubmissionsByActivity = async (
   activityId: string
 ): Promise<SubmissionData[]> => {
-  if (!db) return [];
+  if (!db) return (await getLocalSubmissionsByStudent('')).filter(entry => entry.activityId === activityId);
 
   const q = query(
     collection(db, COLLECTION),
@@ -60,7 +78,7 @@ export const getSubmissionsByStudentInClass = async (
   studentId: string,
   classId: string
 ): Promise<SubmissionData[]> => {
-  if (!db) return [];
+  if (!db) return (await getLocalSubmissionsByStudent(studentId)).filter(entry => entry.classId === classId);
 
   const q = query(
     collection(db, COLLECTION),
@@ -135,7 +153,7 @@ export const hasStudentSubmitted = async (
   studentId: string,
   activityId: string
 ): Promise<boolean> => {
-  if (!db) return false;
+  if (!db) return (await getLocalSubmissionsByStudent(studentId)).some(entry => entry.activityId === activityId);
 
   const q = query(
     collection(db, COLLECTION),

@@ -247,16 +247,16 @@ try {
     await externalReturn(page, /Catálogo de Laboratórios/, 'Navegação dos laboratórios', 'Voltar à tela anterior');
     await externalReturn(page, /Simulado ENEM/, 'Navegação do simulado', 'Voltar');
     await page.getByRole('button', { name: /Relatórios da Turma/ }).click();
-    await page.getByRole('heading', { name: /Diagnóstico pedagógico.*Turma fictícia B/ }).waitFor();
+    await page.getByRole('region', { name: 'Acompanhamento da turma Turma fictícia B', exact: true }).waitFor();
     await page.getByRole('combobox', { name: 'Turma selecionada', exact: true }).selectOption('qa-class-a');
-    await page.getByRole('heading', { name: /Diagnóstico pedagógico.*Turma fictícia A/ }).waitFor();
+    await page.getByRole('region', { name: 'Acompanhamento da turma Turma fictícia A', exact: true }).waitFor();
     await page.evaluate(() => {
       const db = JSON.parse(localStorage.getItem('edu_local_db'));
       db.classes.find(turma => turma.id === 'qa-class-a').name = 'Turma fictícia A atualizada';
       localStorage.setItem('edu_local_db', JSON.stringify(db));
     });
     await page.getByRole('button', { name: 'Atualizar', exact: true }).click();
-    await page.getByRole('heading', { name: /Diagnóstico pedagógico.*Turma fictícia A atualizada/ }).waitFor();
+    await page.getByRole('region', { name: 'Acompanhamento da turma Turma fictícia A atualizada', exact: true }).waitFor();
   });
 
   if (!skipEnem) await scenario('enem-inicio-retomada-entrega-resultado', 'estudante', async page => {
