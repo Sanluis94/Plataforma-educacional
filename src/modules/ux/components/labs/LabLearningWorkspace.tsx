@@ -2,6 +2,7 @@ import { Activity, useState, type ReactNode } from 'react';
 import type { LabLearningContent } from '../../../core/content/labLearningContent';
 import { GuidedLabActivity } from './GuidedLabActivity';
 import type { LearningLevel } from '../../../core/constants/learningLevels';
+import type { LabCompletionHandler } from '../../../data/services/learningCapture';
 
 interface LabLearningWorkspaceProps {
   labId: string;
@@ -10,7 +11,7 @@ interface LabLearningWorkspaceProps {
   objective: string;
   academicLevel?: LearningLevel;
   content?: LabLearningContent;
-  onComplete?: (report: { score: number; telemetryRows: number }) => void;
+  onComplete?: LabCompletionHandler;
   children: ReactNode;
 }
 

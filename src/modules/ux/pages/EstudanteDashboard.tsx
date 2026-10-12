@@ -14,6 +14,13 @@ import { getLabLearningContent } from '../../core/content/labLearningContent';
 import { LabLearningWorkspace } from '../components/labs/LabLearningWorkspace';
 import SoundEffects from '../../core/services/soundEffects';
 import { StudentLmsModules } from '../components/StudentLmsModules';
+import { StudentClassActivity } from '../components/StudentClassActivity';
+import { subscribeActivitiesByClass } from '../../data/repositories/activityRepository';
+import { getSubmissionsByStudent } from '../../data/repositories/submissionRepository';
+import { offlineSyncService } from '../../core/services/offlineSyncService';
+import { learningDocumentId } from '../../data/services/learningCapture';
+import { examAttemptPercentage } from '../../data/services/learningAnalytics';
+import { useLearningCapture } from '../hooks/useLearningCapture';
 import { 
   sendStudentMessage,
   subscribeStudentMessages,
@@ -23,14 +30,13 @@ import {
 } from '../../data/repositories/classRepository';
 import {
   subscribeExamsByClass,
-  saveExamAttempt,
   getExamAttemptsByStudent
 } from '../../data/repositories/examRepository';
 import {
   subscribeLessonPlansByClass
 } from '../../data/repositories/lessonPlanRepository';
 import type {
-  ExamData, ExamAttempt, ExamAnswer,
+  ActivityData, ExamData, ExamAttempt, ExamAnswer, SubmissionData,
   LessonPlanItem
 } from '../../data/types';
 import { useAuth } from '../../core/contexts/AuthContext';
@@ -128,7 +134,7 @@ function ConfettiCanvas({ active, onComplete }: { active: boolean; onComplete: (
 
 type LegacyLab = (typeof ALL_MODULES)[number]['labs'][number];
 const LEGACY_LABS = ALL_MODULES.flatMap<LegacyLab>(module => module.labs);
-const STUDENT_TABS = ['labs', 'exams', 'lesson_plans', 'materials', 'classes', 'gamification', 'gradebook', 'forum', 'certificates'] as const;
+const STUDENT_TABS = ['labs', 'activities', 'exams', 'lesson_plans', 'materials', 'classes', 'gamification', 'gradebook', 'forum', 'certificates'] as const;
 type StudentTab = typeof STUDENT_TABS[number];
 
 export function EstudanteDashboard() {
@@ -152,12 +158,14 @@ export function EstudanteDashboard() {
     studentClasses,
     joinClass,
     handleActivitySubmit,
-    handleLabComplete, labSaveError, labSaving, retryLabCompletion,
+    handleLabComplete, labSaveError, labSaving, labPending, retryLabCompletion,
     modules,
     gradeLevel,
   } = useStudentDashboard(selectedLevel);
 
   const { level, xp, coins } = progress;
+  const legacyCapture = useLearningCapture();
+  const examCapture = useLearningCapture();
 
   const tabParam = searchParams.get('tab');
   const activeTab: StudentTab = STUDENT_TABS.includes(tabParam as StudentTab) ? tabParam as StudentTab : 'labs';
@@ -169,6 +177,7 @@ export function EstudanteDashboard() {
       next.set('tab', tab);
       next.delete('lab');
       next.delete('labReturnTab');
+      next.delete('lessonPlan');
       return next;
     });
   };
@@ -185,8 +194,10 @@ export function EstudanteDashboard() {
       const returnParams = new URLSearchParams(searchParams);
       returnParams.delete('lab');
       returnParams.set('tab', returnParams.get('labReturnTab') === 'lesson_plans' ? 'lesson_plans' : 'labs');
-      returnParams.delete('labReturnTab');
-      navigate(withReturnTo(`/simulacao?lab=${encodeURIComponent(linkedLab.id)}&level=${linkedLab.academicLevel}`, `${location.pathname}?${returnParams}`), { replace: true });
+    returnParams.delete('labReturnTab');
+    returnParams.delete('lessonPlan');
+      const assignment = searchParams.get('lessonPlan') ? `&class=${encodeURIComponent(searchParams.get('class') ?? '')}&lessonPlan=${encodeURIComponent(searchParams.get('lessonPlan')!)}` : '';
+      navigate(withReturnTo(`/simulacao?lab=${encodeURIComponent(linkedLab.id)}&level=${linkedLab.academicLevel}${assignment}`, `${location.pathname}?${returnParams}`), { replace: true });
       return;
     }
     const lab = LEGACY_LABS.find(item => item.id === linkedLab.id);
@@ -207,13 +218,16 @@ export function EstudanteDashboard() {
       next.set('tab', next.get('labReturnTab') === 'lesson_plans' ? 'lesson_plans' : 'labs');
       next.delete('lab');
       next.delete('labReturnTab');
+      next.delete('lessonPlan');
       return next;
     });
   };
 
-  const openLearningLab = (lab: LearningLab, fromTab: StudentTab = activeTab) => {
+  const openLearningLab = (lab: LearningLab, fromTab: StudentTab = activeTab, plan?: LessonPlanItem) => {
+    legacyCapture.current.reset();
     if (lab.source === 'catalog') {
-      navigate(withReturnTo(`/simulacao?lab=${encodeURIComponent(lab.id)}&level=${lab.academicLevel}`, panelLocation));
+      const assignment = plan?.id ? `&class=${encodeURIComponent(plan.turmaId)}&lessonPlan=${encodeURIComponent(plan.id)}` : '';
+      navigate(withReturnTo(`/simulacao?lab=${encodeURIComponent(lab.id)}&level=${lab.academicLevel}${assignment}`, panelLocation));
       return;
     }
     setSearchParams(previous => {
@@ -224,6 +238,8 @@ export function EstudanteDashboard() {
       next.set('tab', 'labs');
       if (fromTab === 'lesson_plans') next.set('labReturnTab', 'lesson_plans');
       else next.delete('labReturnTab');
+      if (plan?.id) { next.set('lessonPlan', plan.id); next.set('class', plan.turmaId); }
+      else next.delete('lessonPlan');
       return next;
     });
     SoundEffects.playClick();
@@ -241,6 +257,11 @@ export function EstudanteDashboard() {
   const [classMaterials, setClassMaterials] = useState<any[]>([]);
   const [classLessonPlans, setClassLessonPlans] = useState<LessonPlanItem[]>([]);
   const [classExams, setClassExams] = useState<ExamData[]>([]);
+  const [classActivities, setClassActivities] = useState<ActivityData[]>([]);
+  const [activitiesError, setActivitiesError] = useState('');
+  const [activityHistory, setActivityHistory] = useState<SubmissionData[]>([]);
+  const [activityHistoryLoading, setActivityHistoryLoading] = useState(true);
+  const [activityHistoryError, setActivityHistoryError] = useState('');
   const [studentAttempts, setStudentAttempts] = useState<ExamAttempt[]>([]);
 
   // Class Messages
@@ -261,6 +282,9 @@ export function EstudanteDashboard() {
   const [examTimeRemaining, setExamTimeRemaining] = useState<number | null>(null);
   const [examResult, setExamResult] = useState<ExamAttempt | null>(null);
   const [submittingExam, setSubmittingExam] = useState(false);
+  const [examSaveError, setExamSaveError] = useState('');
+  const [examPending, setExamPending] = useState(false);
+  const frozenExamAttempt = useRef<Omit<ExamAttempt, 'id'> | null>(null);
   const [copiedMatId, setCopiedMatId] = useState<string | null>(null);
 
   // Keep the class context when refreshing or returning from another screen.
@@ -282,6 +306,9 @@ export function EstudanteDashboard() {
     const unsubMaterials = subscribeEnhancedMaterials(selectedClassId, setClassMaterials);
     const unsubLessonPlans = subscribeLessonPlansByClass(selectedClassId, setClassLessonPlans);
     const unsubExams = subscribeExamsByClass(selectedClassId, setClassExams);
+    setClassActivities([]);
+    setActivitiesError('');
+    const unsubActivities = subscribeActivitiesByClass(selectedClassId, entries => setClassActivities(entries.filter(entry => entry.status === 'published')), () => setActivitiesError('Não foi possível carregar as atividades desta turma. Recarregue a página para tentar novamente.'));
     const unsubMessages = subscribeStudentMessages(selectedClassId, setMessages);
 
     return () => {
@@ -289,9 +316,19 @@ export function EstudanteDashboard() {
       unsubMaterials();
       unsubLessonPlans();
       unsubExams();
+      unsubActivities();
       unsubMessages();
     };
   }, [selectedClassId]);
+
+  useEffect(() => {
+    let active = true;
+    setActivityHistoryLoading(true); setActivityHistoryError('');
+    void getSubmissionsByStudent(studentUid).then(entries => {
+      if (active) setActivityHistory(entries.filter(entry => entry.classId === selectedClassId));
+    }).catch(() => { if (active) setActivityHistoryError('Não foi possível carregar suas entregas anteriores.'); }).finally(() => { if (active) setActivityHistoryLoading(false); });
+    return () => { active = false; };
+  }, [studentUid, selectedClassId]);
 
   // Load student's past exam attempts
   useEffect(() => {
@@ -357,6 +394,9 @@ export function EstudanteDashboard() {
 
   // Handler to Start an Exam
   const handleStartExam = (exam: ExamData) => {
+    examCapture.current.reset();
+    frozenExamAttempt.current = null;
+    setExamSaveError(''); setExamPending(false);
     setActiveExam(exam);
     setExamCurrentQIndex(0);
     setExamAnswers({});
@@ -368,17 +408,21 @@ export function EstudanteDashboard() {
   // Handler to Submit Exam with Automatic Correction
   const handleFinishExam = async () => {
     if (!activeExam || submittingExam) return;
+    if (activeExam.questoes.length === 0 || activeExam.questoes.some(question => !Number.isFinite(question.valorPeso) || question.valorPeso <= 0 || question.opcoes.filter(option => option.isCorreta).length !== 1)) {
+      setExamSaveError('Esta prova está com questões ou pontuação inválidas. Avise seu professor para corrigir a configuração antes da entrega.');
+      return;
+    }
     setSubmittingExam(true);
 
     let totalScore = 0;
-    const maxScore = activeExam.questoes.reduce((sum, q) => sum + (q.valorPeso || 1), 0);
+    const maxScore = activeExam.questoes.reduce((sum, q) => sum + q.valorPeso, 0);
     const answersList: ExamAnswer[] = [];
 
     activeExam.questoes.forEach((q, idx) => {
       const selectedOption = examAnswers[idx];
       const correctOptionIndex = q.opcoes.findIndex(o => o.isCorreta);
       const isCorrect = selectedOption !== undefined && selectedOption === correctOptionIndex;
-      const points = isCorrect ? (q.valorPeso || 1) : 0;
+      const points = isCorrect ? q.valorPeso : 0;
       totalScore += points;
 
       answersList.push({
@@ -389,10 +433,10 @@ export function EstudanteDashboard() {
       });
     });
 
-    const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
+    const percentage = examAttemptPercentage({ pontuacaoObtida: totalScore, pontuacaoMaxima: maxScore }) ?? 0;
     const classificacao = percentage >= 85 ? 'Excelente' : percentage >= 70 ? 'Bom' : percentage >= 50 ? 'Regular' : 'Insuficiente';
 
-    const attempt: Omit<ExamAttempt, 'id'> = {
+    const attempt: Omit<ExamAttempt, 'id'> = frozenExamAttempt.current ?? {
       examId: activeExam.id!,
       examTitle: activeExam.titulo,
       turmaId: activeExam.turmaId || selectedClassId || 'geral',
@@ -403,21 +447,23 @@ export function EstudanteDashboard() {
       porcentagemAproveitamento: percentage,
       classificacao,
       respostas: answersList,
-      dataEnvio: new Date().toISOString()
+      dataEnvio: new Date().toISOString(),
+      evidence: examCapture.current.evidence('exam', { stage: 'assessment', subject: activeExam.disciplina, questions: activeExam.questoes.map((question, index) => ({ questionId: `${activeExam.id}-q${index + 1}`, question: question.enunciado, selectedOption: examAnswers[index] ?? null, selectedText: question.opcoes[examAnswers[index]]?.texto, expectedText: question.opcoes.find(option => option.isCorreta)?.texto, explanation: question.justificativa, correct: answersList[index].acertou, topic: question.tema })) }),
     };
+    frozenExamAttempt.current = attempt;
+    setExamSaveError('');
 
     try {
-      const saved = await saveExamAttempt(attempt);
+      const delivery = await offlineSyncService.deliver({ kind: 'exam', studentId: studentUid, examAttempt: attempt, rewardId: `exam:${activeExam.id}` });
+      const saved: ExamAttempt = { ...attempt, id: learningDocumentId(studentUid, attempt.evidence!.sessionId, `exam-${attempt.turmaId}`) };
+      setExamPending(delivery.queued);
       setExamResult(saved);
       setStudentAttempts(prev => [saved, ...prev]);
-
-      // Award XP & Coins for completing formal exam
-      await handleActivitySubmit({ id: activeExam.id, title: activeExam.titulo }, percentage);
-
-      setShowConfetti(true);
+      setShowConfetti(!delivery.queued);
       SoundEffects.playLevelUp();
     } catch (err) {
       console.error('Erro ao submeter prova:', err);
+      setExamSaveError('Não foi possível guardar a prova. Suas respostas continuam aqui; tente entregar novamente antes de sair.');
     } finally {
       setSubmittingExam(false);
     }
@@ -510,6 +556,7 @@ export function EstudanteDashboard() {
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--border-color)' }}>
         {[
           { id: 'labs', label: '🔬 Laboratórios por Nível', icon: Beaker },
+          { id: 'activities', label: '📋 Atividades da Turma', icon: BookOpen, count: classActivities.length },
           {
             id: 'exams',
             label: '📝 Provas & Avaliações',
@@ -701,6 +748,8 @@ export function EstudanteDashboard() {
       {/* ── INTERACTIVE LAB RUNNER VIEW ── */}
       {labSaving && <p role="status">Salvando progresso do laboratório…</p>}
       {labSaveError && <div role="alert">Não foi possível salvar seu progresso. Suas respostas continuam disponíveis. <button type="button" onClick={retryLabCompletion} disabled={labSaving}>Tentar salvar progresso</button></div>}
+      {labPending && <p role="status">Tentativa guardada neste dispositivo, aguardando confirmação de envio. Reconecte com este mesmo perfil para concluir a entrega.</p>}
+      {examSaveError && activeTab === 'exams' && <p role="alert">{examSaveError}</p>}
       {activeTab === 'labs' && activeLab && (
         <div className="fade-in">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
@@ -725,28 +774,40 @@ export function EstudanteDashboard() {
               academicLevel={getLearningLab(activeLab.id)?.academicLevel}
               objective="Compare os casos e use as evidências para justificar suas respostas."
               content={getLabLearningContent(activeLab.id)}
-              onComplete={async ({ score }) => {
-                if (await handleLabComplete({ id: activeLab.id, title: activeLab.title }, score * 10)) {
+              onComplete={async ({ score, evidence }) => {
+                const result = await handleLabComplete({ id: activeLab.id, title: activeLab.title, ...(searchParams.get('lessonPlan') ? { classId: selectedClassId ?? undefined, lessonPlanId: searchParams.get('lessonPlan')! } : {}) }, score, evidence);
+                if (result) {
                   setShowConfetti(true);
                   SoundEffects.playSuccess();
                 }
+                return result;
               }}
             >
             <activeLab.component
               {...activeLab.props}
               labTitle={activeLab.title}
               labId={activeLab.id}
-              onComplete={async (score: number) => {
-                if (await handleLabComplete({ id: activeLab.id, title: activeLab.title }, score)) {
-                  setShowConfetti(true);
-                  SoundEffects.playSuccess();
-                }
+              onComplete={async () => {
+                return handleLabComplete({ id: activeLab.id, title: activeLab.title, ...(searchParams.get('lessonPlan') ? { classId: selectedClassId ?? undefined, lessonPlanId: searchParams.get('lessonPlan')! } : {}) }, 0, legacyCapture.current.evidence('lab', { labId: activeLab.id, subject: getLearningLab(activeLab.id)?.subject, stage: 'exploration' }));
               }}
             />
             </LabLearningWorkspace>
           </div>
         </div>
       )}
+
+      {activeTab === 'activities' && <section className="fade-in" aria-labelledby="class-activities-title">
+        <h2 id="class-activities-title">Atividades da Turma</h2>
+        {activitiesError && <p role="alert">{activitiesError}</p>}
+        {activityHistoryError && <p role="alert">{activityHistoryError}</p>}
+        {!selectedClassId ? <p>Entre em uma turma com o código fornecido pelo professor para receber atividades.</p> : !activitiesError && classActivities.length === 0 ? <p>O professor ainda não publicou atividades para esta turma.</p> : null}
+        {activityHistoryLoading ? <p role="status">Carregando suas entregas…</p> : <div style={{ display: 'grid', gap: '1rem' }}>{classActivities.map(activity => {
+          let queuedSubmission: SubmissionData | undefined;
+          try { const pending = offlineSyncService.getPendingSubmissions(studentUid).find(item => item.kind === 'submission' && item.submission.classId === selectedClassId && item.submission.activityId === activity.id); if (pending?.kind === 'submission') queuedSubmission = { ...pending.submission, id: pending.id }; } catch { /* Global delivery badge reports an unreadable queue. */ }
+          const previous = queuedSubmission ?? activityHistory.find(entry => entry.activityId === activity.id);
+          return <StudentClassActivity key={`${selectedClassId}-${activity.id}`} activity={activity} studentId={studentUid} onSubmit={handleActivitySubmit} previousSubmission={previous} previousQueued={Boolean(queuedSubmission)} />;
+        })}</div>}
+      </section>}
 
       {/* ── TAB 2: PROVAS & AVALIAÇÕES FORMAIS (ESTILO EDU-INTERACT-V2) ── */}
       {activeTab === 'exams' && !activeExam && (
@@ -909,9 +970,8 @@ export function EstudanteDashboard() {
                     {activeExam.questoes[examCurrentQIndex].opcoes.map((opt, oIdx) => {
                       const isSelected = examAnswers[examCurrentQIndex] === oIdx;
                       return (
-                        <div
+                        <label
                           key={oIdx}
-                          onClick={() => setExamAnswers(prev => ({ ...prev, [examCurrentQIndex]: oIdx }))}
                           style={{
                             padding: '0.85rem 1rem',
                             borderRadius: 'var(--radius-sm, 10px)',
@@ -928,13 +988,14 @@ export function EstudanteDashboard() {
                             type="radio"
                             name={`exam_runner_q_${examCurrentQIndex}`}
                             checked={isSelected}
-                            onChange={() => {}}
+                            onChange={() => setExamAnswers(prev => ({ ...prev, [examCurrentQIndex]: oIdx }))}
+                            disabled={submittingExam || Boolean(frozenExamAttempt.current)}
                             style={{ accentColor: 'var(--color-primary, #E4683F)', cursor: 'pointer' }}
                           />
                           <span style={{ color: isSelected ? 'var(--text-main)' : 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: isSelected ? 600 : 400 }}>
                             {opt.texto}
                           </span>
-                        </div>
+                        </label>
                       );
                     })}
                   </div>
@@ -978,7 +1039,7 @@ export function EstudanteDashboard() {
               <div style={{ textAlign: 'center', padding: '1.5rem 0 2rem' }}>
                 <span style={{ fontSize: '3rem' }}>🎉</span>
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.6rem', fontWeight: 800, margin: '0.5rem 0' }}>
-                  Prova Concluída com Sucesso!
+                  {examPending ? 'Prova guardada neste dispositivo' : 'Prova entregue'}
                 </h3>
                 <div style={{ fontSize: '2.5rem', fontWeight: 900, color: examResult.porcentagemAproveitamento >= 70 ? '#10b981' : '#f59e0b', margin: '0.5rem 0' }}>
                   {examResult.porcentagemAproveitamento}%
@@ -987,6 +1048,8 @@ export function EstudanteDashboard() {
                   Pontuação: <strong>{examResult.pontuacaoObtida} / {examResult.pontuacaoMaxima} pontos</strong> ({examResult.classificacao})
                 </div>
               </div>
+
+              {examPending && <p role="status">A entrega aguarda confirmação de envio. Reconecte com este mesmo perfil para enviá-la ao professor.</p>}
 
               {/* Gabarito Comentado com Justificativas Pedagógicas */}
               <h4 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
@@ -1067,7 +1130,7 @@ export function EstudanteDashboard() {
                       <button
                         onClick={() => {
                           const lab = getLearningLab(plan.laboratorioAssociadoId || '');
-                          if (lab) openLearningLab(lab, 'lesson_plans');
+                          if (lab) openLearningLab(lab, 'lesson_plans', plan);
                         }}
                         disabled={!getLearningLab(plan.laboratorioAssociadoId || '')}
                         className="btn-outline"

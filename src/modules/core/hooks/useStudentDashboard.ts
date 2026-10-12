@@ -8,14 +8,16 @@ import { useAuth } from '../contexts/AuthContext';
 import { SHOP_ITEMS } from '../constants/dashboardConstants';
 import { normalizeLearningLevel, type LearningLevel } from '../constants/learningLevels';
 import { searchLearningLabs, type LearningLab } from '../constants/learningCatalog';
-import { getAIRecommendation, processModuleCompletion, processItemPurchase } from '../services/studentService';
+import { getAIRecommendation, processItemPurchase } from '../services/studentService';
 import { getStudentProgress } from '../../data/repositories/studentRepository';
 import { getStudentClasses, enrollStudent } from '../../data/repositories/classRepository';
-import { saveSubmission } from '../../data/repositories/submissionRepository';
+import { offlineSyncService } from '../services/offlineSyncService';
+import type { LearningEvidence } from '../../data/learningAnalyticsTypes';
+import { ActiveLearningCapture } from '../../data/services/learningCapture';
 import type { Turma } from '../../data/repositories/classRepository';
 import { evaluateAchievements } from '../services/achievementService';
 import type { Achievement } from '../services/achievementService';
-import type { ProgressData } from '../../data/types';
+import type { ActivityData, ProgressData } from '../../data/types';
 import SoundEffects from '../services/soundEffects';
 import { useStudentLabCompletion } from './useStudentLabCompletion';
 import type { CompletedLearningLab } from '../services/studentLabService';
@@ -40,14 +42,16 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
   const prevProgressRef = useRef<ProgressData | null>(null);
   const [labSaveError, setLabSaveError] = useState(false);
   const [labSaving, setLabSaving] = useState(false);
-  const retryLabRef = useRef<{ lab: CompletedLearningLab; score: number } | null>(null);
+  const [labPending, setLabPending] = useState(false);
+  const retryLabRef = useRef<{ lab: CompletedLearningLab; score: number; evidence: LearningEvidence } | null>(null);
 
-  const handleLabComplete = useCallback(async (lab: CompletedLearningLab, score: number) => {
+  const handleLabComplete = useCallback(async (lab: CompletedLearningLab, score: number, evidence: LearningEvidence) => {
     setLabSaving(true);
     setLabSaveError(false);
     try {
-      const result = await completeLab(lab, score);
-      if (result) {
+      const result = await completeLab(lab, score, evidence);
+      setLabPending(result?.queued ?? false);
+      if (result?.progress) {
         setProgress({ level: result.progress.level, xp: result.progress.xp, coins: result.progress.coins });
         setCompletedModules(result.progress.completedModules);
         setPurchasedItems(result.progress.purchasedItems);
@@ -55,7 +59,7 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
       retryLabRef.current = null;
       return result !== null;
     } catch {
-      retryLabRef.current = { lab, score };
+      retryLabRef.current = { lab, score, evidence };
       setLabSaveError(true);
       return false;
     } finally {
@@ -65,7 +69,7 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
 
   const retryLabCompletion = useCallback(() => {
     const pending = retryLabRef.current;
-    if (pending) return handleLabComplete(pending.lab, pending.score);
+    if (pending) return handleLabComplete(pending.lab, pending.score, pending.evidence);
   }, [handleLabComplete]);
 
   // Full progress data for achievement evaluation
@@ -155,6 +159,23 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
     loadClasses();
   }, [uid]);
 
+  useEffect(() => {
+    if (!uid) return;
+    let cancelled = false;
+    const unsubscribe = offlineSyncService.subscribeStatus(() => {
+      try {
+        if (offlineSyncService.getPendingSubmissions(uid).length > 0) return;
+        setLabPending(false);
+        void getStudentProgress(uid).then(data => {
+          if (cancelled) return;
+          setProgress({ level: data.level, xp: data.xp, coins: data.coins });
+          setCompletedModules(data.completedModules ?? []);
+        }).catch(() => undefined);
+      } catch { /* The delivery UI keeps the queue error visible. */ }
+    });
+    return () => { cancelled = true; unsubscribe(); };
+  }, [uid]);
+
   // Busca recomendação da IA adaptativa
   useEffect(() => {
     if (loading) return;
@@ -176,40 +197,8 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
   const handleModuleComplete = useCallback(async (score: number) => {
     if (!uid || !activeSubject || !activeLab) return;
 
-    try {
-      const updated = await processModuleCompletion(
-        uid,
-        activeLab.id, // now tracking lab completion instead of generic subject
-        score,
-        progress.xp,
-        progress.level,
-        progress.coins
-      );
-      
-      // Criar submissão real para as turmas do aluno, para que o professor veja
-      const userName = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Aluno';
-      
-      // Enviar submissão para cada turma onde o aluno está matriculado
-      for (const turma of studentClasses) {
-        await saveSubmission({
-          activityId: activeLab.id,
-          activityTitle: activeLab.title,
-          classId: turma.id,
-          studentId: uid,
-          studentName: userName,
-          score,
-          submittedAt: new Date().toISOString(),
-          status: 'completed'
-        });
-      }
-
-      setProgress(updated);
-      setCompletedModules(prev => prev.includes(activeLab.id) ? prev : [...prev, activeLab.id]);
-      setActiveLab(null);
-    } catch (error) {
-      console.error('[useStudentDashboard] Erro ao completar módulo:', error);
-    }
-  }, [uid, activeSubject, activeLab, studentClasses, progress, currentUser]);
+    return handleLabComplete(activeLab, score, new ActiveLearningCapture().evidence('lab', { labId: activeLab.id, stage: 'exploration' }));
+  }, [uid, activeSubject, activeLab, handleLabComplete]);
 
   // Compra item na loja — salva no Firestore
   const buyItem = useCallback(async (itemId: string) => {
@@ -243,38 +232,23 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
   }, [uid]);
 
   // Submit custom teacher activity
-  const handleActivitySubmit = useCallback(async (activity: any, score: number, answers?: Record<string, unknown>) => {
-    if (!uid) return;
-    try {
-      const updated = await processModuleCompletion(
-        uid,
-        activity.id || 'custom_act',
-        score,
-        progress.xp,
-        progress.level,
-        progress.coins
-      );
+  const handleActivitySubmit = useCallback(async (activity: ActivityData, score: number, evidence: LearningEvidence) => {
+    if (!uid || !activity.id || !activity.classId || !studentClasses.some(item => item.id === activity.classId) || activity.status !== 'published') throw new Error('Atividade ou turma indisponível para este perfil.');
+    const assessed = Boolean(evidence.questions?.length);
+    const result = await offlineSyncService.deliver({
+      kind: 'submission', studentId: uid, ...(assessed ? { rewardId: `activity:${activity.id}` } : {}),
+      submission: { activityId: activity.id, activityTitle: activity.title, classId: activity.classId, studentId: uid, studentName: userData?.name ?? currentUser?.displayName ?? 'Estudante',
+        score, submittedAt: new Date().toISOString(), status: 'completed', evidence,
+        answers: { questions: evidence.questions ?? [], reflection: evidence.reflection ?? '' },
+      },
+    });
+    if (!result.queued) {
+      const updated = await getStudentProgress(uid);
       setProgress({ level: updated.level, xp: updated.xp, coins: updated.coins });
-      setCompletedModules(prev => prev.includes(activity.id || 'custom_act') ? prev : [...prev, activity.id || 'custom_act']);
-
-      const userName = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Aluno';
-      if (activity.classId) {
-        await saveSubmission({
-          activityId: activity.id || 'custom_act',
-          activityTitle: activity.title,
-          classId: activity.classId,
-          studentId: uid,
-          studentName: userName,
-          score,
-          answers,
-          submittedAt: new Date().toISOString(),
-          status: 'completed',
-        });
-      }
-    } catch (err) {
-      console.error('[useStudentDashboard] Erro ao submeter atividade personalizada:', err);
+      setCompletedModules(updated.completedModules);
     }
-  }, [uid, progress, currentUser]);
+    return result;
+  }, [uid, studentClasses, currentUser?.displayName, userData?.name]);
 
   return {
     progress,
@@ -286,7 +260,7 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
     modules,
     handleModuleComplete,
     handleActivitySubmit,
-    handleLabComplete, labSaveError, labSaving, retryLabCompletion,
+    handleLabComplete, labSaveError, labSaving, labPending, retryLabCompletion,
     buyItem,
     gradeLevel,
     loading,

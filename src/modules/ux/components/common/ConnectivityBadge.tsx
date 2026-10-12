@@ -1,19 +1,29 @@
 import { useState, useEffect } from 'react';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { offlineSyncService, type PendingOfflineSubmission } from '../../../core/services/offlineSyncService';
+import { useAuth } from '../../../core/contexts/AuthContext';
+import { db } from '../../../core/services/firebaseConfig';
 
 export function ConnectivityBadge() {
+  const { currentUser, userData } = useAuth();
+  const studentId = userData?.role === 'estudante' ? currentUser?.uid ?? null : null;
   const [isOnline, setIsOnline] = useState<boolean>(offlineSyncService.getIsOnline());
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [queueError, setQueueError] = useState(false);
+  const [legacyRecords, setLegacyRecords] = useState(false);
 
   const updatePendingCount = () => {
-    const list: PendingOfflineSubmission[] = offlineSyncService.getPendingSubmissions();
-    const count = list.filter(item => !item.synced).length;
-    setPendingCount(count);
+    try {
+      setLegacyRecords(offlineSyncService.hasLegacyUnassignedRecords());
+      const list: PendingOfflineSubmission[] = offlineSyncService.getPendingSubmissions(studentId);
+      setPendingCount(list.length);
+      setQueueError(list.some(item => Boolean(item.error)));
+    } catch { setQueueError(true); }
   };
 
   useEffect(() => {
+    offlineSyncService.setCurrentStudent(studentId);
     updatePendingCount();
 
     const unsubscribe = offlineSyncService.subscribeStatus((online) => {
@@ -27,7 +37,7 @@ export function ConnectivityBadge() {
       unsubscribe();
       clearInterval(interval);
     };
-  }, []);
+  }, [studentId]);
 
   const handleManualSync = async () => {
     if (isSyncing || !isOnline) return;
@@ -40,10 +50,10 @@ export function ConnectivityBadge() {
     }
   };
 
-  if (isOnline && pendingCount === 0) {
+  if (isOnline && pendingCount === 0 && !queueError && !legacyRecords) {
     return (
       <div
-        title="Conexão ativa com nuvem e sincronização em tempo real"
+        title={db ? 'Conexão de internet disponível. As entregas confirmam seu salvamento separadamente.' : 'Dados salvos neste navegador. O modo local não envia dados à nuvem.'}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -70,14 +80,14 @@ export function ConnectivityBadge() {
           }}
         />
         <Wifi style={{ width: '0.8rem', height: '0.8rem' }} />
-        <span className="desktop-nav">Online</span>
+        <span className="desktop-nav">{db ? 'Internet disponível' : 'Modo local'}</span>
       </div>
     );
   }
 
   return (
     <div
-      title={isOnline ? `${pendingCount} item(ns) na fila de sincronização` : 'Modo Offline: Seus dados estão salvos localmente e serão sincronizados ao reconectar'}
+      title={legacyRecords ? 'Há registros da versão anterior sem conta ou turma confirmadas. Eles foram preservados neste dispositivo e precisam de revisão antes de qualquer envio. As novas entregas usam a fila do perfil atual.' : queueError ? 'Entrega ainda não confirmada. Os itens na fila foram preservados; tente enviar novamente.' : isOnline ? `${pendingCount} entrega(s) aguardando confirmação` : `${pendingCount} entrega(s) guardadas neste dispositivo. A fila será enviada ao reconectar com seu perfil.`}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -99,7 +109,7 @@ export function ConnectivityBadge() {
       )}
       
       <span>
-        {isOnline ? `Sincronizando (${pendingCount})` : `Offline (${pendingCount})`}
+        {legacyRecords && pendingCount === 0 ? 'Registros antigos para revisão' : queueError ? `Envio pendente (${pendingCount})` : isOnline ? `Aguardando envio (${pendingCount})` : `Sem internet (${pendingCount})`}
       </span>
 
       {isOnline && pendingCount > 0 && (
@@ -115,7 +125,8 @@ export function ConnectivityBadge() {
             alignItems: 'center',
             color: 'inherit'
           }}
-          title="Forçar sincronização imediata"
+          title="Tentar enviar entregas pendentes"
+          aria-label="Tentar enviar entregas pendentes"
         >
           <RefreshCw
             style={{

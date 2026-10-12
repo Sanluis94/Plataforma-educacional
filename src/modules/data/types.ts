@@ -82,6 +82,7 @@ export interface SubmissionData {
   answers?: Record<string, unknown>;
   submittedAt: string;
   status: 'completed' | 'pending';
+  evidence?: import('./learningAnalyticsTypes').LearningEvidence;
 }
 
 // ─── Coleção: progress ────────────────────────────────────────
@@ -161,6 +162,7 @@ export interface ExamAttempt {
   classificacao: 'Insuficiente' | 'Regular' | 'Bom' | 'Excelente';
   respostas: ExamAnswer[];
   dataEnvio: string;
+  evidence?: import('./learningAnalyticsTypes').LearningEvidence;
 }
 
 // ─── Coleção: lesson_plans (Plano de Aulas e Cronograma Bimestral/Semestral) ───
@@ -267,14 +269,18 @@ export interface GradebookWeights {
 export interface StudentGradeReport {
   studentId: string;
   studentName: string;
-  notaProvas: number; // 0 a 10
-  notaLabs: number; // 0 a 10
-  notaAtividades: number; // 0 a 10
-  notaParticipacao: number; // 0 a 10
-  mediaFinal: number; // 0 a 10
-  situacao: 'Aprovado' | 'Recuperação' | 'Insuficiente';
-  frequenciaPercentual: number; // 0 a 100%
+  notaProvas: number | null; // 0 a 10; null = sem evidência avaliada
+  notaLabs: number | null;
+  notaAtividades: number | null;
+  notaParticipacao: number | null; // Nota declarada pelo professor, não inferida de acesso
+  mediaFinal: number | null;
+  situacao: 'Aprovado' | 'Recuperação' | 'Insuficiente' | 'Sem dados' | 'Incompleto';
+  frequenciaPercentual: number | null; // null = nenhuma chamada registrada
   alertaFrequencia: boolean; // true se < 75%
+  missingCategories: string[];
+  coveragePercent: number;
+  notaP1?: number | null;
+  notaP2?: number | null;
 }
 
 // ─── Certificados Digitais de Conclusão ────────────────────────────

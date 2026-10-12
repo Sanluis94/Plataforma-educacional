@@ -6,6 +6,9 @@ import {
   loadDotEnv,
   parseArgs,
   resolveRepoPath,
+  validateOutputDirectory,
+  defaultSource,
+  publicSeedOutputDir,
 } from './config.mjs';
 
 await loadDotEnv();
@@ -13,10 +16,21 @@ await loadDotEnv();
 const args = parseArgs(process.argv.slice(2));
 const host = args.host ?? process.env.ETL_API_HOST ?? '127.0.0.1';
 const port = Number(args.port ?? process.env.ETL_API_PORT ?? 3333);
-const outputDir = resolveRepoPath(args.output ?? process.env.ETL_OUTPUT_DIR ?? defaultOutputDir);
+if (!['127.0.0.1', 'localhost', '::1'].includes(host)) throw new Error('A API de exportações privadas deve permanecer no loopback local.');
+if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Porta ETL inválida.');
+const outputDir = await validateOutputDirectory(resolveRepoPath(args.output ?? (args['public-seed'] === 'true' ? publicSeedOutputDir : process.env.ETL_OUTPUT_DIR ?? defaultOutputDir)), { source: defaultSource, publicSeed: args['public-seed'] === 'true' });
 
 const server = createServer(async (request, response) => {
   try {
+    const requestHost = new URL(`http://${request.headers.host ?? 'invalid'}`).hostname;
+    const origin = request.headers.origin;
+    const localOrigin = origin ? new URL(origin) : null;
+    if (!['127.0.0.1', 'localhost', '[::1]'].includes(requestHost) || (localOrigin && (!['127.0.0.1', 'localhost', '[::1]'].includes(localOrigin.hostname) || !['http:', 'https:'].includes(localOrigin.protocol)))) {
+      sendJson(response, 403, { error: 'Exportações ETL disponíveis apenas no ambiente local.' });
+      return;
+    }
+    if (origin) response.setHeader('access-control-allow-origin', origin);
+    response.setHeader('vary', 'Origin');
     if (request.method !== 'GET') {
       sendJson(response, 405, { error: 'Method not allowed' });
       return;
@@ -57,6 +71,11 @@ const server = createServer(async (request, response) => {
       return;
     }
 
+    if (pathname === '/quality') {
+      sendJson(response, 200, (await readSnapshot()).quality);
+      return;
+    }
+
     const entityMatch = pathname.match(/^\/(users|classes|activities|progress)\/([^/]+)$/);
     if (entityMatch) {
       await handleEntity(response, entityMatch[1], decodeURIComponent(entityMatch[2]));
@@ -78,9 +97,9 @@ const server = createServer(async (request, response) => {
       ],
     });
   } catch (error) {
-    const statusCode = error.code === 'ENOENT' ? 503 : 500;
+    const statusCode = error.code === 'ENOENT' ? 503 : error.code === 'NOT_FOUND' ? 404 : 500;
     sendJson(response, statusCode, {
-      error: error.message,
+      error: statusCode === 503 ? 'Exportação ETL ausente.' : 'Não foi possível ler a exportação ETL.',
       hint: statusCode === 503 ? 'Run npm run etl before starting or querying the local ETL API.' : undefined,
     });
   }
@@ -155,12 +174,17 @@ async function readSnapshot() {
 
 async function readCollection(name) {
   ensureSafeSegment(name);
-  return readOutputJson(`collections/${name}.json`);
+  const snapshot = await readSnapshot();
+  if (!Object.hasOwn(snapshot.collections, name)) throw Object.assign(new Error('Coleção desconhecida.'), { code: 'NOT_FOUND' });
+  return snapshot.collections[name];
 }
 
 async function readMetric(name) {
   ensureSafeSegment(name);
-  return readOutputJson(`metrics/${name}.json`);
+  const snapshot = await readSnapshot();
+  const key = Object.keys(snapshot.metrics).find(key => key.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`) === name);
+  if (!key) throw Object.assign(new Error('Métrica desconhecida.'), { code: 'NOT_FOUND' });
+  return snapshot.metrics[key];
 }
 
 async function readOutputJson(relativePath) {
@@ -183,8 +207,8 @@ function sendJson(response, statusCode, payload) {
   const body = JSON.stringify(payload, null, 2);
 
   response.writeHead(statusCode, {
-    'access-control-allow-origin': '*',
     'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store',
     'content-length': Buffer.byteLength(body),
   });
   response.end(body);

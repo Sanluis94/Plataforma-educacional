@@ -6,12 +6,14 @@ import {
 import type {
   AttendanceRecord,
   ForumTopic,
-  DigitalCertificate
+  DigitalCertificate,
+  SubmissionData, ExamAttempt, ActivityData
 } from '../../data/types';
 import {
   getAttendanceByClass,
   calculateStudentAttendanceRate,
-  calculateStudentGrade,
+  calculateClassGradebook,
+  DEFAULT_WEIGHTS,
   subscribeForumTopicsByClass,
   saveForumTopic,
   addForumReply
@@ -21,6 +23,10 @@ import {
   issueCertificate,
   verifyCertificate
 } from '../../core/services/certificateService';
+import { getSubmissionsByStudentInClass } from '../../data/repositories/submissionRepository';
+import { getExamAttemptsByStudent } from '../../data/repositories/examRepository';
+import { getActivitiesByClass } from '../../data/repositories/activityRepository';
+const gradeLabel = (score: number | null) => score === null ? 'Sem dados' : score.toFixed(1);
 
 interface StudentLmsModulesProps {
   studentId: string;
@@ -41,27 +47,43 @@ export function StudentLmsModules({
   // 1. DADOS DE FREQUÊNCIA & BOLETIM ESCOLAR
   // ─────────────────────────────────────────────────────────────
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
+  const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
+  const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
+  const [activities, setActivities] = useState<ActivityData[]>([]);
+  const [gradeLoading, setGradeLoading] = useState(false);
+  const [gradeError, setGradeError] = useState<string | null>(null);
 
   useEffect(() => {
+    let alive = true;
+    setAttendanceRecords([]);
+    setSubmissions([]);
+    setExamAttempts([]);
+    setActivities([]);
+    setGradeError(null);
     if (!selectedClassId) return;
+    setGradeLoading(true);
     const fetchAtt = async () => {
-      const recs = await getAttendanceByClass(selectedClassId);
-      setAttendanceRecords(recs);
+      try {
+        const [recs, subs, attempts, classActivities] = await Promise.all([getAttendanceByClass(selectedClassId), getSubmissionsByStudentInClass(studentId, selectedClassId), getExamAttemptsByStudent(studentId), getActivitiesByClass(selectedClassId)]);
+        if (!alive) return;
+        setAttendanceRecords(recs);
+        setSubmissions(subs);
+        setExamAttempts(attempts);
+        setActivities(classActivities);
+      } catch {
+        if (alive) setGradeError('Não foi possível carregar suas avaliações. Recarregue a página para tentar novamente.');
+      } finally {
+        if (alive) setGradeLoading(false);
+      }
     };
-    fetchAtt();
-  }, [selectedClassId]);
+    void fetchAtt();
+    return () => { alive = false; };
+  }, [selectedClassId, studentId]);
 
   const attStats = calculateStudentAttendanceRate(studentId, attendanceRecords);
 
-  // Notas do aluno (calculadas a partir de provas, labs e atividades concluídas)
-  const studentScores = {
-    notaProvas: 8.5,
-    notaLabs: 9.2,
-    notaAtividades: 8.0,
-    notaParticipacao: 10.0
-  };
-
-  const finalGrade = calculateStudentGrade(studentScores);
+  const finalGrade = calculateClassGradebook([{ id: studentId, name: studentName }], selectedClassId ?? '', submissions, examAttempts, DEFAULT_WEIGHTS, { attendanceRecords, activities })[0];
+  const studentScores = finalGrade;
 
   // ─────────────────────────────────────────────────────────────
   // 2. FÓRUM PEDAGÓGICO DA TURMA
@@ -156,12 +178,7 @@ export function StudentLmsModules({
   const [validateResult, setValidateResult] = useState<{ cert: DigitalCertificate | null; searched: boolean }>({ cert: null, searched: false });
 
   const loadCertificates = () => {
-    let certs = getStudentCertificates(studentId);
-    // Se o estudante ainda não tem nenhum certificado gerado, emite um inicial de boas-vindas
-    if (certs.length === 0) {
-      const initial = issueCertificate(studentId, studentName, 'Ciências da Natureza & Laboratórios Virtuais', 40);
-      certs = [initial];
-    }
+    const certs = getStudentCertificates(studentId);
     setMyCertificates(certs);
   };
 
@@ -192,7 +209,7 @@ export function StudentLmsModules({
         ].map(tab => (
           <button
             key={tab.id}
-            onClick={() => onViewChange(tab.id as any)}
+            onClick={() => onViewChange(tab.id as typeof activeView)}
             style={{
               padding: '0.6rem 1.15rem',
               borderRadius: 'var(--radius-sm, 10px)',
@@ -220,17 +237,19 @@ export function StudentLmsModules({
           ───────────────────────────────────────────────────────────── */}
       {activeView === 'gradebook' && (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {gradeLoading && <p role="status">Carregando suas entregas e avaliações…</p>}
+          {gradeError && <p role="alert">{gradeError}</p>}
           {/* Card de Frequência Escolar e Indicador LDB */}
           <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem', border: attStats.alertaLDB ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(16,185,129,0.3)' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                 <Calendar style={{ color: 'var(--color-secondary, #293E24)', width: '1.25rem', height: '1.25rem' }} />
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 800, margin: 0 }}>
-                  Assiduidade escolar (controle de faltas LDB)
+                  Frequência registrada na turma
                 </h3>
               </div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
-                A Lei de Diretrizes e Bases da Educação (LDB 9.394/96) exige no mínimo 75% de frequência para aprovação.
+                Esta taxa considera as chamadas registradas pelo professor. Sem chamadas, a frequência permanece sem dados.
               </p>
             </div>
 
@@ -238,11 +257,11 @@ export function StudentLmsModules({
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{attStats.presencas} presenças / {attStats.faltas} faltas</div>
                 <div style={{ fontSize: '1.75rem', fontWeight: 900, color: attStats.alertaLDB ? '#ef4444' : '#10b981' }}>
-                  {attStats.taxaPercentual}%
+                  {attStats.taxaPercentual === null ? 'Sem chamada' : `${attStats.taxaPercentual}%`}
                 </div>
               </div>
               <div>
-                {attStats.alertaLDB ? (
+                {attStats.taxaPercentual === null ? <span>Sem evidência de frequência</span> : attStats.alertaLDB ? (
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.35rem 0.75rem', borderRadius: '8px', background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '0.8rem', fontWeight: 800 }}>
                     <AlertTriangle style={{ width: '0.9rem', height: '0.9rem' }} />
                     Alerta de Faltas
@@ -264,12 +283,12 @@ export function StudentLmsModules({
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 800, margin: 0 }}>
                   Boletim de Avaliação Contínua
                 </h3>
-                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Composição ponderada das notas bimestrais</span>
+                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Panorama das entregas reais no modelo 40/30/20/10. Não substitui o boletim oficial da instituição.</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0,0,0,0.3)', padding: '0.5rem 1rem', borderRadius: '8px' }}>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Média Final:</span>
-                <span style={{ fontSize: '1.35rem', fontWeight: 900, color: finalGrade.mediaFinal >= 6.0 ? '#10b981' : '#ef4444' }}>
-                  {finalGrade.mediaFinal.toFixed(1)}
+                <span style={{ fontSize: '1.35rem', fontWeight: 900, color: finalGrade.mediaFinal === null ? 'var(--text-muted)' : finalGrade.mediaFinal >= 6.0 ? '#10b981' : '#ef4444' }}>
+                  {finalGrade.mediaFinal === null ? 'Sem média' : finalGrade.mediaFinal.toFixed(1)}
                 </span>
                 <span style={{ padding: '0.15rem 0.5rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800, background: finalGrade.situacao === 'Aprovado' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)', color: finalGrade.situacao === 'Aprovado' ? '#10b981' : '#ef4444' }}>
                   {finalGrade.situacao}
@@ -281,7 +300,7 @@ export function StudentLmsModules({
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(184,68,31,0.05)', border: '1px solid rgba(184,68,31,0.2)' }}>
                 <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>📝 Provas formais (40%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
-                  {studentScores.notaProvas.toFixed(1)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ 10</span>
+                  {gradeLabel(studentScores.notaProvas)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaProvas === null ? '' : '/ 10'}</span>
                 </div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Avaliações com gabarito e tempo limitado</span>
               </div>
@@ -289,7 +308,7 @@ export function StudentLmsModules({
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(41,62,36,0.06)', border: '1px solid var(--border-color, #E2D7C3)' }}>
                 <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>🔬 Laboratórios interativos (30%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
-                  {studentScores.notaLabs.toFixed(1)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ 10</span>
+                  {gradeLabel(studentScores.notaLabs)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaLabs === null ? '' : '/ 10'}</span>
                 </div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Simulações práticas e relatórios concluídos</span>
               </div>
@@ -297,7 +316,7 @@ export function StudentLmsModules({
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(41,62,36,0.04)', border: '1px solid var(--border-color, #E2D7C3)' }}>
                 <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>📄 Atividades práticas (20%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
-                  {studentScores.notaAtividades.toFixed(1)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ 10</span>
+                  {gradeLabel(studentScores.notaAtividades)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaAtividades === null ? '' : '/ 10'}</span>
                 </div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Exercícios e questionários de fixação</span>
               </div>
@@ -305,11 +324,12 @@ export function StudentLmsModules({
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(228,104,63,0.06)', border: '1px solid rgba(228,104,63,0.25)' }}>
                 <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>💬 Participação & fórum (10%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
-                  {studentScores.notaParticipacao.toFixed(1)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ 10</span>
+                  {gradeLabel(studentScores.notaParticipacao)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaParticipacao === null ? '' : '/ 10'}</span>
                 </div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Colaboração em dúvidas e respostas da turma</span>
               </div>
             </div>
+            {finalGrade.missingCategories.length > 0 && <p style={{ color: 'var(--text-secondary)' }}>A média está incompleta. Categorias sem evidência: {finalGrade.missingCategories.join(', ')}. A nota de participação depende de avaliação declarada pelo professor.</p>}
           </div>
         </div>
       )}

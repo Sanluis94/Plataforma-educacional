@@ -6,11 +6,10 @@ import type { StudentContext } from '../../data/services/aiAdaptiveEngine';
 import { getAdaptiveRecommendation } from '../../data/services/aiAdaptiveEngine';
 import {
   saveStudentProgress,
-  addCompletedModule,
   addPurchasedItem,
+  completeStudentLabProgress,
 } from '../../data/repositories/studentRepository';
 import { writeLog } from '../../data/repositories/logRepository';
-import { calculateModuleRewards } from './studentProgressRewards';
 
 /**
  * Solicita recomendação adaptativa da IA (Gemini).
@@ -27,25 +26,19 @@ export const processModuleCompletion = async (
   uid: string,
   moduleId: string,
   score: number,
-  currentXP: number,
-  currentLevel: number,
-  currentCoins: number
+  _currentXP: number,
+  _currentLevel: number,
+  _currentCoins: number
 ) => {
-  const { xp, level, coins, earnedXP, earnedCoins } = calculateModuleRewards(score, currentXP, currentLevel, currentCoins);
-  const updatedProgress = { xp, level, coins };
-
-  // Persistir no Firestore
-  await saveStudentProgress(uid, updatedProgress);
-  await addCompletedModule(uid, moduleId);
-
-  // Log do sistema
-  await writeLog(
-    'activity',
-    `Módulo completado: "${moduleId}" — Score: ${score}, +${earnedXP} XP, +${earnedCoins} moedas`,
-    uid
-  );
-
-  return updatedProgress;
+  // Legacy callers still pass a screen snapshot; the transaction uses stored
+  // progress so retries and simultaneous deliveries cannot overwrite it.
+  void _currentXP;
+  void _currentLevel;
+  void _currentCoins;
+  const completion = await completeStudentLabProgress(uid, moduleId, score);
+  if (!completion.alreadyCompleted) await writeLog('activity', `Módulo completado: "${moduleId}" — Score: ${score}`, uid);
+  const { xp, level, coins } = completion.progress;
+  return { xp, level, coins };
 };
 
 /**

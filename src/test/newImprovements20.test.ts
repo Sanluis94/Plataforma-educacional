@@ -205,39 +205,37 @@ describe('20 Strategic Improvements Suite - Kortex Super LMS', () => {
 
   describe('5. Offline Sync Outbox Queue Service', () => {
     beforeEach(() => {
-      offlineSyncService.clearQueue();
+      localStorage.removeItem('kortex_offline_outbox_v2');
+      offlineSyncService.setCurrentStudent('std-10');
       offlineSyncService.setOnline(false); // Inicia modo offline para enfileiramento
     });
 
     it('should enqueue submissions and report queue length', () => {
       const item = {
         studentId: 'std-10',
-        labId: 'sup_fis_01',
-        timestamp: new Date().toISOString(),
-        parameters: { angle: 45 },
-        telemetry: { period: 2.1 }
+        kind: 'submission' as const,
+        submission: { activityId: 'sup_fis_01', activityTitle: 'Física', classId: '', studentId: 'std-10', studentName: 'Fictício', score: 100, submittedAt: new Date().toISOString(), status: 'completed' as const, evidence: { schemaVersion: 1 as const, source: 'lab' as const, sessionId: 'offline-1' } },
       };
 
       offlineSyncService.enqueueSubmission(item);
       const queue = offlineSyncService.getPendingSubmissions();
       expect(queue.length).toBe(1);
-      expect(queue[0].labId).toBe('sup_fis_01');
+      expect(queue[0].kind === 'submission' && queue[0].submission.activityId).toBe('sup_fis_01');
     });
 
-    it('should process queue when online', async () => {
+    it('keeps another account’s queue when the current account reconnects', async () => {
       offlineSyncService.enqueueSubmission({
         studentId: 'std-20',
-        labId: 'sup_calc_01',
-        timestamp: new Date().toISOString(),
-        parameters: { n: 100 },
-        telemetry: { area: 3.1415 }
+        kind: 'submission',
+        submission: { activityId: 'sup_calc_01', activityTitle: 'Cálculo', classId: '', studentId: 'std-20', studentName: 'Fictício', score: 100, submittedAt: new Date().toISOString(), status: 'completed', evidence: { schemaVersion: 1, source: 'lab', sessionId: 'offline-2' } },
       });
 
-      expect(offlineSyncService.getPendingSubmissions().length).toBe(1);
+      expect(offlineSyncService.getPendingSubmissions('std-20').length).toBe(1);
 
       // Reconexão à internet aciona o auto-sync do outbox
       offlineSyncService.setOnline(true);
-      expect(offlineSyncService.getPendingSubmissions().length).toBe(0);
+      await offlineSyncService.syncOutbox();
+      expect(offlineSyncService.getPendingSubmissions('std-20').length).toBe(1);
     });
   });
 

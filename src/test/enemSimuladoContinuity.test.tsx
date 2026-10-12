@@ -1,12 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { EnemSimuladoView } from '../modules/ux/pages/EnemSimuladoView';
 import { BANCO_ITENS_ENEM_PADRAO, processarSimuladoEnemTRI } from '../modules/data/services/triCalculationService';
 import { createEnemAttempt, ENEM_DURATION_SECONDS, enemAttemptStorageKey, readEnemAttempt } from '../modules/data/services/enemAttemptSession';
 
 const auth = vi.hoisted(() => ({ currentUser: { uid: 'student-a' }, userData: { role: 'estudante', name: 'Nome privado', email: 'email-privado@example.test' } }));
+const delivery = vi.hoisted(() => vi.fn());
 vi.mock('../modules/core/contexts/AuthContext', () => ({ useAuth: () => auth }));
+vi.mock('../modules/data/repositories/classRepository', () => ({ getStudentClasses: vi.fn().mockResolvedValue([{ id: 'class-a', name: 'Turma fictícia A' }]) }));
+vi.mock('../modules/core/services/enemLearningDelivery', () => ({ deliverEnemLearning: delivery }));
 const items = BANCO_ITENS_ENEM_PADRAO;
 const now = new Date('2026-10-11T12:00:00Z').getTime();
 const key = enemAttemptStorageKey('student-a');
@@ -22,6 +25,8 @@ function savedAttempt() { return JSON.parse(sessionStorage.getItem(key)!); }
 
 beforeEach(() => {
   sessionStorage.clear();
+  localStorage.clear();
+  delivery.mockReset().mockResolvedValue({ queued: false });
   auth.currentUser.uid = 'student-a';
   auth.userData.role = 'estudante';
   vi.useFakeTimers();
@@ -131,7 +136,7 @@ describe('Continuidade e precisão do treino ENEM', () => {
     vi.setSystemTime(now + ENEM_DURATION_SECONDS * 1000 - 1000);
     act(() => vi.advanceTimersByTime(1000));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent('O tempo terminou');
+    expect(screen.getByText('O tempo terminou. Entregamos as respostas que você marcou.')).toBeInTheDocument();
     expect(savedAttempt()).toMatchObject({ completionReason: 'expired', result: { acertosBrutos: 2 } });
     expect(screen.queryByRole('radio')).not.toBeInTheDocument();
   });
@@ -201,5 +206,34 @@ describe('Continuidade e precisão do treino ENEM', () => {
     expect(readEnemAttempt('student-a')).toMatchObject({ status: 'active', currentIndex: items.length - 1, answers: { [items[0].id]: 0 } });
     sessionStorage.setItem(key, JSON.stringify({ ...attempt, itemIds: ['other-bank'] }));
     expect(readEnemAttempt('student-a').status).toBe('ready');
+  });
+
+  it('guarda resultado pessoal e só compartilha com turma após escolha e clique', async () => {
+    vi.useRealTimers();
+    render(page()); start(); chooseAnswer(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Finalizar simulado' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Entregar mesmo assim' }));
+    await waitFor(() => expect(screen.getByText('Resultado salvo no seu histórico pessoal.')).toBeInTheDocument());
+    expect(delivery).toHaveBeenCalledTimes(1);
+    expect(delivery.mock.calls[0][3]).toBeUndefined();
+    const selection = screen.getByRole('combobox', { name: 'Turma para compartilhar' });
+    expect(selection).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Compartilhar resultado com professor' })).toBeDisabled();
+    fireEvent.change(selection, { target: { value: 'class-a' } });
+    expect(delivery).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Compartilhar resultado com professor' }));
+    await waitFor(() => expect(screen.getByText('Resultado compartilhado com o professor da turma escolhida.')).toBeInTheDocument());
+    expect(delivery.mock.calls[1][3]).toBe('class-a');
+  });
+
+  it('conserva tempo medido ao voltar e não converte o prazo decorrido em tempo ativo', () => {
+    vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+    const view = render(page()); start();
+    act(() => vi.advanceTimersByTime(15_000));
+    expect(savedAttempt().activeSeconds).toBe(15);
+    view.unmount(); vi.setSystemTime(now + 120_000); render(page());
+    expect(savedAttempt().activeSeconds).toBe(15);
+    act(() => vi.advanceTimersByTime(5000));
+    expect(savedAttempt().activeSeconds).toBe(20);
   });
 });

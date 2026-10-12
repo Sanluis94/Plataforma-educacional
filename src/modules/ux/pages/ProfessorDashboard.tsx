@@ -2,9 +2,6 @@ import { useNavigationParams } from '../hooks/useNavigationParams';
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-} from 'recharts';
-import {
   PlusCircle, Users, BookOpen, BarChart as BarChartIcon,
   Award, Download, MessageCircle, Send, Sparkles, Key, CheckCircle,
   AlertTriangle, Layers, RefreshCw, Plus, Trash2,
@@ -15,8 +12,9 @@ import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
 import { LEARNING_LABS_CATALOG, getLearningLab, searchLearningLabs } from '../../core/constants/learningCatalog';
 import { LEARNING_LEVELS, normalizeLearningLevel, learningLevelLabel } from '../../core/constants/learningLevels';
-import { generatePedagogicalDiagnosis, generateCompleteLessonWithAI } from '../../core/services/geminiService';
+import { generateCompleteLessonWithAI } from '../../core/services/geminiService';
 import { ProfessorLmsModules } from '../components/ProfessorLmsModules';
+import { ClassLearningReportView } from '../components/ClassLearningReportView';
 import type {
   ExamData, ExamQuestion, ExamAttempt,
   LessonPlanItem, BimesterPeriod
@@ -49,18 +47,12 @@ import {
   subscribeLessonPlansByClass
 } from '../../data/repositories/lessonPlanRepository';
 import { BatchClassManagerModal } from '../components/labs/BatchClassManagerModal';
-import { generateClassRetentionReport } from '../../core/services/earlyWarningService';
 import { FileSpreadsheet, ShieldAlert } from 'lucide-react';
 import { canAccessPath, withReturnTo } from '../../core/utils/navigation';
 
 const PROFESSOR_TABS = ['classes', 'lesson_plans', 'exams', 'materials', 'labs_overview', 'reports', 'messages', 'lms_gradebook'] as const;
 type ProfessorTab = typeof PROFESSOR_TABS[number];
 const PLAN_PERIODS: BimesterPeriod[] = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre', '1º Semestre', '2º Semestre'];
-
-const SUBJECT_COLORS = [
-  '#293E24', '#B8441F', '#E4683F', '#3D5B36', '#F59C7B', '#172314',
-  '#293E24', '#B8441F', '#E4683F', '#3D5B36', '#F59C7B', '#172314'
-];
 
 export function ProfessorDashboard() {
   const location = useLocation();
@@ -87,6 +79,7 @@ export function ProfessorDashboard() {
     handleCreateClass,
     exportReportCSV,
     globalStats,
+    statsError,
   } = useProfessorDashboard({ activeTab: dashboardTab, classId: searchParams.get('class') });
   const setSelectedClassId = (classId: string) => setSearchParams(previous => {
     const next = new URLSearchParams(previous);
@@ -182,15 +175,6 @@ export function ProfessorDashboard() {
   const [profMessages, setProfMessages] = useState<StudentMessage[]>([]);
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
   const [replyBonusCoins, setReplyBonusCoins] = useState<Record<string, number>>({});
-
-  // AI Diagnostic State
-  const [aiDiagnosis, setAiDiagnosis] = useState<{
-    summary: string;
-    strengths: string[];
-    recommendations: string[];
-    priorityActions: string[];
-  } | null>(null);
-  const [aiLoading, setAiLoading] = useState(false);
 
   // Gemini API Key Modal
   const [showGeminiModal, setShowGeminiModal] = useState(false);
@@ -322,64 +306,15 @@ export function ProfessorDashboard() {
     fetchExamAnalytics();
   }, [selectedExam]);
 
-  // Trigger AI Pedagogical Diagnosis when report changes
-  useEffect(() => {
-    if (!classReport) return;
-
-    const fetchAiDiagnosis = async () => {
-      setAiLoading(true);
-      try {
-        const diag = await generatePedagogicalDiagnosis({
-          className: classReport.className,
-          studentsCount: classReport.studentsCount,
-          completionRate: classReport.completionRate,
-          averageScore: classReport.averageScore,
-          atRiskStudents: classReport.atRiskStudents,
-          topModules: classReport.modules.map(m => ({
-            module: m.module,
-            averageScore: m.averageScore,
-            count: m.eventsCount,
-          })),
-        });
-        setAiDiagnosis(diag);
-      } catch (err) {
-        console.error('Erro ao gerar diagnóstico de IA:', err);
-      } finally {
-        setAiLoading(false);
-      }
-    };
-
-    fetchAiDiagnosis();
-  }, [classReport]);
-
   const totalStudents = turmas.reduce((sum, t) => sum + (t.studentsCount || 0), 0);
   const totalClasses = turmas.length;
 
   const stats = [
-    { label: 'Total de Alunos', value: String(totalStudents), icon: Users, accent: '#B8441F', desc: 'Em todas as turmas ativas' },
+    { label: 'Matrículas nas turmas', value: String(totalStudents), icon: Users, accent: '#B8441F', desc: 'Uma pessoa pode estar em mais de uma turma' },
     { label: 'Turmas Ativas', value: String(totalClasses), icon: BookOpen, accent: '#293E24', desc: 'Com códigos de acesso' },
-    { label: 'Taxa de Conclusão', value: `${globalStats.completionRate}%`, icon: Award, accent: '#E4683F', desc: 'Média geral da turma' },
-    { label: 'Provas Aplicadas', value: String(examsList.length), icon: FileText, accent: '#3D5B36', desc: 'Avaliações com gabarito' },
+    { label: 'Taxa de Conclusão', value: globalStats.completionRate == null ? '—' : `${globalStats.completionRate}%`, icon: Award, accent: '#E4683F', desc: 'Entregas concluídas / esperadas nas turmas' },
+    { label: 'Avaliações criadas', value: String(examsList.length), icon: FileText, accent: '#3D5B36', desc: 'Inclui rascunhos e publicadas' },
   ];
-
-  // Subject engagement chart data
-  const subjectProgressData = ALL_MODULES.map((m, idx) => {
-    const matchingModule = classReport?.modules.find(mod => mod.module.toLowerCase().includes(m.label.toLowerCase()));
-    return {
-      subject: m.label,
-      score: matchingModule ? matchingModule.averageScore : Math.floor(Math.random() * 20 + 75),
-      entregas: matchingModule ? matchingModule.eventsCount : Math.floor(Math.random() * 8 + 2),
-      color: SUBJECT_COLORS[idx % SUBJECT_COLORS.length],
-    };
-  });
-
-  const tooltipStyle = {
-    backgroundColor: 'var(--bg-card)',
-    border: '1px solid var(--border-color)',
-    borderRadius: '10px',
-    color: 'var(--text-main)',
-    padding: '0.6rem 0.8rem',
-  };
 
   const handleSaveGeminiKey = () => {
     if (geminiKeyInput.trim()) {
@@ -858,10 +793,10 @@ export function ProfessorDashboard() {
             onClick={() => setShowEarlyWarning(!showEarlyWarning)}
             className="btn-outline"
             style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 600, background: showEarlyWarning ? 'rgba(239, 68, 68, 0.15)' : 'transparent' }}
-            title="Visualizar radar de risco de evasão e retenção"
+            title="Conferir sinais de acompanhamento da turma"
           >
             <ShieldAlert style={{ width: '0.9rem', height: '0.9rem', color: '#ef4444' }} />
-            Radar de Evasão
+            Acompanhamento dos alunos
           </button>
           <button
             onClick={() => { setIsCreatingClass(true); setDashboardTab('classes'); }}
@@ -874,60 +809,21 @@ export function ProfessorDashboard() {
         </div>
       </div>
 
-      {/* Radar de Evasão e Retenção Escolar (Early Warning System) */}
+      {/* Acompanhamento a partir das evidências da turma selecionada. */}
       {showEarlyWarning && (
-        <div className="glass-card mb-4 fade-in" style={{ padding: '1.25rem', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.4)', background: 'rgba(239, 68, 68, 0.04)', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldAlert style={{ width: '1.25rem', height: '1.25rem', color: '#ef4444' }} />
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                Radar de Evasão & Retenção Escolar (Early Warning System)
-              </h3>
-            </div>
-            <span style={{ fontSize: '0.8rem', background: '#ef444420', color: '#ef4444', padding: '0.2rem 0.6rem', borderRadius: '6px', fontWeight: 700 }}>
-              Algoritmo Preditivo Ativo
-            </span>
-          </div>
-
-          {(() => {
-            const sampleData = [
-              { studentId: '1', studentName: 'Lucas Ferreira', className: turmas[0]?.name || 'Turma A', lastAccessDaysAgo: 16, completedLabsCount: 1, averageScorePct: 42, failedAttemptsCount: 5 },
-              { studentId: '2', studentName: 'Mariana Ramos', className: turmas[0]?.name || 'Turma A', lastAccessDaysAgo: 9, completedLabsCount: 3, averageScorePct: 62, failedAttemptsCount: 3 },
-              { studentId: '3', studentName: 'Gabriel Souza', className: turmas[0]?.name || 'Turma A', lastAccessDaysAgo: 2, completedLabsCount: 12, averageScorePct: 88, failedAttemptsCount: 1 }
-            ];
-            const report = generateClassRetentionReport(turmas[0]?.name || 'Turma Principal', sampleData);
-
-            return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.85rem', flexWrap: 'wrap' }}>
-                  <span>Índice de Saúde da Turma: <strong style={{ color: '#22c55e' }}>{report.classHealthScore}/100</strong></span>
-                  <span>Estudantes em Alerta: <strong style={{ color: '#ef4444' }}>{report.studentsAtRiskCount}</strong></span>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem' }}>
-                  {report.students.map(st => (
-                    <div key={st.studentId} style={{ background: 'var(--bg-surface)', padding: '0.85rem', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                        <strong>{st.studentName}</strong>
-                        <span style={{ color: st.riskLevel === 'Crítico' ? '#ef4444' : st.riskLevel === 'Moderado' ? '#f59e0b' : '#22c55e', fontWeight: 800 }}>
-                          {st.riskLevel} ({st.riskScore} pts)
-                        </span>
-                      </div>
-                      <p style={{ margin: '0.2rem 0', color: 'var(--text-secondary)', fontSize: '0.78rem' }}>
-                        Último acesso há {st.lastAccessDaysAgo} dias • Média: {st.averageScorePct}%
-                      </p>
-                      <p style={{ margin: '0.35rem 0 0 0', color: '#E4683F', fontSize: '0.76rem', fontWeight: 600 }}>
-                        👉 {st.pedagogicalRecommendations[0]}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
+        <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.5rem', border: '1px solid var(--border-color)' }}>
+          <h3 style={{ margin: '0 0 0.75rem', color: 'var(--text-main)' }}>Quem precisa de acompanhamento?</h3>
+          <p style={{ color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+            Confira as entregas e os motivos de apoio de {selectedClass?.name || 'uma turma selecionada'} no relatório.
+            Os sinais servem para orientar uma conversa com o aluno e planejar a retomada.
+          </p>
+          <button type="button" className="btn-outline" disabled={!selectedClassId} onClick={() => selectedClassId && handleViewClassReport(selectedClassId)}>
+            Ver acompanhamento da turma
+          </button>
         </div>
       )}
 
+      {statsError && <p role="alert" style={{ color: 'var(--color-primary-accessible, #B8441F)', marginBottom: '1rem' }}>{statsError}</p>}
       {/* Global Stats Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
         {stats.map((stat, idx) => {
@@ -2440,8 +2336,9 @@ export function ProfessorDashboard() {
         <div className="fade-in">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Turma:</label>
+              <label htmlFor="report-class-select" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Turma:</label>
               <select
+                id="report-class-select"
                 value={selectedClassId || ''}
                 onChange={e => handleViewClassReport(e.target.value)}
                 style={{ padding: '0.5rem 1rem', borderRadius: '8px', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', color: 'var(--text-main)', fontSize: '0.9rem', outline: 'none' }}
@@ -2452,7 +2349,7 @@ export function ProfessorDashboard() {
               </select>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
               <button
                 onClick={() => void refreshReport()}
                 disabled={reportLoading || !selectedClassId}
@@ -2479,87 +2376,11 @@ export function ProfessorDashboard() {
               <p>Carregando relatório da turma...</p>
             </div>
           ) : classReport ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-              {/* AI Diagnosis */}
-              <div className="glass-card" style={{ padding: '1.5rem', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', borderRadius: 'var(--radius-lg, 14px)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                  <Sparkles style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary, #E4683F)' }} />
-                  <h3 style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
-                    Diagnóstico pedagógico assistido por IA ({classReport.className})
-                  </h3>
-                  {aiLoading && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Gerando...</span>}
-                </div>
-
-                {aiDiagnosis ? (
-                  <div>
-                    <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                      {aiDiagnosis.summary}
-                    </p>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                      <div style={{ padding: '1rem', borderRadius: '8px', background: 'var(--color-secondary-light, rgba(41,62,36,0.12))', border: '1px solid var(--border-color, #E2D7C3)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                          <CheckCircle style={{ width: '0.95rem', height: '0.95rem' }} /> Pontos Fortes da Turma
-                        </div>
-                        <ul style={{ margin: 0, paddingLeft: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.83rem', lineHeight: 1.5 }}>
-                          {aiDiagnosis.strengths.map((s, i) => <li key={i}>{s}</li>)}
-                        </ul>
-                      </div>
-
-                      <div style={{ padding: '1rem', borderRadius: '8px', background: 'var(--color-primary-light, rgba(228,104,63,0.12))', border: '1px solid var(--border-color, #E2D7C3)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                          <AlertTriangle style={{ width: '0.95rem', height: '0.95rem' }} /> Recomendações & Intervenções
-                        </div>
-                        <ul style={{ margin: 0, paddingLeft: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.83rem', lineHeight: 1.5 }}>
-                          {aiDiagnosis.recommendations.map((r, i) => <li key={i}>{r}</li>)}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
-                    Processando panorama pedagógico da turma...
-                  </p>
-                )}
-              </div>
-
-              {/* Charts */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem' }}>
-                <div className="glass-card" style={{ padding: '1.5rem' }}>
-                  <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>
-                    📊 Desempenho Médio por Disciplina (%)
-                  </h4>
-                  <div style={{ width: '100%', height: '260px' }}>
-                    <ResponsiveContainer>
-                      <BarChart data={subjectProgressData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color, #E2D7C3)" />
-                        <XAxis dataKey="subject" stroke="var(--text-muted)" fontSize={11} angle={-35} textAnchor="end" interval={0} />
-                        <YAxis domain={[0, 100]} stroke="var(--text-muted)" fontSize={11} />
-                        <Tooltip contentStyle={tooltipStyle} />
-                        <Bar dataKey="score" fill="#293E24" radius={[4, 4, 0, 0]} name="Média (%)" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div className="glass-card" style={{ padding: '1.5rem' }}>
-                  <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>
-                    🔬 Volume de Entregas nos Laboratórios
-                  </h4>
-                  <div style={{ width: '100%', height: '260px' }}>
-                    <ResponsiveContainer>
-                      <BarChart data={subjectProgressData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                        <XAxis dataKey="subject" stroke="var(--text-muted)" fontSize={11} angle={-35} textAnchor="end" interval={0} />
-                        <YAxis stroke="var(--text-muted)" fontSize={11} />
-                        <Tooltip contentStyle={tooltipStyle} />
-                        <Bar dataKey="entregas" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Entregas" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ClassLearningReportView key={`${classReport.classId}:${classReport.generatedAt}`} report={classReport} onViewMessages={() => setDashboardTab('messages')} />
+          ) : !reportError ? (
+            <p role="status" style={{ padding: '1rem', color: 'var(--text-secondary)' }}>
+              {selectedClassId ? 'Nenhum relatório disponível para esta turma. Tente atualizar para conferir os registros.' : 'Crie uma turma e convide seus alunos para começar o acompanhamento.'}
+            </p>
           ) : null}
         </div>
       )}

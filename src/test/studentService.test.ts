@@ -3,11 +3,12 @@
  * Valida cálculos de XP, level-up, e moedas.
  */
 import { describe, it, expect, vi } from 'vitest';
+import { completeStudentLabProgress } from '../modules/data/repositories/studentRepository';
 
 // Mock the repositories since they depend on Firebase
 vi.mock('../modules/data/repositories/studentRepository', () => ({
   saveStudentProgress: vi.fn().mockResolvedValue(undefined),
-  addCompletedModule: vi.fn().mockResolvedValue(undefined),
+  completeStudentLabProgress: vi.fn().mockResolvedValue({ alreadyCompleted: false, progress: { xp: 80, coins: 30, level: 1 } }),
   addPurchasedItem: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -27,21 +28,19 @@ vi.mock('../modules/data/services/aiAdaptiveEngine', () => ({
 const { processModuleCompletion, processItemPurchase, getAIRecommendation } = await import('../modules/core/services/studentService');
 
 describe('processModuleCompletion', () => {
-  it('should calculate earned XP correctly (80% of score)', async () => {
+  it('returns the stored progress from the atomic completion', async () => {
     const result = await processModuleCompletion('uid-1', 'matematica', 100, 0, 1, 0);
     expect(result.xp).toBe(80); // 100 * 0.8
   });
 
-  it('should calculate earned coins correctly (30% of score)', async () => {
+  it('returns the stored coins without recalculating stale UI progress', async () => {
     const result = await processModuleCompletion('uid-1', 'matematica', 100, 0, 1, 0);
     expect(result.coins).toBe(30); // 100 * 0.3
   });
 
-  it('should level up when XP exceeds threshold (level * 500)', async () => {
-    const result = await processModuleCompletion('uid-1', 'matematica', 800, 400, 1, 0);
-    // XP = 400 + (800*0.8) = 400 + 640 = 1040 > 1*500 → level up
-    expect(result.level).toBe(2);
-    expect(result.xp).toBe(1040);
+  it('delegates the real score and identity to the idempotent repository', async () => {
+    await processModuleCompletion('uid-2', 'matematica', 67, 9999, 30, 500);
+    expect(completeStudentLabProgress).toHaveBeenLastCalledWith('uid-2', 'matematica', 67);
   });
 
   it('should NOT level up when XP is below threshold', async () => {
@@ -50,10 +49,9 @@ describe('processModuleCompletion', () => {
     expect(result.level).toBe(1);
   });
 
-  it('should accumulate coins', async () => {
-    const result = await processModuleCompletion('uid-1', 'matematica', 200, 0, 1, 100);
-    // Coins = 100 + (200*0.3) = 100 + 60 = 160
-    expect(result.coins).toBe(160);
+  it('propagates failed persistence instead of returning invented progress', async () => {
+    vi.mocked(completeStudentLabProgress).mockRejectedValueOnce(new Error('permission-denied'));
+    await expect(processModuleCompletion('uid-1', 'matematica', 100, 0, 1, 100)).rejects.toThrow('permission-denied');
   });
 });
 

@@ -1,11 +1,12 @@
 import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
-import { dirname, isAbsolute, resolve } from 'node:path';
+import { readFile, lstat, mkdir } from 'node:fs/promises';
+import { dirname, isAbsolute, resolve, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 export const defaultSource = resolve(repoRoot, 'scripts/etl/source/educational-platform.seed.json');
-export const defaultOutputDir = resolve(repoRoot, 'public/local-data/etl');
+export const defaultOutputDir = resolve(repoRoot, '.local/etl');
+export const publicSeedOutputDir = resolve(repoRoot, 'public/local-data/etl');
 export const FIREBASE_SOURCE = 'firebase';
 
 export async function loadDotEnv() {
@@ -81,4 +82,26 @@ export function resolveRepoPath(value) {
 
 export function resolveSource(value) {
   return value === FIREBASE_SOURCE || /^https?:\/\//i.test(value) || value.startsWith('file://') ? value : resolveRepoPath(value);
+}
+
+/** Never publish an export or delete a caller-selected directory. */
+export async function validateOutputDirectory(output, { source, publicSeed = false } = {}) {
+  const target = resolveRepoPath(output);
+  const approvedRoot = publicSeed ? publicSeedOutputDir : defaultOutputDir;
+  if (publicSeed && resolveSource(source ?? '') !== defaultSource) throw new Error('Somente o seed fictício versionado pode ser publicado com --public-seed.');
+  const within = relative(approvedRoot, target);
+  if (within === '..' || within.startsWith(`..${sep}`) || isAbsolute(within)) throw new Error('A saída ETL deve ficar em .local/etl; --public-seed permite somente public/local-data/etl para o seed fictício.');
+  const segments = relative(repoRoot, target).split(sep).filter(Boolean);
+  let path = repoRoot;
+  for (const segment of segments) {
+    path = resolve(path, segment);
+    try {
+      const info = await lstat(path);
+      if (info.isSymbolicLink() || !info.isDirectory()) throw new Error('A saída ETL não pode atravessar links ou arquivos.');
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      await mkdir(path);
+    }
+  }
+  return target;
 }

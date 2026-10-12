@@ -9,7 +9,8 @@ import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
 import { triggerPrintLabReport, generateLabReportMarkdown, generateLabReportLatex } from '../../core/services/labReportService';
 import { estimateStudentProficiency, getCalibratedTriParametersForLab, type TriProficiencyResult, type TriAnswerRecord } from '../../core/services/triEvaluationService';
 import { sonifier } from '../../core/services/webAudioSonifier';
-import { offlineSyncService } from '../../core/services/offlineSyncService';
+import { useLearningCapture } from '../hooks/useLearningCapture';
+import type { LabCompletionHandler } from '../../data/services/learningCapture';
 import { LabNotebookDrawer } from './labs/LabNotebookDrawer';
 import { LabSplitScreenComparator } from './labs/LabSplitScreenComparator';
 import { LabTimeTravelReplay } from './labs/LabTimeTravelReplay';
@@ -78,7 +79,7 @@ export interface UniversalLabConfig {
 
 interface UniversalLabContainerProps {
   config: UniversalLabConfig;
-  onComplete?: (reportData: { score: number; telemetryRows: number }) => void;
+  onComplete?: LabCompletionHandler;
 }
 
 export function UniversalLabContainer({ config, onComplete }: UniversalLabContainerProps) {
@@ -93,6 +94,7 @@ export function UniversalLabContainer({ config, onComplete }: UniversalLabContai
 
 function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProps) {
   const controlsId = useId();
+  const capture = useLearningCapture();
   // Parâmetros ajustáveis
   const [params, setParams] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
@@ -269,8 +271,8 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
       });
     });
 
-    const finalScore = Math.round((correctCount / config.questions.length) * 10);
-    setScore(finalScore);
+    const finalScore = Math.round((correctCount / config.questions.length) * 100);
+    setScore(finalScore / 10);
     setAnsweredSubmitted(true);
 
     // Avaliação Psicométrica TRI
@@ -280,22 +282,17 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
     // Chime sonoro de sucesso
     sonifier.playSuccessChime();
 
-    // Sincronização offline outbox
-    offlineSyncService.enqueueSubmission({
-      labId: config.id,
-      studentId: 'estudante_ativo',
-      timestamp: new Date().toISOString(),
-      parameters: params,
-      telemetry: currentTelemetry,
-      diagnosticAnswer: {
-        questionText: config.questions[0]?.question || '',
-        selectedOption: config.questions[0]?.options[selectedAnswers[0] ?? 0]?.text || '',
-        correct: correctCount === config.questions.length
-      }
-    });
-
     if (onComplete) {
-      onComplete({ score: finalScore, telemetryRows: telemetryHistory.length });
+      void onComplete({ score: finalScore, telemetryRows: telemetryHistory.length,
+        evidence: capture.current.evidence('lab', {
+          labId: config.id, subject: config.subject, stage: 'assessment',
+          experiment: { parameters: { ...params }, telemetry: { ...currentTelemetry }, samples: telemetryHistory.length,
+            parameterLabels: Object.fromEntries(config.parameters.map(parameter => [parameter.id, parameter.label])),
+            parameterUnits: Object.fromEntries(config.parameters.filter(parameter => parameter.unit).map(parameter => [parameter.id, parameter.unit])),
+          },
+          questions: config.questions.map((question, index) => ({ questionId: `${config.id}-bench-q${index + 1}`, question: question.question, selectedOption: selectedAnswers[index] ?? null, selectedText: question.options[selectedAnswers[index]]?.text, expectedText: question.options.find(option => option.correct)?.text, explanation: question.options[selectedAnswers[index]]?.explanation, correct: question.options[selectedAnswers[index]]?.correct ?? false, topic: config.topic })),
+        }),
+      });
     }
   };
 

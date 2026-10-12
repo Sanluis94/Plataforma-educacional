@@ -46,7 +46,8 @@ vi.mock('../modules/data/repositories/lessonPlanRepository', () => ({
     return () => {};
   }),
 }));
-vi.mock('../modules/data/repositories/submissionRepository', () => ({ saveSubmission: vi.fn() }));
+vi.mock('../modules/data/repositories/submissionRepository', () => ({ saveSubmission: vi.fn(), getSubmissionsByStudent: vi.fn(async () => []) }));
+vi.mock('../modules/data/repositories/activityRepository', () => ({ subscribeActivitiesByClass: vi.fn((_classId, callback) => { callback([]); return () => {}; }) }));
 vi.mock('../modules/core/services/soundEffects', () => ({ default: { playClick: vi.fn(), playUnlock: vi.fn(), playSuccess: vi.fn() } }));
 vi.mock('../modules/ux/components/StudentLmsModules', () => ({
   StudentLmsModules: ({ onViewChange }: { onViewChange: (view: 'forum') => void }) => <button onClick={() => onViewChange('forum')}>Abrir fórum pelo boletim</button>,

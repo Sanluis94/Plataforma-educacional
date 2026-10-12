@@ -49,8 +49,9 @@ describe('Conclusão persistente dos laboratórios', () => {
   });
 
   it('não concede progresso a professor, administrador ou sessão ausente', async () => {
-    for (const role of ['professor', 'admin', 'coordenador'] as const) expect(await completeStudentLab('teacher', role, { id: 'lab', title: 'Teste' }, 100)).toBeNull();
-    expect(await completeStudentLab(undefined, 'estudante', { id: 'lab', title: 'Teste' }, 100)).toBeNull();
+    const evidence = { schemaVersion: 1 as const, source: 'lab' as const, sessionId: 'fictitious' };
+    for (const role of ['professor', 'admin', 'coordenador'] as const) expect(await completeStudentLab('teacher', role, { id: 'lab', title: 'Teste' }, 100, evidence)).toBeNull();
+    expect(await completeStudentLab(undefined, 'estudante', { id: 'lab', title: 'Teste' }, 100, evidence)).toBeNull();
     expect(await getLocalEtlProgress('teacher')).toBeNull();
     expect(fixture.log).not.toHaveBeenCalled();
   });

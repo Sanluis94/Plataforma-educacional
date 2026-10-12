@@ -4,7 +4,8 @@ import { MASTER_LABS_CATALOG, searchLabsCatalog } from '../modules/core/constant
 
 describe('Refinamentos de UX, Acessibilidade e Handover Kortex Super LMS', () => {
   beforeEach(() => {
-    offlineSyncService.clearQueue();
+    localStorage.removeItem('kortex_offline_outbox_v2');
+    offlineSyncService.setCurrentStudent(null);
   });
 
   describe('Connectivity & Offline Outbox Sync', () => {
@@ -12,24 +13,22 @@ describe('Refinamentos de UX, Acessibilidade e Handover Kortex Super LMS', () =>
       offlineSyncService.setOnline(false);
 
       const sub1 = offlineSyncService.enqueueSubmission({
-        labId: 'pendulo_simples_superior',
         studentId: 'student_test_1',
-        timestamp: new Date().toISOString(),
-        parameters: { L: 1.5, g: 9.81 },
-        telemetry: { periodo: 2.45 }
+        kind: 'submission',
+        submission: { activityId: 'pendulo_simples_superior', activityTitle: 'Pêndulo', classId: '', studentId: 'student_test_1', studentName: 'Fictício', score: 100, submittedAt: new Date().toISOString(), status: 'completed', evidence: { schemaVersion: 1, source: 'lab', sessionId: 'offline-3', experiment: { parameters: { L: 1.5, g: 9.81 }, telemetry: { periodo: 2.45 }, samples: 1 } } },
       });
 
       expect(sub1.id).toBeDefined();
       expect(sub1.synced).toBe(false);
 
-      const pending = offlineSyncService.getPendingSubmissions();
+      const pending = offlineSyncService.getPendingSubmissions('student_test_1');
       expect(pending.length).toBe(1);
-      expect(pending[0].labId).toBe('pendulo_simples_superior');
+      expect(pending[0].kind === 'submission' && pending[0].submission.activityId).toBe('pendulo_simples_superior');
 
-      // Ao alternar para online, deve sincronizar
+      // Internet without a signed-in owner is not an acknowledgement.
       offlineSyncService.setOnline(true);
-      const remaining = offlineSyncService.getPendingSubmissions().filter(s => !s.synced);
-      expect(remaining.length).toBe(0);
+      const remaining = offlineSyncService.getPendingSubmissions('student_test_1');
+      expect(remaining.length).toBe(1);
     });
 
     it('deve permitir listener de conectividade em tempo real', () => {

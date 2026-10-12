@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useLearningCapture } from '../../hooks/useLearningCapture';
+import type { LabCompletionHandler, LabCompletionReport } from '../../../data/services/learningCapture';
 import type { LabLearningContent } from '../../../core/content/labLearningContent';
 import { getLearningLab } from '../../../core/constants/learningCatalog';
 import { learningLevelLabel, type LearningLevel } from '../../../core/constants/learningLevels';
@@ -11,7 +13,7 @@ interface GuidedLabActivityProps {
   objective: string;
   academicLevel?: LearningLevel;
   content: LabLearningContent;
-  onComplete?: (report: { score: number; telemetryRows: number }) => void;
+  onComplete?: LabCompletionHandler;
 }
 
 export function GuidedLabActivity({ labId, title, subject, objective, academicLevel, content, onComplete }: GuidedLabActivityProps) {
@@ -24,15 +26,32 @@ export function GuidedLabActivity({ labId, title, subject, objective, academicLe
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
   const [showEvidence, setShowEvidence] = useState(false);
+  const capture = useLearningCapture();
+  const submittedReport = useRef<LabCompletionReport | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const scenario = content.scenarios[scenarioIndex];
   const revealed = revealedScenarios.includes(scenarioIndex);
   const canSubmit = content.questions.length > 0 && content.questions.every((_, index) => answers[index] !== undefined);
   const correctCount = content.questions.filter((question, index) => question.options[answers[index]]?.correct).length;
 
-  function submit() {
-    if (!canSubmit || submitted) return;
+  async function submit(retry = false) {
+    if (!canSubmit || saving || (submitted && !retry)) return;
+    if (!retry) submittedReport.current = {
+      handlesDeliveryFeedback: true,
+      score: Math.round(correctCount / content.questions.length * 100), telemetryRows: 0,
+      evidence: capture.current.evidence('lab', {
+        labId, subject, stage: 'assessment', reflection: notes,
+        observations: content.scenarios.flatMap((scenario, index) => revealedScenarios.includes(index) || hypotheses[index]?.trim() ? [{ scenarioId: scenario.id, scenarioLabel: scenario.label, hypothesis: hypotheses[index] ?? '', observed: revealedScenarios.includes(index) }] : []),
+        questions: content.questions.map((question, index) => ({ questionId: `${labId}-q${index + 1}`, question: question.question, selectedOption: answers[index] ?? null, selectedText: question.options[answers[index]]?.text, expectedText: question.options.find(option => option.correct)?.text, explanation: question.options[answers[index]]?.explanation, correct: question.options[answers[index]]?.correct ?? false, topic: subject })),
+      }),
+    };
     setSubmitted(true);
-    onComplete?.({ score: Math.round(correctCount / content.questions.length * 10), telemetryRows: 0 });
+    setSaveError(false);
+    setSaving(true);
+    try { if (onComplete && await onComplete(submittedReport.current!) === false) setSaveError(true); }
+    catch { setSaveError(true); }
+    finally { setSaving(false); }
   }
 
   function downloadNotes() {
@@ -90,7 +109,7 @@ export function GuidedLabActivity({ labId, title, subject, objective, academicLe
             <h4>{scenario.label}</h4>
             <p>{scenario.situation}</p>
             <label htmlFor={`${labId}-prediction`}>Minha previsão e justificativa</label>
-            <textarea id={`${labId}-prediction`} value={hypotheses[scenarioIndex] || ''} onChange={event => setHypotheses(previous => ({ ...previous, [scenarioIndex]: event.target.value }))} rows={3} />
+            <textarea id={`${labId}-prediction`} maxLength={5000} value={hypotheses[scenarioIndex] || ''} onChange={event => setHypotheses(previous => ({ ...previous, [scenarioIndex]: event.target.value }))} rows={3} />
             <button type="button" onClick={() => setRevealedScenarios(previous => previous.includes(scenarioIndex) ? previous : [...previous, scenarioIndex])}>
               Conferir observação
             </button>
@@ -106,7 +125,7 @@ export function GuidedLabActivity({ labId, title, subject, objective, academicLe
             <h3>Registre suas conclusões</h3>
             <p>{content.reflection}</p>
             <label htmlFor={`${labId}-notes`}>Minha resposta com evidências dos cenários</label>
-            <textarea id={`${labId}-notes`} value={notes} onChange={event => setNotes(event.target.value)} rows={5} />
+            <textarea id={`${labId}-notes`} maxLength={10000} value={notes} onChange={event => setNotes(event.target.value)} rows={5} />
             <div className="guided-lab-actions">
               <button type="button" aria-expanded={showEvidence} onClick={() => setShowEvidence(previous => !previous)}>Conferir critérios de uma boa resposta</button>
               <button type="button" onClick={downloadNotes}>Baixar minhas anotações</button>
@@ -133,7 +152,7 @@ export function GuidedLabActivity({ labId, title, subject, objective, academicLe
       {activeTab === 'assessment' && (
         <article className="guided-lab-card">
           <h3>Aplique o que aprendeu</h3>
-          <p>Escolha uma resposta para cada questão. A correção explica também os equívocos das outras alternativas.</p>
+          <p>Escolha uma resposta para cada questão. A correção explica também os equívocos das outras alternativas. Ao corrigir, suas respostas e anotações são registradas; em uma aula de turma, o professor pode consultá-las.</p>
           {content.questions.map((question, questionIndex) => (
             <fieldset key={question.question} disabled={submitted}>
               <legend>{questionIndex + 1}. {question.question}</legend>
@@ -151,11 +170,13 @@ export function GuidedLabActivity({ labId, title, subject, objective, academicLe
             </fieldset>
           ))}
           {!submitted ? <>
-            <button type="button" disabled={!canSubmit} onClick={submit}>Corrigir respostas</button>
+            <button type="button" disabled={!canSubmit || saving} onClick={() => void submit()}>Corrigir respostas</button>
             {!canSubmit && <p className="guided-lab-hint">Responda todas as questões para conferir a correção.</p>}
           </> : <div role="status">
             <p>Você acertou {correctCount} de {content.questions.length} questões.</p>
-            <button type="button" onClick={() => { setSubmitted(false); setAnswers({}); }}>Tentar novamente</button>
+            {saving && <p>Guardando a tentativa…</p>}
+            {saveError && <p role="alert">Não foi possível guardar a tentativa. Mantenha a atividade aberta e <button type="button" onClick={() => void submit(true)}>tente salvar novamente</button>.</p>}
+            <button type="button" disabled={saving || saveError} onClick={() => { capture.current.reset(); submittedReport.current = null; setSubmitted(false); setAnswers({}); }}>Tentar novamente</button>
           </div>}
         </article>
       )}
