@@ -10,6 +10,8 @@ import { completeStudentLabProgress } from '../../src/modules/data/repositories/
 import { completeStudentLab } from '../../src/modules/core/services/studentLabService.ts';
 import { getLiveClassReport } from '../../src/modules/data/repositories/reportRepository.ts';
 import { offlineSyncService } from '../../src/modules/core/services/offlineSyncService.ts';
+import { initializeApp as initializeAdminApp } from 'firebase-admin/app';
+import { getFirestore as getAdminFirestore } from 'firebase-admin/firestore';
 
 assert.equal(app.options.projectId, 'demo-kortex');
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8080');
@@ -43,8 +45,13 @@ try {
   const absentId = await learner('sem-entrega');
   const classId = `class-${suffix}`, otherClass = `other-${suffix}`;
   const classData = { name: 'Turma de verificação ETL', professorId: teacher.uid, professorName: 'Professora fictícia', studentIds: [studentId, absentId], studentsCount: 2, createdAt: now, updatedAt: now };
-  await setDoc(doc(db, 'classes', classId), classData);
-  await setDoc(doc(db, 'classes', otherClass), { ...classData, studentIds: [studentId], studentsCount: 1 });
+  const fixtureApp=initializeAdminApp({projectId:'demo-kortex'},`etl-fixture-${suffix}`);
+  const fixtureStore=getAdminFirestore(fixtureApp);
+  // Only emulator fixture setup bypasses rules. Application deliveries below
+  // still run through the actual authenticated client and deployed rules file.
+  await fixtureStore.doc(`classes/${classId}`).set(classData);
+  await fixtureStore.doc(`classes/${otherClass}`).set({ ...classData, studentIds: [studentId], studentsCount: 1 });
+  await fixtureStore.terminate();await fixtureApp.delete();
   const activityId = `activity-${suffix}`, examId = `exam-${suffix}`, planId = `plan-${suffix}`;
   await setDoc(doc(db, 'activities', activityId), { title: 'Atividade medida', type: 'quiz', config: {}, professorId: teacher.uid, classId, status: 'published', createdAt: now });
   await setDoc(doc(db, 'activities', `other-${activityId}`), { title: 'Outra turma', type: 'quiz', config: {}, professorId: teacher.uid, classId: otherClass, status: 'published', createdAt: now });

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { GRADE_PERIODS, getGradePolicy, applyPublishedReviews, type GradePolicy, type GradePeriod } from '../../data/repositories/gradePolicyRepository';
+import { gradePolicyDataInPeriod } from '../../data/services/gradePolicyPeriod';
+import { getPublishedSubmissionReviewsByStudent, type SubmissionReview } from '../../data/repositories/submissionRepository';
+import { StudentReviewCard } from './StudentReviewCard';
 import {
-  Award, Calendar, CheckCircle, AlertTriangle,
-  MessageSquare, ShieldCheck, Star, Plus, Printer, X
+  Calendar, CheckCircle, AlertTriangle,
+  MessageSquare, Star, Plus
 } from 'lucide-react';
 import type {
   AttendanceRecord,
   ForumTopic,
-  DigitalCertificate,
   SubmissionData, ExamAttempt, ActivityData
 } from '../../data/types';
 import {
@@ -14,14 +18,14 @@ import {
   calculateStudentAttendanceRate,
   calculateClassGradebook,
   DEFAULT_WEIGHTS,
+  calculateSemesterGrade,
   subscribeForumTopicsByClass,
   saveForumTopic,
   addForumReply
 } from '../../data/repositories/gradebookRepository';
 import {
   getStudentCertificates,
-  issueCertificate,
-  verifyCertificate
+  type Certificate
 } from '../../core/services/certificateService';
 import { getSubmissionsByStudentInClass } from '../../data/repositories/submissionRepository';
 import { getExamAttemptsByStudent } from '../../data/repositories/examRepository';
@@ -34,6 +38,8 @@ interface StudentLmsModulesProps {
   selectedClassId: string | null;
   activeView: 'gradebook' | 'forum' | 'certificates';
   onViewChange: (view: 'gradebook' | 'forum' | 'certificates') => void;
+  period?: GradePeriod;
+  onPeriodChange?: (period: GradePeriod) => void;
 }
 
 export function StudentLmsModules({
@@ -41,7 +47,7 @@ export function StudentLmsModules({
   studentName,
   selectedClassId,
   activeView,
-  onViewChange
+  period = 'atual', onPeriodChange
 }: StudentLmsModulesProps) {
   // ─────────────────────────────────────────────────────────────
   // 1. DADOS DE FREQUÊNCIA & BOLETIM ESCOLAR
@@ -52,6 +58,8 @@ export function StudentLmsModules({
   const [activities, setActivities] = useState<ActivityData[]>([]);
   const [gradeLoading, setGradeLoading] = useState(false);
   const [gradeError, setGradeError] = useState<string | null>(null);
+  const [policy, setPolicy] = useState<GradePolicy | null>(null);
+  const [reviews, setReviews] = useState<SubmissionReview[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -59,17 +67,19 @@ export function StudentLmsModules({
     setSubmissions([]);
     setExamAttempts([]);
     setActivities([]);
+    setPolicy(null); setReviews([]);
     setGradeError(null);
     if (!selectedClassId) return;
     setGradeLoading(true);
     const fetchAtt = async () => {
       try {
-        const [recs, subs, attempts, classActivities] = await Promise.all([getAttendanceByClass(selectedClassId), getSubmissionsByStudentInClass(studentId, selectedClassId), getExamAttemptsByStudent(studentId), getActivitiesByClass(selectedClassId)]);
+        const [recs, subs, attempts, classActivities, publishedPolicy, publishedReviews] = await Promise.all([getAttendanceByClass(selectedClassId), getSubmissionsByStudentInClass(studentId, selectedClassId), getExamAttemptsByStudent(studentId), getActivitiesByClass(selectedClassId), getGradePolicy(selectedClassId, period), getPublishedSubmissionReviewsByStudent(studentId, selectedClassId)]);
         if (!alive) return;
         setAttendanceRecords(recs);
         setSubmissions(subs);
         setExamAttempts(attempts);
         setActivities(classActivities);
+        setPolicy(publishedPolicy); setReviews(publishedReviews);
       } catch {
         if (alive) setGradeError('Não foi possível carregar suas avaliações. Recarregue a página para tentar novamente.');
       } finally {
@@ -78,11 +88,17 @@ export function StudentLmsModules({
     };
     void fetchAtt();
     return () => { alive = false; };
-  }, [selectedClassId, studentId]);
+  }, [selectedClassId, studentId, period]);
 
-  const attStats = calculateStudentAttendanceRate(studentId, attendanceRecords);
+  const periodData = gradePolicyDataInPeriod(policy, { submissions, examAttempts, attendanceRecords });
+  const availablePeriodData = period === 'atual' || policy ? periodData : { submissions: [], examAttempts: [], attendanceRecords: [] };
+  const attStats = calculateStudentAttendanceRate(studentId, availablePeriodData.attendanceRecords);
 
-  const finalGrade = calculateClassGradebook([{ id: studentId, name: studentName }], selectedClassId ?? '', submissions, examAttempts, DEFAULT_WEIGHTS, { attendanceRecords, activities })[0];
+  const weights = policy?.weights ?? DEFAULT_WEIGHTS;
+  const finalGrade = calculateClassGradebook([{ id: studentId, name: studentName }], selectedClassId ?? '', applyPublishedReviews(availablePeriodData.submissions, reviews, policy), availablePeriodData.examAttempts, weights, { attendanceRecords: availablePeriodData.attendanceRecords, activities, participationScores: policy?.participationScores, p1ExamId: policy?.p1ExamId ?? undefined, p2ExamId: policy?.p2ExamId ?? undefined })[0];
+  const universityGrade = policy?.mode === 'university' ? calculateSemesterGrade({ p1: finalGrade.notaP1 ?? null, p2: finalGrade.notaP2 ?? null, labs: finalGrade.notaLabs }, policy.universityWeights) : null;
+  const finalValue = universityGrade ? universityGrade.mediaSemestre : finalGrade.mediaFinal;
+  const finalStatus = universityGrade ? universityGrade.statusUniv : finalGrade.situacao;
   const studentScores = finalGrade;
 
   // ─────────────────────────────────────────────────────────────
@@ -172,71 +188,25 @@ export function StudentLmsModules({
   // ─────────────────────────────────────────────────────────────
   // 3. CERTIFICADOS DIGITAIS DO ESTUDANTE
   // ─────────────────────────────────────────────────────────────
-  const [myCertificates, setMyCertificates] = useState<DigitalCertificate[]>([]);
-  const [previewCert, setPreviewCert] = useState<DigitalCertificate | null>(null);
-  const [validationCodeInput, setValidationCodeInput] = useState('');
-  const [validateResult, setValidateResult] = useState<{ cert: DigitalCertificate | null; searched: boolean }>({ cert: null, searched: false });
-
-  const loadCertificates = () => {
-    const certs = getStudentCertificates(studentId);
-    setMyCertificates(certs);
-  };
-
+  const [myCertificates, setMyCertificates] = useState<Certificate[]>([]);
+  const [certificateLoading, setCertificateLoading] = useState(false);
+  const [certificateError, setCertificateError] = useState('');
   useEffect(() => {
-    loadCertificates();
-  }, [studentId, studentName]);
-
-  const handleClaimNewCert = (courseName: string) => {
-    const cert = issueCertificate(studentId, studentName, courseName, 40);
-    loadCertificates();
-    setPreviewCert(cert);
-  };
-
-  const handleVerifyCode = () => {
-    if (!validationCodeInput.trim()) return;
-    const res = verifyCertificate(validationCodeInput.trim());
-    setValidateResult({ cert: res, searched: true });
-  };
+    let active = true;
+    setCertificateLoading(true); setCertificateError('');
+    void getStudentCertificates(studentId).then(certificates => { if (active) setMyCertificates(certificates); }).catch(() => { if (active) setCertificateError('Não foi possível carregar seus documentos. Tente recarregar a página.'); }).finally(() => { if (active) setCertificateLoading(false); });
+    return () => { active = false; };
+  }, [studentId]);
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Sub-navegação das Abas Moodle/LMS */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.75rem' }}>
-        {[
-          { id: 'gradebook', label: '📊 Meu Boletim & Frequência', icon: Award },
-          { id: 'forum', label: `💬 Fórum da Turma (${forumTopics.length})`, icon: MessageSquare },
-          { id: 'certificates', label: `📜 Meus Certificados (${myCertificates.length})`, icon: ShieldCheck },
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => onViewChange(tab.id as typeof activeView)}
-            style={{
-              padding: '0.6rem 1.15rem',
-              borderRadius: 'var(--radius-sm, 10px)',
-              border: 'none',
-              borderBottom: activeView === tab.id ? '2px solid var(--color-primary, #E4683F)' : '2px solid transparent',
-              background: activeView === tab.id ? 'rgba(228, 104, 63, 0.12)' : 'transparent',
-              color: activeView === tab.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
-              fontWeight: activeView === tab.id ? 800 : 500,
-              fontSize: '0.88rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.2s'
-            }}
-          >
-            <tab.icon style={{ width: '1rem', height: '1rem' }} />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
       {/* ─────────────────────────────────────────────────────────────
           1. ABA: MEU BOLETIM ESCOLAR & FREQUÊNCIA
           ───────────────────────────────────────────────────────────── */}
       {activeView === 'gradebook' && (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <section className="card" style={{padding:16,marginBottom:16}} aria-label="Critérios da minha turma"><h2>Critérios da turma e período</h2><label>Período<select value={period} onChange={event=>onPeriodChange?.(event.target.value as GradePeriod)}>{GRADE_PERIODS.map(value=><option key={value} value={value}>{value==='atual'?'Histórico completo':value}</option>)}</select></label>{policy?<><p>{policy.explanation}</p><p>Versão {policy.version} · Atualizada em {new Date(policy.updatedAt).toLocaleString('pt-BR')}.</p>{policy.mode==='university'&&<p>P1: {gradeLabel(finalGrade.notaP1??null)} ({policy.universityWeights.p1}%) · P2: {gradeLabel(finalGrade.notaP2??null)} ({policy.universityWeights.p2}%) · Laboratórios: {gradeLabel(finalGrade.notaLabs)} ({policy.universityWeights.labs}%).</p>}<p>{policy.reviewMode==='replace-submission-score'?'Pareceres publicados substituem a nota automática das entregas corrigidas neste boletim.':'Pareceres publicados orientam o estudo e ficam separados da nota automática.'}</p></>:<p>{period==='atual'?'O professor ainda não publicou critérios. Os valores abaixo usam o modelo padrão, identificado como provisório.':'O professor ainda não publicou critérios para este período; não há média deste recorte.'}</p>}</section>
+          {reviews.length>0&&<section aria-label="Pareceres publicados"><h2>Devolutivas do professor</h2>{reviews.map(review=><StudentReviewCard key={review.id} review={review} participatesInGrade={policy?.reviewMode==='replace-submission-score'} />)}</section>}
           {gradeLoading && <p role="status">Carregando suas entregas e avaliações…</p>}
           {gradeError && <p role="alert">{gradeError}</p>}
           {/* Card de Frequência Escolar e Indicador LDB */}
@@ -278,27 +248,27 @@ export function StudentLmsModules({
 
           {/* Boletim Escolar Ponderado */}
           <div className="glass-card" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', flexWrap:'wrap',gap:'1rem',justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <div>
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 800, margin: 0 }}>
                   Boletim de Avaliação Contínua
                 </h3>
-                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Panorama das entregas reais no modelo 40/30/20/10. Não substitui o boletim oficial da instituição.</span>
+                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Panorama das entregas reais e dos critérios compartilhados da turma. Não substitui o boletim oficial da instituição.</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0,0,0,0.3)', padding: '0.5rem 1rem', borderRadius: '8px' }}>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Média Final:</span>
-                <span style={{ fontSize: '1.35rem', fontWeight: 900, color: finalGrade.mediaFinal === null ? 'var(--text-muted)' : finalGrade.mediaFinal >= 6.0 ? '#10b981' : '#ef4444' }}>
-                  {finalGrade.mediaFinal === null ? 'Sem média' : finalGrade.mediaFinal.toFixed(1)}
+                <span style={{ fontSize: '1.35rem', fontWeight: 900, color: finalValue === null ? 'var(--text-muted)' : finalValue >= 6.0 ? '#10b981' : '#ef4444' }}>
+                  {finalValue === null ? 'Sem média' : finalValue.toFixed(1)}
                 </span>
-                <span style={{ padding: '0.15rem 0.5rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800, background: finalGrade.situacao === 'Aprovado' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)', color: finalGrade.situacao === 'Aprovado' ? '#10b981' : '#ef4444' }}>
-                  {finalGrade.situacao}
+                <span style={{ padding: '0.15rem 0.5rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800, background: finalStatus === 'Aprovado' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)', color: finalStatus === 'Aprovado' ? '#10b981' : '#ef4444' }}>
+                  {finalStatus}
                 </span>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(184,68,31,0.05)', border: '1px solid rgba(184,68,31,0.2)' }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>📝 Provas formais (40%)</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>📝 Provas formais ({weights.pesoProvas}%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {gradeLabel(studentScores.notaProvas)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaProvas === null ? '' : '/ 10'}</span>
                 </div>
@@ -306,7 +276,7 @@ export function StudentLmsModules({
               </div>
 
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(41,62,36,0.06)', border: '1px solid var(--border-color, #E2D7C3)' }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>🔬 Laboratórios interativos (30%)</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>🔬 Laboratórios interativos ({weights.pesoLabs}%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {gradeLabel(studentScores.notaLabs)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaLabs === null ? '' : '/ 10'}</span>
                 </div>
@@ -314,7 +284,7 @@ export function StudentLmsModules({
               </div>
 
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(41,62,36,0.04)', border: '1px solid var(--border-color, #E2D7C3)' }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>📄 Atividades práticas (20%)</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>📄 Atividades práticas ({weights.pesoAtividades}%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {gradeLabel(studentScores.notaAtividades)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaAtividades === null ? '' : '/ 10'}</span>
                 </div>
@@ -322,7 +292,7 @@ export function StudentLmsModules({
               </div>
 
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(228,104,63,0.06)', border: '1px solid rgba(228,104,63,0.25)' }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>💬 Participação & fórum (10%)</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>💬 Participação & fórum ({weights.pesoParticipacao}%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {gradeLabel(studentScores.notaParticipacao)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaParticipacao === null ? '' : '/ 10'}</span>
                 </div>
@@ -553,217 +523,24 @@ export function StudentLmsModules({
       {/* ─────────────────────────────────────────────────────────────
           3. ABA: MEUS CERTIFICADOS DIGITAIS
           ───────────────────────────────────────────────────────────── */}
-      {activeView === 'certificates' && (
-        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldCheck style={{ color: 'var(--color-secondary, #293E24)', width: '1.4rem', height: '1.4rem' }} />
-              Meus certificados digitais acadêmicos
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
-              Certificados autenticados com hash criptográfico, código de verificação institucional e validade curricular.
-            </p>
-          </div>
+      {activeView === 'certificates' && <section className="fade-in" style={{ color: 'var(--text-main)', minWidth: 0 }}>
+        <h2>Meus certificados e comprovantes</h2>
+        <p>Certificados de curso são emitidos pelo professor após conferir requisitos e a carga horária autorizada. Comprovantes de laboratórios registram atividades avaliadas e tempo observado; não substituem uma certificação institucional.</p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', margin: '1rem 0' }}><Link to="/simulacao" className="btn-outline">Gerar comprovante de laboratórios</Link><Link to="/verificar-certificado" className="btn-outline">Verificar documento</Link></div>
+        {certificateLoading && <p role="status">Carregando documentos…</p>}
+        {certificateError && <p role="alert">{certificateError}</p>}
+        {!certificateLoading && !certificateError && myCertificates.length === 0 && <p>Você ainda não possui documentos emitidos. Seu professor pode emitir um certificado quando os requisitos forem cumpridos; avaliações registradas nos laboratórios podem gerar um comprovante.</p>}
+        <div style={{ display: 'grid', gap: '1rem' }}>{myCertificates.map(certificate => <article key={certificate.id} className="glass-card" style={{ padding: '1.25rem', minWidth: 0 }}>
+          <h3>{certificate.tituloCurso}</h3>
+          <p>{certificate.kind === 'course' ? 'Certificado de curso autorizado pelo professor' : 'Comprovante de atividades'} · {certificate.status === 'revoked' ? 'Revogado' : 'Registro ativo'}</p>
+          <p>Emitido em {new Date(certificate.dataEmissao).toLocaleDateString('pt-BR')}. {certificate.completedCount} atividades verificadas.</p>
+          <p>{certificate.kind === 'course' ? certificate.cargaHorariaHoras + ' horas autorizadas do curso; este valor não representa tempo medido de uso.' : 'Este comprovante não atribui carga horária de curso.'}</p>
+          <p>Tempo de uso observado: {certificate.observedSeconds === null ? 'medição incompleta, sem estimativa' : Math.round(certificate.observedSeconds / 60) + ' minutos nas atividades verificadas'}.</p>
+          <details><summary>Ver dados do meu documento</summary><p>Estudante: {certificate.alunoNome}</p><p>Responsável: {certificate.instituicao}</p><p>Requisitos: {certificate.requirements.minimumCompleted} atividades, com aproveitamento mínimo de {certificate.requirements.minScore}%.</p><p style={{ overflowWrap: 'anywhere' }}>Código: {certificate.codigoValidacao}</p></details>
+          <Link to={'/verificar-certificado?codigo=' + encodeURIComponent(certificate.codigoValidacao)} className="btn-outline">Consultar validade pública</Link>
+        </article>)}</div>
+      </section>}
 
-          {/* Grid de Certificados Emitidos */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
-            {myCertificates.map(cert => (
-              <div
-                key={cert.id}
-                className="glass-card"
-                style={{
-                  padding: '1.5rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  border: '1px solid var(--border-color, #E2D7C3)',
-                  background: 'transparent'
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800, textTransform: 'uppercase' }}>
-                      CERTIFICADO DE CONCLUSÃO
-                    </span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      {cert.dataEmissao}
-                    </span>
-                  </div>
-
-                  <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.5rem' }}>
-                    {cert.tituloCurso}
-                  </h3>
-
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 1rem' }}>
-                    Certificamos que <strong>{cert.alunoNome}</strong> concluiu com êxito todas as atividades práticas e avaliações formativas.
-                  </p>
-
-                  <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: 'var(--color-neutral-300, #E2D7C3)', marginBottom: '1.25rem' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Código de validação de autenticidade:</div>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--color-secondary, #293E24)', fontFamily: 'monospace' }}>
-                      {cert.codigoValidacao}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button
-                    onClick={() => setPreviewCert(cert)}
-                    className="btn-gradient"
-                    style={{ flex: 1, padding: '0.6rem', fontSize: '0.85rem', fontWeight: 700 }}
-                  >
-                    Visualizar diploma
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {/* Card para Reivindicar Certificados de Novas Disciplinas */}
-            <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px dashed var(--border-color, #E2D7C3)' }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800 }}>FORMAÇÃO CONTINUADA</span>
-                <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, margin: '0.35rem 0 0.5rem' }}>
-                  Física Teórica & Prática Experimental
-                </h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 1rem' }}>
-                  Requisito: concluir no mínimo 4 laboratórios do módulo de Física com aproveitamento superior a 70%.
-                </p>
-              </div>
-              <button
-                onClick={() => handleClaimNewCert('Física Teórica & Prática Experimental')}
-                className="btn-outline"
-                style={{ padding: '0.6rem', fontSize: '0.85rem', fontWeight: 700 }}
-              >
-                Emitir certificado (40h)
-              </button>
-            </div>
-          </div>
-
-          {/* Validador Público de Certificados para Estudantes */}
-          <div className="glass-card" style={{ padding: '1.5rem', marginTop: '0.5rem' }}>
-            <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              🔍 Verificar Autenticidade de Qualquer Certificado
-            </h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: '0 0 1rem' }}>
-              Compartilhe o código hash com sua escola, universidade ou empregador para comprovação pública de conclusão.
-            </p>
-
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-              <input
-                type="text"
-                value={validationCodeInput}
-                onChange={(e) => setValidationCodeInput(e.target.value)}
-                placeholder="Ex: EDU-2026-F1A8-7B9C"
-                style={{ flex: 1, padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.88rem', fontFamily: 'monospace' }}
-              />
-              <button
-                onClick={handleVerifyCode}
-                className="btn-outline"
-                style={{ padding: '0.65rem 1.15rem', fontWeight: 700, whiteSpace: 'nowrap' }}
-              >
-                Verificar Código
-              </button>
-            </div>
-
-            {validateResult.searched && (
-              <div style={{ padding: '1rem', borderRadius: '8px', background: validateResult.cert ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', border: validateResult.cert ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(239,68,68,0.3)' }}>
-                {validateResult.cert ? (
-                  <div style={{ color: 'var(--text-main)', fontSize: '0.85rem', lineHeight: 1.5 }}>
-                    <div style={{ color: '#10b981', fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.35rem' }}>✓ Certificado Autêntico e Registrado!</div>
-                    <div>Estudante: <strong>{validateResult.cert.alunoNome}</strong></div>
-                    <div>Disciplina: <strong>{validateResult.cert.tituloCurso}</strong> ({validateResult.cert.cargaHorariaHoras} horas)</div>
-                    <div>Emitido em: <strong>{validateResult.cert.dataEmissao}</strong></div>
-                  </div>
-                ) : (
-                  <div style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.85rem' }}>
-                    Código de validação não encontrado no registro institucional.
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Modal / Visualizador Solene de Diploma Formal */}
-          {previewCert && (
-            <div
-              style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(0,0,0,0.85)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 9999,
-                padding: '1rem'
-              }}
-            >
-              <div
-                style={{
-                  width: '100%',
-                  maxWidth: '750px',
-                  background: '#0e131f',
-                  border: '4px double #d97706',
-                  borderRadius: '16px',
-                  padding: '2.5rem 2rem',
-                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.75)',
-                  position: 'relative',
-                  textAlign: 'center'
-                }}
-              >
-                <button
-                  onClick={() => setPreviewCert(null)}
-                  style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
-                >
-                  <X style={{ width: '1.5rem', height: '1.5rem' }} />
-                </button>
-
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🏛️</div>
-                <div style={{ fontSize: '0.85rem', letterSpacing: '4px', textTransform: 'uppercase', color: '#d97706', fontWeight: 800, marginBottom: '0.5rem' }}>
-                  REPÚBLICA FEDERATIVA DO BRASIL • PLATAFORMA EDU-INTERACT
-                </div>
-                <h2 style={{ fontSize: '1.85rem', fontWeight: 900, color: '#f8fafc', margin: '0 0 1.5rem', fontFamily: 'serif', letterSpacing: '1px' }}>
-                  CERTIFICADO DE CONCLUSÃO ACADÊMICA
-                </h2>
-
-                <p style={{ color: '#cbd5e1', fontSize: '1rem', lineHeight: 1.8, margin: '0 0 1.5rem' }}>
-                  Certificamos para os devidos fins legais e comprovação curricular que o(a) estudante
-                  <br />
-                  <strong style={{ fontSize: '1.35rem', color: 'var(--color-neutral-100, #FAF7EE)', display: 'block', margin: '0.5rem 0' }}>
-                    {previewCert.alunoNome}
-                  </strong>
-                  concluiu com louvor e aproveitamento satisfatório as atividades práticas, simulações virtuais e avaliações formais do curso de
-                  <br />
-                  <strong style={{ fontSize: '1.2rem', color: '#f59e0b', display: 'block', margin: '0.4rem 0' }}>
-                    {previewCert.tituloCurso}
-                  </strong>
-                  com carga horária total de <strong>{previewCert.cargaHorariaHoras} horas</strong>.
-                </p>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
-                  <div style={{ textAlign: 'left', fontSize: '0.78rem', color: '#94a3b8' }}>
-                    <div>Data de Expedição: <strong>{previewCert.dataEmissao}</strong></div>
-                    <div>Código Hash: <strong style={{ fontFamily: 'monospace', color: 'var(--color-primary, #E4683F)' }}>{previewCert.codigoValidacao}</strong></div>
-                  </div>
-
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ width: '160px', borderBottom: '1px solid #94a3b8', marginBottom: '0.35rem' }} />
-                    <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Coordenação Pedagógica</span>
-                  </div>
-
-                  <button
-                    onClick={() => window.print()}
-                    className="btn-gradient"
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 700 }}
-                  >
-                    <Printer style={{ width: '1rem', height: '1rem' }} />
-                    Imprimir
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

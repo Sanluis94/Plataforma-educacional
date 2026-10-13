@@ -22,6 +22,8 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, userData, logout } = useAuth();
+  const familyRequested = new URLSearchParams(location.search).get('portal')==='familia';
+  function closeFamily(){setFamilyOpen(false);if(familyRequested){const params=new URLSearchParams(location.search);params.delete('portal');navigate(location.pathname+(params.size?'?'+params.toString():''),{replace:true,state:null});}}
   const role = userData?.role;
   const origin = location.pathname + location.search;
   const home = getRoleHome(role);
@@ -69,7 +71,7 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
         <nav aria-label="Menu de páginas" style={{ display: 'grid', gap: '0.5rem', maxWidth: '35rem' }}>{navLinks(true)}</nav>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem' }}>
           <button className="btn-outline" onClick={() => { menuButton.current?.focus(); setMenuOpen(false); setPricingOpen(true); }}>Conhecer planos (demonstração)</button>
-          <button className="btn-outline" onClick={() => { menuButton.current?.focus(); setMenuOpen(false); setFamilyOpen(true); }}>Portal da família (demonstração)</button>
+          <button className="btn-outline" onClick={() => { menuButton.current?.focus(); setMenuOpen(false); setFamilyOpen(true); }}>Portal da família</button>
           {currentUser && <button className="btn-outline" onClick={() => void handleLogout()}><LogOut size={16} /> Sair da conta</button>}
         </div>
         {logoutError && <p role="alert">{logoutError}</p>}
@@ -77,7 +79,7 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
     </header>
     <main id="main-content" ref={mainRef} tabIndex={-1} style={{ paddingTop: '4rem', minHeight: '100vh', flex: 1, outline: 'none' }}><Suspense fallback={<p role="status" style={{ padding: '2rem' }}>Carregando tela…</p>}><Outlet /></Suspense></main>
     {pricingOpen && <PricingModal onClose={() => setPricingOpen(false)} />}
-    {familyOpen && <ParentBridgeModal studentName={userData?.name || 'Estudante'} onClose={() => setFamilyOpen(false)} />}
+    {(familyOpen || familyRequested) && <ParentBridgeModal onClose={closeFamily} onLogin={() => { setFamilyOpen(false); navigate('/', {state:{loginPurpose:'family',from:'/'}}); onLoginOpen(); }} />}
     {searchOpen && <CommandPaletteModal isOpen onClose={() => setSearchOpen(false)} theme={theme} onThemeToggle={onThemeToggle} onOpenPricing={() => setPricingOpen(true)} onOpenParentBridge={() => setFamilyOpen(true)} />}
     <style>{`
       .header-icon { padding: 0.5rem; min-width: 2.25rem; min-height: 2.25rem; }

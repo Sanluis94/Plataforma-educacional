@@ -109,7 +109,7 @@ describe('Higher Education (Ensino Superior) Laboratories & Engine', () => {
       ruido: 0.0
     };
 
-    let state: any = { w1: 2.0, w2: 2.0, v1: 0, v2: 0, stepCount: 0, trajectory: [] };
+    const state = { w1: 2.0, w2: 2.0, v1: 0, v2: 0, stepCount: 0, trajectory: [] };
     const step1 = lab.physicsStep(params, state, 0);
 
     expect(step1.telemetry.loss_quadratico).toBeGreaterThan(0);
@@ -147,7 +147,7 @@ describe('SpeedGrader Kortex Submissions & Rubric Evaluation', () => {
 
   it('deve salvar e recuperar a avaliação com rubricas e parecer docente via SpeedGrader', async () => {
     const reviewData = {
-      submissionId: 'sub_test_univ_01',
+      submissionId: 'sub_test_univ_01', classId:'class-1', studentId:'student-1', status:'published' as const,
       professorId: 'prof_test_01',
       rubricScores: {
         crit_1: 4.0,
@@ -166,8 +166,8 @@ describe('SpeedGrader Kortex Submissions & Rubric Evaluation', () => {
 
     const retrieved = await getSubmissionReview('sub_test_univ_01');
     expect(retrieved).toBeDefined();
-    expect(retrieved.rubricScores.crit_1).toBe(4.0);
-    expect(retrieved.totalScore).toBe(9.5);
-    expect(retrieved.generalFeedback).toBe('Excelente dedução analítica dos modos de vibração do oscilador.');
+    expect(retrieved!.rubricScores.crit_1).toBe(4.0);
+    expect(retrieved!.totalScore).toBe(9.5);
+    expect(retrieved!.generalFeedback).toBe('Excelente dedução analítica dos modos de vibração do oscilador.');
   });
 });

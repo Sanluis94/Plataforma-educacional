@@ -60,12 +60,10 @@ describe('Interações acessíveis', () => {
     const trigger = screen.getByRole('button', { name: 'Abrir família' });
     trigger.focus();
     fireEvent.click(trigger);
-    const dialog = screen.getByRole('dialog', { name: /Portal da família.*demonstração/ });
+    const dialog = screen.getByRole('dialog', { name: 'Portal da família' });
     expect(screen.getByRole('button', { name: 'Fechar portal da família' })).toHaveFocus();
-    fireEvent.change(screen.getByLabelText('Escrever um recado de exemplo para a coordenação:'), { target: { value: 'Preciso revisar a atividade.' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Visualizar recado' }));
-    expect(screen.getByRole('status')).toHaveTextContent('Este recado não foi enviado.');
-    expect(screen.getByLabelText('Escrever um recado de exemplo para a coordenação:')).toHaveValue('Preciso revisar a atividade.');
+    expect(screen.getByRole('button',{name:'Entrar para acompanhar'})).toBeInTheDocument();
+    expect(screen.getByText(/Somente os estudantes vinculados/)).toBeInTheDocument();
     fireEvent.keyDown(dialog, { key: 'Escape' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();

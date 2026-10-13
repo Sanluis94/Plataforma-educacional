@@ -45,10 +45,37 @@ jobs:
         run: npm ci
       - name: Exigir conteúdo individual nos 582 laboratórios
         run: npm run labs:audit
+      - name: Conferir os índices leves do catálogo
+        run: node scripts/labs/generate-learning-index.mjs --check
       - name: Testar sem serviços reais
         run: npm run test:local
       - name: Compilar TypeScript e aplicação
         run: npm run build
+
+  permissions:
+    name: Permissões e fluxos no Firebase local
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Instalar dependências do lockfile
+        run: npm ci
+      - name: Verificar Auth e Firestore locais
+        run: npm run emulators:check
+      - name: Verificar captura e relatórios de aprendizagem
+        run: npm run etl:emulator-check
+      - name: Verificar publicação, privacidade e acompanhamento
+        run: npm run evolution:emulator-check
 
   lint:
     name: Lint informativo — dívida existente

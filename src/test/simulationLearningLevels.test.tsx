@@ -1,3 +1,4 @@
+import {saveLocalSubmission} from '../modules/data/services/localEtlClient';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
@@ -23,7 +24,8 @@ beforeEach(() => {
   auth.userData.gradeLevel = 'fundamental_1';
   auth.userData.role = 'estudante';
   localStorage.clear();
-  auth.completeLab.mockReset().mockResolvedValue({ alreadyCompleted: false, queued: false });
+  localStorage.setItem('edu_local_db',JSON.stringify({users:[],classes:[],activities:[],submissions:[],progress:{'test-user':{level:1,xp:0,coins:0,completedModules:[],purchasedItems:[]}},learningEvents:[],systemLogs:[]}));
+  auth.completeLab.mockReset().mockImplementation(async(lab,score,evidence)=>{await saveLocalSubmission({activityId:lab.id,activityTitle:lab.title,classId:'',studentId:'test-user',studentName:'Estudante de teste',score,status:'completed',submittedAt:new Date().toISOString(),evidence});const data=JSON.parse(localStorage.getItem('edu_local_db')!);data.progress['test-user'].completedModules=[lab.id];localStorage.setItem('edu_local_db',JSON.stringify(data));return {alreadyCompleted:false,queued:false};});
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
 });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
@@ -51,7 +53,7 @@ describe('Navegação de laboratórios por nível', () => {
     expect(screen.getByRole('article', { name: getLearningLab('fund1_mat_01')!.title })).toBeInTheDocument();
     expect(screen.queryByRole('article', { name: getLearningLab('pos_ia_01')!.title })).not.toBeInTheDocument();
     expect(screen.queryByText('Bancada: Física')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Certificado deste nível' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Comprovante deste nível' })).toBeDisabled();
   });
 
   it('resolve o laboratório da URL e usa seu nível mesmo com parâmetro conflitante', () => {
@@ -118,12 +120,12 @@ describe('Navegação de laboratórios por nível', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Avaliar' }));
     for (const question of content.questions) fireEvent.click(screen.getByLabelText(question.options.find(option => option.correct)!.text));
     fireEvent.click(screen.getByRole('button', { name: 'Corrigir respostas' }));
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Certificado deste nível' })).toBeEnabled());
-    fireEvent.click(screen.getByRole('button', { name: 'Certificado deste nível' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Comprovante deste nível' })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'Comprovante deste nível' }));
     expect(await screen.findByText('1 atividades de aprendizagem')).toBeInTheDocument();
     expect(screen.getByText('Carga horária não contabilizada.', { exact: false })).toBeInTheDocument();
-    const saved = JSON.parse(localStorage.getItem('kortex_user_certificates') || '[]');
-    expect(saved[0]).toMatchObject({ academicLevelLabel: learningLevelLabel('fundamental_1'), completedLabsCount: 1, totalSimulatedHours: 0 });
+    const saved = JSON.parse(localStorage.getItem('kortex_certificate_records_v2') || '[]');
+    expect(saved[0]).toMatchObject({ academicLevelLabel: learningLevelLabel('fundamental_1'), completedItemIds:['fund1_mat_01'], authorizedCourseHours:null });
   });
 
   it('abre a bancada avançada embutida pelo ID recebido', () => {
@@ -142,16 +144,16 @@ describe('Navegação de laboratórios por nível', () => {
     for (const question of content.questions) fireEvent.click(screen.getByLabelText(question.options.find(option => option.correct)!.text));
     fireEvent.click(screen.getByRole('button', { name: 'Corrigir respostas' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível guardar');
-    expect(screen.getByRole('button', { name: 'Certificado deste nível' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Comprovante deste nível' })).toBeDisabled();
     for (const question of content.questions) expect(screen.getByLabelText(question.options.find(option => option.correct)!.text)).toBeChecked();
     fireEvent.click(screen.getByRole('button', { name: 'tente salvar novamente' }));
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Certificado deste nível' })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Comprovante deste nível' })).toBeEnabled());
     expect(auth.completeLab).toHaveBeenCalledTimes(2);
     expect(auth.completeLab).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'fund1_mat_01' }), 100, expect.objectContaining({ stage: 'assessment', questions: expect.any(Array) }));
     expect(screen.queryByRole('alert')).toBeNull();
   });
 
-  it('cria uma atividade no nível profissional ativo e a abre sem conversão para Médio', () => {
+  it('cria uma atividade no nível profissional ativo e a abre sem conversão para Médio', async () => {
     renderPage('/simulacao?level=profissional');
     fireEvent.click(screen.getByRole('button', { name: 'Criar atividade' }));
     const dialog = within(screen.getByRole('dialog', { name: 'Criar atividade no Kortex Studio' }));
@@ -186,8 +188,8 @@ describe('Navegação de laboratórios por nível', () => {
       fireEvent.change(group.getByRole('combobox'), { target: { value: String(question.options.findIndex(option => option.correct)) } });
     });
     fireEvent.click(dialog.getByRole('button', { name: 'Adicionar à sessão' }));
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Oficina profissional da turma de teste' })).toBeInTheDocument();
+    await waitFor(()=>expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(await screen.findByRole('heading', { name: 'Oficina profissional da turma de teste' })).toBeInTheDocument();
     const url = new URL(screen.getByTestId('location').textContent!, 'https://test.invalid');
     expect(url.pathname).toBe('/simulacao');
     expect(url.searchParams.get('lab')).toMatch(/^custom_/);
@@ -213,7 +215,7 @@ describe('Mapa e busca global', () => {
   });
 
   it('apresenta um registro escolar sem chamar a atividade de avançada', () => {
-    render(<CertificateModal isOpen onClose={vi.fn()} certificate={{ certificateId: 'test', studentId: 'student', studentName: 'Ana', institutionName: 'Kortex', academicLevelLabel: learningLevelLabel('fundamental_1'), totalSimulatedHours: 0, completedLabsCount: 1, issueDate: '10/10/2026', verificationHash: 'hash', verificationUrl: 'https://example.test/test' }} />);
+    render(<CertificateModal isOpen onClose={vi.fn()} certificate={{ certificateId: 'test', observedSeconds:null,status:'active', studentId: 'student', studentName: 'Ana', institutionName: 'Kortex', academicLevelLabel: learningLevelLabel('fundamental_1'), totalSimulatedHours: 0, completedLabsCount: 1, issueDate: '10/10/2026', verificationHash: 'hash', verificationUrl: 'https://example.test/test' }} />);
     expect(screen.getByText('1 atividades de aprendizagem')).toBeInTheDocument();
     expect(screen.queryByText(/laboratórios virtuais avançados/)).not.toBeInTheDocument();
     expect(screen.getByText('Carga horária não contabilizada.', { exact: false })).toBeInTheDocument();

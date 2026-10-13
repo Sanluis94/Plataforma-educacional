@@ -8,7 +8,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { SHOP_ITEMS } from '../constants/dashboardConstants';
 import { normalizeLearningLevel, type LearningLevel } from '../constants/learningLevels';
 import { searchLearningLabs, type LearningLab } from '../constants/learningCatalog';
-import { getAIRecommendation, processItemPurchase } from '../services/studentService';
+import { processItemPurchase } from '../services/studentService';
+import { buildStudentStudySuggestion, type StudentStudySuggestion } from '../services/studentStudyGuidance';
+import { getSubmissionsByStudent } from '../../data/repositories/submissionRepository';
+import { getActivitiesByClass } from '../../data/repositories/activityRepository';
 import { getStudentProgress } from '../../data/repositories/studentRepository';
 import { getStudentClasses, enrollStudent } from '../../data/repositories/classRepository';
 import { offlineSyncService } from '../services/offlineSyncService';
@@ -31,13 +34,15 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
   const [progress, setProgress] = useState({ level: 1, xp: 0, coins: 0 });
   const [completedModules, setCompletedModules] = useState<string[]>([]);
   const [purchasedItems, setPurchasedItems] = useState<string[]>([]);
-  const [aiTip, setAiTip] = useState<any>({ message: 'Analisando seu progresso educacional...', actionType: 'none' });
+  const [aiTip, setAiTip] = useState<StudentStudySuggestion | null>(null);
   const [activeSubject, setActiveSubject] = useState<string | null>(null);
   const [activeLab, setActiveLab] = useState<{id: string, title: string, component: any, props: any} | null>(null);
   const [activeView, setActiveView] = useState<'learning' | 'shop' | 'achievements' | 'classes' | 'leaderboard'>('learning');
   const [shopItems, setShopItems] = useState(SHOP_ITEMS);
   const [studentClasses, setStudentClasses] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
+  const [classesLoading, setClassesLoading] = useState(true);
+  const [classesError, setClassesError] = useState('');
   const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
   const prevProgressRef = useRef<ProgressData | null>(null);
   const [labSaveError, setLabSaveError] = useState(false);
@@ -117,6 +122,13 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
     return [...grouped.values()];
   }, [gradeLevel]);
 
+  const refreshProgress=useCallback(async()=>{
+    if(!uid)return;
+    const data=await getStudentProgress(uid);
+    setProgress({level:data.level,xp:data.xp,coins:data.coins});
+    setCompletedModules(data.completedModules??[]);
+  },[uid]);
+
   // Carrega progresso real do Firestore
   useEffect(() => {
     const loadProgress = async () => {
@@ -148,11 +160,13 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
         setLoading(false);
       }
     };
-    
+
     const loadClasses = async () => {
-      if (!uid) return;
-      const classes = await getStudentClasses(uid);
-      setStudentClasses(classes);
+      if (!uid) { setClassesLoading(false); return; }
+      setClassesLoading(true); setClassesError('');
+      try { setStudentClasses(await getStudentClasses(uid)); }
+      catch { setClassesError('Não foi possível carregar suas turmas. Tente recarregar a página.'); }
+      finally { setClassesLoading(false); }
     };
 
     loadProgress();
@@ -176,22 +190,19 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
     return () => { cancelled = true; unsubscribe(); };
   }, [uid]);
 
-  // Busca recomendação da IA adaptativa
+  // Suggestions are grounded in actual assigned activities and question evidence.
   useEffect(() => {
-    if (loading) return;
+    if (loading || classesLoading || !uid) return;
+    let active = true;
     async function fetchTip() {
-      const tip = await getAIRecommendation({
-        level: progress.level,
-        xp: progress.xp,
-        recentModules: activeSubject ? [activeSubject] : [],
-        weaknesses: progress.level < 5 ? ['fundamentos'] : [],
-        completedModules,
-        enrolledClasses: studentClasses.map(c => c.id),
-      });
-      setAiTip(tip);
+      try {
+        const [submissions, activities] = await Promise.all([getSubmissionsByStudent(uid!), Promise.all(studentClasses.map(item => getActivitiesByClass(item.id)))]);
+        if (active) setAiTip(buildStudentStudySuggestion({ classIds: studentClasses.map(item => item.id), activities: activities.flat(), submissions, level: gradeLevel }));
+      } catch { if (active) setAiTip({ title: 'Sua turma é o próximo passo', message: 'Não foi possível consultar suas respostas para sugerir uma revisão. As atividades e materiais da turma continuam disponíveis.', href: '/estudante?tab=activities', actionLabel: 'Ver atividades da turma', evidenceCount: 0 }); }
     }
-    fetchTip();
-  }, [progress.level, progress.xp, activeSubject, completedModules, studentClasses, loading]);
+    void fetchTip();
+    return () => { active = false; };
+  }, [gradeLevel, completedModules, studentClasses, loading, classesLoading, uid]);
 
   // Completa módulo — salva no Firestore
   const handleModuleComplete = useCallback(async (score: number) => {
@@ -219,15 +230,16 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
 
   // Join a class
   const joinClass = useCallback(async (classCode: string) => {
-    if (!uid || !classCode.trim()) return false;
+    if (!uid || !classCode.trim()) return null;
     try {
-      await enrollStudent(classCode.trim(), uid);
+      const enrolledId = await enrollStudent(classCode.trim(), uid);
       const classes = await getStudentClasses(uid);
       setStudentClasses(classes);
-      return true;
+      const joined = classes.find(item => typeof enrolledId === 'string' ? item.id === enrolledId : item.id === classCode.trim() || item.code?.toUpperCase() === classCode.trim().toUpperCase());
+      return joined ? { classId: joined.id, name: joined.name } : null;
     } catch (error) {
       console.error('[useStudentDashboard] Erro ao entrar na turma:', error);
-      return false;
+      return null;
     }
   }, [uid]);
 
@@ -251,6 +263,7 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
   }, [uid, studentClasses, currentUser?.displayName, userData?.name]);
 
   return {
+    refreshProgress,
     progress,
     aiTip,
     activeSubject, setActiveSubject,
@@ -264,6 +277,7 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
     buyItem,
     gradeLevel,
     loading,
+    classesLoading, classesError,
     achievements,
     achievementToast,
     completedModules,

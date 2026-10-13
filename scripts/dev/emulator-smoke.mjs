@@ -35,10 +35,10 @@ try {
   const { user } = await signInAnonymously(auth);
   assert.ok(user.uid, 'Auth deve criar uma sessão anônima no emulador.');
   const progress = doc(db, 'progress', user.uid);
-  await setDoc(progress, { smokeTest: true, completedLabs: 1 });
-  assert.equal((await getDocFromServer(progress)).data()?.completedLabs, 1);
-  await updateDoc(progress, { completedLabs: 2 });
-  assert.equal((await getDocFromServer(progress)).data()?.completedLabs, 2);
+  await setDoc(progress, { level:1,xp:0,coins:0,completedModules:['ficticio-1'],purchasedItems:[],enrolledClasses:[],updatedAt:new Date().toISOString() });
+  assert.equal((await getDocFromServer(progress)).data()?.completedModules.length, 1);
+  await updateDoc(progress, { completedModules:['ficticio-1','ficticio-2'] });
+  assert.equal((await getDocFromServer(progress)).data()?.completedModules.length, 2);
   await deleteDoc(progress);
   assert.equal((await getDocFromServer(progress)).exists(), false);
   await deleteUser(user);

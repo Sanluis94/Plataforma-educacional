@@ -9,6 +9,7 @@ import {
   BookMarked, PenTool
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { HomeNextStep } from '../components/HomeNextStep';
 import { canAccessPath, getRoleHome, ROLE_LABELS, withReturnTo } from '../../core/utils/navigation';
 
 export function InteractivePendulum() {
@@ -108,7 +109,7 @@ export function InteractivePendulum() {
     };
   }, []);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -136,7 +137,7 @@ export function InteractivePendulum() {
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -151,6 +152,7 @@ export function InteractivePendulum() {
     const dist = Math.hypot(px - bobX, py - bobY);
 
     if (dist < 25) {
+      canvas.setPointerCapture(e.pointerId);
       isDragging.current = true;
       canvas.style.cursor = 'grabbing';
     }
@@ -167,12 +169,16 @@ export function InteractivePendulum() {
       ref={canvasRef}
       width={320}
       height={150}
-      onMouseMove={handleMouseMove}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onPointerMove={handleMouseMove}
+      onPointerDown={handleMouseDown}
+      onPointerUp={handleMouseUp}
+      onPointerCancel={handleMouseUp}
+      tabIndex={0}
+      aria-label="Pêndulo interativo. Arraste o peso ou use as setas esquerda e direita para mudar sua posição."
+      onKeyDown={event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();angleRef.current+=event.key==='ArrowLeft'?-.1:.1;velRef.current=0;}}}
       style={{
         width: '100%',
+        touchAction: 'none',
         maxWidth: '300px',
         height: '140px',
         background: 'rgba(41, 62, 36, 0.04)',
@@ -257,11 +263,11 @@ export function Home({ onLoginOpen }: HomeProps) {
           id: 'coordenacao',
           title: 'Painel da coordenação e gestão',
           category: 'Coordenação institucional',
-          description: 'Conheça os exemplos de indicadores e relatórios da coordenação. A importação de alunos nesta área funciona como demonstração.',
+          description: 'Acompanhe entregas e relatórios reais das turmas vinculadas ao seu perfil de coordenação.',
           href: '/coordenacao',
           icon: Building2,
           color: '#293E24',
-          badgeText: 'Demonstração',
+          badgeText: 'Turmas autorizadas',
           actionText: 'Abrir coordenação'
         },
         {
@@ -306,11 +312,11 @@ export function Home({ onLoginOpen }: HomeProps) {
           id: 'coordenacao',
           title: 'Coordenação escolar',
           category: 'Institucional',
-          description: 'Exemplos de indicadores, prévia de alunos e modelos de relatórios educacionais.',
+          description: 'Consulte relatórios reais e autorize quais turmas cada pessoa da coordenação acompanha.',
           href: '/coordenacao',
           icon: Building2,
           color: '#293E24',
-          badgeText: 'Demonstração',
+          badgeText: 'Vínculos institucionais',
           actionText: 'Ver coordenação'
         },
         {
@@ -421,11 +427,11 @@ export function Home({ onLoginOpen }: HomeProps) {
         id: 'certificates',
         title: 'Certificados e histórico escolar',
         category: 'Progresso acadêmico',
-        description: 'Emita seu certificado formal de conclusão com carga horária e consulte o histórico de notas e experimentos realizados.',
+        description: 'Consulte comprovantes de atividades e certificados emitidos pelo professor após a conferência dos requisitos.',
         href: '/estudante?tab=certificates',
         icon: Award,
         color: '#293E24',
-        badgeText: 'Emissão de certificado',
+        badgeText: 'Registros verificáveis',
         actionText: 'Ver certificados'
       }
     ];
@@ -516,6 +522,7 @@ export function Home({ onLoginOpen }: HomeProps) {
             </span>
           </div>
 
+          <HomeNextStep />
           {/* Grid of Clickable Hub Cards */}
           <div style={{
             display: 'grid',
@@ -641,7 +648,7 @@ export function Home({ onLoginOpen }: HomeProps) {
                   Experimentação científica interativa
                 </h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                  Arraste o pêndulo ao lado com o mouse ou toque para conferir a precisão da física newtoniana na nossa plataforma.
+                  Arraste o peso com o mouse ou toque para observar o movimento do pêndulo. Você também pode usar as setas do teclado.
                 </p>
                 <Link to="/simulacao" className="btn-primary" style={{ padding: '0.65rem 1.4rem', fontSize: '0.88rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
                   <Beaker style={{ width: '1rem', height: '1rem' }} />
@@ -699,7 +706,7 @@ export function Home({ onLoginOpen }: HomeProps) {
                   style={{ padding: '0.85rem 2rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
                   <Beaker style={{ width: '1.15rem', height: '1.15rem' }} />
-                  Explorar laboratórios virtuais
+                  Entrar e explorar laboratórios
                 </Link>
                 <Link
                   to="/enem"
@@ -717,10 +724,10 @@ export function Home({ onLoginOpen }: HomeProps) {
                   Conheça os ambientes da plataforma
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1.25rem' }}>
-                  <div
-                    onClick={onLoginOpen}
+                  <Link
+                    to="/professor"
                     className="card card-interactive"
-                    style={{ padding: '1.5rem', borderRadius: '14px', cursor: 'pointer' }}
+                    style={{ padding: '1.5rem', borderRadius: '14px', cursor: 'pointer', textDecoration: 'none' }}
                   >
                     <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '10px', background: 'rgba(41, 62, 36, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
                       <Users style={{ width: '1.3rem', height: '1.3rem', color: 'var(--color-verde-700)' }} />
@@ -729,12 +736,12 @@ export function Home({ onLoginOpen }: HomeProps) {
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
                       Criação de turmas com código de 6 dígitos, planos de aula BNCC com IA e avaliações com correção automática.
                     </p>
-                  </div>
+                  </Link>
 
-                  <div
-                    onClick={onLoginOpen}
+                  <Link
+                    to="/estudante"
                     className="card card-interactive"
-                    style={{ padding: '1.5rem', borderRadius: '14px', cursor: 'pointer' }}
+                    style={{ padding: '1.5rem', borderRadius: '14px', cursor: 'pointer', textDecoration: 'none' }}
                   >
                     <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '10px', background: 'rgba(228, 104, 63, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
                       <BookOpen style={{ width: '1.3rem', height: '1.3rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
@@ -743,7 +750,7 @@ export function Home({ onLoginOpen }: HomeProps) {
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
                       Mural da turma, atividades de laboratório, simulado ENEM para praticar e conquistas por atividades concluídas.
                     </p>
-                  </div>
+                  </Link>
 
                   <Link
                     to="/simulacao"

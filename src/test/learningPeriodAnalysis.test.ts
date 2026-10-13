@@ -1,0 +1,9 @@
+import { describe,expect,it } from 'vitest';
+import { analyzeLearningPeriod } from '../modules/data/services/learningPeriodAnalysis';
+import type { LearningRecord } from '../modules/data/learningAnalyticsTypes';
+const record=(id:string,score:number|null,date:string,question='Questão'):LearningRecord=>({id,itemId:'a',title:'Atividade',source:'activity',subject:'Matemática',studentId:'s',studentName:'Aluno',score,completed:true,submittedAt:date,activeSeconds:null,assigned:true,evidence:{source:'activity',schemaVersion:1,sessionId:id,stage:'assessment',questions:[{questionId:'q',question,selectedOption:0,correct:score===100,expectedText:'Resposta',topic:'Frações'}]}});
+describe('Recorte e comparação de evidências',()=>{
+  it('inclui nota zero, consolida retentativas e conta respostas da última entrega',()=>{const first=record('1',0,'2026-10-01T12:00:00Z'),last=record('2',100,'2026-10-02T12:00:00Z');const result=analyzeLearningPeriod([first,first,last],{from:'2026-10-01',to:'2026-10-02'});expect(result.records).toHaveLength(2);expect(result.before).toBe(0);expect(result.after).toBe(100);expect(result.topics[0]).toMatchObject({responses:1,correct:1});});
+  it('não compara questões de versões diferentes nem fabrica médias sem nota',()=>{const result=analyzeLearningPeriod([record('1',0,'2026-10-01T12:00:00Z'),record('2',100,'2026-10-02T12:00:00Z','Outra questão'),record('3',null,'2026-10-03T12:00:00Z')],{from:'',to:''});expect(result.comparisons).toHaveLength(0);expect(analyzeLearningPeriod([],{from:'',to:''}).average).toBeNull();});
+  it('rejeita intervalo invertido e exclui fora do período',()=>{expect(analyzeLearningPeriod([],{from:'2026-10-02',to:'2026-10-01'}).invalid).toBe(true);expect(analyzeLearningPeriod([record('1',0,'2026-09-01T12:00:00Z')],{from:'2026-10-01',to:''}).records).toHaveLength(0);});
+});

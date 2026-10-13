@@ -4,14 +4,15 @@
  */
 import {
   collection, addDoc, query, where, getDocs, onSnapshot,
-  doc, getDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, increment
+  doc, getDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, increment, setDoc, writeBatch, runTransaction
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
-import { 
-  getLocalEtlClassesByProfessor, 
-  getLocalStudentClasses, 
-  saveLocalClass, 
-  enrollLocalStudent, 
+import { getRepositoryActor } from './repositoryActor';
+import {
+  getLocalEtlClassesByProfessor,
+  getLocalStudentClasses,
+  saveLocalClass,
+  enrollLocalStudent,
   unenrollLocalStudent,
   getLocalComplementaryMaterials,
   saveLocalComplementaryMaterial,
@@ -21,9 +22,11 @@ import {
 } from '../services/localEtlClient';
 import { sanitizeForFirestore } from '../../core/services/firestoreUtils';
 import type { ClassData } from '../types';
+import { DEFAULT_PROGRESS } from '../types';
 
 // Manter a interface Turma para compatibilidade com o front-end existente
 export interface Turma {
+  studentIds?: string[];
   id: string;
   name: string;
   studentsCount: number;
@@ -72,6 +75,7 @@ export const getProfessorClasses = async (professorId?: string): Promise<Turma[]
       return {
         id: docSnap.id,
         name: data.name,
+        studentIds: data.studentIds ?? [],
         studentsCount: Array.isArray(data.studentIds) ? new Set(data.studentIds.filter((id: unknown) => typeof id === 'string' && id.trim())).size : 0,
         code: data.code || docSnap.id.slice(0, 6).toUpperCase(),
         createdAt: data.createdAt || '',
@@ -79,13 +83,13 @@ export const getProfessorClasses = async (professorId?: string): Promise<Turma[]
         academicLevel: data.academicLevel,
       };
     });
-    
+
     // Sort locally to avoid Firestore missing index issues
     docs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     return docs;
   } catch (error) {
     console.error('[ClassRepository] Erro ao buscar turmas:', error);
-    return getLocalEtlClassesByProfessor(professorId);
+    throw error;
   }
 };
 
@@ -117,12 +121,12 @@ export const getStudentClasses = async (studentId: string): Promise<Turma[]> => 
         createdAt: data.createdAt || '',
       };
     });
-    
+
     docs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     return docs;
   } catch (error) {
     console.error('[ClassRepository] Erro ao buscar turmas do estudante:', error);
-    return [];
+    throw error;
   }
 };
 
@@ -153,8 +157,12 @@ export const saveClass = async (
     updatedAt: new Date().toISOString(),
   };
 
-  const docRef = await addDoc(collection(db, COLLECTION), classData);
-  return { id: docRef.id, name, studentsCount: 0, code: shortCode };
+  const reference = doc(collection(db, COLLECTION));
+  const batch = writeBatch(db);
+  batch.set(reference, classData);
+  batch.set(doc(db, 'class_codes', shortCode), { classId: reference.id, code: shortCode, name, professorName: classData.professorName });
+  await batch.commit();
+  return { id: reference.id, name, studentIds: [], studentsCount: 0, code: shortCode };
 };
 
 /**
@@ -169,79 +177,33 @@ export const deleteClass = async (classId: string): Promise<void> => {
  * Matricula um estudante em uma turma.
  * Suporta busca retrocompatível tanto pelo código de 6 dígitos quanto pelo id do Firestore.
  */
-export const enrollStudent = async (classCodeOrId: string, studentId: string): Promise<void> => {
+export async function ensureClassEnrollmentCode(classId: string, data?: ClassData): Promise<void> {
+  if (!db) return;
+  const classData = data ?? await getDoc(doc(db, COLLECTION, classId)).then(snapshot => snapshot.data() as ClassData);
+  if (!classData) throw new Error('Turma não encontrada.');
+  const code = classData.code || classId.slice(0, 6).toUpperCase();
+  const existing = await getDoc(doc(db, 'class_codes', code));
+  const studentIds = [...new Set(classData.studentIds ?? [])];
+  if (!classData.code || classData.studentsCount !== studentIds.length || studentIds.length !== classData.studentIds.length) await updateDoc(doc(db, COLLECTION, classId), { code, studentIds, studentsCount: studentIds.length, updatedAt: new Date().toISOString() });
+  if (!existing.exists()) await setDoc(doc(db, 'class_codes', code), { classId, code, name: classData.name, professorName: classData.professorName ?? 'Professor' });
+  else if (existing.data().classId !== classId) throw new Error('Este código pertence a outra turma. Solicite à administração um novo código.');
+}
+export const enrollStudent = async (classCodeOrId: string, studentId: string): Promise<string> => {
   const normalized = classCodeOrId.trim().toUpperCase();
-
-  if (!db) {
-    await enrollLocalStudent(normalized, studentId);
-    return;
+  if (!db) { await enrollLocalStudent(normalized, studentId); const classes = await getLocalStudentClasses(studentId); const selected = classes.find(entry => entry.code?.toUpperCase() === normalized || entry.id === classCodeOrId.trim()); if (!selected) throw new Error('Turma não encontrada.'); return selected.id; }
+  const actor = await getRepositoryActor();
+  if (actor.uid !== studentId || actor.role !== 'estudante') throw new Error('A matrícula deve ser feita pelo próprio estudante.');
+  const current = await getStudentClasses(studentId);
+  const already = current.find(entry => entry.code?.toUpperCase() === normalized || entry.id === classCodeOrId.trim());
+  let classId = already?.id;
+  if (!classId) {
+    const code = await getDoc(doc(db, 'class_codes', normalized));
+    if (!code.exists()) throw new Error('Turma não encontrada. Confira o código ou peça ao professor para abrir seu painel e disponibilizar o código.');
+    classId = code.data().classId;
+    await updateDoc(doc(db, COLLECTION, classId!), { studentIds: arrayUnion(studentId), studentsCount: increment(1), updatedAt: new Date().toISOString() });
   }
-
-  let targetDocRef = null;
-  let currentStudentIds: string[] = [];
-
-  // 1. Tenta buscar pelo campo 'code' (código de 6 dígitos amigável)
-  try {
-    const codeQuery = query(
-      collection(db, COLLECTION),
-      where('code', '==', normalized)
-    );
-    const codeSnap = await getDocs(codeQuery);
-
-    if (!codeSnap.empty) {
-      const foundDoc = codeSnap.docs[0];
-      targetDocRef = doc(db, COLLECTION, foundDoc.id);
-      currentStudentIds = foundDoc.data().studentIds || [];
-    }
-  } catch (err) {
-    console.warn('[ClassRepository] Falha ao consultar código de turma, tentando por ID:', err);
-  }
-
-  // 2. Se não encontrou por code, tenta buscar direto pelo id do documento
-  if (!targetDocRef) {
-    try {
-      const idDocRef = doc(db, COLLECTION, classCodeOrId.trim());
-      const idSnap = await getDoc(idDocRef);
-      if (idSnap.exists()) {
-        targetDocRef = idDocRef;
-        currentStudentIds = idSnap.data().studentIds || [];
-      }
-    } catch {
-      // Ignora erro se não for um doc ID válido
-    }
-  }
-
-  // 3. Fallback retrocompatível: busca turmas legadas onde o ID começa com os 6 dígitos digitados
-  if (!targetDocRef) {
-    try {
-      const allSnap = await getDocs(collection(db, COLLECTION));
-      const matched = allSnap.docs.find(d => {
-        const dCode = d.data().code;
-        return (dCode && dCode.toUpperCase() === normalized) ||
-               d.id.toUpperCase().startsWith(normalized) ||
-               d.id === classCodeOrId.trim();
-      });
-      if (matched) {
-        targetDocRef = doc(db, COLLECTION, matched.id);
-        currentStudentIds = matched.data().studentIds || [];
-      }
-    } catch (err) {
-      console.warn('[ClassRepository] Falha na busca por fallback:', err);
-    }
-  }
-
-  if (!targetDocRef) {
-    throw new Error('Turma não encontrada. Verifique o código de 6 dígitos digitado.');
-  }
-
-  // Só adiciona se o aluno ainda não estiver na turma
-  if (!currentStudentIds.includes(studentId)) {
-    await updateDoc(targetDocRef, {
-      studentIds: arrayUnion(studentId),
-      studentsCount: increment(1),
-      updatedAt: new Date().toISOString(),
-    });
-  }
+  await setDoc(doc(db, COLLECTION, classId!, 'student_profiles', studentId), { studentId, name: actor.name || 'Estudante', updatedAt: new Date().toISOString() });
+  return classId!;
 };
 
 /**
@@ -272,6 +234,9 @@ export interface ComplementaryMaterial {
 export interface StudentMessage {
   id?: string;
   studentId: string;
+  bonusCoins?: number;
+  bonusXp?: number;
+  rewardClaimedAt?: string;
   studentName: string;
   message: string;
   replied: boolean;
@@ -324,19 +289,20 @@ export const addComplementaryMaterial = async (
 /**
  * Busca mensagens/dúvidas dos alunos enviadas para a turma.
  */
-export const getStudentMessages = async (classId: string): Promise<StudentMessage[]> => {
+export const getStudentMessages = async (classId: string, studentId?:string): Promise<StudentMessage[]> => {
   if (!db) {
     return getLocalStudentMessages(classId);
   }
   try {
-    const q = collection(db, COLLECTION, classId, 'messages');
+    const reference=collection(db, COLLECTION, classId, 'messages');
+    const q = studentId?query(reference,where('studentId','==',studentId)):reference;
     const snap = await getDocs(q);
     const docs = snap.docs.map(d => ({ id: d.id, ...d.data() } as StudentMessage));
     docs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     return docs;
   } catch (error) {
     console.error('[ClassRepository] Erro ao buscar mensagens:', error);
-    return getLocalStudentMessages(classId);
+    throw error;
   }
 };
 
@@ -379,36 +345,37 @@ export const replyStudentMessage = async (
     return;
   }
   try {
+    if(!Number.isFinite(bonusCoins)||!Number.isFinite(bonusXp)||bonusCoins<0||bonusCoins>1000||bonusXp<0||bonusXp>1000)throw new Error('A recompensa deve ficar entre 0 e 1.000 pontos.');
     const msgDocRef = doc(db, COLLECTION, classId, 'messages', messageId);
     await updateDoc(msgDocRef, {
       replied: true,
       replyText,
-      repliedAt: new Date().toISOString()
+      repliedAt: new Date().toISOString(),
+      bonusCoins, bonusXp,
     });
 
-    // Se houver recompensa e o ID do aluno, adiciona no progresso dele
-    if (studentId && (bonusCoins > 0 || bonusXp > 0)) {
-      const studentDocRef = doc(db, 'progress', studentId);
-      const studentSnap = await getDoc(studentDocRef);
-      if (studentSnap.exists()) {
-        const data = studentSnap.data();
-        const currentXp = data.xp || 0;
-        const currentCoins = data.coins || 0;
-        const newXp = currentXp + bonusXp;
-        const newCoins = currentCoins + bonusCoins;
-        const newLevel = Math.floor(newXp / 500) + 1;
-        await updateDoc(studentDocRef, {
-          xp: newXp,
-          coins: newCoins,
-          level: newLevel,
-          updatedAt: new Date().toISOString()
-        });
-      }
-    }
+    // The student receives the reward atomically on the next message refresh.
   } catch (error) {
     console.error('[ClassRepository] Erro ao responder dúvida:', error);
+    throw error;
   }
 };
+
+export async function claimStudentMessageReward(classId:string,messageId:string,studentId:string):Promise<boolean>{
+  if(!db)return false;
+  const database=db,messageRef=doc(database,COLLECTION,classId,'messages',messageId),progressRef=doc(database,'progress',studentId);
+  return runTransaction(database,async transaction=>{
+    const [message,progress]=await Promise.all([transaction.get(messageRef),transaction.get(progressRef)]);
+    if(!message.exists())return false;
+    const data=message.data();
+    if(data.studentId!==studentId||!data.replied||data.rewardClaimedAt||!(data.bonusCoins>0||data.bonusXp>0))return false;
+    const current={...DEFAULT_PROGRESS,...(progress.exists()?progress.data():{})};
+    const xp=current.xp+(data.bonusXp??0),coins=current.coins+(data.bonusCoins??0),updatedAt=new Date().toISOString();
+    transaction.set(progressRef,{...current,xp,coins,level:Math.floor(xp/500)+1,updatedAt},{merge:true});
+    transaction.update(messageRef,{rewardClaimedAt:updatedAt});
+    return true;
+  });
+}
 
 /**
  * Escuta reativa em tempo real de materiais complementares da turma.
@@ -437,20 +404,22 @@ export const subscribeComplementaryMaterials = (
  */
 export const subscribeStudentMessages = (
   classId: string,
-  callback: (messages: StudentMessage[]) => void
+  callback: (messages: StudentMessage[]) => void,
+  studentId?:string
 ): () => void => {
   if (!db) {
     getLocalStudentMessages(classId).then(callback);
     return () => {};
   }
-  const q = collection(db, COLLECTION, classId, 'messages');
+  const reference=collection(db, COLLECTION, classId, 'messages');
+  const q = studentId?query(reference,where('studentId','==',studentId)):reference;
   return onSnapshot(q, (snap) => {
     const docs = snap.docs.map(d => ({ id: d.id, ...d.data() } as StudentMessage));
     docs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     callback(docs);
   }, (err) => {
     console.error('[ClassRepository] Erro no listener de mensagens:', err);
-    getLocalStudentMessages(classId).then(callback);
+    callback([]);
   });
 };
 

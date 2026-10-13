@@ -73,6 +73,7 @@ describe('login continuity', () => {
     window.history.replaceState(null, '', '/coordenacao?tab=reports');
     render(<App />);
     await screen.findByRole('dialog');
+    fireEvent.click(screen.getByRole('button',{name:/estudante$/i}));
     fireEvent.click(screen.getByRole('button', { name: 'Entrar localmente' }));
     await screen.findByRole('heading', { name: '/estudante' });
     expect(screen.queryByText('Acesso Restrito')).toBeNull();

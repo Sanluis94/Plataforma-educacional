@@ -2,8 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildPedagogicalSummary, generatePedagogicalDiagnosis, getEffectiveGeminiApiKey, type PedagogicalDiagnosis } from '../../core/services/geminiService';
 import type { ClassLearningReport, LearningRecord, LearningStatus } from '../../data/learningAnalyticsTypes';
 import './ClassLearningReportView.css';
+import { LearningPeriodAnalysis } from './LearningPeriodAnalysis';
+import { analyzeLearningPeriod } from '../../data/services/learningPeriodAnalysis';
 
-interface Props { report: ClassLearningReport; onViewMessages?: () => void }
+interface Props { report: ClassLearningReport; onViewMessages?: () => void; onReviewSubmission?:(studentId:string,submissionId:string)=>void; onPlanRetake?:(topic:string)=>void; onOrientStudent?:(studentId:string)=>void }
 const STATUS_LABELS: Record<LearningStatus, string> = { sem_dados: 'Sem evidências', precisa_apoio: 'Precisa de apoio', regular: 'Em acompanhamento', em_destaque: 'Destaque' };
 const STATUS_ORDER: Record<LearningStatus, number> = { precisa_apoio: 0, sem_dados: 1, regular: 2, em_destaque: 3 };
 const SOURCE_LABELS = { activity: 'Atividade', lab: 'Laboratório', exam: 'Avaliação', enem: 'Treino ENEM' };
@@ -13,10 +15,11 @@ const dateLabel = (value: string | null) => !value || !Number.isFinite(Date.pars
 const PARAMETER_LABELS: Record<string, string> = { gravity: 'Gravidade', mass: 'Massa', velocity: 'Velocidade', speed: 'Velocidade', temperature: 'Temperatura', pressure: 'Pressão', volume: 'Volume', time: 'Tempo', energy: 'Energia', height: 'Altura', angle: 'Ângulo', force: 'Força', distance: 'Distância', concentration: 'Concentração', acceleration: 'Aceleração', friction: 'Atrito', voltage: 'Tensão', current: 'Corrente', resistance: 'Resistência' };
 function variableLabel(key: string) { return PARAMETER_LABELS[key] ?? key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]/g, ' '); }
 
-function RecordEvidence({ record }: { record: LearningRecord }) {
+function RecordEvidence({ record, onReview }: { record: LearningRecord; onReview?:()=>void }) {
   const evidence = record.evidence;
   return <article className="learning-report-record">
     <h5>{record.title}</h5>
+    {onReview && (record.source==='activity'||record.source==='lab') && <button type="button" className="btn-outline" onClick={onReview}>Corrigir esta entrega</button>}
     <p className="learning-report-muted">{SOURCE_LABELS[record.source]} · {record.assigned ? 'Atribuída à turma' : 'Prática complementar'} · {evidence?.stage === 'exploration' ? 'Exploração registrada' : evidence?.stage === 'response' ? 'Resposta entregue para leitura' : record.completed ? 'Concluída' : 'Em andamento'}</p>
     <dl className="learning-report-record-meta">
       <div><dt>{record.source === 'enem' ? 'Acertos (%)' : 'Nota registrada'}</dt><dd>{evidence?.stage === 'exploration' ? 'Não se aplica à exploração' : evidence?.stage === 'response' ? 'Resposta escrita sem correção automática' : percent(record.score)}</dd></div>
@@ -42,9 +45,10 @@ function RecordEvidence({ record }: { record: LearningRecord }) {
 }
 
 /** Dados consolidados e evidências individuais da turma; ausência de dados permanece visível. */
-export function ClassLearningReportView({ report, onViewMessages }: Props) {
+export function ClassLearningReportView({ report, onViewMessages, onReviewSubmission, onPlanRetake, onOrientStudent }: Props) {
   const [studentSearch, setStudentSearch] = useState('');
   const [studentStatus, setStudentStatus] = useState('all');
+  const [period,setPeriod] = useState({from:'',to:''});
   const [aiResponse, setAiResponse] = useState<{ report: ClassLearningReport; diagnosis: PedagogicalDiagnosis } | null>(null);
   const [loadingReport, setLoadingReport] = useState<ClassLearningReport | null>(null);
   const aiLoading = loadingReport === report;
@@ -103,13 +107,15 @@ export function ClassLearningReportView({ report, onViewMessages }: Props) {
         <div><dt>Sem tempo registrado</dt><dd>{report.quality.missingTimes}</dd></div></dl>
       {report.quality.warnings.length > 0 && <><h3>Pontos a conferir</h3><ul>{report.quality.warnings.map((warning, index) => <li key={index}>{warning}</li>)}</ul></>}
     </details>
+    <LearningPeriodAnalysis report={report} period={period} onChange={setPeriod} onPlanRetake={onPlanRetake} />
     <section aria-labelledby="learning-students-title"><div className="learning-report-section-heading"><div><h3 id="learning-students-title">Acompanhamento por aluno</h3><p>Confira os motivos e as entregas antes de definir uma intervenção.</p></div>{onViewMessages && <button type="button" className="btn-outline" onClick={onViewMessages}>Abrir mensagens da turma</button>}</div>
       <div className="learning-report-filters"><label>Buscar aluno<input type="search" value={studentSearch} onChange={event => setStudentSearch(event.target.value)} /></label><label>Mostrar<select value={studentStatus} onChange={event => setStudentStatus(event.target.value)}><option value="all">Todos os alunos</option>{Object.entries(STATUS_LABELS).map(([status, label]) => <option key={status} value={status}>{label}</option>)}</select></label></div>
       <p className="learning-report-muted" role="status">{visibleStudents.length} de {report.students.length} alunos exibidos.</p>
       <div className="learning-report-students">{visibleStudents.map(student => <article className="learning-report-student" key={student.studentId}><header><h4>{student.studentName}</h4><span className={`learning-report-status status-${student.status}`}>{STATUS_LABELS[student.status]}</span></header>
         <dl className="learning-report-record-meta"><div><dt>Entregas atribuídas</dt><dd>{student.completedAssignedCount} de {student.expectedCount}</dd></div><div><dt>Média com nota</dt><dd>{percent(student.averageScore)}</dd></div><div><dt>Última evidência</dt><dd>{dateLabel(student.lastActive)}</dd></div></dl>
         {student.supportReasons.length > 0 && <ul className="learning-report-reasons">{student.supportReasons.map((reason, index) => <li key={index}>{reason}</li>)}</ul>}
-        {student.records.length ? <details><summary>Ver {student.records.length} {student.records.length === 1 ? 'entrega' : 'entregas'} de {student.studentName}</summary><div className="learning-report-records">{student.records.map(record => <RecordEvidence key={`${record.source}:${record.id}`} record={record} />)}</div></details> : <p className="learning-report-muted">Nenhuma entrega registrada. Combine com o aluno como iniciar as atividades.</p>}
+        {onOrientStudent&&<button type="button" className="btn-outline" onClick={()=>onOrientStudent(student.studentId)}>Orientar este aluno</button>}
+        {student.records.length ? <details><summary>Ver entregas de {student.studentName} no período</summary><div className="learning-report-records">{analyzeLearningPeriod(student.records,period).records.map(record => <RecordEvidence key={`${record.source}:${record.id}`} record={record} onReview={onReviewSubmission?()=>onReviewSubmission(student.studentId,record.id):undefined} />)}{!analyzeLearningPeriod(student.records,period).records.length&&<p>Nenhuma entrega neste período. Ajuste as datas para consultar o histórico.</p>}</div></details> : <p className="learning-report-muted">Nenhuma entrega registrada. Combine com o aluno como iniciar as atividades.</p>}
       </article>)}</div>{!visibleStudents.length && <p className="learning-report-notice">{report.students.length ? 'Nenhum aluno corresponde a este filtro.' : 'Ainda não há alunos matriculados nesta turma.'}</p>}
     </section>
     <section aria-labelledby="learning-activities-title"><h3 id="learning-activities-title">Leitura por atividade</h3><p>Questões com menor acerto ajudam a escolher o que retomar com a turma.</p>

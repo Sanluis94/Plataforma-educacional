@@ -49,8 +49,8 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               <Award className="w-5 h-5" />
             </div>
             <div>
-              <h3 id="cert-modal-title" className="font-bold text-sm text-white">Certificado Digital de Prática Experimental</h3>
-              <p className="text-xs text-slate-400">Validação para Atividades Acadêmicas Complementares (AAC)</p>
+              <h3 id="cert-modal-title" className="font-bold text-sm text-white">Comprovante de atividades</h3>
+              <p className="text-xs text-slate-400">Registro de aprendizagem; o aceite pela instituição depende dos critérios do curso.</p>
             </div>
           </div>
           <button onClick={onClose} className="p-1 text-slate-400 hover:text-white rounded">
@@ -66,7 +66,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
           </div>
 
           <div className="text-[11px] font-bold tracking-widest uppercase text-amber-500 mb-2">
-            REPÚBLICA FEDERATIVA DO BRASIL &bull; SUPER LMS KORTEX
+            EDU-INTERACT &bull; ATIVIDADES DE APRENDIZAGEM
           </div>
           <h2 className="text-xl md:text-2xl font-serif font-bold text-white mb-4">
             REGISTRO DE ATIVIDADES DE APRENDIZAGEM
@@ -93,7 +93,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
           {/* Validation badge */}
           <div className="mt-6 flex items-center justify-center space-x-1.5 text-[11px] text-emerald-400">
             <ShieldCheck className="w-4 h-4" />
-            <span>Assinado e Verificado Criptograficamente via SHA-256</span>
+            <a href={certificate.verificationUrl} target="_blank" rel="noopener noreferrer">Consultar registro e integridade do comprovante</a>
           </div>
         </div>
 

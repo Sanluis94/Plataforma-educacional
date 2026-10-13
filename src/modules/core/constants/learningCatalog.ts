@@ -1,4 +1,4 @@
-import { MASTER_LABS_CATALOG } from './masterLabsCatalog';
+import { LEARNING_CATALOG_INDEX } from './learningCatalogIndex';
 import { LEGACY_LABS_CATALOG } from './legacyLabsCatalog';
 import { LEARNING_LEVELS, learningLevelLabel, type LearningLevel } from './learningLevels';
 
@@ -26,7 +26,7 @@ const subjectIcons: Record<string, string> = {
 };
 
 export const LEARNING_LABS_CATALOG: LearningLab[] = [
-  ...MASTER_LABS_CATALOG.map(lab => ({
+  ...LEARNING_CATALOG_INDEX.map(lab => ({
     ...lab,
     subjectId: normalizeText(lab.subject).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''),
     academicLevelLabel: learningLevelLabel(lab.academicLevel),

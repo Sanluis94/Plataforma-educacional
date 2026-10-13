@@ -1,3 +1,4 @@
+import {seedAuthorizedLearning} from './fixtures/authorizedLearning';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateLabReportMarkdown, generateLabReportLatex, type LabReportData } from '../modules/core/services/labReportService';
 import { calculateItemProbability, estimateStudentProficiency, getCalibratedTriParametersForLab, type TriAnswerRecord } from '../modules/core/services/triEvaluationService';
@@ -123,38 +124,40 @@ describe('20 Strategic Improvements Suite - Kortex Super LMS', () => {
     });
 
     it('should issue lab certificate and confirm verification URL', async () => {
+      const fixture=seedAuthorizedLearning('stud-554','Roberto Alencar');fixture.login('estudante');
       const cert = await issueLabCertificate({
         studentId: 'stud-554',
         studentName: 'Roberto Alencar',
-        academicLevelLabel: 'Graduação em Física',
+        academicLevel:'medio',academicLevelLabel: 'Ensino Médio',
         completedLabsCount: 8,
         totalSimulatedHours: 80
       });
 
-      expect(cert.certificateId).toContain('CERT-KTX-');
+      expect(cert.certificateId).toMatch(/^[0-9a-f-]{36}$/i);
       expect(cert.studentName).toBe('Roberto Alencar');
-      expect(cert.verificationUrl).toContain('plataforma-educacional-73df6.web.app');
-      
+      expect(cert.verificationUrl).toContain('/verificar-certificado?codigo=');
+
       const isAuthentic = await verifyCertificateAuthenticity(cert);
       expect(isAuthentic).toBe(true);
 
       // Tampered certificate
-      const tampered = { ...cert, totalSimulatedHours: 999 };
+      const tampered = { ...cert, completedLabsCount: 999 };
       const isFake = await verifyCertificateAuthenticity(tampered);
       expect(isFake).toBe(false);
     });
 
-    it('should maintain backward compatibility with LMS classic certificate issuance', () => {
-      const cert = issueCertificate('s-1', 'Maria Costa', 'Química Orgânica', 60);
-      expect(cert.codigoValidacao).toContain('EDU-2026-');
+    it('emite certificado de curso somente após conferir evidências da turma', async () => {
+      const {options}=seedAuthorizedLearning('s-1','Maria Costa');
+      const cert = await issueCertificate('s-1', 'Maria Costa', 'Química Orgânica', 60, options);
+      expect(cert.codigoValidacao).toMatch(/^[0-9a-f-]{36}$/i);
       expect(cert.alunoNome).toBe('Maria Costa');
 
-      const userCerts = getStudentCertificates('s-1');
+      const userCerts = await getStudentCertificates('s-1');
       expect(userCerts.some(c => c.alunoNome === 'Maria Costa')).toBe(true);
 
-      const verified = verifyCertificate(cert.codigoValidacao);
+      const verified = await verifyCertificate(cert.codigoValidacao);
       expect(verified).not.toBeNull();
-      expect(verified?.tituloCurso).toBe('Química Orgânica');
+      expect(verified?.title).toBe('Química Orgânica');
     });
   });
 

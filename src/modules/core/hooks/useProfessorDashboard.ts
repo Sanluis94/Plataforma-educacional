@@ -8,7 +8,8 @@ import { getProfessorClasses } from '../../data/repositories/classRepository';
 import { getActivitiesByProfessor, deleteActivity } from '../../data/repositories/activityRepository';
 import { getLiveClassReport, getProfessorLearningOverview } from '../../data/repositories/reportRepository';
 import type { LocalClassReport } from '../../data/services/localEtlClient';
-import { createNewClass, validateClassName, publishActivity } from '../services/professorService';
+import { createNewClass, validateClassName } from '../services/professorService';
+import { publishClassActivity } from '../../data/repositories/classPublicationRepository';
 import { useAuth } from '../contexts/AuthContext';
 import type { ActivityData } from '../../data/types';
 import { buildClassLearningReportCSV } from '../../data/services/learningReportExport';
@@ -34,6 +35,8 @@ export const useProfessorDashboard = (navigation?: { activeTab: string; classId:
   const [loading, setLoading] = useState(true);
   const [globalStats, setGlobalStats] = useState<{ completionRate: number | null; engagement: number | null }>({ completionRate: null, engagement: null });
   const [statsError, setStatsError] = useState<string | null>(null);
+  const [classCreationError, setClassCreationError] = useState<string | null>(null);
+  const [creatingClass, setCreatingClass] = useState(false);
 
   // Carrega turmas do professor autenticado
   useEffect(() => {
@@ -92,11 +95,11 @@ export const useProfessorDashboard = (navigation?: { activeTab: string; classId:
     setReportLoading(true);
     setClassReport(null);
     try {
-      const report = await getLiveClassReport(classId);
+      const report = await getLiveClassReport(classId,{force:true});
       if (request === reportRequest.current) {
         setClassReport(report);
         try {
-          const overview = await getProfessorLearningOverview(turmas.map(turma => turma.id));
+          const overview = await getProfessorLearningOverview(turmas.map(turma => turma.id),report?[report]:[]);
           if (request === reportRequest.current) { setGlobalStats(overview); setStatsError(null); }
         } catch {
           if (request === reportRequest.current) setStatsError('Os indicadores gerais não foram atualizados. O relatório desta turma continua disponível.');
@@ -122,7 +125,9 @@ export const useProfessorDashboard = (navigation?: { activeTab: string; classId:
   // Cria turma vinculada ao professor autenticado
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateClassName(newClassName) || !currentUser?.uid) return;
+    if (creatingClass) return;
+    if (!validateClassName(newClassName) || !currentUser?.uid) { setClassCreationError('Preencha o nome da turma para continuar.'); return; }
+    setClassCreationError(null); setCreatingClass(true);
 
     try {
       const novaTurma = await createNewClass(
@@ -137,42 +142,23 @@ export const useProfessorDashboard = (navigation?: { activeTab: string; classId:
       return novaTurma;
     } catch (error) {
       console.error('[useProfessorDashboard] Erro ao criar turma:', error);
+      setClassCreationError('Não foi possível confirmar a criação da turma. O nome foi preservado; tente novamente.');
+    } finally {
+      setCreatingClass(false);
     }
   };
 
   // Publica atividade no Firestore
   const handlePublishActivity = async (customPayload?: Partial<ActivityData>) => {
-    if (!currentUser?.uid) return;
+    if (!currentUser?.uid) throw new Error('Entre novamente para publicar uma atividade.');
     const payload = customPayload || activityConfig;
-
-    try {
-      await publishActivity(
-        payload.title || 'Atividade sem título',
-        payload.type || 'quiz',
-        payload.config || {},
-        currentUser.uid,
-        {
-          classId: payload.classId || selectedClassId || undefined,
-          className: payload.className || turmas.find(t => t.id === (payload.classId || selectedClassId))?.name || undefined,
-          subject: payload.subject,
-          description: payload.description,
-          theoryContent: payload.theoryContent,
-          questions: payload.questions,
-          xpReward: payload.xpReward || 100,
-          coinReward: payload.coinReward || 20,
-          dueDate: payload.dueDate,
-        }
-      );
-      // Reload activities
-      const data = await getActivitiesByProfessor(currentUser.uid);
-      setActivities(data);
-
-      setActiveTab('classes');
-      setBuilderStep(1);
-      setActivityConfig({ type: 'quiz', title: '', module: '', config: {} });
-    } catch (error) {
-      console.error('[useProfessorDashboard] Erro ao publicar atividade:', error);
-    }
+    const classId = payload.classId ?? selectedClassId;
+    if (!classId || !turmas.some(turma => turma.id === classId)) throw new Error('Selecione uma das suas turmas para publicar.');
+    const saved = await publishClassActivity(currentUser.uid, { ...payload, classId, className: turmas.find(turma => turma.id === classId)?.name });
+    setActivities(previous => [saved, ...previous.filter(activity => activity.id !== saved.id)]);
+    setBuilderStep(1);
+    setActivityConfig({ type: 'quiz', title: '', module: '', config: {} });
+    return saved;
   };
 
   // Deleta atividade
@@ -231,5 +217,7 @@ export const useProfessorDashboard = (navigation?: { activeTab: string; classId:
     globalStats,
     statsError,
     loading,
+    classCreationError,
+    creatingClass,
   };
 };

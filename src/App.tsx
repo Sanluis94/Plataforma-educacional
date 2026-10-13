@@ -17,6 +17,7 @@ const CoordenacaoDashboard = lazy(() => import('./modules/ux/pages/CoordenacaoDa
 const EnemSimuladoView = lazy(() => import('./modules/ux/pages/EnemSimuladoView'));
 const Home = lazy(() => import('./modules/ux/pages/Home').then(m => ({ default: m.Home })));
 const NotFound = lazy(() => import('./modules/ux/pages/NotFound'));
+const VerifyCertificate = lazy(() => import('./modules/ux/pages/VerifyCertificate'));
 
 function LoginFlow({ loginOpen, openLogin, closeLogin }: { loginOpen: boolean; openLogin: () => void; closeLogin: () => void }) {
   const location = useLocation();
@@ -37,9 +38,12 @@ function LoginFlow({ loginOpen, openLogin, closeLogin }: { loginOpen: boolean; o
 
 function LoginSession({ destination, onCancel, onComplete }: { destination: string | null; onCancel: () => void; onComplete: () => void }) {
   const { userData } = useAuth();
+  const location = useLocation();
+  const purpose = location.state?.loginPurpose === 'family' ? 'family' : 'learning';
   const [loginCompleted, setLoginCompleted] = useState(false);
-  if (loginCompleted && userData) return <LoginDestination destination={getReturnDestination(userData.role, destination)} onComplete={onComplete} />;
-  return <LoginModal onClose={onCancel} onSuccess={() => setLoginCompleted(true)} />;
+  if (loginCompleted && userData) return <LoginDestination destination={purpose === 'family' ? '/?portal=familia' : getReturnDestination(userData.role, destination)} onComplete={onComplete} />;
+  const initialRole = destination?.startsWith('/professor') ? 'professor' : destination?.startsWith('/coordenacao') ? 'coordenador' : 'estudante';
+  return <LoginModal purpose={purpose} initialRole={initialRole} onClose={onCancel} onSuccess={() => setLoginCompleted(true)} />;
 }
 
 function LoginDestination({ destination, onComplete }: { destination: string; onComplete: () => void }) {
@@ -80,6 +84,7 @@ function App() {
                 />
               }>
                 <Route path="/" element={<Home onLoginOpen={openLogin} />} />
+                <Route path="/verificar-certificado" element={<VerifyCertificate />} />
 
                 {/* Rotas protegidas por role com segregação estrita */}
                 <Route path="/professor" element={

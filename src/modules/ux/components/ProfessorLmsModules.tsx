@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Calendar, CheckCircle, AlertTriangle, XCircle, Award,
+  Calendar, CheckCircle, AlertTriangle,  Award,
   Users, MessageSquare, Plus, ShieldCheck, Download, Star,
   Send, Trash2, Filter
 } from 'lucide-react';
@@ -10,7 +10,6 @@ import type {
   ForumTopic,
   GradebookWeights,
   StudentGradeReport,
-  DigitalCertificate,
   ExamAttempt,
   ExamData,
   ActivityData
@@ -30,18 +29,21 @@ import {
   deleteForumReply
 } from '../../data/repositories/gradebookRepository';
 import {
-  issueCertificate,
-  verifyCertificate
-} from '../../core/services/certificateService';
-import {
   getSubmissionsByClass,
-  saveSubmissionReview
+  getSubmissionReviewsByClass,
+  type SubmissionReview
 } from '../../data/repositories/submissionRepository';
 import type { SubmissionData } from '../../data/types';
 import { getExamAttemptsByClass, getExamsByClass } from '../../data/repositories/examRepository';
 import { getLiveClassReport } from '../../data/repositories/reportRepository';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { getActivitiesByClass } from '../../data/repositories/activityRepository';
+import { getGradePolicy, saveGradePolicy, GRADE_PERIODS, applyPublishedReviews, type GradePolicy, type GradePeriod, type GradePolicyValues } from '../../data/repositories/gradePolicyRepository';
+import { gradePolicyDataInPeriod } from '../../data/services/gradePolicyPeriod';
+import { useNavigationParams } from '../hooks/useNavigationParams';
+import { TeacherCorrectionWorkspace } from './TeacherCorrectionWorkspace';
+import { TeacherCertificates } from './TeacherCertificates';
+import './ProfessorWorkflow.css';
 
 interface ProfessorLmsModulesProps {
   turmas: Turma[];
@@ -59,7 +61,10 @@ export function ProfessorLmsModules({
   onSelectClass,
   professorName
 }: ProfessorLmsModulesProps) {
-  const [subTab, setSubTab] = useState<'attendance' | 'gradebook' | 'speedgrader' | 'forum' | 'certificates' | 'lab_studio'>('attendance');
+  const [navigation, setNavigation] = useNavigationParams();
+  const subTabs = ['attendance', 'gradebook', 'speedgrader', 'forum', 'certificates', 'lab_studio'] as const;
+  const subTab = subTabs.includes(navigation.get('subtab') as typeof subTabs[number]) ? navigation.get('subtab') as typeof subTabs[number] : 'attendance';
+  const setSubTab = (tab: typeof subTabs[number]) => setNavigation(previous => { const next = new URLSearchParams(previous); next.set('subtab', tab); return next; });
 
   const activeClassId = selectedClassId || turmas[0]?.id || '';
   const currentTurma = turmas.find(t => t.id === activeClassId);
@@ -75,6 +80,13 @@ export function ProfessorLmsModules({
   const [participationScores, setParticipationScores] = useState<Record<string, number>>({});
   const [p1ExamId, setP1ExamId] = useState('');
   const [p2ExamId, setP2ExamId] = useState('');
+  const [reviews, setReviews] = useState<SubmissionReview[]>([]);
+  const gradePeriod = GRADE_PERIODS.includes(navigation.get('gradePeriod') as GradePeriod) ? navigation.get('gradePeriod') as GradePeriod : 'atual';
+  const [policy, setPolicy] = useState<GradePolicy | null>(null), [policyLoading, setPolicyLoading] = useState(false), [policySaving, setPolicySaving] = useState(false);
+  const [policyError, setPolicyError] = useState(''), [policyMessage, setPolicyMessage] = useState('');
+  const [policyExplanation, setPolicyExplanation] = useState('As notas são calculadas a partir das últimas entregas avaliadas. Categorias sem evidência permanecem sem nota.');
+  const [reviewMode, setReviewMode] = useState<GradePolicy['reviewMode']>('feedback-only');
+  const [startDate, setStartDate] = useState<string | null>(null), [endDate, setEndDate] = useState<string | null>(null);
 
   // ─────────────────────────────────────────────────────────────
   // 1. ESTADO DE FREQUÊNCIA (ATTENDANCE)
@@ -151,15 +163,15 @@ export function ProfessorLmsModules({
     const reports = calculateClassGradebook(
       roster,
       activeClassId,
-      realSubmissions,
-      examAttempts,
+      gradePolicyDataInPeriod({ startDate, endDate }, { submissions: applyPublishedReviews(realSubmissions, reviews, { classId: activeClassId, reviewMode }), examAttempts, attendanceRecords }).submissions,
+      gradePolicyDataInPeriod({ startDate, endDate }, { submissions: realSubmissions, examAttempts, attendanceRecords }).examAttempts,
       weights,
-      { attendanceRecords, activities: classActivities, acceptedRecordIds, participationScores, p1ExamId, p2ExamId }
+      { attendanceRecords: gradePolicyDataInPeriod({ startDate, endDate }, { submissions: realSubmissions, examAttempts, attendanceRecords }).attendanceRecords, activities: classActivities, acceptedRecordIds, participationScores, p1ExamId, p2ExamId }
     );
 
     // Mescla com taxas reais de presença
     const enriched = reports.map((rep: StudentGradeReport) => {
-      const att = calculateStudentAttendanceRate(rep.studentId, attendanceRecords);
+      const att = calculateStudentAttendanceRate(rep.studentId, gradePolicyDataInPeriod({ startDate, endDate }, { submissions: realSubmissions, examAttempts, attendanceRecords }).attendanceRecords);
       return {
         ...rep,
         frequenciaPercentual: att.taxaPercentual,
@@ -168,7 +180,7 @@ export function ProfessorLmsModules({
     });
 
     setGradeReports(enriched);
-  }, [activeClassId, weights, attendanceRecords, roster, realSubmissions, examAttempts, participationScores, p1ExamId, p2ExamId, classActivities, acceptedRecordIds]);
+  }, [activeClassId, weights, attendanceRecords, roster, realSubmissions, examAttempts, participationScores, p1ExamId, p2ExamId, classActivities, acceptedRecordIds, reviews, reviewMode, startDate, endDate]);
 
   // Exportar Boletim em CSV
   const handleExportGradebookCSV = () => {
@@ -201,11 +213,16 @@ export function ProfessorLmsModules({
   const semesterFor = (report: StudentGradeReport) => calculateSemesterGrade({ p1: report.notaP1 ?? null, p2: p1ExamId && p1ExamId === p2ExamId ? null : report.notaP2 ?? null, labs: report.notaLabs }, univWeights);
 
   // SpeedGrader Submissões e Rubricas Interativas
-  const [selectedSubIndex, setSelectedSubIndex] = useState(0);
-  const [rubricScores, setRubricScores] = useState<Record<string, number>>({});
-  const [docenteFeedback, setDocenteFeedback] = useState('');
-  const [speedGraderToast, setSpeedGraderToast] = useState<string | null>(null);
-  const [savingReview, setSavingReview] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    setPolicy(null); setPolicyError(''); setPolicyMessage('');
+    if (!activeClassId) return;
+    setPolicyLoading(true);
+    void getGradePolicy(activeClassId, gradePeriod).then(saved => { if (!alive) return; setPolicy(saved); setWeights(saved?.weights ?? { ...DEFAULT_WEIGHTS, turmaId: activeClassId }); setParticipationScores(saved?.participationScores ?? {}); setP1ExamId(saved?.p1ExamId ?? ''); setP2ExamId(saved?.p2ExamId ?? ''); setIsUniversityGradeMode(saved?.mode === 'university'); setUnivWeights(saved?.universityWeights ?? { p1: 35, p2: 35, labs: 30, minPassDireta: 7, minExameFinal: 4 }); setPolicyExplanation(saved?.explanation ?? 'As notas são calculadas a partir das últimas entregas avaliadas. Categorias sem evidência permanecem sem nota.'); setReviewMode(saved?.reviewMode ?? 'feedback-only'); setStartDate(saved?.startDate ?? null); setEndDate(saved?.endDate ?? null); }).catch(() => { if (alive) setPolicyError('Não foi possível recuperar os critérios desta turma. A configuração anterior não foi aplicada; tente reabrir o período.'); }).finally(() => { if (alive) setPolicyLoading(false); });
+    return () => { alive = false; };
+  }, [activeClassId, gradePeriod]);
+  const policyValues: GradePolicyValues = { classId: activeClassId, period: gradePeriod, professorId: currentUser?.uid ?? '', weights: { ...weights, turmaId: activeClassId }, mode: isUniversityGradeMode ? 'university' : 'school', universityWeights: univWeights, p1ExamId: p1ExamId || null, p2ExamId: p2ExamId || null, participationScores, explanation: policyExplanation, reviewMode, startDate, endDate };
+  async function savePolicy() { if (policySaving || policyLoading) return; setPolicySaving(true); setPolicyError(''); try { const saved = await saveGradePolicy({ ...policyValues, expectedVersion: policy?.version ?? 0 }); setPolicy(saved); setPolicyMessage(`Critérios salvos, versão ${saved.version}. Os alunos desta turma verão a mesma configuração.`); } catch (failure) { setPolicyError(failure instanceof Error && /pesos|nota|período|datas|critérios|provas|explique|sessão/i.test(failure.message) ? failure.message : 'O salvamento não foi confirmado. As alterações continuam nesta tela; tente novamente.'); } finally { setPolicySaving(false); } }
 
   useEffect(() => {
     let alive = true;
@@ -223,7 +240,7 @@ export function ProfessorLmsModules({
     setEvidenceLoading(true);
     const loadEvidence = async () => {
       try {
-        const [report, subs, attempts, exams, activities] = await Promise.all([getLiveClassReport(activeClassId), getSubmissionsByClass(activeClassId), getExamAttemptsByClass(activeClassId), getExamsByClass(activeClassId), getActivitiesByClass(activeClassId)]);
+        const [report, subs, attempts, exams, activities, savedReviews] = await Promise.all([getLiveClassReport(activeClassId), getSubmissionsByClass(activeClassId), getExamAttemptsByClass(activeClassId), getExamsByClass(activeClassId), getActivitiesByClass(activeClassId), getSubmissionReviewsByClass(activeClassId)]);
         if (!alive) return;
         if (!report) throw new Error('Turma indisponível.');
         setRoster(report.students.map(student => ({ id: student.studentId, name: student.studentName })));
@@ -231,6 +248,7 @@ export function ProfessorLmsModules({
         setExamAttempts(attempts);
         setClassExams(exams);
         setClassActivities(activities);
+        setReviews(savedReviews);
         setAcceptedRecordIds(report.students.flatMap(student => student.records.map(record => record.id)));
       } catch (e) {
         if (alive) setEvidenceError('Não foi possível carregar os registros da turma. Troque de turma ou recarregue para tentar novamente.');
@@ -245,6 +263,7 @@ export function ProfessorLmsModules({
 
   const submissionsList = realSubmissions.filter(submission => submission.id && acceptedRecordIds.includes(submission.id)).map((s, idx) => ({
     id: s.id || `sub_real_${idx}`,
+    studentId: s.studentId,
     activityTitle: s.activityTitle || 'Atividade Prática de Laboratório',
     studentName: s.studentName || 'Estudante',
     score: s.evidence?.stage === 'exploration' ? null : Number.isFinite(s.score) && s.score >= 0 && s.score <= 100 ? s.score : null,
@@ -255,6 +274,8 @@ export function ProfessorLmsModules({
     activeSeconds: s.evidence?.activeSeconds ?? null,
     questions: s.evidence?.questions ?? []
   }));
+  const selectedSubIndex = Math.max(0, submissionsList.findIndex(submission => submission.id === navigation.get('submission')));
+  const setSelectedSubIndex = (value: React.SetStateAction<number>) => { const index = typeof value === 'function' ? value(selectedSubIndex) : value; const selected = submissionsList[index]; if (selected) setNavigation(previous => { const next = new URLSearchParams(previous); next.set('submission', selected.id); next.set('student', selected.studentId); return next; }); };
 
   // Atalhos de teclado ergonômicos no SpeedGrader: J (próximo aluno) e K (aluno anterior)
   useEffect(() => {
@@ -277,11 +298,6 @@ export function ProfessorLmsModules({
     return () => window.removeEventListener('keydown', handleKeyNavigation);
   }, [subTab, submissionsList.length]);
 
-  const selectedSubmissionId = submissionsList[selectedSubIndex]?.id ?? submissionsList[0]?.id;
-  useEffect(() => {
-    setRubricScores({});
-    setDocenteFeedback('');
-  }, [selectedSubmissionId]);
 
   // AI Lab Studio (Gerador Zero-Code de Laboratórios)
   const [studioPrompt, setStudioPrompt] = useState('Transferência de Calor e Condução em Barras Metálicas (Lei de Fourier)');
@@ -491,28 +507,8 @@ export function ProfessorLmsModules({
   // ─────────────────────────────────────────────────────────────
   // 4. ESTADO DE CERTIFICADOS DIGITAIS & VALIDAÇÃO
   // ─────────────────────────────────────────────────────────────
-  const [certStudentName, setCertStudentName] = useState('');
-  const [certSubject, setCertSubject] = useState('Ciências da Natureza & Física Experimental');
-  const [certHours, setCertHours] = useState(40);
-  const [issuedCert, setIssuedCert] = useState<DigitalCertificate | null>(null);
-  const [validationCodeInput, setValidationCodeInput] = useState('');
-  const [validatedResult, setValidatedResult] = useState<{ cert: DigitalCertificate | null; searched: boolean }>({ cert: null, searched: false });
-
-  const handleIssueCertificate = () => {
-    const student = roster.find(s => s.name === certStudentName);
-    if (!student) return;
-    const cert = issueCertificate(student.id, student.name, certSubject, certHours);
-    setIssuedCert(cert);
-  };
-
-  const handleValidateCode = () => {
-    if (!validationCodeInput.trim()) return;
-    const result = verifyCertificate(validationCodeInput.trim());
-    setValidatedResult({ cert: result, searched: true });
-  };
-
   return (
-    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className="fade-in professor-lms" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {evidenceError && <p role="alert">{evidenceError}</p>}
       {evidenceLoading ? <p role="status">Carregando estudantes e entregas da turma…</p> : !roster.length && <p role="status">Esta turma ainda não tem estudantes matriculados. Os registros aparecerão depois da matrícula e do envio das atividades.</p>}
       {/* Seletor de Turma & Sub-navegação do Módulo LMS */}
@@ -541,18 +537,19 @@ export function ProfessorLmsModules({
         </div>
 
         {/* Sub-tabs Moodle LMS */}
-        <div style={{ display: 'flex', gap: '0.4rem', background: 'var(--color-neutral-300, #E2D7C3)', padding: '0.3rem', borderRadius: 'var(--radius-sm, 10px)' }}>
+        <div className="lms-subnavigation" style={{ display: 'flex', gap: '0.4rem', background: 'var(--bg-card)', padding: '0.3rem', borderRadius: 'var(--radius-sm, 10px)' }}>
           {[
             { id: 'attendance', label: 'Diário & Frequência', icon: Calendar },
             { id: 'gradebook', label: 'Livro de Notas', icon: Award },
-            { id: 'speedgrader', label: '⚡ SpeedGrader & Rubricas', icon: CheckCircle },
+            { id: 'speedgrader', label: 'Corrigir entregas', icon: CheckCircle },
             { id: 'forum', label: `Fórum da Turma (${forumTopics.length})`, icon: MessageSquare },
             { id: 'certificates', label: 'Certificação Digital', icon: ShieldCheck },
-            { id: 'lab_studio', label: '🪄 AI Lab Studio', icon: Plus },
+            { id: 'lab_studio', label: 'Criar laboratório', icon: Plus },
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setSubTab(tab.id as typeof subTab)}
+              aria-pressed={subTab===tab.id}
               style={{
                 padding: '0.5rem 0.9rem',
                 borderRadius: 'var(--radius-sm, 10px)',
@@ -858,6 +855,13 @@ export function ProfessorLmsModules({
           ───────────────────────────────────────────────────────────── */}
       {subTab === 'gradebook' && (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <section className="professor-workflow card" style={{padding:16,marginBottom:16}} aria-label="Critérios compartilhados do boletim">
+            <h2>Critérios de avaliação da turma</h2><p>Salve a configuração para que os estudantes consultem os mesmos pesos e regras. Alterações ainda não salvas valem apenas nesta tela.</p>
+            <div className="workflow-grid"><label>Período<select value={gradePeriod} onChange={event=>setNavigation(previous=>{const next=new URLSearchParams(previous);next.set('gradePeriod',event.target.value);return next;})}>{GRADE_PERIODS.map(value=><option key={value} value={value}>{value==='atual'?'Histórico completo':value}</option>)}</select></label><label>Data inicial<input type="date" value={startDate||''} onChange={event=>setStartDate(event.target.value||null)} /></label><label>Data final<input type="date" value={endDate||''} onChange={event=>setEndDate(event.target.value||null)} /></label><label>Uso dos pareceres publicados<select value={reviewMode} onChange={event=>setReviewMode(event.target.value as GradePolicy['reviewMode'])}><option value="feedback-only">Orientação separada da nota automática</option><option value="replace-submission-score">Usar a nota do parecer nas entregas corrigidas</option></select></label></div>
+            <label>Explicação para os estudantes<textarea rows={3} value={policyExplanation} onChange={event=>setPolicyExplanation(event.target.value)} maxLength={4000} /></label>
+            {policyLoading&&<p role="status">Carregando critérios salvos…</p>}{policyError&&<p role="alert">{policyError}</p>}{policyMessage&&<p role="status">{policyMessage}</p>}
+            <button className="btn-primary" disabled={policyLoading||policySaving||!activeClassId} onClick={()=>void savePolicy()}>{policySaving?'Salvando…':'Salvar critérios para a turma'}</button>{policy&&<p>Versão {policy.version} · {new Date(policy.updatedAt).toLocaleString('pt-BR')}. {policy.history.length} alterações anteriores registradas.</p>}
+          </section>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -865,7 +869,7 @@ export function ProfessorLmsModules({
                 Livro de notas & boletim ponderado (Gradebook)
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
-                Notas de 0 a 10 a partir das entregas avaliadas. A média final aparece quando todas as categorias com peso têm evidência. Os pesos e a participação configurados aqui valem para esta consulta e exportação.
+                Notas de 0 a 10 a partir das entregas avaliadas. A média final aparece quando todas as categorias com peso têm evidência. Salve os critérios para compartilhar os pesos e as regras com os estudantes.
               </p>
             </div>
             <button
@@ -1563,438 +1567,16 @@ export function ProfessorLmsModules({
       {/* ─────────────────────────────────────────────────────────────
           4. SUB-ABA: CERTIFICAÇÃO DIGITAL & VALIDAÇÃO MEC/LTI
           ───────────────────────────────────────────────────────────── */}
-      {subTab === 'certificates' && (
-        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldCheck style={{ color: 'var(--color-secondary, #293E24)', width: '1.4rem', height: '1.4rem' }} />
-              Certificação digital & validação de autenticidade
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
-              Emissão formal de certificados de conclusão para estudantes aprovados e ferramenta de validação instantânea de códigos hash.
-            </p>
-          </div>
+      {subTab === 'certificates' && <TeacherCertificates key={activeClassId} classId={activeClassId} professorId={currentUser?.uid||''} roster={roster} />}
+      {subTab === 'speedgrader' && <TeacherCorrectionWorkspace submissions={realSubmissions.filter(value=>acceptedRecordIds.includes(value.id||''))} selectedId={navigation.get('submission')||submissionsList[selectedSubIndex]?.id} professorId={currentUser?.uid||''} onSelect={id=>setNavigation(previous=>{const next=new URLSearchParams(previous);next.set('submission',id);return next;})} onReviewed={review=>setReviews(previous=>[...previous.filter(value=>value.id!==review.id),review])} />}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-            {/* Emissor de Certificados pelo Professor */}
-            <div className="glass-card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                🎓 Emitir Novo Certificado Acadêmico
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.25rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Selecione o Estudante</label>
-                  <select
-                    value={certStudentName}
-                    onChange={(e) => setCertStudentName(e.target.value)}
-                    style={{ width: '100%', padding: '0.55rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: '#fff', fontSize: '0.9rem' }}
-                  >
-                    <option value="">Selecione um estudante matriculado</option>
-                    {roster.map(s => (
-                      <option key={s.id} value={s.name}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Disciplina / Formação Concluída</label>
-                  <input
-                    type="text"
-                    value={certSubject}
-                    onChange={(e) => setCertSubject(e.target.value)}
-                    style={{ width: '100%', padding: '0.55rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.9rem' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Carga Horária (Horas)</label>
-                  <input
-                    type="number"
-                    value={certHours}
-                    onChange={(e) => setCertHours(Number(e.target.value))}
-                    style={{ width: '100%', padding: '0.55rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.9rem' }}
-                  />
-                </div>
-              </div>
-
-              <button
-                onClick={handleIssueCertificate}
-                className="btn-gradient"
-                style={{ width: '100%', padding: '0.75rem', fontWeight: 800 }}
-              >
-                Gerar & Autenticar Certificado
-              </button>
-
-              {/* Pré-visualização do Certificado Emitido */}
-              {issuedCert && (
-                <div style={{ marginTop: '1.25rem', padding: '1rem', borderRadius: '8px', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.3)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontWeight: 800, fontSize: '0.88rem', marginBottom: '0.4rem' }}>
-                    <CheckCircle style={{ width: '1rem', height: '1rem' }} />
-                    Certificado Emitido com Sucesso!
-                  </div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                    Código de Autenticidade: <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontFamily: 'monospace' }}>{issuedCert.codigoValidacao}</strong>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Validador Público de Autenticidade */}
-            <div className="glass-card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                🔍 Validador Público de Código de Autenticidade
-              </h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: '0 0 1rem' }}>
-                Digite o código hash presente no rodapé do certificado para verificar sua validade institucional em tempo real.
-              </p>
-
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                <input
-                  type="text"
-                  value={validationCodeInput}
-                  onChange={(e) => setValidationCodeInput(e.target.value)}
-                  placeholder="Ex: EDU-2026-F1A8-7B9C"
-                  style={{ flex: 1, padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.88rem', fontFamily: 'monospace' }}
-                />
-                <button
-                  onClick={handleValidateCode}
-                  className="btn-outline"
-                  style={{ padding: '0.65rem 1.15rem', fontWeight: 700, whiteSpace: 'nowrap' }}
-                >
-                  Verificar
-                </button>
-              </div>
-
-              {validatedResult.searched && (
-                <div style={{ padding: '1rem', borderRadius: '8px', background: validatedResult.cert ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', border: validatedResult.cert ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(239,68,68,0.3)' }}>
-                  {validatedResult.cert ? (
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.4rem' }}>
-                        <CheckCircle style={{ width: '1.1rem', height: '1.1rem' }} />
-                        Certificado Válido e Autêntico!
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', lineHeight: 1.5 }}>
-                        <div>Aluno: <strong>{validatedResult.cert.alunoNome}</strong></div>
-                        <div>Curso: <strong>{validatedResult.cert.tituloCurso}</strong></div>
-                        <div>Carga Horária: <strong>{validatedResult.cert.cargaHorariaHoras} horas</strong></div>
-                        <div>Data de Emissão: <strong>{validatedResult.cert.dataEmissao}</strong></div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ef4444', fontWeight: 700, fontSize: '0.88rem' }}>
-                      <XCircle style={{ width: '1.1rem', height: '1.1rem' }} />
-                      Código de certificado não localizado ou inválido no sistema.
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-      {/* ─────────────────────────────────────────────────────────────
-          SPEEDGRADER & RUBRICAS KORTEX (TELA DIVIDIDA ESTILO CANVAS LMS)
-          ───────────────────────────────────────────────────────────── */}
-      {/* ─────────────────────────────────────────────────────────────
-          SPEEDGRADER & RUBRICAS KORTEX (TELA DIVIDIDA ESTILO CANVAS LMS)
-          ───────────────────────────────────────────────────────────── */}
-      {subTab === 'speedgrader' && (() => {
-        const currentSub = submissionsList[selectedSubIndex] || submissionsList[0];
-        if (!currentSub) return <div className="glass-card" role="status" style={{ padding: '1.5rem' }}>Nenhuma entrega registrada nesta turma. As respostas dos estudantes aparecerão aqui após o envio.</div>;
-        const totalRubricScore = Number((
-          (rubricScores['crit_1'] || 0) +
-          (rubricScores['crit_2'] || 0) +
-          (rubricScores['crit_3'] || 0)
-        ).toFixed(1));
-
-        const handleSaveReview = async () => {
-          if (savingReview || !currentUser?.uid || Object.keys(rubricScores).length < 3) return;
-          setSavingReview(true);
-          try {
-            await saveSubmissionReview({
-              submissionId: currentSub.id,
-              professorId: currentUser?.uid ?? '',
-              rubricScores,
-              totalScore: totalRubricScore,
-              generalFeedback: docenteFeedback,
-              gradedAt: new Date().toISOString()
-            });
-            setSpeedGraderToast(`Parecer de ${currentSub.studentName} guardado. A rubrica é uma avaliação separada da nota automática do boletim.`);
-            setTimeout(() => setSpeedGraderToast(null), 4000);
-          } catch (err) {
-            console.error('Erro ao salvar review:', err);
-            setSpeedGraderToast('Erro ao persistir avaliação da rubrica.');
-            setTimeout(() => setSpeedGraderToast(null), 3000);
-          } finally {
-            setSavingReview(false);
-          }
-        };
-
-        const handleExportSpeedGraderCsv = () => {
-          const headers = ['ID_Submissao', 'Estudante', 'Atividade', 'Turma', 'Data_Entrega', 'Nota', 'Status', 'Hipotese_Investigativa'];
-          const rows = submissionsList.map(s => [
-            s.id,
-            s.studentName,
-            s.activityTitle,
-            currentTurma?.name ?? '',
-            s.submittedAt,
-            s.score,
-            s.status,
-            s.hypothesis
-          ]);
-          const csvContent = '\uFEFF' + [headers, ...rows].map(row => row.map(csvCell).join(';')).join('\n');
-          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', `pauta_speedgrader_${currentTurma?.name || 'turma'}_${new Date().toISOString().slice(0, 10)}.csv`);
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-          setSpeedGraderToast('✓ Planilha de notas e submissões exportada com sucesso em CSV!');
-          setTimeout(() => setSpeedGraderToast(null), 3500);
-        };
-
-        return (
-          <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {/* Feedback Toast */}
-            {speedGraderToast && (
-              <div style={{
-                padding: '0.75rem 1.25rem',
-                borderRadius: '8px',
-                background: 'rgba(16,185,129,0.92)',
-                color: '#fff',
-                fontWeight: 700,
-                fontSize: '0.88rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.25)'
-              }}>
-                <CheckCircle style={{ width: '1.1rem', height: '1.1rem' }} />
-                <span>{speedGraderToast}</span>
-              </div>
-            )}
-
-            {/* Barra Seletora de Entregas dos Alunos */}
-            <div className="glass-card" style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                  Fila de Submissões ({submissionsList.length}):
-                </span>
-                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                  {submissionsList.map((sub, sIdx) => (
-                    <button
-                      key={sub.id}
-                      onClick={() => setSelectedSubIndex(sIdx)}
-                      style={{
-                        padding: '0.35rem 0.75rem',
-                        borderRadius: '6px',
-                        border: selectedSubIndex === sIdx ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
-                        background: selectedSubIndex === sIdx ? 'var(--color-primary-light, rgba(228,104,63,0.18))' : 'transparent',
-                        color: selectedSubIndex === sIdx ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-main)',
-                        fontWeight: selectedSubIndex === sIdx ? 800 : 500,
-                        fontSize: '0.78rem',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {sub.studentName} ({sub.score === null ? 'sem nota' : `${sub.score} pts`})
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  Navegar: <kbd style={{ padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(0,0,0,0.06)', border: '1px solid var(--border-color)' }}>K</kbd> anterior / <kbd style={{ padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(0,0,0,0.06)', border: '1px solid var(--border-color)' }}>J</kbd> próximo
-                </span>
-                <button
-                  onClick={handleExportSpeedGraderCsv}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: '8px',
-                    background: 'rgba(41, 62, 36, 0.08)',
-                    border: '1px solid var(--border-color)',
-                    color: 'var(--color-verde-700, #293E24)',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                  title="Baixar pauta de notas e avaliações em CSV"
-                >
-                  <Download style={{ width: '0.85rem', height: '0.85rem' }} />
-                  <span>Exportar CSV</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Grade Dividida SpeedGrader */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '1.25rem' }}>
-              {/* Lado Esquerdo: Visualizador de Submissão e Telemetria do Aluno */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div className="glass-card" style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                    <div>
-                      <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
-                        Visualizador de Submissão Prática de Laboratório
-                      </h3>
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                        Aluno: <strong>{currentSub.studentName}</strong> · Turma: <strong>{currentTurma?.name || 'Turma A'}</strong> · Entregue {currentSub.submittedAt}
-                      </span>
-                    </div>
-                    <span style={{ background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', padding: '0.25rem 0.65rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 700 }}>
-                      {currentSub.status === 'completed' ? 'Entrega concluída' : 'Entrega pendente'}
-                    </span>
-                  </div>
-
-                  {/* Pré-visualização do Laudo do Aluno */}
-                  <div style={{ background: 'var(--bg-surface)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '0.85rem', lineHeight: '1.6', color: 'var(--text-main)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--color-primary-accessible, #B8441F)', marginBottom: '0.4rem' }}>
-                      Atividade: {currentSub.activityTitle}
-                    </div>
-                    <p style={{ margin: '0 0 0.5rem 0' }}>
-                      <strong>Hipótese Formulada pelo Estudante:</strong> "{currentSub.hypothesis}"
-                    </p>
-                    <div style={{ background: 'var(--bg-card)', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem', fontSize: '0.78rem', fontFamily: 'monospace' }}>
-                      {Object.entries(currentSub.telemetry).map(([k, v]) => (
-                        <div key={k}>{k}: <strong>{typeof v === 'object' ? JSON.stringify(v) : String(v)}</strong></div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div style={{ marginTop: '1rem', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '10px' }}>
-                    <h4 style={{ margin: '0 0 0.5rem' }}>Evidências registradas no envio</h4>
-                    <p>Tempo ativo: {currentSub.activeSeconds === null ? 'Não medido' : `${Math.round(currentSub.activeSeconds)} segundos`}.</p>
-                    {currentSub.questions.length ? currentSub.questions.map(question => <div key={question.questionId} style={{ marginBottom: '0.5rem' }}><strong>{question.question}</strong><br />Resposta: {question.selectedOption === null ? 'Não respondida' : question.selectedOption + 1} · {question.correct === null ? 'Sem correção' : question.correct ? 'Correta' : 'Rever conteúdo'}</div>) : <p>Nenhuma resposta por questão foi registrada neste envio.</p>}
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Parâmetros e medidas acima representam o estado guardado pelo estudante ao enviar a atividade.</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Lado Direito: Rubrica de Avaliação Interativa & Feedback do Professor */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div className="glass-card" style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                      Rubrica de avaliação docente
-                    </h4>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--color-primary-accessible, #B8441F)' }}>
-                      {Object.keys(rubricScores).length < 3 ? 'Preencha os três critérios' : `Prévia: ${totalRubricScore} / 10`}
-                    </div>
-                  </div>
-
-                  {/* Critérios da Rubrica Interativa */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                    {[
-                      {
-                        id: 'crit_1',
-                        titulo: '1. Coleta e Interpretação de Dados',
-                        peso: '4.0 pts',
-                        niveis: [
-                          { label: 'Insuficiente (1.0)', score: 1.0 },
-                          { label: 'Bom (3.0)', score: 3.0 },
-                          { label: 'Excelente (4.0)', score: 4.0 },
-                        ]
-                      },
-                      {
-                        id: 'crit_2',
-                        titulo: '2. Rigor Científico e Dedução Teórica',
-                        peso: '3.0 pts',
-                        niveis: [
-                          { label: 'Regular (1.5)', score: 1.5 },
-                          { label: 'Bom (2.5)', score: 2.5 },
-                          { label: 'Excelente (3.0)', score: 3.0 },
-                        ]
-                      },
-                      {
-                        id: 'crit_3',
-                        titulo: '3. Conclusão Metodológica & ABNT',
-                        peso: '3.0 pts',
-                        niveis: [
-                          { label: 'Regular (1.5)', score: 1.5 },
-                          { label: 'Bom (2.0)', score: 2.0 },
-                          { label: 'Excelente (3.0)', score: 3.0 },
-                        ]
-                      }
-                    ].map((crit) => {
-                      const currentVal = rubricScores[crit.id] ?? 0;
-                      return (
-                        <div key={crit.id} style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
-                            <span>{crit.titulo}</span>
-                            <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{currentVal.toFixed(1)} / {crit.peso}</span>
-                          </div>
-                          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                            {crit.niveis.map((niv, nIdx) => {
-                              const isSelected = Math.abs(currentVal - niv.score) < 0.05;
-                              return (
-                                <button
-                                  key={nIdx}
-                                  onClick={() => setRubricScores(prev => ({ ...prev, [crit.id]: niv.score }))}
-                                  style={{
-                                    padding: '0.3rem 0.6rem',
-                                    borderRadius: '6px',
-                                    border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
-                                    background: isSelected ? 'var(--color-primary-light, rgba(228,104,63,0.18))' : 'transparent',
-                                    color: isSelected ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
-                                    fontSize: '0.72rem',
-                                    fontWeight: isSelected ? 700 : 500,
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  {niv.label}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Caixa de Feedback e Envio */}
-                  <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                      Parecer Docente / Comentário Socrático:
-                    </label>
-                    <textarea
-                      value={docenteFeedback}
-                      onChange={(e) => setDocenteFeedback(e.target.value)}
-                      rows={3}
-                      style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-main)', fontSize: '0.82rem', resize: 'vertical' }}
-                    />
-
-                    <button
-                      onClick={handleSaveReview}
-                      disabled={savingReview || Object.keys(rubricScores).length < 3 || !currentUser?.uid}
-                      className="btn-primary"
-                      style={{ padding: '0.65rem 1rem', fontSize: '0.85rem', fontWeight: 700, borderRadius: '8px', cursor: 'pointer', border: 'none', background: 'var(--color-verde-700, #293E24)', color: '#fff', marginTop: '0.25rem' }}
-                    >
-                      {savingReview ? 'Salvando...' : '✓ Lançar Nota Oficial no Diário'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ─────────────────────────────────────────────────────────────
-          AI LAB STUDIO — CONSTRUTOR ZERO-CODE DE LABORATÓRIOS
-          ───────────────────────────────────────────────────────────── */}
       {subTab === 'lab_studio' && (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div className="glass-card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg, 14px)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <div>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  🪄 Kortex AI Lab Studio — Construtor Zero-Code de Laboratórios
+                  Criar laboratório com roteiro e questões
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>
                   Crie simulações computacionais em segundos a partir de equações diferenciais ou descrições em linguagem natural.

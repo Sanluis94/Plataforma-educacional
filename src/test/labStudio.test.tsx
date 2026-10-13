@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createStudioLab, emptyLearningContent, type StudioLabDraft } from '../modules/core/services/labStudioService';
 import { LAB_LEARNING_CONTENT } from '../modules/core/content/labLearningContent';
 import { MASTER_LABS_CATALOG, createGuidedLabConfig } from '../modules/core/constants/masterLabsCatalog';
@@ -52,12 +52,12 @@ describe('Conteúdo obrigatório no Studio', () => {
     expect(() => createStudioLab(input, [lab])).toThrow('repete trechos completos');
   });
 
-  it('informa conteúdo pendente no formulário e mantém a atividade fora do catálogo', () => {
+  it('informa conteúdo pendente no formulário e mantém a atividade fora do catálogo', async () => {
     const save = vi.fn();
     render(<LabStudioBuilderModal isOpen onClose={vi.fn()} onSaveNewLab={save} />);
     fireEvent.submit(screen.getByRole('button', { name: 'Adicionar à sessão' }).closest('form')!);
     expect(save).not.toHaveBeenCalled();
-    expect(screen.getByRole('alert')).toHaveTextContent('teoria incompleto');
+    await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('teoria incompleto'));
     expect(screen.getByRole('alert')).toHaveTextContent('questão 1 incompleto');
   });
 });

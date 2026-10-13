@@ -9,11 +9,13 @@ import { useDialogAccessibility } from '../hooks/useDialogAccessibility';
 interface LoginModalProps {
   onClose: () => void;
   onSuccess?: () => void;
+  initialRole?: 'estudante' | 'professor' | 'coordenador' | 'admin';
+  purpose?: 'learning' | 'family';
 }
 
-export function LoginModal({ onClose, onSuccess }: LoginModalProps) {
+export function LoginModal({ onClose, onSuccess, initialRole = 'estudante', purpose = 'learning' }: LoginModalProps) {
   const { isLocalAuthMode, loginWithGoogle } = useAuth();
-  const [selectedRole, setSelectedRole] = useState<'estudante' | 'professor' | 'coordenador' | 'admin'>('estudante');
+  const [selectedRole, setSelectedRole] = useState<'estudante' | 'professor' | 'coordenador' | 'admin'>(initialRole);
   const [selectedGrade, setSelectedGrade] = useState<GradeLevel>('medio');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,7 +89,7 @@ export function LoginModal({ onClose, onSuccess }: LoginModalProps) {
               Entrar na plataforma
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
-              Selecione seu perfil para continuar
+              {purpose === 'family' ? 'Entre com o mesmo email informado ao professor.' : 'Selecione seu perfil para continuar'}
             </p>
           </div>
           <button
@@ -107,7 +109,7 @@ export function LoginModal({ onClose, onSuccess }: LoginModalProps) {
         </div>
 
         {/* Role Selector */}
-        <div style={{ display: 'grid', gridTemplateColumns: isLocalAuthMode ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1.25rem' }}>
+        {purpose !== 'family' && <div style={{ display: 'grid', gridTemplateColumns: isLocalAuthMode ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1.25rem' }}>
           {(['estudante', 'professor', 'coordenador', ...(isLocalAuthMode ? ['admin' as const] : [])] as const).map(role => (
             <button
               key={role}
@@ -132,10 +134,10 @@ export function LoginModal({ onClose, onSuccess }: LoginModalProps) {
               </div>
             </button>
           ))}
-        </div>
+        </div>}
 
         {/* Grade Selector */}
-        {selectedRole !== 'admin' && (
+        {purpose !== 'family' && selectedRole !== 'admin' && (
         <div style={{ marginBottom: '1.5rem' }}>
           <label style={{
             color: 'var(--text-secondary)', fontSize: '0.82rem',

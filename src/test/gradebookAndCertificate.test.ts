@@ -1,3 +1,4 @@
+import {seedAuthorizedLearning} from './fixtures/authorizedLearning';
 import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('../modules/core/services/firebaseConfig', () => ({
@@ -137,17 +138,14 @@ describe('Gradebook & Attendance (Moodle Pattern)', () => {
 });
 
 describe('Digital Certificate Service', () => {
-  it('should issue digital certificate with verifiable authentication code', () => {
-    const cert = issueCertificate('student-99', 'Mariana Silva', 'Física Moderna', 40);
-    expect(cert.codigoValidacao).toContain('EDU-2026-');
-    expect(cert.alunoNome).toBe('Mariana Silva');
+  it('confere requisitos e oferece consulta pública sem identidade do aluno', async () => {
+    const {options}=seedAuthorizedLearning();
+    const cert=await issueCertificate('student-99','Mariana Silva','Física Moderna',40,options);
+    expect(cert.codigoValidacao).toMatch(/^[0-9a-f-]{36}$/i);
     expect(cert.cargaHorariaHoras).toBe(40);
-
-    const list = getStudentCertificates('student-99');
-    expect(list).toHaveLength(1);
-
-    const verified = verifyCertificate(cert.codigoValidacao);
-    expect(verified).not.toBeNull();
-    expect(verified?.alunoNome).toBe('Mariana Silva');
+    expect(await getStudentCertificates('student-99')).toHaveLength(1);
+    const verified=await verifyCertificate(cert.codigoValidacao);
+    expect(verified?.title).toBe('Física Moderna');
+    expect(verified).not.toHaveProperty('studentName');
   });
 });
