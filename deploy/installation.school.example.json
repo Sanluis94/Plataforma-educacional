@@ -6,7 +6,7 @@
   "releaseStage": "pilot",
   "origin": "https://escola-exemplo.example.org",
   "firebase": {
-    "apiKey": "AIzaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "apiKey": "SUBSTITUIR_CHAVE_PUBLICA_FIREBASE",
     "authDomain": "kortex-escola-exemplo.firebaseapp.com",
     "projectId": "kortex-escola-exemplo",
     "storageBucket": "kortex-escola-exemplo.firebasestorage.app",

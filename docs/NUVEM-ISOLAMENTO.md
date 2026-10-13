@@ -18,7 +18,7 @@ O frontend é portátil entre AWS e Azure. O banco e a autenticação continuam 
 
 ## Manifestos e preparação
 
-Os dois exemplos usam dados fictícios. Copie para uma pasta privada sob `.local/` e substitua a configuração web pelo aplicativo do respectivo projeto Firebase. Os campos do SDK web são públicos; o manifesto não aceita contas de serviço, chave Gemini ou campos desconhecidos. Essa configuração não concede acesso ao banco: as [regras e a autenticação continuam necessárias](https://firebase.google.com/support/guides/security-checklist).
+Os dois exemplos usam placeholders e não passam na validação até serem preenchidos. Copie para uma pasta privada sob `.local/` e substitua a configuração web pelo aplicativo do respectivo projeto Firebase. Os campos do SDK web são públicos; o manifesto não aceita contas de serviço, chave Gemini ou campos desconhecidos. Essa configuração não concede acesso ao banco: as [regras e a autenticação continuam necessárias](https://firebase.google.com/support/guides/security-checklist). Testes/CI geram configurações sintéticas somente em pastas ignoradas, evitando strings de exemplos que provoquem alertas de credenciais no GitHub.
 
 ```powershell
 New-Item -ItemType Directory -Force .local\cloud-input
@@ -98,4 +98,4 @@ O pacote gerado inclui `firebase.json` somente de Firestore. A publicação futu
 
 `node --test --test-concurrency=2 scripts/cloud/installation.test.mjs` testa manifestos, isolamento declarado, bloqueio comercial, escrita privada, rejeição de credenciais/exportações e parâmetros estáticos do container. A preparação não acessa dados reais.
 
-Docker Engine não está disponível neste computador no momento desta preparação. Portanto imagem final, `nginx -t`, execução sem root/filesystem somente leitura e smoke HTTP dentro do container precisam ser executados no host/CI com Docker antes da liberação. Os arquivos de implantação foram preparados; não houve provisionamento AWS/Azure, criação de projeto Firebase, publicação, migração de usuários ou validação de uma instalação remota. Essa etapa pendente é bloqueio de aceitação comercial, não apenas uma observação.
+Docker Engine não está disponível neste computador. O [CI de validação](https://github.com/Sanluis94/Plataforma-educacional/actions/runs/38420658150) compilou e executou as imagens de escola e uso doméstico, incluindo `nginx -t`, usuário sem root, filesystem somente leitura, headers/cache, recusa de Host e de instalação/projeto/origem incorretos. Esse resultado usa configuração fictícia e comprova os cenários exercitados. Antes da operação, repita a aceitação com os recursos e domínios reais de cada instalação. Não houve provisionamento AWS/Azure, criação de projeto Firebase nem migração de usuários.

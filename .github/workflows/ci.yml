@@ -29,6 +29,32 @@ env:
   VITE_DISABLE_AI: 'true'
 
 jobs:
+  secrets:
+    name: Verificar segredos introduzidos
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Instalar verificador com versão e checksum fixados
+        run: |
+          mkdir -p "$RUNNER_TEMP/gitleaks"
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/gitleaks.tar.gz" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          printf '%s  %s\n' '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb' "$RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks"
+      - name: Impedir novos segredos em commits com saída mascarada
+        env:
+          SCAN_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          SCAN_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if ! [[ "$SCAN_HEAD" =~ ^[0-9a-f]{40}$ ]]; then exit 1; fi
+          if ! [[ "$SCAN_BASE" =~ ^[0-9a-f]{40}$ ]] || ! git cat-file -e "$SCAN_BASE^{commit}" 2>/dev/null; then
+            SCAN_BASE=$(git rev-parse "$SCAN_HEAD^")
+          fi
+          "$RUNNER_TEMP/gitleaks/gitleaks" git . --log-opts="$SCAN_BASE..$SCAN_HEAD" --redact=100 --ignore-gitleaks-allow --report-format=json --report-path="$RUNNER_TEMP/gitleaks-report.json"
+
   validate:
     name: Testes e build
     runs-on: ubuntu-latest
@@ -90,20 +116,22 @@ jobs:
           node-version: '22'
       - name: Validar isolamento e configuração pública
         run: node --test scripts/cloud/installation.test.mjs
+      - name: Gerar configurações fictícias fora do Git
+        run: node scripts/cloud/fixtures.mjs
       - name: Compilar imagem da escola com configuração fictícia
         run: >-
-          docker build --secret id=installation,src=deploy/installation.school.example.json
-          --build-arg KORTEX_INSTALLATION_SHA256=$(node scripts/cloud/manifest-fingerprint.mjs deploy/installation.school.example.json)
+          docker build --secret id=installation,src=.local/cloud-fixtures/school.json
+          --build-arg KORTEX_INSTALLATION_SHA256=$(node scripts/cloud/manifest-fingerprint.mjs .local/cloud-fixtures/school.json)
           --build-arg KORTEX_SOURCE_REVISION=${{ github.sha }} -t kortex-school:ci .
       - name: Verificar contêiner da escola e recusa de instalação incorreta
-        run: node scripts/cloud/check-container.mjs deploy/installation.school.example.json --image kortex-school:ci
+        run: node scripts/cloud/check-container.mjs .local/cloud-fixtures/school.json --image kortex-school:ci
       - name: Compilar imagem doméstica com configuração fictícia
         run: >-
-          docker build --secret id=installation,src=deploy/installation.home.example.json
-          --build-arg KORTEX_INSTALLATION_SHA256=$(node scripts/cloud/manifest-fingerprint.mjs deploy/installation.home.example.json)
+          docker build --secret id=installation,src=.local/cloud-fixtures/home.json
+          --build-arg KORTEX_INSTALLATION_SHA256=$(node scripts/cloud/manifest-fingerprint.mjs .local/cloud-fixtures/home.json)
           --build-arg KORTEX_SOURCE_REVISION=${{ github.sha }} -t kortex-home:ci .
       - name: Verificar contêiner doméstico e recusa de instalação incorreta
-        run: node scripts/cloud/check-container.mjs deploy/installation.home.example.json --image kortex-home:ci
+        run: node scripts/cloud/check-container.mjs .local/cloud-fixtures/home.json --image kortex-home:ci
 
   lint:
     name: Lint informativo — dívida existente

@@ -1,4 +1,4 @@
-import {test} from 'node:test';
+import {test,after} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile,mkdtemp,rm} from 'node:fs/promises';
 import {resolve,join} from 'node:path';
@@ -8,10 +8,16 @@ import {createServer} from 'node:http';
 import {probeHttp} from './http-probe.mjs';
 import {prepareInstallations} from './prepare-installations.mjs';
 import {verifyCloudArtifact} from './build-installation.mjs';
+import {fixtureInstallation} from './fixtures.mjs';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
-const school=JSON.parse(await readFile(new URL('../../deploy/installation.school.example.json',import.meta.url),'utf8'));
-const home=JSON.parse(await readFile(new URL('../../deploy/installation.home.example.json',import.meta.url),'utf8'));
+const school=await fixtureInstallation('school');
+const home=await fixtureInstallation('home');
+const fixtureParent=join(root,'.local','cloud-tests');await mkdir(fixtureParent,{recursive:true});
+const fixtureDirectory=await mkdtemp(join(fixtureParent,'fixtures-'));
+const schoolPath=join(fixtureDirectory,'school.json'),homePath=join(fixtureDirectory,'home.json');
+await writeFile(schoolPath,JSON.stringify(school));await writeFile(homePath,JSON.stringify(home));
+after(()=>rm(fixtureDirectory,{recursive:true,force:true}));
 const clone=()=>structuredClone(school);
 
 test('probe preserva o Host destinado à escola, sem trocá-lo pelo loopback',async()=>{
@@ -46,12 +52,12 @@ test('inventário recusa compartilhar projeto, origem, aplicativo ou número de 
 });
 test('preparação escreve inventário privado e cópias das regras sem alias compartilhado',async()=>{
   const parent=join(root,'.local','cloud-tests');await mkdir(parent,{recursive:true});const temporary=await mkdtemp(join(parent,'prepare-'));const output=join(temporary,'prepared');
-  try{const result=await prepareInstallations([join(root,'deploy/installation.school.example.json'),join(root,'deploy/installation.home.example.json')],output);assert.equal(result.count,2);const inventory=JSON.parse(await readFile(join(output,'isolation-inventory.json'),'utf8'));assert.equal(inventory.installations.length,2);assert.equal(inventory.installations[0].manifestSha256,installationFingerprint(school));const config=JSON.parse(await readFile(join(output,school.id,'firebase.json'),'utf8'));assert.ok(!config.hosting);assert.equal(await readFile(join(output,school.id,'firestore.rules'),'utf8'),await readFile(join(root,'firestore.rules'),'utf8'));await assert.rejects(()=>prepareInstallations([join(root,'deploy/installation.school.example.json')],output),error=>error.code==='EEXIST');}finally{await rm(temporary,{recursive:true,force:true});}
+  try{const result=await prepareInstallations([schoolPath,homePath],output);assert.equal(result.count,2);const inventory=JSON.parse(await readFile(join(output,'isolation-inventory.json'),'utf8'));assert.equal(inventory.installations.length,2);assert.equal(inventory.installations[0].manifestSha256,installationFingerprint(school));const config=JSON.parse(await readFile(join(output,school.id,'firebase.json'),'utf8'));assert.ok(!config.hosting);assert.equal(await readFile(join(output,school.id,'firestore.rules'),'utf8'),await readFile(join(root,'firestore.rules'),'utf8'));await assert.rejects(()=>prepareInstallations([schoolPath],output),error=>error.code==='EEXIST');}finally{await rm(temporary,{recursive:true,force:true});}
 });
-test('preparação não escreve em public/ nem fora da pasta privada',async()=>{await assert.rejects(()=>prepareInstallations([join(root,'deploy/installation.school.example.json')],join(root,'public','cloud')),/privada/);});
+test('preparação não escreve em public/ nem fora da pasta privada',async()=>{await assert.rejects(()=>prepareInstallations([schoolPath],join(root,'public','cloud')),/privada/);});
 test('preparação cria pastas privadas pai sem exigir diretório cloud pré-existente',async()=>{
   const parent=join(root,'.local','cloud-tests');await mkdir(parent,{recursive:true});const temporary=await mkdtemp(join(parent,'parent-'));
-  try{const result=await prepareInstallations([join(root,'deploy/installation.school.example.json')],join(temporary,'nested','prepared'));assert.equal(result.count,1);}finally{await rm(temporary,{recursive:true,force:true});}
+  try{const result=await prepareInstallations([schoolPath],join(temporary,'nested','prepared'));assert.equal(result.count,1);}finally{await rm(temporary,{recursive:true,force:true});}
 });
 test('artefato verifica instalação e rejeita outra chave, conta de serviço e exportação',async()=>{
   const parent=join(root,'.local','cloud-tests');await mkdir(parent,{recursive:true});const temporary=await mkdtemp(join(parent,'artifact-'));

@@ -6,7 +6,7 @@
   "releaseStage": "pilot",
   "origin": "https://casa-exemplo.example.org",
   "firebase": {
-    "apiKey": "AIzaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    "apiKey": "SUBSTITUIR_CHAVE_PUBLICA_FIREBASE",
     "authDomain": "kortex-domestico-exemplo.firebaseapp.com",
     "projectId": "kortex-domestico-exemplo",
     "storageBucket": "kortex-domestico-exemplo.firebasestorage.app",
