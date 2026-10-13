@@ -59,6 +59,8 @@ Os encerramentos das bancadas antigas registram exploração após a prática. A
 
 Uma nova tentativa de atividade conserva respostas e conclusões ao recarregar e não volta à nota anterior durante a atualização da fila. Caderno e código Python ficam separados por conta, laboratório, turma e aula. A prova informa o prazo e impede novas respostas depois dele; tentativas pendentes conservam a evidência para consulta e reenvio. Provas novas usam prazo absoluto também nas regras, com dois minutos para transporte. Registros antigos sem `deadlineAtMillis` mantêm a verificação do prazo na interface até serem salvos novamente pelo professor.
 
+O material de estudo conserva o texto simples, incluindo desigualdades como `x < 4 e y > 2`. Conteúdo HTML antigo apresenta os parágrafos e caracteres legíveis sem inserir HTML executável. A jornada do Studio confere o mesmo texto publicado na tela do aluno.
+
 O Python apresenta falha ao iniciar o worker, mantém o código para uma nova tentativa e ignora resultados que chegam após uma interrupção. O tutor reaproveita a mensagem pendente ao tentar novamente e descarta transcrições de um microfone já cancelado. A política de permissões do Hosting permite solicitar microfone apenas na própria origem; o uso continua dependendo do clique do estudante, da disponibilidade da API de voz e da permissão concedida no navegador. Câmera e geolocalização continuam bloqueadas.
 
 ## Estado da auditoria
@@ -67,7 +69,7 @@ Verificação da versão de 13/10/2026, com dados fictícios e sem ler exportaç
 
 | Evidência | Resultado | Cobertura |
 | --- | --- | --- |
-| `test:local --maxWorkers=2` | 1.151 testes em 71 arquivos, sem falhas | Repositórios, captura, notas, drafts, sessões, avaliação, compras, IA válida/inválida e continuidade |
+| `test:local --maxWorkers=2` | 1.151 testes em 71 arquivos, sem falhas; ajuste final do material com 34 testes específicos aprovados | Repositórios, captura, notas, drafts, sessões, avaliação, compras, IA válida/inválida e continuidade |
 | `labs:audit` e índice leve | 582 conteúdos próprios; zero pendências | Conteúdo, IDs, roteiros e índices preservados |
 | `browser-check --require-complete --workers=3` | 582 laboratórios percorridos | Todos os cenários, teoria, fontes, questões e correção pelo navegador |
 | `polish-bench-browser-check` | 72 bancadas | Abertura, retorno ao roteiro e largura de 320px em todas as bancadas antigas |

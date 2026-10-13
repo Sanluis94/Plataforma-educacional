@@ -5,6 +5,7 @@ import { useLearningCapture } from '../hooks/useLearningCapture';
 import { offlineSyncService } from '../../core/services/offlineSyncService';
 import {draftFingerprint,isDraftEvidence,isDraftObject,useActivityDraft} from '../hooks/useActivityDraft';
 import {useAuth} from '../../core/contexts/AuthContext';
+import {studyMaterialText} from '../../core/utils/studyMaterialText';
 
 interface Props {
   activity: ActivityData;
@@ -95,7 +96,7 @@ function ScopedStudentClassActivity({ activity, onSubmit, previousSubmission, pr
     {previousSubmission && delivered && <p>Esta é sua entrega registrada. Uma nova tentativa utiliza a versão atual da atividade.</p>}
     {!delivered && activity.description && <p style={{ whiteSpace: 'pre-wrap' }}>{activity.description}</p>}
     {activity.dueDate && <p>Prazo: {new Date(activity.dueDate).toLocaleDateString('pt-BR')}</p>}
-    {activity.theoryContent && <details><summary>Material de estudo desta atividade</summary><p style={{ whiteSpace: 'pre-wrap' }}>{activity.theoryContent.replace(/<[^>]*>/g, '')}</p></details>}
+    {activity.theoryContent && <details><summary>Material de estudo desta atividade</summary><p style={{ whiteSpace: 'pre-wrap' }}>{studyMaterialText(activity.theoryContent)}</p></details>}
     <p>Ao entregar, seu professor recebe suas respostas, conclusões e o tempo de uso desta atividade. A entrega pertence à turma selecionada.</p>
     {delivered && recordedQuestions.length > 0 ? <div aria-label="Respostas da entrega registrada">{recordedQuestions.map((question, index) => <section key={question.questionId} style={{ padding: '0.8rem 0', borderBottom: '1px solid var(--border-color)' }}>
       <h4>{index + 1}. {question.question}</h4>
