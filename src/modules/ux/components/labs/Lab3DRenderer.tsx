@@ -18,7 +18,7 @@ export const Lab3DRenderer: React.FC<Lab3DRendererProps> = ({
   const [rotX, setRotX] = useState<number>(0.5);
   const [rotY, setRotY] = useState<number>(0.8);
   const [zoom, setZoom] = useState<number>(1.0);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const isDragging = useRef(false);
   const lastMousePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -128,7 +128,7 @@ export const Lab3DRenderer: React.FC<Lab3DRendererProps> = ({
       ctx.strokeRect(8, 8, 180, 24);
       ctx.fillStyle = '#38bdf8';
       ctx.font = '10px monospace';
-      ctx.fillText(`3D WebGPU | Zoom: ${zoom.toFixed(1)}x`, 14, 24);
+      ctx.fillText(`Ilustração | Zoom: ${zoom.toFixed(1)}x`, 14, 24);
 
       animId = requestAnimationFrame(render);
     };
@@ -137,13 +137,14 @@ export const Lab3DRenderer: React.FC<Lab3DRendererProps> = ({
     return () => cancelAnimationFrame(animId);
   }, [width, height, rotX, rotY, zoom, telemetryVal]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
+  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    isDragging.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
     lastMousePos.current = { x: e.clientX, y: e.clientY };
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging.current) return;
     const dx = e.clientX - lastMousePos.current.x;
     const dy = e.clientY - lastMousePos.current.y;
     setRotY(prev => prev + dx * 0.01);
@@ -151,7 +152,7 @@ export const Lab3DRenderer: React.FC<Lab3DRendererProps> = ({
     lastMousePos.current = { x: e.clientX, y: e.clientY };
   };
 
-  const handleMouseUp = () => setIsDragging(false);
+  const handlePointerUp = () => { isDragging.current = false; };
 
   return (
     <div className="bg-slate-950 border border-slate-800 rounded-lg overflow-hidden relative shadow-md select-none">
@@ -182,12 +183,26 @@ export const Lab3DRenderer: React.FC<Lab3DRendererProps> = ({
         ref={canvasRef}
         width={width}
         height={height}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        tabIndex={0}
+        role="img"
+        aria-label={`${label}. Arraste ou use as setas para girar a ilustração.`}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onLostPointerCapture={handlePointerUp}
+        onKeyDown={event => {
+          if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+          event.preventDefault();
+          if (event.key === 'ArrowLeft') setRotY(value => value - 0.1);
+          if (event.key === 'ArrowRight') setRotY(value => value + 0.1);
+          if (event.key === 'ArrowUp') setRotX(value => Math.max(-1.5, value - 0.1));
+          if (event.key === 'ArrowDown') setRotX(value => Math.min(1.5, value + 0.1));
+        }}
+        style={{ touchAction: 'none' }}
         className="w-full h-auto cursor-grab active:cursor-grabbing block"
       />
+      <p className="px-3 py-2 text-xs text-slate-300">Ilustração da primeira medição ({telemetryVal.toFixed(3)}). O desenho não representa a geometria nem a escala física do experimento. Arraste ou use as setas para girar.</p>
     </div>
   );
 };

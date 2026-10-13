@@ -47,8 +47,10 @@ export function StudentLmsModules({
   studentName,
   selectedClassId,
   activeView,
-  period = 'atual', onPeriodChange
+  period: requestedPeriod = 'atual', onPeriodChange
 }: StudentLmsModulesProps) {
+  const period:GradePeriod=GRADE_PERIODS.includes(requestedPeriod)?requestedPeriod:'atual';
+  const changePeriod=(value:string)=>{const valid=GRADE_PERIODS.find(candidate=>candidate===value);if(valid)onPeriodChange?.(valid);};
   // ─────────────────────────────────────────────────────────────
   // 1. DADOS DE FREQUÊNCIA & BOLETIM ESCOLAR
   // ─────────────────────────────────────────────────────────────
@@ -112,24 +114,24 @@ export function StudentLmsModules({
   const [questionSubject, setQuestionSubject] = useState('Física');
   const [studentReplyText, setStudentReplyText] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
+  const [postingQuestion,setPostingQuestion]=useState(false);
+  const [forumError,setForumError]=useState('');
 
   useEffect(() => {
+    setForumTopics([]);setSelectedTopic(null);setForumError('');
     if (!selectedClassId) return;
     const unsub = subscribeForumTopicsByClass(selectedClassId, (topics) => {
       setForumTopics(topics);
-      if (selectedTopic) {
-        const updated = topics.find(t => t.id === selectedTopic.id);
-        if (updated) setSelectedTopic(updated);
-      }
-    });
+      setSelectedTopic(previous=>previous?topics.find(topic=>topic.id===previous.id)??null:null);
+    },()=>setForumError('Não foi possível carregar as conversas desta turma. Recarregue a página para tentar novamente.'));
     return () => unsub();
-  }, [selectedClassId, selectedTopic?.id]);
+  }, [selectedClassId]);
 
   const handlePostQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!questionTitle.trim() || !questionContent.trim() || !selectedClassId) return;
-
-    await saveForumTopic({
+    if (postingQuestion||!questionTitle.trim() || !questionContent.trim() || !selectedClassId) return;
+    setPostingQuestion(true);setForumError('');
+    try{const topic=await saveForumTopic({
       turmaId: selectedClassId,
       titulo: questionTitle.trim(),
       conteudo: questionContent.trim(),
@@ -139,13 +141,16 @@ export function StudentLmsModules({
       disciplina: questionSubject
     });
 
+    setForumTopics(previous=>previous.some(item=>item.id===topic.id)?previous:[topic,...previous]);
     setQuestionTitle('');
     setQuestionContent('');
     setIsAskingQuestion(false);
+    }catch{setForumError('Não foi possível publicar sua pergunta. O texto continua aqui; tente novamente.');}finally{setPostingQuestion(false);}
   };
 
   const handleSendReply = async () => {
-    if (!selectedTopic?.id || !studentReplyText.trim() || !selectedClassId) return;
+    if (sendingReply||!selectedTopic?.id || !studentReplyText.trim() || !selectedClassId) return;
+    setForumError('');
     setSendingReply(true);
     try {
       const newReply = await addForumReply(selectedClassId, selectedTopic.id, {
@@ -180,7 +185,7 @@ export function StudentLmsModules({
       }));
 
       setStudentReplyText('');
-    } finally {
+    } catch {setForumError('Não foi possível enviar a resposta. Seu texto continua aqui; tente novamente.');} finally {
       setSendingReply(false);
     }
   };
@@ -205,7 +210,7 @@ export function StudentLmsModules({
           ───────────────────────────────────────────────────────────── */}
       {activeView === 'gradebook' && (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <section className="card" style={{padding:16,marginBottom:16}} aria-label="Critérios da minha turma"><h2>Critérios da turma e período</h2><label>Período<select value={period} onChange={event=>onPeriodChange?.(event.target.value as GradePeriod)}>{GRADE_PERIODS.map(value=><option key={value} value={value}>{value==='atual'?'Histórico completo':value}</option>)}</select></label>{policy?<><p>{policy.explanation}</p><p>Versão {policy.version} · Atualizada em {new Date(policy.updatedAt).toLocaleString('pt-BR')}.</p>{policy.mode==='university'&&<p>P1: {gradeLabel(finalGrade.notaP1??null)} ({policy.universityWeights.p1}%) · P2: {gradeLabel(finalGrade.notaP2??null)} ({policy.universityWeights.p2}%) · Laboratórios: {gradeLabel(finalGrade.notaLabs)} ({policy.universityWeights.labs}%).</p>}<p>{policy.reviewMode==='replace-submission-score'?'Pareceres publicados substituem a nota automática das entregas corrigidas neste boletim.':'Pareceres publicados orientam o estudo e ficam separados da nota automática.'}</p></>:<p>{period==='atual'?'O professor ainda não publicou critérios. Os valores abaixo usam o modelo padrão, identificado como provisório.':'O professor ainda não publicou critérios para este período; não há média deste recorte.'}</p>}</section>
+          <section className="card" style={{padding:16,marginBottom:16}} aria-label="Critérios da minha turma"><h2>Critérios da turma e período</h2><label>Período<select value={period} onChange={event=>changePeriod(event.target.value)}>{GRADE_PERIODS.map(value=><option key={value} value={value}>{value==='atual'?'Histórico completo':value}</option>)}</select></label>{policy?<><p>{policy.explanation}</p><p>Versão {policy.version} · Atualizada em {new Date(policy.updatedAt).toLocaleString('pt-BR')}.</p>{policy.mode==='university'&&<p>P1: {gradeLabel(finalGrade.notaP1??null)} ({policy.universityWeights.p1}%) · P2: {gradeLabel(finalGrade.notaP2??null)} ({policy.universityWeights.p2}%) · Laboratórios: {gradeLabel(finalGrade.notaLabs)} ({policy.universityWeights.labs}%).</p>}<p>{policy.reviewMode==='replace-submission-score'?'Pareceres publicados substituem a nota automática das entregas corrigidas neste boletim.':'Pareceres publicados orientam o estudo e ficam separados da nota automática.'}</p></>:<p>{period==='atual'?'O professor ainda não publicou critérios. Os valores abaixo usam o modelo padrão, identificado como provisório.':'O professor ainda não publicou critérios para este período; não há média deste recorte.'}</p>}</section>
           {reviews.length>0&&<section aria-label="Pareceres publicados"><h2>Devolutivas do professor</h2>{reviews.map(review=><StudentReviewCard key={review.id} review={review} participatesInGrade={policy?.reviewMode==='replace-submission-score'} />)}</section>}
           {gradeLoading && <p role="status">Carregando suas entregas e avaliações…</p>}
           {gradeError && <p role="alert">{gradeError}</p>}
@@ -309,6 +314,7 @@ export function StudentLmsModules({
           ───────────────────────────────────────────────────────────── */}
       {activeView === 'forum' && (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {forumError&&<p role="alert">{forumError}</p>}{!selectedClassId&&<p>Entre em uma turma e selecione-a para participar do fórum.</p>}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -321,6 +327,7 @@ export function StudentLmsModules({
             </div>
             <button
               onClick={() => setIsAskingQuestion(!isAskingQuestion)}
+              disabled={!selectedClassId||postingQuestion}
               className="btn-gradient"
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.25rem', fontWeight: 700 }}
             >
@@ -335,10 +342,12 @@ export function StudentLmsModules({
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
                 ❓ Perguntar à Turma ou ao Professor
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <p>As perguntas e respostas deste fórum ficam visíveis para a turma. Para conversar somente com o professor, use Enviar Dúvida em Minhas turmas.</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,220px),1fr))', gap: '1rem', marginBottom: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Título da Pergunta / Dúvida</label>
+                  <label htmlFor="student-forum-title" style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Título da Pergunta / Dúvida</label>
                   <input
+                    id="student-forum-title" maxLength={300} disabled={postingQuestion}
                     type="text"
                     value={questionTitle}
                     onChange={(e) => setQuestionTitle(e.target.value)}
@@ -348,8 +357,9 @@ export function StudentLmsModules({
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Disciplina</label>
+                  <label htmlFor="student-forum-subject" style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Disciplina</label>
                   <select
+                    id="student-forum-subject" disabled={postingQuestion}
                     value={questionSubject}
                     onChange={(e) => setQuestionSubject(e.target.value)}
                     style={{ width: '100%', padding: '0.55rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: '#fff', fontSize: '0.9rem' }}
@@ -363,8 +373,9 @@ export function StudentLmsModules({
               </div>
 
               <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Explique sua Dúvida com Detalhes</label>
+                <label htmlFor="student-forum-content" style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Explique sua Dúvida com Detalhes</label>
                 <textarea
+                  id="student-forum-content" maxLength={20000} disabled={postingQuestion}
                   value={questionContent}
                   onChange={(e) => setQuestionContent(e.target.value)}
                   rows={3}
@@ -375,11 +386,11 @@ export function StudentLmsModules({
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-                <button type="button" onClick={() => setIsAskingQuestion(false)} className="btn-outline" style={{ padding: '0.55rem 1.15rem' }}>
+                <button type="button" disabled={postingQuestion} onClick={() => setIsAskingQuestion(false)} className="btn-outline" style={{ padding: '0.55rem 1.15rem' }}>
                   Cancelar
                 </button>
-                <button type="submit" className="btn-gradient" style={{ padding: '0.55rem 1.5rem', fontWeight: 700 }}>
-                  Enviar Dúvida (+10 XP)
+                <button type="submit" disabled={postingQuestion} className="btn-gradient" style={{ padding: '0.55rem 1.5rem', fontWeight: 700 }}>
+                  {postingQuestion?'Publicando…':'Publicar pergunta para a turma'}
                 </button>
               </div>
             </form>

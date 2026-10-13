@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Columns2, Play, RefreshCw, X, TrendingUp } from 'lucide-react';
 import type { LabParameter } from '../UniversalLabContainer';
 
@@ -17,6 +17,24 @@ export const LabSplitScreenComparator: React.FC<LabSplitScreenComparatorProps> =
   primaryParams,
   onApplyScenarioB
 }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    dialogRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+      if (event.key !== 'Tab') return;
+      const items = dialogRef.current?.querySelectorAll<HTMLElement>('button, input');
+      if (!items?.length) return;
+      if (event.shiftKey && document.activeElement === items[0]) { event.preventDefault(); items[items.length - 1].focus(); }
+      else if (!event.shiftKey && document.activeElement === items[items.length - 1]) { event.preventDefault(); items[0].focus(); }
+    };
+    document.addEventListener('keydown', keydown);
+    return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', keydown); previousFocus?.focus(); };
+  }, [isOpen, onClose]);
   // Cenário B começa clonando Cenário A com uma leve variação no primeiro parâmetro
   const [scenarioBParams, setScenarioBParams] = useState<Record<string, number>>(() => {
     const copy = { ...primaryParams };
@@ -24,7 +42,8 @@ export const LabSplitScreenComparator: React.FC<LabSplitScreenComparatorProps> =
     if (firstKey) {
       const def = parameters.find(p => p.id === firstKey);
       if (def) {
-        copy[firstKey] = Math.min(def.max, Number((copy[firstKey] * 1.5).toFixed(2)));
+        const target = def.min + Math.round((copy[firstKey] * 1.5 - def.min) / def.step) * def.step;
+        copy[firstKey] = Math.max(def.min, Math.min(def.max, Number(target.toFixed(8))));
       }
     }
     return copy;
@@ -42,7 +61,7 @@ export const LabSplitScreenComparator: React.FC<LabSplitScreenComparatorProps> =
 
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-3xl w-full p-6 shadow-2xl flex flex-col text-slate-100">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Comparar parâmetros dos cenários" className="bg-slate-900 border border-slate-700 rounded-xl max-w-3xl w-full p-6 shadow-2xl flex flex-col text-slate-100" style={{ maxHeight: '90dvh', overflowY: 'auto' }}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
           <div className="flex items-center space-x-3">
@@ -50,11 +69,11 @@ export const LabSplitScreenComparator: React.FC<LabSplitScreenComparatorProps> =
               <Columns2 className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-base text-white">Modo Comparativo A/B (Split-Screen)</h3>
-              <p className="text-xs text-slate-400">Contraste de hipóteses e análise direta de sensibilidade paramétrica</p>
+              <h3 className="font-bold text-base text-white">Comparar parâmetros A e B</h3>
+              <p className="text-xs text-slate-400">Ajuste os valores de B e aplique à bancada para observar os resultados.</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white">
+          <button onClick={onClose} aria-label="Fechar comparação" className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -103,7 +122,7 @@ export const LabSplitScreenComparator: React.FC<LabSplitScreenComparatorProps> =
                 const valB = scenarioBParams[p.id] ?? p.defaultValue;
                 const valA = primaryParams[p.id] ?? p.defaultValue;
                 const diff = valB - valA;
-                const diffPct = valA !== 0 ? ((diff / valA) * 100).toFixed(1) : '0';
+                const diffPct = valA !== 0 ? ((diff / Math.abs(valA)) * 100).toFixed(1) : null;
 
                 return (
                   <div key={p.id} className="text-xs bg-slate-900/80 p-2 rounded">
@@ -115,13 +134,14 @@ export const LabSplitScreenComparator: React.FC<LabSplitScreenComparatorProps> =
                         </span>
                         {diff !== 0 && (
                           <span className={`text-[10px] font-mono px-1 rounded ${diff > 0 ? 'bg-emerald-950 text-emerald-400' : 'bg-rose-950 text-rose-400'}`}>
-                            {diff > 0 ? `+${diffPct}%` : `${diffPct}%`}
+                            {diffPct === null ? `Δ ${diff > 0 ? '+' : ''}${diff.toFixed(2)} ${p.unit}` : `${diff > 0 ? '+' : ''}${diffPct}%`}
                           </span>
                         )}
                       </div>
                     </div>
                     <input
                       type="range"
+                      aria-label={`${p.label}: cenário B`}
                       min={p.min}
                       max={p.max}
                       step={p.step}
@@ -137,10 +157,10 @@ export const LabSplitScreenComparator: React.FC<LabSplitScreenComparatorProps> =
         </div>
 
         {/* Insights & Actions */}
-        <div className="mt-4 p-3 bg-slate-800/40 border border-slate-700/60 rounded-lg flex items-center justify-between">
+        <div className="mt-4 p-3 bg-slate-800/40 border border-slate-700/60 rounded-lg flex flex-wrap gap-3 items-center justify-between">
           <div className="flex items-center space-x-2 text-xs text-slate-300">
             <TrendingUp className="w-4 h-4 text-[#E4683F]" />
-            <span>Permite simular o impacto de perturbações e contrastar hipóteses causais instantaneamente.</span>
+            <span>A comparação mostra os parâmetros. Execute B na bancada para medir seu efeito.</span>
           </div>
           <div className="flex items-center space-x-2">
             <button

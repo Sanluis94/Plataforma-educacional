@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { analyzeEssayWithGemini } from '../../../core/services/geminiService';
+import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
 const COMPETENCIAS = [
   { id: 1, name: 'Domínio da Língua Escrita', desc: 'Gramática, ortografia, pontuação e uso culto da língua.' },
@@ -20,7 +21,7 @@ const MODE_CONFIG: Record<string, { theme: string; title: string; description: s
   cohesion: {
     theme: 'Os desafios da mobilidade urbana nas grandes cidades brasileiras',
     title: 'Coesão e Coerência',
-    description: 'Foque no uso de conectivos, progressão textual e articulação entre parágrafos. A IA avaliará especialmente a Competência 4 (mecanismos linguísticos).',
+    description: 'Foque no uso de conectivos, progressão textual e articulação entre parágrafos. A orientação considera especialmente a Competência 4 (mecanismos linguísticos).',
     placeholder: 'Escreva focando em conectivos (porém, além disso, portanto, nesse sentido...) e transições entre parágrafos...',
     focusCompetencias: [3, 4],
   },
@@ -34,47 +35,47 @@ const MODE_CONFIG: Record<string, { theme: string; title: string; description: s
   theme_analysis: {
     theme: 'O estigma associado às doenças mentais na sociedade brasileira',
     title: 'Análise de Tema',
-    description: 'Antes de escrever, analise o tema proposto: identifique palavras-chave, delimitação temática e possíveis abordagens. A IA avaliará a pertinência ao tema (C2).',
+    description: 'Antes de escrever, analise o tema proposto: identifique palavras-chave, delimitação temática e possíveis abordagens. A orientação considera a pertinência ao tema (C2).',
     placeholder: 'Analise o tema: identifique palavras-chave, problematize e delimite sua abordagem antes de dissertar...',
     focusCompetencias: [2],
   },
   repertoire: {
     theme: 'A democratização do acesso à cultura como instrumento de cidadania',
     title: 'Repertório Sociocultural',
-    description: 'Utilize referências culturais, filosóficas, históricas ou científicas para fundamentar seus argumentos. A IA avaliará a qualidade e pertinência do repertório.',
+    description: 'Utilize referências culturais, filosóficas, históricas ou científicas para fundamentar seus argumentos. A orientação considera a qualidade e pertinência do repertório.',
     placeholder: 'Cite filósofos, dados estatísticos, leis, acontecimentos históricos ou obras artísticas para embasar cada argumento...',
     focusCompetencias: [3],
   },
   correction: {
     theme: 'Os desafios para combater a invisibilidade do trabalho de cuidado no Brasil',
     title: 'Correção de Falhas Comuns',
-    description: 'Escreva livremente — a IA identificará erros gramaticais, desvios de registro, problemas de coesão e falhas argumentativas com feedback detalhado por competência.',
-    placeholder: 'Escreva sua redação normalmente. A IA identificará erros gramaticais, problemas de coesão, tangenciamentos e falhas na proposta de intervenção...',
+    description: 'Escreva livremente — a orientação ajuda a revisar erros gramaticais, desvios de registro, problemas de coesão e falhas argumentativas com feedback detalhado por competência.',
+    placeholder: 'Escreva sua redação normalmente. A orientação ajuda a revisar erros gramaticais, problemas de coesão, tangenciamentos e falhas na proposta de intervenção...',
     focusCompetencias: [1, 4],
   },
 };
 
-export function EssayModule({ mode = 'structure', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function EssayModule({ mode = 'structure', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => unknown | Promise<unknown> }) {
   const config = MODE_CONFIG[mode] || MODE_CONFIG['structure'];
   const [essay, setEssay] = useState('');
   const [theme, setTheme] = useState(config.theme);
-  const [feedback, setFeedback] = useState<null | { score: number; comments: string[] }>(null);
+  const [feedback, setFeedback] = useState<null | { score: number; comments: string[];source?:'gemini'|'local' }>(null);
   const [loading, setLoading] = useState(false);
+  const [error,setError]=useState('');
 
   const wordCount = essay.trim().split(/\s+/).filter(Boolean).length;
 
   const analyzeEssay = async () => {
-    if (wordCount < 40) return;
+    if (loading||wordCount < 40) return;
     setLoading(true);
-    const result = await analyzeEssayWithGemini(theme, essay);
-    setFeedback(result);
-    setLoading(false);
+    setError('');try{const result = await analyzeEssayWithGemini(theme, essay);setFeedback(result);}catch{setError('Não foi possível analisar agora. Seu texto continua aqui; tente novamente.');}finally{setLoading(false);}
   };
 
   return (
     <div style={{ padding: '1.5rem' }}>
       <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>✍️ {labTitle || config.title}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>{config.description}</p>
+      <p>A análise é uma estimativa de prática. Sem IA disponível, critérios locais de palavras e estrutura oferecem orientações limitadas; não avaliam integralmente as competências nem produzem uma nota oficial.</p>{error&&<p role="alert">{error}</p>}
 
       {/* Competências em foco */}
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', marginBottom: '1.25rem', paddingBottom: '0.25rem' }}>
@@ -93,12 +94,12 @@ export function EssayModule({ mode = 'structure', labTitle, onComplete }: { mode
       </div>
 
       <div style={{ background: 'var(--bg-secondary)', borderRadius: '10px', padding: '1rem', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.1)' }}>
-        <label style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', display: 'block', marginBottom: '0.4rem' }}>Tema da Redação:</label>
-        <input value={theme} onChange={e => setTheme(e.target.value)}
+        <label htmlFor="essay-theme" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', display: 'block', marginBottom: '0.4rem' }}>Tema da Redação:</label>
+        <input id="essay-theme" disabled={loading} value={theme} onChange={e => {setTheme(e.target.value);setFeedback(null);}}
           style={{ width: '100%', background: 'transparent', border: 'none', color: 'var(--text-main)', fontSize: '1rem', fontWeight: 'bold', outline: 'none' }} />
       </div>
 
-      <textarea value={essay} onChange={e => setEssay(e.target.value)} rows={12}
+      <textarea aria-label="Minha redação" disabled={loading} value={essay} onChange={e => {setEssay(e.target.value);setFeedback(null);}} rows={12}
         placeholder={config.placeholder}
         style={{
           width: '100%', borderRadius: '10px', padding: '1rem', fontSize: '0.95rem',
@@ -113,7 +114,7 @@ export function EssayModule({ mode = 'structure', labTitle, onComplete }: { mode
         <button onClick={analyzeEssay} disabled={wordCount < 40 || loading}
           style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: wordCount >= 40 ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
             border: 'none', color: 'white', cursor: wordCount >= 40 ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}>
-          {loading ? '⏳ Analisando...' : '🤖 Analisar com IA'}
+          {loading ? 'Analisando...' : 'Analisar meu texto'}
         </button>
       </div>
 
@@ -124,7 +125,7 @@ export function EssayModule({ mode = 'structure', labTitle, onComplete }: { mode
               {feedback.score}
             </div>
             <div>
-              <div style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>Nota Total / 1000</div>
+              <div style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>Estimativa de prática / 1000 · {feedback.source==='gemini'?'Gemini':'Critérios locais'}</div>
               <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                 {feedback.score >= 800 ? '🏆 Excelente! Texto bem elaborado.' : feedback.score >= 500 ? '📈 Bom potencial, com pontos a melhorar.' : '📚 Revise os fundamentos da dissertação argumentativa.'}
               </div>
@@ -139,17 +140,7 @@ export function EssayModule({ mode = 'structure', labTitle, onComplete }: { mode
           </div>
         </div>
       )}
-      {onComplete && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
-          <button
-            onClick={() => onComplete(100)}
-            className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: '#10b981', borderColor: '#10b981' }}
-          >
-            ✓ Concluir Laboratório
-          </button>
-        </div>
-      )}
+      <LabExplorationCompletion key={feedback ? 'analyzed' : 'writing'} onComplete={onComplete} ready={!!feedback} />
     </div>
   );
 }

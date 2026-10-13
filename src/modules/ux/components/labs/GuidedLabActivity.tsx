@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import {useAuth} from '../../../core/contexts/AuthContext';
+import {draftFingerprint,isDraftEvidence,isDraftObject,useActivityDraft} from '../../hooks/useActivityDraft';
 import { useLearningCapture } from '../../hooks/useLearningCapture';
 import type { LabCompletionHandler, LabCompletionReport } from '../../../data/services/learningCapture';
 import type { LabLearningContent } from '../../../core/content/labLearningContent';
@@ -15,21 +17,44 @@ interface GuidedLabActivityProps {
   content: LabLearningContent;
   onComplete?: LabCompletionHandler;
 }
+interface GuidedActivityDraft{
+  hypotheses:Record<number,string>;notes:string;answers:Record<number,number>;revealedScenarios:number[];
+  submitted:boolean;report:LabCompletionReport|null;saveError:boolean;activeSeconds:number;
+}
+function isGuidedActivityDraft(value:unknown,content:LabLearningContent):value is GuidedActivityDraft{
+  if(!isDraftObject(value)||!isDraftObject(value.hypotheses)||!isDraftObject(value.answers)||typeof value.notes!=='string'||value.notes.length>10000||typeof value.submitted!=='boolean'||typeof value.saveError!=='boolean'||typeof value.activeSeconds!=='number'||!Number.isFinite(value.activeSeconds)||value.activeSeconds<0||!Array.isArray(value.revealedScenarios))return false;
+  if(!Object.entries(value.hypotheses).every(([key,hypothesis])=>/^\d+$/.test(key)&&Number(key)<content.scenarios.length&&typeof hypothesis==='string'&&hypothesis.length<=5000))return false;
+  if(!Object.entries(value.answers).every(([key,answer])=>/^\d+$/.test(key)&&Number(key)<content.questions.length&&typeof answer==='number'&&Number.isInteger(answer)&&answer>=0&&answer<content.questions[Number(key)].options.length))return false;
+  if(!value.revealedScenarios.every(index=>typeof index==='number'&&Number.isInteger(index)&&index>=0&&index<content.scenarios.length))return false;
+  if(value.report!==null&&(!isDraftObject(value.report)||typeof value.report.score!=='number'||!Number.isFinite(value.report.score)||value.report.score<0||value.report.score>100||typeof value.report.telemetryRows!=='number'||!Number.isInteger(value.report.telemetryRows)||value.report.telemetryRows<0||!isDraftEvidence(value.report.evidence)||value.report.evidence.source!=='lab'||(value.report.handlesDeliveryFeedback!==undefined&&typeof value.report.handlesDeliveryFeedback!=='boolean')))return false;
+  if(value.submitted){
+    const answers=value.answers;
+    return value.report!==null&&content.questions.length>0&&content.questions.every((_,index)=>answers[index]!==undefined);
+  }
+  return value.report===null&&!value.saveError;
+}
 
-export function GuidedLabActivity({ labId, title, subject, objective, academicLevel, content, onComplete }: GuidedLabActivityProps) {
+export function GuidedLabActivity(props:GuidedLabActivityProps){
+  const {currentUser}=useAuth();const params=new URLSearchParams(window.location.search);
+  const draftKey=`edu_guided_draft_v1:${currentUser?.uid??'visitor'}:${params.get('class')??''}:${params.get('lessonPlan')??''}:${props.labId}:${draftFingerprint(props.content)}`;
+  return <ScopedGuidedLabActivity key={draftKey} {...props} draftKey={draftKey} />;
+}
+function ScopedGuidedLabActivity({ labId, title, subject, objective, academicLevel, content, onComplete,draftKey }: GuidedLabActivityProps&{draftKey:string}) {
+  const {restored,persist,storageError}=useActivityDraft<GuidedActivityDraft>(draftKey,{hypotheses:{},notes:'',answers:{},revealedScenarios:[],submitted:false,report:null,saveError:false,activeSeconds:0},(value):value is GuidedActivityDraft=>isGuidedActivityDraft(value,content));
   const level = academicLevel ?? getLearningLab(labId)?.academicLevel;
   const [activeTab, setActiveTab] = useState<'activity' | 'theory' | 'assessment'>('activity');
   const [scenarioIndex, setScenarioIndex] = useState(0);
-  const [revealedScenarios, setRevealedScenarios] = useState<number[]>([]);
-  const [hypotheses, setHypotheses] = useState<Record<number, string>>({});
-  const [notes, setNotes] = useState('');
-  const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [revealedScenarios, setRevealedScenarios] = useState<number[]>(restored.revealedScenarios);
+  const [hypotheses, setHypotheses] = useState<Record<number, string>>(restored.hypotheses);
+  const [notes, setNotes] = useState(restored.notes);
+  const [answers, setAnswers] = useState<Record<number, number>>(restored.answers);
+  const [submitted, setSubmitted] = useState(restored.submitted);
   const [showEvidence, setShowEvidence] = useState(false);
-  const capture = useLearningCapture();
-  const submittedReport = useRef<LabCompletionReport | null>(null);
+  const capture = useLearningCapture({activeSeconds:restored.activeSeconds});
+  const submittedReport = useRef<LabCompletionReport | null>(restored.report);
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState(false);
+  const [saveError, setSaveError] = useState(restored.saveError);
+  useEffect(()=>{const save=()=>persist({hypotheses,notes,answers,revealedScenarios,submitted,report:submittedReport.current,saveError:saveError||saving,activeSeconds:capture.current.activeSeconds});save();window.addEventListener('pagehide',save);return()=>window.removeEventListener('pagehide',save);},[hypotheses,notes,answers,revealedScenarios,submitted,saveError,saving,persist,capture]);
   const scenario = content.scenarios[scenarioIndex];
   const revealed = revealedScenarios.includes(scenarioIndex);
   const canSubmit = content.questions.length > 0 && content.questions.every((_, index) => answers[index] !== undefined);
@@ -75,6 +100,7 @@ export function GuidedLabActivity({ labId, title, subject, objective, academicLe
 
   return (
     <section className="guided-lab" aria-label={`Laboratório: ${title}`}>
+      {storageError&&<p role="alert">{storageError}</p>}
       <header>
         <p className="guided-lab-subject">{level && `${learningLevelLabel(level)} · `}{subject} · Exploração de cenários</p>
         <h2>{title}</h2>
@@ -109,7 +135,7 @@ export function GuidedLabActivity({ labId, title, subject, objective, academicLe
             <h4>{scenario.label}</h4>
             <p>{scenario.situation}</p>
             <label htmlFor={`${labId}-prediction`}>Minha previsão e justificativa</label>
-            <textarea id={`${labId}-prediction`} maxLength={5000} value={hypotheses[scenarioIndex] || ''} onChange={event => setHypotheses(previous => ({ ...previous, [scenarioIndex]: event.target.value }))} rows={3} />
+            <textarea id={`${labId}-prediction`} disabled={submitted} maxLength={5000} value={hypotheses[scenarioIndex] || ''} onChange={event => setHypotheses(previous => ({ ...previous, [scenarioIndex]: event.target.value }))} rows={3} />
             <button type="button" onClick={() => setRevealedScenarios(previous => previous.includes(scenarioIndex) ? previous : [...previous, scenarioIndex])}>
               Conferir observação
             </button>
@@ -125,13 +151,13 @@ export function GuidedLabActivity({ labId, title, subject, objective, academicLe
             <h3>Registre suas conclusões</h3>
             <p>{content.reflection}</p>
             <label htmlFor={`${labId}-notes`}>Minha resposta com evidências dos cenários</label>
-            <textarea id={`${labId}-notes`} maxLength={10000} value={notes} onChange={event => setNotes(event.target.value)} rows={5} />
+            <textarea id={`${labId}-notes`} disabled={submitted} maxLength={10000} value={notes} onChange={event => setNotes(event.target.value)} rows={5} />
             <div className="guided-lab-actions">
               <button type="button" aria-expanded={showEvidence} onClick={() => setShowEvidence(previous => !previous)}>Conferir critérios de uma boa resposta</button>
               <button type="button" onClick={downloadNotes}>Baixar minhas anotações</button>
             </div>
             {showEvidence && <p className="guided-lab-observation">{content.expectedEvidence}</p>}
-            <p className="guided-lab-hint">As anotações ficam nesta atividade enquanto ela estiver aberta. Baixe-as antes de sair.</p>
+            <p className="guided-lab-hint">O rascunho fica neste navegador, separado por conta e atividade, por até 30 dias. Baixe suas anotações para guardar uma cópia.</p>
           </article>
         </div>
       )}

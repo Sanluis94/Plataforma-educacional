@@ -1,5 +1,8 @@
+import { examDeadlineAt } from '../../data/services/examTiming';
+import { buildClassLearningReportCSV } from '../../data/services/learningReportExport';
+import { getLiveClassReport } from '../../data/repositories/reportRepository';
 import { useNavigationParams } from '../hooks/useNavigationParams';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   PlusCircle, Users, BookOpen, BarChart as BarChartIcon,
@@ -23,7 +26,6 @@ import type {
   LessonPlanItem, BimesterPeriod
 } from '../../data/types';
 import {
-  getStudentMessages,
   replyStudentMessage,
   subscribeStudentMessages,
   createClassNotice,
@@ -124,6 +126,8 @@ export function ProfessorDashboard() {
   const [matBimester, setMatBimester] = useState<string>('1º Bimestre');
   const [matSubject, setMatSubject] = useState('Física');
   const [uploadingMat, setUploadingMat] = useState(false);
+  const [readingFile, setReadingFile] = useState(false);
+  const fileReadVersion = useRef(0);
 
   // State for Lesson Plans (Bimestral / Semestral)
   const [classLessonPlans, setClassLessonPlans] = useState<LessonPlanItem[]>([]);
@@ -162,21 +166,7 @@ export function ProfessorDashboard() {
   const [newExamDuration, setNewExamDuration] = useState(50);
   const [newExamDeadline, setNewExamDeadline] = useState('');
   const [newExamTargetClass, setNewExamTargetClass] = useState('');
-  const [newExamQuestions, setNewExamQuestions] = useState<ExamQuestion[]>([
-    {
-      enunciado: 'Qual é a principal consequência observada na conservação de energia do sistema?',
-      tema: 'Termodinâmica / Mecânica',
-      nivelDificuldade: 'Médio',
-      valorPeso: 2.5,
-      justificativa: 'A energia mecânica total permanece constante na ausência de forças dissipativas não-conservativas.',
-      opcoes: [
-        { texto: 'A energia mecânica total é conservada', isCorreta: true },
-        { texto: 'A energia é destruída gradualmente', isCorreta: false },
-        { texto: 'A velocidade aumenta infinitamente', isCorreta: false },
-        { texto: 'A massa do sistema é reduzida', isCorreta: false },
-      ]
-    }
-  ]);
+  const [newExamQuestions, setNewExamQuestions] = useState<ExamQuestion[]>([]);
   const [examAiTopic, setExamAiTopic] = useState('');
   const [examAiGenerating, setExamAiGenerating] = useState(false);
 
@@ -187,11 +177,22 @@ export function ProfessorDashboard() {
 
   // Gemini API Key Modal
   const [showGeminiModal, setShowGeminiModal] = useState(false);
-  const [geminiKeyInput, setGeminiKeyInput] = useState(() => localStorage.getItem('gemini_api_key') || '');
+  const [geminiKeyInput, setGeminiKeyInput] = useState(() => {try{return localStorage.getItem('gemini_api_key')||'';}catch{return '';}});
   const [geminiSaved, setGeminiSaved] = useState(false);
 
   // Auth user data
   const { currentUser, userData } = useAuth();
+  const currentScope = `${currentUser?.uid ?? ''}:${selectedClassId ?? ''}`;
+  const scopeRef = useRef(currentScope);
+  scopeRef.current = currentScope;
+  const [classDataErrors, setClassDataErrors] = useState<Record<string, string>>({});
+  const [classDataLoading, setClassDataLoading] = useState<Record<string, boolean>>({});
+  const [dataRetry, setDataRetry] = useState(0);
+  const [examLoadError, setExamLoadError] = useState('');
+  const [examLoading, setExamLoading] = useState(false);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState('');
+  const [actionPending, setActionPending] = useState<Record<string, boolean>>({});
   const selectedClass = turmas.find(turma => turma.id === selectedClassId) as (typeof turmas[number] & { gradeLevel?: unknown; academicLevel?: unknown }) | undefined;
   const classLevel = normalizeLearningLevel(selectedClass?.gradeLevel, normalizeLearningLevel(selectedClass?.academicLevel, normalizeLearningLevel(userData?.gradeLevel)));
   const catalogueLevel = normalizeLearningLevel(searchParams.get('level'), classLevel);
@@ -239,6 +240,18 @@ export function ProfessorDashboard() {
       setToastMessage(prev => (prev?.text === text ? null : prev));
     }, 4500);
   };
+  const runConfirmedAction = async (key: string, operation: () => Promise<unknown>, apply: () => void, success: string) => {
+    if (actionPending[key]) return;
+    const requestScope = currentScope;
+    setActionPending(previous => ({ ...previous, [key]: true }));
+    try {
+      await operation();
+      if (scopeRef.current !== requestScope) return;
+      apply(); showFeedback(success);
+    } catch (failure) {
+      if (scopeRef.current === requestScope) showFeedback(failure instanceof Error && /limite|arquivo|formato|sessão|turma/i.test(failure.message) ? failure.message : 'A alteração não foi confirmada. O registro foi mantido; tente novamente.', 'error');
+    } finally { if (scopeRef.current === requestScope) setActionPending(previous => ({ ...previous, [key]: false })); }
+  };
 
   // Record the validated class context for reloads and return links.
   useEffect(() => {
@@ -266,54 +279,80 @@ export function ProfessorDashboard() {
 
   // Load class data (notices, materials, lesson plans, messages)
   useEffect(() => {
-    if (!selectedClassId) return;
-
+    let alive = true;
+    setClassNotices([]); setEnhancedMaterials([]); setClassLessonPlans([]); setProfMessages([]);
+    setClassDataErrors({}); setClassDataLoading({}); setActionPending({});
+    setPublishingNotice(false); setUploadingMat(false); setSavingPlan(false); setGeneratingPlanAI(false); setExamAiGenerating(false); setSavingExam(false);
+    setOrientationStudentId(null); setReplyTexts({});
+    fileReadVersion.current += 1; setReadingFile(false);
+    if (!selectedClassId || !currentUser?.uid) return;
+    setClassDataLoading({ notices: true, materials: true, plans: true, messages: true });
+    const loaded = (key: string) => { if (alive) setClassDataLoading(previous => ({ ...previous, [key]: false })); };
+    const failed = (key: string, label: string) => () => { if (alive) { loaded(key); setClassDataErrors(previous => ({ ...previous, [key]: `Não foi possível carregar ${label} desta turma.` })); } };
     const unsubNotices = subscribeClassNotices(selectedClassId, (notices) => {
+      if (!alive) return; loaded('notices');
       setClassNotices(notices);
-    });
+    }, failed('notices', 'os comunicados'));
 
     const unsubMaterials = subscribeEnhancedMaterials(selectedClassId, (mats) => {
+      if (!alive) return; loaded('materials');
       setEnhancedMaterials(mats);
-    });
+    }, failed('materials', 'os materiais'));
 
     const unsubLessonPlans = subscribeLessonPlansByClass(selectedClassId, (plans) => {
+      if (!alive) return; loaded('plans');
       setClassLessonPlans(plans);
-    });
+    }, failed('plans', 'o planejamento'));
 
     const unsubMessages = subscribeStudentMessages(selectedClassId, (msgs) => {
+      if (!alive) return; loaded('messages');
       setProfMessages(msgs);
-    });
+    }, undefined, failed('messages', 'as mensagens'));
 
     return () => {
+      alive = false;
       unsubNotices();
       unsubMaterials();
       unsubLessonPlans();
       unsubMessages();
     };
-  }, [selectedClassId]);
+  }, [selectedClassId, currentUser?.uid, dataRetry]);
 
   // Load teacher exams
   useEffect(() => {
+    let alive = true;
+    setExamsList([]); setExamLoadError('');
+    if (!currentUser?.uid) return;
+    setExamLoading(true);
     const loadExams = async () => {
-      const profId = currentUser?.uid || 'prof_current';
-      const exams = await getExamsByProfessor(profId);
-      setExamsList(exams);
+      try { const exams = await getExamsByProfessor(currentUser.uid); if (alive) setExamsList(exams); }
+      catch { if (alive) setExamLoadError('Não foi possível carregar suas avaliações. Tente novamente.'); }
+      finally { if (alive) setExamLoading(false); }
     };
-    loadExams();
-  }, [currentUser?.uid]);
+    void loadExams();
+    return () => { alive = false; };
+  }, [currentUser?.uid, dataRetry]);
 
   // Load exam analytics when selectedExam changes
   useEffect(() => {
+    let alive = true;
+    setExamAttempts([]); setExamAnalytics(null); setAnalyticsError('');
     if (!selectedExam || !selectedExam.turmaId) return;
+    setAnalyticsLoading(true);
     const fetchExamAnalytics = async () => {
+      try {
       const attempts = await getExamAttemptsByClass(selectedExam.turmaId!);
+      if (!alive) return;
       const filtered = attempts.filter(a => a.examId === selectedExam.id);
       setExamAttempts(filtered);
       const analytics = calculateExamQuestionAnalytics(selectedExam, filtered);
       setExamAnalytics(analytics);
+      } catch { if (alive) setAnalyticsError('Não foi possível carregar as respostas desta avaliação. Tente novamente.'); }
+      finally { if (alive) setAnalyticsLoading(false); }
     };
-    fetchExamAnalytics();
-  }, [selectedExam]);
+    void fetchExamAnalytics();
+    return () => { alive = false; };
+  }, [selectedExam, currentUser?.uid, dataRetry]);
 
   const totalStudents = turmas.reduce((sum, t) => sum + (t.studentsCount || 0), 0);
   const totalClasses = turmas.length;
@@ -326,7 +365,10 @@ export function ProfessorDashboard() {
   ];
 
   const handleSaveGeminiKey = () => {
+    if(!currentUser?.uid)return;
+    try{
     if (geminiKeyInput.trim()) {
+      localStorage.setItem('edu_gemini_key_owner',currentUser.uid);
       localStorage.setItem('gemini_api_key', geminiKeyInput.trim());
     } else {
       localStorage.removeItem('gemini_api_key');
@@ -336,27 +378,35 @@ export function ProfessorDashboard() {
       setGeminiSaved(false);
       setShowGeminiModal(false);
     }, 1200);
+    }catch{showFeedback('Não foi possível guardar sua chave neste navegador. Tente novamente; nenhuma confirmação foi registrada.','error');}
   };
 
   // Handler for File Upload (base64)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    setMatFileName(file.name);
-    const sizeInKb = (file.size / 1024).toFixed(1);
-    setMatFileSize(file.size > 1024 * 1024 ? `${(file.size / (1024 * 1024)).toFixed(2)} MB` : `${sizeInKb} KB`);
-
+    const version = ++fileReadVersion.current;
+    if (file.size > 550_000 || !/^(application\/pdf|image\/(png|jpeg|gif|webp))$/.test(file.type)) {
+      showFeedback(file.size > 550_000 ? 'O anexo deve ter até 550 KB. Para arquivos maiores, publique um link compartilhável.' : 'Escolha um PDF ou uma imagem PNG, JPEG, GIF ou WebP. Para outros formatos, publique um link compartilhável.', 'error');
+      e.target.value = ''; return;
+    }
+    setReadingFile(true);
+    const requestScope = currentScope;
     const reader = new FileReader();
     reader.onload = (event) => {
+      if (version !== fileReadVersion.current || scopeRef.current !== requestScope) return;
       setMatUrl(event.target?.result as string);
+      setMatFileName(file.name); setMatFileSize(`${(file.size / 1000).toFixed(1)} KB`); setReadingFile(false);
     };
+    reader.onerror = () => { if (version === fileReadVersion.current && scopeRef.current === requestScope) { setReadingFile(false); showFeedback('Não foi possível ler o arquivo. O material anterior foi mantido; selecione o anexo novamente.', 'error'); } };
     reader.readAsDataURL(file);
   };
 
   // Handler to publish material
   const handlePublishMaterial = async () => {
-    const targetClass = selectedClassId || (turmas.length > 0 ? turmas[0].id : null);
+    if (uploadingMat || readingFile || !currentUser?.uid) return;
+    const requestScope = currentScope;
+    const targetClass = selectedClassId;
     if (!targetClass) {
       showFeedback('Por favor, crie uma turma na aba "Minhas Turmas" antes de disponibilizar materiais didáticos.', 'error');
       return;
@@ -376,7 +426,7 @@ export function ProfessorDashboard() {
         return;
       }
     } else if (matType === 'arquivo') {
-      if (!matUrl && !matFileName) {
+      if (!matUrl || !matFileName) {
         showFeedback('Por favor, selecione um arquivo do dispositivo para envio.', 'error');
         return;
       }
@@ -390,19 +440,22 @@ export function ProfessorDashboard() {
       } else if (matType === 'link') {
         let cleanUrl = matUrl.trim();
         if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+          if (/^[a-z][a-z\d+.-]*:/i.test(cleanUrl)) throw new Error('Use um link HTTP ou HTTPS válido.');
           cleanUrl = 'https://' + cleanUrl;
         }
+        const parsed = new URL(cleanUrl);
+        if (!['http:', 'https:'].includes(parsed.protocol) || !parsed.hostname) throw new Error('Use um link HTTP ou HTTPS válido.');
         finalLinkOuConteudo = cleanUrl;
       } else {
         finalLinkOuConteudo = matUrl;
       }
 
-      const profId = currentUser?.uid || 'prof_current';
+      const profId = currentUser.uid;
 
       const saved = await addEnhancedMaterial(targetClass, {
         title: matTitle.trim(),
         description: matDesc.trim() || (matType === 'texto' ? 'Resumo de leitura e orientações didáticas' : 'Material didático complementar'),
-        tipo: matType === 'arquivo' ? 'pdf' : matType === 'link' ? 'link' : 'texto',
+        tipo: matType === 'arquivo' ? 'arquivo' : matType === 'link' ? 'link' : 'texto',
         linkOuConteudo: finalLinkOuConteudo,
         nomeArquivo: matType === 'arquivo' ? (matFileName || 'arquivo_anexo') : undefined,
         tamanhoFormatado: matType === 'arquivo' ? (matFileSize || 'N/D') : undefined,
@@ -411,6 +464,7 @@ export function ProfessorDashboard() {
         professorId: profId
       });
 
+      if (scopeRef.current !== requestScope) return;
       setEnhancedMaterials(prev => {
         const titleTrimmed = (saved.title || '').trim().toLowerCase();
         const contentTrimmed = (saved.linkOuConteudo || saved.nomeArquivo || '').trim().toLowerCase();
@@ -433,15 +487,17 @@ export function ProfessorDashboard() {
       showFeedback('Material didático publicado com sucesso para a turma!', 'success');
     } catch (err) {
       console.error('Erro ao publicar material:', err);
-      showFeedback('Não foi possível salvar o material. Tente novamente.', 'error');
+      if (scopeRef.current === requestScope) showFeedback(err instanceof Error && /arquivo|link|HTTP|título|conteúdo|formato/i.test(err.message) ? err.message : 'Não foi possível salvar o material. Seus dados continuam no formulário; tente novamente.', 'error');
     } finally {
-      setUploadingMat(false);
+      if (scopeRef.current === requestScope) setUploadingMat(false);
     }
   };
 
   // Handler to publish Class Notice (Mural)
   const handlePublishNotice = async () => {
-    const targetClass = selectedClassId || (turmas.length > 0 ? turmas[0].id : null);
+    if (publishingNotice || !currentUser?.uid) return;
+    const requestScope = currentScope;
+    const targetClass = selectedClassId;
     if (!targetClass) {
       showFeedback('Selecione ou crie uma turma para publicar comunicado no mural.', 'error');
       return;
@@ -452,7 +508,7 @@ export function ProfessorDashboard() {
     }
     setPublishingNotice(true);
     try {
-      const profId = currentUser?.uid || 'prof_current';
+      const profId = currentUser.uid;
       const profName = userData?.name || currentUser?.displayName || 'Professor';
       const savedNotice = await createClassNotice(
         targetClass,
@@ -461,6 +517,7 @@ export function ProfessorDashboard() {
         newNoticeTitle.trim(),
         newNoticeText.trim()
       );
+      if (scopeRef.current !== requestScope) return;
       setClassNotices(prev => {
         const titleTrimmed = (savedNotice.titulo || '').trim().toLowerCase();
         const textTrimmed = (savedNotice.texto || '').trim().toLowerCase();
@@ -479,15 +536,17 @@ export function ProfessorDashboard() {
       showFeedback('Comunicado publicado no mural da turma com sucesso!', 'success');
     } catch (err) {
       console.error('Erro ao publicar aviso:', err);
-      showFeedback('Erro ao publicar aviso. Tente novamente.', 'error');
+      if (scopeRef.current === requestScope) showFeedback('O comunicado não foi confirmado. Seu texto foi mantido; tente novamente.', 'error');
     } finally {
-      setPublishingNotice(false);
+      if (scopeRef.current === requestScope) setPublishingNotice(false);
     }
   };
 
   // Handler to save Lesson Plan item
   const handleSaveLessonPlan = async () => {
-    const targetClass = selectedClassId || (turmas.length > 0 ? turmas[0].id : null);
+    if (savingPlan || generatingPlanAI || !currentUser?.uid) return;
+    const requestScope = currentScope;
+    const targetClass = selectedClassId;
     if (!targetClass) {
       showFeedback('Selecione ou cadastre uma turma para registrar o planejamento.', 'error');
       return;
@@ -498,7 +557,7 @@ export function ProfessorDashboard() {
     }
     setSavingPlan(true);
     try {
-      const profId = currentUser?.uid || 'prof_current';
+      const profId = currentUser.uid;
       const associatedLab = getLearningLab(newPlanLabId);
       const savedPlan = await saveLessonPlanItem({
         professorId: profId,
@@ -506,14 +565,15 @@ export function ProfessorDashboard() {
         periodo: selectedBimester,
         ordemSemana: (classLessonPlans.filter(p => p.periodo === selectedBimester).length + 1),
         topico: newPlanTopic.trim(),
-        competenciasBNCC: newPlanBNCC.trim() || 'Habilidade Geral da BNCC',
-        metodologia: newPlanMethodology.trim() || 'Aula expositiva dialogada e prática em simulador virtual.',
+        competenciasBNCC: newPlanBNCC.trim(),
+        metodologia: newPlanMethodology.trim(),
         laboratorioAssociadoId: newPlanLabId || undefined,
         laboratorioTitulo: associatedLab?.title || undefined,
         status: 'planejada',
         dataPrevista: newPlanDate || undefined,
         criadoEm: new Date().toISOString()
       });
+      if (scopeRef.current !== requestScope) return;
       setClassLessonPlans(prev => {
         const topicTrimmed = (savedPlan.topico || '').trim().toLowerCase();
         const exists = prev.some(
@@ -521,7 +581,7 @@ export function ProfessorDashboard() {
                (p.turmaId === savedPlan.turmaId &&
                 p.periodo === savedPlan.periodo &&
                 p.topico?.trim().toLowerCase() === topicTrimmed &&
-                p.ordemSemana === savedPlan.ordemSemana)
+                p.ordemSemana === savedPlan.ordemSemana && p.laboratorioAssociadoId===savedPlan.laboratorioAssociadoId)
         );
         if (exists) {
           return prev.map(p => (p.id === savedPlan.id ? savedPlan : p));
@@ -536,44 +596,48 @@ export function ProfessorDashboard() {
       showFeedback('Aula adicionada ao plano de estudos bimestral com sucesso!', 'success');
     } catch (err) {
       console.error('Erro ao salvar item no plano de aula:', err);
-      showFeedback('Erro ao salvar plano de aula.', 'error');
+      if (scopeRef.current === requestScope) showFeedback('A aula não foi salva. O planejamento continua no formulário; tente novamente.', 'error');
     } finally {
-      setSavingPlan(false);
+      if (scopeRef.current === requestScope) setSavingPlan(false);
     }
   };
 
   // Handler to generate Lesson Plan with AI Gemini
   const handleGeneratePlanWithAI = async () => {
+    if (generatingPlanAI || savingPlan || !currentUser?.uid) return;
     if (!newPlanTopic.trim()) {
       showFeedback('Digite o tópico da aula antes de solicitar a sugestão da IA.', 'info');
       return;
     }
     setGeneratingPlanAI(true);
+    const requestScope = currentScope;
     try {
-      await generateCompleteLessonWithAI({
+      const result = await generateCompleteLessonWithAI({
         topic: newPlanTopic.trim(),
         subject: matSubject,
         gradeLevel: learningLevelLabel(catalogueLevel),
         activityType: 'lesson_theory'
       });
-      setNewPlanBNCC(`BNCC: Compreensão teórica e experimental de ${newPlanTopic.trim()}`);
-      setNewPlanMethodology(`Metodologia Ativa: 1) Apresentação conceitual dialogada. 2) Exploração em laboratório virtual interativo. 3) Debate formativo e síntese conceitual com feedback imediato.`);
-      showFeedback('Sugestão pedagógica gerada com sucesso pela IA!', 'success');
+      if (scopeRef.current !== requestScope) return;
+      setNewPlanMethodology(`${result.description}\n\n${result.theoryContent}`);
+      showFeedback('Sugestão recebida. Revise o planejamento e informe as habilidades curriculares antes de salvar.', 'info');
     } catch (err) {
       console.error('Erro ao gerar plano com IA:', err);
-      showFeedback('Não foi possível gerar sugestão pela IA no momento.', 'error');
+      if (scopeRef.current === requestScope) showFeedback(err instanceof Error ? err.message : 'Não foi possível gerar sugestão pela IA. O planejamento foi mantido.', 'error');
     } finally {
-      setGeneratingPlanAI(false);
+      if (scopeRef.current === requestScope) setGeneratingPlanAI(false);
     }
   };
 
   // Handler to generate Exam with AI Gemini
   const handleGenerateExamWithAI = async () => {
+    if (examAiGenerating || savingExam || !currentUser?.uid) return;
     if (!examAiTopic.trim()) {
       showFeedback('Digite um assunto para gerar as questões da prova.', 'info');
       return;
     }
     setExamAiGenerating(true);
+    const requestScope = currentScope;
     try {
       const result = await generateCompleteLessonWithAI({
         topic: examAiTopic.trim(),
@@ -581,13 +645,14 @@ export function ProfessorDashboard() {
         gradeLevel: learningLevelLabel(catalogueLevel),
         activityType: 'quiz'
       });
+      if (scopeRef.current !== requestScope) return;
       setNewExamTitle(result.title || `Avaliação Formal: ${examAiTopic.trim()}`);
       setNewExamDesc(result.description || `Exame avaliativo com correção automática.`);
       if (result.questions && result.questions.length > 0) {
-        const convertedQuestions: ExamQuestion[] = result.questions.map((q, idx) => ({
+        const convertedQuestions: ExamQuestion[] = result.questions.map((q) => ({
           enunciado: q.q,
           tema: examAiTopic.trim(),
-          nivelDificuldade: idx === 0 ? 'Fácil' : idx === 1 ? 'Médio' : 'Difícil',
+          nivelDificuldade: 'Médio',
           valorPeso: 2.5,
           justificativa: q.explanation || 'Resolução baseada nos princípios científicos da disciplina.',
           opcoes: q.options.map((opt, oIdx) => ({
@@ -597,17 +662,24 @@ export function ProfessorDashboard() {
         }));
         setNewExamQuestions(convertedQuestions);
       }
-      showFeedback('Questões com gabarito e resolução comentada geradas com sucesso!', 'success');
+      showFeedback('Questões recebidas com gabarito. Revise cada alternativa, resolução e dificuldade antes de publicar.', 'info');
     } catch (err) {
       console.error('Erro ao gerar prova com IA:', err);
-      showFeedback('Não foi possível gerar questões automáticas pela IA no momento.', 'error');
+      if (scopeRef.current === requestScope) showFeedback(err instanceof Error ? err.message : 'Não foi possível gerar questões. O formulário foi mantido.', 'error');
     } finally {
-      setExamAiGenerating(false);
+      if (scopeRef.current === requestScope) setExamAiGenerating(false);
     }
   };
 
   // Handler to publish Exam for class
   const handlePublishExam = async (status: 'Rascunho' | 'Aberta') => {
+    if (savingExam || examAiGenerating || !currentUser?.uid) return;
+    const requestScope = currentScope;
+    const targetClass = newExamTargetClass || selectedClassId;
+    if(status==='Aberta'&&newExamDeadline&&(examDeadlineAt({dataLimite:newExamDeadline})??0)<Date.now()){showFeedback('A data limite já passou. Ajuste o prazo ou deixe o campo vazio antes de publicar.','error');return;}
+    const targetClassObj = turmas.find(turma => turma.id === targetClass);
+    if (!targetClassObj) { showFeedback('Selecione uma turma de destino para esta avaliação.', 'error'); return; }
+    if (!Number.isInteger(newExamDuration) || newExamDuration < 0 || newExamDuration > 480) { showFeedback('Informe uma duração entre 0 e 480 minutos. Use 0 para uma prova sem cronômetro.', 'error'); return; }
     if (!newExamTitle.trim()) {
       showFeedback('Por favor, informe o título da avaliação antes de salvar.', 'error');
       return;
@@ -622,21 +694,22 @@ export function ProfessorDashboard() {
         showFeedback(`A questão #${i + 1} precisa ter um enunciado preenchido.`, 'error');
         return;
       }
-      const hasCorrect = q.opcoes.some(opt => opt.isCorreta);
-      if (!hasCorrect) {
-        showFeedback(`Marque qual das alternativas da questão #${i + 1} é a correta.`, 'error');
+      if (q.opcoes.length < 2 || q.opcoes.some(option => !option.texto.trim()) || new Set(q.opcoes.map(option => option.texto.trim().toLocaleLowerCase('pt-BR'))).size !== q.opcoes.length) {
+        showFeedback(`Preencha pelo menos duas alternativas distintas na questão #${i + 1}.`, 'error'); return;
+      }
+      if (!Number.isFinite(q.valorPeso) || q.valorPeso <= 0) { showFeedback(`Informe um peso maior que zero na questão #${i + 1}.`, 'error'); return; }
+      if (q.opcoes.filter(opt => opt.isCorreta).length !== 1) {
+        showFeedback(`Marque exatamente uma alternativa correta na questão #${i + 1}.`, 'error');
         return;
       }
     }
 
     setSavingExam(true);
     try {
-      const targetClass = newExamTargetClass || selectedClassId || (turmas.length > 0 ? turmas[0].id : 'turma_geral');
-      const targetClassObj = turmas.find(t => t.id === targetClass);
-      const profId = currentUser?.uid || 'prof_current';
+      const profId = currentUser.uid;
       const profName = userData?.name || currentUser?.displayName || 'Professor';
 
-      const pesoTotal = newExamQuestions.reduce((sum, q) => sum + (q.valorPeso || 1), 0);
+      const pesoTotal = newExamQuestions.reduce((sum, q) => sum + q.valorPeso, 0);
 
       const saved = await saveExam({
         professorId: profId,
@@ -644,9 +717,9 @@ export function ProfessorDashboard() {
         titulo: newExamTitle.trim(),
         descricao: newExamDesc.trim() || 'Avaliação formal com questões de múltipla escolha e correção automática.',
         disciplina: newExamSubject,
-        turmaId: targetClass,
-        turmaNome: targetClassObj?.name || (targetClass === 'turma_geral' ? 'Turma Geral' : 'Turma Vinculada'),
-        duracaoMinutos: newExamDuration || 50,
+        turmaId: targetClassObj.id,
+        turmaNome: targetClassObj.name,
+        duracaoMinutos: newExamDuration,
         dataLimite: newExamDeadline || undefined,
         status,
         pesoTotal,
@@ -654,10 +727,12 @@ export function ProfessorDashboard() {
         criadoEm: new Date().toISOString()
       });
 
+      if (scopeRef.current !== requestScope) return;
       setExamsList(prev => [saved, ...prev.filter(e => e.id !== saved.id)]);
       setExamMode('list');
       setNewExamTitle('');
       setNewExamDesc('');
+      setNewExamQuestions([]); setNewExamDeadline(''); setNewExamTargetClass('');
       showFeedback(
         status === 'Aberta'
           ? '🚀 Avaliação formal publicada e disponibilizada para os alunos!'
@@ -666,9 +741,9 @@ export function ProfessorDashboard() {
       );
     } catch (err) {
       console.error('Erro ao salvar avaliação:', err);
-      showFeedback('Houve um problema ao salvar a avaliação. Tente novamente.', 'error');
+      if (scopeRef.current === requestScope) showFeedback('A avaliação não foi salva. As questões continuam no formulário; tente novamente.', 'error');
     } finally {
-      setSavingExam(false);
+      if (scopeRef.current === requestScope) setSavingExam(false);
     }
   };
 
@@ -677,6 +752,7 @@ export function ProfessorDashboard() {
       {/* Toast Feedback Notification Banner */}
       {toastMessage && (
         <div
+          role={toastMessage.type === 'error' ? 'alert' : 'status'}
           style={{
             position: 'fixed',
             top: '1.5rem',
@@ -714,6 +790,10 @@ export function ProfessorDashboard() {
           </button>
         </div>
       )}
+      {Object.values(classDataLoading).some(Boolean) && <p role="status">Carregando registros da turma…</p>}
+      {!!Object.keys(classDataErrors).length && <div role="alert">{Object.values(classDataErrors).map(error => <p key={error}>{error}</p>)}<button type="button" className="btn-outline" onClick={() => setDataRetry(previous => previous + 1)}>Tentar carregar novamente</button></div>}
+      {examLoading && dashboardTab === 'exams' && <p role="status">Carregando suas avaliações…</p>}
+      {examLoadError && dashboardTab === 'exams' && <div role="alert"><p>{examLoadError}</p><button type="button" onClick={() => setDataRetry(previous => previous + 1)}>Tentar carregar avaliações novamente</button></div>}
 
       {/* Navigation Breadcrumb / Hub Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -793,7 +873,7 @@ export function ProfessorDashboard() {
             onClick={() => setIsBatchManagerOpen(true)}
             className="btn-outline"
             style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 600 }}
-            title="Importar e exportar alunos e notas via CSV"
+            title="Conferir lista de nomes e exportar o relatório da turma"
           >
             <FileSpreadsheet style={{ width: '0.9rem', height: '0.9rem', color: '#10b981' }} />
             Planilhas (CSV)
@@ -932,7 +1012,7 @@ export function ProfessorDashboard() {
                 {classCreationError && <p role="alert">{classCreationError}</p>}
                 <div style={{ flex: 1, minWidth: '220px' }}>
                   <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Nome da Turma</label>
-                  <input
+                  <input aria-label="Nome da Turma"
                     type="text"
                     value={newClassName}
                     onChange={(e) => setNewClassName(e.target.value)}
@@ -1097,7 +1177,7 @@ export function ProfessorDashboard() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <input
                     type="text"
-                    placeholder="Título do comunicado (ex: Data da Prova Bimestral de Física, Entrega do Relatório...)"
+                    aria-label="Título do comunicado" placeholder="Título do comunicado (ex: Data da Prova Bimestral de Física, Entrega do Relatório...)"
                     value={newNoticeTitle}
                     onChange={e => setNewNoticeTitle(e.target.value)}
                     style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.9rem' }}
@@ -1139,7 +1219,8 @@ export function ProfessorDashboard() {
                         </p>
                       </div>
                       <button
-                        onClick={() => deleteClassNotice(selectedClassId, notice.id)}
+                        disabled={actionPending[`notice:${notice.id}`]}
+                        onClick={() => { if (selectedClassId && window.confirm('Excluir este comunicado da turma?')) void runConfirmedAction(`notice:${notice.id}`, () => deleteClassNotice(selectedClassId, notice.id), () => setClassNotices(previous => previous.filter(item => item.id !== notice.id)), 'Comunicado removido.'); }}
                         style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.7 }}
                         title="Excluir aviso"
                       >
@@ -1169,6 +1250,7 @@ export function ProfessorDashboard() {
       {/* ── TAB 2: PLANO DE AULAS BIMESTRAL / SEMESTRAL ── */}
       {dashboardTab === 'lesson_plans' && (
         <div className="fade-in">
+          <fieldset disabled={savingPlan || generatingPlanAI} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
           <div className="glass-card mb-4" style={{ padding: '1.5rem', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', borderRadius: 'var(--radius-lg, 14px)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
@@ -1220,7 +1302,7 @@ export function ProfessorDashboard() {
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input
                     type="text"
-                    placeholder="Ex: Leis da Termodinâmica e Ciclo de Carnot"
+                    aria-label="Tópico / Conteúdo da Aula" placeholder="Ex: Leis da Termodinâmica e Ciclo de Carnot"
                     value={newPlanTopic}
                     onChange={e => setNewPlanTopic(e.target.value)}
                     style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-main)', fontSize: '0.88rem' }}
@@ -1242,7 +1324,7 @@ export function ProfessorDashboard() {
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                   Competências / Habilidades da BNCC:
                 </label>
-                <input
+                <input aria-label="Competências / Habilidades da BNCC:"
                   type="text"
                   placeholder="Ex: EM13CNT102 - Explicar transformações de energia"
                   value={newPlanBNCC}
@@ -1277,7 +1359,7 @@ export function ProfessorDashboard() {
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                   Data Prevista (Opcional):
                 </label>
-                <input
+                <input aria-label="Data Prevista (Opcional):"
                   type="date"
                   value={newPlanDate}
                   onChange={e => setNewPlanDate(e.target.value)}
@@ -1348,6 +1430,7 @@ export function ProfessorDashboard() {
             </div>
           </div>
 
+          </fieldset>
           {/* Timeline of Lessons in Current Bimester */}
           <div className="glass-card" style={{ padding: '1.75rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem' }}>
@@ -1387,7 +1470,8 @@ export function ProfessorDashboard() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                       <select
                         value={plan.status}
-                        onChange={e => updateLessonPlanItem(plan.id!, { status: e.target.value as any })}
+                        disabled={actionPending[`plan:${plan.id}`]}
+                        onChange={e => { const status = e.target.value as LessonPlanItem['status']; void runConfirmedAction(`plan:${plan.id}`, () => updateLessonPlanItem(plan.id!, { status }), () => setClassLessonPlans(previous => previous.map(item => item.id === plan.id ? { ...item, status } : item)), 'Situação da aula atualizada.'); }}
                         style={{ padding: '0.35rem 0.6rem', borderRadius: '6px', background: '#18181b', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', fontSize: '0.75rem' }}
                       >
                         <option value="planejada">Planejada</option>
@@ -1395,7 +1479,8 @@ export function ProfessorDashboard() {
                         <option value="concluida">Concluída</option>
                       </select>
                       <button
-                        onClick={() => deleteLessonPlanItem(plan.id!)}
+                        disabled={actionPending[`plan:${plan.id}`]}
+                        onClick={() => { if (window.confirm('Remover esta aula do planejamento?')) void runConfirmedAction(`plan:${plan.id}`, () => deleteLessonPlanItem(plan.id!), () => setClassLessonPlans(previous => previous.filter(item => item.id !== plan.id)), 'Aula removida do planejamento.'); }}
                         style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem', textAlign: 'center' }}
                       >
                         Remover
@@ -1491,10 +1576,8 @@ export function ProfessorDashboard() {
                     </button>
                     {exam.status === 'Aberta' ? (
                       <button
-                        onClick={async () => {
-                          await updateExam(exam.id!, { status: 'Encerrada' });
-                          setExamsList(prev => prev.map(e => e.id === exam.id ? { ...e, status: 'Encerrada' } : e));
-                        }}
+                        disabled={actionPending[`exam:${exam.id}`]}
+                        onClick={() => void runConfirmedAction(`exam:${exam.id}`, () => updateExam(exam.id!, { status: 'Encerrada' }), () => setExamsList(prev => prev.map(e => e.id === exam.id ? { ...e, status: 'Encerrada' } : e)), 'Avaliação encerrada. Novas tentativas não serão abertas.')}
                         className="btn-outline"
                         style={{ padding: '0.55rem', fontSize: '0.78rem' }}
                       >
@@ -1502,21 +1585,20 @@ export function ProfessorDashboard() {
                       </button>
                     ) : (
                       <button
-                        onClick={async () => {
-                          await updateExam(exam.id!, { status: 'Aberta' });
-                          setExamsList(prev => prev.map(e => e.id === exam.id ? { ...e, status: 'Aberta' } : e));
+                        disabled={actionPending[`exam:${exam.id}`]}
+                        onClick={() => {
+                          const updates: Partial<ExamData> = { status: 'Aberta', ...(exam.dataLimite && (examDeadlineAt(exam) ?? 0) < Date.now() ? { dataLimite: '', deadlineAtMillis: null } : {}) };
+                          void runConfirmedAction(`exam:${exam.id}`, () => updateExam(exam.id!, updates), () => setExamsList(prev => prev.map(e => e.id === exam.id ? { ...e, ...updates } : e)), 'Avaliação aberta para a turma.');
                         }}
                         className="btn-outline"
                         style={{ padding: '0.55rem', fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)' }}
                       >
-                        Reabrir
+                        {exam.dataLimite&&(examDeadlineAt(exam)??0)<Date.now()?'Reabrir sem prazo anterior':exam.status === 'Rascunho' ? 'Publicar para a turma' : 'Reabrir'}
                       </button>
                     )}
                     <button
-                      onClick={async () => {
-                        await deleteExam(exam.id!);
-                        setExamsList(prev => prev.filter(e => e.id !== exam.id));
-                      }}
+                      disabled={actionPending[`exam:${exam.id}`]}
+                      onClick={() => { if (window.confirm('Excluir esta avaliação? As entregas já registradas permanecem no histórico.')) void runConfirmedAction(`exam:${exam.id}`, () => deleteExam(exam.id!), () => setExamsList(prev => prev.filter(e => e.id !== exam.id)), 'Avaliação removida.'); }}
                       style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0 0.5rem' }}
                       title="Deletar prova"
                     >
@@ -1530,7 +1612,7 @@ export function ProfessorDashboard() {
 
           {/* EXAMS: CREATE EXAM VIEW (ESTILO Edu-Interact-v2 QuestionarioEditor) */}
           {examMode === 'create' && (
-            <div className="glass-card" style={{ padding: '1.75rem' }}>
+            <fieldset disabled={savingExam || examAiGenerating} className="glass-card" style={{ padding: '1.75rem', minWidth: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
                   📝 Criador de Provas & Avaliações Formais
@@ -1568,7 +1650,7 @@ export function ProfessorDashboard() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Título da Prova</label>
-                  <input
+                  <input aria-label="Título da Prova"
                     type="text"
                     placeholder="Ex: 1ª Avaliação Bimestral de Física"
                     value={newExamTitle}
@@ -1579,7 +1661,7 @@ export function ProfessorDashboard() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Disciplina</label>
-                  <select
+                  <select aria-label="Disciplina"
                     value={newExamSubject}
                     onChange={e => setNewExamSubject(e.target.value)}
                     style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.9rem' }}
@@ -1593,11 +1675,13 @@ export function ProfessorDashboard() {
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Turma de Destino</label>
                   <select
-                    value={newExamTargetClass}
+                    aria-label="Turma de destino da avaliação"
+                    disabled={savingExam || examAiGenerating}
+                    value={newExamTargetClass || selectedClassId || ''}
                     onChange={e => setNewExamTargetClass(e.target.value)}
                     style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: 'var(--text-main)', fontSize: '0.9rem' }}
                   >
-                    <option value="">Todas as Turmas</option>
+                    <option value="">Selecione a turma</option>
                     {turmas.map(t => (
                       <option key={t.id} value={t.id}>{t.name}</option>
                     ))}
@@ -1606,9 +1690,10 @@ export function ProfessorDashboard() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Duração em Minutos (Cronômetro)</label>
-                  <input
+                  <input aria-label="Duração em Minutos (Cronômetro)"
                     type="number"
                     min="0"
+                    max="480"
                     step="5"
                     placeholder="50 minutos (0 = sem limite)"
                     value={newExamDuration}
@@ -1619,7 +1704,7 @@ export function ProfessorDashboard() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Data Limite de Entrega</label>
-                  <input
+                  <input aria-label="Data Limite de Entrega"
                     type="date"
                     value={newExamDeadline}
                     onChange={e => setNewExamDeadline(e.target.value)}
@@ -1639,16 +1724,16 @@ export function ProfessorDashboard() {
                       setNewExamQuestions(prev => [
                         ...prev,
                         {
-                          enunciado: 'Enunciado da nova questão...',
+                          enunciado: '',
                           tema: newExamSubject,
                           nivelDificuldade: 'Médio',
                           valorPeso: 2.0,
-                          justificativa: 'Justificativa pedagógica e resolução comentada.',
+                          justificativa: '',
                           opcoes: [
-                            { texto: 'Opção A (Correta)', isCorreta: true },
-                            { texto: 'Opção B', isCorreta: false },
-                            { texto: 'Opção C', isCorreta: false },
-                            { texto: 'Opção D', isCorreta: false },
+                            { texto: '', isCorreta: false },
+                            { texto: '', isCorreta: false },
+                            { texto: '', isCorreta: false },
+                            { texto: '', isCorreta: false },
                           ]
                         }
                       ]);
@@ -1688,7 +1773,7 @@ export function ProfessorDashboard() {
                           const val = e.target.value;
                           setNewExamQuestions(prev => prev.map((item, idx) => idx === qIndex ? { ...item, enunciado: val } : item));
                         }}
-                        placeholder="Enunciado detalhado da questão"
+                        aria-label={`Enunciado da questão ${qIndex+1}`} placeholder="Enunciado detalhado da questão"
                         style={{ width: '100%', padding: '0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}
                       />
 
@@ -1696,7 +1781,7 @@ export function ProfessorDashboard() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
                         <div>
                           <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Tema / Eixo Temático</label>
-                          <input
+                          <input aria-label="Tema / Eixo Temático"
                             type="text"
                             value={q.tema}
                             onChange={e => {
@@ -1708,7 +1793,7 @@ export function ProfessorDashboard() {
                         </div>
                         <div>
                           <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Nível de Dificuldade</label>
-                          <select
+                          <select aria-label="Nível de Dificuldade"
                             value={q.nivelDificuldade}
                             onChange={e => {
                               const val = e.target.value as any;
@@ -1723,7 +1808,7 @@ export function ProfessorDashboard() {
                         </div>
                         <div>
                           <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Pontuação / Peso</label>
-                          <input
+                          <input aria-label="Pontuação / Peso"
                             type="number"
                             min="0.5"
                             step="0.5"
@@ -1755,7 +1840,7 @@ export function ProfessorDashboard() {
                                 }));
                               }}
                               style={{ accentColor: '#10b981', cursor: 'pointer' }}
-                              title="Marcar como alternativa correta"
+                              aria-label={`Alternativa correta ${String.fromCharCode(65+oIndex)} da questão ${qIndex+1}`} title="Marcar como alternativa correta"
                             />
                             <input
                               type="text"
@@ -1769,7 +1854,7 @@ export function ProfessorDashboard() {
                                   return { ...item, opcoes: newOpts };
                                 }));
                               }}
-                              placeholder={`Alternativa ${String.fromCharCode(65 + oIndex)}`}
+                              aria-label={`Alternativa ${String.fromCharCode(65+oIndex)} da questão ${qIndex+1}`} placeholder={`Alternativa ${String.fromCharCode(65 + oIndex)}`}
                               style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: opt.isCorreta ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)', background: opt.isCorreta ? 'rgba(16,185,129,0.08)' : 'rgba(0,0,0,0.2)', color: 'var(--text-main)', fontSize: '0.85rem' }}
                             />
                           </div>
@@ -1781,7 +1866,7 @@ export function ProfessorDashboard() {
                         <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
                           Justificativa Pedagógica & Gabarito Comentado (visível após a correção):
                         </label>
-                        <input
+                        <input aria-label="Justificativa Pedagógica & Gabarito Comentado (visível após a correção):"
                           type="text"
                           value={q.justificativa}
                           onChange={e => {
@@ -1818,12 +1903,14 @@ export function ProfessorDashboard() {
                   {savingExam ? 'Publicando Avaliação...' : '🚀 Aplicar Prova para a Turma'}
                 </button>
               </div>
-            </div>
+            </fieldset>
           )}
 
           {/* EXAMS: ANALYTICS VIEW (ESTILO EDU-INTERACT-V2: ACERTOS POR QUESTÃO) */}
           {examMode === 'analytics' && selectedExam && (
             <div className="glass-card" style={{ padding: '1.75rem' }}>
+              {analyticsLoading && <p role="status">Carregando respostas da avaliação…</p>}
+              {analyticsError && <div role="alert"><p>{analyticsError}</p><button type="button" onClick={() => setDataRetry(previous => previous + 1)}>Tentar carregar respostas novamente</button></div>}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <div>
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>
@@ -1984,6 +2071,7 @@ export function ProfessorDashboard() {
       {/* ── TAB 4: MATERIAIS DE APOIO & UPLOADS DE ARQUIVOS ── */}
       {dashboardTab === 'materials' && (
         <div className="fade-in">
+          <fieldset disabled={uploadingMat || readingFile} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
           <div className="glass-card mb-4" style={{ padding: '1.75rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Upload style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
@@ -2004,7 +2092,7 @@ export function ProfessorDashboard() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Trocar Turma:</label>
-                  <select
+                  <select aria-label="Trocar Turma:"
                     value={selectedClassId || ''}
                     onChange={(e) => setSelectedClassId(e.target.value)}
                     style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-card, #F1EAD9)', color: 'var(--text-main)', fontSize: '0.82rem' }}
@@ -2037,7 +2125,7 @@ export function ProfessorDashboard() {
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                   Título do Material
                 </label>
-                <input
+                <input aria-label="Título do Material"
                   type="text"
                   placeholder="Ex: Apostila de Física Térmica, Slides de Aula..."
                   value={matTitle}
@@ -2050,12 +2138,12 @@ export function ProfessorDashboard() {
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                   Tipo de Material
                 </label>
-                <select
+                <select aria-label="Tipo de Material"
                   value={matType}
                   onChange={e => setMatType(e.target.value as any)}
                   style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-card, #F1EAD9)', color: 'var(--text-main)', fontSize: '0.88rem' }}
                 >
-                  <option value="arquivo">📄 Arquivo do Computador (PDF, Imagem, Doc)</option>
+                  <option value="arquivo">📄 Arquivo do computador (PDF ou imagem, até 550 KB)</option>
                   <option value="link">🔗 Link Externo (YouTube, Google Drive, Artigo)</option>
                   <option value="texto">📝 Resumo / Texto de Apoio Direto</option>
                 </select>
@@ -2065,7 +2153,7 @@ export function ProfessorDashboard() {
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                   Bimestre de Associação
                 </label>
-                <select
+                <select aria-label="Bimestre de Associação"
                   value={matBimester}
                   onChange={e => setMatBimester(e.target.value)}
                   style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-card, #F1EAD9)', color: 'var(--text-main)', fontSize: '0.88rem' }}
@@ -2081,7 +2169,7 @@ export function ProfessorDashboard() {
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                   Disciplina
                 </label>
-                <select
+                <select aria-label="Disciplina"
                   value={matSubject}
                   onChange={e => setMatSubject(e.target.value)}
                   style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-card, #F1EAD9)', color: 'var(--text-main)', fontSize: '0.88rem' }}
@@ -2098,6 +2186,8 @@ export function ProfessorDashboard() {
               <div style={{ marginBottom: '1.25rem', padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-subtle, #FAF7EE)', border: '1px dashed var(--border-color, #E2D7C3)', textAlign: 'center' }}>
                 <input
                   type="file"
+                  accept="application/pdf,image/png,image/jpeg,image/gif,image/webp"
+                  disabled={uploadingMat || readingFile}
                   id="mat_file_input"
                   onChange={handleFileUpload}
                   style={{ display: 'none' }}
@@ -2108,6 +2198,8 @@ export function ProfessorDashboard() {
                 >
                   <Upload style={{ width: '1rem', height: '1rem' }} /> Selecionar Arquivo do Dispositivo
                 </label>
+                <p style={{ fontSize: '0.82rem', marginTop: '0.65rem' }}>PDF, PNG, JPEG, GIF ou WebP de até 550 KB. Para documentos e arquivos maiores, selecione Link externo.</p>
+                {readingFile && <p role="status">Lendo arquivo…</p>}
                 {matFileName && (
                   <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-main)' }}>
                     Arquivo Selecionado: <strong>{matFileName}</strong> ({matFileSize})
@@ -2121,7 +2213,7 @@ export function ProfessorDashboard() {
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                   Link / URL do Recurso:
                 </label>
-                <input
+                <input aria-label="Link / URL do Recurso:"
                   type="url"
                   placeholder="https://drive.google.com/... ou https://youtube.com/..."
                   value={matUrl}
@@ -2136,7 +2228,7 @@ export function ProfessorDashboard() {
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                   Conteúdo do Resumo / Instruções Pedagógicas:
                 </label>
-                <textarea
+                <textarea aria-label="Conteúdo do Resumo / Instruções Pedagógicas:"
                   rows={4}
                   placeholder="Escreva aqui o texto explicativo, síntese da aula, fórmulas importantes ou orientações de estudo..."
                   value={matContent}
@@ -2150,7 +2242,7 @@ export function ProfessorDashboard() {
               <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                 Descrição ou Orientações de Leitura:
               </label>
-              <input
+              <input aria-label="Descrição ou Orientações de Leitura:"
                 type="text"
                 placeholder="Ex: Leitura recomendada para a aula da próxima semana."
                 value={matDesc}
@@ -2172,6 +2264,7 @@ export function ProfessorDashboard() {
             </div>
           </div>
 
+          </fieldset>
           {/* List of Published Materials */}
           <div className="glass-card" style={{ padding: '1.75rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
@@ -2240,10 +2333,12 @@ export function ProfessorDashboard() {
                           <button
                             type="button"
                             onClick={() => {
-                              navigator.clipboard.writeText(mat.linkOuConteudo);
-                              setCopiedTextId(mat.id);
-                              setTimeout(() => setCopiedTextId(prev => prev === mat.id ? null : prev), 2000);
-                              showFeedback('Texto copiado para a área de transferência!', 'info');
+                              if (!navigator.clipboard) { showFeedback('Não foi possível copiar. Selecione o texto e copie manualmente.', 'error'); return; }
+                              void navigator.clipboard.writeText(mat.linkOuConteudo).then(() => {
+                                setCopiedTextId(mat.id);
+                                setTimeout(() => setCopiedTextId(prev => prev === mat.id ? null : prev), 2000);
+                                showFeedback('Texto copiado para a área de transferência!', 'info');
+                              }).catch(() => showFeedback('Não foi possível copiar. Selecione o texto e copie manualmente.', 'error'));
                             }}
                             className="btn-outline"
                             style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
@@ -2283,7 +2378,8 @@ export function ProfessorDashboard() {
                       </div>
 
                       <button
-                        onClick={() => selectedClassId && deleteEnhancedMaterial(selectedClassId, mat.id)}
+                        disabled={actionPending[`material:${mat.id}`]}
+                        onClick={() => { if (selectedClassId && window.confirm('Remover este material da turma?')) void runConfirmedAction(`material:${mat.id}`, () => deleteEnhancedMaterial(selectedClassId, mat.id), () => setEnhancedMaterials(previous => previous.filter(item => item.id !== mat.id)), 'Material removido.'); }}
                         style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.25rem' }}
                         title="Remover material"
                       >
@@ -2441,17 +2537,19 @@ export function ProfessorDashboard() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                       <input
                         type="text"
-                        placeholder="Digite sua orientação pedagógica..."
+                        aria-label="Resposta ao estudante" placeholder="Digite sua orientação pedagógica..."
                         value={replyTexts[msg.id!] || ''}
+                        disabled={actionPending[`reply:${msg.id}`]}
                         onChange={e => setReplyTexts(prev => ({ ...prev, [msg.id!]: e.target.value }))}
                         style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-subtle, #FAF7EE)', color: 'var(--text-main)', fontSize: '0.85rem' }}
                       />
                       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                         <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Recompensa de Incentivo 🪙</label>
-                        <input
+                        <input aria-label="Recompensa de Incentivo 🪙"
                           type="number"
                           min="0"
                           max="50"
+                          disabled={actionPending[`reply:${msg.id}`]}
                           value={replyBonusCoins[msg.id!] || 0}
                           onChange={e => setReplyBonusCoins(prev => ({ ...prev, [msg.id!]: parseInt(e.target.value) || 0 }))}
                           style={{ width: '60px', padding: '0.35rem', borderRadius: '4px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-subtle, #FAF7EE)', color: 'var(--text-main)', fontSize: '0.82rem', textAlign: 'center' }}
@@ -2459,16 +2557,16 @@ export function ProfessorDashboard() {
                         <button
                           className="btn-gradient"
                           style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', marginLeft: 'auto', fontWeight: 600 }}
-                          disabled={!(replyTexts[msg.id!] || '').trim()}
+                          disabled={actionPending[`reply:${msg.id}`] || !(replyTexts[msg.id!] || '').trim()}
                           onClick={async () => {
                             const reply = (replyTexts[msg.id!] || '').trim();
                             if (!reply || !selectedClassId) return;
                             const coins = replyBonusCoins[msg.id!] || 0;
-                            await replyStudentMessage(selectedClassId, msg.id!, reply, coins, coins > 0 ? 50 : 0, msg.studentId);
-                            const msgs = await getStudentMessages(selectedClassId);
-                            setProfMessages(msgs);
-                            setReplyTexts(prev => { const n = { ...prev }; delete n[msg.id!]; return n; });
-                            setReplyBonusCoins(prev => { const n = { ...prev }; delete n[msg.id!]; return n; });
+                            await runConfirmedAction(`reply:${msg.id}`, () => replyStudentMessage(selectedClassId, msg.id!, reply, coins, coins > 0 ? 50 : 0, msg.studentId), () => {
+                              setProfMessages(previous => previous.map(item => item.id === msg.id ? { ...item, replied: true, replyText: reply, bonusCoins: coins, bonusXp: coins > 0 ? 50 : 0 } : item));
+                              setReplyTexts(prev => { const next = { ...prev }; delete next[msg.id!]; return next; });
+                              setReplyBonusCoins(prev => { const next = { ...prev }; delete next[msg.id!]; return next; });
+                            }, 'Resposta enviada. Se houver recompensa, o estudante a receberá ao atualizar suas mensagens.');
                           }}
                         >
                           <Send style={{ width: '0.8rem', height: '0.8rem' }} /> Responder
@@ -2492,6 +2590,8 @@ export function ProfessorDashboard() {
           selectedClassId={selectedClassId}
           onSelectClass={(id) => setSelectedClassId(id)}
           professorName={userData?.name || currentUser?.displayName || 'Professor'}
+          onOpenMaterials={() => setDashboardTab('materials')}
+          onPublishActivity={publishActivity}
         />
       )}
 
@@ -2508,9 +2608,10 @@ export function ProfessorDashboard() {
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.25rem' }}>
               Insira sua chave de API para solicitar sugestões pedagógicas e rascunhos de questões. Revise o conteúdo antes de publicar; as sugestões não substituem a avaliação do professor.
             </p>
+            <p>A chave fica neste navegador para sua conta e é removida ao sair ou trocar de conta.</p>
             <input
               type="password"
-              placeholder="Cole sua API Key do Google AI Studio (AIzaSy...)"
+              aria-label="Chave do Gemini" placeholder="Cole sua API Key do Google AI Studio (AIzaSy...)"
               value={geminiKeyInput}
               onChange={(e) => setGeminiKeyInput(e.target.value)}
               style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-subtle, #FAF7EE)', color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '1rem' }}
@@ -2696,20 +2797,18 @@ export function ProfessorDashboard() {
       <BatchClassManagerModal
         isOpen={isBatchManagerOpen}
         onClose={() => setIsBatchManagerOpen(false)}
-        className={turmas[0]?.name || 'Minhas Turmas'}
-        existingStudentsCount={totalStudents}
+        className={turmas.find(item=>item.id===selectedClassId)?.name || 'Selecione uma turma'}
+        existingStudentsCount={turmas.find(item=>item.id===selectedClassId)?.studentsCount??0}
         onImportStudents={(imported) => {
-          showFeedback(`${imported.length} estudantes importados da planilha com sucesso!`, 'success');
+          showFeedback(`${imported.length} nomes e emails conferidos para organizar o acesso. A matrícula é feita pelo estudante com o código da turma.`, 'success');
         }}
-        onExportReportCsv={() => {
-          const csv = `Nome,Email,Turma,Media\nAluno Exemplo,aluno@kortex.edu,Turma Principal,8.5`;
-          const blob = new Blob([csv], { type: 'text/csv' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `relatorio_turma_${Date.now()}.csv`;
-          a.click();
-          URL.revokeObjectURL(url);
+        onExportReportCsv={async () => {
+          if(!selectedClassId)throw new Error('Selecione uma turma.');
+          const report=await getLiveClassReport(selectedClassId,{force:true});
+          if(!report)throw new Error('Relatório indisponível.');
+          const csv=buildClassLearningReportCSV(report);
+          const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+          const link=document.createElement('a');link.href=url;link.download='relatorio-da-turma.csv';link.click();URL.revokeObjectURL(url);
         }}
       />
     </div>

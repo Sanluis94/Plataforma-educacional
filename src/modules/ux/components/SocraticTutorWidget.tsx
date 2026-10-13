@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState,useRef } from 'react';
 import {
   HelpCircle, Sparkles, CheckCircle2, ChevronRight,
   RotateCcw, Award, BookOpen, Lightbulb, Compass, Send
 } from 'lucide-react';
-import { callGeminiWithKey } from '../../core/services/geminiService';
+import { callGeminiWithKey,getEffectiveGeminiApiKey } from '../../core/services/geminiService';
 
 interface SocraticTutorWidgetProps {
   labTitle?: string;
@@ -64,19 +64,22 @@ export function SocraticTutorWidget({ labTitle = 'Simulação Interativa', subje
   const [isCompleted, setIsCompleted] = useState(false);
   const [loadingAiFeedback, setLoadingAiFeedback] = useState(false);
   const [aiFeedback, setAiFeedback] = useState<string | null>(null);
+  const [aiError,setAiError]=useState('');
+  const rewardGranted=useRef(false);
 
   const steps = DEFAULT_QUESTIONS.default;
   const currentStep = steps[currentStepIndex];
 
   const handleNextStep = async () => {
-    if (!studentHypothesis.trim()) return;
+    if (loadingAiFeedback||!studentHypothesis.trim()) return;
+    setAiFeedback(null);setAiError('');
 
     const newAnswers = [...answers];
     newAnswers[currentStepIndex] = studentHypothesis.trim();
     setAnswers(newAnswers);
 
     // If Gemini key is available, get a quick encouraging reflection
-    const apiKey = localStorage.getItem('gemini_api_key');
+    const apiKey = getEffectiveGeminiApiKey();
     if (apiKey) {
       try {
         setLoadingAiFeedback(true);
@@ -88,7 +91,7 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
         const res = await callGeminiWithKey(apiKey, prompt);
         setAiFeedback(res);
       } catch {
-        // Fallback silently if offline
+        setAiError('Não foi possível consultar a IA. Você pode continuar o roteiro de investigação local.');
       } finally {
         setLoadingAiFeedback(false);
       }
@@ -99,7 +102,8 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
       setStudentHypothesis(answers[currentStepIndex + 1] || '');
     } else {
       setIsCompleted(true);
-      if (onRewardXP) {
+      if (onRewardXP&&!rewardGranted.current) {
+        rewardGranted.current=true;
         onRewardXP(50);
       }
     }
@@ -115,10 +119,11 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
 
   return (
     <div style={{ position: 'relative', marginTop: '1rem' }}>
+      {aiError&&<p role="alert">{aiError}</p>}
       {/* Trigger Bar / Card */}
       {!isOpen ? (
         <div
-          onClick={() => setIsOpen(true)}
+          role="button" tabIndex={0} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();setIsOpen(true);}}} onClick={() => setIsOpen(true)}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -422,7 +427,7 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
                   marginBottom: '1.25rem',
                 }}
               >
-                <Sparkles style={{ width: '1rem', height: '1rem' }} /> +50 XP de investigação científica
+                <Sparkles style={{ width: '1rem', height: '1rem' }} /> {onRewardXP?'Recompensa de investigação registrada':'Roteiro de investigação concluído'}
               </div>
 
               <div>

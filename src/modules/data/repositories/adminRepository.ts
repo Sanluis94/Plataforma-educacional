@@ -71,7 +71,7 @@ export const getTeachers = async (): Promise<Teacher[]> => {
     return teachers;
   } catch (error) {
     console.error('[AdminRepository] Erro ao buscar professores:', error);
-    return getLocalEtlTeachers();
+    throw error;
   }
 };
 
@@ -103,7 +103,7 @@ export const getLogs = async (maxResults = 50): Promise<LogEntry[]> => {
     });
   } catch (error) {
     console.error('[AdminRepository] Erro ao buscar logs:', error);
-    return getLocalEtlLogs(maxResults);
+    throw error;
   }
 };
 
@@ -136,7 +136,7 @@ export const getGlobalStats = async (): Promise<{
     };
   } catch (error) {
     console.error('[AdminRepository] Erro ao calcular estatísticas:', error);
-    return getLocalEtlGlobalStats();
+    throw error;
   }
 };
 

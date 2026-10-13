@@ -33,14 +33,24 @@ try {
   await page.locator('header.app-header').getByRole('button', { name: 'Entrar', exact: true }).click();
   const login = page.getByRole('dialog', { name: 'Entrar na plataforma' });
   await login.getByRole('button', { name: 'Entrar localmente', exact: true }).click();
+  await page.goto(origin + '/estudante?tab=labs');
   await page.getByRole('combobox', { name: 'Nível de aprendizado', exact: true }).waitFor();
-  for (const [label, name] of [['Conhecer planos (demonstração)', 'Planos para estudantes, escolas e redes'], ['Portal da família (demonstração)', 'Portal da família e responsáveis — demonstração']]) {
+  for (const [label, name] of [['Conhecer planos (demonstração)', 'Planos para estudantes, escolas e redes'], ['Portal da família', 'Portal da família']]) {
     await page.getByRole('button', { name: 'Abrir menu', exact: true }).click();
     await page.getByRole('button', { name: label, exact: true }).click();
     const dialog = page.getByRole('dialog', { name, exact: true });
     await dialog.waitFor();
     assert.equal(await dialog.evaluate(e => e.contains(document.activeElement)), true);
     for (let n = 0; n < 25; n++) { await page.keyboard.press('Tab'); assert.equal(await dialog.evaluate(e => e.contains(document.activeElement)), true); }
+    if (label === 'Conhecer planos (demonstração)') {
+      const investment=dialog.getByText('Investimento anual Edu-Interact:',{exact:true}).locator('..').locator('strong');
+      const annual=await investment.textContent();
+      await dialog.getByRole('button',{name:'Faturamento mensal',exact:true}).click();
+      await dialog.getByText('R$ 9,90',{exact:true}).waitFor();assert.notEqual(await investment.textContent(),annual);
+      const monthly=await investment.textContent();const slider=dialog.getByRole('slider');const initial=await slider.inputValue();await slider.focus();await page.keyboard.press('ArrowRight');assert.notEqual(await slider.inputValue(),initial);assert.notEqual(await investment.textContent(),monthly);
+      await dialog.getByRole('button',{name:'Ver opção para escola',exact:true}).click();await dialog.getByRole('status').getByText(/Nenhuma contratação foi realizada/).waitFor();
+      checks.push({check:'Planos ilustrativos recalculam período e alunos; seleção informa comparação sem contratação'});
+    }
     await overflow();
     await page.keyboard.press('Escape');
     await dialog.waitFor({ state: 'hidden' });
@@ -76,6 +86,7 @@ try {
   await page.getByRole('button', { name: 'Alto contraste', exact: true }).click();
   const bench = page.locator('.bg-black.text-yellow-300');
   await bench.waitFor();
+  await page.waitForFunction(() => { const node=document.querySelector('.bg-black.text-yellow-300'); return node && getComputedStyle(node).backgroundColor==='rgb(0, 0, 0)' && getComputedStyle(node.querySelector('h2')).color==='rgb(255, 255, 255)'; });
   checks.push({ check: 'Alto contraste usa texto claro sobre fundo escuro no tema claro', ...await contrast(bench.locator('h2').first(), bench) });
   const pressed = await page.getByRole('button', { name: 'Alto contraste', exact: true }).getAttribute('aria-pressed');
   await page.getByRole('button', { name: 'Alto contraste', exact: true }).focus();

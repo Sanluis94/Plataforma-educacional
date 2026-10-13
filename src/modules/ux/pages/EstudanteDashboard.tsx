@@ -26,6 +26,8 @@ import { offlineSyncService } from '../../core/services/offlineSyncService';
 import { learningDocumentId } from '../../data/services/learningCapture';
 import { examAttemptPercentage } from '../../data/services/learningAnalytics';
 import { useLearningCapture } from '../hooks/useLearningCapture';
+import {readClassExamSession,saveClassExamSession,classExamRemainingSeconds} from '../../data/services/classExamSession';
+import {examAcceptingAnswers,examDeadlineAt} from '../../data/services/examTiming';
 import {
   sendStudentMessage,
   subscribeStudentMessages,
@@ -143,7 +145,8 @@ const LEGACY_LABS = ALL_MODULES.flatMap<LegacyLab>(module => module.labs);
 const STUDENT_TABS = ['labs', 'activities', 'exams', 'lesson_plans', 'materials', 'classes', 'gamification', 'gradebook', 'forum', 'certificates'] as const;
 type StudentTab = typeof STUDENT_TABS[number];
 
-export function EstudanteDashboard() {
+export function EstudanteDashboard(){const {currentUser}=useAuth();return <StudentDashboardSession key={currentUser?.uid??'visitor'}/>;}
+function StudentDashboardSession() {
   const { currentUser, userData } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -161,6 +164,7 @@ export function EstudanteDashboard() {
     setActiveLab,
     shopItems,
     buyItem,
+    purchasedItems,purchaseBusy,purchaseError,purchaseNotice,
     achievements,
     studentClasses,
     joinClass,
@@ -169,6 +173,7 @@ export function EstudanteDashboard() {
     modules,
     gradeLevel,
     classesLoading, classesError,
+    loading:progressLoading,progressError,reloadProgress,
     refreshProgress,
   } = useStudentDashboard(selectedLevel);
 
@@ -257,6 +262,8 @@ export function EstudanteDashboard() {
   };
 
   const selectedClassId = studentClasses.find(turma => turma.id === searchParams.get('class'))?.id ?? studentClasses[0]?.id ?? null;
+  const selectedClassRef = useRef(selectedClassId);
+  selectedClassRef.current = selectedClassId;
   const setSelectedClassId = (classId: string) => setSearchParams(previous => {
     const next = new URLSearchParams(previous);
     next.set('class', classId);
@@ -277,11 +284,16 @@ export function EstudanteDashboard() {
   const [currentGradePolicy, setCurrentGradePolicy] = useState<GradePolicy | null>(null);
   const [reviewsError, setReviewsError] = useState('');
   const [studentAttempts, setStudentAttempts] = useState<ExamAttempt[]>([]);
+  const [attemptsLoading, setAttemptsLoading] = useState(true);
+  const [attemptsError, setAttemptsError] = useState('');
+  const [attemptsRefresh, setAttemptsRefresh] = useState(0);
 
   // Class Messages
   const [messages, setMessages] = useState<StudentMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [messageError,setMessageError]=useState('');
+  const [classDataError,setClassDataError]=useState('');
   const [classCodeInput, setClassCodeInput] = useState('');
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinFeedback, setJoinFeedback] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
@@ -298,8 +310,18 @@ export function EstudanteDashboard() {
   const [submittingExam, setSubmittingExam] = useState(false);
   const [examSaveError, setExamSaveError] = useState('');
   const [examPending, setExamPending] = useState(false);
+  const [queuedExamAttempts, setQueuedExamAttempts] = useState<ExamAttempt[]>([]);
+  const [examDraftError,setExamDraftError]=useState('');
+  const examDeadline=useRef<number|null>(null);
   const frozenExamAttempt = useRef<Omit<ExamAttempt, 'id'> | null>(null);
+  const activeExamRef = useRef(activeExam);
+  activeExamRef.current = activeExam;
   const [copiedMatId, setCopiedMatId] = useState<string | null>(null);
+  useEffect(()=>{
+    if(!activeExam)return;
+    const save=()=>{if(!saveClassExamSession(studentUid,{exam:activeExam,answers:examAnswers,questionIndex:examCurrentQIndex,deadlineAt:examDeadline.current,frozen:frozenExamAttempt.current,result:examResult,pending:examPending,activeSeconds:examCapture.current.activeSeconds}))setExamDraftError('Não foi possível guardar a prova nesta aba. Mantenha a página aberta até confirmar a entrega.');};
+    save();window.addEventListener('pagehide',save);return()=>window.removeEventListener('pagehide',save);
+  },[activeExam,examAnswers,examCurrentQIndex,examResult,examPending,submittingExam,studentUid,examCapture]);
 
   // Keep the class context when refreshing or returning from another screen.
   useEffect(() => {
@@ -314,21 +336,24 @@ export function EstudanteDashboard() {
 
   // Subscribe to real-time class data
   useEffect(() => {
-    if (!selectedClassId) return;
-
-    const unsubNotices = subscribeClassNotices(selectedClassId, setClassNotices);
-    const unsubMaterials = subscribeEnhancedMaterials(selectedClassId, setClassMaterials);
-    const unsubLessonPlans = subscribeLessonPlansByClass(selectedClassId, setClassLessonPlans);
-    const unsubExams = subscribeExamsByClass(selectedClassId, setClassExams);
+    let active = true;
+    setClassNotices([]);setClassMaterials([]);setClassLessonPlans([]);setClassExams([]);setMessages([]);setClassDataError('');
     setClassActivities([]);
     setActivitiesError('');
-    const unsubActivities = subscribeActivitiesByClass(selectedClassId, entries => setClassActivities(entries.filter(entry => entry.status === 'published')), () => setActivitiesError('Não foi possível carregar as atividades desta turma. Recarregue a página para tentar novamente.'));
-    let active=true;
+    setActiveExam(null);setExamResult(null);setExamPending(false);setExamAnswers({});setExamTimeRemaining(null);setSubmittingExam(false);setExamSaveError('');setExamDraftError('');setCopiedMatId(null);setNewMessage('');setMessageError('');setSendingMessage(false);
+    frozenExamAttempt.current = null;
+    if (!selectedClassId) return () => { active = false; };
+    const failed=()=>{ if (active) setClassDataError('Não foi possível atualizar todos os dados desta turma. Recarregue a página para tentar novamente.'); };
+    const unsubNotices = subscribeClassNotices(selectedClassId, entries => { if (active) setClassNotices(entries); },failed);
+    const unsubMaterials = subscribeEnhancedMaterials(selectedClassId, entries => { if (active) setClassMaterials(entries); },failed);
+    const unsubLessonPlans = subscribeLessonPlansByClass(selectedClassId, entries => { if (active) setClassLessonPlans(entries); },failed);
+    const unsubExams = subscribeExamsByClass(selectedClassId, entries => { if (active) setClassExams(entries); },failed);
+    const unsubActivities = subscribeActivitiesByClass(selectedClassId, entries => { if (active) setClassActivities(entries.filter(entry => entry.status === 'published')); }, () => { if (active) setActivitiesError('Não foi possível carregar as atividades desta turma. Recarregue a página para tentar novamente.'); });
     const unsubMessages = subscribeStudentMessages(selectedClassId, messages=>{
       if(!active)return;
       setMessages(messages);
-      void Promise.all(messages.filter(message=>message.id&&!message.rewardClaimedAt&&(message.bonusCoins||message.bonusXp)).map(message=>claimStudentMessageReward(selectedClassId,message.id!,studentUid))).then(claims=>{if(active&&claims.some(Boolean))void refreshProgress();}).catch(()=>setActivitiesError('Sua recompensa ainda não foi recebida. Recarregue a página para tentar novamente.'));
-    },studentUid);
+      void Promise.all(messages.filter(message=>message.id&&!message.rewardClaimedAt&&(message.bonusCoins||message.bonusXp)).map(message=>claimStudentMessageReward(selectedClassId,message.id!,studentUid))).then(async claims=>{if(active&&claims.some(Boolean))await refreshProgress();}).catch(()=>{if(active)setActivitiesError('Sua recompensa ainda não foi recebida. Recarregue a página para tentar novamente.');});
+    },studentUid,failed);
 
     return () => {
       active=false;
@@ -343,7 +368,9 @@ export function EstudanteDashboard() {
 
   useEffect(() => {
     let active = true;
+    setActivityHistory([]);
     setActivityHistoryLoading(true); setActivityHistoryError('');
+    if (!selectedClassId) { setActivityHistoryLoading(false); return () => { active = false; }; }
     void getSubmissionsByStudent(studentUid).then(entries => {
       if (active) setActivityHistory(entries.filter(entry => entry.classId === selectedClassId));
     }).catch(() => { if (active) setActivityHistoryError('Não foi possível carregar suas entregas anteriores.'); }).finally(() => { if (active) setActivityHistoryLoading(false); });
@@ -363,12 +390,44 @@ export function EstudanteDashboard() {
 
   // Load student's past exam attempts
   useEffect(() => {
+    let active = true;
+    setAttemptsLoading(true); setAttemptsError('');
     const fetchAttempts = async () => {
       const atts = await getExamAttemptsByStudent(studentUid);
-      setStudentAttempts(atts);
+      if (active) setStudentAttempts(atts);
     };
-    fetchAttempts();
-  }, [studentUid]);
+    fetchAttempts().catch(()=>{if(active)setAttemptsError('Não foi possível consultar seu histórico de provas. Confirme as entregas anteriores antes de iniciar uma nova tentativa.');}).finally(()=>{if(active)setAttemptsLoading(false);});
+    return () => { active = false; };
+  }, [studentUid, attemptsRefresh]);
+
+  // A queue acknowledgement concerns this exact attempt, even if other exams remain pending.
+  useEffect(() => {
+    let active = true;
+    let checking = false;
+    const unsubscribe = offlineSyncService.subscribeStatus(() => {
+      let pending: ReturnType<typeof offlineSyncService.getPendingSubmissions>;
+      try { pending = offlineSyncService.getPendingSubmissions(studentUid).filter(entry => entry.kind === 'exam'); }
+      catch { if (active) setExamSaveError('Não foi possível consultar a fila de provas. Seus registros foram preservados; tente atualizar a página.'); return; }
+      if (!active) return;
+      setQueuedExamAttempts(pending.flatMap(entry => entry.kind === 'exam' ? [{ ...entry.examAttempt, id: entry.id }] : []));
+      if (!examPending || !examResult || !activeExam || checking) return;
+      const queued = pending.find(entry => entry.kind === 'exam' && entry.examAttempt.examId === examResult.examId && entry.examAttempt.turmaId === examResult.turmaId && entry.examAttempt.evidence?.sessionId === examResult.evidence?.sessionId);
+      if (queued) {
+        const deadline = examDeadlineAt(activeExam);
+        if (queued.error && /permission|permiss/i.test(queued.error) && deadline !== null && Date.now() > deadline + 120000) setExamSaveError('O prazo da prova encerrou antes da confirmação de envio. Suas respostas estão preservadas neste dispositivo; peça ao professor para reabrir a prova e tente enviar novamente.');
+        return;
+      }
+      checking = true;
+      void getExamAttemptsByStudent(studentUid).then(attempts => {
+        if (!active) return;
+        const confirmed = attempts.find(attempt => attempt.alunoId === studentUid && attempt.examId === examResult.examId && attempt.turmaId === examResult.turmaId && attempt.evidence?.sessionId === examResult.evidence?.sessionId);
+        if (!confirmed) return;
+        setExamPending(false);setExamSaveError('');setExamResult(confirmed);
+        setStudentAttempts(previous => [confirmed, ...previous.filter(attempt => attempt.id !== confirmed.id)]);
+      }).catch(() => { if (active) setExamSaveError('O envio ainda não pôde ser confirmado. Sua tentativa continua guardada; atualize a página para consultar novamente.'); }).finally(() => { checking = false; });
+    });
+    return () => { active = false; unsubscribe(); };
+  }, [studentUid, activeExam, examResult, examPending]);
 
   // Exam Countdown Timer
   useEffect(() => {
@@ -377,9 +436,7 @@ export function EstudanteDashboard() {
       handleFinishExam();
       return;
     }
-    const timer = setInterval(() => {
-      setExamTimeRemaining(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
-    }, 1000);
+    const timer = setInterval(() => setExamTimeRemaining(classExamRemainingSeconds(examDeadline.current)),1000);
     return () => clearInterval(timer);
   }, [activeExam, examTimeRemaining, examResult]);
 
@@ -412,29 +469,42 @@ export function EstudanteDashboard() {
   // Handler to Send Message to Teacher
   const handleSendMessageSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedClassId || !newMessage.trim()) return;
+    if (sendingMessage||!selectedClassId || !newMessage.trim()) return;
     setSendingMessage(true);
+    setMessageError('');
+    const requestClassId = selectedClassId;
     try {
       await sendStudentMessage(selectedClassId, studentUid, studentName, newMessage.trim());
+      if (selectedClassRef.current !== requestClassId) return;
       setNewMessage('');
       SoundEffects.playClick();
     } catch (err) {
       console.error('Erro ao enviar mensagem:', err);
+      if (selectedClassRef.current === requestClassId) setMessageError('Não foi possível enviar sua dúvida. O texto continua aqui; tente novamente.');
     } finally {
-      setSendingMessage(false);
+      if (selectedClassRef.current === requestClassId) setSendingMessage(false);
     }
   };
 
   // Handler to Start an Exam
   const handleStartExam = (exam: ExamData) => {
-    examCapture.current.reset();
-    frozenExamAttempt.current = null;
-    setExamSaveError(''); setExamPending(false);
-    setActiveExam(exam);
-    setExamCurrentQIndex(0);
-    setExamAnswers({});
-    setExamResult(null);
-    setExamTimeRemaining(exam.duracaoMinutos ? exam.duracaoMinutos * 60 : null);
+    if(!exam.id||exam.turmaId!==selectedClassId){setExamSaveError('Esta prova não pertence à turma selecionada. Confira sua matrícula antes de continuar.');return;}
+    const restored=readClassExamSession(studentUid,exam);
+    const queuedAttempt = queuedExamAttempts.find(attempt => attempt.examId === exam.id && attempt.turmaId === exam.turmaId);
+    const queuedFrozen = queuedAttempt ? { ...queuedAttempt } : null;
+    if (queuedFrozen) delete queuedFrozen.id;
+    if(!restored&&!queuedAttempt&&(attemptsLoading||attemptsError)){setExamSaveError('Confirme seu histórico de provas antes de iniciar uma nova tentativa.');return;}
+    if(!restored&&!queuedAttempt&&!examAcceptingAnswers(exam)){setExamSaveError('Esta prova está fora do período disponível. Confira o prazo com seu professor.');return;}
+    examCapture.current.reset({activeSeconds:restored?.activeSeconds??queuedAttempt?.evidence?.activeSeconds??0});
+    frozenExamAttempt.current = restored?.frozen??queuedFrozen??null;
+    setExamSaveError('');setExamDraftError('');setExamPending(Boolean(queuedAttempt)||Boolean(restored?.pending));
+    setActiveExam(restored?.exam??exam);
+    setExamCurrentQIndex(restored?.questionIndex??0);
+    setExamAnswers(restored?.answers??(queuedAttempt ? Object.fromEntries(queuedAttempt.respostas.filter(answer => answer.opcaoEscolhidaIndex >= 0).map(answer => [answer.questaoIndex, answer.opcaoEscolhidaIndex])) : {}));
+    setExamResult(restored?.result??queuedAttempt??null);
+    const durationDeadline=restored?restored.deadlineAt:exam.duracaoMinutos?Date.now()+exam.duracaoMinutos*60000:null;
+    const courseDeadline=examDeadlineAt(exam);examDeadline.current=durationDeadline===null?courseDeadline:courseDeadline===null?durationDeadline:Math.min(durationDeadline,courseDeadline);
+    setExamTimeRemaining(!examAcceptingAnswers(exam) && !restored?.result && !queuedAttempt ? 0 : classExamRemainingSeconds(examDeadline.current));
     SoundEffects.playClick();
   };
 
@@ -488,28 +558,32 @@ export function EstudanteDashboard() {
 
     try {
       const delivery = await offlineSyncService.deliver({ kind: 'exam', studentId: studentUid, examAttempt: attempt, rewardId: `exam:${activeExam.id}` });
+      if (selectedClassRef.current !== attempt.turmaId || activeExamRef.current?.id !== attempt.examId) return;
       const saved: ExamAttempt = { ...attempt, id: learningDocumentId(studentUid, attempt.evidence!.sessionId, `exam-${attempt.turmaId}`) };
       setExamPending(delivery.queued);
       setExamResult(saved);
-      setStudentAttempts(prev => [saved, ...prev]);
+      if (!delivery.queued) setStudentAttempts(prev => [saved, ...prev.filter(value => value.id !== saved.id)]);
       setShowConfetti(!delivery.queued);
-      SoundEffects.playLevelUp();
+      if (!delivery.queued) SoundEffects.playLevelUp();
     } catch (err) {
       console.error('Erro ao submeter prova:', err);
-      setExamSaveError('Não foi possível guardar a prova. Suas respostas continuam aqui; tente entregar novamente antes de sair.');
+      if (selectedClassRef.current === attempt.turmaId && activeExamRef.current?.id === attempt.examId) setExamSaveError('Não foi possível guardar a prova. Suas respostas continuam aqui; tente entregar novamente antes de sair.');
     } finally {
-      setSubmittingExam(false);
+      if (selectedClassRef.current === attempt.turmaId && activeExamRef.current?.id === attempt.examId) setSubmittingExam(false);
     }
   };
 
   // Pending exams that student has not yet submitted
   const pendingExams = classExams.filter(
-    exam => exam.status === 'Aberta' && !studentAttempts.some(att => att.examId === exam.id)
+    exam => examAcceptingAnswers(exam) && !studentAttempts.some(att => att.examId === exam.id)
   );
 
   return (
     <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '84rem', margin: '0 auto' }}>
       <ConfettiCanvas active={showConfetti} onComplete={() => setShowConfetti(false)} />
+      {classDataError&&<p role="alert">{classDataError}</p>}
+      {examDraftError&&<p role="alert">{examDraftError}</p>}
+      {progressLoading&&<p role="status">Carregando seu progresso…</p>}{progressError&&<p role="alert">{progressError} <button className="btn-outline" onClick={reloadProgress}>Atualizar progresso</button></p>}
 
       {/* Navigation Breadcrumb / Hub Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', padding: '0.6rem 1rem', background: 'var(--bg-glass)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)' }}>
@@ -551,7 +625,7 @@ export function EstudanteDashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '1.75rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-            <span style={{ fontSize: '1.8rem' }}>🎓</span>
+            <span aria-label={purchasedItems.includes('avatar_hero')?'Avatar Herói':'Perfil do estudante'} style={{ fontSize: '1.8rem',padding:6,borderRadius:12,border:purchasedItems.includes('frame_gold')?'3px solid #b8860b':'3px solid transparent',boxShadow:purchasedItems.includes('theme_neon')?'0 0 14px #06b6d4, 0 0 24px #a855f7':undefined }}>{purchasedItems.includes('avatar_hero')?'🦸':'🎓'}</span>
             <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.5px', fontFamily: 'var(--font-heading)' }}>
               Portal do Estudante
             </h1>
@@ -559,13 +633,14 @@ export function EstudanteDashboard() {
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.92rem' }}>
             Acesse seus laboratórios, provas, aulas e materiais de estudo.
           </p>
+          {purchasedItems.includes('badge_genius')&&<p aria-label="Medalha decorativa do perfil">🧠 Medalha do Conhecimento</p>}
         </div>
 
         {/* Gamification Stats Pill */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', padding: '0.65rem 1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-glass)', border: '1px solid var(--border-color)' }}>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>NÍVEL {level}</div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>{xp} XP</div>
+            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>{progressLoading||progressError?'—':xp+' XP'}</div>
           </div>
           <div style={{ width: '1px', height: '2rem', background: 'var(--border-color)' }} />
           <div>
@@ -728,7 +803,7 @@ export function EstudanteDashboard() {
                 </span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '1.25rem' }}>
                 {currentSubjectModule.labs.map((lab, index) => {
                   const isCompleted = completedModules.includes(lab.id);
                   return (
@@ -859,6 +934,8 @@ export function EstudanteDashboard() {
       {/* ── TAB 2: PROVAS & AVALIAÇÕES FORMAIS (ESTILO EDU-INTERACT-V2) ── */}
       {activeTab === 'exams' && !activeExam && (
         <div className="fade-in">
+          {attemptsLoading && <p role="status">Consultando suas provas entregues…</p>}
+          {attemptsError && <div role="alert"><p>{attemptsError}</p><button type="button" className="btn-outline" disabled={attemptsLoading} onClick={() => setAttemptsRefresh(previous => previous + 1)}>Consultar histórico novamente</button></div>}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <div>
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, margin: '0 0 0.35rem', fontFamily: 'var(--font-heading)' }}>
@@ -871,9 +948,11 @@ export function EstudanteDashboard() {
           </div>
 
           {/* Active Exams Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
             {classExams.map(exam => {
-              const attempt = studentAttempts.find(a => a.examId === exam.id);
+              const queued = queuedExamAttempts.some(attempt => attempt.examId === exam.id && attempt.turmaId === exam.turmaId);
+              const attempt = queued ? undefined : studentAttempts.find(a => a.examId === exam.id);
+              const restored = readClassExamSession(studentUid, exam);
               return (
                 <div key={exam.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderRadius: 'var(--radius-lg, 14px)' }}>
                   <div>
@@ -887,7 +966,7 @@ export function EstudanteDashboard() {
                         </span>
                       ) : (
                         <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
-                          Pendente
+                          {queued || restored?.pending ? 'Entrega aguardando confirmação' : examAcceptingAnswers(exam) ? 'Pendente' : 'Fora do período'}
                         </span>
                       )}
                     </div>
@@ -904,6 +983,7 @@ export function EstudanteDashboard() {
                         <Clock style={{ width: '0.85rem', height: '0.85rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
                         <span>Duração: <strong>{exam.duracaoMinutos ? `${exam.duracaoMinutos} min` : 'Sem limite'}</strong></span>
                       </div>
+                      {exam.dataLimite && <div>Prazo: {examDeadlineAt(exam) === null ? 'Confira o prazo com seu professor' : new Date(examDeadlineAt(exam)!).toLocaleString('pt-BR')}</div>}
                       <div>Questões: <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{exam.questoes.length} (Peso Total: {exam.pesoTotal} pts)</strong></div>
                     </div>
                   </div>
@@ -920,11 +1000,11 @@ export function EstudanteDashboard() {
                     </div>
                   ) : (
                     <button
-                      onClick={() => handleStartExam(exam)}
+                      onClick={() => handleStartExam(exam)} disabled={(!restored && !queued && (attemptsLoading || Boolean(attemptsError))) || (!examAcceptingAnswers(exam) && !restored && !queued)}
                       className="btn-gradient"
                       style={{ width: '100%', padding: '0.65rem', fontWeight: 700, fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--gradient-primary)' }}
                     >
-                      Realizar Prova 📝
+                      {queued || restored?.pending ? 'Consultar entrega pendente' : restored ? 'Continuar prova ou consultar entrega' : attemptsLoading ? 'Consultando entregas…' : attemptsError ? 'Histórico indisponível' : !examAcceptingAnswers(exam) ? 'Fora do período disponível' : 'Realizar Prova 📝'}
                     </button>
                   )}
                 </div>
@@ -1036,7 +1116,7 @@ export function EstudanteDashboard() {
                             name={`exam_runner_q_${examCurrentQIndex}`}
                             checked={isSelected}
                             onChange={() => setExamAnswers(prev => ({ ...prev, [examCurrentQIndex]: oIdx }))}
-                            disabled={submittingExam || Boolean(frozenExamAttempt.current)}
+                            disabled={submittingExam || Boolean(frozenExamAttempt.current) || examTimeRemaining === 0}
                             style={{ accentColor: 'var(--color-primary, #E4683F)', cursor: 'pointer' }}
                           />
                           <span style={{ color: isSelected ? 'var(--text-main)' : 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: isSelected ? 600 : 400 }}>
@@ -1096,7 +1176,7 @@ export function EstudanteDashboard() {
                 </div>
               </div>
 
-              {examPending && <p role="status">A entrega aguarda confirmação de envio. Reconecte com este mesmo perfil para enviá-la ao professor.</p>}
+              {examPending && <div><p role="status">A entrega aguarda confirmação de envio. Suas respostas permanecem guardadas neste dispositivo.</p><button type="button" className="btn-outline" disabled={submittingExam} onClick={() => void handleFinishExam()}>{submittingExam ? 'Tentando enviar…' : 'Tentar enviar novamente'}</button></div>}
 
               {/* Gabarito Comentado com Justificativas Pedagógicas */}
               <h4 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
@@ -1209,7 +1289,7 @@ export function EstudanteDashboard() {
           </p>
 
           {classMaterials.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1.25rem' }}>
               {classMaterials.map(mat => (
                 <div key={mat.id} style={{ padding: '1.25rem', borderRadius: 'var(--radius-lg, 14px)', background: 'var(--bg-glass)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
@@ -1257,9 +1337,7 @@ export function EstudanteDashboard() {
                       <button
                         type="button"
                         onClick={() => {
-                          navigator.clipboard.writeText(mat.linkOuConteudo);
-                          setCopiedMatId(mat.id);
-                          setTimeout(() => setCopiedMatId(prev => prev === mat.id ? null : prev), 2000);
+                          if(!navigator.clipboard){setClassDataError('Não foi possível copiar o texto. Selecione o conteúdo e copie manualmente.');return;}void navigator.clipboard.writeText(mat.linkOuConteudo).then(()=>{setCopiedMatId(mat.id);setClassDataError('');setTimeout(()=>setCopiedMatId(previous=>previous===mat.id?null:previous),2000);}).catch(()=>setClassDataError('Não foi possível copiar o texto. Selecione o conteúdo e copie manualmente.'));
                         }}
                         className="btn-outline"
                         style={{ width: '100%', padding: '0.5rem', fontSize: '0.82rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
@@ -1373,7 +1451,7 @@ export function EstudanteDashboard() {
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
                 🏫 Suas Turmas Matriculadas ({studentClasses.length})
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1rem' }}>
                 {studentClasses.map(turma => {
                   const isSelected = selectedClassId === turma.id;
                   const shortCode = turma.code || turma.id.slice(0, 6).toUpperCase();
@@ -1472,6 +1550,7 @@ export function EstudanteDashboard() {
               >
                 {sendingMessage ? 'Enviando...' : 'Enviar Dúvida'}
               </button>
+              {messageError&&<p role="alert">{messageError}</p>}
             </form>
 
             {/* Past Messages List */}
@@ -1505,25 +1584,27 @@ export function EstudanteDashboard() {
               🛍️ Loja de Customização do Perfil
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>
-              Use suas moedas virtuais conquistadas em simuladores e avaliações para desbloquear itens!
+              Use suas moedas virtuais para personalizar o perfil. Os itens adquiridos são aplicados automaticamente e permanecem após recarregar a página.
             </p>
+            {purchaseError&&<p role="alert">{purchaseError}</p>}{purchaseNotice&&<p role="status">{purchaseNotice}</p>}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))', gap: '1.25rem' }}>
               {shopItems.map(item => (
                 <div key={item.id} style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: item.owned ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{item.icon}</div>
                     <h4 style={{ color: 'var(--text-main)', fontWeight: 700, margin: '0 0 0.25rem' }}>{item.name}</h4>
+                    <p>{item.description}</p>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
                     <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.95rem' }}>🪙 {item.price}</span>
                     <button
                       onClick={() => buyItem(item.id)}
-                      disabled={item.owned || coins < item.price}
+                      disabled={purchaseBusy || item.owned || coins < item.price}
                       className="btn-gradient"
                       style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', opacity: item.owned ? 0.6 : (coins < item.price ? 0.5 : 1) }}
                     >
-                      {item.owned ? 'Adquirido' : 'Adquirir'}
+                      {item.owned ? 'Adquirido' : purchaseBusy?'Guardando…':'Adquirir'}
                     </button>
                   </div>
                 </div>
@@ -1537,10 +1618,10 @@ export function EstudanteDashboard() {
               🏆 Conquistas & Medalhas Acadêmicas
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>
-              Desbloqueie conquistas ao explorar os laboratórios e obter excelência nas provas.
+              Desbloqueie conquistas ao concluir laboratórios, acumular experiência e colecionar itens. Cada medalha descreve seu requisito.
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: '1.25rem' }}>
               {achievements.map(ach => (
                 <div key={ach.id} style={{ padding: '1.25rem', borderRadius: '10px', background: ach.unlocked ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.02)', border: ach.unlocked ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ fontSize: '2.25rem', opacity: ach.unlocked ? 1 : 0.4 }}>{ach.icon}</div>
@@ -1558,7 +1639,7 @@ export function EstudanteDashboard() {
 
       {/* ── TAB LMS: BOLETIM ESCOLAR, FÓRUM & CERTIFICADOS DIGITAIS ── */}
       {(activeTab === 'gradebook' || activeTab === 'forum' || activeTab === 'certificates') && (
-        <StudentLmsModules period={searchParams.get('gradePeriod') as import('../../data/repositories/gradePolicyRepository').GradePeriod || 'atual'} onPeriodChange={period=>setSearchParams(previous=>{const next=new URLSearchParams(previous);next.set('gradePeriod',period);return next;})}
+        <StudentLmsModules key={`${studentUid}:${selectedClassId}`} period={searchParams.get('gradePeriod') as import('../../data/repositories/gradePolicyRepository').GradePeriod || 'atual'} onPeriodChange={period=>setSearchParams(previous=>{const next=new URLSearchParams(previous);next.set('gradePeriod',period);return next;})}
           studentId={studentUid}
           studentName={studentName}
           selectedClassId={selectedClassId}

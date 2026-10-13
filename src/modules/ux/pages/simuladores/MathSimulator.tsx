@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
 interface MathSimulatorProps {
   mode?: string;
@@ -6,7 +7,7 @@ interface MathSimulatorProps {
   title?: string;
   labTitle?: string;
   labId?: string;
-  onComplete?: (score: number) => void;
+  onComplete?: (score: number) => unknown | Promise<unknown>;
 }
 
 export function MathSimulator({ mode, functionType = 'linear', title, labTitle, onComplete }: MathSimulatorProps) {
@@ -20,12 +21,10 @@ export function MathSimulator({ mode, functionType = 'linear', title, labTitle, 
 
   const displayTitle = labTitle || title;
 
-  const handleFinish = () => {
-    if (onComplete) onComplete(100);
-  };
+  const [interacted, setInteracted] = useState<Record<string, boolean>>({});
 
   return (
-    <div className="math-simulator mt-4 p-4" style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--shadow-md)' }}>
+    <div onChangeCapture={() => setInteracted(previous => ({ ...previous, [activeTab]: true }))} onClickCapture={event => { if ((event.target as HTMLElement).closest('button')) setInteracted(previous => ({ ...previous, [activeTab]: true })); }} className="math-simulator mt-4 p-4" style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--shadow-md)' }}>
       {/* Header com identificação do laboratório */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
         <div>
@@ -76,12 +75,13 @@ export function MathSimulator({ mode, functionType = 'linear', title, labTitle, 
       </div>
 
       {/* Renderização condicional do laboratório especializado */}
-      {activeTab === 'linear' && <LinearLab onFinish={handleFinish} />}
-      {activeTab === 'quadratic' && <QuadraticLab onFinish={handleFinish} />}
-      {activeTab === 'trigonometric' && <TrigonometricLab onFinish={handleFinish} />}
-      {activeTab === 'spatial' && <SpatialLab onFinish={handleFinish} />}
-      {activeTab === 'statistics' && <StatisticsLab onFinish={handleFinish} />}
-      {activeTab === 'matrices' && <MatricesLab onFinish={handleFinish} />}
+      {activeTab === 'linear' && <LinearLab />}
+      {activeTab === 'quadratic' && <QuadraticLab />}
+      {activeTab === 'trigonometric' && <TrigonometricLab />}
+      {activeTab === 'spatial' && <SpatialLab />}
+      {activeTab === 'statistics' && <StatisticsLab />}
+      {activeTab === 'matrices' && <MatricesLab />}
+      <LabExplorationCompletion key={activeTab} onComplete={onComplete} ready={!!interacted[activeTab]} />
     </div>
   );
 }
@@ -89,7 +89,7 @@ export function MathSimulator({ mode, functionType = 'linear', title, labTitle, 
 // ============================================================================
 // 1. LABORATÓRIO: FUNÇÃO DE 1º GRAU (RETA AFIM)
 // ============================================================================
-function LinearLab({ onFinish }: { onFinish: () => void }) {
+function LinearLab() {
   const [a, setA] = useState(1.5);
   const [b, setB] = useState(-1);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -234,7 +234,7 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Canvas */}
       <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <canvas
@@ -245,7 +245,7 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
           onMouseLeave={handleMouseLeave}
           style={{ width: '100%', maxWidth: '420px', aspectRatio: '420/380', cursor: 'crosshair' }}
         />
-        <div style={{ display: 'flex', gap: '1.25rem', marginTop: '0.75rem', fontSize: '0.75rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', marginTop: '0.75rem', fontSize: '0.75rem' }}>
           <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>● Reta f(x) = {a}x + {b}</span>
           <span style={{ color: '#f59e0b' }}>● Intercepto Y (0, {b})</span>
           <span style={{ color: '#10b981' }}>● Raiz {root !== null ? `(${root.toFixed(2)}, 0)` : 'Inexistente'}</span>
@@ -299,7 +299,7 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
         {/* Diagnóstico de IA */}
         <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(228, 104, 63, 0.08)', border: '1px solid rgba(228, 104, 63, 0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
-            <span>🤖 IA ADAPTATIVA (ANÁLISE AFIM)</span>
+            <span>Observações do modelo (ANÁLISE AFIM)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
             {a > 0
@@ -309,14 +309,6 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
                 : `Com a = 0, a reta é horizontal (f(x) = ${b}). Não existe dependência linear em relação a x.`}
           </p>
         </div>
-
-        <button
-          onClick={onFinish}
-          className="btn-gradient"
-          style={{ width: '100%', fontWeight: 'bold', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)' }}
-        >
-          🏆 Concluir Laboratório de 1º Grau (+50 XP)
-        </button>
       </div>
     </div>
   );
@@ -325,7 +317,7 @@ function LinearLab({ onFinish }: { onFinish: () => void }) {
 // ============================================================================
 // 2. LABORATÓRIO: FUNÇÃO DE 2º GRAU (PARÁBOLA & BHASKARA)
 // ============================================================================
-function QuadraticLab({ onFinish }: { onFinish: () => void }) {
+function QuadraticLab() {
   const [a, setA] = useState(1);
   const [b, setB] = useState(-2);
   const [c, setC] = useState(-3);
@@ -440,7 +432,7 @@ function QuadraticLab({ onFinish }: { onFinish: () => void }) {
   }, [a, b, c]);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Canvas */}
       <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <canvas ref={canvasRef} width={420} height={380} style={{ width: '100%', maxWidth: '420px', aspectRatio: '420/380' }} />
@@ -519,7 +511,7 @@ function QuadraticLab({ onFinish }: { onFinish: () => void }) {
         {/* Diagnóstico IA */}
         <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#a855f7', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
-            <span>🤖 IA ADAPTATIVA (ANÁLISE QUADRÁTICA)</span>
+            <span>Observações do modelo (ANÁLISE QUADRÁTICA)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
             {delta > 0
@@ -529,14 +521,6 @@ function QuadraticLab({ onFinish }: { onFinish: () => void }) {
                 : `Com Δ = ${delta.toFixed(1)} < 0, a parábola flutua completamente ${a > 0 ? 'acima' : 'abaixo'} do eixo X.`}
           </p>
         </div>
-
-        <button
-          onClick={onFinish}
-          className="premium-btn btn-primary"
-          style={{ width: '100%', background: 'linear-gradient(135deg, #a855f7, #ec4899)', fontWeight: 'bold', padding: '0.75rem' }}
-        >
-          🏆 Concluir Laboratório de 2º Grau (+50 XP)
-        </button>
       </div>
     </div>
   );
@@ -545,7 +529,7 @@ function QuadraticLab({ onFinish }: { onFinish: () => void }) {
 // ============================================================================
 // 3. LABORATÓRIO: FUNÇÕES TRIGONOMÉTRICAS & CÍRCULO UNITÁRIO
 // ============================================================================
-function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
+function TrigonometricLab() {
   const [func, setFunc] = useState<'sin' | 'cos' | 'tan'>('sin');
   const [angleDeg, setAngleDeg] = useState(45);
   const [amplitude, setAmplitude] = useState(1);
@@ -698,7 +682,7 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
   }, [angleDeg, func, amplitude, frequency]);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Canvas Duplo: Círculo Unitário & Gráfico de Onda */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', textAlign: 'center' }}>
@@ -797,21 +781,13 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
         {/* Diagnóstico IA */}
         <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(236,72,153,0.08)', border: '1px solid rgba(236,72,153,0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ec4899', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
-            <span>🤖 IA ADAPTATIVA (TRIGONOMETRIA)</span>
+            <span>Observações do modelo (TRIGONOMETRIA)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
             No ângulo de {angleDeg}°, o ponto está no {angleDeg < 90 ? '1º quadrante (sen > 0, cos > 0)' : angleDeg < 180 ? '2º quadrante (sen > 0, cos < 0)' : angleDeg < 270 ? '3º quadrante (sen < 0, cos < 0)' : '4º quadrante (sen < 0, cos > 0)'}.
             A relação fundamental sen²(θ) + cos²(θ) = {(sinVal * sinVal + cosVal * cosVal).toFixed(2)} se mantém constante.
           </p>
         </div>
-
-        <button
-          onClick={onFinish}
-          className="premium-btn btn-primary"
-          style={{ width: '100%', background: 'linear-gradient(135deg, #ec4899, #f59e0b)', fontWeight: 'bold', padding: '0.75rem' }}
-        >
-          🏆 Concluir Laboratório de Trigonometria (+50 XP)
-        </button>
       </div>
     </div>
   );
@@ -822,7 +798,7 @@ function TrigonometricLab({ onFinish }: { onFinish: () => void }) {
 // ============================================================================
 type SolidType = 'cylinder' | 'cone' | 'sphere' | 'cuboid' | 'pyramid';
 
-function SpatialLab({ onFinish }: { onFinish: () => void }) {
+function SpatialLab() {
   const [solid, setSolid] = useState<SolidType>('cylinder');
   const [radius, setRadius] = useState(4);
   const [height, setHeight] = useState(8);
@@ -1034,7 +1010,7 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
   }, [solid, radius, height, length]);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Visualização 3D Isométrica */}
       <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <canvas ref={canvasRef} width={400} height={320} style={{ width: '100%', maxWidth: '400px', background: '#FAF7EE' }} />
@@ -1138,7 +1114,7 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
         {/* Diagnóstico IA */}
         <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(228, 104, 63, 0.08)', border: '1px solid rgba(228, 104, 63, 0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
-            <span>🤖 IA ADAPTATIVA (GEOMETRIA ESPACIAL)</span>
+            <span>Observações do modelo (GEOMETRIA ESPACIAL)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
             {solid === 'sphere'
@@ -1148,14 +1124,6 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
                 : 'Observe como o volume depende quadraticamente das dimensões da base e linearmente da altura.'}
           </p>
         </div>
-
-        <button
-          onClick={onFinish}
-          className="btn-gradient"
-          style={{ width: '100%', fontWeight: 'bold', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)' }}
-        >
-          🏆 Concluir Laboratório de Geometria Espacial (+50 XP)
-        </button>
       </div>
     </div>
   );
@@ -1164,7 +1132,7 @@ function SpatialLab({ onFinish }: { onFinish: () => void }) {
 // ============================================================================
 // 5. LABORATÓRIO: ESTATÍSTICA DESCRITIVA (AMOSTRAGEM, HISTOGRAMA & BOXPLOT)
 // ============================================================================
-function StatisticsLab({ onFinish }: { onFinish: () => void }) {
+function StatisticsLab() {
   const [data, setData] = useState<number[]>([4, 6, 7, 7, 8, 8, 9, 9, 10, 14]);
   const [inputVal, setInputVal] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1355,7 +1323,7 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Visualização de Gráficos */}
       <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <canvas ref={canvasRef} width={420} height={340} style={{ width: '100%', maxWidth: '420px', background: '#FAF7EE' }} />
@@ -1472,7 +1440,7 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
         {/* Diagnóstico IA */}
         <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(228, 104, 63, 0.08)', border: '1px solid rgba(228, 104, 63, 0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
-            <span>🤖 IA ADAPTATIVA (DIAGNÓSTICO ESTATÍSTICO)</span>
+            <span>Observações do modelo (DIAGNÓSTICO ESTATÍSTICO)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
             {Math.abs(stats.mean - stats.median) < 0.5
@@ -1482,14 +1450,6 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
                 : 'Distribuição assimétrica negativa (à esquerda). A média é reduzida por valores atipicamente baixos.'}
           </p>
         </div>
-
-        <button
-          onClick={onFinish}
-          className="btn-gradient"
-          style={{ width: '100%', fontWeight: 'bold', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)' }}
-        >
-          🏆 Concluir Laboratório de Estatística (+50 XP)
-        </button>
       </div>
     </div>
   );
@@ -1498,7 +1458,7 @@ function StatisticsLab({ onFinish }: { onFinish: () => void }) {
 // ============================================================================
 // 6. LABORATÓRIO: MATRIZES & SISTEMAS LINEARES (DETERMINANTES & CRAMER)
 // ============================================================================
-function MatricesLab({ onFinish }: { onFinish: () => void }) {
+function MatricesLab() {
   const [tab, setTab] = useState<'matrix' | 'system'>('system');
 
   // Matriz 2x2: [[a, b], [c, d]]
@@ -1634,7 +1594,7 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
   }, [sys, solutionType, solX, solY]);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem', alignItems: 'start' }}>
       {/* Visualização: Gráfico no Sistema Linear ou Matriz Inversa */}
       <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', width: '100%' }}>
@@ -1803,7 +1763,7 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
         {/* Diagnóstico IA */}
         <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#a855f7', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
-            <span>🤖 IA ADAPTATIVA (ÁLGEBRA LINEAR)</span>
+            <span>Observações do modelo (ÁLGEBRA LINEAR)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
             {solutionType === 'SPD'
@@ -1813,14 +1773,6 @@ function MatricesLab({ onFinish }: { onFinish: () => void }) {
                 : 'As retas são estritamente paralelas e distintas, sem nenhum ponto de interseção. O sistema não tem solução!'}
           </p>
         </div>
-
-        <button
-          onClick={onFinish}
-          className="btn-gradient"
-          style={{ width: '100%', fontWeight: 'bold', padding: '0.75rem' }}
-        >
-          🏆 Concluir Laboratório de Matrizes (+50 XP)
-        </button>
       </div>
     </div>
   );

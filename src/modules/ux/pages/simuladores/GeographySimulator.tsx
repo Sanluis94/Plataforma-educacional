@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
+import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
 interface GeographySimulatorProps {
   mode?: string;
   labTitle?: string;
   labId?: string;
-  onComplete?: (score: number) => void;
+  onComplete?: (score: number) => unknown | Promise<unknown>;
 }
 
 type PlateBoundary = 'divergent' | 'convergent' | 'transform';
@@ -66,9 +67,12 @@ const MODE_QUIZZES: Record<string, GeoQuiz> = {
 export function GeographySimulator({ mode = 'tectonics', labTitle, onComplete }: GeographySimulatorProps) {
   // ── For non-tectonics modes, render quiz mode ──
   if (mode !== 'tectonics') {
-    return <GeographyQuizMode mode={mode} labTitle={labTitle} onComplete={onComplete} />;
+    return <GeographyQuizMode key={mode} mode={mode} labTitle={labTitle} onComplete={onComplete} />;
   }
+  return <TectonicsBench labTitle={labTitle} onComplete={onComplete} />;
+}
 
+function TectonicsBench({ labTitle, onComplete }: GeographySimulatorProps) {
   // ── Tectonics mode (original interactive canvas) ──
   const [boundaryType, setBoundaryType] = useState<PlateBoundary>('convergent');
   const [pressure, setPressure] = useState(50);
@@ -287,12 +291,10 @@ export function GeographySimulator({ mode = 'tectonics', labTitle, onComplete }:
     };
   }, [boundaryType, pressure]);
 
-  const handleFinish = () => {
-    if (onComplete) onComplete(100);
-  };
+  const [interacted, setInteracted] = useState(false);
 
   return (
-    <div className="geography-simulator p-4 premium-glass-card" style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--shadow-md)' }}>
+    <div onChangeCapture={() => setInteracted(true)} onClickCapture={event => { if ((event.target as HTMLElement).closest('button')) setInteracted(true); }} className="geography-simulator p-4 premium-glass-card" style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--shadow-md)' }}>
       <h3 style={{ color: 'var(--text-main)', marginBottom: '1.25rem' }}>
         🌋 {labTitle || 'Laboratório Virtual: Dinâmica de Placas Tectônicas'}
       </h3>
@@ -338,17 +340,15 @@ export function GeographySimulator({ mode = 'tectonics', labTitle, onComplete }:
             </p>
 
             <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-              <div style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, marginBottom: '0.2rem' }}>🤖 Analisador geológico de IA</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, marginBottom: '0.2rem' }}>Observações do modelo geológico</div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
                 {isQuake
-                  ? '⚠️ Pressão crítica atingida! A IA registrou uma ruptura sismológica de alta magnitude.'
+                  ? '⚠️ Pressão crítica atingida! O modelo representa uma ruptura no limite transformante.'
                   : `Monitorando placa tectônica com pressão ${pressure}%.`}
               </p>
             </div>
 
-            <button className="btn-gradient mt-4" style={{ width: '100%', borderRadius: 'var(--radius-sm, 10px)', boxShadow: 'none', fontWeight: 'bold' }} onClick={handleFinish}>
-              🏆 Concluir Simulação (+50 XP & +10 Moedas)
-            </button>
+            <LabExplorationCompletion onComplete={onComplete} ready={interacted} />
           </div>
         </div>
       </div>
@@ -357,7 +357,7 @@ export function GeographySimulator({ mode = 'tectonics', labTitle, onComplete }:
 }
 
 // ── Quiz component for non-canvas geo modes ──
-function GeographyQuizMode({ mode, labTitle, onComplete }: { mode: string; labTitle?: string; onComplete?: (score: number) => void }) {
+function GeographyQuizMode({ mode, labTitle, onComplete }: { mode: string; labTitle?: string; onComplete?: (score: number) => unknown | Promise<unknown> }) {
   const quiz = MODE_QUIZZES[mode] || MODE_QUIZZES['relief'];
   const [currentQ, setCurrentQ] = useState(0);
   const [answered, setAnswered] = useState<number | null>(null);
@@ -419,7 +419,7 @@ function GeographyQuizMode({ mode, labTitle, onComplete }: { mode: string; labTi
           </div>
           {answered !== null && (
             <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(228, 104, 63, 0.08)', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', border: '1px solid rgba(228, 104, 63, 0.2)' }}>
-              🤖 <strong>Análise da IA:</strong> {question.explanation}
+              <strong>Explicação do roteiro:</strong> {question.explanation}
             </div>
           )}
           {answered !== null && (
@@ -433,19 +433,12 @@ function GeographyQuizMode({ mode, labTitle, onComplete }: { mode: string; labTi
           <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>{score === quiz.questions.length ? '🏆' : '🌍'}</div>
           <h3 style={{ color: 'var(--text-main)' }}>Resultado: {score}/{quiz.questions.length}</h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-            {score === quiz.questions.length ? `Excelente! Domínio completo de ${quiz.title}.` : 'Revise os conceitos e tente novamente!'}
+            {score === quiz.questions.length ? `Você acertou todas as questões deste conjunto.` : 'Revise os conceitos e tente novamente!'}
           </p>
           <button onClick={reset} style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer' }}>Refazer Quiz</button>
         </div>
       )}
-      {onComplete && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
-          <button onClick={() => onComplete(100)} className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}>
-            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
-          </button>
-        </div>
-      )}
+      <LabExplorationCompletion key={String(showResult)} onComplete={onComplete} ready={showResult} />
     </div>
   );
 }

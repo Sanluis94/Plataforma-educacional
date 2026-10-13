@@ -34,6 +34,7 @@ vi.mock('../modules/core/services/studentService', () => ({
 }));
 vi.mock('../modules/data/repositories/classRepository', () => ({
   getStudentClasses: vi.fn(async () => fixtures.classes), enrollStudent: fixtures.enroll, sendStudentMessage: vi.fn(),
+  subscribeStudentClasses: vi.fn((_uid, callback) => { callback(fixtures.classes); return () => {}; }),
   subscribeStudentMessages: vi.fn(() => () => {}), subscribeClassNotices: vi.fn(() => () => {}),
   subscribeEnhancedMaterials: vi.fn(() => () => {}),
 }));

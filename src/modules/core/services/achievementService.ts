@@ -3,6 +3,8 @@
  * Verifica condições de desbloqueio e persiste conquistas no progresso do aluno.
  */
 import type { ProgressData } from '../../data/types';
+import {getLearningLab} from '../constants/learningCatalog';
+const completedSubject=(progress:ProgressData,subject:string)=>progress.completedModules.some(id=>id===subject||getLearningLab(id)?.subjectId===subject);
 
 export interface Achievement {
   id: string;
@@ -29,50 +31,50 @@ export const ACHIEVEMENT_DEFINITIONS: Omit<Achievement, 'unlocked'>[] = [
     id: 'math_whiz',
     icon: '⭐',
     name: 'Matemático Célere',
-    description: 'Completou o módulo de Matemática',
-    condition: (p) => p.completedModules.includes('matematica'),
+    description: 'Concluiu uma atividade de Matemática',
+    condition: (p) => completedSubject(p,'matematica'),
   },
   {
     id: 'scientist',
     icon: '🧪',
     name: 'Cientista Iniciante',
     description: 'Completou o lab de Química',
-    condition: (p) => p.completedModules.includes('quimica'),
+    condition: (p) => completedSubject(p,'quimica'),
   },
   {
     id: 'time_traveler',
     icon: '🌍',
     name: 'Viajante do Tempo',
     description: 'Explorou a Linha do Tempo da História',
-    condition: (p) => p.completedModules.includes('historia'),
+    condition: (p) => completedSubject(p,'historia'),
   },
   {
     id: 'polyglot',
     icon: '🎓',
     name: 'Poliglota',
     description: 'Concluiu o módulo de Idiomas',
-    condition: (p) => p.completedModules.includes('idiomas'),
+    condition: (p) => completedSubject(p,'idiomas'),
   },
   {
     id: 'literary',
     icon: '💡',
     name: 'Arguto Literário',
     description: 'Completou o módulo de Português',
-    condition: (p) => p.completedModules.includes('portugues'),
+    condition: (p) => completedSubject(p,'portugues'),
   },
   {
     id: 'biologist',
     icon: '🔬',
     name: 'Biólogo Virtual',
     description: 'Explorou o Microscópio Virtual',
-    condition: (p) => p.completedModules.includes('biologia'),
+    condition: (p) => completedSubject(p,'biologia'),
   },
   {
     id: 'writer',
     icon: '✍️',
     name: 'Escritor Criativo',
     description: 'Completou o módulo de Redação',
-    condition: (p) => p.completedModules.includes('redacao'),
+    condition: (p) => completedSubject(p,'redacao'),
   },
   {
     id: 'level5',

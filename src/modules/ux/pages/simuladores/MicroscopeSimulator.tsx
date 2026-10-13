@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
 interface Slide {
   id: string;
@@ -321,7 +322,7 @@ const renderCellContent = (slideId: string, zoomLevel: number) => {
   );
 };
 
-export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => unknown | Promise<unknown> }) {
   const initialSlide =
     mode === 'genetics' ? SLIDES.find(s => s.id === 'sangue') || SLIDES[0] :
     mode === 'anatomy' ? SLIDES.find(s => s.id === 'sangue') || SLIDES[0] :
@@ -331,6 +332,7 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
   const [selectedSlide, setSelectedSlide] = useState<Slide>(initialSlide);
   const [zoom, setZoom] = useState(10); // 10x, 40x, 100x, 400x
   const [focusOffset, setFocusOffset] = useState(0);
+  const [interacted, setInteracted] = useState(false);
 
   const ZOOM_LEVELS = [10, 40, 100, 400];
 
@@ -338,7 +340,7 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
   const cellScale = zoom <= 10 ? 0.6 : zoom <= 40 ? 1.0 : zoom <= 100 ? 1.6 : 2.4;
 
   return (
-    <div style={{ padding: '1.5rem' }}>
+    <div onChangeCapture={() => setInteracted(true)} onClickCapture={event => { if ((event.target as HTMLElement).closest('button')) setInteracted(true); }} style={{ padding: '1.5rem' }}>
       <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🔬 {labTitle || 'Laboratório de Biologia Virtual'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
         {mode === 'microscopy' ? 'Compare esquemas de células eucarióticas e procarióticas. As ilustrações não são micrografias nem estão em escala.' :
@@ -402,7 +404,7 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
         </div>
 
         {/* Ocular do microscópio */}
-        <div style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ flex: 1, minWidth: 'min(100%, 280px)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{
             aspectRatio: '1/1', maxWidth: '400px', width: '100%', borderRadius: '50%',
             border: '8px solid #293E24', overflow: 'hidden',
@@ -461,17 +463,7 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
           </div>
         </div>
       </div>
-      {onComplete && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
-          <button
-            onClick={() => onComplete(100)}
-            className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
-          >
-            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
-          </button>
-        </div>
-      )}
+      <LabExplorationCompletion onComplete={onComplete} ready={interacted} />
     </div>
   );
 }

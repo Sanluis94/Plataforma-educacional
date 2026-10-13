@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
 const EVENTS = [
   { year: 1789, label: 'Revolução Francesa', category: 'Política', color: '#ef5350', desc: 'Queda do Antigo Regime, ascensão dos ideais liberais de Liberdade, Igualdade e Fraternidade.' },
@@ -56,10 +57,11 @@ const MODE_EVENTS: Record<string, typeof EVENTS> = {
 
 const CATEGORIES = ['Todos', 'Brasil', 'Política', 'Guerra', 'Ciência'];
 
-export function HistoryTimeline({ mode = 'timeline', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function HistoryTimeline({ mode = 'timeline', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => unknown | Promise<unknown> }) {
   const eventsList = MODE_EVENTS[mode] || EVENTS;
   const [filter, setFilter] = useState('Todos');
   const [selected, setSelected] = useState<typeof EVENTS[0] | null>(null);
+  const [explored, setExplored] = useState(false);
 
   const filtered = filter === 'Todos' ? eventsList : eventsList.filter(e => e.category === filter);
   const minYear = eventsList[0].year;
@@ -90,7 +92,11 @@ export function HistoryTimeline({ mode = 'timeline', labTitle, onComplete }: { m
             const pct = ((evt.year - minYear) / span) * 100;
             return (
               <div key={evt.year}
-                onClick={() => setSelected(evt === selected ? null : evt)}
+                role="button"
+                tabIndex={0}
+                aria-label={`${evt.year}: ${evt.label}`}
+                onClick={() => { setSelected(evt === selected ? null : evt); setExplored(true); }}
+                onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelected(evt === selected ? null : evt); setExplored(true); } }}
                 title={`${evt.year}: ${evt.label}`}
                 style={{
                   position: 'absolute', left: `${pct}%`,
@@ -138,25 +144,15 @@ export function HistoryTimeline({ mode = 'timeline', labTitle, onComplete }: { m
       )}
       {/* AI Historical Insight Box */}
       <div style={{ marginTop: '1.25rem', padding: '1rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.25rem' }}>🤖 Contextualização da IA histórica</div>
+        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.25rem' }}>Contextualização do roteiro</div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
           {selected 
             ? `Evento "${selected.label}" (${selected.year}): Note as relações de causa e efeito com o cenário geopolítico mundial.`
-            : 'Explore os eventos da linha do tempo para acionar análises causais da IA.'}
+            : 'Explore os eventos e compare seus contextos históricos.'}
         </p>
       </div>
 
-      {onComplete && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem', marginBottom: '1rem' }}>
-          <button
-            onClick={() => onComplete(100)}
-            className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
-          >
-            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
-          </button>
-        </div>
-      )}
+      <LabExplorationCompletion onComplete={onComplete} ready={explored} />
     </div>
   );
 }

@@ -5,25 +5,13 @@ describe('Gemini Service - Pedagogical AI & Lesson Generator', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Unit test network stub')));
   });
-  it('should generate a complete structured lesson with questions and theory (with fallback)', async () => {
-    const lesson = await generateCompleteLessonWithAI({
+  it('does not present generic fallback questions as an AI-generated lesson', async () => {
+    await expect(generateCompleteLessonWithAI({
       topic: 'Leis da Termodinâmica',
       subject: 'Física',
       gradeLevel: 'Ensino Médio',
       activityType: 'quiz'
-    });
-
-    expect(lesson.title).toBeDefined();
-    expect(lesson.title.length).toBeGreaterThan(0);
-    expect(lesson.description).toBeDefined();
-    expect(lesson.theoryContent).toBeDefined();
-    expect(lesson.theoryContent.length).toBeGreaterThan(20);
-    expect(lesson.questions).toBeDefined();
-    expect(lesson.questions.length).toBeGreaterThanOrEqual(1);
-    expect(lesson.questions[0].options).toHaveLength(4);
-    expect(lesson.questions[0].explanation).toBeDefined();
-    expect(lesson.xpReward).toBeGreaterThan(0);
-    expect(lesson.coinReward).toBeGreaterThan(0);
+    })).rejects.toThrow(/IA não está configurada|conectar ao Gemini/);
   });
 
   it('should generate structured pedagogical diagnosis for a class', async () => {

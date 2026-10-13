@@ -349,6 +349,7 @@ p, li, span, input, select, textarea, button {
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--bg-base);
+  color: var(--text-main);
 }
 
 /* Spinner alinhado às cores do manual */
@@ -642,6 +643,7 @@ p, li, span, input, select, textarea, button {
 .lab-bench {
   background-color: #FAF7EE !important;
   color: #172314 !important;
+  min-width: 0;
   border: 1px solid #E2D7C3 !important;
   border-radius: var(--radius-sm, 10px);
   position: relative;
@@ -654,7 +656,10 @@ p, li, span, input, select, textarea, button {
 .lab-bench canvas {
   background-color: #FAF7EE !important;
   border-radius: inherit;
+  max-width: 100%;
 }
+
+.lab-canvas-container svg { max-width: 100%; height: auto; }
 
 /* Textos e anotações científicas sobre a bancada clara permanecem sempre nítidos e escuros */
 .lab-canvas-container *,

@@ -76,7 +76,7 @@ async function clickMenu(page, name, pathname) {
   const navigation = await menu(page);
   await navigation.getByRole('link', { name, exact: true }).click();
   await page.waitForURL(url => url.pathname === pathname);
-  const headings = { '/': /^Olá,/, '/professor': 'Painel do Professor', '/estudante': 'Portal do Estudante', '/simulacao': 'Laboratórios por nível de aprendizagem', '/enem': 'Treino para o ENEM', '/coordenacao': 'Escola de demonstração', '/admin': /Painel Administrativo/ };
+  const headings = { '/': /^Olá,/, '/professor': 'Painel do Professor', '/estudante': 'Portal do Estudante', '/simulacao': 'Laboratórios por nível de aprendizagem', '/enem': 'Treino para o ENEM', '/coordenacao': 'Coordenação', '/admin': /Painel Administrativo/ };
   await page.locator('main').getByRole('heading', { name: headings[pathname], level: 1 }).waitFor();
   assert.equal(await page.getByRole('navigation', { name: 'Menu de páginas', exact: true }).count(), 0, 'O menu deve fechar após navegar.');
 }
@@ -106,6 +106,24 @@ async function checkCurrentMenu(page, role) {
 async function checkOverflow(page, label) {
   const dimensions = await page.evaluate(() => ({ width: window.innerWidth, scroll: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
   assert.ok(dimensions.scroll <= dimensions.width + 1 && dimensions.body <= dimensions.width + 1, `${label}: transbordamento horizontal ${JSON.stringify(dimensions)}`);
+}
+
+async function checkReadingContrast(page) {
+  const samples = await page.locator('main p, main article > strong').evaluateAll(elements => {
+    const rgba = value => { const values = value.match(/[\d.]+/g)?.map(Number) || []; return [values[0] || 0, values[1] || 0, values[2] || 0, values[3] ?? 1]; };
+    const blend = (foreground, background) => foreground.slice(0, 3).map((value, index) => value * foreground[3] + background[index] * (1 - foreground[3]));
+    const luminance = color => color.map(value => { value /= 255; return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4; }).reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0);
+    return elements.filter(element => element.textContent?.trim() && element.getBoundingClientRect().height > 0).map(element => {
+      const ancestors = []; for (let current = element; current; current = current.parentElement) ancestors.unshift(current);
+      const background = ancestors.reduce((color, ancestor) => blend(rgba(getComputedStyle(ancestor).backgroundColor), color), [255, 255, 255]);
+      const foreground = blend(rgba(getComputedStyle(element).color), background);
+      const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+      return { text: element.textContent.trim().slice(0, 160), foreground, background, ratio: (values[0] + 0.05) / (values[1] + 0.05) };
+    });
+  });
+  assert.ok(samples.length, 'Nenhum texto de leitura encontrado para conferir contraste.');
+  for (const sample of samples) assert.ok(sample.ratio >= 4.5, `Contraste insuficiente: ${JSON.stringify(sample)}`);
+  return samples;
 }
 
 async function scenario(name, role, callback, width = 1280) {
@@ -161,6 +179,16 @@ try {
     });
   }
 
+  await scenario('contraste-leitura-coordenacao-temas-claro-escuro', 'coordenador', async page => {
+    await page.getByRole('heading', { name: 'Nenhuma turma vinculada', exact: true }).waitFor();
+    const contrast = { dark: await checkReadingContrast(page) };
+    await page.getByRole('button', { name: 'Ativar tema claro', exact: true }).click();
+    await page.locator('.app-container.light-theme').waitFor();
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('main article.card')).backgroundColor === 'rgb(250, 247, 238)');
+    contrast.light = await checkReadingContrast(page);
+    await writeFile(new URL('reading-contrast.json', output), JSON.stringify(contrast, null, 2));
+  });
+
   await scenario('login-deep-link-busca-preservada', null, async page => {
     await page.goto(`${origin}/simulacao?lab=fund1_mat_01&level=fundamental_1&subject=Matem%C3%A1tica`);
     await loginDialog(page, 'estudante');
@@ -213,7 +241,7 @@ try {
     await page.goto(`${origin}/estudante`);
     await page.getByRole('button', { name: /Plano de Aulas/ }).click();
     await page.goBack();
-    await page.getByRole('combobox', { name: 'Nível de aprendizado', exact: true }).waitFor();
+    await page.getByRole('heading', { name: 'Atividades da Turma', exact: true }).waitFor();
   });
 
   await scenario('estudante-matricula-invalida-retorno-laboratorio', 'estudante', async page => {

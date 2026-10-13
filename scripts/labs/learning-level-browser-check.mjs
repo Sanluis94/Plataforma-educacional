@@ -33,7 +33,7 @@ async function ids(locator) {
 }
 async function verifyPartition(route) {
   const visited = [];
-  await page.goto(`${origin}/${route}`);
+  await page.goto(`${origin}/${route}${route === 'estudante' ? '?tab=labs' : ''}`);
   for (const level of levels) {
     if (route === 'estudante') {
       await page.getByRole('combobox', { name: 'Nível de aprendizado', exact: true }).selectOption(level.id);
@@ -77,14 +77,14 @@ async function verifyPartition(route) {
 }
 try {
   await verifyPreview(page.request);
-  await page.goto(`${origin}/estudante`);
+  await page.goto(`${origin}/estudante?tab=labs`);
   await page.getByRole('button', { name: 'Entrar localmente', exact: true }).click();
   await verifyPartition('estudante');
   await verifyPartition('simulacao');
 
   for (const level of levels) {
     await profile(level.id);
-    await page.goto(`${origin}/estudante`);
+    await page.goto(`${origin}/estudante?tab=labs`);
     assert.equal(await page.getByRole('combobox', { name: 'Nível de aprendizado', exact: true }).inputValue(), level.id);
     await page.goto(`${origin}/simulacao`);
     await page.getByRole('navigation', { name: 'Níveis de aprendizagem', exact: true })

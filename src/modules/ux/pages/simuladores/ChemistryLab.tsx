@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
 interface Reagent {
   id: string;
@@ -44,7 +45,7 @@ interface ChemistryLabProps {
   mode?: string;
   labTitle?: string;
   labId?: string;
-  onComplete?: (score: number) => void;
+  onComplete?: (score: number) => unknown | Promise<unknown>;
 }
 
 export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }: ChemistryLabProps) {
@@ -373,17 +374,7 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
           💡 {info}
         </p>
       </div>
-      {onComplete && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem' }}>
-          <button
-            onClick={() => onComplete(100)}
-            className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
-          >
-            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
-          </button>
-        </div>
-      )}
+      <LabExplorationCompletion onComplete={onComplete} ready={tubes.some(tube => tube.reagents.length > 0)} />
     </div>
   );
 }

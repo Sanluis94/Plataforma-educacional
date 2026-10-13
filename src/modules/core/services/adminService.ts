@@ -7,31 +7,11 @@ import { getGlobalStats } from '../../data/repositories/adminRepository';
 
 /**
  * Calcula estatísticas globais.
- * Se der erro no Firestore, calcula a partir dos dados de teachers já carregados (fallback).
+ * Uma falha de consulta é propagada; não cria contagens substitutas.
  */
 export const calculateGlobalStats = async (teachersFallback?: Teacher[]) => {
-  try {
-    const stats = await getGlobalStats();
-    return {
-      totalStudents: stats.totalStudents,
-      totalClasses: stats.totalClasses,
-      totalTeachers: stats.totalTeachers,
-      totalActivities: stats.totalActivities,
-    };
-  } catch {
-    // Fallback com dados locais
-    if (teachersFallback) {
-      const totalStudents = teachersFallback.reduce((s, t) => s + t.students, 0);
-      const totalClasses = teachersFallback.reduce((s, t) => s + t.classes, 0);
-      return {
-        totalStudents,
-        totalClasses,
-        totalTeachers: teachersFallback.length,
-        totalActivities: 0,
-      };
-    }
-    return { totalStudents: 0, totalClasses: 0, totalTeachers: 0, totalActivities: 0 };
-  }
+  void teachersFallback;
+  return getGlobalStats();
 };
 
 /**

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
 interface Fragment {
   id: string;
@@ -120,7 +121,7 @@ const MODE_FRAGMENTS: Record<string, Fragment[]> = {
   ],
 };
 
-export function PortugueseModule({ mode = 'syntax', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function PortugueseModule({ mode = 'syntax', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => unknown | Promise<unknown> }) {
   const FRAGMENTS = MODE_FRAGMENTS[mode] || MODE_FRAGMENTS['syntax'];
   const [selectedFragment, setSelectedFragment] = useState(FRAGMENTS[0]);
   const [currentQ, setCurrentQ] = useState(0);
@@ -229,7 +230,7 @@ export function PortugueseModule({ mode = 'syntax', labTitle, onComplete }: { mo
             </div>
             {answered !== null && (
               <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                💡 <strong>Feedback da IA:</strong> {question.explanation}
+                💡 <strong>Explicação do roteiro:</strong> {question.explanation}
               </div>
             )}
             {answered !== null && (
@@ -244,24 +245,14 @@ export function PortugueseModule({ mode = 'syntax', labTitle, onComplete }: { mo
           <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>{score === selectedFragment.questions.length ? '🏆' : '📚'}</div>
           <h3 style={{ color: 'var(--text-main)' }}>Resultado: {score}/{selectedFragment.questions.length}</h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-            {score === selectedFragment.questions.length ? `Excelente! Domínio completo de ${modeLabel}.` : 'Revise os conceitos e tente novamente!'}
+            {score === selectedFragment.questions.length ? `Você acertou todas as questões deste conjunto.` : 'Revise os conceitos e tente novamente!'}
           </p>
           <button onClick={reset} style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer' }}>
             Refazer Quiz
           </button>
         </div>
       )}
-      {onComplete && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
-          <button
-            onClick={() => onComplete(100)}
-            className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
-          >
-            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
-          </button>
-        </div>
-      )}
+      <LabExplorationCompletion key={selectedFragment.id + String(showResult)} onComplete={onComplete} ready={showResult} />
     </div>
   );
 }

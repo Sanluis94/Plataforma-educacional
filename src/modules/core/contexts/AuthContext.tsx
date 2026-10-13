@@ -3,12 +3,12 @@
  * Gerencia login/logout com Google, perfis no Firestore,
  * criação automática de progresso para estudantes e logs de sistema.
  */
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState,useRef } from 'react';
 import type { ReactNode } from 'react';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { auth, db } from '../services/firebaseConfig';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc,writeBatch } from 'firebase/firestore';
 import { writeLog } from '../../data/repositories/logRepository';
 import { DEFAULT_PROGRESS } from '../../data/types';
 import { getLocalEtlUserByRole } from '../../data/services/localEtlClient';
@@ -48,6 +48,7 @@ type LocalSession = {
 };
 
 interface AuthContextType {
+  profileError?:string;
   currentUser: User | LocalAuthUser | null;
   userData: UserData | null;
   loading: boolean;
@@ -59,6 +60,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 const LOCAL_SESSION_KEY = 'edu-interact-local-auth-session';
+function clearPrivateTutorKey(uid?:string){
+  try{if(!uid||localStorage.getItem('edu_gemini_key_owner')!==uid){localStorage.removeItem('gemini_api_key');localStorage.removeItem('edu_gemini_key_owner');}}catch{/* Storage failure does not prevent leaving the account. */}
+}
 
 const LOCAL_PROFILES: Record<AuthRole, { uid: string; name: string; email: string }> = {
   estudante: {
@@ -92,6 +96,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const isLocalAuthMode = !auth || !db;
+  const loginInFlight=useRef(false),profileGeneration=useRef(0);
+  const [profileError,setProfileError]=useState('');
+  const [profileRefresh,setProfileRefresh]=useState(0);
 
   const loginWithGoogle = async (role: AuthRole, gradeLevel: GradeLevel) => {
     if (!auth || !db) {
@@ -116,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         gradeLevel: normalizeLearningLevel(profile.gradeLevel, gradeLevel),
       };
 
+      clearPrivateTutorKey(localUser.uid);
       setCurrentUser(localUser);
       setUserData(localUserData);
       localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify({
@@ -130,6 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const provider = new GoogleAuthProvider();
+    if(loginInFlight.current)throw new Error('O acesso já está em andamento.');
+    loginInFlight.current=true;profileGeneration.current++;setProfileError('');
     try {
       const result = await signInWithPopup(auth!, provider);
       const user = result.user;
@@ -145,17 +155,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role,
           gradeLevel,
         };
-        await setDoc(userDocRef, { ...newData, createdAt: new Date().toISOString() });
-        setUserData(newData);
+        const batch=writeBatch(db!);
+        batch.set(userDocRef, { ...newData, createdAt: new Date().toISOString() });
 
-        // Se for estudante, cria documento de progresso default
+        // A recriação do cadastro não deve apagar progresso já existente.
         if (role === 'estudante') {
           const progressRef = doc(db!, 'progress', user.uid);
-          await setDoc(progressRef, {
+          const progress = await getDoc(progressRef);
+          if (!progress.exists()) batch.set(progressRef, {
             ...DEFAULT_PROGRESS,
             updatedAt: new Date().toISOString(),
           });
         }
+        await batch.commit();
+        setUserData(newData);
 
         // Log de registro
         await writeLog(
@@ -166,6 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setUserData(normalizeUserData(docSnap.data(), gradeLevel));
       }
+      setCurrentUser(user);setLoading(false);
 
       // Log de login
       await writeLog(
@@ -177,7 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Erro no login com Google:", error);
       await writeLog('error', `Falha no login: ${(error as Error).message}`);
       throw error;
-    }
+    }finally{loginInFlight.current=false;}
   };
 
   const updateGradeLevel = async (gradeLevel: GradeLevel) => {
@@ -202,6 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    clearPrivateTutorKey();
     if (isLocalAuthMode) {
       localStorage.removeItem(LOCAL_SESSION_KEY);
       setCurrentUser(null);
@@ -230,6 +245,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (storedSession) {
         try {
           const parsedSession = JSON.parse(storedSession) as LocalSession;
+          clearPrivateTutorKey(parsedSession.currentUser.uid);
           setCurrentUser(parsedSession.currentUser);
           setUserData(normalizeUserData(parsedSession.userData as unknown as Record<string, unknown>));
         } catch {
@@ -240,30 +256,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
+    let active=true;
     const unsubscribe = onAuthStateChanged(auth!, async (user) => {
+      if(!active)return;
+      const generation=++profileGeneration.current;
+      clearPrivateTutorKey(user?.uid);
       setCurrentUser(user);
+      setUserData(null);
+      if(loginInFlight.current){setLoading(false);return;}
       if (user) {
         // Fetch user role data from Firestore
         const docRef = doc(db!, 'users', user.uid);
-        const docSnap = await getDoc(docRef);
+        try{const docSnap = await getDoc(docRef);
+        if(!active||generation!==profileGeneration.current||auth?.currentUser?.uid!==user.uid)return;
         if (docSnap.exists()) {
           setUserData(normalizeUserData(docSnap.data()));
         } else {
            setUserData(null);
         }
+        setProfileError('');
+        }catch{if(active&&generation===profileGeneration.current)setProfileError('Não foi possível confirmar seu perfil. Tente consultar novamente.');}
       } else {
         setUserData(null);
       }
-      setLoading(false);
+      if(active&&generation===profileGeneration.current)setLoading(false);
     });
 
-    return unsubscribe;
-  }, []);
+    return ()=>{active=false;unsubscribe();};
+  }, [profileRefresh]);
 
-const value: AuthContextType = { currentUser, userData, loading, isLocalAuthMode, loginWithGoogle, logout, updateGradeLevel };
+const value: AuthContextType = { currentUser, userData, loading, isLocalAuthMode, loginWithGoogle, logout, updateGradeLevel,profileError };
 
   return (
     <AuthContext.Provider value={value}>
+      {loading&&<p role="status">Conferindo seu acesso…</p>}{profileError&&<p role="alert">{profileError} <button onClick={()=>{setProfileError('');setProfileRefresh(value=>value+1);}}>Consultar perfil novamente</button></p>}
       {!loading && children}
     </AuthContext.Provider>
   );

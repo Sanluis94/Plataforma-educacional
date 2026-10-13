@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 import { useLabLearningContent } from '../../hooks/useLabLearningContent';
 import '../../components/labs/GuidedLabActivity.css';
 
@@ -6,7 +7,7 @@ interface PhilosophySimulatorProps {
   mode?: string;
   labTitle?: string;
   labId?: string;
-  onComplete?: (score: number) => void;
+  onComplete?: (score: number) => unknown | Promise<unknown>;
 }
 
 const MODES: Record<string, { id: string; title: string }> = {
@@ -32,7 +33,6 @@ export function PhilosophySimulator({ mode = 'ethics', labTitle, onComplete }: P
   const [caseIndex, setCaseIndex] = useState(0);
   const [drafts, setDrafts] = useState<Record<string, ArgumentDraft>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
-  const [completed, setCompleted] = useState(false);
 
   if (loading) return <p role="status">Carregando a atividade de argumentação…</p>;
   if (error) return <div role="alert"><p>{error}</p><button type="button" onClick={retry}>Tentar novamente</button></div>;
@@ -69,6 +69,6 @@ export function PhilosophySimulator({ mode = 'ethics', labTitle, onComplete }: P
     </div>
     <p className="guided-lab-hint">Anotações mantidas enquanto esta bancada estiver aberta. Registre cada campo com pelo menos 10 caracteres para marcar a exploração do caso; esse registro não atribui uma nota à qualidade do argumento.</p>
     <p role="status">Casos com argumento registrado: {explored} de {content.scenarios.length}.</p>
-    {onComplete && <button type="button" disabled={explored !== content.scenarios.length || completed} onClick={() => { setCompleted(true); onComplete(100); }}>{completed ? 'Exploração registrada' : 'Registrar exploração dos casos'}</button>}
+    <LabExplorationCompletion onComplete={onComplete} ready={explored === content.scenarios.length} />
   </section>;
 }

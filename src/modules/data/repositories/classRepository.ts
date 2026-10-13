@@ -18,10 +18,10 @@ import {
   saveLocalComplementaryMaterial,
   getLocalStudentMessages,
   saveLocalStudentMessage,
-  replyLocalStudentMessage
 } from '../services/localEtlClient';
 import { sanitizeForFirestore } from '../../core/services/firestoreUtils';
-import type { ClassData } from '../types';
+import { isValidSafeUrl, sanitizeText } from '../../core/services/securityService';
+import type { ClassData, ClassMaterial } from '../types';
 import { DEFAULT_PROGRESS } from '../types';
 
 // Manter a interface Turma para compatibilidade com o front-end existente
@@ -58,7 +58,8 @@ export const generateShortClassCode = (): string => {
  * Busca turmas de um professor específico.
  */
 export const getProfessorClasses = async (professorId?: string): Promise<Turma[]> => {
-  if (!db || !professorId) {
+  if (!professorId) return [];
+  if (!db) {
     console.warn('[ClassRepository] Firestore não inicializado ou sem professorId.');
     return getLocalEtlClassesByProfessor(professorId);
   }
@@ -97,7 +98,8 @@ export const getProfessorClasses = async (professorId?: string): Promise<Turma[]
  * Busca turmas nas quais um estudante está matriculado.
  */
 export const getStudentClasses = async (studentId: string): Promise<Turma[]> => {
-  if (!db || !studentId) {
+  if (!studentId) return [];
+  if (!db) {
     return getLocalStudentClasses(studentId);
   }
 
@@ -113,7 +115,7 @@ export const getStudentClasses = async (studentId: string): Promise<Turma[]> => 
       return {
         id: docSnap.id,
         name: data.name,
-        studentsCount: data.studentsCount || 0,
+        studentsCount: Array.isArray(data.studentIds) ? new Set(data.studentIds).size : 0,
         professorName: data.professorName || 'Professor',
         gradeLevel: data.gradeLevel,
         academicLevel: data.academicLevel,
@@ -130,6 +132,26 @@ export const getStudentClasses = async (studentId: string): Promise<Turma[]> => 
   }
 };
 
+/** The same membership query stays active when a teacher changes the roster. */
+export const subscribeStudentClasses = (studentId: string, callback: (classes: Turma[]) => void, onError?: (error: Error) => void): (() => void) => {
+  let active = true;
+  if (!studentId) { callback([]); return () => { active = false; }; }
+  if (!db) {
+    void getLocalStudentClasses(studentId).then(classes => { if (active) callback(classes); }).catch(error => { if (active) onError?.(error); });
+    return () => { active = false; };
+  }
+  const membership = query(collection(db, COLLECTION), where('studentIds', 'array-contains', studentId));
+  const unsubscribe = onSnapshot(membership, snapshot => {
+    if (!active) return;
+    const classes = snapshot.docs.map(entry => {
+      const data = entry.data();
+      return { id: entry.id, name: data.name, studentsCount: Array.isArray(data.studentIds) ? new Set(data.studentIds).size : 0, professorName: data.professorName || 'Professor', gradeLevel: data.gradeLevel, academicLevel: data.academicLevel, code: data.code || entry.id.slice(0, 6).toUpperCase(), createdAt: data.createdAt || '' };
+    });
+    callback(classes.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+  }, error => { if (active) onError?.(error); });
+  return () => { active = false; unsubscribe(); };
+};
+
 /**
  * Cria uma nova turma no Firestore gerando um código amigável de 6 dígitos.
  */
@@ -138,13 +160,16 @@ export const saveClass = async (
   professorId?: string,
   professorName?: string
 ): Promise<Turma> => {
+  name = name.trim();
+  if (!name || name.length > 200) throw new Error('Informe um nome de turma com até 200 caracteres.');
   const shortCode = generateShortClassCode();
 
-  if (!db || !professorId) {
+  if (!db) {
     console.warn('[ClassRepository] Firestore não inicializado. Turma salva localmente no LocalStorage.');
     const newClass = await saveLocalClass(name, professorId, professorName, shortCode);
     return { id: newClass.id!, name: newClass.name, studentsCount: 0, code: newClass.code || shortCode };
   }
+  if (!professorId) throw new Error('Entre na sua conta de professor antes de criar a turma.');
 
   const classData: Omit<ClassData, 'id'> = {
     name,
@@ -158,35 +183,64 @@ export const saveClass = async (
   };
 
   const reference = doc(collection(db, COLLECTION));
-  const batch = writeBatch(db);
-  batch.set(reference, classData);
-  batch.set(doc(db, 'class_codes', shortCode), { classId: reference.id, code: shortCode, name, professorName: classData.professorName });
-  await batch.commit();
-  return { id: reference.id, name, studentIds: [], studentsCount: 0, code: shortCode };
+  for (let retry = 0; retry < 6; retry++) {
+    const code = retry === 0 ? shortCode : generateShortClassCode();
+    const codeReference = doc(db, 'class_codes', code);
+    if ((await getDoc(codeReference)).exists()) continue;
+    const batch = writeBatch(db);
+    batch.set(reference, { ...classData, code });
+    batch.set(codeReference, { classId: reference.id, code, name, professorName: classData.professorName });
+    try {
+      await batch.commit();
+      return { id: reference.id, name, studentIds: [], studentsCount: 0, code };
+    } catch (error) {
+      const existing = await getDoc(codeReference).catch(() => null);
+      if (!existing?.exists() || existing.data().classId === reference.id) throw error;
+    }
+  }
+  throw new Error('Não foi possível reservar um código para a turma. Tente criar a turma novamente.');
 };
 
 /**
  * Remove uma turma do Firestore.
  */
 export const deleteClass = async (classId: string): Promise<void> => {
-  if (!db) return;
-  await deleteDoc(doc(db, COLLECTION, classId));
+  if (!db) {
+    await getLocalEtlClassesByProfessor();
+    const state = JSON.parse(localStorage.getItem('edu_local_db') ?? '{}');
+    state.classes = (state.classes ?? []).filter((entry: ClassData) => entry.id !== classId);
+    localStorage.setItem('edu_local_db', JSON.stringify(state));
+    return;
+  }
+  const reference = doc(db, COLLECTION, classId);
+  const snapshot = await getDoc(reference);
+  if (!snapshot.exists()) return;
+  const batch = writeBatch(db);
+  batch.delete(reference);
+  if (snapshot.data().code) batch.delete(doc(db, 'class_codes', snapshot.data().code));
+  await batch.commit();
 };
 
 /**
  * Matricula um estudante em uma turma.
  * Suporta busca retrocompatível tanto pelo código de 6 dígitos quanto pelo id do Firestore.
  */
-export async function ensureClassEnrollmentCode(classId: string, data?: ClassData): Promise<void> {
+export async function ensureClassEnrollmentCode(classId: string): Promise<void> {
   if (!db) return;
-  const classData = data ?? await getDoc(doc(db, COLLECTION, classId)).then(snapshot => snapshot.data() as ClassData);
-  if (!classData) throw new Error('Turma não encontrada.');
-  const code = classData.code || classId.slice(0, 6).toUpperCase();
-  const existing = await getDoc(doc(db, 'class_codes', code));
-  const studentIds = [...new Set(classData.studentIds ?? [])];
-  if (!classData.code || classData.studentsCount !== studentIds.length || studentIds.length !== classData.studentIds.length) await updateDoc(doc(db, COLLECTION, classId), { code, studentIds, studentsCount: studentIds.length, updatedAt: new Date().toISOString() });
-  if (!existing.exists()) await setDoc(doc(db, 'class_codes', code), { classId, code, name: classData.name, professorName: classData.professorName ?? 'Professor' });
-  else if (existing.data().classId !== classId) throw new Error('Este código pertence a outra turma. Solicite à administração um novo código.');
+  const database = db;
+  await runTransaction(database, async transaction => {
+    const reference = doc(database, COLLECTION, classId);
+    const snapshot = await transaction.get(reference);
+    if (!snapshot.exists()) throw new Error('Turma não encontrada.');
+    const classData = snapshot.data() as ClassData;
+    const code = classData.code || classId.slice(0, 6).toUpperCase();
+    const codeReference = doc(database, 'class_codes', code);
+    const existing = await transaction.get(codeReference);
+    if (existing.exists() && existing.data().classId !== classId) throw new Error('Este código pertence a outra turma. Solicite à administração um novo código.');
+    const studentIds = [...new Set(classData.studentIds ?? [])];
+    if (!classData.code || classData.studentsCount !== studentIds.length || studentIds.length !== (classData.studentIds ?? []).length) transaction.update(reference, { code, studentIds, studentsCount: studentIds.length, updatedAt: new Date().toISOString() });
+    if (!existing.exists()) transaction.set(codeReference, { classId, code, name: classData.name, professorName: classData.professorName ?? 'Professor' });
+  });
 }
 export const enrollStudent = async (classCodeOrId: string, studentId: string): Promise<string> => {
   const normalized = classCodeOrId.trim().toUpperCase();
@@ -200,7 +254,12 @@ export const enrollStudent = async (classCodeOrId: string, studentId: string): P
     const code = await getDoc(doc(db, 'class_codes', normalized));
     if (!code.exists()) throw new Error('Turma não encontrada. Confira o código ou peça ao professor para abrir seu painel e disponibilizar o código.');
     classId = code.data().classId;
-    await updateDoc(doc(db, COLLECTION, classId!), { studentIds: arrayUnion(studentId), studentsCount: increment(1), updatedAt: new Date().toISOString() });
+    try {
+      await updateDoc(doc(db, COLLECTION, classId!), { studentIds: arrayUnion(studentId), studentsCount: increment(1), updatedAt: new Date().toISOString() });
+    } catch (error) {
+      // A simultaneous enrollment may already have committed the same membership.
+      if (!(await getStudentClasses(studentId)).some(entry => entry.id === classId)) throw error;
+    }
   }
   await setDoc(doc(db, COLLECTION, classId!, 'student_profiles', studentId), { studentId, name: actor.name || 'Estudante', updatedAt: new Date().toISOString() });
   return classId!;
@@ -215,12 +274,14 @@ export const unenrollStudent = async (classId: string, studentId: string): Promi
     return;
   }
 
-  const classDoc = doc(db, COLLECTION, classId);
-  await updateDoc(classDoc, {
-    studentIds: arrayRemove(studentId),
-    studentsCount: increment(-1),
-    updatedAt: new Date().toISOString(),
-  });
+  const actor = await getRepositoryActor();
+  if (actor.uid !== studentId || actor.role !== 'estudante') throw new Error('A saída da turma deve ser feita pelo próprio estudante.');
+  if (!(await getStudentClasses(studentId)).some(entry => entry.id === classId)) return;
+  try {
+    await updateDoc(doc(db, COLLECTION, classId), { studentIds: arrayRemove(studentId), studentsCount: increment(-1), updatedAt: new Date().toISOString() });
+  } catch (error) {
+    if ((await getStudentClasses(studentId)).some(entry => entry.id === classId)) throw error;
+  }
 };
 
 export interface ComplementaryMaterial {
@@ -260,7 +321,7 @@ export const getComplementaryMaterials = async (classId: string): Promise<Comple
     return docs;
   } catch (error) {
     console.error('[ClassRepository] Erro ao buscar materiais:', error);
-    return getLocalComplementaryMaterials(classId);
+    throw error;
   }
 };
 
@@ -273,6 +334,7 @@ export const addComplementaryMaterial = async (
   description: string,
   link: string
 ): Promise<ComplementaryMaterial> => {
+  if (!title.trim() || !isValidSafeUrl(link) || !/^https?:/i.test(link.trim())) throw new Error('Informe o título e um link HTTP ou HTTPS válido.');
   if (!db) {
     return saveLocalComplementaryMaterial(classId, { title, description, link });
   }
@@ -291,7 +353,7 @@ export const addComplementaryMaterial = async (
  */
 export const getStudentMessages = async (classId: string, studentId?:string): Promise<StudentMessage[]> => {
   if (!db) {
-    return getLocalStudentMessages(classId);
+    return (await getLocalStudentMessages(classId)).filter(message => !studentId || message.studentId === studentId);
   }
   try {
     const reference=collection(db, COLLECTION, classId, 'messages');
@@ -315,6 +377,8 @@ export const sendStudentMessage = async (
   studentName: string,
   message: string
 ): Promise<StudentMessage> => {
+  message = sanitizeText(message);
+  if (!message || message.length > 4000) throw new Error('Escreva uma dúvida com até 4.000 caracteres.');
   if (!db) {
     return saveLocalStudentMessage(classId, { studentId, studentName, message });
   }
@@ -340,8 +404,17 @@ export const replyStudentMessage = async (
   bonusXp = 0,
   studentId?: string
 ): Promise<void> => {
+  replyText = sanitizeText(replyText);
+  if (!replyText || replyText.length > 4000) throw new Error('Escreva uma resposta com até 4.000 caracteres.');
+  if (!Number.isInteger(bonusCoins) || !Number.isInteger(bonusXp) || bonusCoins < 0 || bonusCoins > 1000 || bonusXp < 0 || bonusXp > 1000) throw new Error('A recompensa deve usar números inteiros de 0 a 1.000 pontos.');
   if (!db) {
-    await replyLocalStudentMessage(classId, messageId, replyText, bonusCoins, bonusXp, studentId);
+    await getLocalStudentMessages(classId);
+    const state = JSON.parse(localStorage.getItem('edu_local_db') ?? '{}');
+    const message: StudentMessage | undefined = state.messages?.[classId]?.find((entry: StudentMessage) => entry.id === messageId);
+    if (!message || (studentId && message.studentId !== studentId)) throw new Error('A dúvida não está mais disponível nesta turma.');
+    if (message.rewardClaimedAt && ((message.bonusCoins ?? 0) !== bonusCoins || (message.bonusXp ?? 0) !== bonusXp)) throw new Error('Uma recompensa já recebida pelo estudante não pode ser alterada.');
+    Object.assign(message, { replied: true, replyText, repliedAt: new Date().toISOString(), bonusCoins, bonusXp });
+    localStorage.setItem('edu_local_db', JSON.stringify(state));
     return;
   }
   try {
@@ -362,7 +435,19 @@ export const replyStudentMessage = async (
 };
 
 export async function claimStudentMessageReward(classId:string,messageId:string,studentId:string):Promise<boolean>{
-  if(!db)return false;
+  if (!db) {
+    await getLocalStudentMessages(classId);
+    const state = JSON.parse(localStorage.getItem('edu_local_db') ?? '{}');
+    const message: StudentMessage | undefined = state.messages?.[classId]?.find((entry: StudentMessage) => entry.id === messageId);
+    if (!message || message.studentId !== studentId || !message.replied || message.rewardClaimedAt || !((message.bonusCoins ?? 0) > 0 || (message.bonusXp ?? 0) > 0)) return false;
+    const current = { ...DEFAULT_PROGRESS, ...(state.progress?.[studentId] ?? {}) };
+    const xp = current.xp + (message.bonusXp ?? 0), coins = current.coins + (message.bonusCoins ?? 0), updatedAt = new Date().toISOString();
+    state.progress ??= {};
+    state.progress[studentId] = { ...current, xp, coins, level: Math.floor(xp / 500) + 1, updatedAt };
+    message.rewardClaimedAt = updatedAt;
+    localStorage.setItem('edu_local_db', JSON.stringify(state));
+    return true;
+  }
   const database=db,messageRef=doc(database,COLLECTION,classId,'messages',messageId),progressRef=doc(database,'progress',studentId);
   return runTransaction(database,async transaction=>{
     const [message,progress]=await Promise.all([transaction.get(messageRef),transaction.get(progressRef)]);
@@ -382,11 +467,13 @@ export async function claimStudentMessageReward(classId:string,messageId:string,
  */
 export const subscribeComplementaryMaterials = (
   classId: string,
-  callback: (materials: ComplementaryMaterial[]) => void
+  callback: (materials: ComplementaryMaterial[]) => void,
+  onError?: (error: Error) => void
 ): () => void => {
   if (!db) {
-    getLocalComplementaryMaterials(classId).then(callback);
-    return () => {};
+    let active = true;
+    getLocalComplementaryMaterials(classId).then(materials => { if (active) callback(materials); }).catch(error => { if (active) onError?.(error); });
+    return () => { active = false; };
   }
   const q = collection(db, COLLECTION, classId, 'materials');
   return onSnapshot(q, (snap) => {
@@ -395,7 +482,7 @@ export const subscribeComplementaryMaterials = (
     callback(docs);
   }, (err) => {
     console.error('[ClassRepository] Erro no listener de materiais:', err);
-    getLocalComplementaryMaterials(classId).then(callback);
+    onError?.(err);
   });
 };
 
@@ -405,11 +492,13 @@ export const subscribeComplementaryMaterials = (
 export const subscribeStudentMessages = (
   classId: string,
   callback: (messages: StudentMessage[]) => void,
-  studentId?:string
+  studentId?:string,
+  onError?: (error: Error) => void
 ): () => void => {
   if (!db) {
-    getLocalStudentMessages(classId).then(callback);
-    return () => {};
+    let active = true;
+    getStudentMessages(classId, studentId).then(messages => { if (active) callback(messages); }).catch(error => { if (active) onError?.(error); });
+    return () => { active = false; };
   }
   const reference=collection(db, COLLECTION, classId, 'messages');
   const q = studentId?query(reference,where('studentId','==',studentId)):reference;
@@ -419,301 +508,141 @@ export const subscribeStudentMessages = (
     callback(docs);
   }, (err) => {
     console.error('[ClassRepository] Erro no listener de mensagens:', err);
-    callback([]);
+    onError?.(err);
   });
 };
 
-// ─── Avisos da Turma (Mural estilo Edu-Interact-v2) ───────────────
+// ─── Avisos e materiais da turma ───────────────────────────────
+export interface PersistedClassNotice {
+  id: string;
+  turmaId: string;
+  professorId: string;
+  professorName: string;
+  titulo: string;
+  texto: string;
+  criadoEm: string;
+}
+
+export type EnhancedMaterial = Omit<ClassMaterial, 'periodo'> & { periodo?: string };
 const LOCAL_NOTICES_KEY = 'edu_local_notices';
-function getLocalNotices(classId: string): any[] {
+const LOCAL_ENHANCED_KEY = 'edu_local_enhanced_materials';
+function readLocalList<T>(key: string): T[] {
   try {
-    const raw = localStorage.getItem(`${LOCAL_NOTICES_KEY}_${classId}`);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
+    const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
 }
-function saveLocalNotices(classId: string, notices: any[]) {
-  try {
-    localStorage.setItem(`${LOCAL_NOTICES_KEY}_${classId}`, JSON.stringify(notices));
-  } catch (err) {
-    console.error('Erro ao salvar avisos locais:', err);
-  }
+function writeLocalList<T>(key: string, items: T[]): void {
+  try { localStorage.setItem(key, JSON.stringify(items)); }
+  catch { throw new Error('Não foi possível guardar as alterações neste dispositivo. Tente novamente.'); }
 }
 
-/**
- * Deduplica lista de avisos preservando integridade por ID e chave composta (título + texto).
- */
-export function deduplicateNotices(notices: any[]): any[] {
-  const seenIds = new Set<string>();
-  const seenContent = new Set<string>();
-  const result: any[] = [];
-
-  for (const item of notices) {
-    if (!item) continue;
-    const id = item.id ? String(item.id).trim() : '';
-    const title = (item.titulo || '').trim().toLowerCase();
-    const text = (item.texto || '').trim().toLowerCase();
-    const contentKey = `${title}|${text}`;
-
-    if (id && seenIds.has(id)) {
-      continue;
-    }
-    if (contentKey && contentKey !== '|' && seenContent.has(contentKey)) {
-      continue;
-    }
-
-    if (id) seenIds.add(id);
-    if (contentKey && contentKey !== '|') seenContent.add(contentKey);
-    result.push(item);
-  }
-  return result;
-}
-
-export const createClassNotice = async (
-  classId: string,
-  professorId: string,
-  professorName: string,
-  titulo: string,
-  texto: string
-): Promise<any> => {
-  const newNotice = sanitizeForFirestore({
-    turmaId: classId,
-    professorId,
-    professorName,
-    titulo,
-    texto,
-    criadoEm: new Date().toISOString()
+export function deduplicateNotices<T extends { id?: string; titulo?: string; texto?: string }>(notices: T[]): T[] {
+  const ids = new Set<string>(), contents = new Set<string>();
+  return notices.filter(item => {
+    if (!item) return false;
+    const content = (item.titulo ?? '').trim().toLowerCase() + '|' + (item.texto ?? '').trim().toLowerCase();
+    if ((item.id && ids.has(item.id)) || (content !== '|' && contents.has(content))) return false;
+    if (item.id) ids.add(item.id);
+    if (content !== '|') contents.add(content);
+    return true;
   });
+}
 
-  let savedNotice: any = null;
-
+export const createClassNotice = async (classId: string, professorId: string, professorName: string, titulo: string, texto: string): Promise<PersistedClassNotice> => {
+  const notice = { turmaId: classId, professorId, professorName, titulo: sanitizeText(titulo), texto: sanitizeText(texto), criadoEm: new Date().toISOString() };
+  if (!classId || !professorId || !notice.titulo || !notice.texto) throw new Error('Informe a turma, o título e o texto do aviso.');
   if (db) {
-    try {
-      const docRef = await addDoc(collection(db, COLLECTION, classId, 'notices'), newNotice);
-      savedNotice = { id: docRef.id, ...newNotice };
-    } catch (err) {
-      console.warn('[ClassRepository] Falha ao salvar aviso no Firestore, utilizando fallback local:', err);
-    }
+    const reference = await addDoc(collection(db, COLLECTION, classId, 'notices'), sanitizeForFirestore(notice));
+    return { ...notice, id: reference.id };
   }
-
-  if (!savedNotice) {
-    savedNotice = { id: `notice_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`, ...newNotice };
-  }
-
-  // Atualiza cache local garantindo mesmo ID e sem duplicatas
-  const notices = getLocalNotices(classId);
-  const filtered = notices.filter(
-    n => n.id !== savedNotice.id &&
-         !(n.titulo?.trim().toLowerCase() === newNotice.titulo.trim().toLowerCase() &&
-           n.texto?.trim().toLowerCase() === newNotice.texto.trim().toLowerCase())
-  );
-  filtered.unshift(savedNotice);
-  saveLocalNotices(classId, deduplicateNotices(filtered));
-
-  return savedNotice;
+  const saved = { ...notice, id: 'notice-' + crypto.randomUUID() };
+  const key = LOCAL_NOTICES_KEY + '_' + classId;
+  writeLocalList(key, deduplicateNotices([saved, ...readLocalList<PersistedClassNotice>(key)]));
+  return saved;
 };
 
-export const getClassNotices = async (classId: string): Promise<any[]> => {
-  const localDocs = deduplicateNotices(getLocalNotices(classId));
-  if (!db) {
-    return localDocs;
-  }
-  try {
-    const q = collection(db, COLLECTION, classId, 'notices');
-    const snap = await getDocs(q);
-    const remoteDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-    // Documentos remotos têm prioridade sobre qualquer cópia local com ID gerado localmente
-    const merged = deduplicateNotices([...remoteDocs, ...localDocs]);
-    merged.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
-    saveLocalNotices(classId, merged);
-    return merged;
-  } catch (err) {
-    console.error('[ClassRepository] Erro ao buscar avisos da turma:', err);
-    return localDocs;
-  }
+export const getClassNotices = async (classId: string): Promise<PersistedClassNotice[]> => {
+  if (!db) return deduplicateNotices(readLocalList<PersistedClassNotice>(LOCAL_NOTICES_KEY + '_' + classId));
+  const snapshot = await getDocs(collection(db, COLLECTION, classId, 'notices'));
+  return deduplicateNotices(snapshot.docs.map(entry => ({ ...entry.data(), id: entry.id } as PersistedClassNotice))).sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
 };
 
-export const subscribeClassNotices = (
-  classId: string,
-  callback: (notices: any[]) => void
-): () => void => {
-  if (!db) {
-    callback(deduplicateNotices(getLocalNotices(classId)));
-    return () => {};
-  }
-  const q = collection(db, COLLECTION, classId, 'notices');
-  return onSnapshot(q, (snap) => {
-    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    docs.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
-    const deduped = deduplicateNotices(docs);
-    saveLocalNotices(classId, deduped);
-    callback(deduped);
-  }, (err) => {
-    console.error('[ClassRepository] Erro no listener de avisos:', err);
-    callback(deduplicateNotices(getLocalNotices(classId)));
-  });
+export const subscribeClassNotices = (classId: string, callback: (notices: PersistedClassNotice[]) => void, onError?: (error: Error) => void): (() => void) => {
+  if (!db) { callback(deduplicateNotices(readLocalList<PersistedClassNotice>(LOCAL_NOTICES_KEY + '_' + classId))); return () => {}; }
+  return onSnapshot(collection(db, COLLECTION, classId, 'notices'), snapshot => {
+    callback(deduplicateNotices(snapshot.docs.map(entry => ({ ...entry.data(), id: entry.id } as PersistedClassNotice))).sort((a, b) => b.criadoEm.localeCompare(a.criadoEm)));
+  }, error => { console.error('[ClassRepository] Erro ao acompanhar avisos:', error); onError?.(error); });
 };
 
 export const deleteClassNotice = async (classId: string, noticeId: string): Promise<void> => {
-  const notices = getLocalNotices(classId).filter(n => n.id !== noticeId);
-  saveLocalNotices(classId, notices);
-  if (!db) return;
-  try {
-    await deleteDoc(doc(db, COLLECTION, classId, 'notices', noticeId));
-  } catch (err) {
-    console.warn('[ClassRepository] Erro ao deletar aviso no Firestore:', err);
-  }
+  if (db) { await deleteDoc(doc(db, COLLECTION, classId, 'notices', noticeId)); return; }
+  const key = LOCAL_NOTICES_KEY + '_' + classId;
+  writeLocalList(key, readLocalList<PersistedClassNotice>(key).filter(notice => notice.id !== noticeId));
 };
 
-// ─── Materiais com Suporte a Upload & Categorização ───────────────
-
-/**
- * Deduplica lista de materiais didáticos garantindo chave única por ID e por conteúdo/arquivo.
- */
-export function deduplicateMaterials(materials: any[]): any[] {
-  const seenIds = new Set<string>();
-  const seenContent = new Set<string>();
-  const result: any[] = [];
-
-  for (const item of materials) {
-    if (!item) continue;
-    const id = item.id ? String(item.id).trim() : '';
+export function deduplicateMaterials<T extends { id?: string; title?: string; titulo?: string; nomeArquivo?: string; linkOuConteudo?: string; url?: string; description?: string }>(materials: T[]): T[] {
+  const ids = new Set<string>(), contents = new Set<string>();
+  return materials.filter(item => {
+    if (!item) return false;
     const title = (item.title || item.titulo || '').trim().toLowerCase();
-    const content = (item.nomeArquivo || item.linkOuConteudo || item.url || item.description || '').trim().toLowerCase();
-    const contentKey = `${title}|${content}`;
-
-    if (id && seenIds.has(id)) {
-      continue;
-    }
-    if (contentKey && contentKey !== '|' && seenContent.has(contentKey)) {
-      continue;
-    }
-
-    if (id) seenIds.add(id);
-    if (contentKey && contentKey !== '|') seenContent.add(contentKey);
-    result.push(item);
-  }
-  return result;
+    const content = (item.linkOuConteudo || item.url || item.description || item.nomeArquivo || '').trim();
+    const key = title + '|' + content;
+    if ((item.id && ids.has(item.id)) || (key !== '|' && contents.has(key))) return false;
+    if (item.id) ids.add(item.id);
+    if (key !== '|') contents.add(key);
+    return true;
+  });
 }
 
-export const addEnhancedMaterial = async (
-  classId: string,
-  material: {
-    title: string;
-    description: string;
-    tipo: 'pdf' | 'link' | 'texto' | 'arquivo';
-    linkOuConteudo: string;
-    nomeArquivo?: string;
-    tamanhoFormatado?: string;
-    disciplina?: string;
-    periodo?: string;
-    professorId?: string;
-  }
-): Promise<any> => {
-  const item = sanitizeForFirestore({
-    ...material,
-    turmaId: classId,
-    criadoEm: new Date().toISOString()
-  });
-
-  let savedItem: any = null;
-
+export const addEnhancedMaterial = async (classId: string, material: Omit<EnhancedMaterial, 'id' | 'turmaId' | 'criadoEm'>): Promise<EnhancedMaterial> => {
+  const item = sanitizeForFirestore({ ...material, title: sanitizeText(material.title), turmaId: classId, criadoEm: new Date().toISOString() });
+  if (!classId || !item.title || !item.linkOuConteudo.trim()) throw new Error('Informe a turma, o título e o conteúdo do material.');
+  if (item.tipo !== 'texto' && !isValidSafeUrl(item.linkOuConteudo)) throw new Error('O material precisa de um link HTTP/HTTPS ou arquivo PDF/imagem válido.');
+  if (item.tipo === 'link' && !/^https?:/i.test(item.linkOuConteudo.trim())) throw new Error('Use um endereço HTTP ou HTTPS para o link.');
+  if (new TextEncoder().encode(JSON.stringify(item)).length > 750_000) throw new Error('Este arquivo é grande demais. Use um link para o arquivo ou um anexo menor que 550 KB.');
   if (db) {
-    try {
-      const docRef = await addDoc(collection(db, COLLECTION, classId, 'enhanced_materials'), item);
-      savedItem = { id: docRef.id, ...item };
-    } catch (err) {
-      console.warn('[ClassRepository] Falha ao salvar material no Firestore, utilizando fallback local:', err);
-    }
+    const reference = await addDoc(collection(db, COLLECTION, classId, 'enhanced_materials'), item);
+    return { ...item, id: reference.id };
   }
-
-  if (!savedItem) {
-    savedItem = { id: `mat_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`, ...item };
-  }
-
-  // Salva no armazenamento local com o ID consistente
-  try {
-    await saveLocalComplementaryMaterial(classId, {
-      title: item.title,
-      description: item.description,
-      type: item.tipo === 'texto' ? 'texto' : item.tipo === 'link' ? 'link' : 'pdf',
-      url: item.linkOuConteudo,
-      subject: item.disciplina,
-      bimester: item.periodo,
-      fileName: item.nomeArquivo,
-      fileSize: item.tamanhoFormatado
-    } as any);
-  } catch (err) {
-    console.warn('[ClassRepository] Falha ao salvar material em storage local:', err);
-  }
-
-  return savedItem;
+  const saved = { ...item, id: 'material-' + crypto.randomUUID() };
+  const key = LOCAL_ENHANCED_KEY + '_' + classId;
+  writeLocalList(key, deduplicateMaterials([saved, ...readLocalList<EnhancedMaterial>(key)]));
+  return saved;
 };
 
-export const getEnhancedMaterials = async (classId: string): Promise<any[]> => {
-  let localDocs: any[] = [];
-  try {
-    const local = await getLocalComplementaryMaterials(classId);
-    localDocs = (local || []).map((m: any) => ({
-      id: m.id,
-      title: m.title,
-      description: m.description,
-      tipo: m.type === 'link' ? 'link' : m.type === 'texto' ? 'texto' : 'pdf',
-      linkOuConteudo: m.url || m.linkOuConteudo || '',
-      nomeArquivo: m.fileName || m.nomeArquivo,
-      tamanhoFormatado: m.fileSize || m.tamanhoFormatado,
-      disciplina: m.subject || m.disciplina,
-      periodo: m.bimester || m.periodo,
-      turmaId: classId,
-      criadoEm: m.createdAt || m.criadoEm || new Date().toISOString()
-    }));
-  } catch {
-    localDocs = [];
+export const getEnhancedMaterials = async (classId: string): Promise<EnhancedMaterial[]> => {
+  if (db) {
+    const snapshot = await getDocs(collection(db, COLLECTION, classId, 'enhanced_materials'));
+    return deduplicateMaterials(snapshot.docs.map(entry => ({ ...entry.data(), id: entry.id } as EnhancedMaterial))).sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
   }
-
-  if (!db) {
-    return deduplicateMaterials(localDocs);
-  }
-  try {
-    const q = collection(db, COLLECTION, classId, 'enhanced_materials');
-    const snap = await getDocs(q);
-    const remoteDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-    const merged = deduplicateMaterials([...remoteDocs, ...localDocs]);
-    merged.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
-    return merged;
-  } catch (err) {
-    console.error('[ClassRepository] Erro ao buscar materiais enriquecidos:', err);
-    return deduplicateMaterials(localDocs);
-  }
-};
-
-export const subscribeEnhancedMaterials = (
-  classId: string,
-  callback: (materials: any[]) => void
-): () => void => {
-  if (!db) {
-    getEnhancedMaterials(classId).then(mats => callback(deduplicateMaterials(mats)));
-    return () => {};
-  }
-  const q = collection(db, COLLECTION, classId, 'enhanced_materials');
-  return onSnapshot(q, (snap) => {
-    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    docs.sort((a: any, b: any) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
-    callback(deduplicateMaterials(docs));
-  }, (err) => {
-    console.error('[ClassRepository] Erro no listener de materiais enriquecidos:', err);
-    getEnhancedMaterials(classId).then(mats => callback(deduplicateMaterials(mats)));
+  // Read older local records once alongside the dedicated list, preserving their IDs.
+  const legacy = await getLocalComplementaryMaterials(classId);
+  const projected = legacy.map(entry => {
+    const material = entry as typeof entry & { type?: string; url?: string; subject?: string; bimester?: string; fileName?: string; fileSize?: string };
+    return { id: entry.id, title: entry.title, description: entry.description, tipo: material.type === 'link' ? 'link' as const : material.type === 'texto' ? 'texto' as const : 'pdf' as const, linkOuConteudo: material.url || entry.link || '', nomeArquivo: material.fileName, tamanhoFormatado: material.fileSize, disciplina: material.subject, periodo: material.bimester, turmaId: classId, criadoEm: entry.createdAt };
   });
+  return deduplicateMaterials([...readLocalList<EnhancedMaterial>(LOCAL_ENHANCED_KEY + '_' + classId), ...projected]).sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
+};
+
+export const subscribeEnhancedMaterials = (classId: string, callback: (materials: EnhancedMaterial[]) => void, onError?: (error: Error) => void): (() => void) => {
+  if (!db) {
+    let active = true;
+    getEnhancedMaterials(classId).then(materials => { if (active) callback(materials); }).catch(error => { if (active) onError?.(error); });
+    return () => { active = false; };
+  }
+  return onSnapshot(collection(db, COLLECTION, classId, 'enhanced_materials'), snapshot => {
+    callback(deduplicateMaterials(snapshot.docs.map(entry => ({ ...entry.data(), id: entry.id } as EnhancedMaterial))).sort((a, b) => b.criadoEm.localeCompare(a.criadoEm)));
+  }, error => { console.error('[ClassRepository] Erro ao acompanhar materiais:', error); onError?.(error); });
 };
 
 export const deleteEnhancedMaterial = async (classId: string, materialId: string): Promise<void> => {
-  if (!db) return;
-  try {
-    await deleteDoc(doc(db, COLLECTION, classId, 'enhanced_materials', materialId));
-  } catch (err) {
-    console.warn('[ClassRepository] Erro ao deletar material no Firestore:', err);
-  }
+  if (db) { await deleteDoc(doc(db, COLLECTION, classId, 'enhanced_materials', materialId)); return; }
+  // Initialize legacy storage before reading it, then remove both representations.
+  await getLocalComplementaryMaterials(classId);
+  const state = JSON.parse(localStorage.getItem('edu_local_db') ?? '{}');
+  if (state.complementaryMaterials?.[classId]) state.complementaryMaterials[classId] = state.complementaryMaterials[classId].filter((material: { id: string }) => material.id !== materialId);
+  const key = LOCAL_ENHANCED_KEY + '_' + classId;
+  writeLocalList(key, readLocalList<EnhancedMaterial>(key).filter(material => material.id !== materialId));
+  localStorage.setItem('edu_local_db', JSON.stringify(state));
 };

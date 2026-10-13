@@ -10,7 +10,8 @@ import { triggerPrintLabReport, generateLabReportMarkdown, generateLabReportLate
 import { estimateStudentProficiency, getCalibratedTriParametersForLab, type TriProficiencyResult, type TriAnswerRecord } from '../../core/services/triEvaluationService';
 import { sonifier } from '../../core/services/webAudioSonifier';
 import { useLearningCapture } from '../hooks/useLearningCapture';
-import type { LabCompletionHandler } from '../../data/services/learningCapture';
+import type { LabCompletionHandler, LabCompletionReport } from '../../data/services/learningCapture';
+import { useAuth } from '../../core/contexts/AuthContext';
 import { LabNotebookDrawer } from './labs/LabNotebookDrawer';
 import { LabSplitScreenComparator } from './labs/LabSplitScreenComparator';
 import { LabTimeTravelReplay } from './labs/LabTimeTravelReplay';
@@ -81,25 +82,53 @@ interface UniversalLabContainerProps {
   config: UniversalLabConfig;
   onComplete?: LabCompletionHandler;
 }
+type SimulationState = NonNullable<UniversalLabConfig['initialState']>;
+interface BenchDraft {
+  fingerprint: string;
+  params: Record<string, number>;
+  answers: Record<number, number>;
+  report: LabCompletionReport | null;
+  corrected: boolean;
+}
+const benchScope = () => {
+  const query = new URLSearchParams(window.location.search);
+  return `${query.get('class') ?? query.get('classId') ?? ''}:${query.get('lessonPlan') ?? query.get('lessonPlanId') ?? ''}`;
+};
 
 export function UniversalLabContainer({ config, onComplete }: UniversalLabContainerProps) {
+  const { currentUser } = useAuth();
+  const sessionKey = `${currentUser?.uid ?? 'guest'}:${config.id}:${benchScope()}`;
   if (config.presentation === 'guided_activity') {
     if (!config.learningContent) throw new Error(`Atividade sem conteúdo: ${config.id}`);
-    return <GuidedLabActivity key={config.id} labId={config.id} title={config.title} subject={config.subject} objective={config.objective} academicLevel={config.academicLevel} content={config.learningContent} onComplete={onComplete} />;
+    return <GuidedLabActivity key={sessionKey} labId={config.id} title={config.title} subject={config.subject} objective={config.objective} academicLevel={config.academicLevel} content={config.learningContent} onComplete={onComplete} />;
   }
-  return <LabLearningWorkspace key={config.id} labId={config.id} title={config.title} subject={config.subject} objective={config.objective} academicLevel={config.academicLevel} content={config.learningContent} onComplete={onComplete}>
+  return <LabLearningWorkspace key={sessionKey} labId={config.id} title={config.title} subject={config.subject} objective={config.objective} academicLevel={config.academicLevel} content={config.learningContent} onComplete={onComplete}>
     <SimulatedLabContainer config={config} onComplete={onComplete} />
   </LabLearningWorkspace>;
 }
 
 function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProps) {
   const controlsId = useId();
+  const { currentUser, userData } = useAuth();
+  const draftKey = currentUser?.uid ? `kortex_bench_draft_v1_${encodeURIComponent(currentUser.uid)}_${encodeURIComponent(config.id)}_${encodeURIComponent(benchScope())}` : null;
+  const fingerprint = JSON.stringify({ parameters: config.parameters, questions: config.questions });
+  const [draft] = useState<BenchDraft | null>(() => {
+    if (!draftKey) return null;
+    try {
+      const saved = JSON.parse(localStorage.getItem(draftKey) ?? 'null') as BenchDraft | null;
+      if (!saved || saved.fingerprint !== fingerprint || !saved.params || !saved.answers) return null;
+      if (saved.report && (saved.report.evidence?.labId !== config.id || saved.report.evidence?.source !== 'lab' || !saved.report.evidence.sessionId)) return null;
+      return saved;
+    } catch { return null; }
+  });
+  const [draftError, setDraftError] = useState(false);
   const capture = useLearningCapture();
   // Parâmetros ajustáveis
   const [params, setParams] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
     config.parameters.forEach(p => {
-      initial[p.id] = p.defaultValue;
+      const saved = draft?.params[p.id];
+      initial[p.id] = typeof saved === 'number' && Number.isFinite(saved) && saved >= p.min && saved <= p.max ? saved : p.defaultValue;
     });
     return initial;
   });
@@ -111,10 +140,20 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
   const [activeTab, setActiveTab] = useState<'simulacao' | 'teoria' | 'avaliacao' | 'laudo'>('simulacao');
 
   // Questionário diagnóstico e TRI
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
-  const [answeredSubmitted, setAnsweredSubmitted] = useState(false);
-  const [_score, setScore] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>(() => Object.fromEntries(Object.entries(draft?.answers ?? {}).filter(([index, answer]) => Number.isInteger(answer) && !!config.questions?.[Number(index)]?.options[answer])));
+  const [answeredSubmitted, setAnsweredSubmitted] = useState(!!draft?.corrected && !!draft.report);
+  const [score, setScore] = useState<number | undefined>(draft?.report?.score);
+  const [savingEvaluation, setSavingEvaluation] = useState(false);
+  const [evaluationError, setEvaluationError] = useState(draft?.report && !draft.corrected ? 'Uma tentativa ainda não salva foi recuperada. Tente enviar novamente.' : '');
+  const submittedReport = useRef<LabCompletionReport | null>(draft?.report ?? null);
+  const submittingRef = useRef(false);
   const [triResult, setTriResult] = useState<TriProficiencyResult | null>(null);
+  useEffect(() => {
+    if (!draftKey) return;
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({ fingerprint, params, answers: selectedAnswers, report: submittedReport.current, corrected: answeredSubmitted } satisfies BenchDraft));
+    } catch { setDraftError(true); }
+  }, [draftKey, fingerprint, params, selectedAnswers, answeredSubmitted, savingEvaluation, score]);
 
   // Estados dos novos módulos estratégicos
   const [isHighContrast, setIsHighContrast] = useState(false);
@@ -122,6 +161,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
   const [isSoundMuted, setIsSoundMuted] = useState(true);
   const [isNoiseActive, setIsNoiseActive] = useState(false);
   const [isNotebookOpen, setIsNotebookOpen] = useState(false);
+  const [notebookNotes, setNotebookNotes] = useState('');
   const [isSplitCompareOpen, setIsSplitCompareOpen] = useState(false);
   const [showTimeTravel, setShowTimeTravel] = useState(false);
   const [isPythonOpen, setIsPythonOpen] = useState(false);
@@ -130,14 +170,20 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
   const [is3DMode, setIs3DMode] = useState(false);
   const [copiedFormat, setCopiedFormat] = useState<'md' | 'tex' | null>(null);
   const [lastA11yMessage, setLastA11yMessage] = useState<string>('');
+  const [reportError, setReportError] = useState('');
   const [isControlsOpenOnMobile, setIsControlsOpenOnMobile] = useState<boolean>(true);
 
   // Canvas e Loop
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const stateRef = useRef<Record<string, any>>(config.initialState || {});
+  const stateRef = useRef<SimulationState>(structuredClone(config.initialState || {}));
   const lastTimeRef = useRef<number>(performance.now());
   const animationFrameId = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(Date.now());
+  const elapsedSimulationRef = useRef(0);
+  const lastSampleRef = useRef(0);
+  const primaryMeasurementRef=useRef<string|null>(null);
+  const snapshotsRef = useRef<{ state: SimulationState; params: Record<string, number>; telemetry: Record<string, number> }[]>([]);
+  const [replayIndex, setReplayIndex] = useState<number | null>(null);
+  const visibleTelemetry = replayIndex === null ? currentTelemetry : snapshotsRef.current[replayIndex]?.telemetry ?? currentTelemetry;
 
   // Atualizar parâmetro individual
   const handleParamChange = (id: string, value: number) => {
@@ -149,7 +195,13 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
   };
 
   const handleReset = () => {
-    stateRef.current = config.initialState ? { ...config.initialState } : {};
+    stateRef.current = structuredClone(config.initialState || {});
+    elapsedSimulationRef.current = 0;
+    lastSampleRef.current = 0;
+    primaryMeasurementRef.current=null;
+    snapshotsRef.current = [];
+    setReplayIndex(null);
+    setShowTimeTravel(false);
     setTelemetryHistory([]);
     setRawTelemetryArray([]);
     setCurrentTelemetry({});
@@ -166,7 +218,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
     if (canvasRef.current) {
       try {
         return canvasRef.current.toDataURL('image/png');
-      } catch (_e) {
+      } catch {
         return null;
       }
     }
@@ -175,40 +227,41 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
 
   // Loop de Animação e Física
   useEffect(() => {
+    if (activeTab !== 'simulacao') return;
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let historyCounter = 0;
+    const ctx = canvas?.getContext('2d');
 
     const renderLoop = (now: number) => {
-      const dt = Math.min((now - lastTimeRef.current) / 1000, 0.05);
+      const dt = Math.max(0,Math.min((now - lastTimeRef.current) / 1000, 0.05));
       lastTimeRef.current = now;
 
-      if (isRunning) {
-        // Se o ruído experimental Monte Carlo estiver ativo, aplica perturbação gaussiana leve
+      if (isRunning && replayIndex === null && document.visibilityState === 'visible') {
+        // Perturbação uniforme limitada à faixa permitida de cada instrumento.
         const effectiveParams = { ...params };
         if (isNoiseActive) {
-          Object.keys(effectiveParams).forEach(k => {
-            const noise = (Math.random() - 0.5) * 0.03 * effectiveParams[k];
-            effectiveParams[k] = Number((effectiveParams[k] + noise).toFixed(3));
+          config.parameters.forEach(parameter => {
+            const value = effectiveParams[parameter.id];
+            const noise = (Math.random() - 0.5) * 0.03 * Math.abs(value);
+            effectiveParams[parameter.id] = Math.max(parameter.min, Math.min(parameter.max, Number((value + noise).toFixed(3))));
           });
         }
 
         const result = config.physicsStep(effectiveParams, stateRef.current, dt);
         stateRef.current = result.nextState;
-        setCurrentTelemetry(result.telemetry);
-
-        const firstVal = Object.values(result.telemetry)[0] ?? 10;
+        elapsedSimulationRef.current += dt;
+        primaryMeasurementRef.current??=Object.keys(result.telemetry).find(key=>Number.isFinite(result.telemetry[key]))??null;
+        const firstVal = primaryMeasurementRef.current?result.telemetry[primaryMeasurementRef.current]:NaN;
         if (!isSoundMuted) {
-          sonifier.updateContinuousPitch(firstVal, 0, 100);
+          if (Number.isFinite(firstVal)) sonifier.updateContinuousPitch(firstVal, 0, 100);
         }
 
-        historyCounter++;
-        if (historyCounter % 6 === 0) {
+        if (elapsedSimulationRef.current - lastSampleRef.current >= 0.1) {
+          lastSampleRef.current = elapsedSimulationRef.current;
+          const sampleTime=Number(elapsedSimulationRef.current.toFixed(3));
+          setCurrentTelemetry(result.telemetry);
+          snapshotsRef.current = [...snapshotsRef.current, { state: structuredClone(result.nextState), params: { ...effectiveParams }, telemetry: { ...result.telemetry } }].slice(-100);
           setTelemetryHistory(prev => {
-            const next = [...prev, { time: Number((now / 1000).toFixed(2)), ...result.telemetry }];
+            const next = [...prev, { ...result.telemetry, time: sampleTime }];
             return next.slice(-100);
           });
           setRawTelemetryArray(prev => [...prev, firstVal].slice(-100));
@@ -217,8 +270,11 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
         sonifier.stopContinuousPitch();
       }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      config.renderCanvas(ctx, stateRef.current, params, canvas.width, canvas.height);
+      if (canvas && ctx) {
+        const snapshot = replayIndex === null ? undefined : snapshotsRef.current[replayIndex];
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        config.renderCanvas(ctx, snapshot?.state ?? stateRef.current, snapshot?.params ?? params, canvas.width, canvas.height);
+      }
 
       animationFrameId.current = requestAnimationFrame(renderLoop);
     };
@@ -232,30 +288,43 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
       }
       sonifier.stopContinuousPitch();
     };
-  }, [config, isRunning, params, isNoiseActive, isSoundMuted]);
+  }, [config, isRunning, params, isNoiseActive, isSoundMuted, activeTab, is3DMode, replayIndex]);
 
   // Exportar dados para CSV
   const handleExportCSV = () => {
     if (telemetryHistory.length === 0) {
-      alert('Nenhum dado de telemetria coletado ainda. Execute a simulação para gerar pontos.');
+      setLastA11yMessage('Execute a simulação para coletar dados antes de exportar.');
       return;
     }
-
-    const headers = Object.keys(telemetryHistory[0]).join(',');
-    const rows = telemetryHistory.map(row => Object.values(row).join(',')).join('\n');
-    const csvContent = `data:text/csv;charset=utf-8,${headers}\n${rows}`;
-    const encodedUri = encodeURI(csvContent);
+    const columns = [...Array.from(new Set(telemetryHistory.flatMap(row => Object.keys(row)))).filter(key=>key!=='time').sort(),'time'];
+    const cell = (value: string | number | undefined) => {
+      const safe = typeof value === 'string' && /^[=+\-@\t\r]/.test(value) ? `'${value}` : String(value ?? '');
+      return `"${safe.replace(/"/g, '""')}"`;
+    };
+    const csv = [columns.map(cell).join(','), ...telemetryHistory.map(row => columns.map(column => cell(row[column])).join(','))].join('\r\n');
+    const url = URL.createObjectURL(new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' }));
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
+    link.setAttribute('href', url);
     link.setAttribute('download', `${config.id}_telemetria_kortex.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   // Submissão do Quiz Diagnóstico com cálculo TRI
-  const handleSubmitEvaluation = () => {
-    if (!config.questions || config.questions.length === 0) return;
+  const allAnswersSelected = !!config.questions?.length && config.questions.every((question, index) => question.options[selectedAnswers[index]] !== undefined);
+  const handleSubmitEvaluation = async (allowUnanswered = false) => {
+    if (!config.questions?.length || submittingRef.current) return false;
+    if (!allAnswersSelected && !allowUnanswered) {
+      setEvaluationError('Responda todas as perguntas antes de corrigir.');
+      return false;
+    }
+    if (answeredSubmitted && !evaluationError) return true;
+    submittingRef.current = true;
+    setSavingEvaluation(true);
+    setEvaluationError('');
+    if (!submittedReport.current) {
     let correctCount = 0;
     const answersRecord: TriAnswerRecord[] = [];
 
@@ -272,18 +341,13 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
     });
 
     const finalScore = Math.round((correctCount / config.questions.length) * 100);
-    setScore(finalScore / 10);
-    setAnsweredSubmitted(true);
+    setScore(finalScore);
 
     // Avaliação Psicométrica TRI
     const tri = estimateStudentProficiency(answersRecord);
     setTriResult(tri);
 
-    // Chime sonoro de sucesso
-    sonifier.playSuccessChime();
-
-    if (onComplete) {
-      void onComplete({ score: finalScore, telemetryRows: telemetryHistory.length,
+      submittedReport.current = { score: finalScore, telemetryRows: telemetryHistory.length, handlesDeliveryFeedback: true,
         evidence: capture.current.evidence('lab', {
           labId: config.id, subject: config.subject, stage: 'assessment',
           experiment: { parameters: { ...params }, telemetry: { ...currentTelemetry }, samples: telemetryHistory.length,
@@ -292,65 +356,57 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           },
           questions: config.questions.map((question, index) => ({ questionId: `${config.id}-bench-q${index + 1}`, question: question.question, selectedOption: selectedAnswers[index] ?? null, selectedText: question.options[selectedAnswers[index]]?.text, expectedText: question.options.find(option => option.correct)?.text, explanation: question.options[selectedAnswers[index]]?.explanation, correct: question.options[selectedAnswers[index]]?.correct ?? false, topic: config.topic })),
         }),
-      });
+      };
+    }
+    try {
+      if (onComplete && await onComplete(submittedReport.current) === false) throw new Error('A entrega não foi salva.');
+      setAnsweredSubmitted(true);
+      if (!isSoundMuted) sonifier.playSuccessChime();
+      return true;
+    } catch {
+      setEvaluationError('Não foi possível salvar suas respostas. Elas foram mantidas nesta tela; tente enviar novamente.');
+      return false;
+    } finally {
+      submittingRef.current = false;
+      setSavingEvaluation(false);
     }
   };
 
-  // Geração de Relatório de Bancada Formal
-  const handlePrintReport = () => {
-    const duration = Math.round((Date.now() - startTimeRef.current) / 1000);
-    triggerPrintLabReport({
+  // Os três formatos usam os mesmos dados, sem inferir nota de uma exploração.
+  const reportData = () => ({
       labId: config.id,
       labTitle: config.title,
       academicLevel: config.academicLevel,
       subject: config.subject,
-      studentName: 'Estudante Kortex',
+      studentName: userData?.name || 'Estudante',
       date: new Date().toLocaleDateString('pt-BR'),
-      durationSeconds: duration,
+      durationSeconds: capture.current.activeSeconds,
       parametersUsed: params,
       parameterDefinitions: config.parameters.map(p => ({ id: p.id, label: p.label, unit: p.unit })),
       telemetrySnapshot: currentTelemetry,
+      studentNotes: notebookNotes,
       diagnosticQuestionText: config.questions?.[0]?.question,
-      selectedAnswerText: config.questions?.[0]?.options[selectedAnswers[0] ?? 0]?.text,
-      isCorrect: config.questions?.[0]?.options[selectedAnswers[0] ?? 0]?.correct,
-      scorePct: triResult ? Math.round((triResult.scoreEnem / 1000) * 100) : 100
+      selectedAnswerText: config.questions?.[0]?.options[selectedAnswers[0]]?.text,
+      isCorrect: answeredSubmitted ? config.questions?.[0]?.options[selectedAnswers[0]]?.correct : undefined,
+      scorePct: answeredSubmitted ? score : undefined,
+      diagnosticResults: answeredSubmitted ? config.questions?.map((question, index) => ({ question: question.question, selectedAnswer: question.options[selectedAnswers[index]]?.text, correct: question.options[selectedAnswers[index]]?.correct ?? false })) : undefined,
     });
+
+  const handlePrintReport = () => {
+    setReportError('');
+    if (!triggerPrintLabReport(reportData())) setReportError('A impressão não abriu. Permita a abertura de uma nova janela e tente novamente.');
   };
 
-  const handleCopyMarkdownReport = () => {
-    const md = generateLabReportMarkdown({
-      labId: config.id,
-      labTitle: config.title,
-      academicLevel: config.academicLevel,
-      subject: config.subject,
-      studentName: 'Estudante Kortex',
-      date: new Date().toLocaleDateString('pt-BR'),
-      durationSeconds: Math.round((Date.now() - startTimeRef.current) / 1000),
-      parametersUsed: params,
-      parameterDefinitions: config.parameters.map(p => ({ id: p.id, label: p.label, unit: p.unit })),
-      telemetrySnapshot: currentTelemetry
-    });
-    navigator.clipboard.writeText(md);
-    setCopiedFormat('md');
-    setTimeout(() => setCopiedFormat(null), 2000);
-  };
-
-  const handleCopyLatexReport = () => {
-    const tex = generateLabReportLatex({
-      labId: config.id,
-      labTitle: config.title,
-      academicLevel: config.academicLevel,
-      subject: config.subject,
-      studentName: 'Estudante Kortex',
-      date: new Date().toLocaleDateString('pt-BR'),
-      durationSeconds: Math.round((Date.now() - startTimeRef.current) / 1000),
-      parametersUsed: params,
-      parameterDefinitions: config.parameters.map(p => ({ id: p.id, label: p.label, unit: p.unit })),
-      telemetrySnapshot: currentTelemetry
-    });
-    navigator.clipboard.writeText(tex);
-    setCopiedFormat('tex');
-    setTimeout(() => setCopiedFormat(null), 2000);
+  const handleCopyReport = async (format: 'md' | 'tex') => {
+    setCopiedFormat(null);
+    setReportError('');
+    try {
+      const data = reportData();
+      await navigator.clipboard.writeText(format === 'md' ? generateLabReportMarkdown(data) : generateLabReportLatex(data));
+      setCopiedFormat(format);
+    } catch {
+      setReportError('Não foi possível copiar. Verifique a permissão da área de transferência ou use a impressão.');
+    }
   };
 
   const socraticContext = config.socraticPromptContext 
@@ -381,6 +437,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
       }}
     >
       {/* Barra Superior: Cabeçalho & Acessibilidade AAA */}
+      {draftError && <p role="alert">O navegador não conseguiu salvar o rascunho da bancada. Mantenha esta tela aberta até enviar suas respostas e exporte suas anotações.</p>}
       <div style={{
         display: 'flex',
         flexWrap: 'wrap',
@@ -430,7 +487,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
               sonifier.setMuted(next);
             }}
             onKeyboardShortcut={(act) => {
-              if (act === 'toggle_play') setIsRunning(!isRunning);
+              if (act === 'toggle_play') { setReplayIndex(null); setIsRunning(previous => !previous); }
               else if (act === 'reset') handleReset();
               else if (act === 'open_notebook') setIsNotebookOpen(true);
               else if (act === 'open_compare') setIsSplitCompareOpen(true);
@@ -487,7 +544,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
         </button>
 
         <button
-          onClick={() => setShowTimeTravel(!showTimeTravel)}
+          onClick={() => { setShowTimeTravel(previous => !previous); setIsRunning(false); setReplayIndex(null); setActiveTab('simulacao'); }}
           aria-pressed={showTimeTravel}
           className="btn-outline"
           style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem', background: showTimeTravel ? 'rgba(56, 189, 248, 0.15)' : 'transparent' }}
@@ -511,20 +568,21 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           onClick={() => setIsSocraticOpen(true)}
           className="btn-outline"
           style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-          title="Conversar com o Tutor Socrático por Chat e Voz"
+          title="Conversar com o tutor por texto e voz"
         >
           <Bot style={{ width: '13px', height: '13px', color: '#f59e0b' }} />
-          <span>Tutor IA por Voz</span>
+          <span>Tutor de investigação</span>
         </button>
 
         <button
           onClick={() => setIsExamOpen(true)}
+          disabled={!config.questions?.length || answeredSubmitted || savingEvaluation}
           className="btn-outline"
           style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-          title="Modo Prova com Tela Cheia e Auditoria"
+          title="Responder às perguntas com cronômetro e registro de foco nesta sessão"
         >
           <ShieldAlert style={{ width: '13px', height: '13px', color: '#ef4444' }} />
-          <span>Modo Exame Seguro</span>
+          <span>Avaliação com tempo</span>
         </button>
 
         <button
@@ -532,21 +590,22 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           aria-pressed={is3DMode}
           className="btn-outline"
           style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem', background: is3DMode ? 'rgba(228, 104, 63, 0.15)' : 'transparent' }}
-          title="Alternar entre visualização 2D e 3D Espacial"
+          title="Visualização ilustrativa do primeiro valor medido; não representa a geometria do experimento"
         >
           <Box style={{ width: '13px', height: '13px', color: '#E4683F' }} />
-          <span>{is3DMode ? 'Voltar para 2D' : 'Ver em 3D'}</span>
+          <span>{is3DMode ? 'Voltar ao experimento' : 'Visualizar valor em 3D'}</span>
         </button>
 
         <button
           onClick={() => setIsNoiseActive(!isNoiseActive)}
+          aria-label={isNoiseActive?'Variação aleatória ativa':'Adicionar variação'}
           aria-pressed={isNoiseActive}
           className="btn-outline"
           style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem', background: isNoiseActive ? 'rgba(234, 179, 8, 0.15)' : 'transparent' }}
-          title="Injetar ruído gaussiano Monte Carlo para simular instrumentos reais"
+          title="Variação aleatória de até 1,5% nos parâmetros, dentro das faixas permitidas"
         >
           <span style={{ fontSize: '11px' }}>🎲</span>
-          <span>{isNoiseActive ? 'Ruído Real Ativo' : 'Adicionar Ruído'}</span>
+          <span>{isNoiseActive ? 'Variação aleatória ativa' : 'Adicionar variação'}</span>
         </button>
       </div>
 
@@ -554,14 +613,29 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
       {showTimeTravel && (
         <LabTimeTravelReplay
           history={rawTelemetryArray}
-          currentTime={telemetryHistory.length * 0.05}
+          currentTime={telemetryHistory.at(-1)?.time ?? 0}
+          sampleTimes={telemetryHistory.map(row => row.time)}
           onScrubToTime={(targetIdx) => {
-            // Retrocede estado
-            stateRef.current.val = rawTelemetryArray[targetIdx] ?? stateRef.current.val;
+            setIsRunning(false);
+            setReplayIndex(snapshotsRef.current[targetIdx] ? targetIdx : null);
           }}
           isRunning={isRunning}
         />
       )}
+
+      {showTimeTravel && rawTelemetryArray.length < 5 && <p role="status">Execute o experimento até coletar pelo menos cinco amostras para rever a sessão.</p>}
+      {replayIndex !== null && <p role="status">Reprodução de uma amostra registrada. Os controles mantêm os valores atuais; ao iniciar, você volta ao experimento ao vivo.</p>}
+
+      <SecureExamModal
+        key={isExamOpen ? 'open' : 'closed'}
+        isOpen={isExamOpen}
+        onClose={() => setIsExamOpen(false)}
+        onStartExam={() => { setActiveTab('avaliacao'); setIsRunning(false); }}
+        labTitle={config.title}
+        durationMinutes={20}
+        canFinish={allAnswersSelected}
+        onFinishExam={() => handleSubmitEvaluation(true)}
+      />
 
       {/* Conteúdo da Aba Ativa */}
       {activeTab === 'simulacao' && (
@@ -582,10 +656,10 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
               {is3DMode ? (
                 <div style={{ width: '100%', height: '100%', padding: '1rem' }}>
                   <Lab3DRenderer
-                    telemetryVal={Object.values(currentTelemetry)[0] ?? 20}
+                    telemetryVal={Object.values(visibleTelemetry)[0] ?? 0}
                     width={680}
                     height={380}
-                    label={`Modelo 3D Tridimensional: ${config.title}`}
+                    label={`Ilustração do valor: ${Object.keys(visibleTelemetry)[0] ?? 'aguardando medição'}`}
                   />
                 </div>
               ) : (
@@ -611,7 +685,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                 border: '1px solid rgba(255, 255, 255, 0.1)'
               }}>
                 <button
-                  onClick={() => setIsRunning(!isRunning)}
+                  onClick={() => { setReplayIndex(null); setIsRunning(previous => !previous); }}
                   style={{
                     background: isRunning ? '#eab308' : '#22c55e',
                     color: '#172314',
@@ -666,7 +740,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                 fontFamily: 'monospace',
                 color: '#38bdf8'
               }}>
-                {Object.entries(currentTelemetry).map(([key, val]) => (
+                {Object.entries(visibleTelemetry).map(([key, val]) => (
                   <span key={key}>
                     {key}: <strong style={{ color: '#fff' }}>{typeof val === 'number' ? val.toFixed(2) : val}</strong>
                   </span>
@@ -675,13 +749,14 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
             </div>
 
             {/* Ações Inferiores: Exportação de Dados */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 Pontos de telemetria gravados: <strong>{telemetryHistory.length}</strong>
               </span>
 
               <button
                 onClick={handleExportCSV}
+                disabled={telemetryHistory.length === 0}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -697,7 +772,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                 }}
               >
                 <Download style={{ width: '14px', height: '14px' }} />
-                Exportar Dados (.CSV / Python)
+                Exportar dados (.csv)
               </button>
             </div>
           </div>
@@ -884,26 +959,26 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-main)' }}>
-                Avaliação Diagnóstica & Psicométrica (Padrão TRI ENEM/ENADE)
+                Perguntas sobre o experimento
               </h3>
               <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                 Responda com base nas observações e medições da bancada virtual.
               </p>
             </div>
-            {triResult && (
+            {score !== undefined && (
               <div style={{ textAlign: 'right' }}>
                 <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-primary)' }}>
-                  {triResult.scoreEnem} pts
+                  {score}% de acertos
                 </span>
                 <span style={{ display: 'block', fontSize: '0.7rem', color: '#22c55e', fontWeight: 700 }}>
-                  Classificação: {triResult.classification}
+                  {triResult ? `Estimativa de prática: ${triResult.scoreEnem} pontos · ${triResult.classification}` : 'Resultado da tentativa recuperada'}
                 </span>
               </div>
             )}
           </div>
 
           {(config.questions || []).map((q, qIdx) => (
-            <fieldset key={qIdx} disabled={answeredSubmitted} style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', minWidth: 0, border: 0, padding: 0, margin: 0 }}>
+            <fieldset key={qIdx} disabled={answeredSubmitted || savingEvaluation || submittedReport.current !== null} style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', minWidth: 0, border: 0, padding: 0, margin: 0 }}>
               <legend style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '0.65rem' }}>
                 {qIdx + 1}. {q.question}
               </legend>
@@ -967,9 +1042,11 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
             </fieldset>
           ))}
 
-          {!answeredSubmitted ? (
+          {!config.questions?.length && <p>Este experimento não possui perguntas próprias. Use a avaliação do roteiro, quando disponível.</p>}
+          {!!config.questions?.length && !answeredSubmitted && !isExamOpen ? (
             <button
-              onClick={handleSubmitEvaluation}
+              onClick={() => { void handleSubmitEvaluation(); }}
+              disabled={savingEvaluation || (!allAnswersSelected && !evaluationError)}
               style={{
                 alignSelf: 'flex-start',
                 background: 'var(--color-primary)',
@@ -982,14 +1059,17 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                 fontSize: '0.85rem'
               }}
             >
-              Corrigir respostas
+              {savingEvaluation ? 'Salvando respostas…' : evaluationError ? 'Tentar salvar novamente' : 'Corrigir respostas'}
             </button>
-          ) : (
+          ) : answeredSubmitted ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#22c55e', fontSize: '0.85rem', fontWeight: 600 }}>
               <CheckCircle2 style={{ width: '18px', height: '18px' }} />
-              Respostas corrigidas. Confira as justificativas acima.
+              {onComplete ? 'Respostas salvas e corrigidas.' : 'Respostas corrigidas nesta sessão.'} Confira as justificativas acima.
             </div>
-          )}
+          ) : null}
+          {evaluationError && <p role="alert">{evaluationError}</p>}
+          {answeredSubmitted && <button className="btn-outline" onClick={() => { submittedReport.current = null; capture.current.reset(); setSelectedAnswers({}); setAnsweredSubmitted(false); setScore(undefined); setTriResult(null); setEvaluationError(''); }}>Responder novamente</button>}
+          {triResult && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>A estimativa usa um modelo de prática. Ela não corresponde a uma nota oficial do ENEM ou ENADE.</p>}
         </div>
       )}
 
@@ -1004,10 +1084,10 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           flexDirection: 'column',
           gap: '1rem'
         }}>
-          <div style={{ borderBottom: '2px solid var(--color-primary)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ borderBottom: '2px solid var(--color-primary)', paddingBottom: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-main)' }}>
-                RELATÓRIO EXPERIMENTAL DE LABORATÓRIO (PADRÃO ABNT / IEEE)
+                Relatório do experimento
               </h3>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                 Plataforma Kortex · Ambiente Virtual de Aprendizagem Prática
@@ -1015,7 +1095,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
-                onClick={handleCopyMarkdownReport}
+                onClick={() => { void handleCopyReport('md'); }}
                 className="btn-outline"
                 style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                 title="Copiar relatório formatado em Markdown"
@@ -1025,7 +1105,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
               </button>
 
               <button
-                onClick={handleCopyLatexReport}
+                onClick={() => { void handleCopyReport('tex'); }}
                 className="btn-outline"
                 style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                 title="Copiar código-fonte LaTeX do relatório"
@@ -1039,9 +1119,10 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', fontSize: '0.85rem' }}>
             <div><strong>Experimento:</strong> {config.title}</div>
             <div><strong>Área / Nível:</strong> {config.subject} ({learningLevelLabel(config.academicLevel)})</div>
-            <div><strong>Status:</strong> {isRunning ? 'Em Andamento' : 'Concluído'}</div>
+            <div><strong>Status:</strong> {answeredSubmitted ? 'Perguntas corrigidas' : 'Perguntas não corrigidas'} · Experimento pausado enquanto você consulta o relatório</div>
             <div><strong>Amostras de Telemetria:</strong> {telemetryHistory.length} pontos</div>
           </div>
+          {reportError && <p role="alert">{reportError}</p>}
 
           <div style={{ marginTop: '0.5rem' }}>
             <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '0.35rem' }}>1. Parâmetros Utilizados na Bancada</h4>
@@ -1094,24 +1175,31 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
         isOpen={isNotebookOpen}
         onClose={() => setIsNotebookOpen(false)}
         labId={config.id}
+        activityScope={benchScope()}
         labTitle={config.title}
         onCaptureCanvasSnapshot={handleCaptureSnapshot}
+        onNotesChange={setNotebookNotes}
       />
 
       <LabSplitScreenComparator
+        key={isSplitCompareOpen ? 'compare-open' : 'compare-closed'}
         isOpen={isSplitCompareOpen}
         onClose={() => setIsSplitCompareOpen(false)}
         parameters={config.parameters}
         primaryParams={params}
-        onApplyScenarioB={(bParams) => setParams(bParams)}
+        onApplyScenarioB={(bParams) => { setParams(bParams); setReplayIndex(null); setActiveTab('simulacao'); setIsRunning(true); }}
       />
 
       <LabPythonRunnerModal
         isOpen={isPythonOpen}
         onClose={() => setIsPythonOpen(false)}
         labTitle={config.title}
+        labId={config.id}
+        activityScope={benchScope()}
         telemetry={currentTelemetry}
         history={rawTelemetryArray}
+        sampleTimes={telemetryHistory.map(row=>row.time)}
+        sampleLabel={primaryMeasurementRef.current??undefined}
       />
 
       <LabSocraticTutorModal
@@ -1121,17 +1209,6 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
         topic={config.topic}
         parameters={params}
         telemetry={currentTelemetry}
-      />
-
-      <SecureExamModal
-        isOpen={isExamOpen}
-        onClose={() => setIsExamOpen(false)}
-        labTitle={config.title}
-        durationMinutes={20}
-        onFinishExam={(incidents) => {
-          alert(`Avaliação finalizada com sucesso! Registro de auditoria: ${incidents} ocorrência(s).`);
-          handleSubmitEvaluation();
-        }}
       />
 
       {/* Widget do Tutor Socrático Integrado */}

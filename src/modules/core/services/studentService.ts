@@ -5,8 +5,7 @@
 import type { StudentContext } from '../../data/services/aiAdaptiveEngine';
 import { getAdaptiveRecommendation } from '../../data/services/aiAdaptiveEngine';
 import {
-  saveStudentProgress,
-  addPurchasedItem,
+  purchaseStudentItem,
   completeStudentLabProgress,
 } from '../../data/repositories/studentRepository';
 import { writeLog } from '../../data/repositories/logRepository';
@@ -44,21 +43,18 @@ export const processModuleCompletion = async (
 /**
  * Processa compra de um item na loja de gamificação.
  */
-export const processItemPurchase = async (
+export const processItemPurchase = async <T extends { id: string; name: string; price: number; icon: string; owned: boolean }>(
   uid: string,
   itemId: string,
   coins: number,
-  items: { id: string; name: string; price: number; icon: string; owned: boolean }[]
+  items: T[]
 ) => {
   const item = items.find(i => i.id === itemId);
   if (!item || item.owned || coins < item.price) return null;
 
-  const newCoins = coins - item.price;
-  const newItems = items.map(i => i.id === itemId ? { ...i, owned: true } : i);
-
-  // Persistir no Firestore
-  await saveStudentProgress(uid, { coins: newCoins });
-  await addPurchasedItem(uid, itemId);
+  const progress=await purchaseStudentItem(uid,itemId);
+  const newCoins=progress.coins;
+  const newItems=items.map(item=>({...item,owned:progress.purchasedItems.includes(item.id)}));
 
   // Log
   await writeLog(
@@ -67,5 +63,5 @@ export const processItemPurchase = async (
     uid
   );
 
-  return { newCoins, newItems };
+  return { newCoins, newItems, purchasedItems:progress.purchasedItems };
 };

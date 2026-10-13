@@ -749,7 +749,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
 
       {/* Pendulum Tab */}
       {activeTab === 'pendulum' && (
-        <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
+        <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
           {/* Canvas Area */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="lab-canvas-container" style={{ padding: '1.25rem' }}>
@@ -844,7 +844,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
 
       {/* Collisions Tab */}
       {activeTab === 'collisions' && (
-        <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
+        <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="lab-canvas-container" style={{ padding: '1.25rem' }}>
               <canvas
@@ -940,7 +940,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
         const refractedAngle = isTotalInternalReflection ? incidentAngle : (rad2 * 180 / Math.PI);
 
         return (
-          <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
+          <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
             <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div className="lab-canvas-container" style={{ width: '100%', height: '300px', background: '#FAF7EE', borderRadius: 'var(--radius-sm, 10px)', position: 'relative', overflow: 'hidden', border: '1px solid #E2D7C3' }}>
                 {/* Meio 1 (Ar / Meio Superior) */}
@@ -1026,12 +1026,12 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
 
       {/* Electromagnetism Tab */}
       {activeTab === 'electromagnetism' && (
-        <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
+        <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
           <div>
             <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🧲 Eletromagnetismo — Força de Lorentz</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Exemplo de elétron com velocidade perpendicular a um campo magnético uniforme: r = mv / (|q|B). A figura é esquemática, sem escala; se houver velocidade paralela ao campo, a trajetória pode ser helicoidal.</p>
             <div className="lab-canvas-container" style={{ width: '100%', height: '280px', background: '#FAF7EE', borderRadius: 'var(--radius-sm, 10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2D7C3', position: 'relative' }}>
-              <svg width="300" height="220">
+              <svg width="300" height="220" viewBox="0 0 300 220">
                 <circle cx="150" cy="110" r="70" fill="none" stroke="var(--color-secondary, #293E24)" strokeWidth="2.5" strokeDasharray="6 4" />
                 <circle cx="220" cy="110" r="11" fill="var(--color-primary, #E4683F)" />
                 <text x="220" y="114" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">e⁻</text>
@@ -1055,7 +1055,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
 
       {/* Thermodynamics Tab */}
       {activeTab === 'thermodynamics' && (
-        <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
+        <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
           <div>
             <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🔥 Termodinâmica — Equação dos Gases Ideais</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Relação entre Pressão (P), Volume (V) e Temperatura (T) no modelo ideal P · V = n · R · T.</p>
@@ -1086,12 +1086,12 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
 
       {/* Modern Physics Tab */}
       {activeTab === 'modern_physics' && (
-        <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem' }}>
+        <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
           <div>
             <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>⚛️ Física Moderna — Efeito Fotoelétrico</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Fótons incidentes com energia E = h · f ejetam fotoelétrons com energia cinética K_máx = hf - Φ.</p>
             <div className="lab-canvas-container" style={{ width: '100%', height: '280px', background: '#FAF7EE', borderRadius: 'var(--radius-sm, 10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2D7C3' }}>
-              <svg width="320" height="200">
+              <svg width="320" height="200" viewBox="0 0 320 200">
                 <rect x="40" y="40" width="20" height="120" fill="#293E24" rx="3" />
                 <text x="50" y="175" textAnchor="middle" fill="#172314" fontSize="11" fontWeight="700">Placa (Catodo)</text>
                 <path d="M 120,40 L 55,90" stroke="var(--color-primary, #E4683F)" strokeWidth="2.5" strokeDasharray="4 2" />

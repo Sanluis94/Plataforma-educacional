@@ -135,6 +135,7 @@ export interface ExamData {
   duracaoMinutos?: number; // ex: 45 minutos (ou sem limite se 0/undefined)
   dataInicio?: string;
   dataLimite?: string;
+  deadlineAtMillis?:number|null;
   status: 'Rascunho' | 'Aberta' | 'Encerrada';
   pesoTotal: number;
   questoes: ExamQuestion[];
