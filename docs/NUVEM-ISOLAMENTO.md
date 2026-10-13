@@ -44,11 +44,14 @@ No computador/CI com Docker Engine e BuildKit:
 $revision = git rev-parse HEAD
 $manifest = (Resolve-Path .local/cloud/preparacao-001/escola-exemplo/installation.json).Path
 $image = "kortex/escola-exemplo:$revision"
-docker build --platform linux/amd64 --secret "id=installation,src=$manifest" --build-arg "KORTEX_SOURCE_REVISION=$revision" --tag $image .
+$manifestSha = node scripts/cloud/manifest-fingerprint.mjs $manifest
+docker build --platform linux/amd64 --secret "id=installation,src=$manifest" --build-arg "KORTEX_SOURCE_REVISION=$revision" --build-arg "KORTEX_INSTALLATION_SHA256=$manifestSha" --tag $image .
 node scripts/cloud/check-container.mjs $manifest --image $image
 ```
 
 O manifesto entra temporariamente via [BuildKit secret](https://docs.docker.com/build/building/secrets/), evitando `COPY .env` e a inclusão do arquivo nas camadas. Seus campos públicos necessários são compilados no frontend. IA externa fica desativada: uma chave privada do projeto não deve ir para o navegador; habilitação futura requer serviço protegido e avaliação jurídica/operacional específica.
+
+O hash normalizado do manifesto também entra como argumento obrigatório de build: o [cache Docker não considera o conteúdo de secrets](https://docs.docker.com/build/cache/invalidation/#build-secrets). Isso separa a camada compilada quando muda a instalação ou sua configuração. Calcule o hash do manifesto atual a cada build e execute o verificador da imagem; não reutilize um hash antigo. O verificador compara o fingerprint da imagem com o manifesto independentemente do cache.
 
 Para iniciar manualmente uma instalação já testada:
 

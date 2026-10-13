@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile,mkdtemp,rm} from 'node:fs/promises';
 import {resolve,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {validateInstallation,validateInstallationSet,installationEnvironment,installationFingerprint} from './installation.mjs';
+import {validateInstallation,validateInstallationSet,installationEnvironment,installationFingerprint,assertInstallationFingerprint} from './installation.mjs';
+import {createServer} from 'node:http';
+import {probeHttp} from './http-probe.mjs';
 import {prepareInstallations} from './prepare-installations.mjs';
 import {verifyCloudArtifact} from './build-installation.mjs';
 
@@ -11,6 +13,24 @@ const root=fileURLToPath(new URL('../../',import.meta.url));
 const school=JSON.parse(await readFile(new URL('../../deploy/installation.school.example.json',import.meta.url),'utf8'));
 const home=JSON.parse(await readFile(new URL('../../deploy/installation.home.example.json',import.meta.url),'utf8'));
 const clone=()=>structuredClone(school);
+
+test('probe preserva o Host destinado à escola, sem trocá-lo pelo loopback',async()=>{
+  const server=createServer((request,response)=>{response.setHeader('Content-Type','application/json');response.end(JSON.stringify({host:request.headers.host,forwarded:request.headers['x-forwarded-host']}));});
+  await new Promise(done=>server.listen(0,'127.0.0.1',done));
+  try{const response=await probeHttp(`http://127.0.0.1:${server.address().port}/installation.json`,{Host:'escola.example.org','X-Forwarded-Host':'outra.example.org'});assert.equal(response.status,200);assert.deepEqual(await response.json(),{host:'escola.example.org',forwarded:'outra.example.org'});assert.throws(()=>probeHttp('https://example.org/'),/loopback/);}finally{await new Promise(done=>server.close(done));}
+});
+
+test('cache de compilação exige fingerprint atual e diferente por instalação/configuração',()=>{
+  assert.notEqual(installationFingerprint(school),installationFingerprint(home));
+  assert.doesNotThrow(()=>assertInstallationFingerprint(school,installationFingerprint(school)));
+  assert.throws(()=>assertInstallationFingerprint(home,installationFingerprint(school)),/cache/);
+  const changed=clone();changed.name='Novo nome da escola';assert.throws(()=>assertInstallationFingerprint(changed,installationFingerprint(school)),/cache/);
+  assert.throws(()=>assertInstallationFingerprint(school,undefined),/cache/);
+});
+
+test('contato público não aceita injeção de parâmetros em links de email',()=>{
+  const item=clone();item.controller.privacyContactEmail='nome?subject=outro@example.test';assert.throws(()=>validateInstallation(item),/email inválido/);
+});
 test('instalações escolar e doméstica usam projetos, aplicativos e origens distintos',()=>assert.equal(validateInstallationSet([school,home]).length,2));
 test('configuração compilada não inclui chaves privadas ou emuladores',()=>{
   const env=installationEnvironment(school);assert.equal(env.VITE_FIREBASE_PROJECT_ID,school.firebase.projectId);assert.equal(env.VITE_INSTALLATION_MODE,'school');assert.equal(env.VITE_GEMINI_API_KEY,'');assert.equal(env.VITE_DISABLE_AI,'true');assert.equal(env.VITE_USE_FIREBASE_EMULATORS,'false');assert.equal(env.VITE_DATA_CONTROLLER_NAME,'');assert.equal(env.VITE_PUBLIC_RELEASE_STAGE,'pilot');

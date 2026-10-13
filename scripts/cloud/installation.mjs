@@ -30,7 +30,7 @@ export function validateInstallation(input){
   if(!/^\d{6,20}$/.test(config.messagingSenderId)||!new RegExp(`^1:${config.messagingSenderId}:web:[a-f0-9]{20,40}$`).test(config.appId))fail('firebase.appId/messagingSenderId: identificadores web inconsistentes.');
   const controller=object(source.controller,'controller',['name','document','privacyContactEmail']);
   const contact={name:string(controller.name,'controller.name',200),document:string(controller.document,'controller.document',40),privacyContactEmail:string(controller.privacyContactEmail,'controller.privacyContactEmail',254)};
-  if(contact.privacyContactEmail&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.privacyContactEmail))fail('controller.privacyContactEmail: email inválido.');
+  if(contact.privacyContactEmail&&!/^[A-Za-z0-9._+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(contact.privacyContactEmail))fail('controller.privacyContactEmail: email inválido.');
   const readiness=object(source.operationalReadiness,'operationalReadiness',['legalApproved','securityApproved','dataProcessingApproved','backupRestoreTested','legalApprovalReference']);
   for(const field of ['legalApproved','securityApproved','dataProcessingApproved','backupRestoreTested'])if(typeof readiness[field]!=='boolean')fail(`operationalReadiness.${field}: informe true ou false.`);
   const legalApprovalReference=string(readiness.legalApprovalReference,'operationalReadiness.legalApprovalReference',300);
@@ -57,3 +57,6 @@ export function installationEnvironment(installation){
   };
 }
 export function installationFingerprint(item){return createHash('sha256').update(JSON.stringify(validateInstallation(item))).digest('hex');}
+export function assertInstallationFingerprint(item,fingerprint){
+  if(fingerprint!==installationFingerprint(item))fail('KORTEX_INSTALLATION_SHA256 deve corresponder ao manifesto atual para separar o cache de compilação.');
+}

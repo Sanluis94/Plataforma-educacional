@@ -4,6 +4,7 @@ import {resolve} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {validateInstallation,installationFingerprint} from './installation.mjs';
+import {probeHttp} from './http-probe.mjs';
 
 function docker(args){return new Promise((done,reject)=>{const child=spawn('docker',args,{shell:false,windowsHide:true,stdio:['ignore','pipe','pipe']});let out='',error='';const timer=setTimeout(()=>{child.kill();reject(new Error('Docker não respondeu em60segundos.'));},60000);child.stdout.on('data',chunk=>{out+=chunk;});child.stderr.on('data',chunk=>{error+=chunk;});child.once('error',()=>{clearTimeout(timer);reject(new Error('Docker não está disponível; a validação real do container continua pendente.'));});child.once('exit',code=>{clearTimeout(timer);code===0?done(out.trim()):reject(new Error(error.trim()||'Docker não concluiu a operação.'));});});}
 async function checkContainer(manifest,image){
@@ -16,13 +17,15 @@ async function checkContainer(manifest,image){
     if(info.Config.User!=='101:101'||info.HostConfig.ReadonlyRootfs!==true)throw new Error('Container precisa de usuário101 e filesystem somente leitura.');
     checks.push('usuário sem root e filesystem somente leitura');
     const port=info.NetworkSettings.Ports['8080/tcp'][0].HostPort,origin=`http://127.0.0.1:${port}`;
-    const request=(path,host=new URL(item.origin).hostname)=>fetch(origin+path,{headers:{Host:host},signal:AbortSignal.timeout(3000)});
+    const request=(path,host=new URL(item.origin).hostname)=>probeHttp(origin+path,{Host:host});
     for(let retry=0;retry<30;retry++){try{if((await request('/healthz','127.0.0.1')).status===200)break;}catch{/* Wait for local nginx, not a cloud resource. */}if(retry===29)throw new Error('Nginx não respondeu ao health check.');await new Promise(done=>setTimeout(done,250));}
     if((await request('/','another-school.example.org')).status!==421||(await request('/','127.0.0.1')).status!==421)throw new Error('Nginx precisa recusar o domínio de outra instalação.');
-    const spoof=await fetch(origin+'/',{headers:{Host:'wrong.example.org','X-Forwarded-Host':new URL(item.origin).hostname},signal:AbortSignal.timeout(3000)});
+    const spoof=await probeHttp(origin+'/',{Host:'wrong.example.org','X-Forwarded-Host':new URL(item.origin).hostname});
     if(spoof.status!==421)throw new Error('X-Forwarded-Host não pode trocar a instalação autorizada.');
     checks.push('host de outra instalação recusado, sem confiar em X-Forwarded-Host');
-    const metadataResponse=await request('/installation.json'),metadata=await metadataResponse.json();
+    const metadataResponse=await request('/installation.json');
+    if(metadataResponse.status!==200)throw new Error(`Metadados da instalação responderam HTTP${metadataResponse.status}.`);
+    const metadata=await metadataResponse.json();
     if(metadata.id!==item.id||metadata.firebaseProjectId!==item.firebase.projectId||metadata.origin!==item.origin||metadata.manifestSha256!==installationFingerprint(item))throw new Error('Container vinculado a outra instalação.');
     if(metadataResponse.headers.get('cache-control')!=='no-store')throw new Error('Metadata da instalação precisa de no-store.');
     checks.push('identidade da instalação e cache de metadados');

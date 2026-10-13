@@ -2,7 +2,7 @@ import {spawn} from 'node:child_process';
 import {readFile,writeFile,readdir,mkdir} from 'node:fs/promises';
 import {resolve,dirname,join,relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {validateInstallation,installationEnvironment,installationFingerprint} from './installation.mjs';
+import {validateInstallation,installationEnvironment,installationFingerprint,assertInstallationFingerprint} from './installation.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 export async function verifyCloudArtifact(directory,installation){
@@ -26,6 +26,7 @@ export async function verifyCloudArtifact(directory,installation){
 
 async function buildInstallation(path){
   const installation=validateInstallation(JSON.parse(await readFile(resolve(path),'utf8')));
+  assertInstallationFingerprint(installation,process.env.KORTEX_INSTALLATION_SHA256);
   for(const key of Object.keys(process.env))if(key.startsWith('VITE_')||['GOOGLE_APPLICATION_CREDENTIALS','FIREBASE_CONFIG','FIREBASE_TOKEN','GEMINI_API_KEY'].includes(key))delete process.env[key];
   Object.assign(process.env,installationEnvironment(installation),{NODE_ENV:'production'});
   const sourceRevision=process.env.KORTEX_SOURCE_REVISION??'unrecorded';

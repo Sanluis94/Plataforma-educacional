@@ -11,8 +11,9 @@ COPY src/ src/
 COPY public/ public/
 COPY scripts/cloud/ scripts/cloud/
 ARG KORTEX_SOURCE_REVISION
+ARG KORTEX_INSTALLATION_SHA256
 RUN --mount=type=secret,id=installation,required=true \
-    KORTEX_SOURCE_REVISION="${KORTEX_SOURCE_REVISION}" node scripts/cloud/build-installation.mjs /run/secrets/installation
+    KORTEX_SOURCE_REVISION="${KORTEX_SOURCE_REVISION}" KORTEX_INSTALLATION_SHA256="${KORTEX_INSTALLATION_SHA256}" node scripts/cloud/build-installation.mjs /run/secrets/installation
 
 FROM ${NGINX_IMAGE} AS runtime
 USER root
