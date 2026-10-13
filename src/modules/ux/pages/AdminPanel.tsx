@@ -2,6 +2,7 @@ import { useNavigationParams } from '../hooks/useNavigationParams';
 import { Users, BookOpen, Activity, Shield, TrendingUp, Search } from 'lucide-react';
 import { useAdminDashboard } from '../../core/hooks/useAdminDashboard';
 import { useState } from 'react';
+import { PrivacyRequestsAdmin } from '../components/privacy/PrivacyRequestsAdmin';
 
 export function AdminPanel() {
   const {
@@ -10,7 +11,7 @@ export function AdminPanel() {
     stats,loading,error,reload,
   } = useAdminDashboard();
   const [searchParams, setSearchParams] = useNavigationParams();
-  const activeTab = ['teachers', 'logs'].includes(searchParams.get('tab') || '') ? searchParams.get('tab') : 'overview';
+  const activeTab = ['teachers', 'logs', 'privacy'].includes(searchParams.get('tab') || '') ? searchParams.get('tab') : 'overview';
   const setActiveTab = (tab: string) => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('tab', tab); return next; });
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,6 +28,7 @@ export function AdminPanel() {
     { id: 'overview' as const, label: '📊 Visão Geral' },
     { id: 'teachers' as const, label: '👩‍🏫 Professores' },
     { id: 'logs' as const, label: '🔐 Logs de Segurança' },
+    { id: 'privacy' as const, label: 'Solicitações de privacidade' },
   ];
 
   const filteredTeachers = searchQuery
@@ -211,6 +213,7 @@ export function AdminPanel() {
       )}
 
       {/* Permissions Section */}
+      {activeTab === 'privacy' && <PrivacyRequestsAdmin />}
       <div style={{ marginTop: '2.5rem' }}>
         <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>Permissões por Função</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1rem' }}>

@@ -72,6 +72,7 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem' }}>
           <button className="btn-outline" onClick={() => { menuButton.current?.focus(); setMenuOpen(false); setPricingOpen(true); }}>Conhecer planos (demonstração)</button>
           <button className="btn-outline" onClick={() => { menuButton.current?.focus(); setMenuOpen(false); setFamilyOpen(true); }}>Portal da família</button>
+          {currentUser && <Link to="/meus-dados" className="btn-outline" onClick={() => setMenuOpen(false)}>Meus dados e solicitações</Link>}
           {currentUser && <button className="btn-outline" onClick={() => void handleLogout()}><LogOut size={16} /> Sair da conta</button>}
         </div>
         {logoutError && <p role="alert">{logoutError}</p>}

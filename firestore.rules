@@ -22,13 +22,24 @@ service cloud.firestore {
     function date(value) { return value is string && value.matches('^\\d{4}-\\d{2}-\\d{2}T.*Z$'); }
     function progressValid(data) { return data.keys().hasOnly(['level','xp','coins','completedModules','purchasedItems','enrolledClasses','updatedAt']) && data.get('level', 1) is number && data.get('level', 1) >= 1 && score(data.get('xp', 0), 10000000) && score(data.get('coins', 0), 10000000) && data.get('completedModules', []) is list && data.get('purchasedItems', []) is list && data.get('enrolledClasses', []) is list; }
     function profileValid(data) { return data.keys().hasOnly(['name','email','role','gradeLevel','academicLevel','department','courseId','createdAt','updatedAt','lastLoginAt']) && shortText(data.name, 200) && data.email is string && data.role in ['estudante','professor','coordenador','admin']; }
+    function initialRegistrationAllowed(data) {
+      let policyPath = /databases/$(database)/documents/installation_policy/public;
+      return !exists(policyPath) ? (request.auth.token.get('aud','') in ['plataforma-educacional-73df6','demo-kortex'] && data.role != 'admin') : (
+        get(policyPath).data.keys().hasOnly(['schemaVersion','installationId','mode','staffRegistration']) &&
+        get(policyPath).data.schemaVersion == 1 && shortText(get(policyPath).data.installationId,200) &&
+        ((get(policyPath).data.mode == 'school' && get(policyPath).data.staffRegistration == 'assigned-only') ||
+          (get(policyPath).data.mode == 'home' && get(policyPath).data.staffRegistration == 'students-only')) && data.role == 'estudante'
+      );
+    }
+
+    match /installation_policy/public { allow get: if true; allow list, create, update, delete: if false; }
 
     match /users/{uid} {
       allow read: if own(uid) || admin();
-      // First-time teacher registration remains available; it grants only the
-      // ability to create and manage the person's own classes. Coordination
-      // receives no class access until an administrator explicitly assigns it.
-      allow create: if profileValid(request.resource.data) && (admin() || (own(uid) && request.resource.data.role != 'admin' && request.resource.data.email == request.auth.token.email));
+      // Dedicated school/home installations require preassigned staff. The
+      // Shared pilot and its demo emulator are explicit legacy exceptions;
+      // a new project without an approved policy cannot create profiles.
+      allow create: if profileValid(request.resource.data) && (admin() || (own(uid) && initialRegistrationAllowed(request.resource.data) && request.resource.data.email == request.auth.token.email));
       allow update: if admin() || (own(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','gradeLevel','academicLevel','department','courseId','updatedAt','lastLoginAt']) && shortText(request.resource.data.name,200) && request.resource.data.role == resource.data.role && request.resource.data.email == resource.data.email);
       allow delete: if admin();
     }
@@ -184,6 +195,22 @@ service cloud.firestore {
       allow get: if id.matches('^[0-9a-fA-F-]{36}$'); allow list: if false;
       allow create: if signed() && mirrored(request.resource.data) && getAfter(/databases/$(database)/documents/certificate_records/$(id)).data.issuerId == request.auth.uid;
       allow update: if signed() && mirrored(request.resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','revokedAt']) && request.resource.data.status == 'revoked' && (admin() || teaches(getAfter(/databases/$(database)/documents/certificate_records/$(id)).data.classId));
+      allow delete: if false;
+    }
+    match /privacy_requests/{id} {
+      function ownRequestId() { return signed() && id.split('__').size() == 2 && id.split('__')[0] == request.auth.uid && id.split('__')[1].matches('^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'); }
+      function valid(data) {
+        return data.keys().hasAll(['id','protocol','ownerId','kind','details','status','createdAt','updatedAt','updatedBy','version','resolution','history']) && data.keys().hasOnly(['id','protocol','ownerId','kind','details','status','createdAt','updatedAt','updatedBy','version','resolution','history']) && data.id == id && data.protocol == 'DP-' + id.split('__')[1] && data.ownerId == id.split('__')[0] && data.kind in ['access','correction','deletion','portability','objection','consent-revocation','review','other'] && data.details is string && data.details.size() >= 10 && data.details.size() <= 4000 && data.status in ['received','processing','completed','declined'] && data.createdAt is timestamp && data.updatedAt is timestamp && data.updatedBy is string && data.version is int && data.version >= 1 && data.version <= 101 && data.resolution is string && data.resolution.size() <= 4000 && data.history is map && data.history.size() <= 100;
+      }
+      function appended(data) {
+        let eventKey = string(data.version);
+        let event = data.history[eventKey];
+        return data.history.size() == resource.data.history.size() + 1 && data.history.diff(resource.data.history).affectedKeys().hasOnly([eventKey]) && event.keys().hasAll(['status','at','by','resolution']) && event.keys().hasOnly(['status','at','by','resolution']) && event.status == data.status && event.at == request.time && event.by == request.auth.uid && event.resolution == data.resolution;
+      }
+      allow get: if ownRequestId() || admin();
+      allow list: if own(resource.data.ownerId) || admin();
+      allow create: if ownRequestId() && valid(request.resource.data) && request.resource.data.ownerId == request.auth.uid && request.resource.data.status == 'received' && request.resource.data.version == 1 && request.resource.data.resolution == '' && request.resource.data.history.size() == 0 && request.resource.data.updatedBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
+      allow update: if admin() && valid(request.resource.data) && resource.data.status in ['received','processing'] && request.resource.data.status in ['processing','completed','declined'] && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt','updatedBy','version','resolution','history']) && request.resource.data.version == resource.data.version + 1 && request.resource.data.updatedAt == request.time && request.resource.data.updatedBy == request.auth.uid && (request.resource.data.status != resource.data.status || request.resource.data.resolution != resource.data.resolution) && (request.resource.data.status == 'processing' || request.resource.data.resolution.size() >= 10) && appended(request.resource.data);
       allow delete: if false;
     }
     match /system_logs/{id} { allow read: if admin(); allow create: if signed() && request.resource.data.get('userId', request.auth.uid) == request.auth.uid && shortText(request.resource.data.message, 5000); allow update, delete: if false; }

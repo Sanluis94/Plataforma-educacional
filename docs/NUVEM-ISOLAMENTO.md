@@ -80,9 +80,33 @@ A escolha de região de frontend não define a região de dados. Selecione e reg
 
 ## Configurar o backend dedicado
 
+O pacote inclui `installation-policy.json`, para aprovação e gravação administrativa em `installation_policy/public` no projeto correspondente. Ele contém apenas ID da instalação, modo e regra de ingresso: escola usa `assigned-only`; doméstico usa `students-only`. Clientes podem consultar somente esse documento e não podem alterá-lo. A aplicação confere sua correspondência no servidor antes de iniciar ou restaurar uma sessão em modos dedicados. Um novo projeto sem política não admite cadastro de perfil; somente o piloto compartilhado existente e `demo-kortex` mantêm a exceção legado. Não copie essa exceção para novas instalações.
+
+Atribua equipe e administrador pelo processo administrativo autorizado, preservando os UIDs do Auth e documentando a aprovação. Escolher um cargo na tela não concede cadastro docente quando a política da escola exige atribuição. Perfis existentes não são regravados no login. Não houve gravação remota dessa política nem criação de administradores nesta preparação.
+
 Antes de expor a instalação, um operador autorizado precisa preparar cada projeto: aplicativo web próprio, Google Login e domínios autorizados exatos, Firestore sem modo de teste, regras/índices revisados e roles administrativas específicas. Use uma conta/grupo de operações com acesso mínimo por escola; não distribua credenciais Admin nos containers. A mesma pessoa com uma conta Google ainda pode entrar em instalações diferentes quando a política permitir, mas os cadastros/UIDs e documentos são de projetos separados.
 
 O pacote gerado inclui `firebase.json` somente de Firestore. A publicação futura deve sempre passar `--project ID_DESTA_INSTALACAO --config CAMINHO_DO_PACOTE/firebase.json`; não reutilize o alias `production` atual. Publicação de índices/regras e criação de Auth/banco são operações externas, não executadas pelos scripts de preparação. A versão de regras deve ser a mesma testada nos emuladores; a comparação depois da implantação deve confirmar projeto e conteúdo.
+
+O pacote também contém `installation-policy.json`, com o caminho `installation_policy/public` e os campos públicos da política de cadastro. Na escola, `staffRegistration: assigned-only` exige que a equipe seja atribuída administrativamente; no doméstico, `students-only` permite cadastro de estudante. Um operador com autorização Admin deve aplicar a política ao projeto correto depois de confirmar manifesto, projeto, regras e identidade dos responsáveis. Os clientes não podem escrever esse documento. Sua aplicação e o primeiro administrador são passos de bootstrap separados: nenhum script cria administradores ou transforma o usuário que chegou primeiro em equipe. A configuração explícita escolar/doméstica precisa corresponder à política antes de abrir o uso.
+
+Para conferir o manifesto contra uma cópia JSON da configuração Web SDK obtida pelo operador autorizado:
+
+```powershell
+node scripts/cloud/preflight-backend.mjs .local/cloud/preparacao-001/escola-exemplo/installation.json .local/cloud-input/firebase-web-sdk-escola.json --out .local/cloud/preflight-escola.json
+```
+
+Esse preflight compara os seis campos públicos, registra o hash das regras locais e lista verificações manuais de backend. Não autentica, consulta usuários, publica dados nem comprova que o JSON foi emitido pelo Firebase. Obtenha a configuração pelo console/API oficial do projeto, registre sua origem e confirme o vínculo administrativamente. A [API de configuração Web](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps/getConfig) fornece esses metadados para um aplicativo identificado.
+
+## Backups, restauração e incidentes
+
+Cada pacote privado recebe `BACKUP-RESTAURACAO.md` e `RESPOSTA-INCIDENTE.md` com identidade da instalação, campos de responsáveis e resultado inicial “não executado”. Preencha RPO/RTO, região/IAM/destino, retenção e evidências privadas por escola. Os modelos não ativam backups, ensaios ou alertas.
+
+O plano precisa cobrir documentos, Authentication/UIDs, eventuais arquivos Storage, regras/índices e imagens/configuração. [Backups gerenciados Firestore](https://firebase.google.com/docs/firestore/backups) protegem os dados desse banco e são restaurados em banco novo; não substituem recuperação de Auth, arquivos e configuração. A aplicação atual usa o banco padrão, portanto uma restauração em banco nomeado requer um plano específico antes de direcionar tráfego. Defina destino autorizado de ensaio e preserve o projeto da instituição: nunca use outra escola como destino.
+
+A recuperação de Authentication precisa manter ou reconciliar os UIDs que vinculam turmas, entregas, pareceres e certificados. [Importação/exportação Auth](https://firebase.google.com/docs/cli/auth) é uma operação administrativa com informações sensíveis; não distribua exportações ou hashes de senha em Git, `public/`, imagens ou artefatos abertos. Somente uma restauração exercitada e aprovada permite registrar `backupRestoreTested: true`.
+
+O modelo de incidente separa detecção, preservação restrita de evidência, contenção autorizada, avaliação jurídica/comunicação e recuperação. Registre escopo por instalação, horários com fuso, responsáveis e aprovação. Prazos e decisões de comunicação devem seguir o procedimento jurídico aprovado descrito em `CONFORMIDADE-BRASIL.md`; o modelo não presume que todo incidente exige a mesma comunicação.
 
 ## Aceitação antes de entrada em operação
 
@@ -97,5 +121,18 @@ O pacote gerado inclui `firebase.json` somente de Firestore. A publicação futu
 ## Validação disponível neste computador
 
 `node --test --test-concurrency=2 scripts/cloud/installation.test.mjs` testa manifestos, isolamento declarado, bloqueio comercial, escrita privada, rejeição de credenciais/exportações e parâmetros estáticos do container. A preparação não acessa dados reais.
+
+O teste de backend entre projetos usa somente dados fictícios e emuladores locais:
+
+```powershell
+node scripts/cloud/check-project-isolation.mjs
+node --test --test-concurrency=2 scripts/cloud/backend-readiness.test.mjs scripts/cloud/installation.test.mjs
+```
+
+O runner independente reserva `127.0.0.1:8080/9099`, fixa `demo-school-a` e `demo-home-b`, remove credenciais administrativas do ambiente e carrega as regras do repositório nos dois namespaces antes dos testes. A [configuração oficial dos emuladores](https://firebase.google.com/docs/emulator-suite/install_and_configure) permite ambientes com múltiplos IDs usando `singleProjectMode: false`; isso não modifica o runner comum `demo-kortex`. Não execute enquanto outro teste usa essas portas.
+
+O relatório privado `.local/cloud-isolation/report.json` registra hash das regras, projetos e verificações. Ele confere cadastros separados para o mesmo email, validação da audiência do token pelo Auth Admin, leitura/escrita entre os documentos dos dois alunos negada, ausência do progresso escolar no namespace doméstico e preservação doméstica após exclusão na escola. Nenhum token aparece no relatório.
+
+**Limitação encontrada no emulador:** um token de outro projeto foi aceito pelo endpoint Firestore local quando o UID do recurso coincidiu com o token, mesmo sem esse cadastro no namespace de destino. Os probes registram `firestoreAudienceIsolationVerified: false` e `passed-with-emulator-limitation`; não se conta esse caso como isolamento comprovado. A validação de audiência por Auth Admin passou separadamente. [Tokens do emulador são sem assinatura](https://firebase.google.com/docs/emulator-suite/connect_auth); na validação de tokens reais, a [audiência precisa corresponder ao projeto](https://firebase.google.com/docs/auth/admin/verify-id-tokens). Repita a tentativa de acesso entre projetos reais em homologação autorizada antes da liberação comercial.
 
 Docker Engine não está disponível neste computador. O [CI de validação](https://github.com/Sanluis94/Plataforma-educacional/actions/runs/38420658150) compilou e executou as imagens de escola e uso doméstico, incluindo `nginx -t`, usuário sem root, filesystem somente leitura, headers/cache, recusa de Host e de instalação/projeto/origem incorretos. Esse resultado usa configuração fictícia e comprova os cenários exercitados. Antes da operação, repita a aceitação com os recursos e domínios reais de cada instalação. Não houve provisionamento AWS/Azure, criação de projeto Firebase nem migração de usuários.

@@ -19,6 +19,7 @@ const Home = lazy(() => import('./modules/ux/pages/Home').then(m => ({ default: 
 const NotFound = lazy(() => import('./modules/ux/pages/NotFound'));
 const VerifyCertificate = lazy(() => import('./modules/ux/pages/VerifyCertificate'));
 const ProductInformation = lazy(() => import('./modules/ux/pages/ProductInformation'));
+const MyData = lazy(() => import('./modules/ux/pages/MyData'));
 
 function LoginFlow({ loginOpen, openLogin, closeLogin }: { loginOpen: boolean; openLogin: () => void; closeLogin: () => void }) {
   const location = useLocation();
@@ -89,6 +90,7 @@ function App() {
                 <Route path="/privacidade" element={<ProductInformation topic="privacy" />} />
                 <Route path="/termos" element={<ProductInformation topic="terms" />} />
                 <Route path="/seguranca" element={<ProductInformation topic="safety" />} />
+                <Route path="/meus-dados" element={<ProtectedRoute allowedRoles={ROUTE_ROLES['/meus-dados']}><MyData /></ProtectedRoute>} />
 
                 {/* Rotas protegidas por role com segregação estrita */}
                 <Route path="/professor" element={
