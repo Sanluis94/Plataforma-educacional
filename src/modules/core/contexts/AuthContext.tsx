@@ -13,6 +13,9 @@ import { writeLog } from '../../data/repositories/logRepository';
 import { DEFAULT_PROGRESS } from '../../data/types';
 import { getLocalEtlUserByRole } from '../../data/services/localEtlClient';
 import { LEARNING_LEVELS, isLearningLevel, normalizeLearningLevel, type LearningLevel } from '../constants/learningLevels';
+import { productDeployment } from '../config/productConfiguration';
+import { getInitialRegistrationRole } from '../config/registrationPolicy';
+import { getConfirmedInstallationPolicy } from '../../data/repositories/installationPolicyRepository';
 
 export type GradeLevel = LearningLevel;
 
@@ -39,6 +42,7 @@ const AUTH_LOG_ERROR_CODES = new Set([
   'auth/network-request-failed', 'auth/unauthorized-domain', 'auth/operation-not-allowed',
   'auth/account-exists-with-different-credential', 'auth/user-disabled', 'auth/too-many-requests',
   'permission-denied', 'unavailable', 'failed-precondition',
+  'auth/installation-policy-unavailable', 'auth/staff-not-assigned',
 ]);
 function authLogErrorCode(error: unknown): string {
   const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
@@ -111,9 +115,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profileRefresh,setProfileRefresh]=useState(0);
 
   const loginWithGoogle = async (role: AuthRole, gradeLevel: GradeLevel) => {
+    const registrationRole = getInitialRegistrationRole(productDeployment.mode, role);
     if (!auth || !db) {
-      const etlProfile = await getLocalEtlUserByRole(role);
-      const fallbackProfile = LOCAL_PROFILES[role];
+      if (productDeployment.mode !== 'pilot') throw Object.assign(new Error('A configuração de acesso desta instalação está incompleta.'), { code: 'auth/installation-policy-unavailable' });
+      const etlProfile = await getLocalEtlUserByRole(registrationRole);
+      const fallbackProfile = LOCAL_PROFILES[registrationRole];
       const profile = {
         uid: etlProfile?.id ?? fallbackProfile.uid,
         name: etlProfile?.name ?? fallbackProfile.name,
@@ -129,7 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const localUserData: UserData = {
         name: profile.name,
         email: profile.email,
-        role,
+        role: registrationRole,
         gradeLevel: normalizeLearningLevel(profile.gradeLevel, gradeLevel),
       };
 
@@ -143,7 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    if (role === 'admin') {
+    if (registrationRole === 'admin') {
       throw { code: 'auth/admin-local-only', message: 'Admin local só está disponível sem Firebase configurado.' };
     }
 
@@ -151,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if(loginInFlight.current)throw new Error('O acesso já está em andamento.');
     loginInFlight.current=true;profileGeneration.current++;setProfileError('');
     try {
+      const installationPolicy = await getConfirmedInstallationPolicy(productDeployment);
       const result = await signInWithPopup(auth!, provider);
       const user = result.user;
       
@@ -158,18 +165,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const docSnap = await getDoc(userDocRef);
       
       if (!docSnap.exists()) {
+        if (installationPolicy?.staffRegistration === 'assigned-only' && registrationRole !== 'estudante') {
+          throw Object.assign(new Error('O cadastro da equipe precisa ser autorizado pela escola antes do acesso.'), { code: 'auth/staff-not-assigned' });
+        }
         // Primeiro login — cria perfil
         const newData: UserData = {
           name: user.displayName || 'Novo Usuário',
           email: user.email || '',
-          role,
+          role: registrationRole,
           gradeLevel,
         };
         const batch=writeBatch(db!);
         batch.set(userDocRef, { ...newData, createdAt: new Date().toISOString() });
 
         // A recriação do cadastro não deve apagar progresso já existente.
-        if (role === 'estudante') {
+        if (registrationRole === 'estudante') {
           const progressRef = doc(db!, 'progress', user.uid);
           const progress = await getDoc(progressRef);
           if (!progress.exists()) batch.set(progressRef, {
@@ -251,6 +261,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!auth || !db) {
+      if (productDeployment.mode !== 'pilot') {
+        setCurrentUser(null);setUserData(null);setProfileError('A configuração de acesso desta instalação está incompleta. Avise o responsável pela plataforma.');setLoading(false);return;
+      }
       const storedSession = localStorage.getItem(LOCAL_SESSION_KEY);
 
       if (storedSession) {
@@ -278,7 +291,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user) {
         // Fetch user role data from Firestore
         const docRef = doc(db!, 'users', user.uid);
-        try{const docSnap = await getDoc(docRef);
+        try{await getConfirmedInstallationPolicy(productDeployment);const docSnap = await getDoc(docRef);
         if(!active||generation!==profileGeneration.current||auth?.currentUser?.uid!==user.uid)return;
         if (docSnap.exists()) {
           setUserData(normalizeUserData(docSnap.data()));
@@ -286,7 +299,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
            setUserData(null);
         }
         setProfileError('');
-        }catch{if(active&&generation===profileGeneration.current)setProfileError('Não foi possível confirmar seu perfil. Tente consultar novamente.');}
+        }catch(error){if(active&&generation===profileGeneration.current)setProfileError(error&&typeof error==='object'&&'code'in error&&error.code==='auth/installation-policy-unavailable'?'A política de acesso desta instalação não pôde ser confirmada. Avise o responsável pela plataforma.':'Não foi possível confirmar seu perfil. Tente consultar novamente.');}
       } else {
         setUserData(null);
       }

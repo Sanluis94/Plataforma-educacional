@@ -3,6 +3,7 @@ import {resolve,dirname,join,relative,isAbsolute} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {validateInstallationSet,installationFingerprint} from './installation.mjs';
+import {operationalRecords} from './operational-records.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 export async function prepareInstallations(paths,output){
@@ -26,6 +27,8 @@ export async function prepareInstallations(paths,output){
     await Promise.all(['firestore.rules','firestore.indexes.json'].map(file=>copyFile(join(root,file),join(directory,file))));
     await writeFile(join(directory,'firebase.json'),JSON.stringify({firestore:{rules:'firestore.rules',indexes:'firestore.indexes.json'}},null,2)+'\n');
     await writeFile(join(directory,'container.env'),`KORTEX_INSTALLATION_ID=${installation.id}\nKORTEX_FIREBASE_PROJECT_ID=${installation.firebase.projectId}\nKORTEX_PUBLIC_ORIGIN=${installation.origin}\n`);
+    await writeFile(join(directory,'installation-policy.json'),JSON.stringify({path:'installation_policy/public',data:{schemaVersion:1,installationId:installation.id,mode:installation.mode,staffRegistration:installation.mode==='school'?'assigned-only':'students-only'}},null,2)+'\n');
+    await Promise.all(Object.entries(operationalRecords(installation)).map(([file,content])=>writeFile(join(directory,file),content)));
     await writeFile(join(directory,'deployment-plan.json'),JSON.stringify({installationId:installation.id,mode:installation.mode,releaseStage:installation.releaseStage,origin:installation.origin,firebaseProjectId:installation.firebase.projectId,manifestSha256:installationFingerprint(installation),sourceRevision,workingTreeDirty:dirty,container:{port:8080,healthPath:'/healthz',readOnlyRootFilesystem:true,tmpfs:'/tmp',environment:{KORTEX_INSTALLATION_ID:installation.id,KORTEX_FIREBASE_PROJECT_ID:installation.firebase.projectId,KORTEX_PUBLIC_ORIGIN:installation.origin}},backend:{provider:'Firebase/Google Cloud',authentication:'projeto dedicado',database:'Firestore dedicado',requiredAuthorizedDomain:new URL(installation.origin).hostname},cloudTargets:['AWS ECS/Fargate com ALB HTTPS','Azure Container Apps com ingress HTTPS'],provisioned:false},null,2)+'\n');
   }
   await writeFile(join(destination,'isolation-inventory.json'),JSON.stringify({schemaVersion:1,sourceRevision,workingTreeDirty:dirty,installations:installations.map(item=>({id:item.id,mode:item.mode,origin:item.origin,firebaseProjectId:item.firebase.projectId,manifestSha256:installationFingerprint(item)}))},null,2)+'\n');

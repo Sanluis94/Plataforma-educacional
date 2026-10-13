@@ -6,6 +6,8 @@ import { GRADE_LABELS } from '../../core/contexts/AuthContext';
 import { X } from 'lucide-react';
 import { Logo } from './Logo';
 import { useDialogAccessibility } from '../hooks/useDialogAccessibility';
+import { productDeployment } from '../../core/config/productConfiguration';
+import { getInitialRegistrationRole } from '../../core/config/registrationPolicy';
 
 interface LoginModalProps {
   onClose: () => void;
@@ -16,7 +18,9 @@ interface LoginModalProps {
 
 export function LoginModal({ onClose, onSuccess, initialRole = 'estudante', purpose = 'learning' }: LoginModalProps) {
   const { isLocalAuthMode, loginWithGoogle } = useAuth();
-  const [selectedRole, setSelectedRole] = useState<'estudante' | 'professor' | 'coordenador' | 'admin'>(initialRole);
+  const isHome = productDeployment.mode === 'home';
+  const isSchool = productDeployment.mode === 'school';
+  const [selectedRole, setSelectedRole] = useState<'estudante' | 'professor' | 'coordenador' | 'admin'>(() => getInitialRegistrationRole(productDeployment.mode, initialRole, purpose));
   const [selectedGrade, setSelectedGrade] = useState<GradeLevel>('medio');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,12 +31,16 @@ export function LoginModal({ onClose, onSuccess, initialRole = 'estudante', purp
     setLoading(true);
     setError(null);
     try {
-      await loginWithGoogle(selectedRole, selectedGrade);
+      await loginWithGoogle(getInitialRegistrationRole(productDeployment.mode, selectedRole, purpose), selectedGrade);
       (onSuccess ?? onClose)();
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code || '';
       if (code === 'auth/admin-local-only') {
         setError('Login como administrador só está disponível no modo local.');
+      } else if (code === 'auth/installation-policy-unavailable') {
+        setError('A política de acesso desta instalação não pôde ser confirmada. Avise o responsável pela plataforma.');
+      } else if (code === 'auth/staff-not-assigned') {
+        setError('Seu acesso à equipe ainda não foi autorizado. Peça à escola que prepare seu cadastro e tente novamente.');
       } else if (code === 'auth/not-configured') {
         setError('O acesso está indisponível no momento. Tente novamente mais tarde.');
       } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
@@ -87,10 +95,10 @@ export function LoginModal({ onClose, onSuccess, initialRole = 'estudante', purp
               <Logo symbolSize={26} />
             </div>
             <h2 id="login-title" style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.35rem', fontWeight: 700 }}>
-              Entrar na plataforma
+              {purpose === 'family' ? 'Entrar para acompanhar' : isHome ? 'Entrar para estudar em casa' : isSchool ? 'Entrar na escola' : 'Entrar na plataforma'}
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
-              {purpose === 'family' ? 'Entre com o mesmo email informado ao professor.' : 'Selecione seu perfil para continuar'}
+              {purpose === 'family' ? 'Entre com o mesmo email informado no convite.' : isHome ? `${productDeployment.installationName} · Seu primeiro acesso cria um perfil de estudante. Você pode ajustar o nível de estudo no seu painel.` : isSchool ? `${productDeployment.installationName} · Use o endereço indicado pela sua escola. O cadastro da equipe precisa ser autorizado previamente; o acesso às turmas depende dos vínculos autorizados.` : 'Selecione seu perfil para continuar'}
             </p>
           </div>
           <button
@@ -110,7 +118,7 @@ export function LoginModal({ onClose, onSuccess, initialRole = 'estudante', purp
         </div>
 
         {/* Role Selector */}
-        {purpose !== 'family' && <div style={{ display: 'grid', gridTemplateColumns: isLocalAuthMode ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1.25rem' }}>
+        {purpose !== 'family' && !isHome && <div style={{ display: 'grid', gridTemplateColumns: isLocalAuthMode ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1.25rem' }}>
           {(['estudante', 'professor', 'coordenador', ...(isLocalAuthMode ? ['admin' as const] : [])] as const).map(role => (
             <button
               key={role}
@@ -138,7 +146,7 @@ export function LoginModal({ onClose, onSuccess, initialRole = 'estudante', purp
         </div>}
 
         {/* Grade Selector */}
-        {purpose !== 'family' && selectedRole !== 'admin' && (
+        {purpose !== 'family' && !isHome && selectedRole !== 'admin' && (
         <div style={{ marginBottom: '1.5rem' }}>
           <label style={{
             color: 'var(--text-secondary)', fontSize: '0.82rem',

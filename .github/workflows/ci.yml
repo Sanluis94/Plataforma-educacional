@@ -107,6 +107,8 @@ jobs:
         run: npm run etl:emulator-check
       - name: Verificar publicação, privacidade e acompanhamento
         run: npm run evolution:emulator-check
+      - name: Verificar projetos escolares e domésticos com dados fictícios
+        run: npm run cloud:isolation-check
 
   cloud:
     name: Contêineres e vínculo por instalação
@@ -120,7 +122,7 @@ jobs:
         with:
           node-version: '22'
       - name: Validar isolamento e configuração pública
-        run: node --test scripts/cloud/installation.test.mjs
+        run: npm run cloud:test
       - name: Gerar configurações fictícias fora do Git
         run: node scripts/cloud/fixtures.mjs
       - name: Compilar imagem da escola com configuração fictícia

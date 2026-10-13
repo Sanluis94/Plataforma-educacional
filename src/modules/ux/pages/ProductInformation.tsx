@@ -49,7 +49,7 @@ export default function ProductInformation({ topic }: { topic: 'privacy' | 'term
       </Section>
       <Section title="Seus direitos e como pedir ajuda">
         <p>Você pode solicitar informações sobre o tratamento, acesso, correção, revisão de decisões automatizadas e, quando cabível, exclusão, oposição e revogação de consentimento. A exclusão depende das obrigações de conservação aplicáveis, que deverão ser informadas pelo responsável.</p>
-        <p>A plataforma ainda não oferece exportação integral nem exclusão automática da conta e de todos os registros. O processo de atendimento e a verificação proporcional de identidade precisam ser concluídos antes da operação comercial.</p><Contact />
+        <p>Depois de entrar, você pode <Link to="/meus-dados">registrar e acompanhar uma solicitação sobre seus dados</Link>, com protocolo e resposta da administração desta instalação. Registrar o pedido não executa exportação integral nem exclusão automática. A equipe precisa verificar o escopo, a identidade ou representação quando cabível e as obrigações de conservação. O processo operacional ainda deve ser definido para uso comercial.</p><Contact />
       </Section>
     </>}
     {topic === 'terms' && <>

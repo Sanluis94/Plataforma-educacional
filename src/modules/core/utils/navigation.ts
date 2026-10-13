@@ -5,6 +5,7 @@ export const ROUTE_ROLES: Record<string, NavigationRole[]> = {
   '/professor': ['professor', 'coordenador', 'admin'],
   '/coordenacao': ['coordenador', 'admin'],
   '/admin': ['admin'],
+  '/meus-dados': ['estudante', 'professor', 'coordenador', 'admin'],
   '/simulacao': ['estudante', 'professor', 'coordenador', 'admin'],
   '/enem': ['estudante', 'professor', 'coordenador', 'admin'],
 };
