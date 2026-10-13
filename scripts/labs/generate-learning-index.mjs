@@ -18,7 +18,8 @@ const outputs = [
 ];
 for (const [path, expected] of outputs) {
   if (process.argv.includes('--check')) {
-    if (await readFile(new URL(path, root), 'utf8') !== expected) throw new Error(`${path}: regenere o índice do catálogo.`);
+    const actual = (await readFile(new URL(path, root), 'utf8')).replace(/\r\n/g, '\n');
+    if (actual !== expected) throw new Error(`${path}: regenere o índice do catálogo.`);
   } else await writeFile(new URL(path, root), expected);
 }
 console.log(`Índice leve: ${index.length} itens; conteúdo: ${Object.keys(packs).length} laboratórios.`);

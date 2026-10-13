@@ -50,7 +50,7 @@ export class ActiveLearningCapture {
   interact() { this.tick(); this.lastInteraction = Date.now(); }
   setVisible(visible: boolean) { this.tick(); this.visible = visible; }
   stop() { this.tick(); this.running = false; }
-  reset() { this.sessionId = newLearningSessionId(); this.startedAt = new Date().toISOString(); this.activeMilliseconds = 0; this.checkpoint = this.lastInteraction = Date.now(); }
+  reset(initial?:{activeSeconds?:number}) { this.sessionId = newLearningSessionId(); this.startedAt = new Date().toISOString(); this.activeMilliseconds = Number.isFinite(initial?.activeSeconds)&&initial!.activeSeconds!>=0?initial!.activeSeconds!*1000:0; this.checkpoint = this.lastInteraction = Date.now(); }
   get activeSeconds() { this.tick(); return Math.round(this.activeMilliseconds / 1000); }
 
   evidence(source: LearningEvidence['source'], details: Partial<LearningEvidence> = {}): LearningEvidence {

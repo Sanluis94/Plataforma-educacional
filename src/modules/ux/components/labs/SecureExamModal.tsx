@@ -1,162 +1,146 @@
-import React, { useState, useEffect } from 'react';
-import { ShieldAlert, Lock, AlertTriangle, Clock, CheckCircle2, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ShieldAlert, Clock, X } from 'lucide-react';
 
 interface SecureExamModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onStartExam?: () => void;
   labTitle: string;
   durationMinutes?: number;
-  onFinishExam: (incidentsCount: number) => void;
+  canFinish?: boolean;
+  onFinishExam: (incidentsCount: number) => boolean | void | Promise<boolean | void>;
 }
 
-export const SecureExamModal: React.FC<SecureExamModalProps> = ({
-  isOpen,
-  onClose,
-  labTitle,
-  durationMinutes = 30,
-  onFinishExam
-}) => {
-  const [secondsRemaining, setSecondsRemaining] = useState<number>(durationMinutes * 60);
-  const [incidentLogs, setIncidentLogs] = useState<string[]>([]);
-  const [isFullscreenActive, setIsFullscreenActive] = useState<boolean>(false);
-  const [examStarted, setExamStarted] = useState<boolean>(false);
+/** Browser focus events are observations, not proof of misconduct. */
+export function SecureExamModal({ isOpen, onClose, onStartExam, labTitle, durationMinutes = 30, canFinish = true, onFinishExam }: SecureExamModalProps) {
+  const [secondsRemaining, setSecondsRemaining] = useState(durationMinutes * 60);
+  const [incidents, setIncidents] = useState<string[]>([]);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+  const deadline = useRef(0);
+  const incidentsRef = useRef<string[]>([]);
+  const finishing = useRef(false);
+  const expired = useRef(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const ownsFullscreen = useRef(false);
+  const mounted = useRef(true);
 
-  // Monitora troca de janelas ou abas (blur)
-  useEffect(() => {
-    if (!examStarted) return;
-
-    const handleBlur = () => {
-      const log = `[${new Date().toLocaleTimeString()}] Perda de foco: Janela ou aba foi alterada.`;
-      setIncidentLogs(prev => [...prev, log]);
-    };
-
-    window.addEventListener('blur', handleBlur);
-    return () => window.removeEventListener('blur', handleBlur);
-  }, [examStarted]);
-
-  // Temporizador regressivo
-  useEffect(() => {
-    let timer: any;
-    if (examStarted && secondsRemaining > 0) {
-      timer = setInterval(() => {
-        setSecondsRemaining(prev => {
-          if (prev <= 1) {
-            handleComplete();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+  const finish = useCallback(async () => {
+    if (finishing.current) return;
+    finishing.current = true;
+    setSaving(true);
+    setMessage('');
+    try {
+      if (await onFinishExam(incidentsRef.current.length) === false) {
+        setMessage('As respostas ainda não foram salvas. Tente finalizar novamente.');
+        return;
+      }
+      if (mounted.current) onClose();
+    } catch {
+      setMessage('Não foi possível salvar as respostas. Tente finalizar novamente.');
+    } finally {
+      finishing.current = false;
+      if (mounted.current) setSaving(false);
     }
-    return () => clearInterval(timer);
-  }, [examStarted, secondsRemaining]);
+  }, [onClose, onFinishExam]);
 
-  const handleStartExam = () => {
+  useEffect(() => {
+    if (!isOpen || started) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    dialogRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !starting) onClose();
+      if (event.key !== 'Tab') return;
+      const buttons = dialogRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)');
+      if (!buttons?.length) return;
+      if (event.shiftKey && document.activeElement === buttons[0]) { event.preventDefault(); buttons[buttons.length - 1].focus(); }
+      else if (!event.shiftKey && document.activeElement === buttons[buttons.length - 1]) { event.preventDefault(); buttons[0].focus(); }
+    };
+    document.addEventListener('keydown', keydown);
+    return () => { document.removeEventListener('keydown', keydown); previousFocus?.focus(); };
+  }, [isOpen, started, starting, onClose]);
+
+  useEffect(() => {
+    if (!isOpen || !started) return;
+    const blur = () => {
+      const log = `${new Date().toLocaleTimeString('pt-BR')}: a janela perdeu o foco.`;
+      incidentsRef.current = [...incidentsRef.current, log];
+      setIncidents(incidentsRef.current);
+    };
+    const fullscreenChange = () => setFullscreen(!!document.fullscreenElement);
+    window.addEventListener('blur', blur);
+    document.addEventListener('fullscreenchange', fullscreenChange);
+    return () => { window.removeEventListener('blur', blur); document.removeEventListener('fullscreenchange', fullscreenChange); };
+  }, [isOpen, started]);
+
+  useEffect(() => {
+    if (!isOpen || !started) return;
+    const update = () => {
+      const remaining = Math.max(0, Math.ceil((deadline.current - Date.now()) / 1000));
+      setSecondsRemaining(remaining);
+      if (remaining === 0 && !expired.current) { expired.current = true; void finish(); }
+    };
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, [isOpen, started, finish]);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      if (ownsFullscreen.current && document.fullscreenElement && document.exitFullscreen) void Promise.resolve(document.exitFullscreen()).catch(() => {});
+    };
+  }, []);
+
+  const start = async () => {
+    if (starting) return;
+    setStarting(true);
     try {
       if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-        setIsFullscreenActive(true);
+        await document.documentElement.requestFullscreen();
+        ownsFullscreen.current = true;
+        setFullscreen(!!document.fullscreenElement);
       }
-    } catch (_e) {}
-    setExamStarted(true);
-  };
-
-  const handleComplete = () => {
-    try {
-      if (document.fullscreenElement && document.exitFullscreen) {
-        document.exitFullscreen();
+    } catch {
+      setMessage('Tela cheia indisponível. Você pode continuar a prática nesta janela.');
+    }
+      if (!mounted.current) {
+        if (ownsFullscreen.current && document.fullscreenElement && document.exitFullscreen) void Promise.resolve(document.exitFullscreen()).catch(() => {});
+        return;
       }
-    } catch (_e) {}
-    onFinishExam(incidentLogs.length);
-    onClose();
+      deadline.current = Date.now() + durationMinutes * 60_000;
+      expired.current = false;
+      onStartExam?.();
+      setStarted(true);
+      setStarting(false);
   };
 
   if (!isOpen) return null;
+  if (!started) return <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="timed-practice-title" aria-describedby="timed-practice-description" className="bg-slate-900 border border-slate-700 rounded-xl max-w-lg w-full p-6 shadow-2xl text-slate-100">
+      <div className="flex items-center justify-between gap-3">
+        <h3 id="timed-practice-title" className="font-bold flex items-center gap-2"><ShieldAlert className="w-5 h-5" />Avaliação com tempo</h3>
+        <button disabled={starting} onClick={onClose} aria-label="Fechar avaliação com tempo"><X className="w-5 h-5" /></button>
+      </div>
+      <p className="my-3">{labTitle}</p>
+      <p id="timed-practice-description" className="text-sm text-slate-300">Você terá {durationMinutes} minutos para responder às perguntas da bancada. Ao terminar o tempo, as respostas serão enviadas; questões sem resposta contam como incorretas. A tela cheia é opcional. Perdas de foco são exibidas apenas nesta sessão e não comprovam irregularidade.</p>
+      <button disabled={starting} onClick={() => { void start(); }} className="mt-4 w-full py-2.5 bg-rose-600 rounded-lg font-bold">{starting ? 'Preparando…' : 'Iniciar e responder às perguntas'}</button>
+    </div>
+  </div>;
 
-  const minutes = Math.floor(secondsRemaining / 60);
-  const seconds = secondsRemaining % 60;
-
-  return (
-    <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-lg w-full p-6 shadow-2xl text-slate-100 flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-          <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-rose-500/20 text-rose-400 rounded-lg">
-              <ShieldAlert className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-white">Modo Avaliação Segura (Lockdown)</h3>
-              <p className="text-xs text-slate-400 truncate max-w-[280px]">{labTitle}</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white rounded">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {!examStarted ? (
-          <div className="space-y-4 my-2 text-xs">
-            <div className="p-3 bg-amber-950/40 border border-amber-800/60 rounded-lg text-amber-200 space-y-1.5">
-              <div className="font-bold flex items-center space-x-1.5">
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <span>Protocolo de Integridade Acadêmica:</span>
-              </div>
-              <p className="leading-relaxed text-slate-300">
-                1. A avaliação será executada em tela cheia obrigatória.<br />
-                2. Trocas de aba, saída de janela ou atalhos de sistema serão auditados.<br />
-                3. O tempo limite desta prova é de <strong>{durationMinutes} minutos</strong>.
-              </p>
-            </div>
-
-            <button
-              onClick={handleStartExam}
-              className="w-full py-2.5 bg-gradient-to-r from-rose-600 to-[#E4683F] hover:opacity-90 font-bold text-white rounded-lg flex items-center justify-center space-x-2 shadow-lg"
-            >
-              <Lock className="w-4 h-4" />
-              <span>Entrar em Modo Seguro e Iniciar Prova</span>
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4 my-2">
-            {/* Timer Banner */}
-            <div className="flex items-center justify-between p-3 bg-slate-950 border border-slate-800 rounded-lg">
-              <div className="flex items-center space-x-2 text-slate-300 text-xs">
-                <Clock className="w-4 h-4 text-[#E4683F]" />
-                <span>Tempo Restante {isFullscreenActive ? '(Tela Cheia Ativa)' : ''}:</span>
-              </div>
-              <span className="font-mono text-xl font-bold text-[#E4683F]">
-                {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-              </span>
-            </div>
-
-            {/* Incidents Auditor */}
-            <div className="bg-slate-950 border border-slate-800 rounded-lg p-3">
-              <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-semibold text-slate-300">Auditoria de Foco em Tempo Real:</span>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${incidentLogs.length === 0 ? 'bg-emerald-950 text-emerald-400' : 'bg-rose-950 text-rose-400'}`}>
-                  {incidentLogs.length === 0 ? 'Zero Ocorrências' : `${incidentLogs.length} Ocorrência(s)`}
-                </span>
-              </div>
-              <div className="max-h-24 overflow-y-auto text-[11px] font-mono text-slate-400 space-y-1">
-                {incidentLogs.length === 0 ? (
-                  <p className="text-emerald-500">Nenhuma irregularidade detectada na sessão.</p>
-                ) : (
-                  incidentLogs.map((log, i) => <p key={i} className="text-rose-400">{log}</p>)
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={handleComplete}
-              className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 font-bold text-white text-xs rounded-lg flex items-center justify-center space-x-1.5 shadow"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Finalizar Avaliação e Salvar Respostas</span>
-            </button>
-          </div>
-        )}
+  return <section aria-label="Sessão de avaliação com tempo" className="bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100">
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <p className="flex items-center gap-2 text-sm"><Clock className="w-4 h-4" />Tempo restante <span role="timer" className="font-mono font-bold">{String(Math.floor(secondsRemaining / 60)).padStart(2, '0')}:{String(secondsRemaining % 60).padStart(2, '0')}</span>{fullscreen && ' · Tela cheia ativa'}</p>
+      <div className="flex flex-wrap gap-2">
+        <button disabled={saving || (!canFinish && secondsRemaining > 0)} onClick={() => { void finish(); }} className="px-3 py-2 bg-emerald-700 rounded text-sm">{saving ? 'Salvando respostas…' : 'Finalizar e salvar respostas'}</button>
+        <button disabled={saving} onClick={onClose} className="px-3 py-2 bg-slate-700 rounded text-sm">Sair sem finalizar</button>
       </div>
     </div>
-  );
-};
+    <p className="text-xs text-slate-300">Responda às perguntas abaixo. {incidents.length} perda(s) de foco observada(s) nesta sessão. Sair mantém suas respostas na tela, sem registrar uma entrega.</p>
+    {incidents.length > 0 && <details className="mt-2 text-xs"><summary>Ver registro de foco desta sessão</summary>{incidents.map((entry, index) => <p key={index}>{entry}</p>)}</details>}
+    {message && <p role="alert" className="mt-2 text-sm text-amber-300">{message}</p>}
+  </section>;
+}

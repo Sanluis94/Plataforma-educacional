@@ -79,7 +79,7 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
     </header>
     <main id="main-content" ref={mainRef} tabIndex={-1} style={{ paddingTop: '4rem', minHeight: '100vh', flex: 1, outline: 'none' }}><Suspense fallback={<p role="status" style={{ padding: '2rem' }}>Carregando tela…</p>}><Outlet /></Suspense></main>
     {pricingOpen && <PricingModal onClose={() => setPricingOpen(false)} />}
-    {(familyOpen || familyRequested) && <ParentBridgeModal onClose={closeFamily} onLogin={() => { setFamilyOpen(false); navigate('/', {state:{loginPurpose:'family',from:'/'}}); onLoginOpen(); }} />}
+    {(familyOpen || familyRequested) && <ParentBridgeModal onClose={closeFamily} onLogin={() => { setFamilyOpen(false); navigate('/', {state:{loginPurpose:'family',from:'/',requiresAuth:true}}); }} />}
     {searchOpen && <CommandPaletteModal isOpen onClose={() => setSearchOpen(false)} theme={theme} onThemeToggle={onThemeToggle} onOpenPricing={() => setPricingOpen(true)} onOpenParentBridge={() => setFamilyOpen(true)} />}
     <style>{`
       .header-icon { padding: 0.5rem; min-width: 2.25rem; min-height: 2.25rem; }

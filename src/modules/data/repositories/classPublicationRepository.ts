@@ -8,9 +8,11 @@ import type { ActivityData } from '../types';
 export async function publishClassActivity(professorId: string, payload: Partial<ActivityData>): Promise<ActivityData> {
   const publicationId = String(payload.config?.publicationId ?? '');
   if (!professorId || !payload.classId || !payload.title?.trim() || !payload.description?.trim() || !publicationId || publicationId.length > 100) throw new Error('Preencha turma, título e instrução antes de publicar.');
-  const activity: Omit<ActivityData, 'id'> = sanitizeForFirestore({ title: payload.title.trim(), description: payload.description.trim(), professorId, classId: payload.classId, className: payload.className, subject: payload.subject?.trim(), questions: payload.questions ?? [], type: payload.type ?? 'quiz', config: { ...payload.config, publicationId }, dueDate: payload.dueDate, createdAt: new Date().toISOString(), status: 'published' });
+  const questions=payload.questions??[];
+  if(payload.type!=='written_response'&&(!questions.length||questions.some(question=>!question.q?.trim()||!Array.isArray(question.options)||question.options.length<2||question.options.some(option=>typeof option!=='string'||!option.trim())||new Set(question.options.map(option=>option.trim().toLocaleLowerCase())).size!==question.options.length||!Number.isInteger(question.answer)||question.answer<0||question.answer>=question.options.length||!question.explanation?.trim())))throw new Error('Confira enunciados, alternativas diferentes, gabarito e explicações antes de publicar.');
+  const activity: Omit<ActivityData, 'id'> = sanitizeForFirestore({ title: payload.title.trim(), description: payload.description.trim(), theoryContent: payload.theoryContent?.trim(), professorId, classId: payload.classId, className: payload.className, subject: payload.subject?.trim(), questions: payload.questions ?? [], type: payload.type ?? 'quiz', config: { ...payload.config, publicationId }, dueDate: payload.dueDate, createdAt: new Date().toISOString(), status: 'published' });
   function acknowledged(existing: ActivityData): ActivityData {
-    const keys = ['title', 'description', 'classId', 'professorId', 'questions', 'type', 'dueDate'] as const;
+    const keys = ['title', 'description', 'theoryContent', 'subject', 'classId', 'professorId', 'questions', 'type', 'dueDate'] as const;
     if (keys.some(key => JSON.stringify(existing[key] ?? null) !== JSON.stringify(activity[key] ?? null))) throw new Error('Esta publicação já foi confirmada com outro conteúdo. Confira a atividade publicada antes de criar uma nova versão.');
     return existing;
   }

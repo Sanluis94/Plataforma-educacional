@@ -6,6 +6,7 @@ import {
   collection, addDoc, query, where, getDocs, doc, updateDoc, deleteDoc, onSnapshot, setDoc, getDoc
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
+import {examDeadlineAt} from '../services/examTiming';
 import type { ExamData, ExamAttempt } from '../types';
 
 import { sanitizeForFirestore } from '../../core/services/firestoreUtils';
@@ -31,6 +32,7 @@ function saveLocalExams(exams: ExamData[]) {
     localStorage.setItem(LOCAL_EXAMS_KEY, JSON.stringify(exams));
   } catch (err) {
     console.error('Erro ao salvar exames locais:', err);
+    throw new Error('Não foi possível guardar a prova neste dispositivo. Tente novamente.');
   }
 }
 
@@ -56,49 +58,41 @@ function saveLocalAttempts(attempts: ExamAttempt[]) {
  * Cria ou publica uma nova prova.
  */
 export const saveExam = async (exam: Omit<ExamData, 'id'>): Promise<ExamData> => {
-  const sanitized = sanitizeForFirestore(exam);
-
-  // Sempre sincroniza com cache local como garantia de consistência
-  const exams = getLocalExams();
+  const deadline=examDeadlineAt(exam);
+  if(exam.dataLimite&&deadline===null)throw new Error('Informe uma data limite válida.');
+  const sanitized = sanitizeForFirestore({...exam,...(deadline===null?{}:{dataLimite:new Date(deadline).toISOString(),deadlineAtMillis:deadline})});
 
   if (!db) {
-    const newExam: ExamData = { id: `exam_${Date.now()}`, ...sanitized } as ExamData;
+    const exams = getLocalExams();
+    const newExam: ExamData = { ...sanitized, id: `exam_${crypto.randomUUID()}` } as ExamData;
     exams.unshift(newExam);
     saveLocalExams(exams);
     return newExam;
   }
 
-  try {
-    const docRef = await addDoc(collection(db, EXAMS_COLLECTION), sanitized);
-    const savedExam: ExamData = { id: docRef.id, ...sanitized } as ExamData;
-    exams.unshift(savedExam);
-    saveLocalExams(exams);
-    return savedExam;
-  } catch (err) {
-    console.warn('[examRepository] Falha ao salvar no Firestore, utilizando persistência local resiliente:', err);
-    const fallbackExam: ExamData = { id: `exam_${Date.now()}`, ...sanitized } as ExamData;
-    exams.unshift(fallbackExam);
-    saveLocalExams(exams);
-    return fallbackExam;
-  }
+  if (!exam.turmaId) throw new Error('Selecione a turma antes de salvar a prova.');
+  const docRef = await addDoc(collection(db, EXAMS_COLLECTION), sanitized);
+  return { ...sanitized, id: docRef.id } as ExamData;
 };
 
 /**
  * Atualiza dados de uma prova existente.
  */
 export const updateExam = async (id: string, updates: Partial<ExamData>): Promise<void> => {
+  if(Object.hasOwn(updates,'dataLimite')){const deadline=examDeadlineAt(updates);if(updates.dataLimite&&deadline===null)throw new Error('Informe uma data limite válida.');updates={...updates,dataLimite:deadline===null?'':new Date(deadline).toISOString(),deadlineAtMillis:deadline};}
   if (!db) {
     const exams = getLocalExams();
     const idx = exams.findIndex(e => e.id === id);
-    if (idx !== -1) {
-      exams[idx] = { ...exams[idx], ...updates, atualizadoEm: new Date().toISOString() };
-      saveLocalExams(exams);
-    }
+    if (idx === -1) throw new Error('A prova não está mais disponível. Atualize a lista.');
+    exams[idx] = { ...exams[idx], ...sanitizeForFirestore(updates), id, atualizadoEm: new Date().toISOString() };
+    saveLocalExams(exams);
     return;
   }
 
   const docRef = doc(db, EXAMS_COLLECTION, id);
-  await updateDoc(docRef, { ...updates, atualizadoEm: new Date().toISOString() });
+  const data = { ...updates, atualizadoEm: new Date().toISOString() };
+  delete data.id;
+  await updateDoc(docRef, sanitizeForFirestore(data));
 };
 
 /**
@@ -119,9 +113,8 @@ export const deleteExam = async (id: string): Promise<void> => {
  * Busca todas as provas criadas por um professor.
  */
 export const getExamsByProfessor = async (professorId: string): Promise<ExamData[]> => {
-  const localList = getLocalExams().filter(e => e.professorId === professorId || e.professorId === 'prof_current');
   if (!db) {
-    return localList;
+    return getLocalExams().filter(e => e.professorId === professorId).sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
   }
 
   try {
@@ -131,16 +124,10 @@ export const getExamsByProfessor = async (professorId: string): Promise<ExamData
     );
     const snap = await getDocs(q);
     const remoteList = snap.docs.map(d => ({ id: d.id, ...d.data() } as ExamData));
-    const map = new Map<string, ExamData>();
-    for (const e of localList) if (e.id) map.set(e.id, e);
-    for (const e of remoteList) if (e.id) map.set(e.id, e);
-
-    const combined = Array.from(map.values());
-    combined.sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
-    return combined;
+    return remoteList.sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
   } catch (err) {
     console.error('[examRepository] Erro ao buscar provas do professor:', err);
-    return localList;
+    throw err;
   }
 };
 
@@ -148,9 +135,8 @@ export const getExamsByProfessor = async (professorId: string): Promise<ExamData
  * Busca todas as provas abertas atribuídas a uma turma específica.
  */
 export const getExamsByClass = async (classId: string): Promise<ExamData[]> => {
-  const localList = getLocalExams().filter(e => (e.turmaId === classId || e.turmaId === 'turma_geral' || !e.turmaId) && e.status === 'Aberta');
   if (!db) {
-    return localList;
+    return getLocalExams().filter(e => e.turmaId === classId && e.status === 'Aberta').sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
   }
 
   try {
@@ -161,16 +147,10 @@ export const getExamsByClass = async (classId: string): Promise<ExamData[]> => {
     );
     const snap = await getDocs(q);
     const remoteList = snap.docs.map(d => ({ id: d.id, ...d.data() } as ExamData));
-    const map = new Map<string, ExamData>();
-    for (const e of localList) if (e.id) map.set(e.id, e);
-    for (const e of remoteList) if (e.id) map.set(e.id, e);
-
-    const combined = Array.from(map.values());
-    combined.sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
-    return combined;
+    return remoteList.sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
   } catch (err) {
     console.error('[examRepository] Erro ao buscar provas da turma:', err);
-    return localList;
+    throw err;
   }
 };
 
@@ -180,7 +160,8 @@ export const getExamsByClass = async (classId: string): Promise<ExamData[]> => {
  */
 export const subscribeExamsByClass = (
   classId: string,
-  callback: (exams: ExamData[]) => void
+  callback: (exams: ExamData[]) => void,
+  onError?: (error: Error) => void
 ): (() => void) => {
   if (!db) {
     callback(getLocalExams().filter(e => e.turmaId === classId && e.status === 'Aberta'));
@@ -199,6 +180,7 @@ export const subscribeExamsByClass = (
     callback(data);
   }, (error) => {
     console.error('[examRepository] Erro no listener de provas:', error);
+    onError?.(error);
   });
 };
 
@@ -208,11 +190,15 @@ export const subscribeExamsByClass = (
 export const saveExamAttempt = async (attempt: Omit<ExamAttempt, 'id'>): Promise<ExamAttempt> => {
   if (!attempt.alunoId || !attempt.examId || !Number.isFinite(attempt.porcentagemAproveitamento) || attempt.porcentagemAproveitamento < 0 || attempt.porcentagemAproveitamento > 100) throw new Error('Tentativa de prova inválida.');
   const stableId = attempt.evidence?.sessionId ? learningDocumentId(attempt.alunoId, attempt.evidence.sessionId, `exam-${attempt.turmaId}`) : undefined;
+  const sameAttempt = (previous: Omit<ExamAttempt, 'id'>) => previous.alunoId === attempt.alunoId && previous.examId === attempt.examId && previous.turmaId === attempt.turmaId && previous.evidence?.sessionId === attempt.evidence?.sessionId && previous.pontuacaoObtida === attempt.pontuacaoObtida && previous.pontuacaoMaxima === attempt.pontuacaoMaxima && JSON.stringify(previous.respostas) === JSON.stringify(attempt.respostas);
   if (!db) {
     const attempts = getLocalAttempts();
     const existing = stableId && attempts.find(entry => entry.id === stableId);
-    if (existing) return existing;
-    const newAttempt: ExamAttempt = { id: stableId ?? `attempt_${Date.now()}`, ...attempt };
+    if (existing) {
+      if (!sameAttempt(existing)) throw new Error('Esta tentativa já foi enviada com outras respostas. Abra uma nova tentativa para refazer a prova.');
+      return existing;
+    }
+    const newAttempt: ExamAttempt = { ...attempt, id: stableId ?? `attempt_${crypto.randomUUID()}` };
     attempts.unshift(newAttempt);
     saveLocalAttempts(attempts);
     return newAttempt;
@@ -224,12 +210,12 @@ export const saveExamAttempt = async (attempt: Omit<ExamAttempt, 'id'>): Promise
     catch (error) {
       const existing = await getDoc(reference).catch(() => null);
       const data = existing?.exists() ? existing.data() as Omit<ExamAttempt, 'id'> : null;
-      if (data?.alunoId === attempt.alunoId && data.examId === attempt.examId && data.turmaId === attempt.turmaId && data.evidence?.sessionId === attempt.evidence?.sessionId) return { ...data, id: stableId };
+      if (data && sameAttempt(data)) return { ...data, id: stableId };
       throw error;
     }
     return { ...attempt, id: stableId };
   }
-  const docRef = await addDoc(collection(db, ATTEMPTS_COLLECTION), attempt);
+  const docRef = await addDoc(collection(db, ATTEMPTS_COLLECTION), sanitizeForFirestore(attempt));
   return { id: docRef.id, ...attempt };
 };
 
@@ -250,7 +236,7 @@ export const getExamAttemptsByClass = async (classId: string): Promise<ExamAttem
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as ExamAttempt));
   } catch (err) {
     console.error('[examRepository] Erro ao buscar tentativas da turma:', err);
-    return getLocalAttempts().filter(a => a.turmaId === classId);
+    throw err;
   }
 };
 
@@ -271,7 +257,7 @@ export const getExamAttemptsByStudent = async (studentId: string): Promise<ExamA
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as ExamAttempt));
   } catch (err) {
     console.error('[examRepository] Erro ao buscar tentativas do aluno:', err);
-    return getLocalAttempts().filter(a => a.alunoId === studentId);
+    throw err;
   }
 };
 

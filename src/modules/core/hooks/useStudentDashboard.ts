@@ -13,7 +13,7 @@ import { buildStudentStudySuggestion, type StudentStudySuggestion } from '../ser
 import { getSubmissionsByStudent } from '../../data/repositories/submissionRepository';
 import { getActivitiesByClass } from '../../data/repositories/activityRepository';
 import { getStudentProgress } from '../../data/repositories/studentRepository';
-import { getStudentClasses, enrollStudent } from '../../data/repositories/classRepository';
+import { getStudentClasses, subscribeStudentClasses, enrollStudent } from '../../data/repositories/classRepository';
 import { offlineSyncService } from '../services/offlineSyncService';
 import type { LearningEvidence } from '../../data/learningAnalyticsTypes';
 import { ActiveLearningCapture } from '../../data/services/learningCapture';
@@ -41,8 +41,15 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
   const [shopItems, setShopItems] = useState(SHOP_ITEMS);
   const [studentClasses, setStudentClasses] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
+  const [progressError,setProgressError]=useState('');
+  const [progressRefresh,setProgressRefresh]=useState(0);
+  const reloadProgress=useCallback(()=>setProgressRefresh(value=>value+1),[]);
   const [classesLoading, setClassesLoading] = useState(true);
   const [classesError, setClassesError] = useState('');
+  const [purchaseBusy,setPurchaseBusy]=useState(false);
+  const purchaseInFlight=useRef(false);
+  const [purchaseError,setPurchaseError]=useState('');
+  const [purchaseNotice,setPurchaseNotice]=useState('');
   const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
   const prevProgressRef = useRef<ProgressData | null>(null);
   const [labSaveError, setLabSaveError] = useState(false);
@@ -131,13 +138,16 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
 
   // Carrega progresso real do Firestore
   useEffect(() => {
+    let active=true;
     const loadProgress = async () => {
       if (!uid) {
         setLoading(false);
         return;
       }
       try {
+        setLoading(true);setProgressError('');
         const data = await getStudentProgress(uid);
+        if(!active)return;
         setProgress({ level: data.level, xp: data.xp, coins: data.coins });
         setCompletedModules(data.completedModules || []);
         setPurchasedItems(data.purchasedItems || []);
@@ -156,21 +166,28 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
         }
       } catch (error) {
         console.error('[useStudentDashboard] Erro ao carregar progresso:', error);
+        if(active)setProgressError('Não foi possível consultar seu progresso. Tente atualizar novamente.');
       } finally {
-        setLoading(false);
+        if(active)setLoading(false);
       }
     };
 
-    const loadClasses = async () => {
-      if (!uid) { setClassesLoading(false); return; }
-      setClassesLoading(true); setClassesError('');
-      try { setStudentClasses(await getStudentClasses(uid)); }
-      catch { setClassesError('Não foi possível carregar suas turmas. Tente recarregar a página.'); }
-      finally { setClassesLoading(false); }
-    };
-
     loadProgress();
-    loadClasses();
+    return()=>{active=false;};
+  }, [uid,progressRefresh]);
+
+  useEffect(() => {
+    let active = true;
+    setStudentClasses([]); setClassesError(''); setClassesLoading(Boolean(uid));
+    if (!uid) return () => { active = false; };
+    const unsubscribe = subscribeStudentClasses(uid, classes => {
+      if (!active) return;
+      setStudentClasses(classes); setClassesError(''); setClassesLoading(false);
+    }, () => {
+      if (!active) return;
+      setStudentClasses([]); setClassesLoading(false); setClassesError('Não foi possível atualizar suas turmas. Recarregue a página para confirmar sua matrícula.');
+    });
+    return () => { active = false; unsubscribe(); };
   }, [uid]);
 
   useEffect(() => {
@@ -213,7 +230,8 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
 
   // Compra item na loja — salva no Firestore
   const buyItem = useCallback(async (itemId: string) => {
-    if (!uid) return;
+    if (!uid||purchaseInFlight.current) return;
+    purchaseInFlight.current=true;setPurchaseBusy(true);setPurchaseError('');setPurchaseNotice('');
 
     try {
       const result = await processItemPurchase(uid, itemId, progress.coins, shopItems);
@@ -221,10 +239,14 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
         SoundEffects.playCoin();
         setProgress(prev => ({ ...prev, coins: result.newCoins }));
         setShopItems(result.newItems);
-        setPurchasedItems(prev => prev.includes(itemId) ? prev : [...prev, itemId]);
+        setPurchasedItems(result.purchasedItems);
+        setPurchaseNotice('Item adquirido e aplicado ao seu perfil.');
       }
     } catch (error) {
       console.error('[useStudentDashboard] Erro ao comprar item:', error);
+      setPurchaseError(error instanceof Error?error.message:'Não foi possível adquirir o item. Tente novamente.');
+    } finally {
+      purchaseInFlight.current=false;setPurchaseBusy(false);
     }
   }, [uid, progress.coins, shopItems]);
 
@@ -264,6 +286,7 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
 
   return {
     refreshProgress,
+    purchasedItems,purchaseBusy,purchaseError,purchaseNotice,
     progress,
     aiTip,
     activeSubject, setActiveSubject,
@@ -277,6 +300,7 @@ export const useStudentDashboard = (requestedLevel?: LearningLevel) => {
     buyItem,
     gradeLevel,
     loading,
+    progressError,reloadProgress,
     classesLoading, classesError,
     achievements,
     achievementToast,

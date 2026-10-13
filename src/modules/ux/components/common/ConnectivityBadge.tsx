@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { offlineSyncService, type PendingOfflineSubmission } from '../../../core/services/offlineSyncService';
 import { useAuth } from '../../../core/contexts/AuthContext';
@@ -13,14 +13,14 @@ export function ConnectivityBadge() {
   const [queueError, setQueueError] = useState(false);
   const [legacyRecords, setLegacyRecords] = useState(false);
 
-  const updatePendingCount = () => {
+  const updatePendingCount = useCallback(() => {
     try {
       setLegacyRecords(offlineSyncService.hasLegacyUnassignedRecords());
       const list: PendingOfflineSubmission[] = offlineSyncService.getPendingSubmissions(studentId);
       setPendingCount(list.length);
       setQueueError(list.some(item => Boolean(item.error)));
     } catch { setQueueError(true); }
-  };
+  }, [studentId]);
 
   useEffect(() => {
     offlineSyncService.setCurrentStudent(studentId);
@@ -37,7 +37,7 @@ export function ConnectivityBadge() {
       unsubscribe();
       clearInterval(interval);
     };
-  }, [studentId]);
+  }, [studentId, updatePendingCount]);
 
   const handleManualSync = async () => {
     if (isSyncing || !isOnline) return;
@@ -45,8 +45,10 @@ export function ConnectivityBadge() {
     try {
       await offlineSyncService.syncOutbox();
       updatePendingCount();
+    } catch {
+      setQueueError(true);
     } finally {
-      setTimeout(() => setIsSyncing(false), 600);
+      setIsSyncing(false);
     }
   };
 

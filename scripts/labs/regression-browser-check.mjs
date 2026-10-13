@@ -29,6 +29,7 @@ async function assess(id, title, content) {
   const activity = page.getByRole('region', { name: `Laboratório: ${title}`, exact: true });
   await activity.waitFor();
   await activity.getByRole('button', { name: 'Avaliar', exact: true }).click();
+  if (await activity.getByRole('button', { name: 'Tentar novamente', exact: true }).count()) await activity.getByRole('button', { name: 'Tentar novamente', exact: true }).click();
   for (const question of content.questions) await activity.getByLabel(question.options.find(option => option.correct).text, { exact: true }).check();
   await activity.getByRole('button', { name: 'Corrigir respostas', exact: true }).click();
   await page.waitForFunction(id => JSON.parse(localStorage.getItem('edu_local_db')).progress['qa-estudante']?.completedModules.includes(id), id);
@@ -110,10 +111,21 @@ try {
   checks.push('Professor: nível do catálogo acompanha a turma através do repositório real');
   await role('coordenador');
   await page.goto(`${origin}/coordenacao`);
-  for (const name of ['Panorama & Indicadores', 'Matriz Curricular & Semestres', 'Radar de Retenção & Evasão', 'Importação de Alunos', 'Dossiê MEC / SINAES', 'Relatório Institucional']) {
-    await page.getByRole('button', { name: new RegExp(name) }).click();
-    checks.push(`Coordenação: aba ${name} renderiza`);
-  }
+  await page.getByRole('heading', { name: 'Nenhuma turma vinculada', exact: true }).waitFor();
+  assert.equal(await page.getByRole('button', { name: 'Exportar relatório', exact: true }).isDisabled(), true);
+  await role('admin'); await page.goto(`${origin}/coordenacao`);
+  await page.getByRole('heading', { name: 'Autorizar acompanhamento da coordenação', exact: true }).waitFor();
+  await page.getByRole('combobox', { name: /^Turma$/ }).selectOption('qa-class');
+  await page.getByRole('combobox', { name: /^Perfil de coordenação/ }).selectOption('qa-coordenador');
+  await page.getByRole('button', { name: 'Autorizar turma', exact: true }).click();
+  await page.getByText('Turma vinculada à coordenação.', { exact: true }).waitFor();
+  await role('coordenador'); await page.goto(`${origin}/coordenacao`);
+  await page.getByRole('heading', { name: 'Aprendizagem da turma', exact: true }).waitFor();
+  const exportPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Exportar relatório', exact: true }).click();
+  const exported = await exportPromise;
+  assert.ok((await readFile(await exported.path(), 'utf8')).includes('Turma fictícia Fundamental II'));
+  checks.push('Coordenação: vínculo autorizado pela administração libera relatório e exportação reais');
   await role('admin');
   await page.goto(`${origin}/admin`);
   await page.getByRole('heading', { name: 'Painel Administrativo', exact: true }).waitFor();

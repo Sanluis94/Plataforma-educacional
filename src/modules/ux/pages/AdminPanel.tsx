@@ -7,7 +7,7 @@ export function AdminPanel() {
   const {
     teachers,
     logs,
-    stats
+    stats,loading,error,reload,
   } = useAdminDashboard();
   const [searchParams, setSearchParams] = useNavigationParams();
   const activeTab = ['teachers', 'logs'].includes(searchParams.get('tab') || '') ? searchParams.get('tab') : 'overview';
@@ -35,6 +35,7 @@ export function AdminPanel() {
 
   return (
     <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '80rem', margin: '0 auto' }}>
+      {loading&&<p role="status">Carregando dados administrativos…</p>}{error&&<p role="alert">{error}</p>}<button className="btn-outline" disabled={loading} onClick={reload}>Atualizar dados</button>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
         <div style={{
@@ -58,7 +59,7 @@ export function AdminPanel() {
             <div key={stat.label} className={`stat-card ${stat.accent}`} style={{ borderRadius: 'var(--radius-lg, 14px)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <Icon style={{ width: '1.25rem', height: '1.25rem', color: stat.accent === 'cyan' ? 'var(--color-primary-accessible, #B8441F)' : 'var(--color-verde-700, #293E24)' }} />
-                <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'var(--font-heading)' }}>{stat.value}</span>
+                <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'var(--font-heading)' }}>{loading||error?'—':stat.value}</span>
               </div>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{stat.label}</p>
             </div>
@@ -68,7 +69,7 @@ export function AdminPanel() {
 
       {/* Tabs */}
       <div style={{
-        display: 'flex', gap: '0.25rem', marginBottom: '1.5rem',
+        display: 'flex', flexWrap:'wrap',gap: '0.25rem', marginBottom: '1.5rem',
         borderBottom: '1px solid var(--border-color)', paddingBottom: 0,
       }}>
         {tabs.map(tab => (
@@ -173,7 +174,7 @@ export function AdminPanel() {
       {/* Logs Tab */}
       {activeTab === 'logs' && (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {logs.length > 0 ? logs.map((log: any, i: number) => {
+          {logs.length > 0 ? logs.map((log, i: number) => {
             const colors: Record<string, string> = { auth: 'var(--color-primary-accessible, #B8441F)', ai: 'var(--color-verde-700, #293E24)', error: 'var(--color-vermelho, #BC391F)' };
             const color = colors[log.type] || 'var(--text-muted)';
             return (
@@ -204,7 +205,7 @@ export function AdminPanel() {
             </div>
           )}
           <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '1rem', textAlign: 'center' }}>
-            Logs de segurança são armazenados no Firestore com retenção de 30 dias.
+            Estes são os registros recentes disponíveis na plataforma. Nenhuma exclusão automática por prazo é informada por este painel.
           </p>
         </div>
       )}
@@ -214,7 +215,7 @@ export function AdminPanel() {
         <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>Permissões por Função</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1rem' }}>
           {[
-            { title: 'Admin', icon: Shield, color: 'var(--color-vermelho, #BC391F)', perms: ['Acesso total ao sistema', 'Gerenciar usuários', 'Configurações globais'] },
+            { title: 'Admin', icon: Shield, color: 'var(--color-vermelho, #BC391F)', perms: ['Consultar cadastros e métricas', 'Consultar registros do sistema', 'Autorizar vínculos de coordenação'] },
             { title: 'Professor', icon: Users, color: 'var(--color-verde-700, #293E24)', perms: ['Visualizar métricas', 'Gerenciar turmas', 'Criar laboratórios'] },
             { title: 'Aluno', icon: BookOpen, color: 'var(--color-primary-accessible, #B8441F)', perms: ['Acessar laboratórios', 'Ver progresso próprio', 'Conquistar badges'] },
           ].map(role => {

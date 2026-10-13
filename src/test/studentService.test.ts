@@ -10,6 +10,7 @@ vi.mock('../modules/data/repositories/studentRepository', () => ({
   saveStudentProgress: vi.fn().mockResolvedValue(undefined),
   completeStudentLabProgress: vi.fn().mockResolvedValue({ alreadyCompleted: false, progress: { xp: 80, coins: 30, level: 1 } }),
   addPurchasedItem: vi.fn().mockResolvedValue(undefined),
+  purchaseStudentItem: vi.fn().mockResolvedValue({coins:150,purchasedItems:['item1']}),
 }));
 
 vi.mock('../modules/data/repositories/logRepository', () => ({

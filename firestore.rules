@@ -98,8 +98,13 @@ service cloud.firestore {
       allow delete: if teaches(resource.data.turmaId) || admin();
     }
     match /exam_attempts/{id} {
+      function withinDeadline() {
+        let exam = get(/databases/$(database)/documents/exams/$(request.resource.data.examId)).data;
+        // The client stops answers at the deadline; allow two minutes for transport.
+        return exam.get('deadlineAtMillis', null) == null || request.time.toMillis() <= exam.deadlineAtMillis + 120000;
+      }
       allow read: if workRead(resource.data.turmaId, resource.data.alunoId);
-      allow create: if own(request.resource.data.alunoId) && enrolled(request.resource.data.turmaId, request.auth.uid) && request.resource.data.examId is string && get(/databases/$(database)/documents/exams/$(request.resource.data.examId)).data.turmaId == request.resource.data.turmaId && get(/databases/$(database)/documents/exams/$(request.resource.data.examId)).data.status == 'Aberta' && score(request.resource.data.porcentagemAproveitamento, 100) && request.resource.data.pontuacaoMaxima > 0 && score(request.resource.data.pontuacaoObtida, request.resource.data.pontuacaoMaxima) && date(request.resource.data.dataEnvio);
+      allow create: if own(request.resource.data.alunoId) && enrolled(request.resource.data.turmaId, request.auth.uid) && request.resource.data.examId is string && get(/databases/$(database)/documents/exams/$(request.resource.data.examId)).data.turmaId == request.resource.data.turmaId && get(/databases/$(database)/documents/exams/$(request.resource.data.examId)).data.status == 'Aberta' && withinDeadline() && score(request.resource.data.porcentagemAproveitamento, 100) && request.resource.data.pontuacaoMaxima > 0 && score(request.resource.data.pontuacaoObtida, request.resource.data.pontuacaoMaxima) && date(request.resource.data.dataEnvio);
       allow update, delete: if admin();
     }
     match /lesson_plans/{id} { allow read: if own(resource.data.professorId) || classRead(resource.data.turmaId); allow create: if (own(request.resource.data.professorId) && teaches(request.resource.data.turmaId)) || admin(); allow update: if admin() || (teaches(resource.data.turmaId) && request.resource.data.turmaId == resource.data.turmaId && request.resource.data.professorId == resource.data.professorId); allow delete: if teaches(resource.data.turmaId) || admin(); }
@@ -143,7 +148,7 @@ service cloud.firestore {
       function validLink(data) { let invitation = getAfter(/databases/$(database)/documents/family_invitations/$(data.invitationId)).data; return data.keys().hasOnly(['id','invitationId','classId','className','studentId','studentName','professorId','professorName','parentId','email','status','createdAt','revokedAt']) && id == data.classId + '__' + data.studentId + '__' + request.auth.uid && data.parentId == request.auth.uid && request.auth.token.email_verified == true && data.email == request.auth.token.email.lower() && invitation.status == 'accepted' && invitation.acceptedBy == request.auth.uid && invitation.classId == data.classId && invitation.studentId == data.studentId && invitation.professorId == data.professorId && invitation.email == data.email && enrolled(data.classId, data.studentId) && data.status == 'active'; }
       allow read: if own(resource.data.parentId) || teaches(resource.data.classId) || admin();
       allow create: if signed() && validLink(request.resource.data);
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','revokedAt']) && request.resource.data.status == 'revoked' && (own(resource.data.parentId) || teaches(resource.data.classId) || admin());
+      allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','revokedAt']) && request.resource.data.status == 'revoked' && (own(resource.data.parentId) || teaches(resource.data.classId) || admin())) || (resource.data.status == 'revoked' && validLink(request.resource.data) && request.resource.data.parentId == resource.data.parentId && request.resource.data.classId == resource.data.classId && request.resource.data.studentId == resource.data.studentId && request.resource.data.professorId == resource.data.professorId);
       allow delete: if false;
     }
     match /family_messages/{id} {

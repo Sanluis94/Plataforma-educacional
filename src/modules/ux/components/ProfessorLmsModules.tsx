@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Calendar, CheckCircle, AlertTriangle,  Award,
   Users, MessageSquare, Plus, ShieldCheck, Download, Star,
@@ -43,6 +43,7 @@ import { gradePolicyDataInPeriod } from '../../data/services/gradePolicyPeriod';
 import { useNavigationParams } from '../hooks/useNavigationParams';
 import { TeacherCorrectionWorkspace } from './TeacherCorrectionWorkspace';
 import { TeacherCertificates } from './TeacherCertificates';
+import { TeacherLabStudio } from './TeacherLabStudio';
 import './ProfessorWorkflow.css';
 
 interface ProfessorLmsModulesProps {
@@ -50,16 +51,21 @@ interface ProfessorLmsModulesProps {
   selectedClassId: string | null;
   onSelectClass: (id: string) => void;
   professorName: string;
+  onOpenMaterials?: () => void;
+  onPublishActivity?: (activity: Partial<ActivityData>) => Promise<ActivityData>;
 }
 
 const formatGrade = (grade: number | null | undefined) => grade == null ? 'Sem dados' : grade.toFixed(1);
 const csvCell = (value: unknown) => `"${String(value ?? '').replace(/^[\s]*[=+@-]/, "'$&").replace(/"/g, '""')}"`;
+const localDate = () => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; };
 
 export function ProfessorLmsModules({
   turmas,
   selectedClassId,
   onSelectClass,
-  professorName
+  professorName,
+  onOpenMaterials,
+  onPublishActivity
 }: ProfessorLmsModulesProps) {
   const [navigation, setNavigation] = useNavigationParams();
   const subTabs = ['attendance', 'gradebook', 'speedgrader', 'forum', 'certificates', 'lab_studio'] as const;
@@ -69,6 +75,9 @@ export function ProfessorLmsModules({
   const activeClassId = selectedClassId || turmas[0]?.id || '';
   const currentTurma = turmas.find(t => t.id === activeClassId);
   const { currentUser } = useAuth();
+  const scope = `${currentUser?.uid ?? ''}:${activeClassId}`;
+  const scopeRef = useRef(scope);
+  scopeRef.current = scope;
   const [roster, setRoster] = useState<{ id: string; name: string }[]>([]);
   const [realSubmissions, setRealSubmissions] = useState<SubmissionData[]>([]);
   const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
@@ -82,8 +91,11 @@ export function ProfessorLmsModules({
   const [p2ExamId, setP2ExamId] = useState('');
   const [reviews, setReviews] = useState<SubmissionReview[]>([]);
   const gradePeriod = GRADE_PERIODS.includes(navigation.get('gradePeriod') as GradePeriod) ? navigation.get('gradePeriod') as GradePeriod : 'atual';
+  const periodRef = useRef(gradePeriod);
+  periodRef.current = gradePeriod;
   const [policy, setPolicy] = useState<GradePolicy | null>(null), [policyLoading, setPolicyLoading] = useState(false), [policySaving, setPolicySaving] = useState(false);
   const [policyError, setPolicyError] = useState(''), [policyMessage, setPolicyMessage] = useState('');
+  const [policyReady, setPolicyReady] = useState(false), [policyRetry, setPolicyRetry] = useState(0);
   const [policyExplanation, setPolicyExplanation] = useState('As notas são calculadas a partir das últimas entregas avaliadas. Categorias sem evidência permanecem sem nota.');
   const [reviewMode, setReviewMode] = useState<GradePolicy['reviewMode']>('feedback-only');
   const [startDate, setStartDate] = useState<string | null>(null), [endDate, setEndDate] = useState<string | null>(null);
@@ -93,35 +105,54 @@ export function ProfessorLmsModules({
   // ─────────────────────────────────────────────────────────────
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [isRecordingAttendance, setIsRecordingAttendance] = useState(false);
-  const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
+  const [attendanceDate, setAttendanceDate] = useState(() => localDate());
   const [attendanceContent, setAttendanceContent] = useState('');
   const [attendanceStatusMap, setAttendanceStatusMap] = useState<Record<string, 'presente' | 'falta' | 'justificada'>>({});
   const [savingAttendance, setSavingAttendance] = useState(false);
+  const [attendanceError, setAttendanceError] = useState('');
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendanceRetry, setAttendanceRetry] = useState(0);
+  const [attendanceMessage, setAttendanceMessage] = useState('');
 
   // Carrega histórico de frequência da turma
   useEffect(() => {
     let alive = true;
     setAttendanceRecords([]);
-    if (!activeClassId) return;
+    setSavingAttendance(false);
+    setIsRecordingAttendance(false);
+    setAttendanceError(''); setAttendanceMessage('');
+    if (!activeClassId || !currentUser?.uid) return;
+    setAttendanceLoading(true);
     const fetchAttendance = async () => {
-      const records = await getAttendanceByClass(activeClassId);
-      if (alive) setAttendanceRecords(records);
+      try {
+        const records = await getAttendanceByClass(activeClassId);
+        if (alive) setAttendanceRecords(records);
+      } catch {
+        if (alive) setAttendanceError('Não foi possível carregar a frequência desta turma. Tente novamente antes de registrar a chamada.');
+      } finally { if (alive) setAttendanceLoading(false); }
     };
     fetchAttendance();
     return () => { alive = false; };
-  }, [activeClassId]);
+  }, [activeClassId, currentUser?.uid, attendanceRetry]);
 
   // A chamada é preenchida pelo professor para os estudantes matriculados.
+  const selectAttendanceDate = (date: string) => {
+    const existing = attendanceRecords.find(record => record.data === date && !record.aulaNumero);
+    setAttendanceDate(date);
+    setAttendanceStatusMap(existing ? Object.fromEntries(existing.registros.map(record => [record.studentId, record.status])) : {});
+    setAttendanceContent(existing?.conteudoResumo ?? '');
+    setAttendanceError(''); setAttendanceMessage('');
+  };
   const handleOpenAttendanceModal = () => {
-    const initial: Record<string, 'presente' | 'falta' | 'justificada'> = {};
-    setAttendanceStatusMap(initial);
-    setAttendanceContent('Aula Prática em Laboratório Virtual & Resolução de Problemas');
+    selectAttendanceDate(localDate());
     setIsRecordingAttendance(true);
   };
 
   const handleSaveAttendance = async () => {
-    if (!activeClassId || !attendanceContent.trim() || !roster.length || roster.some(student => !attendanceStatusMap[student.id])) return;
+    if (savingAttendance || !activeClassId || !attendanceContent.trim() || !attendanceDate || !roster.length || roster.some(student => !attendanceStatusMap[student.id])) return;
+    const requestScope = scope;
     setSavingAttendance(true);
+    setAttendanceError('');
     try {
       const registros = roster.map(s => ({
         studentId: s.id,
@@ -137,12 +168,15 @@ export function ProfessorLmsModules({
         criadoEm: new Date().toISOString()
       });
 
-      setAttendanceRecords(prev => [saved, ...prev]);
+      if (scopeRef.current !== requestScope) return;
+      setAttendanceRecords(prev => [saved, ...prev.filter(record => record.id !== saved.id && !(record.data === saved.data && !record.aulaNumero))]);
       setIsRecordingAttendance(false);
+      setAttendanceMessage('Chamada salva para esta turma. Registros da mesma data são atualizados, sem contar a aula duas vezes.');
     } catch (err) {
       console.error('Erro ao salvar chamada:', err);
+      if (scopeRef.current === requestScope) setAttendanceError('O salvamento da chamada não foi confirmado. Suas marcações continuam nesta tela; tente novamente.');
     } finally {
-      setSavingAttendance(false);
+      if (scopeRef.current === requestScope) setSavingAttendance(false);
     }
   };
 
@@ -215,14 +249,14 @@ export function ProfessorLmsModules({
   // SpeedGrader Submissões e Rubricas Interativas
   useEffect(() => {
     let alive = true;
-    setPolicy(null); setPolicyError(''); setPolicyMessage('');
-    if (!activeClassId) return;
+    setPolicy(null); setPolicyError(''); setPolicyMessage(''); setPolicyReady(false); setPolicySaving(false);
+    if (!activeClassId || !currentUser?.uid) return;
     setPolicyLoading(true);
-    void getGradePolicy(activeClassId, gradePeriod).then(saved => { if (!alive) return; setPolicy(saved); setWeights(saved?.weights ?? { ...DEFAULT_WEIGHTS, turmaId: activeClassId }); setParticipationScores(saved?.participationScores ?? {}); setP1ExamId(saved?.p1ExamId ?? ''); setP2ExamId(saved?.p2ExamId ?? ''); setIsUniversityGradeMode(saved?.mode === 'university'); setUnivWeights(saved?.universityWeights ?? { p1: 35, p2: 35, labs: 30, minPassDireta: 7, minExameFinal: 4 }); setPolicyExplanation(saved?.explanation ?? 'As notas são calculadas a partir das últimas entregas avaliadas. Categorias sem evidência permanecem sem nota.'); setReviewMode(saved?.reviewMode ?? 'feedback-only'); setStartDate(saved?.startDate ?? null); setEndDate(saved?.endDate ?? null); }).catch(() => { if (alive) setPolicyError('Não foi possível recuperar os critérios desta turma. A configuração anterior não foi aplicada; tente reabrir o período.'); }).finally(() => { if (alive) setPolicyLoading(false); });
+    void getGradePolicy(activeClassId, gradePeriod).then(saved => { if (!alive) return; setPolicy(saved); setPolicyReady(true); setWeights(saved?.weights ?? { ...DEFAULT_WEIGHTS, turmaId: activeClassId }); setParticipationScores(saved?.participationScores ?? {}); setP1ExamId(saved?.p1ExamId ?? ''); setP2ExamId(saved?.p2ExamId ?? ''); setIsUniversityGradeMode(saved?.mode === 'university'); setUnivWeights(saved?.universityWeights ?? { p1: 35, p2: 35, labs: 30, minPassDireta: 7, minExameFinal: 4 }); setPolicyExplanation(saved?.explanation ?? 'As notas são calculadas a partir das últimas entregas avaliadas. Categorias sem evidência permanecem sem nota.'); setReviewMode(saved?.reviewMode ?? 'feedback-only'); setStartDate(saved?.startDate ?? null); setEndDate(saved?.endDate ?? null); }).catch(() => { if (alive) setPolicyError('Não foi possível recuperar os critérios desta turma. Tente novamente para consultar e editar a configuração correta.'); }).finally(() => { if (alive) setPolicyLoading(false); });
     return () => { alive = false; };
-  }, [activeClassId, gradePeriod]);
+  }, [activeClassId, gradePeriod, currentUser?.uid, policyRetry]);
   const policyValues: GradePolicyValues = { classId: activeClassId, period: gradePeriod, professorId: currentUser?.uid ?? '', weights: { ...weights, turmaId: activeClassId }, mode: isUniversityGradeMode ? 'university' : 'school', universityWeights: univWeights, p1ExamId: p1ExamId || null, p2ExamId: p2ExamId || null, participationScores, explanation: policyExplanation, reviewMode, startDate, endDate };
-  async function savePolicy() { if (policySaving || policyLoading) return; setPolicySaving(true); setPolicyError(''); try { const saved = await saveGradePolicy({ ...policyValues, expectedVersion: policy?.version ?? 0 }); setPolicy(saved); setPolicyMessage(`Critérios salvos, versão ${saved.version}. Os alunos desta turma verão a mesma configuração.`); } catch (failure) { setPolicyError(failure instanceof Error && /pesos|nota|período|datas|critérios|provas|explique|sessão/i.test(failure.message) ? failure.message : 'O salvamento não foi confirmado. As alterações continuam nesta tela; tente novamente.'); } finally { setPolicySaving(false); } }
+  async function savePolicy() { if (policySaving || policyLoading || !policyReady) return; const requestScope = `${scope}:${gradePeriod}`; setPolicySaving(true); setPolicyError(''); setPolicyMessage(''); try { const saved = await saveGradePolicy({ ...policyValues, expectedVersion: policy?.version ?? 0 }); if (`${scopeRef.current}:${periodRef.current}` !== requestScope) return; setPolicy(saved); setPolicyMessage(`Critérios salvos, versão ${saved.version}. Os alunos desta turma verão a mesma configuração.`); } catch (failure) { if (`${scopeRef.current}:${periodRef.current}` === requestScope) setPolicyError(failure instanceof Error && /pesos|nota|período|datas|critérios|provas|explique|sessão/i.test(failure.message) ? failure.message : 'O salvamento não foi confirmado. As alterações continuam nesta tela; tente novamente.'); } finally { if (`${scopeRef.current}:${periodRef.current}` === requestScope) setPolicySaving(false); } }
 
   useEffect(() => {
     let alive = true;
@@ -232,11 +266,12 @@ export function ProfessorLmsModules({
     setClassExams([]);
     setClassActivities([]);
     setAcceptedRecordIds([]);
+    setReviews([]);
     setParticipationScores({});
     setP1ExamId('');
     setP2ExamId('');
     setEvidenceError(null);
-    if (!activeClassId) return;
+    if (!activeClassId || !currentUser?.uid) return;
     setEvidenceLoading(true);
     const loadEvidence = async () => {
       try {
@@ -259,7 +294,7 @@ export function ProfessorLmsModules({
     };
     void loadEvidence();
     return () => { alive = false; };
-  }, [activeClassId]);
+  }, [activeClassId, currentUser?.uid]);
 
   const submissionsList = realSubmissions.filter(submission => submission.id && acceptedRecordIds.includes(submission.id)).map((s, idx) => ({
     id: s.id || `sub_real_${idx}`,
@@ -296,42 +331,8 @@ export function ProfessorLmsModules({
 
     window.addEventListener('keydown', handleKeyNavigation);
     return () => window.removeEventListener('keydown', handleKeyNavigation);
-  }, [subTab, submissionsList.length]);
+  }, [subTab, submissionsList.length,setSelectedSubIndex]);
 
-
-  // AI Lab Studio (Gerador Zero-Code de Laboratórios)
-  const [studioPrompt, setStudioPrompt] = useState('Transferência de Calor e Condução em Barras Metálicas (Lei de Fourier)');
-  const [studioSubject, setStudioSubject] = useState('Engenharia Térmica');
-  const [isGeneratingStudioLab, setIsGeneratingStudioLab] = useState(false);
-  const [generatedLab, setGeneratedLab] = useState<{
-    id: string;
-    title: string;
-    subject: string;
-    diffEquation: string;
-    params: { name: string; unit: string; val: number }[];
-    quizQuestion: string;
-  } | null>(null);
-
-  const handleGenerateStudioLab = () => {
-    if (!studioPrompt.trim()) return;
-    setIsGeneratingStudioLab(true);
-    setTimeout(() => {
-      setGeneratedLab({
-        id: `custom_lab_${Date.now()}`,
-        title: studioPrompt.trim(),
-        subject: studioSubject,
-        diffEquation: '∂T/∂t = α · (∂²T/∂x²)  (Equação da Difusão Térmica Unidimensional)',
-        params: [
-          { name: 'Condutividade Térmica (k)', unit: 'W/(m·K)', val: 401 }, // Cobre
-          { name: 'Temperatura da Fonte (T₁)', unit: '°C', val: 100 },
-          { name: 'Temperatura Ambiente (T₀)', unit: '°C', val: 25 },
-          { name: 'Comprimento da Haste (L)', unit: 'm', val: 0.5 }
-        ],
-        quizQuestion: 'Como o coeficiente de difusividade térmica afeta a velocidade com que o perfil estacionário de temperatura é alcançado na extremidade isolada?'
-      });
-      setIsGeneratingStudioLab(false);
-    }, 700);
-  };
 
   // 3. ESTADO DO FÓRUM PEDAGÓGICO DA TURMA
   // ─────────────────────────────────────────────────────────────
@@ -343,12 +344,17 @@ export function ProfessorLmsModules({
   const [isCreatingTopic, setIsCreatingTopic] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
+  const [creatingTopic, setCreatingTopic] = useState(false);
+  const [forumMutation, setForumMutation] = useState(false);
+  const [forumLoading, setForumLoading] = useState(false);
+  const [forumError, setForumError] = useState('');
+  const [forumRetry, setForumRetry] = useState(0);
   const [forumToast, setForumToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [forumFilter, setForumFilter] = useState<'all' | 'unanswered' | 'answered'>('all');
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
     setForumToast({ msg, type });
-    setTimeout(() => setForumToast(null), 3500);
+    setTimeout(() => setForumToast(previous => previous?.msg === msg ? null : previous), 3500);
   };
 
   // Formata o nome do docente sem duplicação de 'Prof.'
@@ -358,32 +364,39 @@ export function ProfessorLmsModules({
 
   // Inscreve no fórum da turma em tempo real
   useEffect(() => {
-    if (!activeClassId) return;
+    let alive = true;
+    setForumTopics([]); setSelectedTopic(null); setForumError(''); setForumToast(null);
+    setReplyText(''); setSendingReply(false); setCreatingTopic(false); setForumMutation(false);
+    if (!activeClassId || !currentUser?.uid) return;
+    setForumLoading(true);
     const unsub = subscribeForumTopicsByClass(activeClassId, (topics) => {
+      if (!alive) return;
       setForumTopics(topics);
-      if (selectedTopic) {
-        const updated = topics.find(t => t.id === selectedTopic.id);
-        if (updated) setSelectedTopic(updated);
-      }
+      setForumLoading(false);
+      setSelectedTopic(previous => previous ? topics.find(topic => topic.id === previous.id) ?? null : null);
+    }, () => {
+      if (alive) { setForumLoading(false); setForumError('Não foi possível carregar o fórum desta turma. Tente novamente.'); }
     });
-    return () => unsub();
-  }, [activeClassId, selectedTopic?.id]);
+    return () => { alive = false; unsub(); };
+  }, [activeClassId, currentUser?.uid, forumRetry]);
 
   const handleCreateTopic = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTopicTitle.trim() || !newTopicContent.trim() || !activeClassId) return;
-
+    if (creatingTopic || !currentUser?.uid || !newTopicTitle.trim() || !newTopicContent.trim() || !activeClassId) return;
+    const requestScope = scope;
+    setCreatingTopic(true);
     try {
       const created = await saveForumTopic({
         turmaId: activeClassId,
         titulo: newTopicTitle.trim(),
         conteudo: newTopicContent.trim(),
-        autorId: 'prof_current',
+        autorId: currentUser.uid,
         autorNome: profDisplayName,
         autorRole: 'professor',
         disciplina: newTopicSubject
       });
 
+      if (scopeRef.current !== requestScope) return;
       setForumTopics(prev => [created, ...prev.filter(t => t.id !== created.id)]);
       setSelectedTopic(created);
       setNewTopicTitle('');
@@ -392,24 +405,26 @@ export function ProfessorLmsModules({
       showToast('Novo tópico de discussão criado com sucesso!', 'success');
     } catch (err) {
       console.error('Erro ao criar tópico:', err);
-      showToast('Erro ao criar tópico no fórum.', 'error');
-    }
+      if (scopeRef.current === requestScope) showToast('Não foi possível publicar o tópico. O texto continua no formulário; tente novamente.', 'error');
+    } finally { if (scopeRef.current === requestScope) setCreatingTopic(false); }
   };
 
   const handleSendReply = async () => {
-    if (!selectedTopic?.id || !replyText.trim() || !activeClassId) return;
+    if (sendingReply || !currentUser?.uid || !selectedTopic?.id || !replyText.trim() || !activeClassId) return;
+    const requestScope = scope, topicId = selectedTopic.id;
     setSendingReply(true);
     try {
       const newReply = await addForumReply(activeClassId, selectedTopic.id, {
-        autorId: 'prof_current',
+        autorId: currentUser.uid,
         autorNome: profDisplayName,
         autorRole: 'professor',
         texto: replyText.trim()
       });
 
-      // Atualização otimista imediata do selectedTopic
+      if (scopeRef.current !== requestScope) return;
+      // Atualiza apenas depois de o repositório confirmar o envio.
       setSelectedTopic(prev => {
-        if (!prev) return null;
+        if (!prev || prev.id !== topicId) return prev;
         const currentList = prev.respostas || [];
         const exists = currentList.some(r => r.id === newReply.id);
         if (exists) return prev;
@@ -437,19 +452,22 @@ export function ProfessorLmsModules({
       showToast('Resposta do professor publicada com sucesso!', 'success');
     } catch (err) {
       console.error('Erro ao enviar resposta no fórum:', err);
-      showToast('Erro ao enviar resposta. Verifique a conexão e tente novamente.', 'error');
+      if (scopeRef.current === requestScope) showToast('Erro ao enviar resposta. O texto foi mantido; verifique a conexão e tente novamente.', 'error');
     } finally {
-      setSendingReply(false);
+      if (scopeRef.current === requestScope) setSendingReply(false);
     }
   };
 
   const handleToggleBestReply = async (replyId?: string, currentStatus?: boolean) => {
-    if (!selectedTopic?.id || !replyId || !activeClassId) return;
+    if (forumMutation || !selectedTopic?.id || !replyId || !activeClassId) return;
+    const requestScope = scope, topicId = selectedTopic.id;
     const newStatus = !currentStatus;
+    setForumMutation(true);
     try {
       await markForumBestReply(activeClassId, selectedTopic.id, replyId, newStatus);
+      if (scopeRef.current !== requestScope) return;
       setSelectedTopic(prev => {
-        if (!prev) return null;
+        if (!prev || prev.id !== topicId) return prev;
         return {
           ...prev,
           respostas: (prev.respostas || []).map(r => ({
@@ -458,36 +476,43 @@ export function ProfessorLmsModules({
           }))
         };
       });
-      showToast(newStatus ? 'Resposta destacada como a melhor da discussão! (+20 XP para o aluno)' : 'Destaque removido.', 'success');
+      showToast(newStatus ? 'Resposta destacada como a melhor da discussão.' : 'Destaque removido.', 'success');
     } catch (err) {
       console.error('Erro ao marcar melhor resposta:', err);
-    }
+      if (scopeRef.current === requestScope) showToast('Não foi possível salvar o destaque. Tente novamente.', 'error');
+    } finally { if (scopeRef.current === requestScope) setForumMutation(false); }
   };
 
   const handleDeleteTopic = async (topicId?: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!activeClassId || !topicId) return;
+    if (forumMutation || !activeClassId || !topicId) return;
     if (!window.confirm('Tem certeza de que deseja excluir este tópico da turma?')) return;
+    const requestScope = scope;
+    setForumMutation(true);
     try {
       await deleteForumTopic(activeClassId, topicId);
+      if (scopeRef.current !== requestScope) return;
       setForumTopics(prev => prev.filter(t => t.id !== topicId));
       if (selectedTopic?.id === topicId) setSelectedTopic(null);
       showToast('Tópico removido com sucesso.', 'success');
     } catch (err) {
       console.error('Erro ao excluir tópico:', err);
-      showToast('Falha ao excluir tópico.', 'error');
-    }
+      if (scopeRef.current === requestScope) showToast('Falha ao excluir tópico.', 'error');
+    } finally { if (scopeRef.current === requestScope) setForumMutation(false); }
   };
 
   const handleDeleteReply = async (replyId?: string) => {
-    if (!selectedTopic?.id || !replyId || !activeClassId) return;
+    if (forumMutation || !selectedTopic?.id || !replyId || !activeClassId) return;
     if (!window.confirm('Deseja realmente remover esta resposta?')) return;
+    const requestScope = scope, topicId = selectedTopic.id;
+    setForumMutation(true);
     try {
       await deleteForumReply(activeClassId, selectedTopic.id, replyId);
-      setSelectedTopic(prev => prev ? {
+      if (scopeRef.current !== requestScope) return;
+      setSelectedTopic(prev => prev?.id === topicId ? {
         ...prev,
         respostas: (prev.respostas || []).filter(r => r.id !== replyId)
-      } : null);
+      } : prev);
       setForumTopics(prev => prev.map(top => {
         if (top.id === selectedTopic.id) {
           return {
@@ -500,8 +525,8 @@ export function ProfessorLmsModules({
       showToast('Resposta removida.', 'success');
     } catch (err) {
       console.error('Erro ao excluir resposta:', err);
-      showToast('Falha ao remover resposta.', 'error');
-    }
+      if (scopeRef.current === requestScope) showToast('Falha ao remover resposta.', 'error');
+    } finally { if (scopeRef.current === requestScope) setForumMutation(false); }
   };
 
   // ─────────────────────────────────────────────────────────────
@@ -517,6 +542,8 @@ export function ProfessorLmsModules({
           <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Turma Ativa:</span>
           <select
             value={activeClassId}
+            aria-label="Turma ativa no diário"
+            disabled={savingAttendance || policySaving || sendingReply || creatingTopic || forumMutation}
             onChange={(e) => onSelectClass(e.target.value)}
             style={{
               padding: '0.55rem 1rem',
@@ -577,6 +604,9 @@ export function ProfessorLmsModules({
           ───────────────────────────────────────────────────────────── */}
       {subTab === 'attendance' && (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {attendanceLoading && <p role="status">Carregando chamadas registradas…</p>}
+          {attendanceError && <div role="alert"><p>{attendanceError}</p>{!isRecordingAttendance && <button type="button" onClick={() => setAttendanceRetry(previous => previous + 1)}>Tentar carregar novamente</button>}</div>}
+          {attendanceMessage && <p role="status">{attendanceMessage}</p>}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -584,12 +614,12 @@ export function ProfessorLmsModules({
                 Diário de classe & controle de frequência
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
-                Registro de chamada escolar, presença em laboratórios e monitoramento de infrequência conforme a LDB (mínimo 75%).
+                Registre presença, falta ou falta justificada. O percentual considera as aulas registradas; faltas justificadas não são contadas como presença.
               </p>
             </div>
             <button
               onClick={handleOpenAttendanceModal}
-              disabled={evidenceLoading || !roster.length}
+              disabled={evidenceLoading || attendanceLoading || !!attendanceError || !roster.length}
               className="btn-gradient"
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.25rem', fontWeight: 700 }}
             >
@@ -607,6 +637,7 @@ export function ProfessorLmsModules({
                 </h3>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
+                    disabled={savingAttendance}
                     onClick={() => {
                       const allPres: Record<string, 'presente' | 'falta' | 'justificada'> = {};
                       roster.forEach(s => { allPres[s.id] = 'presente'; });
@@ -617,6 +648,7 @@ export function ProfessorLmsModules({
                     ✓ Marcar Todos Presentes
                   </button>
                   <button
+                    disabled={savingAttendance}
                     onClick={() => setIsRecordingAttendance(false)}
                     style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.78rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: 'none', cursor: 'pointer' }}
                   >
@@ -627,17 +659,21 @@ export function ProfessorLmsModules({
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', marginBottom: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Data da Aula</label>
+                  <label htmlFor="attendance-date" style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Data da Aula</label>
                   <input
+                    id="attendance-date"
+                    disabled={savingAttendance}
                     type="date"
                     value={attendanceDate}
-                    onChange={(e) => setAttendanceDate(e.target.value)}
+                    onChange={(e) => selectAttendanceDate(e.target.value)}
                     style={{ width: '100%', padding: '0.55rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.9rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Conteúdo / Habilidade BNCC Trabalhada</label>
+                  <label htmlFor="attendance-content" style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Conteúdo trabalhado</label>
                   <input
+                    id="attendance-content"
+                    disabled={savingAttendance}
                     type="text"
                     value={attendanceContent}
                     onChange={(e) => setAttendanceContent(e.target.value)}
@@ -648,6 +684,7 @@ export function ProfessorLmsModules({
               </div>
 
               {/* Roster de Chamada Rápida */}
+              {attendanceRecords.some(record => record.data === attendanceDate && !record.aulaNumero) && <p role="status">Já existe uma chamada nesta data. As marcações salvas foram recuperadas; salvar atualiza esse registro.</p>}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
                 <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Lista de Alunos da Turma:</div>
                 {roster.map(student => {
@@ -671,6 +708,8 @@ export function ProfessorLmsModules({
                       <div style={{ display: 'flex', gap: '0.35rem' }}>
                         <button
                           type="button"
+                          disabled={savingAttendance}
+                          aria-pressed={currentStatus === 'presente'}
                           onClick={() => setAttendanceStatusMap(prev => ({ ...prev, [student.id]: 'presente' }))}
                           style={{
                             padding: '0.35rem 0.75rem',
@@ -687,6 +726,8 @@ export function ProfessorLmsModules({
                         </button>
                         <button
                           type="button"
+                          disabled={savingAttendance}
+                          aria-pressed={currentStatus === 'falta'}
                           onClick={() => setAttendanceStatusMap(prev => ({ ...prev, [student.id]: 'falta' }))}
                           style={{
                             padding: '0.35rem 0.75rem',
@@ -703,6 +744,8 @@ export function ProfessorLmsModules({
                         </button>
                         <button
                           type="button"
+                          disabled={savingAttendance}
+                          aria-pressed={currentStatus === 'justificada'}
                           onClick={() => setAttendanceStatusMap(prev => ({ ...prev, [student.id]: 'justificada' }))}
                           style={{
                             padding: '0.35rem 0.75rem',
@@ -715,7 +758,7 @@ export function ProfessorLmsModules({
                             color: currentStatus === 'justificada' ? '#f59e0b' : 'var(--text-muted)'
                           }}
                         >
-                          Justificada
+                          Falta justificada
                         </button>
                       </div>
                     </div>
@@ -726,6 +769,7 @@ export function ProfessorLmsModules({
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
                 <button
                   type="button"
+                  disabled={savingAttendance}
                   onClick={() => setIsRecordingAttendance(false)}
                   className="btn-outline"
                   style={{ padding: '0.6rem 1.25rem' }}
@@ -735,7 +779,7 @@ export function ProfessorLmsModules({
                 <button
                   type="button"
                   onClick={handleSaveAttendance}
-                  disabled={savingAttendance || !roster.length || roster.some(student => !attendanceStatusMap[student.id])}
+                  disabled={savingAttendance || !attendanceDate || !attendanceContent.trim() || !roster.length || roster.some(student => !attendanceStatusMap[student.id])}
                   className="btn-gradient"
                   style={{ padding: '0.6rem 1.75rem', fontWeight: 800 }}
                 >
@@ -749,7 +793,7 @@ export function ProfessorLmsModules({
           <div className="glass-card" style={{ padding: '1.5rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Users style={{ width: '1.2rem', height: '1.2rem', color: 'var(--color-secondary, #293E24)' }} />
-              Taxa geral de assiduidade por estudante (LDB 75%)
+              Presença nas aulas registradas (referência de alerta: 75%)
             </h3>
 
             <div style={{ overflowX: 'auto' }}>
@@ -854,13 +898,15 @@ export function ProfessorLmsModules({
           2. SUB-ABA: LIVRO DE NOTAS & BOLETIM PONDERADO
           ───────────────────────────────────────────────────────────── */}
       {subTab === 'gradebook' && (
-        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="fade-in">
+          {!policyReady && !policyLoading && policyError && <button type="button" onClick={() => setPolicyRetry(previous => previous + 1)}>Tentar carregar critérios novamente</button>}
+          <fieldset disabled={policyLoading || policySaving || !policyReady} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0, border: 0, padding: 0, margin: 0 }}>
           <section className="professor-workflow card" style={{padding:16,marginBottom:16}} aria-label="Critérios compartilhados do boletim">
             <h2>Critérios de avaliação da turma</h2><p>Salve a configuração para que os estudantes consultem os mesmos pesos e regras. Alterações ainda não salvas valem apenas nesta tela.</p>
             <div className="workflow-grid"><label>Período<select value={gradePeriod} onChange={event=>setNavigation(previous=>{const next=new URLSearchParams(previous);next.set('gradePeriod',event.target.value);return next;})}>{GRADE_PERIODS.map(value=><option key={value} value={value}>{value==='atual'?'Histórico completo':value}</option>)}</select></label><label>Data inicial<input type="date" value={startDate||''} onChange={event=>setStartDate(event.target.value||null)} /></label><label>Data final<input type="date" value={endDate||''} onChange={event=>setEndDate(event.target.value||null)} /></label><label>Uso dos pareceres publicados<select value={reviewMode} onChange={event=>setReviewMode(event.target.value as GradePolicy['reviewMode'])}><option value="feedback-only">Orientação separada da nota automática</option><option value="replace-submission-score">Usar a nota do parecer nas entregas corrigidas</option></select></label></div>
             <label>Explicação para os estudantes<textarea rows={3} value={policyExplanation} onChange={event=>setPolicyExplanation(event.target.value)} maxLength={4000} /></label>
             {policyLoading&&<p role="status">Carregando critérios salvos…</p>}{policyError&&<p role="alert">{policyError}</p>}{policyMessage&&<p role="status">{policyMessage}</p>}
-            <button className="btn-primary" disabled={policyLoading||policySaving||!activeClassId} onClick={()=>void savePolicy()}>{policySaving?'Salvando…':'Salvar critérios para a turma'}</button>{policy&&<p>Versão {policy.version} · {new Date(policy.updatedAt).toLocaleString('pt-BR')}. {policy.history.length} alterações anteriores registradas.</p>}
+            <button className="btn-primary" disabled={policyLoading||policySaving||!policyReady||!activeClassId} onClick={()=>void savePolicy()}>{policySaving?'Salvando…':'Salvar critérios para a turma'}</button>{policy&&<p>Versão {policy.version} · {new Date(policy.updatedAt).toLocaleString('pt-BR')}. {policy.history.length} alterações anteriores registradas.</p>}
           </section>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
@@ -926,7 +972,7 @@ export function ProfessorLmsModules({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📝 Provas Formais</label>
-                  <input
+                  <input aria-label="📝 Provas Formais"
                     type="number"
                     value={weights.pesoProvas}
                     onChange={(e) => setWeights(prev => ({ ...prev, pesoProvas: Number(e.target.value) }))}
@@ -935,7 +981,7 @@ export function ProfessorLmsModules({
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>🔬 Laboratórios Virtuais</label>
-                  <input
+                  <input aria-label="🔬 Laboratórios Virtuais"
                     type="number"
                     value={weights.pesoLabs}
                     onChange={(e) => setWeights(prev => ({ ...prev, pesoLabs: Number(e.target.value) }))}
@@ -944,7 +990,7 @@ export function ProfessorLmsModules({
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📄 Atividades Práticas</label>
-                  <input
+                  <input aria-label="📄 Atividades Práticas"
                     type="number"
                     value={weights.pesoAtividades}
                     onChange={(e) => setWeights(prev => ({ ...prev, pesoAtividades: Number(e.target.value) }))}
@@ -953,7 +999,7 @@ export function ProfessorLmsModules({
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>💬 Participação & Fórum</label>
-                  <input
+                  <input aria-label="💬 Participação & Fórum"
                     type="number"
                     value={weights.pesoParticipacao}
                     onChange={(e) => setWeights(prev => ({ ...prev, pesoParticipacao: Number(e.target.value) }))}
@@ -967,7 +1013,7 @@ export function ProfessorLmsModules({
                 <div><label htmlFor="gradebook-p2">Prova usada como P2</label><select id="gradebook-p2" value={p2ExamId} onChange={event => setP2ExamId(event.target.value)}><option value="">Selecione outra prova</option>{classExams.map(exam => <option key={exam.id} value={exam.id} disabled={exam.id === p1ExamId}>{exam.titulo}</option>)}</select></div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📚 Prova Teórica 1 (P1)</label>
-                  <input
+                  <input aria-label="📚 Prova Teórica 1 (P1)"
                     type="number"
                     value={univWeights.p1}
                     onChange={(e) => setUnivWeights(prev => ({ ...prev, p1: Number(e.target.value) }))}
@@ -976,7 +1022,7 @@ export function ProfessorLmsModules({
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📚 Prova Teórica 2 (P2)</label>
-                  <input
+                  <input aria-label="📚 Prova Teórica 2 (P2)"
                     type="number"
                     value={univWeights.p2}
                     onChange={(e) => setUnivWeights(prev => ({ ...prev, p2: Number(e.target.value) }))}
@@ -985,7 +1031,7 @@ export function ProfessorLmsModules({
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>🔬 Prática / Laboratórios</label>
-                  <input
+                  <input aria-label="🔬 Prática / Laboratórios"
                     type="number"
                     value={univWeights.labs}
                     onChange={(e) => setUnivWeights(prev => ({ ...prev, labs: Number(e.target.value) }))}
@@ -994,7 +1040,7 @@ export function ProfessorLmsModules({
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>🎯 Nota de Corte Direta</label>
-                  <input
+                  <input aria-label="🎯 Nota de Corte Direta"
                     type="number"
                     step="0.5"
                     value={univWeights.minPassDireta}
@@ -1134,6 +1180,7 @@ export function ProfessorLmsModules({
               </table>
             </div>
           </div>
+          </fieldset>
         </div>
       )}
 
@@ -1142,9 +1189,11 @@ export function ProfessorLmsModules({
           ───────────────────────────────────────────────────────────── */}
       {subTab === 'forum' && (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {forumLoading && <p role="status">Carregando discussões da turma…</p>}
+          {forumError && <div role="alert"><p>{forumError}</p><button type="button" onClick={() => setForumRetry(previous => previous + 1)}>Tentar carregar fórum novamente</button></div>}
           {/* Toast Notification do Fórum */}
           {forumToast && (
-            <div style={{
+            <div role={forumToast.type === 'error' ? 'alert' : 'status'} style={{
               padding: '0.75rem 1.25rem',
               borderRadius: '8px',
               background: forumToast.type === 'success' ? 'rgba(16,185,129,0.92)' : 'rgba(239,68,68,0.92)',
@@ -1193,8 +1242,10 @@ export function ProfessorLmsModules({
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Título da Discussão</label>
+                  <label htmlFor="forum-topic-title" style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Título da Discussão</label>
                   <input
+                    id="forum-topic-title"
+                    disabled={creatingTopic}
                     type="text"
                     value={newTopicTitle}
                     onChange={(e) => setNewTopicTitle(e.target.value)}
@@ -1205,7 +1256,8 @@ export function ProfessorLmsModules({
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Disciplina</label>
-                  <select
+                  <select aria-label="Disciplina"
+                    disabled={creatingTopic}
                     value={newTopicSubject}
                     onChange={(e) => setNewTopicSubject(e.target.value)}
                     style={{ width: '100%', padding: '0.55rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: '#fff', fontSize: '0.9rem' }}
@@ -1220,8 +1272,10 @@ export function ProfessorLmsModules({
               </div>
 
               <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Mensagem Inicial / Pergunta Orientadora</label>
+                <label htmlFor="forum-topic-content" style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Mensagem Inicial / Pergunta Orientadora</label>
                 <textarea
+                  id="forum-topic-content"
+                  disabled={creatingTopic}
                   value={newTopicContent}
                   onChange={(e) => setNewTopicContent(e.target.value)}
                   rows={3}
@@ -1232,11 +1286,11 @@ export function ProfessorLmsModules({
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-                <button type="button" onClick={() => setIsCreatingTopic(false)} className="btn-outline" style={{ padding: '0.55rem 1.15rem' }}>
+                <button type="button" disabled={creatingTopic} onClick={() => setIsCreatingTopic(false)} className="btn-outline" style={{ padding: '0.55rem 1.15rem' }}>
                   Cancelar
                 </button>
-                <button type="submit" className="btn-gradient" style={{ padding: '0.55rem 1.5rem', fontWeight: 700 }}>
-                  Publicar Tópico
+                <button type="submit" disabled={creatingTopic || !newTopicTitle.trim() || !newTopicContent.trim()} className="btn-gradient" style={{ padding: '0.55rem 1.5rem', fontWeight: 700 }}>
+                  {creatingTopic ? 'Publicando tópico…' : 'Publicar Tópico'}
                 </button>
               </div>
             </form>
@@ -1324,7 +1378,10 @@ export function ProfessorLmsModules({
                   return (
                     <div
                       key={top.id}
-                      onClick={() => setSelectedTopic(top)}
+                      onClick={() => { if (!sendingReply && !forumMutation) { setSelectedTopic(top); setReplyText(''); } }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={event => { if (event.currentTarget === event.target && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); if (!sendingReply && !forumMutation) { setSelectedTopic(top); setReplyText(''); } } }}
                       className="glass-card"
                       style={{
                         padding: '1.25rem',
@@ -1356,6 +1413,7 @@ export function ProfessorLmsModules({
                           </span>
                           <button
                             type="button"
+                            disabled={forumMutation || sendingReply}
                             onClick={(e) => handleDeleteTopic(top.id, e)}
                             title="Excluir tópico"
                             style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}
@@ -1390,6 +1448,7 @@ export function ProfessorLmsModules({
                     <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>{selectedTopic.disciplina}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <button
+                        disabled={forumMutation || sendingReply}
                         onClick={(e) => handleDeleteTopic(selectedTopic.id, e)}
                         style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
                       >
@@ -1453,6 +1512,7 @@ export function ProfessorLmsModules({
                             </span>
                             <button
                               type="button"
+                              disabled={forumMutation || sendingReply}
                               onClick={() => handleDeleteReply(reply.id)}
                               title="Excluir resposta"
                               style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.1rem' }}
@@ -1468,6 +1528,7 @@ export function ProfessorLmsModules({
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                           <button
                             type="button"
+                            disabled={forumMutation || sendingReply}
                             onClick={() => handleToggleBestReply(reply.id, !!reply.isMelhorResposta)}
                             style={{
                               background: 'none',
@@ -1482,7 +1543,7 @@ export function ProfessorLmsModules({
                             }}
                           >
                             <Star style={{ width: '0.8rem', height: '0.8rem', fill: reply.isMelhorResposta ? '#f59e0b' : 'none' }} />
-                            {reply.isMelhorResposta ? 'Desmarcar Melhor Resposta' : 'Destacar como Melhor Resposta (+20 XP)'}
+                            {reply.isMelhorResposta ? 'Desmarcar Melhor Resposta' : 'Destacar como Melhor Resposta'}
                           </button>
                         </div>
                       </div>
@@ -1510,6 +1571,7 @@ export function ProfessorLmsModules({
                     </span>
                   </div>
                   <textarea
+                    disabled={sendingReply}
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                     placeholder="Escreva uma orientação conceitual, resposta pedagógica ou resolução de dúvida para a turma..."
@@ -1570,132 +1632,8 @@ export function ProfessorLmsModules({
       {subTab === 'certificates' && <TeacherCertificates key={activeClassId} classId={activeClassId} professorId={currentUser?.uid||''} roster={roster} />}
       {subTab === 'speedgrader' && <TeacherCorrectionWorkspace submissions={realSubmissions.filter(value=>acceptedRecordIds.includes(value.id||''))} selectedId={navigation.get('submission')||submissionsList[selectedSubIndex]?.id} professorId={currentUser?.uid||''} onSelect={id=>setNavigation(previous=>{const next=new URLSearchParams(previous);next.set('submission',id);return next;})} onReviewed={review=>setReviews(previous=>[...previous.filter(value=>value.id!==review.id),review])} />}
 
-      {subTab === 'lab_studio' && (
-        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div className="glass-card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg, 14px)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  Criar laboratório com roteiro e questões
-                </h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>
-                  Crie simulações computacionais em segundos a partir de equações diferenciais ou descrições em linguagem natural.
-                </p>
-              </div>
-              <span style={{ background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', color: 'var(--color-primary-accessible, #B8441F)', padding: '0.35rem 0.85rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700 }}>
-                Motor Universal v2.0
-              </span>
-            </div>
+      {subTab === 'lab_studio' && <TeacherLabStudio key={currentUser?.uid} professorId={currentUser?.uid || ''} classId={activeClassId} className={currentTurma?.name || ''} onPublish={onPublishActivity} onShare={onOpenMaterials} />}
 
-            {/* Prompt e Configuração */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
-                  Tema do Experimento ou Equação Diferencial:
-                </label>
-                <input
-                  type="text"
-                  value={studioPrompt}
-                  onChange={(e) => setStudioPrompt(e.target.value)}
-                  placeholder="Ex: Pêndulo Duplo com EDOs Não-Lineares de Lagrange"
-                  style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.9rem' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
-                  Disciplina / Área Acadêmica:
-                </label>
-                <select
-                  value={studioSubject}
-                  onChange={(e) => setStudioSubject(e.target.value)}
-                  style={{ width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#18181b', color: '#fff', fontSize: '0.9rem' }}
-                >
-                  <option value="Engenharia Térmica">Engenharia Térmica & Fluidos</option>
-                  <option value="Engenharia Mecânica">Engenharia Mecânica & Vibrações</option>
-                  <option value="Engenharia Elétrica">Engenharia Elétrica & Telecom</option>
-                  <option value="Química Industrial">Química & Processos Industriais</option>
-                  <option value="Ciência da Computação">Ciência da Computação & IA</option>
-                  <option value="Biotecnologia">Bioquímica & Biotecnologia</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Sugestões Rápidas de Prompt */}
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Sugestões rápidas:</span>
-              {[
-                'Transferência de Calor em Aletas (Fourier)',
-                'Pêndulo Duplo Caótico (Lagrangiano)',
-                'Reator CSTR e Cinética de 2ª Ordem',
-                'Cinética de Crescimento Celular (Monod)',
-              ].map((sug, sIdx) => (
-                <button
-                  key={sIdx}
-                  onClick={() => setStudioPrompt(sug)}
-                  style={{ padding: '0.3rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontSize: '0.75rem', cursor: 'pointer' }}
-                >
-                  💡 {sug}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={handleGenerateStudioLab}
-              disabled={isGeneratingStudioLab}
-              className="btn-gradient"
-              style={{ width: '100%', padding: '0.85rem', fontWeight: 800, fontSize: '0.92rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-            >
-              {isGeneratingStudioLab ? 'Sintetizando Solvers Numéricos...' : '⚡ Compilar e Gerar Laboratório com IA'}
-            </button>
-
-            {/* Resultado do Laboratório Gerado */}
-            {generatedLab && (
-              <div style={{ marginTop: '1.5rem', padding: '1.25rem', borderRadius: '10px', background: 'var(--bg-surface)', border: '1px solid var(--color-primary, #E4683F)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '1.2rem' }}>🔬</span>
-                    <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>{generatedLab.title}</strong>
-                  </div>
-                  <span style={{ fontSize: '0.75rem', background: 'rgba(34,197,94,0.15)', color: '#22c55e', padding: '0.2rem 0.6rem', borderRadius: '999px', fontWeight: 700 }}>
-                    ✓ Solver Numérico Pronto
-                  </span>
-                </div>
-
-                <div style={{ background: 'var(--bg-card)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '1rem', fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--color-primary-accessible, #B8441F)' }}>
-                  <strong>Equação Governante:</strong> {generatedLab.diffEquation}
-                </div>
-
-                <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                    Parâmetros e Variáveis de Controle:
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.5rem' }}>
-                    {generatedLab.params.map((p, pIdx) => (
-                      <div key={pIdx} style={{ background: 'var(--bg-card)', padding: '0.5rem 0.75rem', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between' }}>
-                        <span>{p.name}:</span>
-                        <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>{p.val} {p.unit}</strong>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ background: 'rgba(228,104,63,0.08)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(228,104,63,0.2)', marginBottom: '1.25rem', fontSize: '0.82rem', color: 'var(--text-main)' }}>
-                  <strong>Desafio Diagnóstico:</strong> {generatedLab.quizQuestion}
-                </div>
-
-                <button
-                  onClick={() => alert(`Laboratório "${generatedLab.title}" publicado com sucesso no catálogo oficial da turma!`)}
-                  className="btn-primary"
-                  style={{ width: '100%', padding: '0.75rem', fontWeight: 800, background: 'var(--color-verde-700, #293E24)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
-                >
-                  ✓ Publicar Laboratório no Catálogo da Turma
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -171,9 +171,4 @@ export const MODULES_BY_GRADE: Record<GradeLevel, string[]> = {
   pos_graduacao: ['matematica', 'fisica', 'quimica', 'biologia', 'hardskills', 'softskills', 'filosofia'],
 };
 
-export const SHOP_ITEMS = [
-  { id: 'avatar_hero', name: 'Avatar Herói', price: 200, icon: '🦸', owned: false },
-  { id: 'frame_gold', name: 'Moldura Dourada', price: 150, icon: '🏅', owned: false },
-  { id: 'badge_genius', name: 'Badge Gênio', price: 100, icon: '🧠', owned: false },
-  { id: 'theme_neon', name: 'Tema Neon', price: 300, icon: '✨', owned: false },
-];
+export { SHOP_ITEMS } from './shopItems';

@@ -148,7 +148,7 @@ try {
     assert.notEqual(first.id, second.id); assert.notEqual(first.evidence.sessionId, second.evidence.sessionId);
     await page.evaluate(() => { const db = JSON.parse(localStorage.getItem('edu_local_db')); db.submissions.push(structuredClone(db.submissions[0])); localStorage.setItem('edu_local_db', JSON.stringify(db)); });
     const surface = await report(page); assert.equal(await metric(surface, 'Entregas da turma'), '1 de 4'); assert.equal(await metric(surface, 'Média das entregas com nota'), '100%');
-    const ana = await student(surface); await ana.getByText(`Ver 2 entregas de ${studentName}`, { exact: true }).click();
+    const ana = await student(surface); await ana.getByText(`Ver entregas de ${studentName} no período`, { exact: true }).click();
     assert.equal(await ana.locator('.learning-report-record').count(), 2);
     await surface.getByText('Como lemos estes dados', { exact: true }).click();
     assert.equal(await surface.getByText('Duplicados removidos', { exact: true }).locator('..').locator('dd').textContent(), '1');

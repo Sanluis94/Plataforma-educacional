@@ -7,7 +7,7 @@ import { LAB_LEARNING_CONTENT } from '../modules/core/content/labLearningContent
 import { MASTER_LABS_CATALOG, resolveUniversalLab } from '../modules/core/constants/masterLabsCatalog';
 import { ALL_MODULES } from '../modules/core/constants/dashboardConstants';
 
-afterEach(() => { cleanup(); vi.restoreAllMocks(); });
+afterEach(() => { cleanup(); localStorage.clear();vi.restoreAllMocks(); });
 const content = LAB_LEARNING_CONTENT.fund1_mat_01;
 const props = { labId: 'fund1_mat_01', title: 'Ábaco e Sistema de Numeração Decimal', subject: 'Matemática', objective: 'Compor e decompor números.', content };
 const guidedLabs = MASTER_LABS_CATALOG.map(({ id }) => ({ id, config: resolveUniversalLab(id) }))

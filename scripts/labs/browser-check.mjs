@@ -61,6 +61,7 @@ async function verifyActivity(page, lab) {
   }
   await activity.getByRole('button', { name: 'Conferir critérios de uma boa resposta', exact: true }).click();
   await activity.getByText(content.expectedEvidence, { exact: true }).waitFor({ state: 'visible' });
+  if (lab.id === 'fund1_mat_01') await activity.getByLabel('Minha resposta com evidências dos cenários', { exact: true }).fill('Uma centena equivale a dez dezenas: 10 × 10 = 100 sementes.');
   await activity.getByRole('button', { name: 'Compreender', exact: true }).click();
   await activity.getByText(content.theory, { exact: true }).waitFor({ state: 'visible' });
   await activity.getByText(content.workedExample, { exact: true }).waitFor({ state: 'visible' });
@@ -81,7 +82,7 @@ async function verifyActivity(page, lab) {
   }
   await activity.getByRole('button', { name: 'Investigar', exact: true }).click();
   if (lab.id === 'fund1_mat_01') {
-    await activity.getByLabel('Minha resposta com evidências dos cenários', { exact: true }).fill('Uma centena equivale a dez dezenas: 10 × 10 = 100 sementes.');
+    assert.equal(await activity.getByLabel('Minha resposta com evidências dos cenários', { exact: true }).isDisabled(), true, 'Uma entrega congelada deve manter suas anotações originais.');
     const downloadPromise = page.waitForEvent('download');
     await activity.getByRole('button', { name: 'Baixar minhas anotações', exact: true }).click();
     const download = await downloadPromise;

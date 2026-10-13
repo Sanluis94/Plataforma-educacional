@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
 const VOCABULARY = {
   english: [
@@ -75,13 +76,14 @@ const MODE_DATA: Record<string, Record<'english' | 'spanish', Array<{ word: stri
   },
 };
 
-export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => unknown | Promise<unknown> }) {
   const [lang, setLang] = useState<'english' | 'spanish'>('english');
   const [currentIdx, setCurrentIdx] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState(false);
   const [audioStatus, setAudioStatus] = useState('');
+  useEffect(() => () => { window.speechSynthesis?.cancel(); }, []);
 
   const modeData = MODE_DATA[mode] || VOCABULARY;
   const words = modeData[lang] || VOCABULARY[lang];
@@ -130,7 +132,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>{mode === 'conversation' ? 'Pratique falas de diálogos curtos para pedir informação, esclarecer e agradecer.' : 'Pratique palavras e expressões em inglês e espanhol.'} O áudio usa a voz sintetizada disponível no navegador; as frases escritas também servem de apoio.</p>
 
       {/* Lang selector */}
-      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
         {(['english', 'spanish'] as const).map(l => (
           <button key={l} aria-pressed={lang === l} onClick={() => { setLang(l); reset(); }}
             style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
@@ -148,7 +150,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
         <div>
           {/* Card da palavra */}
           <div style={{ background: 'var(--bg-secondary)', borderRadius: '16px', padding: '2rem', marginBottom: '1.25rem', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>
+            <div style={{ fontSize: '2.5rem', overflowWrap: 'anywhere', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>
               {current.word}
             </div>
             {current.phonetic && <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>{current.phonetic}</div>}
@@ -215,17 +217,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
         </p>
       </div>
 
-      {onComplete && currentIdx === words.length && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem', marginBottom: '1rem' }}>
-          <button
-            onClick={() => onComplete(Math.round(100 * score / words.length))}
-            className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
-          >
-            Registrar resultado do módulo
-          </button>
-        </div>
-      )}
+      <LabExplorationCompletion key={lang + String(currentIdx === words.length)} onComplete={onComplete} ready={currentIdx === words.length} />
     </div>
   );
 }

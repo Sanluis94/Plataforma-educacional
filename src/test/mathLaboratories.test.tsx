@@ -21,7 +21,7 @@ describe('MathSimulator - 6 Unique Specialized Laboratories Suite', () => {
     });
   });
 
-  it('1. Linear Mode (Função de 1º Grau) renders slope, root, and handles completion', () => {
+  it('1. Linear Mode (Função de 1º Grau) renders slope, root, and handles completion', async () => {
     const onComplete = vi.fn();
     render(<MathSimulator mode="linear" onComplete={onComplete} />);
 
@@ -30,12 +30,14 @@ describe('MathSimulator - 6 Unique Specialized Laboratories Suite', () => {
     expect(screen.getByText(/Coeficiente Linear/i)).toBeDefined();
     expect(screen.getByText(/Taxa de Variação/i)).toBeDefined();
 
-    const finishBtn = screen.getByRole('button', { name: /Concluir Laboratório de 1º Grau/i });
+    const finishBtn = screen.getByRole('button', { name: 'Registrar exploração' });
+    fireEvent.change(screen.getAllByRole('slider')[0], { target: { value: '2' } });
     fireEvent.click(finishBtn);
-    expect(onComplete).toHaveBeenCalledWith(100);
+    expect(onComplete).toHaveBeenCalledWith(0);
+    await screen.findByRole('button', { name: 'Exploração registrada' });
   });
 
-  it('2. Quadratic Mode (Função de 2º Grau) renders Bhaskara, delta, and vertex', () => {
+  it('2. Quadratic Mode (Função de 2º Grau) renders Bhaskara, delta, and vertex', async () => {
     const onComplete = vi.fn();
     render(<MathSimulator mode="quadratic" onComplete={onComplete} />);
 
@@ -44,12 +46,14 @@ describe('MathSimulator - 6 Unique Specialized Laboratories Suite', () => {
     expect(screen.getAllByText(/Vértice V/i)[0]).toBeDefined();
     expect(screen.getAllByText(/Concavidade/i)[0]).toBeDefined();
 
-    const finishBtn = screen.getByRole('button', { name: /Concluir Laboratório de 2º Grau/i });
+    const finishBtn = screen.getByRole('button', { name: 'Registrar exploração' });
+    fireEvent.change(screen.getAllByRole('slider')[0], { target: { value: '2' } });
     fireEvent.click(finishBtn);
-    expect(onComplete).toHaveBeenCalledWith(100);
+    expect(onComplete).toHaveBeenCalledWith(0);
+    await screen.findByRole('button', { name: 'Exploração registrada' });
   });
 
-  it('3. Trigonometric Mode renders Unit Circle, Sine, Cosine, and Tangent', () => {
+  it('3. Trigonometric Mode renders Unit Circle, Sine, Cosine, and Tangent', async () => {
     const onComplete = vi.fn();
     render(<MathSimulator mode="trigonometric" onComplete={onComplete} />);
 
@@ -59,12 +63,14 @@ describe('MathSimulator - 6 Unique Specialized Laboratories Suite', () => {
     expect(screen.getAllByRole('button', { name: /Cosseno/i })[0]).toBeDefined();
     expect(screen.getAllByRole('button', { name: /Tangente/i })[0]).toBeDefined();
 
-    const finishBtn = screen.getByRole('button', { name: /Concluir Laboratório de Trigonometria/i });
+    const finishBtn = screen.getByRole('button', { name: 'Registrar exploração' });
+    fireEvent.change(screen.getAllByRole('slider')[0], { target: { value: '2' } });
     fireEvent.click(finishBtn);
-    expect(onComplete).toHaveBeenCalledWith(100);
+    expect(onComplete).toHaveBeenCalledWith(0);
+    await screen.findByRole('button', { name: 'Exploração registrada' });
   });
 
-  it('4. Spatial Geometry Mode renders 3D Solids, Volume, and Surface Area', () => {
+  it('4. Spatial Geometry Mode renders 3D Solids, Volume, and Surface Area', async () => {
     const onComplete = vi.fn();
     render(<MathSimulator mode="spatial" onComplete={onComplete} />);
 
@@ -82,12 +88,14 @@ describe('MathSimulator - 6 Unique Specialized Laboratories Suite', () => {
     fireEvent.click(sphereBtn);
     expect(screen.getByText(/Fórmula do Volume:/i)).toBeDefined();
 
-    const finishBtn = screen.getByRole('button', { name: /Concluir Laboratório de Geometria Espacial/i });
+    const finishBtn = screen.getByRole('button', { name: 'Registrar exploração' });
+    fireEvent.change(screen.getAllByRole('slider')[0], { target: { value: '2' } });
     fireEvent.click(finishBtn);
-    expect(onComplete).toHaveBeenCalledWith(100);
+    expect(onComplete).toHaveBeenCalledWith(0);
+    await screen.findByRole('button', { name: 'Exploração registrada' });
   });
 
-  it('5. Statistics Mode renders Dataset, Frequency, Mean, Median, and Boxplot', () => {
+  it('5. Statistics Mode renders Dataset, Frequency, Mean, Median, and Boxplot', async () => {
     const onComplete = vi.fn();
     render(<MathSimulator mode="statistics" onComplete={onComplete} />);
 
@@ -102,12 +110,14 @@ describe('MathSimulator - 6 Unique Specialized Laboratories Suite', () => {
     const outlierBtn = screen.getAllByRole('button', { name: /Com Outlier Notável/i })[0];
     fireEvent.click(outlierBtn);
 
-    const finishBtn = screen.getByRole('button', { name: /Concluir Laboratório de Estatística/i });
+    const finishBtn = screen.getByRole('button', { name: 'Registrar exploração' });
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '6' } });
     fireEvent.click(finishBtn);
-    expect(onComplete).toHaveBeenCalledWith(100);
+    expect(onComplete).toHaveBeenCalledWith(0);
+    await screen.findByRole('button', { name: 'Exploração registrada' });
   });
 
-  it('6. Matrices Mode renders Matrix Inversion, Cramer Determinants, and Linear Systems', () => {
+  it('6. Matrices Mode renders Matrix Inversion, Cramer Determinants, and Linear Systems', async () => {
     const onComplete = vi.fn();
     render(<MathSimulator mode="matrices" onComplete={onComplete} />);
 
@@ -123,8 +133,10 @@ describe('MathSimulator - 6 Unique Specialized Laboratories Suite', () => {
     expect(screen.getByText(/Editor da Matriz A/i)).toBeDefined();
     expect(screen.getByText(/Cálculo do Determinante:/i)).toBeDefined();
 
-    const finishBtn = screen.getByRole('button', { name: /Concluir Laboratório de Matrizes/i });
+    const finishBtn = screen.getByRole('button', { name: 'Registrar exploração' });
+    fireEvent.change(screen.getAllByRole('spinbutton')[0], { target: { value: '7' } });
     fireEvent.click(finishBtn);
-    expect(onComplete).toHaveBeenCalledWith(100);
+    expect(onComplete).toHaveBeenCalledWith(0);
+    await screen.findByRole('button', { name: 'Exploração registrada' });
   });
 });

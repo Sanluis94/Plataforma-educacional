@@ -3,10 +3,11 @@
  * Implementa funcionalidades centrais inspiradas no padrão Moodle e Canvas LMS.
  */
 import {
-  collection, addDoc, query, where, getDocs, doc, getDoc, updateDoc, deleteDoc, onSnapshot
+  collection, addDoc, query, where, getDocs, doc, getDocFromServer, deleteDoc, onSnapshot, runTransaction, setDoc
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import { sanitizeText } from '../../core/services/securityService';
+import { sanitizeForFirestore } from '../../core/services/firestoreUtils';
 import { examAttemptPercentage, learningTimestamp } from '../services/learningAnalytics';
 import type {
   AttendanceRecord,
@@ -39,6 +40,7 @@ function saveLocalAttendance(classId: string, records: AttendanceRecord[]) {
     localStorage.setItem(`${LOCAL_ATTENDANCE_KEY}_${classId}`, JSON.stringify(records));
   } catch (err) {
     console.error('Erro ao salvar frequência local:', err);
+    throw new Error('Não foi possível guardar a chamada neste dispositivo. Tente novamente.');
   }
 }
 
@@ -56,6 +58,7 @@ function saveLocalForum(classId: string, topics: ForumTopic[]) {
     localStorage.setItem(`${LOCAL_FORUM_KEY}_${classId}`, JSON.stringify(topics));
   } catch (err) {
     console.error('Erro ao salvar fórum local:', err);
+    throw new Error('Não foi possível guardar o fórum neste dispositivo. Tente novamente.');
   }
 }
 
@@ -64,16 +67,19 @@ function saveLocalForum(classId: string, topics: ForumTopic[]) {
 export const saveAttendanceRecord = async (
   record: Omit<AttendanceRecord, 'id'>
 ): Promise<AttendanceRecord> => {
+  const date = new Date(`${record.data}T00:00:00Z`);
+  const validDate = /^\d{4}-\d{2}-\d{2}$/.test(record.data) && Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === record.data;
+  if (!record.turmaId || !validDate || (record.aulaNumero !== undefined && (!Number.isInteger(record.aulaNumero) || record.aulaNumero < 1)) || !record.registros.length || new Set(record.registros.map(entry => entry.studentId)).size !== record.registros.length || record.registros.some(entry => !entry.studentId || !['presente', 'falta', 'justificada'].includes(entry.status))) throw new Error('Informe uma data válida e uma situação para cada estudante, sem duplicatas.');
+  const id = `attendance-${encodeURIComponent(record.turmaId)}-${record.data}-${record.aulaNumero ?? 1}`;
+  const item: AttendanceRecord = { ...sanitizeForFirestore(record), id };
   if (!db) {
     const list = getLocalAttendance(record.turmaId);
-    const item: AttendanceRecord = { id: `att_${Date.now()}`, ...record };
-    list.unshift(item);
-    saveLocalAttendance(record.turmaId, list);
+    saveLocalAttendance(record.turmaId, [item, ...list.filter(entry => !(entry.data === record.data && (entry.aulaNumero ?? 1) === (record.aulaNumero ?? 1)))]);
     return item;
   }
 
-  const docRef = await addDoc(collection(db, ATTENDANCE_COLL), record);
-  return { id: docRef.id, ...record };
+  await setDoc(doc(db, ATTENDANCE_COLL, id), sanitizeForFirestore(record));
+  return item;
 };
 
 export const getAttendanceByClass = async (classId: string): Promise<AttendanceRecord[]> => {
@@ -89,7 +95,7 @@ export const getAttendanceByClass = async (classId: string): Promise<AttendanceR
     return docs;
   } catch (err) {
     console.error('[gradebookRepository] Erro ao buscar frequências:', err);
-    return getLocalAttendance(classId);
+    throw err;
   }
 };
 
@@ -103,7 +109,7 @@ export const calculateStudentAttendanceRate = (
 
   const distinctLessons = new Map<string, AttendanceRecord>();
   records.forEach(rec => {
-    const key = `${rec.turmaId}:${rec.data}:${rec.aulaNumero ?? ''}`;
+    const key = `${rec.turmaId}:${rec.data}:${rec.aulaNumero ?? 1}`;
     const previous = distinctLessons.get(key);
     if (!previous || Date.parse(rec.criadoEm) > Date.parse(previous.criadoEm)) distinctLessons.set(key, rec);
   });
@@ -111,7 +117,7 @@ export const calculateStudentAttendanceRate = (
     const reg = rec.registros.find(r => r.studentId === studentId);
     if (reg && ['presente', 'falta', 'justificada'].includes(reg.status)) {
       totalAulas++;
-      if (reg.status === 'presente' || reg.status === 'justificada') {
+      if (reg.status === 'presente') {
         presencas++;
       } else {
         faltas++;
@@ -177,136 +183,88 @@ export const saveForumTopic = async (
     respostas: [],
     criadoEm: new Date().toISOString()
   };
-
-  // Garante sincronização no cache local
-  const localList = getLocalForum(topic.turmaId);
-
+  if (!newTopic.turmaId || !newTopic.autorId || !newTopic.titulo || !newTopic.conteudo) throw new Error('Selecione uma turma e informe o título e a mensagem.');
+  if (newTopic.titulo.length > 300 || newTopic.conteudo.length > 20000) throw new Error('Use até 300 caracteres no título e 20.000 na mensagem do tópico.');
   if (!db) {
-    const item: ForumTopic = { id: `top_${Date.now()}`, ...newTopic };
-    localList.unshift(item);
-    saveLocalForum(topic.turmaId, localList);
+    const item: ForumTopic = { ...newTopic, id: 'topic-' + crypto.randomUUID() };
+    saveLocalForum(topic.turmaId, [item, ...getLocalForum(topic.turmaId)]);
     return item;
   }
-
-  try {
-    const docRef = await addDoc(collection(db, FORUM_COLL), newTopic);
-    const item: ForumTopic = { id: docRef.id, ...newTopic };
-    // Mantém cópia atualizada no storage local
-    localList.unshift(item);
-    saveLocalForum(topic.turmaId, localList);
-    return item;
-  } catch (err) {
-    console.warn('[gradebookRepository] Falha ao salvar tópico no Firestore, usando fallback local:', err);
-    const item: ForumTopic = { id: `top_${Date.now()}`, ...newTopic };
-    localList.unshift(item);
-    saveLocalForum(topic.turmaId, localList);
-    return item;
-  }
+  const reference = await addDoc(collection(db, FORUM_COLL), sanitizeForFirestore(newTopic));
+  return { ...newTopic, id: reference.id };
 };
 
 export const getForumTopicsByClass = async (classId: string): Promise<ForumTopic[]> => {
-  if (!db) {
-    return getLocalForum(classId);
-  }
-
-  try {
-    const q = query(collection(db, FORUM_COLL), where('turmaId', '==', classId));
-    const snap = await getDocs(q);
-    const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as ForumTopic));
-    list.sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
-    if (list.length > 0) {
-      saveLocalForum(classId, list);
-    }
-    return list.length > 0 ? list : getLocalForum(classId);
-  } catch (err) {
-    console.error('[gradebookRepository] Erro ao buscar tópicos do fórum:', err);
-    return getLocalForum(classId);
-  }
+  if (!db) return getLocalForum(classId).sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
+  const snapshot = await getDocs(query(collection(db, FORUM_COLL), where('turmaId', '==', classId)));
+  return snapshot.docs.map(entry => ({ ...entry.data(), id: entry.id } as ForumTopic)).sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
 };
 
 export const subscribeForumTopicsByClass = (
   classId: string,
-  callback: (topics: ForumTopic[]) => void
+  callback: (topics: ForumTopic[]) => void,
+  onError?: (error: Error) => void
 ): (() => void) => {
   if (!db) {
-    callback(getLocalForum(classId));
+    callback(getLocalForum(classId).sort((a, b) => b.criadoEm.localeCompare(a.criadoEm)));
     return () => {};
   }
-
-  const q = query(collection(db, FORUM_COLL), where('turmaId', '==', classId));
-  return onSnapshot(q, (snap) => {
-    const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as ForumTopic));
-    list.sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
-    if (list.length > 0) {
-      saveLocalForum(classId, list);
-      callback(list);
-    } else {
-      const localList = getLocalForum(classId);
-      callback(localList);
-    }
-  }, (err) => {
-    console.warn('[gradebookRepository] Listener do fórum usando cache local:', err);
-    callback(getLocalForum(classId));
+  return onSnapshot(query(collection(db, FORUM_COLL), where('turmaId', '==', classId)), snapshot => {
+    callback(snapshot.docs.map(entry => ({ ...entry.data(), id: entry.id } as ForumTopic)).sort((a, b) => b.criadoEm.localeCompare(a.criadoEm)));
+  }, error => {
+    console.error('[gradebookRepository] Erro ao acompanhar o fórum:', error);
+    onError?.(error);
   });
 };
 
-/**
- * Adiciona uma resposta a um tópico do fórum.
- * Salva com persistência resiliente tanto no Firestore quanto no cache local.
- */
+/** Reads and writes the same topic transactionally, keeping concurrent replies. */
+async function updateForumReplies(classId: string, topicId: string, mutate: (replies: ForumReply[]) => ForumReply[]): Promise<void> {
+  if (!db) {
+    const topics = getLocalForum(classId);
+    const topic = topics.find(entry => entry.id === topicId);
+    if (!topic) throw new Error('O tópico não está mais disponível. Atualize o fórum.');
+    topic.respostas = mutate(topic.respostas ?? []);
+    saveLocalForum(classId, topics);
+    return;
+  }
+  const database = db;
+  const reference = doc(database, FORUM_COLL, topicId);
+  for (let retry = 0; retry < 3; retry++) {
+    let readReplies: string | undefined;
+    try {
+      await runTransaction(database, async transaction => {
+        const snapshot = await transaction.get(reference);
+        if (!snapshot.exists() || snapshot.data().turmaId !== classId) throw new Error('O tópico não está mais disponível nesta turma. Atualize o fórum.');
+        readReplies = JSON.stringify(snapshot.data().respostas ?? []);
+        transaction.update(reference, { respostas: sanitizeForFirestore(mutate(snapshot.data().respostas ?? [])) });
+      });
+      return;
+    } catch (error) {
+      // Append-only rules can reject a stale list before Firestore reports
+      // contention. Retry only when a fresh server read proves that it changed.
+      if (retry === 2 || readReplies === undefined || (error as { code?: string }).code !== 'permission-denied') throw error;
+      const latest = await getDocFromServer(reference).catch(() => null);
+      if (!latest?.exists() || latest.data().turmaId !== classId || JSON.stringify(latest.data().respostas ?? []) === readReplies) throw error;
+    }
+  }
+}
+
 export const addForumReply = async (
   classId: string,
   topicId: string,
   reply: Omit<ForumReply, 'id' | 'criadoEm'>
 ): Promise<ForumReply> => {
   const newReply: ForumReply = {
-    id: `rep_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
     ...reply,
+    id: 'reply-' + crypto.randomUUID(),
     texto: sanitizeText(reply.texto),
+    isMelhorResposta: false,
+    moedasGanhas: 0,
     criadoEm: new Date().toISOString()
   };
-
-  // 1. Persistência imediata no cache local (garante sincronização síncrona/offline)
-  const localTopics = getLocalForum(classId);
-  const localTopic = localTopics.find(t => t.id === topicId);
-  if (localTopic) {
-    if (!localTopic.respostas) localTopic.respostas = [];
-    localTopic.respostas.push(newReply);
-    saveLocalForum(classId, localTopics);
-  }
-
-  if (!db) {
-    return newReply;
-  }
-
-  // 2. Persistência no Firestore
-  try {
-    const topicRef = doc(db, FORUM_COLL, topicId);
-    const docSnap = await getDoc(topicRef);
-
-    if (docSnap.exists()) {
-      const current = docSnap.data() as ForumTopic;
-      const currentReplies = current.respostas || [];
-      await updateDoc(topicRef, {
-        respostas: [...currentReplies, newReply]
-      });
-    } else {
-      // Se não encontrou pelo docId direto, busca por fallback na turma
-      const q = query(collection(db, FORUM_COLL), where('turmaId', '==', classId));
-      const allSnap = await getDocs(q);
-      const matched = allSnap.docs.find(d => d.id === topicId);
-      if (matched) {
-        const current = matched.data() as ForumTopic;
-        const currentReplies = current.respostas || [];
-        await updateDoc(doc(db, FORUM_COLL, matched.id), {
-          respostas: [...currentReplies, newReply]
-        });
-      }
-    }
-  } catch (err) {
-    console.warn('[gradebookRepository] Falha ao persistir resposta no Firestore, mantido no cache local:', err);
-  }
-
+  if (!newReply.autorId || !newReply.texto) throw new Error('Escreva uma resposta antes de enviar.');
+  if (newReply.texto.length > 10000) throw new Error('Use até 10.000 caracteres na resposta.');
+  await updateForumReplies(classId, topicId, replies => [...replies, newReply]);
   return newReply;
 };
 
@@ -399,85 +357,31 @@ export function calculateClassGradebook(
 /**
  * Marca ou desmarca uma resposta como Melhor Resposta (destaque oficial).
  */
+/** Highlights one response without promising a reward that is not credited. */
 export const markForumBestReply = async (
   classId: string,
   topicId: string,
   replyId: string,
   isBest: boolean
 ): Promise<void> => {
-  // 1. Atualiza no cache local
-  const localTopics = getLocalForum(classId);
-  const localTopic = localTopics.find(t => t.id === topicId);
-  if (localTopic && localTopic.respostas) {
-    localTopic.respostas.forEach(r => {
-      if (r.id === replyId) {
-        r.isMelhorResposta = isBest;
-        r.moedasGanhas = isBest ? 20 : 0;
-      } else if (isBest) {
-        r.isMelhorResposta = false;
-      }
-    });
-    saveLocalForum(classId, localTopics);
-  }
-
-  if (!db) return;
-
-  // 2. Atualiza no Firestore
-  try {
-    const topicRef = doc(db, FORUM_COLL, topicId);
-    const docSnap = await getDoc(topicRef);
-    if (docSnap.exists()) {
-      const current = docSnap.data() as ForumTopic;
-      const updated = (current.respostas || []).map(r => ({
-        ...r,
-        isMelhorResposta: r.id === replyId ? isBest : (isBest ? false : r.isMelhorResposta),
-        moedasGanhas: r.id === replyId && isBest ? 20 : (r.id === replyId ? 0 : r.moedasGanhas)
-      }));
-      await updateDoc(topicRef, { respostas: updated });
-    }
-  } catch (err) {
-    console.warn('[gradebookRepository] Falha ao atualizar melhor resposta no Firestore:', err);
-  }
+  await updateForumReplies(classId, topicId, replies => {
+    if (!replies.some(reply => reply.id === replyId)) throw new Error('A resposta não está mais disponível. Atualize o fórum.');
+    return replies.map(reply => ({
+      ...reply,
+      isMelhorResposta: reply.id === replyId ? isBest : (isBest ? false : !!reply.isMelhorResposta),
+      moedasGanhas: 0
+    }));
+  });
 };
 
-/**
- * Remove um tópico do fórum (moderação do professor).
- */
 export const deleteForumTopic = async (classId: string, topicId: string): Promise<void> => {
-  const localTopics = getLocalForum(classId).filter(t => t.id !== topicId);
-  saveLocalForum(classId, localTopics);
-
-  if (!db) return;
-
-  try {
-    await deleteDoc(doc(db, FORUM_COLL, topicId));
-  } catch (err) {
-    console.warn('[gradebookRepository] Falha ao remover tópico do Firestore:', err);
+  if (!db) {
+    saveLocalForum(classId, getLocalForum(classId).filter(topic => topic.id !== topicId));
+    return;
   }
+  await deleteDoc(doc(db, FORUM_COLL, topicId));
 };
 
-/**
- * Remove uma resposta de um tópico do fórum (moderação do professor).
- */
 export const deleteForumReply = async (classId: string, topicId: string, replyId: string): Promise<void> => {
-  const localTopics = getLocalForum(classId);
-  const localTopic = localTopics.find(t => t.id === topicId);
-  if (localTopic && localTopic.respostas) {
-    localTopic.respostas = localTopic.respostas.filter(r => r.id !== replyId);
-    saveLocalForum(classId, localTopics);
-  }
-
-  if (!db) return;
-
-  try {
-    const topicRef = doc(db, FORUM_COLL, topicId);
-    const docSnap = await getDoc(topicRef);
-    if (docSnap.exists()) {
-      const current = docSnap.data() as ForumTopic;
-      const updated = (current.respostas || []).filter(r => r.id !== replyId);
-      await updateDoc(topicRef, { respostas: updated });
-    }
-  } catch (err) {
-    console.warn('[gradebookRepository] Falha ao deletar resposta no Firestore:', err);
-  }
+  await updateForumReplies(classId, topicId, replies => replies.filter(reply => reply.id !== replyId));
 };

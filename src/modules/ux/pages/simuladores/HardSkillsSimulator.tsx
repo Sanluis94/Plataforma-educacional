@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
 type Step = { instruction: string; hint: string };
 type Program = { title: string; icon: string; steps: Step[]; result: string };
@@ -70,13 +71,14 @@ const MODE_PROGRAMS: Record<string, Program> = {
   },
 };
 
-export function HardSkillsSimulator({ mode = 'programming', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function HardSkillsSimulator({ mode = 'programming', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => unknown | Promise<unknown> }) {
   const program = MODE_PROGRAMS[mode] || MODE_PROGRAMS['programming'];
   const [step, setStep] = useState(0);
   const [input, setInput] = useState('');
   const [done, setDone] = useState(false);
 
   const next = () => {
+    if(!input.trim())return;
     if (step < program.steps.length - 1) {
       setStep(s => s + 1);
       setInput('');
@@ -109,26 +111,26 @@ export function HardSkillsSimulator({ mode = 'programming', labTitle, onComplete
             <h4 style={{ color: 'var(--color-primary)', marginBottom: '0.75rem' }}>Desafio Técnico:</h4>
             <p style={{ color: 'var(--text-main)', lineHeight: '1.7', marginBottom: '1rem' }}>{program.steps[step].instruction}</p>
             <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '8px', padding: '0.75rem', fontSize: '0.82rem', color: 'var(--text-secondary)', borderLeft: '3px solid var(--color-secondary)' }}>
-              💡 <strong>Dica da IA:</strong> {program.steps[step].hint}
+              💡 <strong>Dica do roteiro:</strong> {program.steps[step].hint}
             </div>
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', display: 'block', marginBottom: '0.4rem' }}>Escreva sua solução / raciocínio técnico:</label>
-            <textarea value={input} onChange={e => setInput(e.target.value)} rows={3}
+            <textarea aria-label="Solução e raciocínio técnico" value={input} onChange={e => setInput(e.target.value)} rows={3}
               placeholder="Digite o código, comando ou explicação..."
               style={{ width: '100%', borderRadius: '8px', padding: '0.75rem', background: 'var(--bg-secondary)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', resize: 'none', outline: 'none', fontFamily: 'monospace', boxSizing: 'border-box' }} />
           </div>
 
-          <button onClick={next} style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
+          <button disabled={!input.trim()} onClick={next} style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
             {step < program.steps.length - 1 ? 'Próximo Passo →' : 'Concluir Desafio'}
           </button>
         </div>
       ) : (
         <div style={{ textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '12px', padding: '2rem' }}>
           <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>🎓</div>
-          <h3 style={{ color: 'var(--text-main)', marginBottom: '0.75rem' }}>Módulo Concluído com Sucesso!</h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>{program.result}</p>
+          <h3 style={{ color: 'var(--text-main)', marginBottom: '0.75rem' }}>Etapas de prática concluídas</h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>Confira sua solução com as dicas do roteiro e use a avaliação guiada para verificar o aprendizado.</p>
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
             <button onClick={reset} style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
               Refazer Desafio
@@ -138,23 +140,13 @@ export function HardSkillsSimulator({ mode = 'programming', labTitle, onComplete
       )}
 
       <div style={{ marginTop: '1.25rem', padding: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>🤖 Analisador de IA de código</div>
+        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>Roteiro de raciocínio técnico</div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
-          Executando laboratório técnico de {program.title}. Pratique sintaxe limpa e boas práticas de arquitetura.
+          Pratique {program.title}. Este roteiro conserva seu raciocínio durante a etapa, mas não executa nem corrige automaticamente o código digitado. Compare sua solução com as dicas antes de avançar.
         </p>
       </div>
 
-      {onComplete && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem', marginBottom: '1rem' }}>
-          <button
-            onClick={() => onComplete(100)}
-            className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
-          >
-            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
-          </button>
-        </div>
-      )}
+      <LabExplorationCompletion key={done ? 'completed-practice' : 'practice'} onComplete={onComplete} ready={done} />
     </div>
   );
 }

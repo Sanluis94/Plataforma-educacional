@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
 interface Scenario {
   id: string;
@@ -82,7 +83,7 @@ const MODE_SCENARIOS: Record<string, Scenario[]> = {
   ]
 };
 
-export function SoftSkillsModule({ mode = 'communication', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => void }) {
+export function SoftSkillsModule({ mode = 'communication', labTitle, onComplete }: { mode?: string; labTitle?: string; labId?: string; onComplete?: (score: number) => unknown | Promise<unknown> }) {
   const scenariosList = MODE_SCENARIOS[mode] || MODE_SCENARIOS['communication'];
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
@@ -113,13 +114,14 @@ export function SoftSkillsModule({ mode = 'communication', labTitle, onComplete 
       <div style={{ padding: '2rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '16px' }}>
         <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🌟</div>
         <h2 style={{ color: 'var(--text-main)' }}>Trilha de Soft Skills Concluída!</h2>
-        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--color-primary)', margin: '0.5rem 0' }}>+{totalXP} XP</div>
+        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--color-primary)', margin: '0.5rem 0' }}>+{totalXP} pontos de prática</div>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          {totalXP >= 70 ? 'Excelente! Você demonstrou maturidade comportamental e liderança avançada.' : 'Bom progresso! Continue desenvolvendo suas soft skills com mais cenários.'}
+          {totalXP >= 70 ? 'Sua escolha corresponde à orientação deste cenário. Compare os argumentos e relacione a decisão com situações reais.' : 'Reveja a orientação do cenário e compare os efeitos de cada alternativa.'}
         </p>
         <button onClick={reset} style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
           Refazer Trilha
         </button>
+        <LabExplorationCompletion onComplete={onComplete} ready />
       </div>
     );
   }
@@ -129,7 +131,7 @@ export function SoftSkillsModule({ mode = 'communication', labTitle, onComplete 
       <h2 style={{ color: 'var(--text-main)', marginBottom: '0.25rem' }}>💼 {labTitle || 'Laboratório de Habilidades Socioemocionais'}</h2>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Cenário {scenarioIdx + 1}/{scenariosList.length}</span>
-        <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>⚡ {totalXP} XP</span>
+        <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>⚡ {totalXP} pontos de prática</span>
       </div>
 
       <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.25rem', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -159,10 +161,10 @@ export function SoftSkillsModule({ mode = 'communication', labTitle, onComplete 
       {chosen !== null && (
         <div>
           <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '1rem', marginBottom: '1rem', borderLeft: '3px solid var(--color-primary)' }}>
-            <strong style={{ color: 'var(--color-primary)' }}>Feedback da IA:</strong>
+            <strong style={{ color: 'var(--color-primary)' }}>Orientação desta alternativa:</strong>
             <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0', fontSize: '0.88rem', lineHeight: '1.6' }}>{scenario.choices[chosen].outcome}</p>
             <div style={{ marginTop: '0.5rem', color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '0.82rem' }}>
-              +{scenario.choices[chosen].xp} XP conquistados
+              +{scenario.choices[chosen].xp} pontos de prática conquistados
             </div>
           </div>
           <button onClick={next} style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
@@ -172,25 +174,14 @@ export function SoftSkillsModule({ mode = 'communication', labTitle, onComplete 
       )}
 
       <div style={{ marginTop: '1.25rem', padding: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>🤖 Avaliação de IA comportamental</div>
+        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>Orientação do cenário</div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
           {chosen !== null
-            ? `Decisão analisada para a competência ${mode.toUpperCase()}: +${scenario.choices[chosen].xp} XP computada!`
+            ? `A orientação desta alternativa corresponde ao roteiro local: ${scenario.choices[chosen].xp} pontos de prática nesta sessão. Esses pontos não são XP nem moedas da sua conta.`
             : `Pratique competências de ${mode.replace('_', ' ')} através de tomada de decisão contextualizada.`}
         </p>
       </div>
 
-      {onComplete && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem', marginBottom: '1rem' }}>
-          <button
-            onClick={() => onComplete(100)}
-            className="btn-gradient"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 15px rgba(16,185,129,0.3)', fontWeight: 'bold' }}
-          >
-            🏆 Concluir Laboratório (+50 XP & +10 Moedas)
-          </button>
-        </div>
-      )}
     </div>
   );
 }

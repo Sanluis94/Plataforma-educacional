@@ -20,11 +20,12 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, allowedRoles, redirectTo = '/' }: ProtectedRouteProps) {
-  const { currentUser, userData, loading } = useAuth();
+  const { currentUser, userData, loading,profileError } = useAuth();
   const location = useLocation();
 
   // Enquanto carrega, não renderiza nada (o Suspense/LoadingFallback cuida disso)
   if (loading) return <p role="status" style={{ padding: '2rem' }}>Verificando seu acesso…</p>;
+  if(currentUser&&profileError)return <p role="status">O painel aguarda a confirmação do seu perfil. Use Consultar perfil novamente para recuperar o acesso.</p>;
 
   // Não autenticado → redireciona para Home e sinaliza necessidade de login
   if (!currentUser || !userData) {

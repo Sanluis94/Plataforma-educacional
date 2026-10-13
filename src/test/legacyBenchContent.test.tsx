@@ -21,20 +21,21 @@ describe('Conteúdo específico nas bancadas da biblioteca inicial', () => {
     expect(screen.queryByText(/IA biológica/)).toBeNull();
   });
 
-  it('pratica diálogos próprios, conclui a última expressão e reinicia ao trocar de idioma', () => {
+  it('pratica diálogos próprios, conclui a última expressão e reinicia ao trocar de idioma', async () => {
     const completed = vi.fn();
     render(<LanguagesModule mode="conversation" onComplete={completed} />);
     expect(screen.getByText('Could you repeat that, please?')).toBeVisible();
     expect(screen.queryByText('Sustainable')).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Registrar resultado do módulo' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Registrar exploração' })).toBeDisabled();
     for (const [index, answer] of ['Você poderia repetir, por favor?', 'Onde fica a biblioteca?', 'Obrigado pela sua ajuda.'].entries()) {
       fireEvent.click(screen.getByRole('button', { name: answer }));
       expect(screen.getByText(new RegExp(`^Tradução: ${answer.replace(/[?.]/g, '\\$&')}$`))).toBeVisible();
       fireEvent.click(screen.getByRole('button', { name: index === 2 ? 'Ver resultado' : 'Próxima expressão →' }));
     }
     expect(screen.getByRole('heading', { name: 'Módulo concluído! 3/3 acertos' })).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Registrar resultado do módulo' }));
-    expect(completed).toHaveBeenCalledExactlyOnceWith(100);
+    fireEvent.click(screen.getByRole('button', { name: 'Registrar exploração' }));
+    await screen.findByRole('button', { name: 'Exploração registrada' });
+    expect(completed).toHaveBeenCalledExactlyOnceWith(0);
     fireEvent.click(screen.getByRole('button', { name: /Espanhol/ }));
     expect(screen.getByText('¿Podrías repetirlo, por favor?')).toBeVisible();
     expect(screen.queryByText(/Módulo concluído/)).toBeNull();
@@ -59,11 +60,11 @@ describe('Conteúdo específico nas bancadas da biblioteca inicial', () => {
     }
   });
 
-  it('mantém argumentos separados por caso e registra somente após explorar os três', () => {
+  it('mantém argumentos separados por caso e registra somente após explorar os três', async () => {
     const completed = vi.fn();
     const content = LAB_LEARNING_CONTENT.fil_4;
     render(<PhilosophySimulator mode="logic" onComplete={completed} />);
-    const finish = screen.getByRole('button', { name: 'Registrar exploração dos casos' });
+    const finish = screen.getByRole('button', { name: 'Registrar exploração' });
     expect(finish).toBeDisabled();
     for (const [index, scenario] of content.scenarios.entries()) {
       fireEvent.click(screen.getByRole('button', { name: scenario.label }));
@@ -76,7 +77,7 @@ describe('Conteúdo específico nas bancadas da biblioteca inicial', () => {
     expect(screen.getByLabelText('Minha posição sobre o caso')).toHaveValue('Argumento do caso 1: Minha posição sobre o caso.');
     expect(screen.getByRole('status')).toHaveTextContent('3 de 3');
     fireEvent.click(finish);
-    expect(completed).toHaveBeenCalledExactlyOnceWith(100);
-    expect(screen.getByRole('button', { name: 'Exploração registrada' })).toBeDisabled();
+    expect(completed).toHaveBeenCalledExactlyOnceWith(0);
+    expect(await screen.findByRole('button', { name: 'Exploração registrada' })).toBeDisabled();
   });
 });

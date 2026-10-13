@@ -9,6 +9,7 @@ import { getLocalEtlProgress, saveLocalProgress } from '../services/localEtlClie
 import { DEFAULT_PROGRESS } from '../types';
 import type { ProgressData } from '../types';
 import { calculateModuleRewards } from '../../core/services/studentProgressRewards';
+import { SHOP_ITEMS } from '../../core/constants/shopItems';
 
 // Manter interface legada para compatibilidade com UI
 export interface StudentProgress {
@@ -27,6 +28,26 @@ export interface StudentLabCompletion {
 // Serialize local writes for the same student, including different labs. Remote
 // writes additionally use Firestore transactions to protect other tabs/devices.
 const laboratoryWrites = new Map<string, Promise<unknown>>();
+
+/** Debit and ownership share one write, using stored balance across tabs. */
+export async function purchaseStudentItem(uid:string,itemId:string):Promise<ProgressData>{
+  const item=SHOP_ITEMS.find(item=>item.id===itemId);
+  if(!uid||!item)throw new Error('Este item não está disponível.');
+  const product=item;
+  const previous=laboratoryWrites.get(uid)??Promise.resolve();
+  const operation=previous.catch(()=>undefined).then(async()=>{
+    function purchase(current:ProgressData):ProgressData{
+      if(current.purchasedItems.includes(itemId))return current;
+      if(current.coins<product.price)throw new Error('Você ainda não tem moedas suficientes para este item.');
+      return {...current,coins:current.coins-product.price,purchasedItems:[...current.purchasedItems,itemId],updatedAt:new Date().toISOString()};
+    }
+    if(!db){const current=await getLocalEtlProgress(uid)??{...DEFAULT_PROGRESS,completedModules:[],purchasedItems:[]};const updated=purchase(current);if(updated!==current)await saveLocalProgress(uid,updated);return updated;}
+    const reference=doc(db,COLLECTION,uid);
+    return runTransaction(db,async transaction=>{const snapshot=await transaction.get(reference);const current={...DEFAULT_PROGRESS,...(snapshot.exists()?snapshot.data():{})} as ProgressData;const updated=purchase(current);if(updated!==current)transaction.set(reference,updated,{merge:true});return updated;});
+  });
+  laboratoryWrites.set(uid,operation);
+  try{return await operation;}finally{if(laboratoryWrites.get(uid)===operation)laboratoryWrites.delete(uid);}
+}
 
 /** Records the completion and its reward together; failures reach the caller. */
 export async function completeStudentLabProgress(uid: string, labId: string, score: number): Promise<StudentLabCompletion> {

@@ -1,0 +1,6 @@
+import {it,expect} from 'vitest';
+import {examDeadlineAt,examAcceptingAnswers} from '../modules/data/services/examTiming';
+it('data limite sem horário encerra no fim do dia escolhido pelo professor',()=>{const deadline=examDeadlineAt({dataLimite:'2026-10-13'})!;expect(new Date(deadline).getHours()).toBe(23);expect(new Date(deadline).getMinutes()).toBe(59);expect(examAcceptingAnswers({status:'Aberta',dataLimite:'2026-10-13'},deadline)).toBe(true);expect(examAcceptingAnswers({status:'Aberta',dataLimite:'2026-10-13'},deadline+1)).toBe(false);});
+it('horário absoluto preserva o prazo independente de quem consulta',()=>{expect(examDeadlineAt({dataLimite:'2026-10-14T02:59:59.999Z'})).toBe(Date.parse('2026-10-14T02:59:59.999Z'));});
+it('rascunho, encerramento, início futuro e prazo inválido não abrem prova',()=>{expect(examAcceptingAnswers({status:'Rascunho'})).toBe(false);expect(examAcceptingAnswers({status:'Encerrada'})).toBe(false);expect(examAcceptingAnswers({status:'Aberta',dataInicio:'2099-01-01T00:00:00Z'},0)).toBe(false);expect(examAcceptingAnswers({status:'Aberta',dataLimite:'inválido'})).toBe(false);});
+it('data inexistente e início inválido exigem correção do professor',()=>{expect(examDeadlineAt({dataLimite:'2026-02-31'})).toBeNull();expect(examAcceptingAnswers({status:'Aberta',dataInicio:'inválido'})).toBe(false);});
