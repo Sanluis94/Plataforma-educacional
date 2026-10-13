@@ -1,0 +1,49 @@
+# Template deliberadamente incompleto; não provisiona recursos.
+# Configure ACR por identidade gerenciada e substitua os valores antes de aplicar.
+name: SUBSTITUIR_INSTALLATION_ID
+type: Microsoft.App/containerApps
+location: SUBSTITUIR_REGIAO
+identity:
+  type: SystemAssigned
+properties:
+  managedEnvironmentId: SUBSTITUIR_AMBIENTE_DESTA_ESCOLA
+  configuration:
+    activeRevisionsMode: Single
+    ingress:
+      external: true
+      targetPort: 8080
+      transport: auto
+      allowInsecure: false
+      traffic:
+        - latestRevision: true
+          weight: 100
+  template:
+    containers:
+      - name: frontend
+        image: SUBSTITUIR_ACR_IMAGE_POR_DIGEST
+        resources:
+          cpu: 0.25
+          memory: 0.5Gi
+        env:
+          - name: KORTEX_INSTALLATION_ID
+            value: SUBSTITUIR_INSTALLATION_ID
+          - name: KORTEX_FIREBASE_PROJECT_ID
+            value: SUBSTITUIR_PROJETO_DEDICADO
+          - name: KORTEX_PUBLIC_ORIGIN
+            value: https://SUBSTITUIR_DOMINIO_DESTA_ESCOLA
+        probes:
+          - type: Liveness
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          - type: Readiness
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 2
+            periodSeconds: 10
+    scale:
+      minReplicas: 1
+      maxReplicas: 2

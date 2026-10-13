@@ -1,6 +1,6 @@
 /**
  * Gemini Service — Gerenciador de Chave de API e Integração com Google Gemini.
- * Suporta priorização da chave inserida no navegador (localStorage) e chave padrão de ambiente (VITE_GEMINI_API_KEY).
+ * Chave pessoal no navegador; chave de ambiente permitida apenas em desenvolvimento.
  */
 
 // Modelo estável recomendado para novos projetos na revisão de outubro/2026.
@@ -13,7 +13,7 @@ export const getEffectiveGeminiApiKey = (): string | null => {
   if (localKey && localKey.trim().length > 0) {
     return localKey.trim();
   }
-  const envKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const envKey = import.meta.env.DEV ? import.meta.env.VITE_GEMINI_API_KEY : undefined;
   if (envKey && typeof envKey === 'string' && envKey.trim().length > 0) {
     return envKey.trim();
   }

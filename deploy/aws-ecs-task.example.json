@@ -1,0 +1,42 @@
+{
+  "family": "SUBSTITUIR_INSTALLATION_ID",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "SUBSTITUIR_ROLE_LEITURA_ECR_E_LOGS",
+  "volumes": [{ "name": "nginx-tmp" }],
+  "runtimePlatform": { "cpuArchitecture": "X86_64", "operatingSystemFamily": "LINUX" },
+  "containerDefinitions": [
+    {
+      "name": "frontend",
+      "image": "SUBSTITUIR_ECR_IMAGE_POR_DIGEST",
+      "essential": true,
+      "user": "101:101",
+      "readonlyRootFilesystem": true,
+      "mountPoints": [{ "sourceVolume": "nginx-tmp", "containerPath": "/tmp", "readOnly": false }],
+      "linuxParameters": { "capabilities": { "drop": ["ALL"] } },
+      "portMappings": [{ "containerPort": 8080, "protocol": "tcp" }],
+      "environment": [
+        { "name": "KORTEX_INSTALLATION_ID", "value": "SUBSTITUIR_INSTALLATION_ID" },
+        { "name": "KORTEX_FIREBASE_PROJECT_ID", "value": "SUBSTITUIR_PROJETO_DEDICADO" },
+        { "name": "KORTEX_PUBLIC_ORIGIN", "value": "https://SUBSTITUIR_DOMINIO_DESTA_ESCOLA" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/healthz || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 10
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "SUBSTITUIR_LOG_GROUP",
+          "awslogs-region": "SUBSTITUIR_REGIAO",
+          "awslogs-stream-prefix": "frontend"
+        }
+      }
+    }
+  ]
+}

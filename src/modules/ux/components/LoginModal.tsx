@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import type { GradeLevel } from '../../core/contexts/AuthContext';
 import { GRADE_LABELS } from '../../core/contexts/AuthContext';
@@ -196,6 +197,9 @@ export function LoginModal({ onClose, onSuccess, initialRole = 'estudante', purp
 
         <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.75rem' }}>
           {isLocalAuthMode ? 'Modo local ativo para testes neste clone.' : 'Use sua conta Google. Se você já tem cadastro, seu perfil será mantido.'}
+        </p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.5 }}>
+          Antes de entrar, consulte <Link to="/privacidade" onClick={requestClose}>como seus dados são usados</Link> e os <Link to="/termos" onClick={requestClose}>termos de uso</Link>. Para menores, o uso deve ser combinado com a escola ou responsável legal.
         </p>
       </div>
     </div>

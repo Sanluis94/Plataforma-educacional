@@ -7,6 +7,8 @@ const requiredFirebaseFields = [
   'VITE_FIREBASE_APP_ID',
 ] as const;
 
+import { readProductDeployment } from '../../src/modules/core/config/productDeployment.ts';
+
 /** Creates the child environment without changing the shell or loaded files. */
 export function productionEnvironment(
   source: Record<string, string | undefined>,
@@ -22,13 +24,21 @@ export function productionEnvironment(
   if (source.VITE_FIREBASE_PROJECT_ID?.trim() !== productionProject.trim()) {
     throw new Error('VITE_FIREBASE_PROJECT_ID não corresponde ao alias production de .firebaserc.');
   }
+  const deployment = readProductDeployment(source);
 
   const env = { ...source };
+  const publicFields = new Set<string>([...requiredFirebaseFields,
+    'VITE_FIREBASE_MEASUREMENT_ID', 'VITE_INSTALLATION_ID', 'VITE_INSTALLATION_NAME',
+    'VITE_INSTALLATION_MODE', 'VITE_PUBLIC_RELEASE_STAGE', 'VITE_DATA_CONTROLLER_NAME',
+    'VITE_DATA_CONTROLLER_DOCUMENT', 'VITE_PRIVACY_CONTACT_EMAIL',
+  ]);
+  // Blank unknown VITE values explicitly so Vite cannot recover them from .env.
+  for (const field of Object.keys(source)) if (field.startsWith('VITE_') && !publicFields.has(field)) env[field] = '';
   for (const field of requiredFirebaseFields) env[field] = source[field]!.trim();
   env.NODE_ENV = 'production';
   env.VITE_USE_FIREBASE_EMULATORS = 'false';
   // An explicit empty value prevents Vite from recovering the private .env key.
   env.VITE_GEMINI_API_KEY = '';
-  env.VITE_DISABLE_AI = source.VITE_DISABLE_AI === 'true' ? 'true' : 'false';
+  env.VITE_DISABLE_AI = deployment.stage === 'commercial' || source.VITE_DISABLE_AI === 'true' ? 'true' : 'false';
   return env;
 }

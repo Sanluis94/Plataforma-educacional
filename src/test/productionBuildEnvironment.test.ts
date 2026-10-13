@@ -12,6 +12,18 @@ const validEnvironment = {
 };
 
 describe('ambiente repetível da compilação de produção', () => {
+  it('remove valores VITE desconhecidos sem modificar o ambiente privado original', () => {
+    const source = { ...validEnvironment, VITE_UNEXPECTED_SECRET: 'example-only-do-not-publish', VITE_INSTALLATION_NAME: 'Escola de teste' };
+    const result = productionEnvironment(source, project);
+    expect(result.VITE_UNEXPECTED_SECRET).toBe('');
+    expect(result.VITE_INSTALLATION_NAME).toBe('Escola de teste');
+    expect(source.VITE_UNEXPECTED_SECRET).toBe('example-only-do-not-publish');
+  });
+  it('valida os dados públicos e mantém IA externa desativada na operação comercial', () => {
+    const commercial = { ...validEnvironment, VITE_PUBLIC_RELEASE_STAGE: 'commercial', VITE_INSTALLATION_MODE: 'school', VITE_INSTALLATION_ID: 'school-fixture', VITE_DATA_CONTROLLER_NAME: 'Escola fictícia', VITE_PRIVACY_CONTACT_EMAIL: 'privacidade@example.test', VITE_DISABLE_AI: 'false' };
+    expect(productionEnvironment(commercial, project).VITE_DISABLE_AI).toBe('true');
+    expect(() => productionEnvironment({ ...commercial, VITE_PRIVACY_CONTACT_EMAIL: '' }, project)).toThrow('Publicação comercial exige');
+  });
   it.each(Object.keys(validEnvironment))('recusa o campo obrigatório ausente ou vazio %s', field => {
     for (const value of [undefined, '', '   ']) {
       const source = { ...validEnvironment, [field]: value };

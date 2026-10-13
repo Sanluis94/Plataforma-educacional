@@ -3,7 +3,7 @@
  * Implementa funcionalidades centrais inspiradas no padrão Moodle e Canvas LMS.
  */
 import {
-  collection, addDoc, query, where, getDocs, doc, getDocFromServer, deleteDoc, onSnapshot, runTransaction, setDoc
+  collection, addDoc, query, where, getDocs, doc, getDocFromServer, deleteDoc, onSnapshot, runTransaction, writeBatch
 } from 'firebase/firestore';
 import { db } from '../../core/services/firebaseConfig';
 import { sanitizeText } from '../../core/services/securityService';
@@ -78,8 +78,36 @@ export const saveAttendanceRecord = async (
     return item;
   }
 
-  await setDoc(doc(db, ATTENDANCE_COLL, id), sanitizeForFirestore(record));
+  const source = doc(db, ATTENDANCE_COLL, id);
+  const previous = (await getAttendanceByClass(record.turmaId)).find(entry => entry.id === id);
+  const previousStudents = (previous?.registros ?? []).map(entry => entry.studentId);
+  const currentStudents = new Set(record.registros.map(entry => entry.studentId));
+  const removed = [...new Set(previousStudents)].filter(studentId => !currentStudents.has(studentId));
+  if (record.registros.length + removed.length + 1 > 500) throw new Error('Esta chamada excede o limite de publicação. Divida a turma antes de salvar os registros individuais.');
+  const batch = writeBatch(db);
+  batch.set(source, sanitizeForFirestore(record));
+  record.registros.forEach((entry, sourceIndex) => batch.set(doc(db!, COLLECTION_CLASSES, record.turmaId, 'attendance_students', entry.studentId, 'records', id), {
+    sourceId: id, sourceIndex, data: record.data, aulaNumero: record.aulaNumero ?? 1, status: entry.status, updatedAt: record.criadoEm,
+  }));
+  removed.forEach(studentId => batch.delete(doc(db!, COLLECTION_CLASSES, record.turmaId, 'attendance_students', studentId, 'records', id)));
+  await batch.commit();
   return item;
+};
+
+const COLLECTION_CLASSES = 'classes';
+
+/** Students read their own published frequency, never the class roster. */
+export const getStudentAttendanceRecords = async (classId: string, studentId: string): Promise<AttendanceRecord[]> => {
+  if (!classId || !studentId) return [];
+  if (!db) return getLocalAttendance(classId).flatMap(record => {
+    const own = record.registros.find(entry => entry.studentId === studentId);
+    return own ? [{ ...record, registros: [own] }] : [];
+  });
+  const snapshot = await getDocs(collection(db, COLLECTION_CLASSES, classId, 'attendance_students', studentId, 'records'));
+  return snapshot.docs.map(entry => {
+    const projection = entry.data();
+    return { id: projection.sourceId, turmaId: classId, data: projection.data, aulaNumero: projection.aulaNumero, criadoEm: projection.updatedAt, registros: [{ studentId, studentName: '', status: projection.status }] } as AttendanceRecord;
+  }).sort((a, b) => b.data.localeCompare(a.data));
 };
 
 export const getAttendanceByClass = async (classId: string): Promise<AttendanceRecord[]> => {

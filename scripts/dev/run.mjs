@@ -29,6 +29,8 @@ export function runtimeEnvironment(mode, source = process.env) {
   env.VITE_GEMINI_API_KEY = '';
   env.VITE_USE_FIREBASE_EMULATORS = 'false';
   env.VITE_DISABLE_AI = 'true';
+  for (const key of ['VITE_INSTALLATION_ID', 'VITE_INSTALLATION_NAME', 'VITE_INSTALLATION_MODE', 'VITE_DATA_CONTROLLER_NAME', 'VITE_DATA_CONTROLLER_DOCUMENT', 'VITE_PRIVACY_CONTACT_EMAIL']) env[key] = '';
+  env.VITE_PUBLIC_RELEASE_STAGE = 'pilot';
 
   if (mode === 'emulator') {
     Object.assign(env, {

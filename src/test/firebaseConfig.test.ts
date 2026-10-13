@@ -72,6 +72,16 @@ describe('Firebase configuration isolation', () => {
     expect(sdk.initializeApp).not.toHaveBeenCalled();
     expect(sdk.connectAuthEmulator).not.toHaveBeenCalled();
     expect(sdk.connectFirestoreEmulator).not.toHaveBeenCalled();
+    expect(config.configurationUnavailable).toBe(false);
+  });
+
+  it('blocks local-profile fallback in a published installation without Firebase', async () => {
+    vi.stubEnv('DEV', false);
+    vi.stubEnv('PROD', true);
+    const config = await import('../modules/core/services/firebaseConfig');
+    expect(config.configurationUnavailable).toBe(true);
+    expect(config.app).toBeNull();
+    expect(sdk.initializeApp).not.toHaveBeenCalled();
   });
 
   it('uses only a demo project and both emulators even when real settings are present', async () => {
