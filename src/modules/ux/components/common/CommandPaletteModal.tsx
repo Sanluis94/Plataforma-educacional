@@ -132,7 +132,7 @@ export function CommandPaletteModal({
     },
     {
       id: 'action-family',
-      title: 'Portal da família (demonstração)',
+      title: 'Portal da família',
       subtitle: 'Conheça a proposta de acompanhamento familiar',
       category: 'Ações Rápidas',
       icon: Heart,

@@ -1,169 +1,177 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // ─── Funções Auxiliares de Autenticação e Autorização ───────
-    function isAuthenticated() {
-      return request.auth != null;
+    function signed() { return request.auth != null; }
+    function own(id) { return signed() && request.auth.uid == id; }
+    function role(value) { return signed() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == value; }
+    function admin() { return role('admin'); }
+    function cls(id) { return get(/databases/$(database)/documents/classes/$(id)).data; }
+    function teachingRole() { return role('professor') || role('coordenador'); }
+    function teaches(id) { return signed() && cls(id).professorId == request.auth.uid && teachingRole(); }
+    function coordinates(id) { return role('coordenador') && request.auth.uid in cls(id).get('coordinatorIds', []); }
+    function enrolled(id, student) { return student in cls(id).studentIds; }
+    function staff(id) { return admin() || teaches(id) || coordinates(id); }
+    function classRead(id) { return signed() && (staff(id) || enrolled(id, request.auth.uid)); }
+    function family(classId, studentId) {
+      let link = get(/databases/$(database)/documents/family_links/$(classId + '__' + studentId + '__' + request.auth.uid)).data;
+      return signed() && link.status == 'active' && link.parentId == request.auth.uid && link.email == request.auth.token.email.lower() && request.auth.token.email_verified == true && enrolled(classId, studentId);
     }
+    function workRead(classId, studentId) { return own(studentId) || staff(classId) || family(classId, studentId); }
+    function shortText(value, max) { return value is string && value.size() > 0 && value.size() <= max; }
+    function score(value, max) { return value is number && value >= 0 && value <= max; }
+    function date(value) { return value is string && value.matches('^\\d{4}-\\d{2}-\\d{2}T.*Z$'); }
+    function progressValid(data) { return data.keys().hasOnly(['level','xp','coins','completedModules','purchasedItems','enrolledClasses','updatedAt']) && data.get('level', 1) is number && data.get('level', 1) >= 1 && score(data.get('xp', 0), 10000000) && score(data.get('coins', 0), 10000000) && data.get('completedModules', []) is list && data.get('purchasedItems', []) is list && data.get('enrolledClasses', []) is list; }
+    function profileValid(data) { return data.keys().hasOnly(['name','email','role','gradeLevel','academicLevel','department','courseId','createdAt','updatedAt','lastLoginAt']) && shortText(data.name, 200) && data.email is string && data.role in ['estudante','professor','coordenador','admin']; }
 
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+    match /users/{uid} {
+      allow read: if own(uid) || admin();
+      // First-time teacher registration remains available; it grants only the
+      // ability to create and manage the person's own classes. Coordination
+      // receives no class access until an administrator explicitly assigns it.
+      allow create: if profileValid(request.resource.data) && (admin() || (own(uid) && request.resource.data.role != 'admin' && request.resource.data.email == request.auth.token.email));
+      allow update: if admin() || (own(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','gradeLevel','academicLevel','department','courseId','updatedAt','lastLoginAt']) && shortText(request.resource.data.name,200) && request.resource.data.role == resource.data.role && request.resource.data.email == resource.data.email);
+      allow delete: if admin();
     }
-
-    function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-    }
-
-    function hasRole(role) {
-      return isAuthenticated() && getUserData().role == role;
-    }
-
-    function isProfessor() {
-      return hasRole('professor');
-    }
-
-    function isStudent() {
-      return hasRole('estudante');
-    }
-
-    function isAdmin() {
-      return hasRole('admin');
-    }
-
-    // ─── 1. Coleção: users ──────────────────────────────────────
-    match /users/{userId} {
-      allow read: if isAuthenticated();
-      // Criação de perfil próprio: impede que usuário comum crie a si próprio como 'admin'
-      allow create: if isOwner(userId)
-        && (request.resource.data.role != 'admin' || isAdmin());
-      // Edição de perfil próprio: não pode alterar o próprio cargo a menos que seja admin
-      allow update: if isOwner(userId)
-        && (request.resource.data.role == resource.data.role || isAdmin());
-      allow delete: if isAdmin();
-    }
-
-    // ─── 2. Coleção: classes & Subcoleções ──────────────────────
+    match /progress/{uid} { allow read: if own(uid) || admin(); allow create: if (own(uid) || admin()) && progressValid(request.resource.data); allow update: if (own(uid) || admin()) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['level','xp','coins','completedModules','purchasedItems','enrolledClasses','updatedAt']) && request.resource.data.get('completedModules',[]) is list && score(request.resource.data.get('xp',0),10000000) && score(request.resource.data.get('coins',0),10000000) && request.resource.data.get('level',1) >= 1; allow delete: if own(uid) || admin(); }
+    match /student_progress/{uid} { allow read: if own(uid) || admin(); allow write: if false; }
     match /classes/{classId} {
-      allow read: if isAuthenticated();
-      // Apenas professores ou admins podem criar turmas
-      allow create: if isProfessor() || isAdmin();
-      
-      // Atualização:
-      // a) Professor dono ou Admin pode atualizar tudo
-      // b) Aluno autenticado pode atualizar APENAS matrícula (studentIds, studentsCount, updatedAt)
-      allow update: if isAuthenticated() && (
-        resource.data.professorId == request.auth.uid
-        || isAdmin()
-        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['studentIds', 'studentsCount', 'updatedAt'])
-      );
-
-      // Exclusão apenas pelo professor dono ou admin
-      allow delete: if (isAuthenticated() && resource.data.professorId == request.auth.uid) || isAdmin();
-
-      // Subcoleções da Turma
-      match /materials/{materialId} {
-        allow read: if isAuthenticated();
-        allow create, delete: if (isAuthenticated() && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid) || isAdmin();
-        allow update: if (isAuthenticated() && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid) || isAdmin();
+      function readable() { return signed() && (admin() || (resource.data.professorId == request.auth.uid && teachingRole()) || request.auth.uid in resource.data.studentIds || (role('coordenador') && request.auth.uid in resource.data.get('coordinatorIds', []))); }
+      function classValid(data) { return shortText(data.name, 200) && data.professorId is string && data.studentIds is list && data.studentIds.size() == data.studentIds.toSet().size() && data.studentsCount == data.studentIds.size() && data.get('coordinatorIds', []) is list; }
+      function selfEnrollment() {
+        let before = resource.data.studentIds.toSet(); let after = request.resource.data.studentIds.toSet();
+        return role('estudante') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['studentIds','studentsCount','updatedAt']) && (
+          (!(request.auth.uid in before) && after == before.union([request.auth.uid].toSet()) && request.resource.data.studentsCount == resource.data.studentIds.size() + 1) ||
+          (request.auth.uid in before && after == before.difference([request.auth.uid].toSet()) && request.resource.data.studentsCount == resource.data.studentIds.size() - 1)
+        );
       }
-
-      match /messages/{messageId} {
-        allow read: if isAuthenticated();
-        // Qualquer aluno/professor autenticado pode postar dúvidas
-        allow create: if isAuthenticated();
-        // Professor dono da turma pode responder
-        allow update: if (isAuthenticated() && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid) || isAdmin();
-        allow delete: if (isAuthenticated() && (resource.data.studentId == request.auth.uid || get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid)) || isAdmin();
+      allow read: if readable();
+      allow create: if classValid(request.resource.data) && (admin() || (teachingRole() && own(request.resource.data.professorId) && request.resource.data.studentIds.size() == 0 && request.resource.data.get('coordinatorIds', []).size() == 0 && !('institutionId' in request.resource.data)));
+      allow update: if classValid(request.resource.data) && (admin() || (teaches(classId) && request.resource.data.professorId == resource.data.professorId && request.resource.data.get('coordinatorIds', []) == resource.data.get('coordinatorIds', []) && request.resource.data.get('institutionId', '') == resource.data.get('institutionId', '')) || selfEnrollment());
+      allow delete: if admin() || teaches(classId);
+      match /student_profiles/{studentId} {
+        allow read: if own(studentId) || staff(classId);
+        allow create, update: if (teaches(classId) || admin() || (own(studentId) && enrolled(classId, studentId))) && request.resource.data.keys().hasOnly(['studentId','name','gradeLevel','academicLevel','updatedAt']) && request.resource.data.studentId == studentId && shortText(request.resource.data.name, 200);
+        allow delete: if admin() || teaches(classId) || own(studentId);
       }
-
-      match /notices/{noticeId} {
-        allow read: if isAuthenticated();
-        allow create, update, delete: if (isAuthenticated() && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid) || isAdmin();
-      }
-
-      match /enhanced_materials/{materialId} {
-        allow read: if isAuthenticated();
-        allow create, update, delete: if (isAuthenticated() && get(/databases/$(database)/documents/classes/$(classId)).data.professorId == request.auth.uid) || isAdmin();
+      match /materials/{id} { allow read: if classRead(classId); allow write: if admin() || teaches(classId); }
+      match /notices/{id} { allow read: if classRead(classId); allow write: if admin() || teaches(classId); }
+      match /enhanced_materials/{id} { allow read: if classRead(classId); allow write: if admin() || teaches(classId); }
+      match /messages/{id} {
+        function rewards(data) { return score(data.get('bonusCoins',0),1000) && score(data.get('bonusXp',0),1000); }
+        function claimReward() {
+          let path = /databases/$(database)/documents/progress/$(request.auth.uid);
+          let before = exists(path) ? get(path).data : {'xp':0,'coins':0};
+          let after = getAfter(path).data;
+          return own(resource.data.studentId) && enrolled(classId,request.auth.uid) && resource.data.replied == true && !('rewardClaimedAt' in resource.data) && rewards(resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rewardClaimedAt']) && date(request.resource.data.rewardClaimedAt) && after.xp == before.get('xp',0) + resource.data.get('bonusXp',0) && after.coins == before.get('coins',0) + resource.data.get('bonusCoins',0);
+        }
+        allow read: if own(resource.data.studentId) || staff(classId) || family(classId, resource.data.studentId);
+        allow create: if own(request.resource.data.studentId) && enrolled(classId, request.auth.uid) && shortText(request.resource.data.message, 4000) && request.resource.data.get('replied', false) == false;
+        allow update: if ((teaches(classId) || admin()) && request.resource.data.studentId == resource.data.studentId && request.resource.data.message == resource.data.message && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['replied','replyText','repliedAt','bonusCoins','bonusXp']) && rewards(request.resource.data) && (!('rewardClaimedAt' in resource.data) || (request.resource.data.get('bonusCoins',0) == resource.data.get('bonusCoins',0) && request.resource.data.get('bonusXp',0) == resource.data.get('bonusXp',0)))) || claimReward();
+        allow delete: if own(resource.data.studentId) || teaches(classId) || admin();
       }
     }
-
-    // ─── 3. Coleção: activities ─────────────────────────────────
-    match /activities/{activityId} {
-      allow read: if isAuthenticated();
-      allow create: if isProfessor() || isAdmin();
-      allow update, delete: if (isAuthenticated() && resource.data.professorId == request.auth.uid) || isAdmin();
+    match /class_codes/{code} {
+      allow get: if signed(); allow list: if false;
+      allow create, update: if signed() && (admin() || (teachingRole() && getAfter(/databases/$(database)/documents/classes/$(request.resource.data.classId)).data.professorId == request.auth.uid)) && request.resource.data.keys().hasOnly(['classId','code','name','professorName']) && request.resource.data.code == code && getAfter(/databases/$(database)/documents/classes/$(request.resource.data.classId)).data.code == code && (!exists(/databases/$(database)/documents/class_codes/$(code)) || resource.data.classId == request.resource.data.classId);
+      allow delete: if teaches(resource.data.classId) || admin();
     }
-
-    // ─── 4. Coleção: submissions ────────────────────────────────
-    match /submissions/{submissionId} {
-      // Leitura permitida para o aluno autor, professor ou admin
-      allow read: if isAuthenticated() && (
-        resource.data.studentId == request.auth.uid
-        || isProfessor()
-        || isAdmin()
-      );
-      // Criação permitida apenas por estudante autenticado com o próprio ID
-      allow create: if (isStudent() || isAuthenticated()) && request.resource.data.studentId == request.auth.uid;
-      allow update, delete: if isAdmin();
+    match /activities/{id} {
+      allow get: if admin() || (signed() && teachingRole() && !exists(/databases/$(database)/documents/activities/$(id)) && id.matches('activity-' + request.auth.uid + '-.*')) || own(resource.data.professorId) || classRead(resource.data.classId);
+      allow list: if admin() || own(resource.data.professorId) || classRead(resource.data.classId);
+      allow create: if (teachingRole() && own(request.resource.data.professorId) && (teaches(request.resource.data.get('classId', '')) || (!('classId' in request.resource.data) && request.resource.data.status == 'draft'))) || admin();
+      allow update: if admin() || (own(resource.data.professorId) && teachingRole() && request.resource.data.professorId == resource.data.professorId && (teaches(request.resource.data.get('classId','')) || (!('classId' in request.resource.data) && request.resource.data.status == 'draft')));
+      allow delete: if admin() || (own(resource.data.professorId) && teachingRole());
     }
-
-    // ─── 5. Coleção: progress & student_progress ────────────────
-    match /progress/{userId} {
-      allow read: if isOwner(userId) || isProfessor() || isAdmin();
-      allow write: if isOwner(userId) || isAdmin();
+    match /submissions/{id} {
+      function valid() {
+        let data = request.resource.data;
+        return data.keys().hasOnly(['activityId','activityTitle','classId','studentId','studentName','score','answers','submittedAt','status','evidence']) && own(data.studentId) && shortText(data.activityId, 200) && score(data.score, 100) && data.status in ['completed','pending'] && date(data.submittedAt) && (data.classId == '' ? data.evidence.source == 'lab' : enrolled(data.classId, request.auth.uid)) && (data.get('evidence', {}).get('source', '') in ['lab','enem'] || (get(/databases/$(database)/documents/activities/$(data.activityId)).data.classId == data.classId && get(/databases/$(database)/documents/activities/$(data.activityId)).data.status == 'published'));
+      }
+      allow read: if workRead(resource.data.classId, resource.data.studentId);
+      allow create: if valid();
+      allow update, delete: if admin();
     }
-
-    match /student_progress/{userId} {
-      allow read: if isOwner(userId) || isProfessor() || isAdmin();
-      allow write: if isOwner(userId) || isAdmin();
+    match /exams/{id} {
+      allow read: if own(resource.data.professorId) || classRead(resource.data.turmaId);
+      allow create: if (own(request.resource.data.professorId) && teaches(request.resource.data.turmaId)) || admin();
+      allow update: if admin() || (teaches(resource.data.turmaId) && request.resource.data.turmaId == resource.data.turmaId && request.resource.data.professorId == resource.data.professorId);
+      allow delete: if teaches(resource.data.turmaId) || admin();
     }
-
-    // ─── 6. Coleção: exams & exam_attempts ──────────────────────
-    match /exams/{examId} {
-      allow read: if isAuthenticated();
-      allow create: if isProfessor() || isAdmin();
-      allow update, delete: if (isAuthenticated() && resource.data.professorId == request.auth.uid) || isAdmin();
+    match /exam_attempts/{id} {
+      allow read: if workRead(resource.data.turmaId, resource.data.alunoId);
+      allow create: if own(request.resource.data.alunoId) && enrolled(request.resource.data.turmaId, request.auth.uid) && request.resource.data.examId is string && get(/databases/$(database)/documents/exams/$(request.resource.data.examId)).data.turmaId == request.resource.data.turmaId && get(/databases/$(database)/documents/exams/$(request.resource.data.examId)).data.status == 'Aberta' && score(request.resource.data.porcentagemAproveitamento, 100) && request.resource.data.pontuacaoMaxima > 0 && score(request.resource.data.pontuacaoObtida, request.resource.data.pontuacaoMaxima) && date(request.resource.data.dataEnvio);
+      allow update, delete: if admin();
     }
-
-    match /exam_attempts/{attemptId} {
-      allow read: if isAuthenticated() && (
-        resource.data.alunoId == request.auth.uid
-        || isProfessor()
-        || isAdmin()
-      );
-      allow create: if (isStudent() || isAuthenticated()) && request.resource.data.alunoId == request.auth.uid;
-      allow update, delete: if isAdmin();
+    match /lesson_plans/{id} { allow read: if own(resource.data.professorId) || classRead(resource.data.turmaId); allow create: if (own(request.resource.data.professorId) && teaches(request.resource.data.turmaId)) || admin(); allow update: if admin() || (teaches(resource.data.turmaId) && request.resource.data.turmaId == resource.data.turmaId && request.resource.data.professorId == resource.data.professorId); allow delete: if teaches(resource.data.turmaId) || admin(); }
+    match /attendance/{id} { allow read: if classRead(resource.data.turmaId); allow create: if teaches(request.resource.data.turmaId) || admin(); allow update: if admin() || (teaches(resource.data.turmaId) && request.resource.data.turmaId == resource.data.turmaId); allow delete: if teaches(resource.data.turmaId) || admin(); }
+    match /forum_topics/{id} {
+      allow read: if classRead(resource.data.turmaId);
+      allow create: if classRead(request.resource.data.turmaId) && own(request.resource.data.autorId) && shortText(request.resource.data.titulo, 300) && shortText(request.resource.data.conteudo, 20000) && request.resource.data.respostas.size() == 0;
+      allow update: if admin() || (teaches(resource.data.turmaId) && request.resource.data.turmaId == resource.data.turmaId && request.resource.data.autorId == resource.data.autorId) || (classRead(resource.data.turmaId) && request.resource.data.turmaId == resource.data.turmaId && request.resource.data.autorId == resource.data.autorId && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['respostas']) && request.resource.data.respostas.size() == resource.data.respostas.size() + 1 && request.resource.data.respostas.hasAll(resource.data.respostas) && request.resource.data.respostas[resource.data.respostas.size()].autorId == request.auth.uid && request.resource.data.respostas[resource.data.respostas.size()].get('isMelhorResposta', false) == false && request.resource.data.respostas[resource.data.respostas.size()].get('moedasGanhas', 0) == 0);
+      allow delete: if teaches(resource.data.turmaId) || admin() || own(resource.data.autorId);
     }
-
-    // ─── 7. Coleção: lesson_plans ───────────────────────────────
-    match /lesson_plans/{planId} {
-      allow read: if isAuthenticated();
-      allow create: if isProfessor() || isAdmin();
-      allow update, delete: if (isAuthenticated() && resource.data.professorId == request.auth.uid) || isAdmin();
+    match /submission_reviews/{id} {
+      function valid(data) { return data.keys().hasOnly(['id','submissionId','classId','studentId','professorId','status','gradedAt','rubricScores','totalScore','generalFeedback','updatedAt','version','history']) && data.submissionId == id && data.studentId == get(/databases/$(database)/documents/submissions/$(id)).data.studentId && data.classId == get(/databases/$(database)/documents/submissions/$(id)).data.classId && data.professorId == cls(data.classId).professorId && data.status in ['draft','published'] && score(data.totalScore, 10) && data.rubricScores is map && data.generalFeedback is string && data.generalFeedback.size() <= 10000 && data.version is int && data.version >= 1 && data.history is list && date(data.gradedAt); }
+      allow get: if staff(get(/databases/$(database)/documents/submissions/$(id)).data.classId) || (resource.data.status == 'published' && (own(resource.data.studentId) || family(resource.data.classId, resource.data.studentId)));
+      allow list: if staff(resource.data.classId) || (resource.data.status == 'published' && (own(resource.data.studentId) || family(resource.data.classId, resource.data.studentId)));
+      allow create: if valid(request.resource.data) && (teaches(request.resource.data.classId) || admin());
+      allow update: if valid(request.resource.data) && (teaches(resource.data.classId) || admin()) && request.resource.data.classId == resource.data.classId && request.resource.data.studentId == resource.data.studentId && request.resource.data.professorId == resource.data.professorId && request.resource.data.version == resource.data.version + 1;
+      allow delete: if teaches(resource.data.classId) || admin();
     }
-
-    // ─── 8. Coleção: attendance (Diário de Classe) ──────────────
-    match /attendance/{attendanceId} {
-      allow read: if isAuthenticated();
-      allow create, update, delete: if isProfessor() || isAdmin();
+    match /grade_policies/{id} {
+      function valid(data) { return data.keys().hasOnly(['id','classId','period','professorId','weights','mode','universityWeights','p1ExamId','p2ExamId','participationScores','explanation','reviewMode','version','updatedAt','history','startDate','endDate']) && id == data.classId + '__' + data.period && data.professorId == cls(data.classId).professorId && data.weights.turmaId == data.classId && score(data.weights.pesoProvas,100) && score(data.weights.pesoLabs,100) && score(data.weights.pesoAtividades,100) && score(data.weights.pesoParticipacao,100) && data.weights.pesoProvas + data.weights.pesoLabs + data.weights.pesoAtividades + data.weights.pesoParticipacao > 0 && data.mode in ['school','university'] && data.reviewMode in ['feedback-only','replace-submission-score'] && data.participationScores is map && data.version is int && data.version >= 1 && data.history is list; }
+      allow get: if classRead(id.split('__')[0]);
+      allow list: if classRead(resource.data.classId);
+      allow create: if valid(request.resource.data) && request.resource.data.participationScores.size() == 0 && request.resource.data.version == 1 && (teaches(request.resource.data.classId) || admin());
+      allow update: if valid(request.resource.data) && request.resource.data.participationScores.size() == 0 && request.resource.data.classId == resource.data.classId && request.resource.data.professorId == resource.data.professorId && request.resource.data.period == resource.data.period && request.resource.data.version == resource.data.version + 1 && (teaches(request.resource.data.classId) || admin());
+      allow delete: if teaches(resource.data.classId) || admin();
+      match /student_scores/{studentId} {
+        allow read: if staff(id.split('__')[0]) || (own(studentId) && enrolled(id.split('__')[0],studentId));
+        allow create, update: if (teaches(id.split('__')[0]) || admin()) && request.resource.data.keys().hasOnly(['classId','period','studentId','professorId','score','version','updatedAt']) && request.resource.data.classId == id.split('__')[0] && request.resource.data.studentId == studentId && enrolled(request.resource.data.classId,studentId) && request.resource.data.professorId == cls(request.resource.data.classId).professorId && score(request.resource.data.score,10) && request.resource.data.version == getAfter(/databases/$(database)/documents/grade_policies/$(id)).data.version;
+        allow delete: if teaches(id.split('__')[0]) || admin();
+      }
     }
-
-    // ─── 9. Coleção: forum_topics (Fórum Pedagógico) ────────────
-    match /forum_topics/{topicId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      // Atualização permitida para respostas da turma ou moderação docente
-      allow update: if isAuthenticated();
-      allow delete: if (isAuthenticated() && resource.data.autorId == request.auth.uid) || isProfessor() || isAdmin();
+    match /student_guidance/{id} { allow read: if workRead(resource.data.classId, resource.data.studentId); allow create: if (teaches(request.resource.data.classId) || admin()) && request.resource.data.keys().hasOnly(['classId','studentId','professorId','text','activityId','createdAt']) && request.resource.data.professorId == cls(request.resource.data.classId).professorId && enrolled(request.resource.data.classId, request.resource.data.studentId) && shortText(request.resource.data.text, 4000) && date(request.resource.data.createdAt); allow update: if admin() || (teaches(resource.data.classId) && request.resource.data.classId == resource.data.classId && request.resource.data.studentId == resource.data.studentId && request.resource.data.professorId == resource.data.professorId && shortText(request.resource.data.text,4000)); allow delete: if teaches(resource.data.classId) || admin(); }
+    match /family_invitations/{id} {
+      function invited() { return signed() && request.auth.token.email_verified == true && request.auth.token.email.lower() == resource.data.email; }
+      allow read: if teaches(resource.data.classId) || admin() || invited();
+      allow create: if (teaches(request.resource.data.classId) || admin()) && request.resource.data.keys().hasOnly(['id','classId','className','studentId','studentName','professorId','professorName','email','status','createdAt','expiresAt']) && request.resource.data.id == id && enrolled(request.resource.data.classId, request.resource.data.studentId) && request.resource.data.professorId == cls(request.resource.data.classId).professorId && request.resource.data.email is string && request.resource.data.email == request.resource.data.email.lower() && request.resource.data.expiresAt is timestamp && request.resource.data.expiresAt > request.time && request.resource.data.status == 'pending';
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','acceptedBy','acceptedAt']) && ((teaches(resource.data.classId) || admin()) && request.resource.data.status == 'revoked' || (invited() && resource.data.status == 'pending' && resource.data.expiresAt > request.time && request.resource.data.status == 'accepted' && request.resource.data.acceptedBy == request.auth.uid && enrolled(resource.data.classId, resource.data.studentId)));
+      allow delete: if teaches(resource.data.classId) || admin();
     }
-
-    // ─── 10. Coleção: system_logs ───────────────────────────────
-    match /system_logs/{logId} {
-      allow create: if isAuthenticated();
-      allow read: if isAdmin();
-      allow update, delete: if false; // Logs são imutáveis
+    match /family_links/{id} {
+      function validLink(data) { let invitation = getAfter(/databases/$(database)/documents/family_invitations/$(data.invitationId)).data; return data.keys().hasOnly(['id','invitationId','classId','className','studentId','studentName','professorId','professorName','parentId','email','status','createdAt','revokedAt']) && id == data.classId + '__' + data.studentId + '__' + request.auth.uid && data.parentId == request.auth.uid && request.auth.token.email_verified == true && data.email == request.auth.token.email.lower() && invitation.status == 'accepted' && invitation.acceptedBy == request.auth.uid && invitation.classId == data.classId && invitation.studentId == data.studentId && invitation.professorId == data.professorId && invitation.email == data.email && enrolled(data.classId, data.studentId) && data.status == 'active'; }
+      allow read: if own(resource.data.parentId) || teaches(resource.data.classId) || admin();
+      allow create: if signed() && validLink(request.resource.data);
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','revokedAt']) && request.resource.data.status == 'revoked' && (own(resource.data.parentId) || teaches(resource.data.classId) || admin());
+      allow delete: if false;
     }
-
+    match /family_messages/{id} {
+      function linked(data) { let link = get(/databases/$(database)/documents/family_links/$(data.linkId)).data; return data.classId == link.classId && data.studentId == link.studentId && data.parentId == link.parentId && data.professorId == link.professorId && link.status == 'active' && enrolled(link.classId, link.studentId) && (own(link.parentId) || teaches(link.classId) || admin()); }
+      allow read: if linked(resource.data);
+      allow create: if signed() && linked(request.resource.data) && request.resource.data.keys().hasOnly(['id','linkId','classId','studentId','parentId','professorId','senderId','senderName','text','createdAt']) && request.resource.data.id == id && own(request.resource.data.senderId) && shortText(request.resource.data.text, 4000) && date(request.resource.data.createdAt);
+      allow update, delete: if false;
+    }
+    match /certificate_records/{id} {
+      function proof(data, index) {
+        let present = index < data.evidenceSubmissionIds.size();
+        let source = present ? get(/databases/$(database)/documents/submissions/$(data.evidenceSubmissionIds[index])).data : {};
+        let evidence = source.get('evidence',{});
+        return !present || (source.studentId == data.studentId && source.status == 'completed' && score(source.score,100) && source.score >= data.requirements.minScore && evidence.get('stage','') == 'assessment' && evidence.get('source','') in ['lab','activity'] && evidence.get('questions',[]) is list && evidence.get('questions',[]).size() > 0 && data.completedItemIds[index] == evidence.get('labId',source.activityId) && (data.kind != 'course' || source.classId == data.classId));
+      }
+      function valid(data) { return data.keys().hasOnly(['id','publicCode','studentId','studentName','classId','issuerId','kind','title','issuerLabel','academicLevelLabel','issuedAt','status','authorizedCourseHours','observedSeconds','completedItemIds','evidenceSubmissionIds','requirements','integrityHash','revokedAt','revocationReason']) && data.id == id && data.publicCode == id && id.matches('^[0-9a-fA-F-]{36}$') && data.kind in ['course','lab-record'] && shortText(data.title,300) && shortText(data.studentName,200) && data.status == 'active' && date(data.issuedAt) && data.completedItemIds is list && data.completedItemIds.size() == data.completedItemIds.toSet().size() && data.evidenceSubmissionIds is list && data.evidenceSubmissionIds.size() <= 8 && data.evidenceSubmissionIds.size() == data.completedItemIds.size() && data.evidenceSubmissionIds.size() == data.evidenceSubmissionIds.toSet().size() && data.requirements.minimumCompleted is int && data.requirements.minimumCompleted >= 1 && data.requirements.minimumCompleted <= 8 && data.completedItemIds.size() >= data.requirements.minimumCompleted && data.evidenceSubmissionIds.size() >= data.requirements.minimumCompleted && score(data.requirements.minScore,100) && data.integrityHash is string && data.integrityHash.size() == 64 && (data.observedSeconds == null || score(data.observedSeconds, 604800)); }
+      allow read: if own(resource.data.studentId) || own(resource.data.issuerId) || (resource.data.classId != '' && staff(resource.data.classId)) || admin();
+      allow create: if valid(request.resource.data) && ((request.resource.data.kind == 'course' && (teaches(request.resource.data.classId) || admin()) && request.resource.data.issuerId == request.auth.uid && enrolled(request.resource.data.classId, request.resource.data.studentId) && request.resource.data.authorizedCourseHours is number && request.resource.data.authorizedCourseHours > 0 && request.resource.data.authorizedCourseHours <= 1000) || (request.resource.data.kind == 'lab-record' && own(request.resource.data.studentId) && request.resource.data.issuerId == request.auth.uid && request.resource.data.classId == '' && request.resource.data.authorizedCourseHours == null && get(/databases/$(database)/documents/progress/$(request.auth.uid)).data.completedModules.hasAll(request.resource.data.completedItemIds))) && proof(request.resource.data,0) && proof(request.resource.data,1) && proof(request.resource.data,2) && proof(request.resource.data,3) && proof(request.resource.data,4) && proof(request.resource.data,5) && proof(request.resource.data,6) && proof(request.resource.data,7);
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','revokedAt','revocationReason']) && resource.data.status == 'active' && request.resource.data.status == 'revoked' && (admin() || (resource.data.classId != '' && teaches(resource.data.classId)));
+      allow delete: if false;
+    }
+    match /certificate_public/{id} {
+      function mirrored(data) { let record = getAfter(/databases/$(database)/documents/certificate_records/$(id)).data; return data.keys().hasOnly(['id','kind','title','issuerLabel','issuedAt','status','authorizedCourseHours','observedSeconds','completedCount','requirementsSummary','integrityHash','revokedAt']) && data.id == id && data.kind == record.kind && data.title == record.title && data.issuerLabel == record.issuerLabel && data.issuedAt == record.issuedAt && data.status == record.status && data.authorizedCourseHours == record.authorizedCourseHours && data.observedSeconds == record.observedSeconds && data.completedCount == record.completedItemIds.size() && data.integrityHash == record.integrityHash && shortText(data.requirementsSummary, 1000); }
+      allow get: if id.matches('^[0-9a-fA-F-]{36}$'); allow list: if false;
+      allow create: if signed() && mirrored(request.resource.data) && getAfter(/databases/$(database)/documents/certificate_records/$(id)).data.issuerId == request.auth.uid;
+      allow update: if signed() && mirrored(request.resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','revokedAt']) && request.resource.data.status == 'revoked' && (admin() || teaches(getAfter(/databases/$(database)/documents/certificate_records/$(id)).data.classId));
+      allow delete: if false;
+    }
+    match /system_logs/{id} { allow read: if admin(); allow create: if signed() && request.resource.data.get('userId', request.auth.uid) == request.auth.uid && shortText(request.resource.data.message, 5000); allow update, delete: if false; }
   }
 }

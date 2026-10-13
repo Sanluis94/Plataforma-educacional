@@ -10,7 +10,12 @@ import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
 import { getLearningLab, type LearningLab } from '../../core/constants/learningCatalog';
 import { LEARNING_LEVELS, normalizeLearningLevel, learningLevelLabel } from '../../core/constants/learningLevels';
-import { getLabLearningContent } from '../../core/content/labLearningContent';
+import { useLabLearningContent } from '../hooks/useLabLearningContent';
+import { readLastLearningLab, saveLastLearningLab, lastLearningLabHref } from '../../core/services/studentStudyGuidance';
+import { StudentReviewCard } from '../components/StudentReviewCard';
+import { getPublishedSubmissionReviewsByStudent, type SubmissionReview } from '../../data/repositories/submissionRepository';
+import { getGradePolicy, type GradePolicy } from '../../data/repositories/gradePolicyRepository';
+import { StudentGuidanceInbox } from '../components/StudentGuidance';
 import { LabLearningWorkspace } from '../components/labs/LabLearningWorkspace';
 import SoundEffects from '../../core/services/soundEffects';
 import { StudentLmsModules } from '../components/StudentLmsModules';
@@ -21,12 +26,13 @@ import { offlineSyncService } from '../../core/services/offlineSyncService';
 import { learningDocumentId } from '../../data/services/learningCapture';
 import { examAttemptPercentage } from '../../data/services/learningAnalytics';
 import { useLearningCapture } from '../hooks/useLearningCapture';
-import { 
+import {
   sendStudentMessage,
   subscribeStudentMessages,
+  claimStudentMessageReward,
   subscribeClassNotices,
   subscribeEnhancedMaterials,
-  type StudentMessage 
+  type StudentMessage
 } from '../../data/repositories/classRepository';
 import {
   subscribeExamsByClass,
@@ -149,6 +155,7 @@ export function EstudanteDashboard() {
 
   const {
     progress,
+    aiTip,
     completedModules,
     activeLab,
     setActiveLab,
@@ -161,14 +168,18 @@ export function EstudanteDashboard() {
     handleLabComplete, labSaveError, labSaving, labPending, retryLabCompletion,
     modules,
     gradeLevel,
+    classesLoading, classesError,
+    refreshProgress,
   } = useStudentDashboard(selectedLevel);
 
   const { level, xp, coins } = progress;
+  const labContent = useLabLearningContent(activeLab?.id);
+  const lastLab = readLastLearningLab(studentUid);
   const legacyCapture = useLearningCapture();
   const examCapture = useLearningCapture();
 
   const tabParam = searchParams.get('tab');
-  const activeTab: StudentTab = STUDENT_TABS.includes(tabParam as StudentTab) ? tabParam as StudentTab : 'labs';
+  const activeTab: StudentTab = STUDENT_TABS.includes(tabParam as StudentTab) ? tabParam as StudentTab : (searchParams.has('level')||searchParams.has('subject')||searchParams.has('lab')) ? 'labs' : studentClasses.length ? 'activities' : 'classes';
   const panelLocation = location.pathname + location.search;
   const setActiveTab = (tab: StudentTab) => {
     setActiveLab(null);
@@ -262,6 +273,9 @@ export function EstudanteDashboard() {
   const [activityHistory, setActivityHistory] = useState<SubmissionData[]>([]);
   const [activityHistoryLoading, setActivityHistoryLoading] = useState(true);
   const [activityHistoryError, setActivityHistoryError] = useState('');
+  const [publishedReviews, setPublishedReviews] = useState<SubmissionReview[]>([]);
+  const [currentGradePolicy, setCurrentGradePolicy] = useState<GradePolicy | null>(null);
+  const [reviewsError, setReviewsError] = useState('');
   const [studentAttempts, setStudentAttempts] = useState<ExamAttempt[]>([]);
 
   // Class Messages
@@ -309,9 +323,15 @@ export function EstudanteDashboard() {
     setClassActivities([]);
     setActivitiesError('');
     const unsubActivities = subscribeActivitiesByClass(selectedClassId, entries => setClassActivities(entries.filter(entry => entry.status === 'published')), () => setActivitiesError('Não foi possível carregar as atividades desta turma. Recarregue a página para tentar novamente.'));
-    const unsubMessages = subscribeStudentMessages(selectedClassId, setMessages);
+    let active=true;
+    const unsubMessages = subscribeStudentMessages(selectedClassId, messages=>{
+      if(!active)return;
+      setMessages(messages);
+      void Promise.all(messages.filter(message=>message.id&&!message.rewardClaimedAt&&(message.bonusCoins||message.bonusXp)).map(message=>claimStudentMessageReward(selectedClassId,message.id!,studentUid))).then(claims=>{if(active&&claims.some(Boolean))void refreshProgress();}).catch(()=>setActivitiesError('Sua recompensa ainda não foi recebida. Recarregue a página para tentar novamente.'));
+    },studentUid);
 
     return () => {
+      active=false;
       unsubNotices();
       unsubMaterials();
       unsubLessonPlans();
@@ -319,7 +339,7 @@ export function EstudanteDashboard() {
       unsubActivities();
       unsubMessages();
     };
-  }, [selectedClassId]);
+  }, [selectedClassId,studentUid,refreshProgress]);
 
   useEffect(() => {
     let active = true;
@@ -329,6 +349,17 @@ export function EstudanteDashboard() {
     }).catch(() => { if (active) setActivityHistoryError('Não foi possível carregar suas entregas anteriores.'); }).finally(() => { if (active) setActivityHistoryLoading(false); });
     return () => { active = false; };
   }, [studentUid, selectedClassId]);
+
+  useEffect(() => {
+    let active = true; setPublishedReviews([]); setCurrentGradePolicy(null); setReviewsError('');
+    if (!selectedClassId) return;
+    void Promise.all([getPublishedSubmissionReviewsByStudent(studentUid, selectedClassId), getGradePolicy(selectedClassId)]).then(([reviews, policy]) => { if (active) { setPublishedReviews(reviews); setCurrentGradePolicy(policy); } }).catch(() => { if (active) setReviewsError('Não foi possível carregar as orientações publicadas pelo professor. Recarregue para tentar novamente.'); });
+    return () => { active = false; };
+  }, [studentUid, selectedClassId]);
+
+  useEffect(() => {
+    if (activeLab && userData?.role === 'estudante') saveLastLearningLab(studentUid, { labId: activeLab.id, ...(searchParams.get('lessonPlan') && selectedClassId ? { classId: selectedClassId, lessonPlanId: searchParams.get('lessonPlan')! } : {}) });
+  }, [activeLab, studentUid, selectedClassId, searchParams, userData?.role]);
 
   // Load student's past exam attempts
   useEffect(() => {
@@ -365,8 +396,10 @@ export function EstudanteDashboard() {
         return;
       }
       setClassCodeInput('');
+      setSelectedClassId(joined.classId);
+      setActiveTab('activities');
       SoundEffects.playSuccess();
-      setJoinFeedback({ msg: '🎉 Matrícula realizada com sucesso na turma!', type: 'success' });
+      setJoinFeedback({ msg: `Você entrou na turma ${joined.name}. Veja abaixo as atividades publicadas pelo professor.`, type: 'success' });
       setTimeout(() => setJoinFeedback(null), 5000);
     } catch (err: any) {
       console.error('Erro ao matricular na turma:', err);
@@ -548,9 +581,19 @@ export function EstudanteDashboard() {
           <select aria-label="Turma selecionada" value={selectedClassId || ''} onChange={event => setSelectedClassId(event.target.value)} style={{ padding: '0.65rem', borderRadius: '8px', background: 'var(--color-bg-card, #FAF7EE)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}>
             {studentClasses.map(turma => <option key={turma.id} value={turma.id}>{turma.name}</option>)}
           </select>
-          <span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--text-secondary)' }}>As provas, aulas, materiais e avisos são desta turma.</span>
+          <span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--text-secondary)' }}>As atividades, provas, aulas, materiais e avisos são desta turma.</span>
         </label>
       )}
+
+      {classesLoading && <p role="status">Carregando suas turmas…</p>}
+      {classesError && <p role="alert">{classesError}</p>}
+      {!classesLoading && !classesError && <section className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem', color: 'var(--text-main)' }} aria-labelledby="student-next-step-title">
+        <h2 id="student-next-step-title">{aiTip?.title ?? (studentClasses.length ? 'Comece pelas atividades da turma' : 'Seu primeiro passo: entrar na turma')}</h2>
+        <p>{aiTip?.message ?? (studentClasses.length ? 'Leia a proposta, realize a atividade, entregue suas respostas e consulte a orientação do professor.' : 'Peça o código ao professor. Depois da matrícula, suas atividades, materiais e orientações aparecem neste painel.')}</p>
+        {aiTip ? <Link className="btn-primary" to={aiTip.href.startsWith('/simulacao') ? withReturnTo(aiTip.href, panelLocation) : aiTip.href}>{aiTip.actionLabel}</Link> : <button className="btn-primary" onClick={() => setActiveTab(studentClasses.length ? 'activities' : 'classes')}>{studentClasses.length ? 'Ver atividades da minha turma' : 'Entrar na turma'}</button>}
+        {lastLab && <Link className="btn-outline" style={{ marginLeft: '0.75rem' }} to={withReturnTo(lastLearningLabHref(lastLab), panelLocation)}>Continuar de onde parei</Link>}
+        {joinFeedback && activeTab !== 'classes' && <p role={joinFeedback.type === 'success' ? 'status' : 'alert'}>{joinFeedback.msg}</p>}
+      </section>}
 
       {/* Reorganized Student Navigation Bar with Dynamic Badges */}
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--border-color)' }}>
@@ -582,7 +625,7 @@ export function EstudanteDashboard() {
               borderRadius: 'var(--radius-sm, 10px) var(--radius-sm, 10px) 0 0',
               border: 'none',
               borderBottom: activeTab === tab.id ? '2px solid var(--color-primary, #E4683F)' : '2px solid transparent',
-              background: activeTab === tab.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.1))' : 'transparent',
+              backgroundColor: activeTab === tab.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.1))' : 'transparent',
               color: activeTab === tab.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
               fontWeight: activeTab === tab.id ? 700 : 500,
               fontSize: '0.9rem',
@@ -765,7 +808,9 @@ export function EstudanteDashboard() {
             </span>
           </div>
 
-          <div className="glass-card" style={{ padding: '1rem', minHeight: '520px', borderRadius: 'var(--radius-lg, 14px)' }}>
+          {labContent.loading && <p role="status">Carregando o roteiro do laboratório…</p>}
+          {labContent.error && <p role="alert">{labContent.error} <button type="button" onClick={labContent.retry}>Tentar carregar roteiro</button></p>}
+          {labContent.content && <div className="glass-card" style={{ padding: '1rem', minHeight: '520px', borderRadius: 'var(--radius-lg, 14px)' }}>
             <LabLearningWorkspace
               key={activeLab.id}
               labId={activeLab.id}
@@ -773,7 +818,7 @@ export function EstudanteDashboard() {
               subject={getLearningLab(activeLab.id)?.subject || 'Laboratório'}
               academicLevel={getLearningLab(activeLab.id)?.academicLevel}
               objective="Compare os casos e use as evidências para justificar suas respostas."
-              content={getLabLearningContent(activeLab.id)}
+              content={labContent.content}
               onComplete={async ({ score, evidence }) => {
                 const result = await handleLabComplete({ id: activeLab.id, title: activeLab.title, ...(searchParams.get('lessonPlan') ? { classId: selectedClassId ?? undefined, lessonPlanId: searchParams.get('lessonPlan')! } : {}) }, score, evidence);
                 if (result) {
@@ -792,12 +837,14 @@ export function EstudanteDashboard() {
               }}
             />
             </LabLearningWorkspace>
-          </div>
+          </div>}
         </div>
       )}
 
       {activeTab === 'activities' && <section className="fade-in" aria-labelledby="class-activities-title">
         <h2 id="class-activities-title">Atividades da Turma</h2>
+        <StudentGuidanceInbox classId={selectedClassId} studentId={studentUid} />
+        {reviewsError && <p role="alert">{reviewsError}</p>}
         {activitiesError && <p role="alert">{activitiesError}</p>}
         {activityHistoryError && <p role="alert">{activityHistoryError}</p>}
         {!selectedClassId ? <p>Entre em uma turma com o código fornecido pelo professor para receber atividades.</p> : !activitiesError && classActivities.length === 0 ? <p>O professor ainda não publicou atividades para esta turma.</p> : null}
@@ -805,7 +852,7 @@ export function EstudanteDashboard() {
           let queuedSubmission: SubmissionData | undefined;
           try { const pending = offlineSyncService.getPendingSubmissions(studentUid).find(item => item.kind === 'submission' && item.submission.classId === selectedClassId && item.submission.activityId === activity.id); if (pending?.kind === 'submission') queuedSubmission = { ...pending.submission, id: pending.id }; } catch { /* Global delivery badge reports an unreadable queue. */ }
           const previous = queuedSubmission ?? activityHistory.find(entry => entry.activityId === activity.id);
-          return <StudentClassActivity key={`${selectedClassId}-${activity.id}`} activity={activity} studentId={studentUid} onSubmit={handleActivitySubmit} previousSubmission={previous} previousQueued={Boolean(queuedSubmission)} />;
+          return <div key={`${selectedClassId}-${activity.id}`}><StudentClassActivity activity={activity} studentId={studentUid} onSubmit={handleActivitySubmit} previousSubmission={previous} previousQueued={Boolean(queuedSubmission)} /><StudentReviewCard review={publishedReviews.find(review => review.submissionId === previous?.id)} participatesInGrade={currentGradePolicy?.reviewMode === 'replace-submission-score'} /></div>;
         })}</div>}
       </section>}
 
@@ -1511,7 +1558,7 @@ export function EstudanteDashboard() {
 
       {/* ── TAB LMS: BOLETIM ESCOLAR, FÓRUM & CERTIFICADOS DIGITAIS ── */}
       {(activeTab === 'gradebook' || activeTab === 'forum' || activeTab === 'certificates') && (
-        <StudentLmsModules
+        <StudentLmsModules period={searchParams.get('gradePeriod') as import('../../data/repositories/gradePolicyRepository').GradePeriod || 'atual'} onPeriodChange={period=>setSearchParams(previous=>{const next=new URLSearchParams(previous);next.set('gradePeriod',period);return next;})}
           studentId={studentUid}
           studentName={studentName}
           selectedClassId={selectedClassId}

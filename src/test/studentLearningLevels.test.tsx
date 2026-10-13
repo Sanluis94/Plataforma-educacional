@@ -46,7 +46,7 @@ vi.mock('../modules/data/repositories/lessonPlanRepository', () => ({
     return () => {};
   }),
 }));
-vi.mock('../modules/data/repositories/submissionRepository', () => ({ saveSubmission: vi.fn(), getSubmissionsByStudent: vi.fn(async () => []) }));
+vi.mock('../modules/data/repositories/submissionRepository', () => ({ saveSubmission: vi.fn(), getPublishedSubmissionReviewsByStudent:vi.fn(async()=>[]),getSubmissionsByStudentInClass:vi.fn(async()=>[]),getSubmissionsByStudent: vi.fn(async () => []) }));
 vi.mock('../modules/data/repositories/activityRepository', () => ({ subscribeActivitiesByClass: vi.fn((_classId, callback) => { callback([]); return () => {}; }) }));
 vi.mock('../modules/core/services/soundEffects', () => ({ default: { playClick: vi.fn(), playUnlock: vi.fn(), playSuccess: vi.fn() } }));
 vi.mock('../modules/ux/components/StudentLmsModules', () => ({
@@ -67,7 +67,7 @@ function HistoryControls() {
   return <><button onClick={() => navigate(-1)}>Histórico anterior</button><span data-testid="panel-url">{location.pathname}{location.search}</span></>;
 }
 
-function renderStudent(url = '/estudante') {
+function renderStudent(url = '/estudante?tab=labs') {
   return render(<MemoryRouter initialEntries={[url]}><HistoryControls /><Routes>
     <Route path="/estudante" element={<EstudanteDashboard />} />
     <Route path="/simulacao" element={<Destination />} />
@@ -88,7 +88,7 @@ describe('trilha do estudante por nível de aprendizado', () => {
     renderStudent();
     expect(screen.getByRole('combobox', { name: 'Nível de aprendizado' })).toHaveValue('fundamental_1');
     const labs = searchLearningLabs({ academicLevel: 'fundamental_1' });
-    expect(screen.getByRole('status')).toHaveTextContent(`${labs.length} laboratórios`);
+    expect(screen.getAllByRole('status').find(item=>item.textContent?.includes('laboratórios'))).toHaveTextContent(`${labs.length} laboratórios`);
     const subject = screen.getByRole('combobox', { name: 'Disciplina' });
     expect([...subject.querySelectorAll('option')].map(option => option.value)).toEqual([...new Set(labs.map(lab => lab.subject))]);
     expect(screen.queryByRole('article', { name: 'Funções Trigonométricas' })).not.toBeInTheDocument();
@@ -97,7 +97,7 @@ describe('trilha do estudante por nível de aprendizado', () => {
   });
 
   it('reconcilia a disciplina ao trocar de nível e mantém apenas os tópicos correspondentes', () => {
-    renderStudent('/estudante?level=graduacao&subject=disciplina-inexistente');
+    renderStudent('/estudante?tab=labs&level=graduacao&subject=disciplina-inexistente');
     const level = screen.getByRole('combobox', { name: 'Nível de aprendizado' });
     expect(level).toHaveValue('graduacao');
     fireEvent.change(level, { target: { value: 'pos_graduacao' } });

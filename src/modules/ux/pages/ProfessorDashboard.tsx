@@ -15,6 +15,9 @@ import { LEARNING_LEVELS, normalizeLearningLevel, learningLevelLabel } from '../
 import { generateCompleteLessonWithAI } from '../../core/services/geminiService';
 import { ProfessorLmsModules } from '../components/ProfessorLmsModules';
 import { ClassLearningReportView } from '../components/ClassLearningReportView';
+import { ClassActivityPublisher } from '../components/ClassActivityPublisher';
+import { StudentOrientationComposer } from '../components/StudentGuidance';
+import { ClassFamilyManager } from '../components/ClassFamilyManager';
 import type {
   ExamData, ExamQuestion, ExamAttempt,
   LessonPlanItem, BimesterPeriod
@@ -29,6 +32,7 @@ import {
   addEnhancedMaterial,
   subscribeEnhancedMaterials,
   deleteEnhancedMaterial,
+  ensureClassEnrollmentCode,
   type StudentMessage
 } from '../../data/repositories/classRepository';
 import {
@@ -50,7 +54,7 @@ import { BatchClassManagerModal } from '../components/labs/BatchClassManagerModa
 import { FileSpreadsheet, ShieldAlert } from 'lucide-react';
 import { canAccessPath, withReturnTo } from '../../core/utils/navigation';
 
-const PROFESSOR_TABS = ['classes', 'lesson_plans', 'exams', 'materials', 'labs_overview', 'reports', 'messages', 'lms_gradebook'] as const;
+const PROFESSOR_TABS = ['classes', 'activities', 'lesson_plans', 'exams', 'materials', 'labs_overview', 'reports', 'messages', 'lms_gradebook'] as const;
 type ProfessorTab = typeof PROFESSOR_TABS[number];
 const PLAN_PERIODS: BimesterPeriod[] = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre', '1º Semestre', '2º Semestre'];
 
@@ -80,7 +84,12 @@ export function ProfessorDashboard() {
     exportReportCSV,
     globalStats,
     statsError,
+    activities = [],
+    publishActivity,
+    classCreationError,
+    creatingClass,
   } = useProfessorDashboard({ activeTab: dashboardTab, classId: searchParams.get('class') });
+  const [orientationStudentId, setOrientationStudentId] = useState<string | null>(null);
   const setSelectedClassId = (classId: string) => setSearchParams(previous => {
     const next = new URLSearchParams(previous);
     next.set('class', classId);
@@ -864,6 +873,7 @@ export function ProfessorDashboard() {
       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--border-color)' }}>
         {[
           { id: 'classes', label: '🏫 Minhas Turmas & Mural', icon: BookOpen },
+          { id: 'activities', label: '📋 Criar atividade', icon: PlusCircle },
           { id: 'lms_gradebook', label: '📚 Diário, Notas e Fórum', icon: Award },
           { id: 'lesson_plans', label: '📅 Plano de Aulas Bimestral', icon: Calendar },
           { id: 'exams', label: `📝 Provas & Avaliações (${examsList.length})`, icon: FileText },
@@ -902,6 +912,12 @@ export function ProfessorDashboard() {
       {/* ── TAB 1: MINHAS TURMAS & MURAL DE AVISOS ── */}
       {dashboardTab === 'classes' && (
         <div className="fade-in">
+          <section className="professor-workflow glass-card" aria-label="Primeiros passos do professor" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
+            <h2>{turmas.length ? 'Próximo passo com sua turma' : 'Comece sua primeira turma'}</h2>
+            <ol><li>Crie uma turma para organizar os alunos.</li><li>Compartilhe o código da turma para que eles se matriculem.</li><li>Publique uma atividade e acompanhe as entregas e devolutivas.</li></ol>
+            <div className="workflow-actions"><button type="button" className="btn-outline" onClick={() => setIsCreatingClass(true)}>{turmas.length ? 'Criar outra turma' : 'Criar minha primeira turma'}</button><button type="button" className="btn-gradient" disabled={!selectedClassId} onClick={() => setDashboardTab('activities')}>Preparar primeira atividade</button>{selectedClassId && <button type="button" className="btn-outline" onClick={() => handleViewClassReport(selectedClassId)}>Acompanhar entregas</button>}</div>
+            {selectedClass && <p>Turma atual: <strong>{selectedClass.name}</strong>. Código para convite: <strong>{selectedClass.code || selectedClass.id.slice(0, 6).toUpperCase()}</strong>. {activities.filter(activity => activity.classId === selectedClassId && activity.status === 'published').length} atividade(s) publicada(s).</p>}
+          </section>
           {/* Create Class Modal/Form */}
           {isCreatingClass && (
             <div className="glass-card mb-4" style={{ padding: '1.5rem', border: '1px solid var(--border-color)', background: 'var(--bg-glass)', borderRadius: 'var(--radius-lg, 14px)' }}>
@@ -913,6 +929,7 @@ export function ProfessorDashboard() {
                 const turma = await handleCreateClass(event);
                 if (turma) setSelectedClassId(turma.id);
               }} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                {classCreationError && <p role="alert">{classCreationError}</p>}
                 <div style={{ flex: 1, minWidth: '220px' }}>
                   <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Nome da Turma</label>
                   <input
@@ -928,8 +945,8 @@ export function ProfessorDashboard() {
                   <button type="button" onClick={() => setIsCreatingClass(false)} className="btn-outline" style={{ padding: '0.65rem 1.25rem', borderRadius: 'var(--radius-sm, 10px)' }}>
                     Cancelar
                   </button>
-                  <button type="submit" className="btn-gradient" style={{ padding: '0.65rem 1.5rem', fontWeight: 700, borderRadius: 'var(--radius-sm, 10px)', background: 'var(--gradient-primary)' }}>
-                    Confirmar
+                  <button type="submit" disabled={creatingClass} className="btn-gradient" style={{ padding: '0.65rem 1.5rem', fontWeight: 700, borderRadius: 'var(--radius-sm, 10px)', background: 'var(--gradient-primary)' }}>
+                    {creatingClass ? 'Criando turma…' : 'Criar turma'}
                   </button>
                 </div>
               </form>
@@ -937,7 +954,7 @@ export function ProfessorDashboard() {
           )}
 
           {/* Classes Cards Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%,320px), 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
             {turmas.map(turma => {
               const isSelected = selectedClassId === turma.id;
               return (
@@ -952,6 +969,10 @@ export function ProfessorDashboard() {
                     cursor: 'pointer'
                   }}
                   onClick={() => setSelectedClassId(turma.id)}
+                  onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); setSelectedClassId(turma.id); } }}
+                  tabIndex={0}
+                  role="group"
+                  aria-label={`Turma ${turma.name}${isSelected ? ', selecionada' : ', pressione Enter para selecionar'}`}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                     <div>
@@ -994,9 +1015,7 @@ export function ProfessorDashboard() {
                       onClick={(e) => {
                         e.stopPropagation();
                         const codeToCopy = turma.code || turma.id.slice(0, 6).toUpperCase();
-                        navigator.clipboard.writeText(codeToCopy);
-                        setCopiedClassCode(turma.id);
-                        setTimeout(() => setCopiedClassCode(null), 2500);
+                        void ensureClassEnrollmentCode(turma.id).then(()=>navigator.clipboard.writeText(codeToCopy)).then(() => { setCopiedClassCode(turma.id); setTimeout(() => setCopiedClassCode(null), 2500); }).catch(() => showFeedback('Não foi possível disponibilizar ou copiar o código. Tente novamente antes de compartilhar.', 'info'));
                       }}
                       style={{
                         display: 'flex',
@@ -1136,8 +1155,16 @@ export function ProfessorDashboard() {
               )}
             </div>
           )}
+          {selectedClassId && <ClassFamilyManager classId={selectedClassId} />}
         </div>
       )}
+
+      {dashboardTab === 'activities' && <ClassActivityPublisher key={`${currentUser?.uid}:${selectedClassId}`}
+        classes={turmas} selectedClassId={selectedClassId} professorId={currentUser?.uid ?? ''}
+        onPublish={publishActivity}
+        onCreateClass={() => { setIsCreatingClass(true); setDashboardTab('classes'); }}
+        onPublished={activity => { showFeedback('Atividade publicada. Acompanhe as entregas desta turma no relatório.', 'success'); setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('class', activity.classId!); next.set('tab', 'reports'); next.set('activity', activity.id!); return next; }); }}
+      />}
 
       {/* ── TAB 2: PLANO DE AULAS BIMESTRAL / SEMESTRAL ── */}
       {dashboardTab === 'lesson_plans' && (
@@ -2376,7 +2403,11 @@ export function ProfessorDashboard() {
               <p>Carregando relatório da turma...</p>
             </div>
           ) : classReport ? (
-            <ClassLearningReportView key={`${classReport.classId}:${classReport.generatedAt}`} report={classReport} onViewMessages={() => setDashboardTab('messages')} />
+            <ClassLearningReportView key={`${classReport.classId}:${classReport.generatedAt}`} report={classReport} onViewMessages={() => setDashboardTab('messages')}
+              onReviewSubmission={(studentId, submissionId) => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('tab', 'lms_gradebook'); next.set('subtab', 'speedgrader'); next.set('student', studentId); next.set('submission', submissionId); return next; })}
+              onPlanRetake={title => { setNewPlanTopic(`Retomada: ${title}`); setNewPlanMethodology('Retomar as respostas e evidências da turma, propor uma nova investigação e comparar o resultado com a entrega anterior.'); setDashboardTab('lesson_plans'); }}
+              onOrientStudent={studentId => { setOrientationStudentId(studentId); setDashboardTab('messages'); }}
+            />
           ) : !reportError ? (
             <p role="status" style={{ padding: '1rem', color: 'var(--text-secondary)' }}>
               {selectedClassId ? 'Nenhum relatório disponível para esta turma. Tente atualizar para conferir os registros.' : 'Crie uma turma e convide seus alunos para começar o acompanhamento.'}
@@ -2475,7 +2506,7 @@ export function ProfessorDashboard() {
               </h3>
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-              Insira sua chave de API para habilitar diagnósticos pedagógicos de alta precisão e formulação automática de questões de provas e planos de aula.
+              Insira sua chave de API para solicitar sugestões pedagógicas e rascunhos de questões. Revise o conteúdo antes de publicar; as sugestões não substituem a avaliação do professor.
             </p>
             <input
               type="password"
@@ -2661,6 +2692,7 @@ export function ProfessorDashboard() {
         </div>
       )}
       {/* Modal de Gestão em Lote via Planilhas (CSV / Sheets) */}
+      {orientationStudentId && selectedClassId && currentUser?.uid && <StudentOrientationComposer classId={selectedClassId} studentId={orientationStudentId} teacherId={currentUser.uid} studentName={classReport?.students.find(student => student.studentId === orientationStudentId)?.studentName} onClose={() => setOrientationStudentId(null)} onSaved={() => { setOrientationStudentId(null); showFeedback('Orientação enviada para o aluno desta turma.', 'success'); }} />}
       <BatchClassManagerModal
         isOpen={isBatchManagerOpen}
         onClose={() => setIsBatchManagerOpen(false)}

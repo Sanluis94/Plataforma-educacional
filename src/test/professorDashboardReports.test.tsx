@@ -32,7 +32,7 @@ describe('relatórios ligados à navegação do professor', () => {
     expect(fixtures.getReport).not.toHaveBeenCalled();
     rerender({ tab: 'reports', classId: 'class-b' });
     await waitFor(() => expect(result.current.classReport?.classId).toBe('class-b'));
-    expect(fixtures.getReport).toHaveBeenCalledExactlyOnceWith('class-b');
+    expect(fixtures.getReport).toHaveBeenCalledExactlyOnceWith('class-b',{force:true});
     await act(async () => { await result.current.refreshReport(); });
     expect(fixtures.getReport).toHaveBeenCalledTimes(2);
   });
@@ -41,7 +41,7 @@ describe('relatórios ligados à navegação do professor', () => {
     let finishFirst!: (value: LocalClassReport) => void;
     fixtures.getReport.mockImplementation(classId => classId === 'class-a' ? new Promise(resolve => { finishFirst = resolve; }) : Promise.resolve(report(classId)));
     const { result, rerender } = renderHook(({ classId }) => useProfessorDashboard({ activeTab: 'reports', classId }), { initialProps: { classId: 'class-a' } });
-    await waitFor(() => expect(fixtures.getReport).toHaveBeenCalledWith('class-a'));
+    await waitFor(() => expect(fixtures.getReport).toHaveBeenCalledWith('class-a',{force:true}));
     rerender({ classId: 'class-b' });
     await waitFor(() => expect(result.current.classReport?.classId).toBe('class-b'));
     await act(async () => { finishFirst(report('class-a')); });

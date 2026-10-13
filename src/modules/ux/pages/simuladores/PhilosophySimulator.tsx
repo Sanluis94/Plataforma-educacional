@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getLabLearningContent } from '../../../core/content/labLearningContent';
+import { useLabLearningContent } from '../../hooks/useLabLearningContent';
 import '../../components/labs/GuidedLabActivity.css';
 
 interface PhilosophySimulatorProps {
@@ -28,12 +28,14 @@ const EMPTY_ARGUMENT: ArgumentDraft = { claim: '', reason: '', objection: '', re
 
 export function PhilosophySimulator({ mode = 'ethics', labTitle, onComplete }: PhilosophySimulatorProps) {
   const entry = MODES[mode];
-  const content = entry && getLabLearningContent(entry.id);
+  const {content,loading,error,retry} = useLabLearningContent(entry?.id);
   const [caseIndex, setCaseIndex] = useState(0);
   const [drafts, setDrafts] = useState<Record<string, ArgumentDraft>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [completed, setCompleted] = useState(false);
 
+  if (loading) return <p role="status">Carregando a atividade de argumentação…</p>;
+  if (error) return <div role="alert"><p>{error}</p><button type="button" onClick={retry}>Tentar novamente</button></div>;
   if (!content) return <p role="alert">Atividade de argumentação indisponível para este modo.</p>;
   const scenario = content.scenarios[caseIndex];
   const draft = drafts[scenario.id] ?? EMPTY_ARGUMENT;

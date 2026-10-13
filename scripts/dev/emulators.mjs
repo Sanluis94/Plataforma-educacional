@@ -6,8 +6,8 @@ const projectDir = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const mode = process.argv[2];
 const cliPath = join(projectDir, 'node_modules/firebase-tools/lib/bin/firebase.js');
 
-if (!['start', 'check', 'learning-check'].includes(mode) || process.argv.length > 3) {
-  console.error('Uso: node scripts/dev/emulators.mjs <start|check|learning-check>');
+if (!['start', 'check', 'learning-check','evolution-check'].includes(mode) || process.argv.length > 3) {
+  console.error('Uso: node scripts/dev/emulators.mjs <start|check|learning-check|evolution-check>');
   process.exitCode = 2;
 } else if (!existsSync(cliPath)) {
   console.error('Firebase CLI local ausente. Execute npm ci.');
@@ -25,6 +25,7 @@ if (!['start', 'check', 'learning-check'].includes(mode) || process.argv.length 
   ];
   if (mode === 'check') args.push('node scripts/dev/emulator-smoke.mjs');
   if (mode === 'learning-check') args.push('node scripts/dev/learning-emulator-check.mjs');
+  if (mode === 'evolution-check') args.push('node scripts/dev/platform-evolution-emulator-check.mjs');
 
   process.env.GCLOUD_PROJECT = 'demo-kortex';
   process.env.GOOGLE_CLOUD_PROJECT = 'demo-kortex';

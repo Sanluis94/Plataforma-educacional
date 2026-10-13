@@ -47,8 +47,8 @@ describe('leitura docente das evidências consolidadas', () => {
     render(<ClassLearningReportView report={report()} />);
     fireEvent.change(screen.getByRole('searchbox', { name: 'Buscar aluno' }), { target: { value: 'ana' } });
     expect(screen.queryByRole('heading', { name: 'Beto' })).not.toBeInTheDocument();
-    const details = screen.getByText('Ver 1 entrega de Ana').closest('details')!;
-    fireEvent.click(within(details).getByText('Ver 1 entrega de Ana'));
+    const details = screen.getByText('Ver entregas de Ana no período').closest('details')!;
+    fireEvent.click(within(details).getByText('Ver entregas de Ana no período'));
     expect(details.open).toBe(true);
     expect(within(details).getByText('Opção marcada: 2ª alternativa · Resposta incorreta: retomar este conceito.')).toBeInTheDocument();
     expect(within(details).getByText('A massa muda o resultado.')).toBeInTheDocument();

@@ -7,6 +7,9 @@ import {
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { useStudentLabCompletion } from '../../core/hooks/useStudentLabCompletion';
+import { getStudentProgress } from '../../data/repositories/studentRepository';
+import { useLabLearningContent } from '../hooks/useLabLearningContent';
+import { readLastLearningLab, saveLastLearningLab, lastLearningLabHref, type LastLearningLab } from '../../core/services/studentStudyGuidance';
 import type { LabCompletionReport } from '../../data/services/learningCapture';
 import { offlineSyncService } from '../../core/services/offlineSyncService';
 import { getReturnDestination } from '../../core/utils/navigation';
@@ -190,6 +193,23 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
   const [showCertModal, setShowCertModal] = useState(false);
   const [currentCertificate, setCurrentCertificate] = useState<LabCertificate | null>(null);
   const activeCustomLab = customLabs.find(lab => lab.id === activeTab);
+  const learningContent = useLabLearningContent(activeCustomLab ? undefined : getLearningLab(activeTab)?.id);
+  const [lastLab,setLastLab] = useState<LastLearningLab|null>(null);
+  const [progressError,setProgressError] = useState('');
+  const [certificateError,setCertificateError] = useState('');
+  const [certificateSaving,setCertificateSaving] = useState(false);
+  useEffect(() => {
+    let cancelled=false;setCompletedActivities([]);setLastLab(null);setProgressError('');
+    const uid=currentUser?.uid;if(!uid)return;
+    setLastLab(readLastLearningLab(uid));
+    void getStudentProgress(uid).then(progress=>{if(cancelled)return;const restored=(progress.completedModules||[]).flatMap(id=>{const lab=getLearningLab(id);return lab?[{id,academicLevel:lab.academicLevel}]:[];});setCompletedActivities(previous=>[...new Map([...previous,...restored].map(item=>[item.id,item])).values()]);}).catch(()=>{if(!cancelled)setProgressError('Não foi possível recuperar as atividades concluídas. Suas entregas continuam registradas; atualize a página para tentar novamente.');});
+    return()=>{cancelled=true;};
+  },[currentUser?.uid]);
+  useEffect(()=>{
+    const uid=currentUser?.uid;if(!uid||embedded||!getLearningLab(activeTab))return;
+    const value={labId:activeTab,...(searchParams.get('class')&&searchParams.get('lessonPlan')?{classId:searchParams.get('class')!,lessonPlanId:searchParams.get('lessonPlan')!}:{})};
+    saveLastLearningLab(uid,value);setLastLab(value);
+  },[activeTab,embedded,currentUser?.uid,searchParams]);
 
   const selectedLab = activeCustomLab ?? getLearningLab(activeTab);
   const completedAtLevel = completedActivities.filter(activity => activity.academicLevel === catalogLevel);
@@ -233,16 +253,20 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
   }
 
   const handleOpenCertificate = async () => {
-    if (completedAtLevel.length === 0) return;
-    const cert = await issueLabCertificate({
-      studentId: currentUser?.uid || userData?.email || 'estudante_default',
+    if (completedAtLevel.length === 0 || !currentUser?.uid || certificateSaving) return;
+    setCertificateSaving(true);setCertificateError('');
+    try { const cert = await issueLabCertificate({
+      studentId: currentUser.uid,
       studentName: userData?.name || 'Estudante Kortex',
+      academicLevel: catalogLevel,
       academicLevelLabel: learningLevelLabel(catalogLevel),
       completedLabsCount: completedAtLevel.length,
       totalSimulatedHours: 0,
     });
     setCurrentCertificate(cert);
     setShowCertModal(true);
+    } catch(failure) {setCertificateError(failure instanceof Error?failure.message:'Não foi possível conferir os requisitos do comprovante.');}
+    finally {setCertificateSaving(false);}
   };
 
   useEffect(() => {
@@ -288,7 +312,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
     const draw = () => {
       const width = canvas.width;
       const height = canvas.height;
-      
+
       // Tela de fundo clara do laboratório com grade de alta precisão
       ctx.fillStyle = '#FAF7EE';
       ctx.fillRect(0, 0, width, height);
@@ -529,8 +553,10 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
             </label>
             <button type="button" className="btn-outline" onClick={() => setShowSkillTree(true)}><GitBranch size={16} /> Mapa de atividades</button>
             <button type="button" className="btn-outline" onClick={() => setShowStudio(true)}><PlusCircle size={16} /> Criar atividade</button>
-            <button type="button" className="btn-outline" disabled={completedAtLevel.length === 0} onClick={handleOpenCertificate} title="Atividades concluídas nesta sessão; carga horária não contabilizada"><Award size={16} /> Certificado deste nível</button>
+            <button type="button" className="btn-outline" disabled={completedAtLevel.length === 0 || certificateSaving} onClick={()=>void handleOpenCertificate()} title="Comprovante emitido após conferir entregas avaliadas; sem carga horária de curso"><Award size={16} /> {certificateSaving?'Conferindo entregas…':'Comprovante deste nível'}</button>
           </div>
+          {lastLab&&!activeTab&&<p><Link className="btn-primary" to={lastLearningLabHref(lastLab)}>Continuar de onde parei: {getLearningLab(lastLab.labId)?.title}</Link></p>}
+          {progressError&&<p role="alert">{progressError}</p>}{certificateError&&<p role="alert">{certificateError}</p>}
           {activeTab && <button type="button" className="btn-outline" style={{ marginTop: '1rem' }} onClick={() => setShowCatalogExplorer(previous => !previous)}>{showCatalogExplorer ? 'Recolher atividades' : 'Explorar atividades deste nível'}</button>}
           {showCatalogExplorer && <>
             <p role="status" style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>{filteredLabs.length + customResults.length} atividades em {learningLevelLabel(catalogLevel)}.</p>
@@ -1093,7 +1119,9 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
       {!embedded && getLearningLab(activeTab)?.source === 'legacy' && <Suspense fallback={<p role="status">Carregando bancada…</p>}>
         <LegacyLabRunner key={activeTab} labId={activeTab} onComplete={completeSelectedLab} />
       </Suspense>}
-      {(activeCustomLab || NEW_ADVANCED_LABS[activeTab] || MASTER_LABS_CATALOG.some(l => l.id === activeTab)) && (
+      {!embedded&&learningContent.loading&&<p role="status">Carregando o roteiro desta atividade…</p>}
+      {!embedded&&learningContent.error&&<div role="alert"><p>{learningContent.error}</p><button className="btn-outline" onClick={learningContent.retry}>Tentar novamente</button></div>}
+      {(activeCustomLab || NEW_ADVANCED_LABS[activeTab] || MASTER_LABS_CATALOG.some(l => l.id === activeTab)) && (activeCustomLab||learningContent.content) && (
         <UniversalLabContainer
           config={activeCustomLab ? createGuidedLabConfig(activeCustomLab, activeCustomLab.learningContent) : resolveUniversalLab(activeTab)}
           onComplete={report => embedded ? onComplete?.(report.score) : completeSelectedLab(report)}

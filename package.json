@@ -11,6 +11,7 @@
     "emulators:start": "node scripts/dev/emulators.mjs start",
     "emulators:check": "node scripts/dev/emulators.mjs check",
     "etl:emulator-check": "node scripts/dev/emulators.mjs learning-check",
+    "evolution:emulator-check": "node scripts/dev/emulators.mjs evolution-check",
     "mcp:register": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/mcp/register.ps1",
     "mcp:check": "node scripts/mcp/check.mjs",
     "labs:audit": "node --experimental-strip-types scripts/labs/audit.mjs",

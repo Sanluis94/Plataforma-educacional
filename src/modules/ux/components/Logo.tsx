@@ -22,13 +22,13 @@ export interface LogoProps {
 
 export const Logo: React.FC<LogoProps> = ({
   variant = 'horizontal',
-  colorMode = 'default',
+  colorMode,
   symbolSize = 32,
   className = '',
   showTagline = false,
 }) => {
   const isNegative = colorMode === 'negative';
-  const textColor = isNegative ? '#F1EAD9' : '#293E24';
+  const textColor = colorMode ? (isNegative ? '#F1EAD9' : '#293E24') : 'var(--text-main)';
   const leafColor = '#E4683F';
   const circuitLineColor = '#FFFFFF';
   const circuitDotFill = '#FFFFFF';
@@ -109,7 +109,7 @@ export const Logo: React.FC<LogoProps> = ({
               fontFamily: "'Manrope', -apple-system, sans-serif",
               fontSize: '0.68rem',
               fontWeight: 500,
-              color: isNegative ? 'rgba(241, 234, 217, 0.75)' : '#5A6D56',
+              color: colorMode ? (isNegative ? 'rgba(241, 234, 217, 0.75)' : '#5A6D56') : 'var(--text-secondary)',
               letterSpacing: '0.01em',
               marginTop: '0.15rem',
             }}

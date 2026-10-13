@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { createStudioLab, emptyLearningContent, type StudioLab, type StudioLabDraft } from '../../../core/services/labStudioService';
 import { LearningContentEditor } from './LearningContentEditor';
+import { loadAllLearningContent } from '../../../core/content/labLearningContent';
 import { LEARNING_LEVELS, type LearningLevel } from '../../../core/constants/learningLevels';
 import './LabStudioBuilderModal.css';
 
@@ -17,6 +18,7 @@ const initialDraft = (academicLevel: LearningLevel): StudioLabDraft => ({ title:
 export function LabStudioBuilderModal({ isOpen, onClose, onSaveNewLab, existingLabs = [], initialAcademicLevel = 'medio' }: LabStudioBuilderModalProps) {
   const [draft, setDraft] = useState(() => initialDraft(initialAcademicLevel));
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
   const dialog = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!isOpen) return;
@@ -25,7 +27,7 @@ export function LabStudioBuilderModal({ isOpen, onClose, onSaveNewLab, existingL
     document.body.style.overflow = 'hidden';
     dialog.current?.focus();
     const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape' && !saving) onClose();
       if (event.key !== 'Tab') return;
       const controls = [...(dialog.current?.querySelectorAll<HTMLElement>('button, input, textarea, select') || [])].filter(element => !element.hasAttribute('disabled'));
       const first = controls[0];
@@ -36,27 +38,31 @@ export function LabStudioBuilderModal({ isOpen, onClose, onSaveNewLab, existingL
     };
     window.addEventListener('keydown', handleKey);
     return () => { document.body.style.overflow = previousOverflow; window.removeEventListener('keydown', handleKey); previousFocus?.focus(); };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose,saving]);
   if (!isOpen) return null;
 
-  function save(event: FormEvent) {
+  async function save(event: FormEvent) {
     event.preventDefault();
+    if (saving) return;
+    setSaving(true);
     try {
+      await loadAllLearningContent();
       const lab = createStudioLab(draft, existingLabs);
       onSaveNewLab(lab);
       setDraft(initialDraft(initialAcademicLevel));
       setError('');
       onClose();
     } catch (failure) { setError(failure instanceof Error ? failure.message : 'Confira o conteúdo antes de adicionar a atividade.'); }
+    finally { setSaving(false); }
   }
 
   const metadata = (label: string, field: 'title' | 'subject' | 'topic' | 'objective', minimum: number) => <label className="studio-field">
     <span>{label}</span><input value={draft[field]} required minLength={minimum} onChange={event => setDraft(previous => ({ ...previous, [field]: event.target.value }))} />
   </label>;
 
-  return <div className="lab-studio-backdrop" onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
+  return <div className="lab-studio-backdrop" onClick={event => { if (event.target === event.currentTarget && !saving) onClose(); }}>
     <div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="studio-title" className="lab-studio">
-      <header><h2 id="studio-title">Criar atividade no Kortex Studio</h2><button type="button" onClick={onClose} aria-label="Fechar Studio">×</button></header>
+      <header><h2 id="studio-title">Criar atividade no Kortex Studio</h2><button type="button" onClick={onClose} aria-label="Fechar Studio" disabled={saving}>×</button></header>
       <p>Prepare um roteiro com explicação, exemplo, três cenários e duas questões com feedback. A atividade ficará disponível nesta sessão. Revise a correção do conteúdo antes de compartilhar com alunos.</p>
       {error && <p role="alert" className="studio-errors">{error}</p>}
       <form onSubmit={save}>
@@ -73,7 +79,7 @@ export function LabStudioBuilderModal({ isOpen, onClose, onSaveNewLab, existingL
           <label className="studio-field"><span>Tempo de estudo estimado (horas)</span><input type="number" min="0.25" max="40" step="0.25" required value={draft.estimatedHours} onChange={event => setDraft(previous => ({ ...previous, estimatedHours: Number(event.target.value) }))} /></label>
         </fieldset>
         <LearningContentEditor content={draft.content} onChange={content => setDraft(previous => ({ ...previous, content }))} />
-        <footer><button type="button" onClick={onClose}>Cancelar</button><button type="submit">Adicionar à sessão</button></footer>
+        <footer><button type="button" onClick={onClose} disabled={saving}>Cancelar</button><button type="submit" disabled={saving}>{saving ? 'Conferindo roteiro…' : 'Adicionar à sessão'}</button></footer>
       </form>
     </div>
   </div>;
