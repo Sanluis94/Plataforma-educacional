@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "escola-exemplo",
+  "name": "Escola Exemplo — piloto",
+  "mode": "school",
+  "releaseStage": "pilot",
+  "origin": "https://escola-exemplo.example.org",
+  "firebase": {
+    "apiKey": "AIzaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "authDomain": "kortex-escola-exemplo.firebaseapp.com",
+    "projectId": "kortex-escola-exemplo",
+    "storageBucket": "kortex-escola-exemplo.firebasestorage.app",
+    "messagingSenderId": "123456789012",
+    "appId": "1:123456789012:web:aaaaaaaaaaaaaaaaaaaa"
+  },
+  "controller": { "name": "", "document": "", "privacyContactEmail": "" },
+  "operationalReadiness": {
+    "legalApproved": false,
+    "securityApproved": false,
+    "dataProcessingApproved": false,
+    "backupRestoreTested": false,
+    "legalApprovalReference": ""
+  }
+}

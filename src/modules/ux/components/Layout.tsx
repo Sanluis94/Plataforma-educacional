@@ -78,6 +78,11 @@ export function Layout({ theme, onThemeToggle, onLoginOpen }: LayoutProps) {
       </div>}
     </header>
     <main id="main-content" ref={mainRef} tabIndex={-1} style={{ paddingTop: '4rem', minHeight: '100vh', flex: 1, outline: 'none' }}><Suspense fallback={<p role="status" style={{ padding: '2rem' }}>Carregando tela…</p>}><Outlet /></Suspense></main>
+    <footer style={{ padding: '1.2rem 1rem', borderTop: '1px solid var(--border-color)', background: 'var(--bg-surface)' }}>
+      <nav aria-label="Privacidade e segurança" style={{ maxWidth: '90rem', margin: 'auto', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+        <Link to="/privacidade">Privacidade e seus dados</Link><Link to="/termos">Termos de uso</Link><Link to="/seguranca">Segurança e famílias</Link>
+      </nav>
+    </footer>
     {pricingOpen && <PricingModal onClose={() => setPricingOpen(false)} />}
     {(familyOpen || familyRequested) && <ParentBridgeModal onClose={closeFamily} onLogin={() => { setFamilyOpen(false); navigate('/', {state:{loginPurpose:'family',from:'/',requiresAuth:true}}); }} />}
     {searchOpen && <CommandPaletteModal isOpen onClose={() => setSearchOpen(false)} theme={theme} onThemeToggle={onThemeToggle} onOpenPricing={() => setPricingOpen(true)} onOpenParentBridge={() => setFamilyOpen(true)} />}

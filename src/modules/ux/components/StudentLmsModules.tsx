@@ -14,7 +14,7 @@ import type {
   SubmissionData, ExamAttempt, ActivityData
 } from '../../data/types';
 import {
-  getAttendanceByClass,
+  getStudentAttendanceRecords,
   calculateStudentAttendanceRate,
   calculateClassGradebook,
   DEFAULT_WEIGHTS,
@@ -75,7 +75,7 @@ export function StudentLmsModules({
     setGradeLoading(true);
     const fetchAtt = async () => {
       try {
-        const [recs, subs, attempts, classActivities, publishedPolicy, publishedReviews] = await Promise.all([getAttendanceByClass(selectedClassId), getSubmissionsByStudentInClass(studentId, selectedClassId), getExamAttemptsByStudent(studentId), getActivitiesByClass(selectedClassId), getGradePolicy(selectedClassId, period), getPublishedSubmissionReviewsByStudent(studentId, selectedClassId)]);
+        const [recs, subs, attempts, classActivities, publishedPolicy, publishedReviews] = await Promise.all([getStudentAttendanceRecords(selectedClassId, studentId), getSubmissionsByStudentInClass(studentId, selectedClassId), getExamAttemptsByStudent(studentId), getActivitiesByClass(selectedClassId), getGradePolicy(selectedClassId, period), getPublishedSubmissionReviewsByStudent(studentId, selectedClassId)]);
         if (!alive) return;
         setAttendanceRecords(recs);
         setSubmissions(subs);
@@ -220,12 +220,14 @@ export function StudentLmsModules({
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                 <Calendar style={{ color: 'var(--color-secondary, #293E24)', width: '1.25rem', height: '1.25rem' }} />
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 800, margin: 0 }}>
-                  Frequência registrada na turma
+                  Frequência dos registros publicados
                 </h3>
               </div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
-                Esta taxa considera as chamadas registradas pelo professor. Sem chamadas, a frequência permanece sem dados.
+                Esta taxa considera os registros individuais publicados pelo professor. Sem registros publicados, a frequência permanece sem dados.
               </p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.5rem 0 0' }}>Chamadas anteriores podem ainda aguardar publicação individual. Confira o histórico completo com o professor antes de usar esta taxa como frequência total da turma.</p>
+              {!gradeLoading && !gradeError && !attendanceRecords.length && <p role="status">Sua frequência individual ainda não foi publicada. Se já houve chamada, peça ao professor para abrir e salvar o registro novamente.</p>}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>

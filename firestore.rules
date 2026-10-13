@@ -53,6 +53,15 @@ service cloud.firestore {
         allow create, update: if (teaches(classId) || admin() || (own(studentId) && enrolled(classId, studentId))) && request.resource.data.keys().hasOnly(['studentId','name','gradeLevel','academicLevel','updatedAt']) && request.resource.data.studentId == studentId && shortText(request.resource.data.name, 200);
         allow delete: if admin() || teaches(classId) || own(studentId);
       }
+      match /attendance_students/{studentId}/records/{attendanceId} {
+        function validIndividual(data) {
+          let source = getAfter(/databases/$(database)/documents/attendance/$(attendanceId)).data;
+          return data.keys().hasOnly(['sourceId','sourceIndex','data','aulaNumero','status','updatedAt']) && data.sourceId == attendanceId && source.turmaId == classId && data.sourceIndex is int && data.sourceIndex >= 0 && data.sourceIndex < source.registros.size() && source.registros[data.sourceIndex].studentId == studentId && source.registros[data.sourceIndex].status == data.status && data.data == source.data && data.aulaNumero == source.get('aulaNumero',1) && data.updatedAt == source.criadoEm;
+        }
+        allow read: if staff(classId) || (own(studentId) && enrolled(classId,studentId));
+        allow create, update: if (teaches(classId) || admin()) && validIndividual(request.resource.data);
+        allow delete: if teaches(classId) || admin();
+      }
       match /materials/{id} { allow read: if classRead(classId); allow write: if admin() || teaches(classId); }
       match /notices/{id} { allow read: if classRead(classId); allow write: if admin() || teaches(classId); }
       match /enhanced_materials/{id} { allow read: if classRead(classId); allow write: if admin() || teaches(classId); }
@@ -108,7 +117,7 @@ service cloud.firestore {
       allow update, delete: if admin();
     }
     match /lesson_plans/{id} { allow read: if own(resource.data.professorId) || classRead(resource.data.turmaId); allow create: if (own(request.resource.data.professorId) && teaches(request.resource.data.turmaId)) || admin(); allow update: if admin() || (teaches(resource.data.turmaId) && request.resource.data.turmaId == resource.data.turmaId && request.resource.data.professorId == resource.data.professorId); allow delete: if teaches(resource.data.turmaId) || admin(); }
-    match /attendance/{id} { allow read: if classRead(resource.data.turmaId); allow create: if teaches(request.resource.data.turmaId) || admin(); allow update: if admin() || (teaches(resource.data.turmaId) && request.resource.data.turmaId == resource.data.turmaId); allow delete: if teaches(resource.data.turmaId) || admin(); }
+    match /attendance/{id} { allow read: if staff(resource.data.turmaId); allow create: if teaches(request.resource.data.turmaId) || admin(); allow update: if admin() || (teaches(resource.data.turmaId) && request.resource.data.turmaId == resource.data.turmaId); allow delete: if teaches(resource.data.turmaId) || admin(); }
     match /forum_topics/{id} {
       allow read: if classRead(resource.data.turmaId);
       allow create: if classRead(request.resource.data.turmaId) && own(request.resource.data.autorId) && shortText(request.resource.data.titulo, 300) && shortText(request.resource.data.conteudo, 20000) && request.resource.data.respostas.size() == 0;

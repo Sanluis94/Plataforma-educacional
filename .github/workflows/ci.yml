@@ -77,6 +77,32 @@ jobs:
       - name: Verificar publicação, privacidade e acompanhamento
         run: npm run evolution:emulator-check
 
+  cloud:
+    name: Contêineres e vínculo por instalação
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Validar isolamento e configuração pública
+        run: node --test scripts/cloud/installation.test.mjs
+      - name: Compilar imagem da escola com configuração fictícia
+        run: >-
+          docker build --secret id=installation,src=deploy/installation.school.example.json
+          --build-arg KORTEX_SOURCE_REVISION=${{ github.sha }} -t kortex-school:ci .
+      - name: Verificar contêiner da escola e recusa de instalação incorreta
+        run: node scripts/cloud/check-container.mjs deploy/installation.school.example.json --image kortex-school:ci
+      - name: Compilar imagem doméstica com configuração fictícia
+        run: >-
+          docker build --secret id=installation,src=deploy/installation.home.example.json
+          --build-arg KORTEX_SOURCE_REVISION=${{ github.sha }} -t kortex-home:ci .
+      - name: Verificar contêiner doméstico e recusa de instalação incorreta
+        run: node scripts/cloud/check-container.mjs deploy/installation.home.example.json --image kortex-home:ci
+
   lint:
     name: Lint informativo — dívida existente
     runs-on: ubuntu-latest

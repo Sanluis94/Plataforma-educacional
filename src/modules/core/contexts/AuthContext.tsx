@@ -34,6 +34,16 @@ function normalizeUserData(data: Record<string, unknown>, fallback: GradeLevel =
 }
 
 type AuthRole = UserData['role'];
+const AUTH_LOG_ERROR_CODES = new Set([
+  'auth/popup-closed-by-user', 'auth/popup-blocked', 'auth/cancelled-popup-request',
+  'auth/network-request-failed', 'auth/unauthorized-domain', 'auth/operation-not-allowed',
+  'auth/account-exists-with-different-credential', 'auth/user-disabled', 'auth/too-many-requests',
+  'permission-denied', 'unavailable', 'failed-precondition',
+]);
+function authLogErrorCode(error: unknown): string {
+  const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+  return typeof code === 'string' && AUTH_LOG_ERROR_CODES.has(code) ? code : 'unknown';
+}
 
 type LocalAuthUser = {
   uid: string;
@@ -173,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Log de registro
         await writeLog(
           'auth',
-          `Novo usuário registrado: ${user.email} (${role})`,
+          'Cadastro criado via Google.',
           user.uid
         );
       } else {
@@ -184,12 +194,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Log de login
       await writeLog(
         'auth',
-        `Login via Google — ${user.email} (${role})`,
+        'Login via Google concluído.',
         user.uid
       );
     } catch (error) {
-      console.error("Erro no login com Google:", error);
-      await writeLog('error', `Falha no login: ${(error as Error).message}`);
+      const code = authLogErrorCode(error);
+      console.error('Não foi possível concluir o login com Google.', code);
+      await writeLog('error', `Falha no login com Google (${code}).`, auth?.currentUser?.uid);
       throw error;
     }finally{loginInFlight.current=false;}
   };
@@ -230,7 +241,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (auth.currentUser) {
       await writeLog(
         'auth',
-        `Logout — ${auth.currentUser.email}`,
+        'Sessão encerrada.',
         auth.currentUser.uid
       );
     }

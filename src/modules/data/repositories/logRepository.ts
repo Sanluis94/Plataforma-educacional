@@ -15,7 +15,7 @@ export const writeLog = async (
   metadata?: Record<string, unknown>
 ): Promise<void> => {
   if (!db) {
-    console.warn('[LogRepository] Firestore não inicializado. Log ignorado:', message);
+    console.warn('[LogRepository] Firestore não inicializado. Registro de evento indisponível.');
     return;
   }
 
@@ -27,8 +27,8 @@ export const writeLog = async (
       ...(userId && { userId }),
       ...(metadata && { metadata }),
     });
-  } catch (error) {
+  } catch {
     // Logs nunca devem bloquear a aplicação — falha silenciosa
-    console.error('[LogRepository] Erro ao escrever log:', error);
+    console.error('[LogRepository] Não foi possível registrar o evento.');
   }
 };

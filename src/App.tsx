@@ -18,6 +18,7 @@ const EnemSimuladoView = lazy(() => import('./modules/ux/pages/EnemSimuladoView'
 const Home = lazy(() => import('./modules/ux/pages/Home').then(m => ({ default: m.Home })));
 const NotFound = lazy(() => import('./modules/ux/pages/NotFound'));
 const VerifyCertificate = lazy(() => import('./modules/ux/pages/VerifyCertificate'));
+const ProductInformation = lazy(() => import('./modules/ux/pages/ProductInformation'));
 
 function LoginFlow({ loginOpen, openLogin, closeLogin }: { loginOpen: boolean; openLogin: () => void; closeLogin: () => void }) {
   const location = useLocation();
@@ -85,6 +86,9 @@ function App() {
               }>
                 <Route path="/" element={<Home onLoginOpen={openLogin} />} />
                 <Route path="/verificar-certificado" element={<VerifyCertificate />} />
+                <Route path="/privacidade" element={<ProductInformation topic="privacy" />} />
+                <Route path="/termos" element={<ProductInformation topic="terms" />} />
+                <Route path="/seguranca" element={<ProductInformation topic="safety" />} />
 
                 {/* Rotas protegidas por role com segregação estrita */}
                 <Route path="/professor" element={

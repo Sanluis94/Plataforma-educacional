@@ -49,6 +49,9 @@ const isConfigValid = !!(
   firebaseConfig.projectId
 );
 
+// The entry point blocks the developer's local profiles in a published build.
+export const configurationUnavailable = import.meta.env.PROD && !isConfigValid;
+
 // A app nomeada também separa a sessão de autenticação local da sessão real.
 // Reutilizar a instância evita inicialização e conexão repetidas durante HMR.
 const appName = useFirebaseEmulators ? "kortex-emulator" : "[DEFAULT]";

@@ -85,4 +85,10 @@ node node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting --pro
 
 Antes de executar o deploy, confira o diff e os arquivos elegíveis, rode testes, auditoria de conteúdo e compilação, envie ao GitHub e integre a revisão validada em `main`. Compile a revisão exata que será publicada; não reutilize o `dist` de `dev:local` nem de emuladores. Confira depois o login Google, os arquivos publicados e a ausência de exportações privadas. O Hosting ignora `local-data/**`, mas essas exportações também devem permanecer fora da pasta de publicação.
 
-A instalação ainda apresenta dívida de dependências: `npm audit` encontrou 41 entradas (2 baixas, 14 moderadas, 24 altas e 1 crítica). A crítica já existia; dez entradas novas pertencem à árvore de desenvolvimento do Firebase CLI. Não foi aplicado `audit fix --force`, que sugere mudanças incompatíveis. Revise atualizações em trabalho separado e repita `npm audit` para obter o diagnóstico atual. O lint global também permanece pendente de correção.
+A revisão de 13/10/2026 atualizou dependências compatíveis. `npm audit --omit=dev` passou a registrar oito alertas moderados, sem altos ou críticos; a árvore completa mantém sete altos e onze moderados, principalmente nas ferramentas locais. Consulte [a análise de segurança](SEGURANCA-PRODUTO.md) e repita a auditoria para obter o diagnóstico atual. O lint global também permanece pendente de correção.
+
+## Preparação do produto e da nuvem
+
+Consulte [adequação brasileira e critérios de liberação](CONFORMIDADE-BRASIL.md), [instalações isoladas por escola e uso doméstico](NUVEM-ISOLAMENTO.md), [auditoria de dados](AUDITORIA-DADOS-PRODUTO.md) e [segurança e dependências](SEGURANCA-PRODUTO.md). O piloto deixa a identificação do responsável e o contato vazios até sua definição; isso não libera tratamento comercial de dados reais de menores.
+
+`npm run cloud:test` valida os manifestos e a preparação; `npm run cloud:prepare -- escola.json casa.json --out .local/cloud/lote` gera pacotes privados sem provisionar recursos. O CI compila e executa os contêineres de escola e uso doméstico com configuração fictícia. Builds comerciais exigem responsável, canal e registros operacionais; o checklist não substitui evidências reais.

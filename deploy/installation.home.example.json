@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "domestico-exemplo",
+  "name": "Kortex em casa — piloto",
+  "mode": "home",
+  "releaseStage": "pilot",
+  "origin": "https://casa-exemplo.example.org",
+  "firebase": {
+    "apiKey": "AIzaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    "authDomain": "kortex-domestico-exemplo.firebaseapp.com",
+    "projectId": "kortex-domestico-exemplo",
+    "storageBucket": "kortex-domestico-exemplo.firebasestorage.app",
+    "messagingSenderId": "987654321012",
+    "appId": "1:987654321012:web:bbbbbbbbbbbbbbbbbbbb"
+  },
+  "controller": { "name": "", "document": "", "privacyContactEmail": "" },
+  "operationalReadiness": {
+    "legalApproved": false,
+    "securityApproved": false,
+    "dataProcessingApproved": false,
+    "backupRestoreTested": false,
+    "legalApprovalReference": ""
+  }
+}
