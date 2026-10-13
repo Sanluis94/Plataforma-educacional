@@ -34,8 +34,6 @@ export function readProductDeployment(source: Record<string, unknown>): ProductD
   };
 }
 
-export const productDeployment = readProductDeployment(import.meta.env || {});
-
 export function privacyRequestUrl(email: string, kind: 'rights' | 'safety', installation: string): string {
   const subject = kind === 'safety' ? 'Relato de segurança na plataforma' : 'Solicitação sobre meus dados pessoais';
   const body = `Instalação: ${installation}\n\n${kind === 'safety' ? 'Descreva o ocorrido e informe o endereço ou código do conteúdo, se houver.' : 'Informe o pedido: acesso, correção, revisão de decisão, exclusão ou outro direito.'}\n\nNão envie senhas, documentos de identidade ou dados de outros estudantes neste primeiro contato.`;

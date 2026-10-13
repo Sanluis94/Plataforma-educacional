@@ -27,6 +27,13 @@ export function productionEnvironment(
   const deployment = readProductDeployment(source);
 
   const env = { ...source };
+  const publicFields = new Set<string>([...requiredFirebaseFields,
+    'VITE_FIREBASE_MEASUREMENT_ID', 'VITE_INSTALLATION_ID', 'VITE_INSTALLATION_NAME',
+    'VITE_INSTALLATION_MODE', 'VITE_PUBLIC_RELEASE_STAGE', 'VITE_DATA_CONTROLLER_NAME',
+    'VITE_DATA_CONTROLLER_DOCUMENT', 'VITE_PRIVACY_CONTACT_EMAIL',
+  ]);
+  // Blank unknown VITE values explicitly so Vite cannot recover them from .env.
+  for (const field of Object.keys(source)) if (field.startsWith('VITE_') && !publicFields.has(field)) env[field] = '';
   for (const field of requiredFirebaseFields) env[field] = source[field]!.trim();
   env.NODE_ENV = 'production';
   env.VITE_USE_FIREBASE_EMULATORS = 'false';

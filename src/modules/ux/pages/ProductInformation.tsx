@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { productDeployment, privacyRequestUrl } from '../../core/config/productDeployment';
+import { privacyRequestUrl } from '../../core/config/productDeployment';
+import { productDeployment } from '../../core/config/productConfiguration';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return <section style={{ marginTop: '1.7rem' }}><h2 style={{ fontSize: '1.2rem', marginBottom: '0.6rem' }}>{title}</h2>{children}</section>;
