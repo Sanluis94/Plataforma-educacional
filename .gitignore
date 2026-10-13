@@ -21,6 +21,26 @@ dist-ssr
 # Local ETL generated artifacts
 public/local-data/etl/
 firebase-service-account*.json
+*service-account*.json
+*service_account*.json
+*firebase-adminsdk*.json
+*credentials*.json
+secrets.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Real installation manifests and infrastructure state belong in .local/.
+deploy/installation.*.json
+!deploy/installation.*.example.json
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
 
 # Editor directories and files
 .vscode/*
