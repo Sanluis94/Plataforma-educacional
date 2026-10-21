@@ -87,7 +87,7 @@ describe('Navegação de laboratórios por nível', () => {
     const lab = getLearningLab('math_1')!;
     renderPage(`/simulacao?level=${lab.academicLevel}`);
     fireEvent.change(screen.getByRole('searchbox', { name: 'Buscar laboratórios' }), { target: { value: 'math_1' } });
-    fireEvent.click(within(screen.getByRole('article', { name: lab.title })).getByRole('button', { name: 'Abrir laboratório' }));
+    fireEvent.click(within(screen.getByRole('article', { name: lab.title })).getByRole('button', { name: `Abrir ${lab.title}` }));
     expect(await screen.findByRole('region', { name: `Laboratório: ${lab.title}` }, { timeout: 10000 })).toBeInTheDocument();
     const url = new URL(screen.getByTestId('location').textContent!, 'https://test.invalid');
     expect(url.pathname).toBe('/simulacao');

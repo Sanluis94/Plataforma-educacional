@@ -561,11 +561,12 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
           {showCatalogExplorer && <>
             <p role="status" style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>{filteredLabs.length + customResults.length} atividades em {learningLevelLabel(catalogLevel)}.</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 270px), 1fr))', gap: '0.85rem', maxHeight: '500px', overflowY: 'auto', padding: '0.2rem' }}>
-              {[...customResults, ...filteredLabs].map(lab => <article key={lab.id} aria-label={lab.title} data-lab-id={lab.id} data-academic-level={lab.academicLevel} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {[...customResults, ...filteredLabs].map(lab => <article key={lab.id} aria-label={lab.title} data-lab-id={lab.id} data-academic-level={lab.academicLevel} className="lab-catalog-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {/* A área inteira do card abre a atividade e recebe foco pelo teclado. */}
                 <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{learningLevelLabel(lab.academicLevel)} · {lab.subject}</span>
-                <h2 style={{ fontSize: '1rem', margin: 0 }}>{lab.icon} {lab.title}</h2>
+                <h2 className="lab-catalog-card__title" style={{ fontSize: '1rem', margin: 0 }}>{lab.icon} {lab.title}</h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{lab.topic}</p>
-                <button type="button" className="btn-outline" onClick={() => openLab(lab)} style={{ marginTop: 'auto' }}><Play size={14} /> Abrir laboratório</button>
+                <button type="button" className="lab-catalog-card__action" aria-label={`Abrir ${lab.title}`} onClick={() => openLab(lab)} />
               </article>)}
             </div>
             {filteredLabs.length + customResults.length === 0 && <p>Nenhum laboratório encontrado. Experimente outra disciplina ou termo de busca.</p>}

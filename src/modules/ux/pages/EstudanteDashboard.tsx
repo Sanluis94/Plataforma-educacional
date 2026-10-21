@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Beaker, Trophy, BookOpen, Clock, FileText,
-  Calendar, Upload, ExternalLink, Play, Bell,
+  Calendar, Upload, ExternalLink, Bell,
   Award, ShieldCheck, MessageSquare, Copy, Check, Download, Home as HomeIcon
 } from 'lucide-react';
 import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
@@ -807,15 +807,13 @@ function StudentDashboardSession() {
                 {currentSubjectModule.labs.map((lab, index) => {
                   const isCompleted = completedModules.includes(lab.id);
                   return (
-                    <div
+                    <article
                       key={lab.id}
-                      role="article"
                       aria-label={lab.title}
                       data-lab-id={lab.id}
                       data-academic-level={lab.academicLevel}
-                      className="glass-card"
+                      className="glass-card lab-catalog-card lab-catalog-card--student"
                       style={{
-                        padding: '1.5rem',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
@@ -838,23 +836,16 @@ function StudentDashboardSession() {
                           )}
                         </div>
 
-                        <h4 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: '0 0 0.4rem' }}>
+                        <h4 className="lab-catalog-card__title" style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: '0 0 0.4rem' }}>
                           {lab.title}
                         </h4>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 1rem', lineHeight: 1.4 }}>
                           {lab.objective}
                         </p>
                       </div>
-
-                      <button
-                        onClick={() => openLearningLab(lab)}
-                        aria-label={`Iniciar ${lab.title}`}
-                        className="btn-gradient"
-                        style={{ width: '100%', padding: '0.65rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
-                      >
-                        <Play style={{ width: '0.9rem', height: '0.9rem' }} /> Iniciar Laboratório Virtual
-                      </button>
-                    </div>
+                      {/* O botão cobre o card sem envolver títulos e parágrafos em HTML inválido. */}
+                      <button type="button" className="lab-catalog-card__action" onClick={() => openLearningLab(lab)} aria-label={`Iniciar ${lab.title}`} />
+                    </article>
                   );
                 })}
               </div>
