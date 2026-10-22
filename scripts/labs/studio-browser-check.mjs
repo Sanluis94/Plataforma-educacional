@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { verifyPreview, isolateBrowserData } from './browser-fixture.mjs';
+import { verifyPreview, isolateBrowserData, selectCatalogSubject } from './browser-fixture.mjs';
 
 // Serve the local build-browser-preview.mjs artifact on this origin. Hashes reject an old build or
 // another checkout before a successful QA report can be written.
@@ -59,7 +59,7 @@ async function chooseLevel(fixture) {
   await navigation.getByRole('button', { name }).click();
   await page.waitForURL(url => url.searchParams.get('level') === fixture.level && !url.searchParams.has('lab'));
   await navigation.getByRole('button', { name, pressed: true }).waitFor();
-  await catalog.getByLabel('Disciplina', { exact: true }).selectOption('');
+  await selectCatalogSubject(catalog);
   await catalog.getByLabel('Buscar laboratórios', { exact: true }).fill('');
 }
 
@@ -167,7 +167,7 @@ async function verifySearchAndReopen(fixture, id) {
   const card = catalog.getByRole('article', { name: fixture.title, exact: true });
   await card.waitFor();
   assert.equal(await card.count(), 1, 'A atividade deve aparecer uma vez no nível correto.');
-  assert.equal(await catalog.getByRole('button', { name: 'Abrir laboratório', exact: true }).count(), 1);
+  assert.equal(await catalog.getByRole('button', { name: `Abrir ${fixture.title}`, exact: true }).count(), 1);
   await card.getByText(`${fixture.label} · ${fixture.subject}`, { exact: true }).waitFor();
   await catalog.getByRole('status').getByText(`1 atividades em ${fixture.label}.`, { exact: true }).waitFor();
   const other = fixtures.find(candidate => candidate.level !== fixture.level);
@@ -183,7 +183,7 @@ async function verifySearchAndReopen(fixture, id) {
     if (await expand.isVisible()) await expand.click();
     await card.waitFor();
     assert.equal(await card.count(), 1, 'Reabrir uma atividade não deve duplicar seu cartão.');
-    await card.getByRole('button', { name: 'Abrir laboratório', exact: true }).click();
+    await card.getByRole('button', { name: `Abrir ${fixture.title}`, exact: true }).click();
     await page.waitForURL(url => url.searchParams.get('lab') === id && url.searchParams.get('level') === fixture.level);
     const activity = page.getByRole('region', { name: `Laboratório: ${fixture.title}`, exact: true });
     await activity.waitFor();

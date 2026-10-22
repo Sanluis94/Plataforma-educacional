@@ -14,6 +14,16 @@ export const levels = [
 ];
 export const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 
+/** Select a catalogue subject through the current disclosure/buttons UI. */
+export async function selectCatalogSubject(catalog, subject = '') {
+  const trigger = catalog.getByRole('button', { name: 'Escolher matéria', exact: true });
+  if (await trigger.getAttribute('aria-expanded') !== 'true') await trigger.click();
+  const label = (subject || 'Todas as matérias').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  await catalog.getByRole('group', { name: 'Matérias disponíveis', exact: true })
+    .getByRole('button', { name: new RegExp(`^${label} \\(\\d+ laboratórios\\)$`) }).click();
+  await catalog.locator('.lab-subject-picker__value').filter({ hasText: subject || 'Todas as matérias' }).waitFor();
+}
+
 // Browser checks must never read the private ETL export in public/local-data.
 export async function isolateBrowserData(surface, onBlocked = () => {}) {
   await surface.route('**/*', route => {

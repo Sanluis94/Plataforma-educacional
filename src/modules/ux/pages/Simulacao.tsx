@@ -2,7 +2,7 @@ import { useNavigationParams } from '../hooks/useNavigationParams';
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import {
   Play, Pause, RotateCcw, ArrowLeft, Home as HomeIcon,
-  ChevronDown, ChevronUp, HelpCircle, Settings2
+  ChevronDown, ChevronUp, HelpCircle, Settings2, Search
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
@@ -27,6 +27,8 @@ import { LEARNING_LEVELS, normalizeLearningLevel, learningLevelLabel, type Learn
 import { SkillTreeExplorerModal } from '../components/labs/SkillTreeExplorerModal';
 import { LabStudioBuilderModal } from '../components/labs/LabStudioBuilderModal';
 import { CertificateModal } from '../components/labs/CertificateModal';
+import { SubjectPicker } from '../components/labs/SubjectPicker';
+import '../components/labs/LabCatalog.css';
 import { issueLabCertificate, type LabCertificate } from '../../core/services/certificateService';
 import { GitBranch, PlusCircle, Award } from 'lucide-react';
 
@@ -171,6 +173,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
   const embeddedTarget = labId ?? mode ?? 'pendulum';
   const activeTab = embedded ? PHYSICS_MODES_BY_LAB_ID[embeddedTarget] ?? embeddedTarget : requestedLab?.id || '';
   const catalogLevel = requestedLab?.academicLevel ?? normalizeLearningLevel(searchParams.get('level'), normalizeLearningLevel(userData?.gradeLevel));
+  const levelNavRef = useRef<HTMLElement>(null);
   const [showMission, setShowMission] = useState(true);
   const [selectedMissionOption, setSelectedMissionOption] = useState<number | null>(null);
   const [missionCompleted, setMissionCompleted] = useState(false);
@@ -186,6 +189,14 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
   }, [activeTab, embedded]);
   const [completedActivities, setCompletedActivities] = useState<{ id: string; academicLevel: LearningLevel }[]>([]);
   const counts = getLearningLabCounts();
+  // Mantém a etapa escolhida visível na faixa horizontal de telas pequenas.
+  useEffect(() => {
+    const nav = levelNavRef.current;
+    const selected = nav?.querySelector<HTMLButtonElement>('button[aria-pressed="true"]');
+    if (nav && selected && nav.scrollWidth > nav.clientWidth) {
+      nav.scrollLeft = selected.offsetLeft - nav.offsetLeft - (nav.clientWidth - selected.clientWidth) / 2;
+    }
+  }, [catalogLevel]);
 
   // Novos modais estratégicos
   const [showSkillTree, setShowSkillTree] = useState(false);
@@ -213,10 +224,16 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
 
   const selectedLab = activeCustomLab ?? getLearningLab(activeTab);
   const completedAtLevel = completedActivities.filter(activity => activity.academicLevel === catalogLevel);
+  const levelLabs = searchLearningLabs({ academicLevel: catalogLevel });
+  const customAtLevel = customLabs.filter(lab => lab.academicLevel === catalogLevel);
   const subjects = [...new Set([
-    ...searchLearningLabs({ academicLevel: catalogLevel }).map(lab => lab.subject),
-    ...customLabs.filter(lab => lab.academicLevel === catalogLevel).map(lab => lab.subject),
+    ...levelLabs.map(lab => lab.subject),
+    ...customAtLevel.map(lab => lab.subject),
   ])].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const subjectOptions = subjects.map(name => ({
+    name,
+    count: levelLabs.filter(lab => lab.subject === name).length + customAtLevel.filter(lab => lab.subject === name).length,
+  }));
   const selectedSubject = searchParams.get('subject') ?? selectedLab?.subject ?? '';
   const catalogSubject = subjects.includes(selectedSubject) ? selectedSubject : '';
   const filteredLabs = searchLearningLabs({ query: catalogSearch, academicLevel: catalogLevel, subject: catalogSubject || undefined });
@@ -224,7 +241,13 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
   const customResults = customLabs.filter(lab => lab.academicLevel === catalogLevel && (!catalogSubject || lab.subject === catalogSubject) && `${lab.title} ${lab.subject} ${lab.topic}`.toLocaleLowerCase('pt-BR').includes(query));
 
   function setCatalogSubject(value: string) {
-    setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('subject', value); return next; });
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous);
+      // Um vazio explícito impede que a matéria da atividade aberta reaplique o filtro.
+      if (value || selectedLab) next.set('subject', value);
+      else next.delete('subject');
+      return next;
+    });
   }
 
   function openLab(lab: LearningLab | StudioLab) {
@@ -534,38 +557,40 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
           <h1 style={{ color: 'var(--text-main)', marginBottom: '0.4rem' }}>Laboratórios por nível de aprendizagem</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Escolha seu nível, a disciplina e a atividade. O catálogo reúne {LEARNING_LABS_CATALOG.length} laboratórios.</p>
         </header>
-        <section aria-label="Catálogo de laboratórios" className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
-          <nav aria-label="Níveis de aprendizagem" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-            {LEARNING_LEVELS.map(level => <button key={level.id} type="button" aria-pressed={catalogLevel === level.id} className={catalogLevel === level.id ? 'btn-primary' : 'btn-outline'} onClick={() => {
+        <section aria-label="Catálogo de laboratórios" className="glass-card lab-catalog" style={{ marginBottom: '1.5rem' }}>
+          <div className="lab-catalog__heading">
+            <span className="lab-catalog__eyebrow">Seu espaço de descoberta</span>
+            <h2>Encontre sua próxima atividade</h2>
+          </div>
+          <nav ref={levelNavRef} aria-label="Níveis de aprendizagem" className="lab-catalog__levels">
+            {LEARNING_LEVELS.map(level => <button key={level.id} type="button" aria-label={`${level.label} (${counts[level.id]})`} aria-pressed={catalogLevel === level.id} className="lab-catalog__level" onClick={() => {
               setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('level', level.id); next.delete('lab'); next.delete('subject'); next.delete('q'); return next; });
-            }}>{level.label} ({counts[level.id]})</button>)}
+            }}><span>{level.label}</span><span className="lab-catalog__level-count">{counts[level.id]}</span></button>)}
           </nav>
-          <p style={{ color: 'var(--text-secondary)', margin: '0.85rem 0' }}>{LEARNING_LEVELS.find(level => level.id === catalogLevel)?.description}</p>
-          <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'end' }}>
-            <label style={{ display: 'grid', gap: '0.3rem', flex: '1 1 250px', color: 'var(--text-main)' }}>Disciplina
-              <select aria-label="Disciplina" value={catalogSubject} onChange={event => { setCatalogSubject(event.target.value); setShowCatalogExplorer(true); }} style={{ padding: '0.6rem', color: 'var(--text-main)', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-                <option value="">Todas as disciplinas deste nível</option>
-                {subjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}
-              </select>
+          <p className="lab-catalog__description">{LEARNING_LEVELS.find(level => level.id === catalogLevel)?.description}</p>
+          <div className="lab-catalog__filters">
+            <SubjectPicker key={catalogLevel} subjects={subjectOptions} selected={catalogSubject} onSelect={value => { setCatalogSubject(value); setShowCatalogExplorer(true); }} />
+            <label className="lab-catalog__search"><span className="lab-catalog__field-label">Buscar laboratórios</span>
+              <span className="lab-catalog__search-field"><Search size={18} aria-hidden="true" /><input type="search" aria-label="Buscar laboratórios" placeholder="Título, tópico ou código" value={catalogSearch} onChange={event => { setCatalogSearch(event.target.value); setShowCatalogExplorer(true); }} /></span>
             </label>
-            <label style={{ display: 'grid', gap: '0.3rem', flex: '1 1 260px', color: 'var(--text-main)' }}>Buscar laboratórios
-              <input type="search" aria-label="Buscar laboratórios" placeholder="Título, tópico ou código" value={catalogSearch} onChange={event => { setCatalogSearch(event.target.value); setShowCatalogExplorer(true); }} style={{ padding: '0.6rem', color: 'var(--text-main)', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px' }} />
-            </label>
-            <button type="button" className="btn-outline" onClick={() => setShowSkillTree(true)}><GitBranch size={16} /> Mapa de atividades</button>
-            <button type="button" className="btn-outline" onClick={() => setShowStudio(true)}><PlusCircle size={16} /> Criar atividade</button>
-            <button type="button" className="btn-outline" disabled={completedAtLevel.length === 0 || certificateSaving} onClick={()=>void handleOpenCertificate()} title="Comprovante emitido após conferir entregas avaliadas; sem carga horária de curso"><Award size={16} /> {certificateSaving?'Conferindo entregas…':'Comprovante deste nível'}</button>
+          </div>
+          <div className="lab-catalog__tools">
+            <button type="button" className="btn-outline lab-catalog__tool" onClick={() => setShowSkillTree(true)}><GitBranch size={16} /> Mapa de atividades</button>
+            <button type="button" className="btn-outline lab-catalog__tool" onClick={() => setShowStudio(true)}><PlusCircle size={16} /> Criar atividade</button>
+            <button type="button" className="btn-outline lab-catalog__tool" disabled={completedAtLevel.length === 0 || certificateSaving} onClick={()=>void handleOpenCertificate()} title="Comprovante emitido após conferir entregas avaliadas; sem carga horária de curso"><Award size={16} /> {certificateSaving?'Conferindo entregas…':'Comprovante deste nível'}</button>
           </div>
           {lastLab&&!activeTab&&<p><Link className="btn-primary" to={lastLearningLabHref(lastLab)}>Continuar de onde parei: {getLearningLab(lastLab.labId)?.title}</Link></p>}
           {progressError&&<p role="alert">{progressError}</p>}{certificateError&&<p role="alert">{certificateError}</p>}
           {activeTab && <button type="button" className="btn-outline" style={{ marginTop: '1rem' }} onClick={() => setShowCatalogExplorer(previous => !previous)}>{showCatalogExplorer ? 'Recolher atividades' : 'Explorar atividades deste nível'}</button>}
           {showCatalogExplorer && <>
-            <p role="status" style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>{filteredLabs.length + customResults.length} atividades em {learningLevelLabel(catalogLevel)}.</p>
+            <p role="status" className="lab-catalog__result-count"><strong>{filteredLabs.length + customResults.length}</strong> atividades em {learningLevelLabel(catalogLevel)}.</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 270px), 1fr))', gap: '0.85rem', maxHeight: '500px', overflowY: 'auto', padding: '0.2rem' }}>
-              {[...customResults, ...filteredLabs].map(lab => <article key={lab.id} aria-label={lab.title} data-lab-id={lab.id} data-academic-level={lab.academicLevel} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {[...customResults, ...filteredLabs].map(lab => <article key={lab.id} aria-label={lab.title} data-lab-id={lab.id} data-academic-level={lab.academicLevel} className="lab-catalog-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {/* A área inteira do card abre a atividade e recebe foco pelo teclado. */}
                 <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{learningLevelLabel(lab.academicLevel)} · {lab.subject}</span>
-                <h2 style={{ fontSize: '1rem', margin: 0 }}>{lab.icon} {lab.title}</h2>
+                <h2 className="lab-catalog-card__title" style={{ fontSize: '1rem', margin: 0 }}>{lab.icon} {lab.title}</h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{lab.topic}</p>
-                <button type="button" className="btn-outline" onClick={() => openLab(lab)} style={{ marginTop: 'auto' }}><Play size={14} /> Abrir laboratório</button>
+                <button type="button" className="lab-catalog-card__action" aria-label={`Abrir ${lab.title}`} onClick={() => openLab(lab)} />
               </article>)}
             </div>
             {filteredLabs.length + customResults.length === 0 && <p>Nenhum laboratório encontrado. Experimente outra disciplina ou termo de busca.</p>}

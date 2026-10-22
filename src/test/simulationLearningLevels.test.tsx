@@ -6,8 +6,8 @@ import { Simulacao } from '../modules/ux/pages/Simulacao';
 import { SkillTreeExplorerModal } from '../modules/ux/components/labs/SkillTreeExplorerModal';
 import { CommandPaletteModal } from '../modules/ux/components/common/CommandPaletteModal';
 import { CertificateModal } from '../modules/ux/components/labs/CertificateModal';
-import { LEARNING_LABS_CATALOG, getLearningLab, getLearningLabCounts } from '../modules/core/constants/learningCatalog';
-import { learningLevelLabel } from '../modules/core/constants/learningLevels';
+import { LEARNING_LABS_CATALOG, getLearningLab, getLearningLabCounts, searchLearningLabs } from '../modules/core/constants/learningCatalog';
+import { learningLevelLabel, type LearningLevel } from '../modules/core/constants/learningLevels';
 import { getLabLearningContent } from '../modules/core/content/labLearningContent';
 
 const auth = vi.hoisted(() => ({ userData: { gradeLevel: 'fundamental_1', name: 'Estudante de teste', role: 'estudante' }, completeLab: vi.fn() }));
@@ -18,6 +18,12 @@ function Location() { const location = useLocation(); return <output data-testid
 function RouteJump({ to }: { to: string }) { const navigate = useNavigate(); return <button onClick={() => navigate(to)}>Abrir resultado da busca</button>; }
 function renderPage(url = '/simulacao', props: React.ComponentProps<typeof Simulacao> = {}) {
   return render(<MemoryRouter initialEntries={[url]}><Simulacao {...props} /><Location /></MemoryRouter>);
+}
+
+function chooseSubject(subject: string, level: LearningLevel) {
+  fireEvent.click(screen.getByRole('button', { name: 'Escolher matéria' }));
+  const count = searchLearningLabs({ academicLevel: level, subject }).length;
+  fireEvent.click(within(screen.getByRole('group', { name: 'Matérias disponíveis' })).getByRole('button', { name: `${subject} (${count} laboratórios)` }));
 }
 
 beforeEach(() => {
@@ -40,10 +46,10 @@ describe('Navegação de laboratórios por nível', () => {
   it('reconcilia a disciplina quando outra atividade chega pela busca global', async () => {
     const lab = getLearningLab('port_3')!;
     render(<MemoryRouter initialEntries={['/simulacao?level=medio']}><Simulacao /><RouteJump to={`/simulacao?lab=port_3&level=${lab.academicLevel}`} /><Location /></MemoryRouter>);
-    fireEvent.change(screen.getByRole('combobox', { name: 'Disciplina' }), { target: { value: getLearningLab('math_2')!.subject } });
+    chooseSubject(getLearningLab('math_2')!.subject, getLearningLab('math_2')!.academicLevel);
     fireEvent.click(screen.getByRole('button', { name: 'Abrir resultado da busca' }));
     expect(await screen.findByRole('region', { name: `Laboratório: ${lab.title}` }, { timeout: 10000 })).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Disciplina' })).toHaveValue(lab.subject);
+    expect(screen.getByRole('button', { name: 'Escolher matéria' })).toHaveTextContent(lab.subject);
   });
 
   it('inicia no nível do perfil, com contagem real e sem abrir bancada de outro nível', () => {
@@ -75,11 +81,42 @@ describe('Navegação de laboratórios por nível', () => {
   it('filtra por disciplina dentro do nível atual', () => {
     const lab = getLearningLab('fund1_mat_01')!;
     renderPage();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Disciplina' }), { target: { value: lab.subject } });
+    chooseSubject(lab.subject, lab.academicLevel);
     expect(screen.getByRole('article', { name: lab.title })).toBeInTheDocument();
     const otherSubject = LEARNING_LABS_CATALOG.find(item => item.academicLevel === 'fundamental_1' && item.subject !== lab.subject)!;
     expect(screen.queryByRole('article', { name: otherSubject.title })).not.toBeInTheDocument();
     expect(screen.getAllByRole('article').every(article => article.textContent?.includes(lab.subject))).toBe(true);
+    expect(screen.getByTestId('location')).toHaveTextContent('/simulacao?subject=');
+    expect(screen.getByRole('button', { name: 'Escolher matéria' })).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('fecha o painel de matérias com Escape e oferece a opção de limpar o filtro', () => {
+    const lab = getLearningLab('fund1_mat_01')!;
+    renderPage();
+    const trigger = screen.getByRole('button', { name: 'Escolher matéria' });
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.keyDown(trigger, { key: 'Escape' });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(trigger);
+    fireEvent.pointerDown(document.body);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    chooseSubject(lab.subject, lab.academicLevel);
+    fireEvent.click(trigger);
+    fireEvent.click(within(screen.getByRole('group', { name: 'Matérias disponíveis' })).getByRole('button', { name: 'Todas as matérias (21 laboratórios)' }));
+    expect(screen.getByTestId('location')).not.toHaveTextContent('subject=');
+    expect(screen.getAllByRole('article')).toHaveLength(getLearningLabCounts().fundamental_1);
+  });
+
+  it('limpa a matéria com laboratório aberto sem fechar a atividade', () => {
+    const lab = getLearningLab('fund1_mat_01')!;
+    renderPage(`/simulacao?lab=${lab.id}`);
+    fireEvent.click(screen.getByRole('button', { name: 'Escolher matéria' }));
+    fireEvent.click(within(screen.getByRole('group', { name: 'Matérias disponíveis' })).getByRole('button', { name: 'Todas as matérias (21 laboratórios)' }));
+    expect(screen.getByRole('button', { name: 'Escolher matéria' })).toHaveTextContent('Todas as matérias');
+    expect(within(screen.getByRole('region', { name: 'Catálogo de laboratórios' })).getAllByRole('article')).toHaveLength(getLearningLabCounts().fundamental_1);
+    expect(screen.getByRole('heading', { name: lab.title })).toBeInTheDocument();
+    expect(screen.getByTestId('location')).toHaveTextContent(`lab=${lab.id}`);
   });
 
   it('abre um legado no catálogo global sem enviar o professor ao painel de estudante', async () => {
@@ -87,7 +124,7 @@ describe('Navegação de laboratórios por nível', () => {
     const lab = getLearningLab('math_1')!;
     renderPage(`/simulacao?level=${lab.academicLevel}`);
     fireEvent.change(screen.getByRole('searchbox', { name: 'Buscar laboratórios' }), { target: { value: 'math_1' } });
-    fireEvent.click(within(screen.getByRole('article', { name: lab.title })).getByRole('button', { name: 'Abrir laboratório' }));
+    fireEvent.click(within(screen.getByRole('article', { name: lab.title })).getByRole('button', { name: `Abrir ${lab.title}` }));
     expect(await screen.findByRole('region', { name: `Laboratório: ${lab.title}` }, { timeout: 10000 })).toBeInTheDocument();
     const url = new URL(screen.getByTestId('location').textContent!, 'https://test.invalid');
     expect(url.pathname).toBe('/simulacao');

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { root, origin, levels, readCatalog, verifyPreview, isolateBrowserData } from './browser-fixture.mjs';
+import { root, origin, levels, readCatalog, verifyPreview, isolateBrowserData, selectCatalogSubject } from './browser-fixture.mjs';
 
 const catalog = await readCatalog();
 const output = new URL('.local/labs/browser/', root);
@@ -49,12 +49,20 @@ async function verifyPartition(route) {
         .and(page.locator('[aria-pressed="true"]')).waitFor();
     }
     const subjectSelect = page.getByRole('combobox', { name: 'Disciplina', exact: true });
-    const subjects = await subjectSelect.locator('option').evaluateAll(options => options.map(option => option.value).filter(Boolean));
+    let subjects;
+    if (route === 'estudante') subjects = await subjectSelect.locator('option').evaluateAll(options => options.map(option => option.value).filter(Boolean));
+    else {
+      await catalogRegion.getByRole('button', { name: 'Escolher matéria', exact: true }).click();
+      subjects = await catalogRegion.locator('.lab-subject-picker__option > span:first-child').allTextContents();
+      subjects = subjects.filter(subject => subject !== 'Todas as matérias');
+      await page.keyboard.press('Escape');
+    }
     const expected = catalog.filter(lab => lab.academicLevel === level.id);
     assert.deepEqual([...subjects].sort(), [...new Set(expected.map(lab => lab.subject))].sort());
     const visitedAtLevel = [];
     for (const subject of subjects) {
-      await subjectSelect.selectOption(subject);
+      if (route === 'estudante') await subjectSelect.selectOption(subject);
+      else await selectCatalogSubject(catalogRegion, subject);
       const matches = expected.filter(lab => lab.subject === subject);
       await page.locator(`[data-lab-id="${matches[0].id}"]`).waitFor();
       const cards = await ids(route === 'estudante' ? page : catalogRegion);
@@ -94,7 +102,7 @@ try {
 
   await page.goto(`${origin}/simulacao?lab=math_3&level=fundamental_1`);
   await page.getByRole('region', { name: 'Laboratório: Funções Trigonométricas', exact: true }).waitFor();
-  assert.equal(await catalogRegion.getByLabel('Disciplina', { exact: true }).inputValue(), 'Matemática');
+  assert.equal(await catalogRegion.locator('.lab-subject-picker__value').textContent(), 'Matemática');
   await page.getByRole('navigation', { name: 'Níveis de aprendizagem', exact: true })
     .getByRole('button', { name: 'Ensino Médio (134)', exact: true, pressed: true }).waitFor();
   await page.keyboard.press('Control+k');
@@ -104,7 +112,7 @@ try {
   await palette.getByText(portugueseLab.title, { exact: true }).click();
   await page.waitForURL(url => url.searchParams.get('lab') === 'port_3');
   await page.getByRole('region', { name: `Laboratório: ${portugueseLab.title}`, exact: true }).waitFor();
-  assert.equal(await catalogRegion.getByLabel('Disciplina', { exact: true }).inputValue(), portugueseLab.subject);
+  assert.equal(await catalogRegion.locator('.lab-subject-picker__value').textContent(), portugueseLab.subject);
   checks.push({ check: 'link conflitante e busca global reconciliam nível, ID e disciplina', ids: ['math_3', 'port_3'] });
 
   await page.goto(`${origin}/simulacao?lab=fis_1&level=pos_graduacao`);
