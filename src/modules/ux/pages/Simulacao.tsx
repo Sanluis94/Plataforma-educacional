@@ -241,7 +241,13 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
   const customResults = customLabs.filter(lab => lab.academicLevel === catalogLevel && (!catalogSubject || lab.subject === catalogSubject) && `${lab.title} ${lab.subject} ${lab.topic}`.toLocaleLowerCase('pt-BR').includes(query));
 
   function setCatalogSubject(value: string) {
-    setSearchParams(previous => { const next = new URLSearchParams(previous); if (value) next.set('subject', value); else next.delete('subject'); return next; });
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous);
+      // Um vazio explícito impede que a matéria da atividade aberta reaplique o filtro.
+      if (value || selectedLab) next.set('subject', value);
+      else next.delete('subject');
+      return next;
+    });
   }
 
   function openLab(lab: LearningLab | StudioLab) {

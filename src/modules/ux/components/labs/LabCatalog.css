@@ -53,7 +53,7 @@
 }
 
 .lab-catalog__level[aria-pressed='true'] {
-  background: var(--color-primary-accessible);
+  background: var(--color-laranja-700);
   border-color: var(--color-primary-accessible);
   color: #fff;
 }
@@ -67,7 +67,7 @@
 }
 
 .lab-catalog__level[aria-pressed='true'] .lab-catalog__level-count {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.12);
 }
 
 .lab-catalog__description {
@@ -221,7 +221,11 @@
 .lab-subject-picker__option.is-active {
   border-color: var(--color-primary-accessible);
   background: var(--color-laranja-100);
-  color: var(--color-verde-900);
+  color: #172314;
+}
+
+.lab-subject-picker__option.is-active .lab-subject-picker__option-meta {
+  color: var(--color-laranja-700);
 }
 
 .lab-subject-picker__option-meta {

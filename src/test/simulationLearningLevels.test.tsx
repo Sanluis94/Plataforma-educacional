@@ -108,6 +108,17 @@ describe('Navegação de laboratórios por nível', () => {
     expect(screen.getAllByRole('article')).toHaveLength(getLearningLabCounts().fundamental_1);
   });
 
+  it('limpa a matéria com laboratório aberto sem fechar a atividade', () => {
+    const lab = getLearningLab('fund1_mat_01')!;
+    renderPage(`/simulacao?lab=${lab.id}`);
+    fireEvent.click(screen.getByRole('button', { name: 'Escolher matéria' }));
+    fireEvent.click(within(screen.getByRole('group', { name: 'Matérias disponíveis' })).getByRole('button', { name: 'Todas as matérias (21 laboratórios)' }));
+    expect(screen.getByRole('button', { name: 'Escolher matéria' })).toHaveTextContent('Todas as matérias');
+    expect(within(screen.getByRole('region', { name: 'Catálogo de laboratórios' })).getAllByRole('article')).toHaveLength(getLearningLabCounts().fundamental_1);
+    expect(screen.getByRole('heading', { name: lab.title })).toBeInTheDocument();
+    expect(screen.getByTestId('location')).toHaveTextContent(`lab=${lab.id}`);
+  });
+
   it('abre um legado no catálogo global sem enviar o professor ao painel de estudante', async () => {
     auth.userData.role = 'professor';
     const lab = getLearningLab('math_1')!;
