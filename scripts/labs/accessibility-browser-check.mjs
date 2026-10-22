@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
-import { root, origin, readCatalog, verifyPreview, isolateBrowserData } from './browser-fixture.mjs';
+import { root, origin, readCatalog, verifyPreview, isolateBrowserData, selectCatalogSubject } from './browser-fixture.mjs';
 
 const output = new URL('.local/labs/accessibility-browser/', root);
 await mkdir(output, { recursive: true });
@@ -66,16 +66,16 @@ try {
 
   await page.goto(origin + '/simulacao?level=fundamental_2&returnTo=' + encodeURIComponent('/estudante?tab=exams&level=fundamental_2'));
   const lab = (await readCatalog()).find(item => item.id === 'fund2_mat_01');
-  await page.getByRole('combobox', { name: 'Disciplina', exact: true }).selectOption(lab.subject);
+  await selectCatalogSubject(page.getByRole('region', { name: 'Catálogo de laboratórios', exact: true }), lab.subject);
   await page.getByRole('searchbox', { name: 'Buscar laboratórios', exact: true }).fill(lab.id);
-  await page.getByRole('article', { name: lab.title }).getByRole('button', { name: 'Abrir laboratório', exact: true }).click();
+  await page.getByRole('article', { name: lab.title }).getByRole('button', { name: `Abrir ${lab.title}`, exact: true }).click();
   await page.getByRole('region', { name: 'Laboratório: ' + lab.title, exact: true }).waitFor();
   assert.equal(await page.locator('p[tabindex="-1"]').evaluate(e => e === document.activeElement), true);
   await page.reload();
   await page.getByRole('region', { name: 'Laboratório: ' + lab.title, exact: true }).waitFor();
   await page.getByRole('button', { name: 'Voltar ao catálogo', exact: true }).click();
   assert.equal(await page.getByRole('searchbox', { name: 'Buscar laboratórios' }).inputValue(), lab.id);
-  assert.equal(await page.getByRole('combobox', { name: 'Disciplina', exact: true }).inputValue(), lab.subject);
+  assert.equal(await page.locator('.lab-subject-picker__value').textContent(), lab.subject);
   await page.getByRole('link', { name: 'Voltar à tela anterior', exact: true }).click();
   await page.waitForURL(url => url.pathname === '/estudante' && url.searchParams.get('tab') === 'exams');
   checks.push({ check: 'Catálogo preserva disciplina, busca e origem após atividade e recarga; foco identifica atividade' });

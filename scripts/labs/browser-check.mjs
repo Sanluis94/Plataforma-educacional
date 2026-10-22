@@ -3,7 +3,7 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { createHash } from 'node:crypto';
-import { readCatalog, levels, verifyPreview, isolateBrowserData } from './browser-fixture.mjs';
+import { readCatalog, levels, verifyPreview, isolateBrowserData, selectCatalogSubject } from './browser-fixture.mjs';
 
 // Build with build-browser-preview.mjs, then serve preview on 127.0.0.1:5175.
 // It deliberately uses the
@@ -121,12 +121,12 @@ async function verifyShard(index) {
     const level = levels.find(level => level.id === lab.academicLevel);
     await page.getByRole('navigation', { name: 'Níveis de aprendizagem', exact: true })
       .getByRole('button', { name: `${level.label} (${level.count})`, exact: true }).click();
-    await catalogRegion.getByLabel('Disciplina', { exact: true }).selectOption('');
+    await selectCatalogSubject(catalogRegion);
     await catalogRegion.getByLabel('Buscar laboratórios', { exact: true }).fill(lab.id);
     const card = catalogRegion.getByRole('article', { name: lab.title, exact: true });
     await card.getByText(`${level.label} · ${lab.subject}`, { exact: true }).waitFor();
-    assert.equal(await card.getByRole('button', { name: 'Abrir laboratório', exact: true }).count(), 1);
-    await card.getByRole('button', { name: 'Abrir laboratório', exact: true }).click();
+    assert.equal(await card.getByRole('button', { name: `Abrir ${lab.title}`, exact: true }).count(), 1);
+    await card.getByRole('button', { name: `Abrir ${lab.title}`, exact: true }).click();
     await page.waitForURL(url => url.searchParams.get('lab') === lab.id && url.searchParams.get('level') === lab.academicLevel);
     await verifyActivity(page, lab);
     if (lab.id === 'soft_1') {
