@@ -18,23 +18,23 @@ export function Navbar({ theme, onThemeToggle, onLoginOpen }: NavbarProps) {
   // Role-aware nav links
   const navLinks = currentUser && userData ? (() => {
     if (userData.role === 'coordenador') return [
-      { to: '/coordenacao', label: '🏛️ Painel Coordenação' },
-      { to: '/professor', label: '🏫 Visão Docente' },
-      { to: '/simulacao', label: '⚗️ Laboratórios' },
+      { to: '/coordenacao', label: 'Painel Coordenação' },
+      { to: '/professor', label: 'Visão Docente' },
+      { to: '/simulacao', label: 'Laboratórios' },
     ];
     if (userData.role === 'professor') return [
-      { to: '/professor', label: '🏫 Minhas Turmas' },
-      { to: '/simulacao', label: '⚗️ Laboratórios' },
-      { to: '/admin', label: '📊 Relatórios', adminOnly: true },
+      { to: '/professor', label: 'Minhas Turmas' },
+      { to: '/simulacao', label: 'Laboratórios' },
+      { to: '/admin', label: 'Relatórios', adminOnly: true },
     ];
     if (userData.role === 'admin') return [
-      { to: '/admin', label: '🛡️ Painel Admin' },
-      { to: '/coordenacao', label: '🏛️ Coordenação' },
-      { to: '/professor', label: '🏫 Docência' },
+      { to: '/admin', label: 'Painel Admin' },
+      { to: '/coordenacao', label: 'Coordenação' },
+      { to: '/professor', label: 'Docência' },
     ];
     return [
-      { to: '/estudante', label: '📚 Meu Aprendizado' },
-      { to: '/simulacao', label: '⚗️ Laboratórios' },
+      { to: '/estudante', label: 'Meu Aprendizado' },
+      { to: '/simulacao', label: 'Laboratórios' },
     ];
   })() : [
     { to: '/', label: 'Início' },
@@ -85,7 +85,7 @@ export function Navbar({ theme, onThemeToggle, onLoginOpen }: NavbarProps) {
                 {userData.name?.split(' ')[0] || 'Usuário'}
               </span>
               <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                {userData.role === 'coordenador' ? '🏛️ Coordenação' : userData.role === 'professor' ? '👨‍🏫 Professor' : userData.role === 'admin' ? '🛡️ Admin' : '🎓 Estudante'} · {GRADE_LABELS[userData.gradeLevel]?.split('(')[0]?.trim() || ''}
+                {userData.role === 'coordenador' ? 'Coordenação' : userData.role === 'professor' ? 'Professor' : userData.role === 'admin' ? 'Admin' : 'Estudante'} · {GRADE_LABELS[userData.gradeLevel]?.split('(')[0]?.trim() || ''}
               </span>
             </div>
             {currentUser.photoURL && (

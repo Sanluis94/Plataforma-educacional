@@ -170,7 +170,7 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
         }
       `}</style>
       
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🧪 {labTitle || 'Laboratório de Química Virtual'}</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>{labTitle || 'Laboratório de Química Virtual'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
         {_mode === 'ph_scale' ? 'Compare valores exemplificativos de pH de soluções individuais a 25 °C. Cores são símbolos didáticos; misturas sem dados suficientes não recebem pH calculado.' :
          _mode === 'titration' ? 'Exemplo calculado de titulação entre ácido forte e base forte a 25 °C.' :
@@ -182,12 +182,12 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
 
       {_mode === 'titration' && (
         <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>🫙 Titulação Ácido-Base</h3>
+          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>Titulação Ácido-Base</h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Exemplo ideal: 12,5 mL de HCl 0,10 mol/L recebem 12,5 mL de NaOH 0,10 mol/L. As quantidades de H⁺ e OH⁻ são iguais: 1,25 mmol de cada. A equivalência ocorre em pH 7 a 25 °C; a viragem da fenolftaleína em faixa básica não é a definição de equivalência.</p>
           <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-primary-accessible, #B8441F)', marginBottom: '0.25rem', fontWeight: 700 }}>Bureta Graduada</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-primary-accessible, #B8441F)' }}>NaOH 0.10 M</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-primary-accessible, #A63D1B)', marginBottom: '0.25rem', fontWeight: 700 }}>Bureta Graduada</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-primary-accessible, #A63D1B)' }}>NaOH 0.10 M</div>
               <div style={{ margin: '0.5rem 0', color: 'var(--text-muted)', fontSize: '0.78rem' }}>Volume Adicionado: 12.5 mL</div>
             </div>
             <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
@@ -201,10 +201,10 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
 
       {_mode === 'stoichiometry' && (
         <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>⚖️ Estequiometria e Balancemento de Reações</h3>
+          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>Estequiometria e Balancemento de Reações</h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Ajuste os coeficientes estequiométricos para satisfazer a Lei de Lavoisier (Conservação das Massas):</p>
           <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-verde-700, #293E24)', padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)', textAlign: 'center', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>1</span> N₂ + <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>3</span> H₂  →  <span style={{ color: 'var(--color-verde-700, #293E24)' }}>2</span> NH₃
+            <span style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>1</span> N₂ + <span style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>3</span> H₂  →  <span style={{ color: 'var(--color-verde-700, #293E24)' }}>2</span> NH₃
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'center' }}>Massa dos Reagentes: 28g (N₂) + 6g (H₂) = 34g | Massa dos Produtos: 34g (NH₃)</div>
         </div>
@@ -212,7 +212,7 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
 
       {_mode === 'organic' && (
         <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>🧬 Química Orgânica — Construtor de Cadeias</h3>
+          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>Química Orgânica — Construtor de Cadeias</h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Montagem de hidrocarbonetos e identificação de funções orgânicas oxigenadas e nitrogenadas.</p>
           <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
             <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-verde-700, #293E24)', marginBottom: '0.5rem' }}>Etanol (Álcool): CH₃ — CH₂ — OH</div>
@@ -223,7 +223,7 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
 
       {_mode === 'electrochemistry' && (
         <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>🔋 Eletroquímica — Pilha de Daniell</h3>
+          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>Eletroquímica — Pilha de Daniell</h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Simulação de transferência de elétrons do Ânodo (Oxidação do Zinco) para o Cátodo (Redução do Cobre).</p>
           <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
             <div style={{ padding: '1rem', background: 'rgba(188,57,31,0.1)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--color-danger, #BC391F)', textAlign: 'center' }}>
@@ -235,17 +235,17 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
               <div style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Cu²⁺(aq) + 2e⁻ → Cu(s)</div>
             </div>
           </div>
-          <div style={{ marginTop: '1rem', textAlign: 'center', fontWeight: 700, color: 'var(--color-primary-accessible, #B8441F)' }}>DDP da Pilha (E⁰) = +1.10 Volts</div>
+          <div style={{ marginTop: '1rem', textAlign: 'center', fontWeight: 700, color: 'var(--color-primary-accessible, #A63D1B)' }}>DDP da Pilha (E⁰) = +1.10 Volts</div>
         </div>
       )}
 
       {_mode === 'gases' && (
         <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>🎈 Gases Ideais — Lei dos Gases</h3>
+          <h3 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.75rem' }}>Gases Ideais — Lei dos Gases</h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Comportamento de partículas gasosas sob variação de Pressão (P), Volume (V) e Temperatura (T).</p>
           <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
             <div><span style={{ color: 'var(--color-verde-700, #293E24)' }}>Pressão:</span> <strong>2.0 atm</strong></div>
-            <div><span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>Volume:</span> <strong>5.0 L</strong></div>
+            <div><span style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>Volume:</span> <strong>5.0 L</strong></div>
             <div><span style={{ color: 'var(--color-danger, #BC391F)' }}>Temperatura:</span> <strong>350 K</strong></div>
           </div>
         </div>
@@ -345,7 +345,7 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
               <div style={{ display: 'flex', gap: '0.35rem' }}>
                 <button onClick={() => mixTube(tube.id)} disabled={tube.reagents.length < 2}
                   style={{ padding: '0.3rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', cursor: tube.reagents.length >= 2 ? 'pointer' : 'not-allowed',
-                    background: '#E4683F', border: 'none', color: 'white', fontWeight: 700, opacity: tube.reagents.length < 2 ? 0.4 : 1 }}>
+                    background: '#E4683F', border: 'none', color: 'var(--color-on-primary, #172314)', fontWeight: 700, opacity: tube.reagents.length < 2 ? 0.4 : 1 }}>
                   Misturar
                 </button>
                 <button onClick={() => resetTube(tube.id)}
@@ -367,11 +367,11 @@ export function ChemistryLab({ mode: _mode = 'ph_scale', labTitle, onComplete }:
         color: 'var(--text-main)',
         fontSize: '0.9rem',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.8rem', marginBottom: '0.4rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, fontSize: '0.8rem', marginBottom: '0.4rem' }}>
           <span>Observações da bancada</span>
         </div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
-          💡 {info}
+          {info}
         </p>
       </div>
       <LabExplorationCompletion onComplete={onComplete} ready={tubes.some(tube => tube.reagents.length > 0)} />

@@ -28,7 +28,7 @@ export function MathSimulator({ mode, functionType = 'linear', title, labTitle, 
       {/* Header com identificação do laboratório */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
         <div>
-          <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--color-primary-accessible, #B8441F)' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--color-primary-accessible, #A63D1B)' }}>
             Laboratório especializado de matemática
           </span>
           <h2 style={{ color: 'var(--text-main)', margin: '0.25rem 0 0 0', fontSize: '1.35rem' }}>
@@ -246,7 +246,7 @@ function LinearLab() {
           style={{ width: '100%', maxWidth: '420px', aspectRatio: '420/380', cursor: 'crosshair' }}
         />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', marginTop: '0.75rem', fontSize: '0.75rem' }}>
-          <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>● Reta f(x) = {a}x + {b}</span>
+          <span style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>● Reta f(x) = {a}x + {b}</span>
           <span style={{ color: '#f59e0b' }}>● Intercepto Y (0, {b})</span>
           <span style={{ color: '#10b981' }}>● Raiz {root !== null ? `(${root.toFixed(2)}, 0)` : 'Inexistente'}</span>
         </div>
@@ -260,7 +260,7 @@ function LinearLab() {
           <div style={{ marginBottom: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               <span>Coeficiente Angular (a - Inclinação):</span>
-              <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{a.toFixed(1)}</strong>
+              <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>{a.toFixed(1)}</strong>
             </div>
             <input
               type="range" min="-4" max="4" step="0.2" value={a}
@@ -287,18 +287,18 @@ function LinearLab() {
           <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block' }}>Classificação</span>
             <strong style={{ color: a > 0 ? '#10b981' : a < 0 ? '#ef4444' : '#f59e0b', fontSize: '0.85rem' }}>
-              {a > 0 ? '📈 Estritamente Crescente' : a < 0 ? '📉 Estritamente Decrescente' : '⏸️ Função Constante'}
+              {a > 0 ? 'Estritamente Crescente' : a < 0 ? 'Estritamente Decrescente' : 'Função Constante'}
             </strong>
           </div>
           <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block' }}>Taxa de Variação (Δy/Δx)</span>
-            <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.85rem' }}>{a} por unidade de x</strong>
+            <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontSize: '0.85rem' }}>{a} por unidade de x</strong>
           </div>
         </div>
 
         {/* Diagnóstico de IA */}
         <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(228, 104, 63, 0.08)', border: '1px solid rgba(228, 104, 63, 0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #A63D1B)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
             <span>Observações do modelo (ANÁLISE AFIM)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
@@ -466,7 +466,7 @@ function QuadraticLab() {
           <div style={{ marginBottom: '0.8rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               <span>b (Deslocamento linear):</span>
-              <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{b.toFixed(1)}</strong>
+              <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>{b.toFixed(1)}</strong>
             </div>
             <input
               type="range" min="-5" max="5" step="0.5" value={b}
@@ -752,7 +752,7 @@ function TrigonometricLab() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               <span>Frequência Angular (B):</span>
-              <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{frequency.toFixed(1)}</strong>
+              <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>{frequency.toFixed(1)}</strong>
             </div>
             <input
               type="range" min="0.5" max="3" step="0.5" value={frequency}
@@ -770,7 +770,7 @@ function TrigonometricLab() {
           </div>
           <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.6rem', borderRadius: '8px' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block' }}>cos(θ)</span>
-            <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.85rem' }}>{cosVal.toFixed(3)}</strong>
+            <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontSize: '0.85rem' }}>{cosVal.toFixed(3)}</strong>
           </div>
           <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.6rem', borderRadius: '8px' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block' }}>tg(θ)</span>
@@ -1051,7 +1051,7 @@ function SpatialLab() {
             <div style={{ marginBottom: '0.8rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                 <span>Raio (r):</span>
-                <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{radius} cm</strong>
+                <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>{radius} cm</strong>
               </div>
               <input
                 type="range" min="1" max="8" step="0.5" value={radius}
@@ -1093,7 +1093,7 @@ function SpatialLab() {
         {/* Resultados das Grandezas */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
           <div style={{ background: 'rgba(228, 104, 63, 0.1)', padding: '0.85rem', borderRadius: '8px', border: '1px solid rgba(228, 104, 63, 0.25)' }}>
-            <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', display: 'block', fontWeight: 700 }}>VOLUME (Capacidade)</span>
+            <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #A63D1B)', display: 'block', fontWeight: 700 }}>VOLUME (Capacidade)</span>
             <strong style={{ color: 'var(--text-main)', fontSize: '1.15rem' }}>{metrics.volume.toFixed(2)} cm³</strong>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block' }}>≈ {(metrics.volume / 1000).toFixed(3)} Litros</span>
           </div>
@@ -1107,13 +1107,13 @@ function SpatialLab() {
 
         {/* Fórmulas formatadas */}
         <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          <div><strong>Fórmula do Volume:</strong> <code style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{metrics.formulaVol}</code></div>
+          <div><strong>Fórmula do Volume:</strong> <code style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>{metrics.formulaVol}</code></div>
           <div><strong>Fórmula da Superfície:</strong> <code style={{ color: '#10b981' }}>{metrics.formulaArea}</code></div>
         </div>
 
         {/* Diagnóstico IA */}
         <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(228, 104, 63, 0.08)', border: '1px solid rgba(228, 104, 63, 0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #A63D1B)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
             <span>Observações do modelo (GEOMETRIA ESPACIAL)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
@@ -1328,7 +1328,7 @@ function StatisticsLab() {
       <div className="lab-canvas-container" style={{ background: '#FAF7EE', borderRadius: '12px', padding: '12px', border: '1px solid #E2D7C3', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <canvas ref={canvasRef} width={420} height={340} style={{ width: '100%', maxWidth: '420px', background: '#FAF7EE' }} />
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', fontSize: '0.75rem' }}>
-          <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>■ Histograma de Classes</span>
+          <span style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>■ Histograma de Classes</span>
           <span style={{ color: '#a855f7' }}>■ Intervalo Interquartil (IQR)</span>
           <span style={{ color: '#ec4899' }}>■ Mediana</span>
         </div>
@@ -1418,7 +1418,7 @@ function StatisticsLab() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', textAlign: 'center' }}>
           <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.6rem', borderRadius: '8px' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Média (x̄)</span>
-            <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', display: 'block', fontSize: '1rem' }}>{stats.mean.toFixed(2)}</strong>
+            <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)', display: 'block', fontSize: '1rem' }}>{stats.mean.toFixed(2)}</strong>
           </div>
           <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.6rem', borderRadius: '8px' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Mediana (Me)</span>
@@ -1439,7 +1439,7 @@ function StatisticsLab() {
 
         {/* Diagnóstico IA */}
         <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(228, 104, 63, 0.08)', border: '1px solid rgba(228, 104, 63, 0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #A63D1B)', fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>
             <span>Observações do modelo (DIAGNÓSTICO ESTATÍSTICO)</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
@@ -1636,7 +1636,7 @@ function MatricesLab() {
           <>
             <canvas ref={canvasRef} width={400} height={300} style={{ width: '100%', maxWidth: '400px', background: '#FAF7EE' }} />
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', fontSize: '0.75rem' }}>
-              <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>● Reta 1: {sys.a1}x + {sys.b1}y = {sys.c1}</span>
+              <span style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>● Reta 1: {sys.a1}x + {sys.b1}y = {sys.c1}</span>
               <span style={{ color: '#a855f7' }}>● Reta 2: {sys.a2}x + {sys.b2}y = {sys.c2}</span>
               <span style={{ color: '#facc15' }}>● Interseção P(x, y)</span>
             </div>
@@ -1648,10 +1648,10 @@ function MatricesLab() {
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <span style={{ fontSize: '1.5rem', color: 'var(--color-primary, #E4683F)' }}>[</span>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 60px)', gap: '0.5rem' }}>
-                  <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>{invM[0][0].toFixed(2)}</div>
-                  <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>{invM[0][1].toFixed(2)}</div>
-                  <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>{invM[1][0].toFixed(2)}</div>
-                  <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>{invM[1][1].toFixed(2)}</div>
+                  <div style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700 }}>{invM[0][0].toFixed(2)}</div>
+                  <div style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700 }}>{invM[0][1].toFixed(2)}</div>
+                  <div style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700 }}>{invM[1][0].toFixed(2)}</div>
+                  <div style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700 }}>{invM[1][1].toFixed(2)}</div>
                 </div>
                 <span style={{ fontSize: '1.5rem', color: 'var(--color-primary, #E4683F)' }}>]</span>
               </div>
@@ -1675,7 +1675,7 @@ function MatricesLab() {
             <h4 style={{ margin: '0 0 0.8rem 0', color: 'var(--text-main)', fontSize: '0.95rem' }}>Equações do Sistema Linear</h4>
 
             {/* Reta 1 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem', fontSize: '0.85rem', color: 'var(--color-primary-accessible, #B8441F)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem', fontSize: '0.85rem', color: 'var(--color-primary-accessible, #A63D1B)' }}>
               <input
                 type="number" value={sys.a1} onChange={e => setSys({ ...sys, a1: parseFloat(e.target.value) || 0 })}
                 style={{ width: '45px', padding: '0.3rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.15)', background: '#111', color: '#fff', textAlign: 'center' }}

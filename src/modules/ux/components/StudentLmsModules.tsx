@@ -275,7 +275,7 @@ export function StudentLmsModules({
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(184,68,31,0.05)', border: '1px solid rgba(184,68,31,0.2)' }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>📝 Provas formais ({weights.pesoProvas}%)</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, textTransform: 'uppercase' }}>Provas formais ({weights.pesoProvas}%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {gradeLabel(studentScores.notaProvas)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaProvas === null ? '' : '/ 10'}</span>
                 </div>
@@ -283,7 +283,7 @@ export function StudentLmsModules({
               </div>
 
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(41,62,36,0.06)', border: '1px solid var(--border-color, #E2D7C3)' }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>🔬 Laboratórios interativos ({weights.pesoLabs}%)</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>Laboratórios interativos ({weights.pesoLabs}%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {gradeLabel(studentScores.notaLabs)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaLabs === null ? '' : '/ 10'}</span>
                 </div>
@@ -291,7 +291,7 @@ export function StudentLmsModules({
               </div>
 
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(41,62,36,0.04)', border: '1px solid var(--border-color, #E2D7C3)' }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>📄 Atividades práticas ({weights.pesoAtividades}%)</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700, textTransform: 'uppercase' }}>Atividades práticas ({weights.pesoAtividades}%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {gradeLabel(studentScores.notaAtividades)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaAtividades === null ? '' : '/ 10'}</span>
                 </div>
@@ -299,7 +299,7 @@ export function StudentLmsModules({
               </div>
 
               <div className="glass-card" style={{ padding: '1rem', background: 'rgba(228,104,63,0.06)', border: '1px solid rgba(228,104,63,0.25)' }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>💬 Participação & fórum ({weights.pesoParticipacao}%)</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, textTransform: 'uppercase' }}>Participação & fórum ({weights.pesoParticipacao}%)</div>
                 <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.15rem' }}>
                   {gradeLabel(studentScores.notaParticipacao)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{studentScores.notaParticipacao === null ? '' : '/ 10'}</span>
                 </div>
@@ -320,7 +320,7 @@ export function StudentLmsModules({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <MessageSquare style={{ color: 'var(--color-primary-accessible, #B8441F)', width: '1.4rem', height: '1.4rem' }} />
+                <MessageSquare style={{ color: 'var(--color-primary-accessible, #A63D1B)', width: '1.4rem', height: '1.4rem' }} />
                 Fórum de dúvidas & debates da turma
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
@@ -342,7 +342,7 @@ export function StudentLmsModules({
           {isAskingQuestion && (
             <form onSubmit={handlePostQuestion} className="glass-card" style={{ padding: '1.5rem', border: '1px solid var(--border-color, #E2D7C3)' }}>
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
-                ❓ Perguntar à Turma ou ao Professor
+                Perguntar à Turma ou ao Professor
               </h3>
               <p>As perguntas e respostas deste fórum ficam visíveis para a turma. Para conversar somente com o professor, use Enviar Dúvida em Minhas turmas.</p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,220px),1fr))', gap: '1rem', marginBottom: '1rem' }}>
@@ -437,8 +437,8 @@ export function StudentLmsModules({
                       </p>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                         <span>Autor: <strong style={{ color: 'var(--text-main)' }}>{top.autorNome}</strong></span>
-                        <span style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
-                          💬 {top.respostas?.length || 0} respostas
+                        <span style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700 }}>
+                          {top.respostas?.length || 0} respostas
                         </span>
                       </div>
                     </div>
@@ -452,7 +452,7 @@ export function StudentLmsModules({
               <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: 'fit-content' }}>
                 <div style={{ borderBottom: '1px solid var(--border-color, #E2D7C3)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>{selectedTopic.disciplina}</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-primary-accessible, #A63D1B)' }}>{selectedTopic.disciplina}</span>
                     <button onClick={() => setSelectedTopic(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.82rem' }}>Fechar</button>
                   </div>
                   <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 800, margin: '0 0 0.5rem' }}>

@@ -1,6 +1,38 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Design System v2: as utilidades de cor do Tailwind usadas nos laboratórios
+   passam a falar a paleta da marca (neutros verdes, laranja, sálvia, vermelho). */
+@theme {
+  --color-slate-50: #F7F8F5;
+  --color-slate-100: #EEF1EB;
+  --color-slate-200: #DCE2D8;
+  --color-slate-300: #C2CCBD;
+  --color-slate-400: #94A38E;
+  --color-slate-500: #6B7D66;
+  --color-slate-600: #4E604A;
+  --color-slate-700: #3A4A36;
+  --color-slate-800: #24321F;
+  --color-slate-900: #182616;
+  --color-slate-950: #0D150B;
+
+  --color-amber-300: #F59C7B;
+  --color-amber-400: #EC7E58;
+  --color-amber-500: #E4683F;
+  --color-amber-600: #B8441F;
+  --color-orange-400: #EC7E58;
+  --color-orange-500: #E4683F;
+  --color-yellow-400: #F59C7B;
+  --color-sky-300: #C2CCBD;
+  --color-sky-400: #A8D5A2;
+  --color-sky-500: #76866F;
+  --color-emerald-300: #C3E3BE;
+  --color-emerald-400: #A8D5A2;
+  --color-emerald-500: #7FB878;
+  --color-rose-400: #F2A08A;
+  --color-rose-500: #BC391F;
+}
+
 /* ═══════════════════════════════════════════════════════
    Manual de Identidade Visual — Edu-Interact v1.0
    "Onde a raiz encontra o circuito — unindo o rigor
@@ -29,9 +61,13 @@
   --color-verde-900: #172314;
   --color-verde-700: #293E24;
   --color-verde-500: #3D5B36;
-  
-  --color-laranja-700: #B8441F;
-  --color-laranja-500: #E4683F;
+  --color-verde-300: #76866F; /* v1.1: borda de controles (3,24:1 sobre Nude — WCAG 1.4.11) */
+  --color-verde-200: #A8D5A2; /* v1.1: sálvia, sucesso no modo escuro */
+
+  --color-laranja-700: #A63D1B; /* v1.1: texto laranja (5,30:1 sobre Nude) */
+  --color-laranja-600: #B8441F; /* v1.1: antigo Laranja 700, só ícones e texto ≥ 24px */
+  --color-laranja-500: #E4683F; /* preenchimento — nunca cor de texto sobre Nude (2,76:1) */
+  --color-laranja-400: #EC7E58; /* v1.1: hover de ações primárias */
   --color-laranja-300: #F59C7B;
   --color-laranja-100: #FCEEE9;
 
@@ -54,12 +90,16 @@
   --text-secondary: #293E24;  /* Verde 700 para leitura corrente */
   --text-muted: #556B51;      /* Verde atenuado (contraste AA > 4.6:1 sobre Nude) */
 
-  --border-color: #E2D7C3;   /* Linha fina de 1px em Nude 300 para separar seções */
+  --border-color: #E2D7C3;   /* Linha fina de 1px em Nude 300 para separar seções (decorativa) */
   --border-card: #E2D7C3;
+  --border-control: #76866F; /* v1.1: borda de campos e controles, ≥ 3:1 */
+  --focus-ring: #A63D1B;     /* v1.1: anel de foco de 3px, ≥ 3:1 sobre Nude */
 
-  --color-primary: #E4683F;       /* Laranja 500 para ações e destaque */
+  --color-primary: #E4683F;       /* Laranja 500 para preenchimento de ações e destaque */
   --color-primary-rgb: 228, 104, 63;
-  --color-primary-accessible: #B8441F; /* Laranja 700 para textos pequenos (AA > 4.5:1) */
+  --color-primary-hover: #EC7E58; /* Laranja 400 */
+  --color-on-primary: #172314;    /* v1.1: texto sobre Laranja 500 (4,93:1); branco falhava (3,31:1) */
+  --color-primary-accessible: #A63D1B; /* Laranja 700 para textos (5,30:1 sobre Nude) */
 
   --color-secondary: #293E24;     /* Verde 700 */
   --color-secondary-rgb: 41, 62, 36;
@@ -70,10 +110,10 @@
   --color-danger: #BC391F;
 
   /* Aliases para compatibilidade mantendo a identidade visual estrita */
-  --color-cyan: #B8441F;
+  --color-cyan: #A63D1B;
   --color-violet: #293E24;
   --color-success: #293E24;
-  --color-warning: #B8441F;
+  --color-warning: #A63D1B;
   --color-error: #BC391F;
 
   /* Cantos oficiais: 10px pequenos, 14-16px grandes. Nunca 0px nem pill total em cards */
@@ -119,9 +159,14 @@
   --border-color: #E2D7C3;
   --border-card: #E2D7C3;
 
+  --border-control: #76866F;
+  --focus-ring: #A63D1B;
+
   --color-primary: #E4683F;
   --color-primary-rgb: 228, 104, 63;
-  --color-primary-accessible: #B8441F;
+  --color-primary-hover: #EC7E58;
+  --color-on-primary: #172314;
+  --color-primary-accessible: #A63D1B;
   --color-secondary: #293E24;
   --color-secondary-rgb: 41, 62, 36;
   --color-secondary-light: rgba(41, 62, 36, 0.12);
@@ -150,22 +195,26 @@
   --bg-surface: rgba(13, 21, 11, 0.97);
   --bg-overlay: rgba(6, 10, 5, 0.85);
 
-  --text-main: #FFFFFF;       /* Branco absoluto para máxima nitidez (18:1 WCAG AAA) */
+  --text-main: #FAF7EE;       /* v1.1: Nude 100 (14,8:1) — menos ofuscamento que o branco puro */
   --text-secondary: #ECE7DA;  /* Nude claro de alta legibilidade (14:1) */
-  --text-muted: #B6C7B3;      /* Sálvia claro de alto contraste (7.5:1 WCAG AAA) */
+  --text-muted: #B6C7B3;      /* Sálvia claro de alto contraste (8,9:1) */
 
   --border-color: rgba(241, 234, 217, 0.24); /* Linhas divisórias nítidas de 1px */
   --border-card: rgba(241, 234, 217, 0.22);  /* Bordas de cartões perfeitamente delineadas */
+  --border-control: #7C8F78; /* v1.1: borda de controles, 4,56:1 sobre o cartão escuro */
+  --focus-ring: #F59C7B;     /* v1.1: Laranja 300, 7,5:1 */
 
   --color-primary: #E4683F;   /* Laranja 500 oficial */
   --color-primary-rgb: 228, 104, 63;
+  --color-primary-hover: #F59C7B;
+  --color-on-primary: #172314;
   --color-primary-accessible: #F59C7B; /* Laranja claro vibrante em fundo escuro (> 7.5:1) */
 
-  /* Cores Verdes acessíveis no tema escuro (NUNCA CAMUFLADAS) */
-  --color-verde-900: #FFFFFF;
+  /* Cores Verdes acessíveis no tema escuro — só derivações da paleta (manual v1.1, seção 09) */
+  --color-verde-900: #FAF7EE;
   --color-verde-800: #ECE7DA;
   --color-verde-700: #A8D5A2; /* Verde sálvia luminoso, contraste 9.4:1 sobre #182616 (WCAG AAA) */
-  --color-verde-500: #86EFAC; /* Verde menta vibrante para destaques e sucesso */
+  --color-verde-500: #A8D5A2; /* v1.1: substitui o verde-menta #86EFAC, que estava fora da paleta */
   --color-verde-light: rgba(168, 213, 162, 0.16);
   --color-verde-accent: #A8D5A2;
 
@@ -173,16 +222,17 @@
   --color-secondary-rgb: 168, 213, 162;
   --color-secondary-light: rgba(168, 213, 162, 0.16);
 
-  --color-danger: #F87171;
-  --color-vermelho: #F87171;
-  --color-vermelho-bg: rgba(248, 113, 113, 0.14);
-  --color-vermelho-border: rgba(248, 113, 113, 0.4);
+  /* v1.1: Vermelho 300 derivado da paleta (7,7:1) no lugar de #F87171 */
+  --color-danger: #F2A08A;
+  --color-vermelho: #F2A08A;
+  --color-vermelho-bg: rgba(242, 160, 138, 0.14);
+  --color-vermelho-border: rgba(242, 160, 138, 0.45);
 
   --color-cyan: #F59C7B;
   --color-violet: #A8D5A2;
-  --color-success: #86EFAC;
+  --color-success: #A8D5A2;
   --color-warning: #F59C7B;
-  --color-error: #F87171;
+  --color-error: #F2A08A;
 
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.55);
@@ -203,7 +253,7 @@
   --chart-2: #E4683F;
   --chart-3: #B6C7B3;
   --chart-4: #F59C7B;
-  --chart-5: #F87171;
+  --chart-5: #F2A08A;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -491,7 +541,8 @@ p, li, span, input, select, textarea, button {
    Botões Oficiais Edu-Interact
    ═══════════════════════════════════════════════════════ */
 
-/* Botão Principal de Ação / CTA: Laranja 500 com alto contraste */
+/* Botão Principal de Ação / CTA: Laranja 500 com texto Verde 900 (manual v1.1: 4,93:1).
+   O texto branco anterior tinha 3,31:1 e falhava a WCAG 1.4.3. */
 .btn,
 .btn-primary,
 .btn-gradient {
@@ -499,25 +550,37 @@ p, li, span, input, select, textarea, button {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  min-height: 2.75rem; /* 44px — alvo de toque confortável (WCAG 2.5.8 / manual v1.1) */
   padding: 0.65rem 1.25rem;
   border-radius: var(--radius-sm); /* 10px */
-  background: #E4683F;
-  color: #FFFFFF !important;
+  background: var(--color-primary);
+  color: var(--color-on-primary) !important;
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
   text-decoration: none !important;
 }
 
 .btn:hover,
 .btn-primary:hover,
 .btn-gradient:hover {
-  background: #C44C24;
-  color: #FFFFFF !important;
-  transform: translateY(-1px);
+  background: var(--color-primary-hover);
+  color: var(--color-on-primary) !important;
+}
+
+.btn:disabled,
+.btn-primary:disabled,
+.btn-gradient:disabled,
+.btn-secondary:disabled,
+.btn-outline:disabled,
+.btn[aria-disabled="true"],
+.btn-primary[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
 }
 
 /* Botão Secundário / Estrutural: Verde 700 */
@@ -735,7 +798,7 @@ p, li, span, input, select, textarea, button {
 .badge-primary,
 .badge-cyan,
 .badge-laranja {
-  color: #B8441F;
+  color: var(--color-primary-accessible);
   background: rgba(228, 104, 63, 0.1);
   border-color: rgba(184, 68, 31, 0.3);
 }
@@ -762,7 +825,7 @@ p, li, span, input, select, textarea, button {
 
 .badge-yellow,
 .badge-warning {
-  color: #9A3412;
+  color: var(--color-primary-accessible);
   background: rgba(234, 88, 12, 0.1);
   border-color: rgba(234, 88, 12, 0.35);
 }
@@ -872,13 +935,13 @@ input[type="password"],
 textarea {
   width: 100%;
   padding: 0.65rem 0.9rem;
+  min-height: 2.75rem;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-control); /* v1.1: ≥ 3:1 (WCAG 1.4.11); Nude 300 tinha 1,19:1 */
   background: var(--bg-card);
   color: var(--text-main);
   font-family: var(--font-body);
-  font-size: 0.875rem;
-  outline: none;
+  font-size: 1rem; /* v1.1: 16px evita zoom automático no iOS e melhora a leitura */
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -888,24 +951,31 @@ input[type="number"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
 textarea:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(228, 104, 63, 0.18);
+  border-color: var(--focus-ring);
 }
 
-/* Focus styles for keyboard navigation */
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border: 2px solid var(--color-error);
+}
+
+/* Foco de teclado (manual v1.1): anel de 3px, ≥ 3:1, que estilos inline não conseguem apagar */
 *:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--focus-ring) !important;
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+/* Alvos de foco programático (ex.: <main tabIndex={-1}>) não exibem anel */
+[tabindex="-1"]:focus:not(:focus-visible),
+main[tabindex="-1"]:focus-visible {
+  outline: none !important;
 }
 
 /* Tabelas com divisória de 1px Nude 300 */
@@ -993,7 +1063,8 @@ html.font-scale-130 { font-size: 20.8px; }
 
 body.dyslexia-font,
 body.dyslexia-font * {
-  font-family: 'OpenDyslexic', 'Comic Sans MS', 'Trebuchet MS', -apple-system, sans-serif !important;
+  /* Terceira voz tipográfica do manual v1.1: Atkinson Hyperlegible (Braille Institute) */
+  font-family: 'Atkinson Hyperlegible', 'OpenDyslexic', 'Verdana', -apple-system, sans-serif !important;
   letter-spacing: 0.05em !important;
   word-spacing: 0.12em !important;
   line-height: 1.8 !important;
@@ -1089,16 +1160,6 @@ body.focus-mode-active textarea:focus {
   }
 }
 
-/* Focus visível com contorno elegante e contraste WCAG */
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-a:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
 /* Animações e micro-interações táteis */
 .btn-outline,
 .btn-primary,
@@ -1128,3 +1189,121 @@ a:focus-visible {
   }
 }
 
+
+/* ═══════════════════════════════════════════════════════
+   Camada de acessibilidade — manual de identidade v1.1
+   WCAG 2.2 AA + DUA. Fica por último para prevalecer sobre
+   estilos legados com a mesma especificidade.
+   ═══════════════════════════════════════════════════════ */
+
+/* 2.4.11: o foco nunca fica escondido sob o cabeçalho fixo de 4rem */
+html {
+  scroll-padding-top: 5rem;
+}
+
+/* Traço de ícone oficial: 1,75px (manual, seção 06) */
+svg.lucide {
+  stroke-width: 1.75;
+}
+
+/* Alvos de toque mínimos (2.5.8) em todas as variantes de botão */
+.btn-secondary,
+.btn-green,
+.btn-outline,
+.btn-outline-cyan,
+.btn-outline-laranja,
+.btn-outline-violet {
+  min-height: 2.75rem;
+}
+
+/* Texto laranja sempre em Laranja 700 (nunca Laranja 500 sobre Nude) */
+.btn-outline-laranja,
+.btn-outline-violet {
+  color: var(--color-primary-accessible) !important;
+}
+
+/* 1.4.12: o modo de espaçamento de texto aplica os valores de referência da WCAG */
+body.text-spacing-active,
+body.text-spacing-active * {
+  line-height: 1.5 !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+}
+
+body.text-spacing-active p,
+body.text-spacing-active li {
+  margin-bottom: 2em;
+}
+
+body.text-spacing-active h1,
+body.text-spacing-active h2,
+body.text-spacing-active h3 {
+  letter-spacing: 0.04em !important;
+}
+
+/* Títulos grandes ficam legíveis com entrelinha menor que o corpo */
+body.dyslexia-font h1,
+body.dyslexia-font h2,
+body.dyslexia-font h3 {
+  line-height: 1.3 !important;
+}
+
+/* Sublinhar links: identifica links sem depender só de cor (1.4.1) */
+body.underline-links-active a:not(.btn):not(.btn-primary):not(.btn-outline):not(.btn-secondary):not(.skip-content) {
+  text-decoration: underline !important;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 0.08em;
+}
+
+/* Alto contraste: aproxima o texto de apoio do texto principal e reforça bordas */
+body.high-contrast-active .app-container.light-theme {
+  --text-secondary: #172314;
+  --text-muted: #293E24;
+  --border-color: #76866F;
+  --border-card: #76866F;
+  --bg-card: #FFFFFF;
+}
+
+body.high-contrast-active .app-container.dark-theme {
+  --bg-base: #000000;
+  --bg-card: #0D150B;
+  --text-main: #FFFFFF;
+  --text-secondary: #FAF7EE;
+  --text-muted: #ECE7DA;
+  --border-color: #B6C7B3;
+  --border-card: #B6C7B3;
+}
+
+body.high-contrast-active .card,
+body.high-contrast-active .glass-card,
+body.high-contrast-active .stat-card {
+  border-width: 2px;
+}
+
+/* Modo de cores forçadas (Alto Contraste do Windows) */
+@media (forced-colors: active) {
+  .btn, .btn-primary, .btn-gradient, .btn-secondary, .btn-green,
+  .btn-outline, .btn-outline-cyan, .btn-outline-laranja, .btn-outline-violet,
+  .card, .glass-card, .stat-card {
+    border: 1px solid ButtonText;
+  }
+
+  *:focus-visible {
+    outline: 3px solid Highlight !important;
+  }
+
+  .circuit-divider::after,
+  .brand-circuit {
+    forced-color-adjust: auto;
+  }
+}
+
+/* Grafismo raiz-circuito (manual, seção 05) — sempre decorativo */
+.brand-circuit {
+  pointer-events: none;
+  color: var(--color-primary);
+}
+
+.dark-theme .brand-circuit {
+  color: var(--color-laranja-300);
+}

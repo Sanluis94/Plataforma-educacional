@@ -1,3 +1,4 @@
+import { PartyPopper } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
@@ -128,7 +129,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🌐 {labTitle || 'Idiomas — Inglês & Espanhol'}</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>{labTitle || 'Idiomas — Inglês & Espanhol'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>{mode === 'conversation' ? 'Pratique falas de diálogos curtos para pedir informação, esclarecer e agradecer.' : 'Pratique palavras e expressões em inglês e espanhol.'} O áudio usa a voz sintetizada disponível no navegador; as frases escritas também servem de apoio.</p>
 
       {/* Lang selector */}
@@ -137,7 +138,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
           <button key={l} aria-pressed={lang === l} onClick={() => { setLang(l); reset(); }}
             style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
               background: lang === l ? 'var(--color-primary)' : 'var(--bg-secondary)',
-              color: lang === l ? 'white' : 'var(--text-secondary)', fontWeight: lang === l ? 'bold' : 'normal' }}>
+              color: lang === l ? 'var(--color-on-primary, #172314)' : 'var(--text-secondary)', fontWeight: lang === l ? 'bold' : 'normal' }}>
             {l === 'english' ? '🇺🇸 Inglês' : '🇪🇸 Espanhol'}
           </button>
         ))}
@@ -157,7 +158,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
             
             <button onClick={() => speak(current.word, lang === 'english' ? 'en-US' : 'es-ES')}
               style={{ padding: '0.5rem 1.25rem', borderRadius: '25px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', color: 'var(--text-main)', cursor: 'pointer', marginBottom: '1rem', fontSize: '0.9rem' }}>
-              🔊 Ouvir Pronúncia
+              Ouvir Pronúncia
             </button>
             {audioStatus && <p role="status" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{audioStatus}</p>}
 
@@ -167,7 +168,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic' }}>"{current.example}"</div>
                 <button onClick={() => speak(current.example, lang === 'english' ? 'en-US' : 'es-ES')}
                   style={{ marginTop: '0.5rem', padding: '0.25rem 0.75rem', borderRadius: '20px', border: '1px solid rgba(76,175,80,0.4)', background: 'transparent', color: '#4caf50', cursor: 'pointer', fontSize: '0.75rem' }}>
-                  🔊 Ouvir Frase
+                  Ouvir Frase
                 </button>
               </div>
             )}
@@ -192,7 +193,7 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
           {answered && (
             <div style={{ textAlign: 'center' }}>
               <button onClick={next}
-                style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
+                style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'var(--color-on-primary, #172314)', cursor: 'pointer', fontWeight: 'bold' }}>
                 {currentIdx === words.length - 1 ? 'Ver resultado' : 'Próxima expressão →'}
               </button>
             </div>
@@ -200,16 +201,16 @@ export function LanguagesModule({ mode = 'vocabulary', labTitle, onComplete }: {
         </div>
       ) : (
         <div style={{ textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '12px', padding: '2rem' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🎉</div>
+          <div aria-hidden="true" style={{ display: 'grid', placeItems: 'center', width: '4.5rem', height: '4.5rem', margin: '0 auto 0.75rem', borderRadius: '50%', background: 'rgba(var(--color-primary-rgb), 0.12)', color: 'var(--color-primary-accessible)' }}><PartyPopper size={32} /></div>
           <h3 style={{ color: 'var(--text-main)' }}>Módulo concluído! {score}/{words.length} acertos</h3>
-          <button onClick={reset} style={{ marginTop: '1rem', padding: '0.5rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer' }}>
+          <button onClick={reset} style={{ marginTop: '1rem', padding: '0.5rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'var(--color-on-primary, #172314)', cursor: 'pointer' }}>
             Refazer
           </button>
         </div>
       )}
       {/* AI Pronunciation Box */}
       <div style={{ marginTop: '1.25rem', padding: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-subtle, #FAF7EE)', border: '1px solid var(--border-color, #E2D7C3)' }}>
-        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>Orientação de pronúncia</div>
+        <div style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>Orientação de pronúncia</div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
           {lang === 'english'
             ? 'Atenção aos padrões de acentuação tônica (syllable stress) em palavras polissilábicas.'

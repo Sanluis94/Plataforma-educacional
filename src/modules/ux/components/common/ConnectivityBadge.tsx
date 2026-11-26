@@ -61,11 +61,11 @@ export function ConnectivityBadge() {
           alignItems: 'center',
           gap: '0.35rem',
           padding: '0.25rem 0.6rem',
-          borderRadius: '999px',
-          background: 'rgba(34, 197, 94, 0.08)',
-          border: '1px solid rgba(34, 197, 94, 0.25)',
-          color: '#16a34a',
-          fontSize: '0.72rem',
+          borderRadius: '8px',
+          background: 'var(--color-verde-light)',
+          border: '1px solid var(--border-control)',
+          color: 'var(--color-success)',
+          fontSize: '0.8125rem',
           fontWeight: 700,
           cursor: 'default',
           userSelect: 'none'
@@ -76,9 +76,9 @@ export function ConnectivityBadge() {
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            background: '#22c55e',
+            background: 'var(--color-success)',
             display: 'inline-block',
-            boxShadow: '0 0 6px #22c55e'
+            boxShadow: 'none'
           }}
         />
         <Wifi style={{ width: '0.8rem', height: '0.8rem' }} />
@@ -95,11 +95,11 @@ export function ConnectivityBadge() {
         alignItems: 'center',
         gap: '0.4rem',
         padding: '0.25rem 0.65rem',
-        borderRadius: '999px',
-        background: isOnline ? 'rgba(234, 179, 8, 0.12)' : 'rgba(239, 68, 68, 0.12)',
-        border: isOnline ? '1px solid rgba(234, 179, 8, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
-        color: isOnline ? '#b45309' : '#dc2626',
-        fontSize: '0.72rem',
+        borderRadius: '8px',
+        background: isOnline ? 'rgba(var(--color-primary-rgb), 0.12)' : 'var(--color-vermelho-bg)',
+        border: isOnline ? '1px solid var(--color-primary-accessible)' : '1px solid var(--color-vermelho-border)',
+        color: isOnline ? 'var(--color-primary-accessible)' : 'var(--color-error)',
+        fontSize: '0.8125rem',
         fontWeight: 700,
         userSelect: 'none'
       }}

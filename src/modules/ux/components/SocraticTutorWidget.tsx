@@ -147,7 +147,7 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--color-primary-accessible, #B8441F)',
+                color: 'var(--color-primary-accessible, #A63D1B)',
               }}
             >
               <Sparkles style={{ width: '1.25rem', height: '1.25rem' }} />
@@ -170,7 +170,7 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
               borderRadius: '10px',
               background: 'rgba(228, 104, 63, 0.1)',
               border: '1px solid rgba(184, 68, 31, 0.25)',
-              color: 'var(--color-primary-accessible, #B8441F)',
+              color: 'var(--color-primary-accessible, #A63D1B)',
               fontSize: '0.8rem',
               fontWeight: 600,
             }}
@@ -328,7 +328,7 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
 
               {/* AI Feedback if generated */}
               {loadingAiFeedback && (
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-primary-accessible, #B8441F)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-primary-accessible, #A63D1B)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <Sparkles style={{ width: '0.9rem', height: '0.9rem', animation: 'spin 1.5s linear infinite' }} />
                   O tutor socrático está analisando seu raciocínio...
                 </div>
@@ -351,7 +351,7 @@ Dê um feedback curto de 2 a 3 frases parabenizando a observação do estudante 
                 >
                   <Sparkles style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-primary)', flexShrink: 0, marginTop: '2px' }} />
                   <div>
-                    <strong style={{ display: 'block', marginBottom: '0.2rem', color: 'var(--color-primary-accessible, #B8441F)' }}>Reflexão do tutor IA:</strong>
+                    <strong style={{ display: 'block', marginBottom: '0.2rem', color: 'var(--color-primary-accessible, #A63D1B)' }}>Reflexão do tutor IA:</strong>
                     {aiFeedback}
                   </div>
                 </div>

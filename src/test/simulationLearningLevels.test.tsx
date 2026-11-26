@@ -115,7 +115,7 @@ describe('Navegação de laboratórios por nível', () => {
     fireEvent.click(within(screen.getByRole('group', { name: 'Matérias disponíveis' })).getByRole('button', { name: 'Todas as matérias (21 laboratórios)' }));
     expect(screen.getByRole('button', { name: 'Escolher matéria' })).toHaveTextContent('Todas as matérias');
     expect(within(screen.getByRole('region', { name: 'Catálogo de laboratórios' })).getAllByRole('article')).toHaveLength(getLearningLabCounts().fundamental_1);
-    expect(screen.getByRole('heading', { name: lab.title })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: lab.title, level: 2 })).toBeInTheDocument();
     expect(screen.getByTestId('location')).toHaveTextContent(`lab=${lab.id}`);
   });
 
@@ -226,7 +226,7 @@ describe('Navegação de laboratórios por nível', () => {
     });
     fireEvent.click(dialog.getByRole('button', { name: 'Adicionar à sessão' }));
     await waitFor(()=>expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-    expect(await screen.findByRole('heading', { name: 'Oficina profissional da turma de teste' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Oficina profissional da turma de teste', level: 2 })).toBeInTheDocument();
     const url = new URL(screen.getByTestId('location').textContent!, 'https://test.invalid');
     expect(url.pathname).toBe('/simulacao');
     expect(url.searchParams.get('lab')).toMatch(/^custom_/);

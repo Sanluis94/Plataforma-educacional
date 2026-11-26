@@ -1,0 +1,281 @@
+/* Barra de acessibilidade (DUA) — manual de identidade v1.1 */
+.a11y-toolbar {
+  position: relative;
+}
+
+.a11y-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm, 10px);
+  border: 1px solid var(--border-control);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.a11y-trigger:hover {
+  background: var(--color-verde-light);
+}
+
+.a11y-trigger[aria-expanded="true"],
+.a11y-trigger--active {
+  border-color: var(--color-primary-accessible);
+  color: var(--color-primary-accessible);
+  background: rgba(var(--color-primary-rgb), 0.12);
+}
+
+/* Indicador de opções ativas: forma + cor, não só cor */
+.a11y-trigger__dot {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--bg-card);
+}
+
+.a11y-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 22rem;
+  max-width: calc(100vw - 1.5rem);
+  max-height: calc(100dvh - 5.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bg-card);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-lg, 14px);
+  padding: 1rem;
+  z-index: 100;
+  box-shadow: 0 12px 32px -8px rgba(23, 35, 20, 0.25);
+  color: var(--text-main);
+}
+
+.a11y-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.a11y-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.a11y-panel__title svg {
+  color: var(--color-primary-accessible);
+}
+
+.a11y-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.a11y-reset:hover {
+  border-color: var(--border-control);
+}
+
+.a11y-group {
+  border: 0;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.a11y-group__label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.a11y-scale {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.a11y-scale button {
+  min-height: 2.75rem;
+  border-radius: var(--radius-sm, 10px);
+  border: 1px solid var(--border-control);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.a11y-scale button[aria-pressed="true"] {
+  border: 2px solid var(--color-primary-accessible);
+  background: rgba(var(--color-primary-rgb), 0.14);
+  color: var(--text-main);
+}
+
+.a11y-options {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.a11y-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm, 10px);
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.a11y-option:hover {
+  border-color: var(--border-control);
+  background: var(--color-verde-light);
+}
+
+.a11y-option[aria-pressed="true"] {
+  border-color: var(--color-secondary);
+  background: var(--color-secondary-light);
+}
+
+.a11y-option__icon {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--color-verde-light);
+  color: var(--text-secondary);
+}
+
+.a11y-option__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.a11y-option__name {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.a11y-option__hint {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Interruptor visual: posição + ícone, além da cor */
+.a11y-switch {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-control);
+  background: var(--bg-base);
+  position: relative;
+  transition: background-color 0.16s ease;
+}
+
+.a11y-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 50%;
+  background: var(--border-control);
+  transition: transform 0.16s ease, background-color 0.16s ease;
+}
+
+.a11y-option[aria-pressed="true"] .a11y-switch {
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
+
+.a11y-option[aria-pressed="true"] .a11y-switch::after {
+  transform: translateX(1rem);
+  background: var(--bg-card);
+}
+
+.a11y-speech {
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.85rem;
+}
+
+.a11y-speech__row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.a11y-speech__status {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.a11y-speech__hint {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.a11y-speech__stop {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border-radius: var(--radius-sm, 10px);
+  border: 1px solid var(--color-vermelho-border);
+  background: var(--color-vermelho-bg);
+  color: var(--color-error);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+@media (forced-colors: active) {
+  .a11y-option[aria-pressed="true"],
+  .a11y-scale button[aria-pressed="true"] {
+    outline: 2px solid Highlight;
+  }
+  .a11y-switch::after { background: ButtonText; }
+}

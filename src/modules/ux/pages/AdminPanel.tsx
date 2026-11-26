@@ -25,9 +25,9 @@ export function AdminPanel() {
   ];
 
   const tabs = [
-    { id: 'overview' as const, label: '📊 Visão Geral' },
-    { id: 'teachers' as const, label: '👩‍🏫 Professores' },
-    { id: 'logs' as const, label: '🔐 Logs de Segurança' },
+    { id: 'overview' as const, label: 'Visão Geral' },
+    { id: 'teachers' as const, label: 'Professores' },
+    { id: 'logs' as const, label: 'Logs de Segurança' },
     { id: 'privacy' as const, label: 'Solicitações de privacidade' },
   ];
 
@@ -36,22 +36,21 @@ export function AdminPanel() {
     : teachers;
 
   return (
-    <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '80rem', margin: '0 auto' }}>
-      {loading&&<p role="status">Carregando dados administrativos…</p>}{error&&<p role="alert">{error}</p>}<button className="btn-outline" disabled={loading} onClick={reload}>Atualizar dados</button>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-        <div style={{
-          width: '2.5rem', height: '2.5rem', borderRadius: 'var(--radius-sm, 10px)',
-          background: 'var(--color-verde-light, rgba(41, 62, 36, 0.15))', border: '1px solid var(--color-verde-500, #3D5B36)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Shield style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-verde-700, #293E24)' }} />
+    <div className="fade-in ei-page">
+      {loading&&<p role="status">Carregando dados administrativos…</p>}{error&&<p role="alert">{error}</p>}{/* Cabeçalho */}
+      <header className="ei-page-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: 0 }}>
+          <span className="ei-icon-box" aria-hidden="true" style={{ width: '3.5rem', height: '3.5rem', background: 'rgba(250,247,238,0.1)', color: '#F59C7B' }}>
+            <Shield size={28} />
+          </span>
+          <div>
+            <p className="ei-page-header__eyebrow">Administração</p>
+            <h1>Painel Administrativo</h1>
+            <p>Visão global da instituição, professores e logs de segurança.</p>
+          </div>
         </div>
-        <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, fontFamily: 'var(--font-heading)' }}>Painel Administrativo</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>Visão global da instituição, professores e logs de segurança.</p>
-        </div>
-      </div>
+        <button className="btn-secondary btn-on-dark" disabled={loading} onClick={reload}>Atualizar dados</button>
+      </header>
 
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
@@ -60,7 +59,7 @@ export function AdminPanel() {
           return (
             <div key={stat.label} className={`stat-card ${stat.accent}`} style={{ borderRadius: 'var(--radius-lg, 14px)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <Icon style={{ width: '1.25rem', height: '1.25rem', color: stat.accent === 'cyan' ? 'var(--color-primary-accessible, #B8441F)' : 'var(--color-verde-700, #293E24)' }} />
+                <Icon style={{ width: '1.25rem', height: '1.25rem', color: stat.accent === 'cyan' ? 'var(--color-primary-accessible, #A63D1B)' : 'var(--color-verde-700, #293E24)' }} />
                 <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'var(--font-heading)' }}>{loading||error?'—':stat.value}</span>
               </div>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{stat.label}</p>
@@ -81,7 +80,7 @@ export function AdminPanel() {
             onClick={() => setActiveTab(tab.id)}
             style={{
               padding: '0.65rem 1rem', background: 'none', border: 'none', cursor: 'pointer',
-              color: activeTab === tab.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-muted)',
+              color: activeTab === tab.id ? 'var(--color-primary-accessible, #A63D1B)' : 'var(--text-muted)',
               borderBottom: activeTab === tab.id ? '2px solid var(--color-primary, #E4683F)' : '2px solid transparent',
               fontWeight: activeTab === tab.id ? 700 : 500,
               fontSize: '0.875rem', transition: 'all 0.2s',
@@ -155,7 +154,7 @@ export function AdminPanel() {
                       <td style={{ color: 'var(--text-secondary)' }}>{t.email}</td>
                       <td style={{ textAlign: 'center', color: 'var(--text-main)' }}>{t.classes}</td>
                       <td style={{ textAlign: 'center' }}>
-                        <span style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>{t.students}</span>
+                        <span style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700 }}>{t.students}</span>
                       </td>
                     </tr>
                   ))}
@@ -177,7 +176,7 @@ export function AdminPanel() {
       {activeTab === 'logs' && (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {logs.length > 0 ? logs.map((log, i: number) => {
-            const colors: Record<string, string> = { auth: 'var(--color-primary-accessible, #B8441F)', ai: 'var(--color-verde-700, #293E24)', error: 'var(--color-vermelho, #BC391F)' };
+            const colors: Record<string, string> = { auth: 'var(--color-primary-accessible, #A63D1B)', ai: 'var(--color-verde-700, #293E24)', error: 'var(--color-vermelho, #BC391F)' };
             const color = colors[log.type] || 'var(--text-muted)';
             return (
               <div key={i} className="glass-card" style={{
@@ -220,7 +219,7 @@ export function AdminPanel() {
           {[
             { title: 'Admin', icon: Shield, color: 'var(--color-vermelho, #BC391F)', perms: ['Consultar cadastros e métricas', 'Consultar registros do sistema', 'Autorizar vínculos de coordenação'] },
             { title: 'Professor', icon: Users, color: 'var(--color-verde-700, #293E24)', perms: ['Visualizar métricas', 'Gerenciar turmas', 'Criar laboratórios'] },
-            { title: 'Aluno', icon: BookOpen, color: 'var(--color-primary-accessible, #B8441F)', perms: ['Acessar laboratórios', 'Ver progresso próprio', 'Conquistar badges'] },
+            { title: 'Aluno', icon: BookOpen, color: 'var(--color-primary-accessible, #A63D1B)', perms: ['Acessar laboratórios', 'Ver progresso próprio', 'Conquistar badges'] },
           ].map(role => {
             const Icon = role.icon;
             return (

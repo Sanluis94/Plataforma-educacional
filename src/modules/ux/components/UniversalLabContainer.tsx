@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useRef, useId } from 'react';
-import { 
-  Play, Pause, RotateCcw, Download, 
-  FileText, CheckCircle2, Sliders,
-  BookOpen, Columns2, History, Terminal, 
-  Bot, ShieldAlert, Box, Copy, Check
-} from 'lucide-react';
+import { Play, Pause, RotateCcw, Download, FileText, CheckCircle2, Sliders, BookOpen, Columns2, History, Terminal, Bot, ShieldAlert, Box, Copy, Check, Dices } from 'lucide-react';
 import { SocraticTutorWidget } from '../components/SocraticTutorWidget';
 import { triggerPrintLabReport, generateLabReportMarkdown, generateLabReportLatex } from '../../core/services/labReportService';
 import { estimateStudentProficiency, getCalibratedTriParametersForLab, type TriProficiencyResult, type TriAnswerRecord } from '../../core/services/triEvaluationService';
@@ -506,7 +501,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                   borderRadius: '8px',
                   border: 'none',
                   background: activeTab === tab ? 'var(--color-primary)' : 'transparent',
-                  color: activeTab === tab ? (isHighContrast ? '#000' : '#fff') : 'var(--text-secondary)',
+                  color: activeTab === tab ? (isHighContrast ? '#000' : 'var(--color-on-primary, #172314)') : 'var(--text-secondary)',
                   fontSize: '0.8rem',
                   fontWeight: activeTab === tab ? 600 : 500,
                   cursor: 'pointer',
@@ -514,7 +509,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                   textTransform: 'capitalize'
                 }}
               >
-                {tab === 'simulacao' ? '⚗️ Experimento' : tab === 'teoria' ? '📖 Teoria' : tab === 'avaliacao' ? '📝 Perguntas' : '📄 Relatório'}
+                {tab === 'simulacao' ? 'Experimento' : tab === 'teoria' ? 'Teoria' : tab === 'avaliacao' ? 'Perguntas' : 'Relatório'}
               </button>
             ))}
           </div>
@@ -604,7 +599,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
           style={{ padding: '0.3rem 0.65rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem', background: isNoiseActive ? 'rgba(234, 179, 8, 0.15)' : 'transparent' }}
           title="Variação aleatória de até 1,5% nos parâmetros, dentro das faixas permitidas"
         >
-          <span style={{ fontSize: '11px' }}>🎲</span>
+          <Dices size={14} aria-hidden="true" />
           <span>{isNoiseActive ? 'Variação aleatória ativa' : 'Adicionar variação'}</span>
         </button>
       </div>
@@ -1036,7 +1031,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
                   borderRadius: '6px',
                   borderLeft: '3px solid var(--color-primary)'
                 }}>
-                  💡 <strong>Justificativa:</strong> {q.options[selectedAnswers[qIdx] ?? 0]?.explanation || 'Consulte a teoria.'}
+                  <strong>Justificativa:</strong> {q.options[selectedAnswers[qIdx] ?? 0]?.explanation || 'Consulte a teoria.'}
                 </div>
               )}
             </fieldset>
@@ -1050,7 +1045,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
               style={{
                 alignSelf: 'flex-start',
                 background: 'var(--color-primary)',
-                color: isHighContrast ? '#000' : '#fff',
+                color: isHighContrast ? '#000' : 'var(--color-on-primary, #172314)',
                 border: 'none',
                 padding: '0.65rem 1.4rem',
                 borderRadius: '8px',
@@ -1154,7 +1149,7 @@ function SimulatedLabContainer({ config, onComplete }: UniversalLabContainerProp
               alignItems: 'center',
               gap: '0.4rem',
               background: 'var(--color-primary)',
-              color: isHighContrast ? '#000' : '#fff',
+              color: isHighContrast ? '#000' : 'var(--color-on-primary, #172314)',
               border: 'none',
               padding: '0.6rem 1.25rem',
               borderRadius: '8px',

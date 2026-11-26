@@ -1,3 +1,4 @@
+import { Lock } from 'lucide-react';
 /**
  * ProtectedRoute — Componente de guarda de rotas.
  * Verifica autenticação e role do usuário antes de renderizar a página.
@@ -64,7 +65,7 @@ function Forbidden({ userRole }: { userRole: string }) {
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       minHeight: 'calc(100vh - 8rem)', textAlign: 'center', padding: '2rem',
     }}>
-      <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔒</div>
+      <div aria-hidden="true" style={{ display: 'grid', placeItems: 'center', width: '5rem', height: '5rem', margin: '0 auto 0.75rem', borderRadius: '50%', background: 'rgba(var(--color-primary-rgb), 0.12)', color: 'var(--color-primary-accessible)' }}><Lock size={32} /></div>
       <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
         Acesso Restrito
       </h1>

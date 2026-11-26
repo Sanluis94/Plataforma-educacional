@@ -1,14 +1,23 @@
-import { useState, useEffect, useRef, useId } from 'react';
+import { useState, useEffect, useRef, useId, type ReactNode } from 'react';
 import {
-  VolumeX, Pause, Play, Eye, RotateCcw,
-  Sparkles, Check, Accessibility
+  VolumeX, Pause, Play, Eye, RotateCcw, Accessibility,
+  Type, Contrast, WrapText, Underline,
 } from 'lucide-react';
+import './AccessibilityToolbar.css';
 
 interface AccessibilitySettings {
   fontSizePercent: 100 | 115 | 130;
   dyslexiaFont: boolean;
   focusMode: boolean;
+  /** WCAG 1.4.12 — espaçamento de texto ampliado */
+  textSpacing: boolean;
+  /** Alto contraste: texto de apoio e bordas reforçados */
+  highContrast: boolean;
+  /** WCAG 1.4.1 — links identificáveis sem depender da cor */
+  underlineLinks: boolean;
 }
+
+type ToggleKey = Exclude<keyof AccessibilitySettings, 'fontSizePercent'>;
 
 const STORAGE_KEY = 'edu_interact_accessibility';
 
@@ -16,49 +25,67 @@ const defaultSettings: AccessibilitySettings = {
   fontSizePercent: 100,
   dyslexiaFont: false,
   focusMode: false,
+  textSpacing: false,
+  highContrast: false,
+  underlineLinks: false,
 };
+
+/** Classe aplicada ao <body> para cada opção */
+const BODY_CLASSES: Record<ToggleKey, string> = {
+  dyslexiaFont: 'dyslexia-font',
+  focusMode: 'focus-mode-active',
+  textSpacing: 'text-spacing-active',
+  highContrast: 'high-contrast-active',
+  underlineLinks: 'underline-links-active',
+};
+
+const OPTIONS: { key: ToggleKey; name: string; hint: string; icon: ReactNode }[] = [
+  { key: 'dyslexiaFont', name: 'Fonte de leitura facilitada', hint: 'Atkinson Hyperlegible, com mais espaço entre letras — ajuda na dislexia e na baixa visão', icon: <Type size={18} aria-hidden="true" /> },
+  { key: 'textSpacing', name: 'Espaçamento ampliado', hint: 'Mais espaço entre linhas, palavras e parágrafos', icon: <WrapText size={18} aria-hidden="true" /> },
+  { key: 'highContrast', name: 'Alto contraste', hint: 'Reforça textos de apoio e contornos', icon: <Contrast size={18} aria-hidden="true" /> },
+  { key: 'underlineLinks', name: 'Sublinhar links', hint: 'Identifica links sem depender da cor', icon: <Underline size={18} aria-hidden="true" /> },
+  { key: 'focusMode', name: 'Reduzir distrações', hint: 'Remove animações e efeitos visuais (TDAH, TEA, sensibilidade a movimento)', icon: <Eye size={18} aria-hidden="true" /> },
+];
+
+const SCALES = [
+  { val: 100, label: '100% (Padrão)', symbol: 'A' },
+  { val: 115, label: '115% (Médio)', symbol: 'A+' },
+  { val: 130, label: '130% (Grande)', symbol: 'A++' },
+] as const;
+
+function loadSettings(): AccessibilitySettings {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    // Mescla com o padrão: preferências salvas antes das novas opções continuam válidas
+    if (saved) return { ...defaultSettings, ...JSON.parse(saved) };
+  } catch (e) {
+    console.warn('Erro ao carregar preferências de acessibilidade:', e);
+  }
+  return defaultSettings;
+}
 
 export function AccessibilityToolbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [settings, setSettings] = useState<AccessibilitySettings>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.warn('Erro ao carregar preferências de acessibilidade:', e);
-    }
-    return defaultSettings;
-  });
+  const [settings, setSettings] = useState<AccessibilitySettings>(loadSettings);
 
   // Text to speech states
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [speechMessage, setSpeechMessage] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
 
   // Apply settings to DOM
   useEffect(() => {
-    // 1. Font scale
     const root = document.documentElement;
     root.classList.remove('font-scale-100', 'font-scale-115', 'font-scale-130');
     root.classList.add(`font-scale-${settings.fontSizePercent}`);
 
-    // 2. Dyslexia font
-    if (settings.dyslexiaFont) {
-      document.body.classList.add('dyslexia-font');
-    } else {
-      document.body.classList.remove('dyslexia-font');
-    }
+    (Object.keys(BODY_CLASSES) as ToggleKey[]).forEach((key) => {
+      document.body.classList.toggle(BODY_CLASSES[key], Boolean(settings[key]));
+    });
 
-    // 3. Focus mode for ADHD / Autism
-    if (settings.focusMode) {
-      document.body.classList.add('focus-mode-active');
-    } else {
-      document.body.classList.remove('focus-mode-active');
-    }
-
-    // Persist
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     } catch {
@@ -66,7 +93,7 @@ export function AccessibilityToolbar() {
     }
   }, [settings]);
 
-  // Click outside to close
+  // Click outside / Escape to close
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -90,12 +117,12 @@ export function AccessibilityToolbar() {
     };
   }, [isOpen]);
 
-  // Speech synthesis handlers
   const handleToggleSpeech = () => {
     if (!('speechSynthesis' in window)) {
-      alert('Seu navegador não suporta a síntese de voz nativa.');
+      setSpeechMessage('Seu navegador não oferece leitura em voz alta.');
       return;
     }
+    setSpeechMessage('');
 
     if (isSpeaking) {
       if (isPaused) {
@@ -152,106 +179,51 @@ export function AccessibilityToolbar() {
     handleStopSpeech();
   };
 
+  const toggle = (key: ToggleKey) => setSettings((s) => ({ ...s, [key]: !s[key] }));
+  const hasActiveOptions = settings.fontSizePercent !== 100 || (Object.keys(BODY_CLASSES) as ToggleKey[]).some((key) => settings[key]);
+
   return (
-    <div style={{ position: 'relative' }} ref={dropdownRef}>
-      {/* Trigger Button */}
+    <div className="a11y-toolbar" ref={dropdownRef}>
       <button
         ref={triggerRef}
+        type="button"
+        className={`a11y-trigger${hasActiveOptions ? ' a11y-trigger--active' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '0.5rem',
-          borderRadius: '10px',
-          background: isOpen || settings.dyslexiaFont || settings.focusMode ? 'rgba(228, 104, 63, 0.12)' : 'none',
-          border: isOpen || settings.dyslexiaFont || settings.focusMode ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
-          color: isOpen || settings.dyslexiaFont || settings.focusMode ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-        }}
         title="Opções de acessibilidade"
         aria-label="Opções de acessibilidade"
         aria-expanded={isOpen}
         aria-controls={panelId}
       >
-        <Accessibility style={{ width: '1.15rem', height: '1.15rem' }} />
+        <Accessibility size={20} aria-hidden="true" />
+        {hasActiveOptions && <span className="a11y-trigger__dot" aria-hidden="true" />}
       </button>
 
-      {/* Popover Menu */}
       {isOpen && (
         <div
           id={panelId}
           role="region"
           aria-label="Opções de acessibilidade"
-          className="slide-down"
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 0.5rem)',
-            right: 0,
-            width: '320px',
-            maxWidth: '90vw',
-            background: 'var(--bg-card)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '14px',
-            padding: '1.15rem',
-            zIndex: 100,
-          }}
+          className="a11y-panel slide-down"
         >
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.85rem' }}>
-              <Sparkles style={{ width: '1rem', height: '1rem', color: 'var(--color-primary)' }} />
+          <div className="a11y-panel__header">
+            <h2 className="a11y-panel__title">
+              <Accessibility size={18} aria-hidden="true" />
               Acessibilidade
-            </div>
-            <button
-              onClick={handleReset}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                fontSize: '0.75rem',
-                padding: '0.2rem 0.4rem',
-                borderRadius: '6px',
-              }}
-              title="Restaurar padrões"
-              aria-label="Restaurar opções de acessibilidade"
-            >
-              <RotateCcw style={{ width: '0.75rem', height: '0.75rem' }} />
+            </h2>
+            <button type="button" className="a11y-reset" onClick={handleReset} aria-label="Restaurar opções de acessibilidade">
+              <RotateCcw size={14} aria-hidden="true" />
               Padrão
             </button>
           </div>
 
-          {/* Section 1: Tamanho do Texto */}
-          <div style={{ marginBottom: '1rem' }}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-              Tamanho do texto
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem' }}>
-              {([
-                { val: 100, label: '100% (Padrão)', symbol: 'A' },
-                { val: 115, label: '115% (Médio)', symbol: 'A+' },
-                { val: 130, label: '130% (Grande)', symbol: 'A++' },
-              ] as const).map((scale) => (
+          <fieldset className="a11y-group">
+            <legend className="a11y-group__label">Tamanho do texto</legend>
+            <div className="a11y-scale">
+              {SCALES.map((scale) => (
                 <button
                   key={scale.val}
+                  type="button"
                   onClick={() => setSettings((s) => ({ ...s, fontSizePercent: scale.val }))}
-                  style={{
-                    padding: '0.4rem 0.5rem',
-                    borderRadius: '10px',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    border: settings.fontSizePercent === scale.val ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
-                    background: settings.fontSizePercent === scale.val ? 'rgba(228, 104, 63, 0.15)' : 'rgba(41, 62, 36, 0.03)',
-                    color: settings.fontSizePercent === scale.val ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s',
-                  }}
                   title={scale.label}
                   aria-label={`Tamanho do texto: ${scale.label}`}
                   aria-pressed={settings.fontSizePercent === scale.val}
@@ -260,161 +232,54 @@ export function AccessibilityToolbar() {
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
-          {/* Section 2: Tipografia Amigável para Dislexia */}
-          <div style={{ marginBottom: '1rem' }}>
-            <button
-              onClick={() => setSettings((s) => ({ ...s, dyslexiaFont: !s.dyslexiaFont }))}
-              aria-pressed={settings.dyslexiaFont}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0.6rem 0.75rem',
-                borderRadius: '10px',
-                border: settings.dyslexiaFont ? '1px solid var(--color-secondary)' : '1px solid var(--border-color)',
-                background: settings.dyslexiaFont ? 'rgba(41, 62, 36, 0.08)' : 'rgba(41, 62, 36, 0.03)',
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              <div>
-                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
-                  Fonte para dislexia
-                </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                  Aumenta espaçamento e peso das letras
-                </div>
-              </div>
-              <div
-                style={{
-                  width: '1.25rem',
-                  height: '1.25rem',
-                  borderRadius: '6px',
-                  border: settings.dyslexiaFont ? '1px solid var(--color-secondary)' : '1px solid var(--border-color)',
-                  background: settings.dyslexiaFont ? 'var(--color-secondary)' : 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#fff',
-                }}
-              >
-                {settings.dyslexiaFont && <Check style={{ width: '0.9rem', height: '0.9rem' }} />}
-              </div>
-            </button>
-          </div>
-
-          {/* Section 3: Modo Foco (TDAH e TEA) - Estilizado conforme pág. 11 do manual */}
-          <div style={{ marginBottom: '1rem' }}>
-            <button
-              onClick={() => setSettings((s) => ({ ...s, focusMode: !s.focusMode }))}
-              aria-pressed={settings.focusMode}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0.6rem 0.75rem',
-                borderRadius: '10px',
-                border: settings.focusMode ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
-                background: settings.focusMode ? 'rgba(228, 104, 63, 0.12)' : 'rgba(41, 62, 36, 0.03)',
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', fontWeight: 600, color: settings.focusMode ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-main)' }}>
-                  <Eye style={{ width: '0.9rem', height: '0.9rem' }} />
-                  Reduzir distrações
-                </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                  Reduz animações e efeitos visuais
-                </div>
-              </div>
-              <div
-                style={{
-                  width: '1.25rem',
-                  height: '1.25rem',
-                  borderRadius: '6px',
-                  border: settings.focusMode ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
-                  background: settings.focusMode ? 'var(--color-primary)' : 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#fff',
-                }}
-              >
-                {settings.focusMode && <Check style={{ width: '0.9rem', height: '0.9rem' }} />}
-              </div>
-            </button>
-          </div>
-
-          {/* Section 4: Leitor em Voz Alta (Web Speech API) */}
-          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.85rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Leitura em voz alta
-              </div>
-              {isSpeaking && (
-                <span style={{ fontSize: '0.68rem', color: 'var(--color-secondary)', fontWeight: 700 }}>
-                  {isPaused ? 'Pausado' : 'Reproduzindo'}
-                </span>
-              )}
+          <fieldset className="a11y-group">
+            <legend className="a11y-group__label">Leitura e visualização</legend>
+            <div className="a11y-options">
+              {OPTIONS.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  className="a11y-option"
+                  onClick={() => toggle(option.key)}
+                  aria-pressed={settings[option.key]}
+                >
+                  <span className="a11y-option__icon">{option.icon}</span>
+                  <span className="a11y-option__text">
+                    <span className="a11y-option__name">{option.name}</span>
+                    <span className="a11y-option__hint">{option.hint}</span>
+                  </span>
+                  <span className="a11y-switch" aria-hidden="true" />
+                </button>
+              ))}
             </div>
+          </fieldset>
 
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button
-                onClick={handleToggleSpeech}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  padding: '0.5rem',
-                  borderRadius: '10px',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  border: '1px solid var(--color-verde-700)',
-                  background: 'rgba(41, 62, 36, 0.08)',
-                  color: 'var(--color-verde-700)',
-                  cursor: 'pointer',
-                }}
-              >
+          <div className="a11y-speech">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span className="a11y-group__label" style={{ margin: 0 }}>Leitura em voz alta</span>
+              <span className="a11y-speech__status" role="status">
+                {isSpeaking ? (isPaused ? 'Pausado' : 'Reproduzindo') : ''}
+              </span>
+            </div>
+            <div className="a11y-speech__row">
+              <button type="button" className="btn-outline" style={{ flex: 1 }} onClick={handleToggleSpeech}>
                 {isSpeaking && !isPaused ? (
-                  <>
-                    <Pause style={{ width: '0.85rem', height: '0.85rem' }} /> Pausar leitura
-                  </>
+                  <><Pause size={16} aria-hidden="true" /> Pausar leitura</>
                 ) : (
-                  <>
-                    <Play style={{ width: '0.85rem', height: '0.85rem' }} /> {isPaused ? 'Continuar' : 'Ler tela'}
-                  </>
+                  <><Play size={16} aria-hidden="true" /> {isPaused ? 'Continuar' : 'Ler tela'}</>
                 )}
               </button>
-
               {isSpeaking && (
-                <button
-                  onClick={handleStopSpeech}
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '10px',
-                    fontSize: '0.78rem',
-                    border: '1px solid rgba(188, 57, 31, 0.3)',
-                    background: 'rgba(188, 57, 31, 0.08)',
-                    color: 'var(--color-vermelho, #BC391F)',
-                    cursor: 'pointer',
-                  }}
-                  title="Parar áudio"
-                  aria-label="Parar leitura em voz alta"
-                >
-                  <VolumeX style={{ width: '0.9rem', height: '0.9rem' }} />
+                <button type="button" className="a11y-speech__stop" onClick={handleStopSpeech} title="Parar áudio" aria-label="Parar leitura em voz alta">
+                  <VolumeX size={18} aria-hidden="true" />
                 </button>
               )}
             </div>
-            <p style={{ margin: '0.35rem 0 0', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-              Selecione um trecho ou clique em Ler tela para ouvir o texto com a voz disponível no navegador.
+            {speechMessage && <p className="a11y-speech__hint" role="alert">{speechMessage}</p>}
+            <p className="a11y-speech__hint">
+              Selecione um trecho ou use Ler tela para ouvir o texto com a voz disponível no navegador.
             </p>
           </div>
         </div>

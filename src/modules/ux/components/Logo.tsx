@@ -29,13 +29,16 @@ export const Logo: React.FC<LogoProps> = ({
 }) => {
   const isNegative = colorMode === 'negative';
   const textColor = colorMode ? (isNegative ? '#F1EAD9' : '#293E24') : 'var(--text-main)';
-  const leafColor = '#E4683F';
-  const circuitLineColor = '#FFFFFF';
-  const circuitDotFill = '#FFFFFF';
-  const circuitDotInner = '#E4683F';
+  // Manual v1.1, seção 01: padrão = folha Laranja 500 com nervura Verde 900;
+  // negativo = folha Nude com nervura Laranja 500.
+  const leafColor = isNegative ? '#F1EAD9' : '#E4683F';
+  const circuitColor = isNegative ? '#E4683F' : '#172314';
+  // Abaixo de 24px, só a folha, sem a nervura (tamanho mínimo do manual)
+  const showCircuit = symbolSize >= 24;
 
-  // SVG da Semente com Nervura de Circuito (Raiz & Dado)
-  const renderSymbol = () => (
+  // SVG da Semente com Nervura de Circuito (Raiz & Dado).
+  // Decorativo no lockup (o wordmark já nomeia a marca); nomeado quando aparece sozinho.
+  const renderSymbol = (label?: string) => (
     <svg
       width={symbolSize}
       height={symbolSize}
@@ -43,37 +46,28 @@ export const Logo: React.FC<LogoProps> = ({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{ flexShrink: 0, display: 'block' }}
-      aria-label="Símbolo Edu-Interact: Raiz e Circuito"
+      {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true, focusable: 'false' })}
     >
       {/* Folha / Gota Orgânica */}
       <path
         d="M16 2.5C21.5 8 26.5 13.5 26.5 18C26.5 23.8 21.8 28.5 16 29.5C10.2 28.5 5.5 23.8 5.5 18C5.5 13.5 10.5 8 16 2.5Z"
         fill={leafColor}
       />
-      {/* Nervura central do circuito - Ciclo CSFA (3 nós) */}
-      <line
-        x1="16"
-        y1="7"
-        x2="16"
-        y2="25"
-        stroke={circuitLineColor}
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-      {/* Nó 1: Provocação */}
-      <circle cx="16" cy="9.5" r="2.2" fill={circuitDotFill} />
-      <circle cx="16" cy="9.5" r="1.1" fill={circuitDotInner} />
-      {/* Nó 2: Experimentação */}
-      <circle cx="16" cy="16" r="2.2" fill={circuitDotFill} />
-      <circle cx="16" cy="16" r="1.1" fill={circuitDotInner} />
-      {/* Nó 3: Maiêutica */}
-      <circle cx="16" cy="22.5" r="2.2" fill={circuitDotFill} />
-      <circle cx="16" cy="22.5" r="1.1" fill={circuitDotInner} />
+      {showCircuit && (
+        <>
+          {/* Nervura central do circuito - Ciclo CSFA (3 nós) */}
+          <line x1="16" y1="7" x2="16" y2="25" stroke={circuitColor} strokeWidth="1.75" strokeLinecap="round" />
+          {/* Nó 1: Provocação · Nó 2: Experimentação · Nó 3: Maiêutica */}
+          <circle cx="16" cy="9.5" r="2" fill={circuitColor} />
+          <circle cx="16" cy="16" r="2" fill={circuitColor} />
+          <circle cx="16" cy="22.5" r="2" fill={circuitColor} />
+        </>
+      )}
     </svg>
   );
 
   if (variant === 'symbol-only') {
-    return <div className={`edu-interact-symbol ${className}`}>{renderSymbol()}</div>;
+    return <div className={`edu-interact-symbol ${className}`}>{renderSymbol('Edu-Interact')}</div>;
   }
 
   const isStacked = variant === 'stacked';
@@ -92,6 +86,7 @@ export const Logo: React.FC<LogoProps> = ({
       {renderSymbol()}
       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
         <span
+          className="edu-interact-wordmark"
           style={{
             fontFamily: "'Space Grotesk', -apple-system, sans-serif",
             fontWeight: 700,
@@ -107,7 +102,7 @@ export const Logo: React.FC<LogoProps> = ({
           <span
             style={{
               fontFamily: "'Manrope', -apple-system, sans-serif",
-              fontSize: '0.68rem',
+              fontSize: '0.8125rem',
               fontWeight: 500,
               color: colorMode ? (isNegative ? 'rgba(241, 234, 217, 0.75)' : '#5A6D56') : 'var(--text-secondary)',
               letterSpacing: '0.01em',

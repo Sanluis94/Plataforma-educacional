@@ -6,13 +6,13 @@
   padding: 0.25rem 0.65rem;
   border-radius: 10px;
   font-family: var(--font-body, 'Manrope', sans-serif);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   border: 1px solid;
 }
 
 .badge-primary {
-  color: var(--color-laranja-700, #B8441F);
+  color: var(--color-primary-accessible, #A63D1B);
   background-color: rgba(228, 104, 63, 0.1);
   border-color: rgba(184, 68, 31, 0.3);
 }
@@ -30,13 +30,13 @@
 }
 
 .badge-warning {
-  color: #9A3412;
+  color: var(--color-primary-accessible, #A63D1B);
   background-color: rgba(234, 88, 12, 0.1);
   border-color: rgba(234, 88, 12, 0.35);
 }
 
 .badge-error {
-  color: var(--color-vermelho, #BC391F);
+  color: var(--color-error, #BC391F);
   background-color: rgba(188, 57, 31, 0.1);
   border-color: rgba(188, 57, 31, 0.35);
 }

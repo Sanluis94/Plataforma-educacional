@@ -1,3 +1,4 @@
+import { GraduationCap } from 'lucide-react';
 import { useState } from 'react';
 import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
@@ -91,7 +92,7 @@ export function HardSkillsSimulator({ mode = 'programming', labTitle, onComplete
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🖥️ {labTitle || program.title}</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>{labTitle || program.title}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>Simulação prática e interativa de fundamentos tecnológicos.</p>
 
       {!done ? (
@@ -111,7 +112,7 @@ export function HardSkillsSimulator({ mode = 'programming', labTitle, onComplete
             <h4 style={{ color: 'var(--color-primary)', marginBottom: '0.75rem' }}>Desafio Técnico:</h4>
             <p style={{ color: 'var(--text-main)', lineHeight: '1.7', marginBottom: '1rem' }}>{program.steps[step].instruction}</p>
             <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '8px', padding: '0.75rem', fontSize: '0.82rem', color: 'var(--text-secondary)', borderLeft: '3px solid var(--color-secondary)' }}>
-              💡 <strong>Dica do roteiro:</strong> {program.steps[step].hint}
+              <strong>Dica do roteiro:</strong> {program.steps[step].hint}
             </div>
           </div>
 
@@ -122,13 +123,13 @@ export function HardSkillsSimulator({ mode = 'programming', labTitle, onComplete
               style={{ width: '100%', borderRadius: '8px', padding: '0.75rem', background: 'var(--bg-secondary)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--text-main)', resize: 'none', outline: 'none', fontFamily: 'monospace', boxSizing: 'border-box' }} />
           </div>
 
-          <button disabled={!input.trim()} onClick={next} style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
+          <button disabled={!input.trim()} onClick={next} style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'var(--color-on-primary, #172314)', cursor: 'pointer', fontWeight: 'bold' }}>
             {step < program.steps.length - 1 ? 'Próximo Passo →' : 'Concluir Desafio'}
           </button>
         </div>
       ) : (
         <div style={{ textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '12px', padding: '2rem' }}>
-          <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>🎓</div>
+          <div aria-hidden="true" style={{ display: 'grid', placeItems: 'center', width: '4.5rem', height: '4.5rem', margin: '0 auto 0.75rem', borderRadius: '50%', background: 'rgba(var(--color-primary-rgb), 0.12)', color: 'var(--color-primary-accessible)' }}><GraduationCap size={32} /></div>
           <h3 style={{ color: 'var(--text-main)', marginBottom: '0.75rem' }}>Etapas de prática concluídas</h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>Confira sua solução com as dicas do roteiro e use a avaliação guiada para verificar o aprendizado.</p>
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
@@ -140,7 +141,7 @@ export function HardSkillsSimulator({ mode = 'programming', labTitle, onComplete
       )}
 
       <div style={{ marginTop: '1.25rem', padding: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>Roteiro de raciocínio técnico</div>
+        <div style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.2rem' }}>Roteiro de raciocínio técnico</div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
           Pratique {program.title}. Este roteiro conserva seu raciocínio durante a etapa, mas não executa nem corrige automaticamente o código digitado. Compare sua solução com as dicas antes de avançar.
         </p>

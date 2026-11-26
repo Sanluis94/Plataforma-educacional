@@ -1,11 +1,7 @@
 import { useNavigationParams } from '../hooks/useNavigationParams';
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  Beaker, Trophy, BookOpen, Clock, FileText,
-  Calendar, Upload, ExternalLink, Bell,
-  Award, ShieldCheck, MessageSquare, Copy, Check, Download, Home as HomeIcon
-} from 'lucide-react';
+import { Beaker, Trophy, BookOpen, Clock, FileText, Calendar, Upload, ExternalLink, Bell, Award, ShieldCheck, MessageSquare, Copy, Check, Download, Home as HomeIcon, Sparkles, GraduationCap, Zap, Coins, PartyPopper } from 'lucide-react';
 import { useStudentDashboard } from '../../core/hooks/useStudentDashboard';
 import { ALL_MODULES } from '../../core/constants/dashboardConstants';
 import { getLearningLab, type LearningLab } from '../../core/constants/learningCatalog';
@@ -579,76 +575,56 @@ function StudentDashboardSession() {
   );
 
   return (
-    <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '84rem', margin: '0 auto' }}>
+    <div className="fade-in ei-page">
       <ConfettiCanvas active={showConfetti} onComplete={() => setShowConfetti(false)} />
       {classDataError&&<p role="alert">{classDataError}</p>}
       {examDraftError&&<p role="alert">{examDraftError}</p>}
       {progressLoading&&<p role="status">Carregando seu progresso…</p>}{progressError&&<p role="alert">{progressError} <button className="btn-outline" onClick={reloadProgress}>Atualizar progresso</button></p>}
 
-      {/* Navigation Breadcrumb / Hub Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', padding: '0.6rem 1rem', background: 'var(--bg-glass)', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)' }}>
-        <Link
-          to="/"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.45rem 0.9rem',
-            borderRadius: 'var(--radius-sm, 10px)',
-            background: 'var(--color-primary-light, rgba(228, 104, 63, 0.12))',
-            border: '1px solid var(--color-primary-accessible, #B8441F)',
-            color: 'var(--color-primary-accessible, #B8441F)',
-            fontSize: '0.85rem',
-            fontWeight: 700,
-            textDecoration: 'none',
-            transition: 'all 0.2s',
-          }}
-          className="hover:scale-102"
-        >
-          <HomeIcon style={{ width: '1rem', height: '1rem' }} />
-          ← Página inicial
-        </Link>
+      {/* Trilha de navegação e atalhos */}
+      <nav aria-label="Trilha de navegação" className="ei-breadcrumb" style={{ justifyContent: 'space-between' }}>
+        <Link to="/"><HomeIcon size={16} aria-hidden="true" /> Página inicial</Link>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <span>Acesso rápido:</span>
+          <Link to={withReturnTo(`/simulacao?level=${gradeLevel}`, panelLocation)}><Beaker size={16} aria-hidden="true" /> Catálogo de Laboratórios</Link>
+          <Link to={withReturnTo('/enem', panelLocation)}><FileText size={16} aria-hidden="true" /> Simulado ENEM</Link>
+        </span>
+      </nav>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', minWidth: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          <span style={{ color: 'var(--text-secondary)' }}>Acesso rápido:</span>
-          <Link to={withReturnTo(`/simulacao?level=${gradeLevel}`, panelLocation)} style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            🔬 Catálogo de Laboratórios
-          </Link>
-          <span>•</span>
-          <Link to={withReturnTo('/enem', panelLocation)} style={{ color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            📝 Simulado ENEM
-          </Link>
-        </div>
-      </div>
-
-      {/* Header with Student Stats Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '1.75rem' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-            <span aria-label={purchasedItems.includes('avatar_hero')?'Avatar Herói':'Perfil do estudante'} style={{ fontSize: '1.8rem',padding:6,borderRadius:12,border:purchasedItems.includes('frame_gold')?'3px solid #b8860b':'3px solid transparent',boxShadow:purchasedItems.includes('theme_neon')?'0 0 14px #06b6d4, 0 0 24px #a855f7':undefined }}>{purchasedItems.includes('avatar_hero')?'🦸':'🎓'}</span>
-            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.5px', fontFamily: 'var(--font-heading)' }}>
-              Portal do Estudante
-            </h1>
-          </div>
-          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.92rem' }}>
-            Acesse seus laboratórios, provas, aulas e materiais de estudo.
-          </p>
-          {purchasedItems.includes('badge_genius')&&<p aria-label="Medalha decorativa do perfil">🧠 Medalha do Conhecimento</p>}
-        </div>
-
-        {/* Gamification Stats Pill */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', padding: '0.65rem 1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-glass)', border: '1px solid var(--border-color)' }}>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>NÍVEL {level}</div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>{progressLoading||progressError?'—':xp+' XP'}</div>
-          </div>
-          <div style={{ width: '1px', height: '2rem', background: 'var(--border-color)' }} />
-          <div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>MOEDAS</div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>🪙 {coins}</div>
+      {/* Cabeçalho do painel com indicadores de progresso */}
+      <header className="ei-page-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: 0 }}>
+          <span
+            role="img"
+            aria-label={purchasedItems.includes('avatar_hero') ? 'Avatar Herói' : 'Perfil do estudante'}
+            className="ei-icon-box"
+            style={{
+              width: '4rem', height: '4rem', borderRadius: '50%', background: '#E4683F', color: '#172314',
+              border: purchasedItems.includes('frame_gold') ? '3px solid #F59C7B' : '3px solid rgba(250,247,238,0.2)',
+              boxShadow: purchasedItems.includes('theme_neon') ? '0 0 0 4px rgba(228,104,63,0.35), 0 0 24px rgba(228,104,63,0.6)' : undefined,
+            }}
+          >
+            {purchasedItems.includes('avatar_hero') ? <Sparkles size={28} aria-hidden="true" /> : <GraduationCap size={28} aria-hidden="true" />}
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <p className="ei-page-header__eyebrow">Meu aprendizado</p>
+            <h1>Portal do Estudante</h1>
+            <p>Acesse seus laboratórios, provas, aulas e materiais de estudo.</p>
+            {purchasedItems.includes('badge_genius') && <p aria-label="Medalha decorativa do perfil" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: '#F59C7B', fontWeight: 700 }}><Award size={16} aria-hidden="true" /> Medalha do Conhecimento</p>}
           </div>
         </div>
-      </div>
+
+        <div className="ei-page-header__stats">
+          <div className="ei-stat">
+            <span className="ei-stat__label"><Zap size={14} aria-hidden="true" /> Nível {level}</span>
+            <span className="ei-stat__value">{progressLoading || progressError ? '—' : `${xp} XP`}</span>
+          </div>
+          <div className="ei-stat">
+            <span className="ei-stat__label"><Coins size={14} aria-hidden="true" /> Moedas</span>
+            <span className="ei-stat__value">{coins}</span>
+          </div>
+        </div>
+      </header>
 
       {studentClasses.length > 0 && (
         <label style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem', color: 'var(--text-main)', fontWeight: 600 }}>
@@ -670,65 +646,37 @@ function StudentDashboardSession() {
         {joinFeedback && activeTab !== 'classes' && <p role={joinFeedback.type === 'success' ? 'status' : 'alert'}>{joinFeedback.msg}</p>}
       </section>}
 
-      {/* Reorganized Student Navigation Bar with Dynamic Badges */}
-      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--border-color)' }}>
+      {/* Abas do painel */}
+      <div className="ei-tabs" role="toolbar" aria-label="Seções do painel do estudante">
         {[
-          { id: 'labs', label: '🔬 Laboratórios por Nível', icon: Beaker },
-          { id: 'activities', label: '📋 Atividades da Turma', icon: BookOpen, count: classActivities.length },
+          { id: 'labs', label: 'Laboratórios por Nível', icon: Beaker },
+          { id: 'activities', label: 'Atividades da Turma', icon: BookOpen, count: classActivities.length },
           {
             id: 'exams',
-            label: '📝 Provas & Avaliações',
+            label: 'Provas & Avaliações',
             icon: FileText,
             count: classExams.length,
             badge: pendingExams.length > 0 ? `${pendingExams.length} pendente${pendingExams.length > 1 ? 's' : ''}` : undefined,
-            badgeColor: 'var(--color-primary-accessible, #B8441F)'
           },
-          { id: 'gradebook', label: '📊 Boletim & Frequência', icon: Award },
-          { id: 'forum', label: `💬 Fórum da Turma`, icon: MessageSquare },
-          { id: 'certificates', label: '📜 Meus Certificados', icon: ShieldCheck },
-          { id: 'lesson_plans', label: `📅 Plano de Aulas (${classLessonPlans.length})`, icon: Calendar },
-          { id: 'materials', label: `📁 Materiais & Downloads (${classMaterials.length})`, icon: Upload },
-          { id: 'classes', label: `🏫 Minha Turma & Avisos (${classNotices.length})`, icon: BookOpen },
-          { id: 'gamification', label: '🏆 Conquistas & Loja', icon: Trophy },
+          { id: 'gradebook', label: 'Boletim & Frequência', icon: Award },
+          { id: 'forum', label: 'Fórum da Turma', icon: MessageSquare },
+          { id: 'certificates', label: 'Meus Certificados', icon: ShieldCheck },
+          { id: 'lesson_plans', label: 'Plano de Aulas', icon: Calendar, count: classLessonPlans.length },
+          { id: 'materials', label: 'Materiais & Downloads', icon: Upload, count: classMaterials.length },
+          { id: 'classes', label: 'Minha Turma & Avisos', icon: BookOpen, count: classNotices.length },
+          { id: 'gamification', label: 'Conquistas & Loja', icon: Trophy },
         ].map(tab => (
           <button
             key={tab.id}
+            type="button"
+            className="ei-tab"
             onClick={() => setActiveTab(tab.id as StudentTab)}
             aria-pressed={activeTab === tab.id}
-            style={{
-              padding: '0.65rem 1.25rem',
-              borderRadius: 'var(--radius-sm, 10px) var(--radius-sm, 10px) 0 0',
-              border: 'none',
-              borderBottom: activeTab === tab.id ? '2px solid var(--color-primary, #E4683F)' : '2px solid transparent',
-              backgroundColor: activeTab === tab.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.1))' : 'transparent',
-              color: activeTab === tab.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
-              fontWeight: activeTab === tab.id ? 700 : 500,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.2s',
-              whiteSpace: 'nowrap',
-            }}
           >
-            <tab.icon style={{ width: '1rem', height: '1rem' }} />
-            {tab.label} {tab.count !== undefined && !tab.badge && `(${tab.count})`}
-            {tab.badge && (
-              <span
-                style={{
-                  fontSize: '0.7rem',
-                  padding: '0.15rem 0.5rem',
-                  borderRadius: '9999px',
-                  background: 'rgba(245,158,11,0.2)',
-                  color: '#fbbf24',
-                  fontWeight: 700,
-                  border: '1px solid rgba(245,158,11,0.3)',
-                }}
-              >
-                ● {tab.badge}
-              </span>
-            )}
+            <tab.icon size={18} aria-hidden="true" />
+            {tab.label}
+            {tab.count !== undefined && !tab.badge && <span className="ei-tab__count">{tab.count}</span>}
+            {tab.badge && <span className="ei-tab__alert">{tab.badge}</span>}
           </button>
         ))}
       </div>
@@ -824,7 +772,7 @@ function StudentDashboardSession() {
                     >
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800 }}>LAB #{index + 1}</span>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 800 }}>LAB #{index + 1}</span>
                           {isCompleted ? (
                             <span style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)', background: 'var(--color-verde-light, rgba(41, 62, 36, 0.15))', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
                               ✓ Concluído
@@ -870,7 +818,7 @@ function StudentDashboardSession() {
               {searchParams.get('labReturnTab') === 'lesson_plans' ? '← Voltar ao Plano de Aulas' : '← Voltar aos Laboratórios'}
             </button>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Laboratório Ativo: <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{activeLab.title}</strong>
+              Laboratório Ativo: <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>{activeLab.title}</strong>
             </span>
           </div>
 
@@ -930,7 +878,7 @@ function StudentDashboardSession() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <div>
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, margin: '0 0 0.35rem', fontFamily: 'var(--font-heading)' }}>
-                📝 Provas & Avaliações da Turma
+                Provas & Avaliações da Turma
               </h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0 }}>
                 Exames com contagem regressiva, questões com gabarito comentado e correção automática instantânea.
@@ -948,7 +896,7 @@ function StudentDashboardSession() {
                 <div key={exam.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderRadius: 'var(--radius-lg, 14px)' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, textTransform: 'uppercase' }}>
                         {exam.disciplina}
                       </span>
                       {attempt ? (
@@ -956,7 +904,7 @@ function StudentDashboardSession() {
                           ✓ Concluída ({attempt.porcentagemAproveitamento}%)
                         </span>
                       ) : (
-                        <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #A63D1B)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
                           {queued || restored?.pending ? 'Entrega aguardando confirmação' : examAcceptingAnswers(exam) ? 'Pendente' : 'Fora do período'}
                         </span>
                       )}
@@ -971,11 +919,11 @@ function StudentDashboardSession() {
 
                     <div style={{ padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-glass)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <Clock style={{ width: '0.85rem', height: '0.85rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+                        <Clock style={{ width: '0.85rem', height: '0.85rem', color: 'var(--color-primary-accessible, #A63D1B)' }} />
                         <span>Duração: <strong>{exam.duracaoMinutos ? `${exam.duracaoMinutos} min` : 'Sem limite'}</strong></span>
                       </div>
                       {exam.dataLimite && <div>Prazo: {examDeadlineAt(exam) === null ? 'Confira o prazo com seu professor' : new Date(examDeadlineAt(exam)!).toLocaleString('pt-BR')}</div>}
-                      <div>Questões: <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{exam.questoes.length} (Peso Total: {exam.pesoTotal} pts)</strong></div>
+                      <div>Questões: <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>{exam.questoes.length} (Peso Total: {exam.pesoTotal} pts)</strong></div>
                     </div>
                   </div>
 
@@ -995,7 +943,7 @@ function StudentDashboardSession() {
                       className="btn-gradient"
                       style={{ width: '100%', padding: '0.65rem', fontWeight: 700, fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--gradient-primary)' }}
                     >
-                      {queued || restored?.pending ? 'Consultar entrega pendente' : restored ? 'Continuar prova ou consultar entrega' : attemptsLoading ? 'Consultando entregas…' : attemptsError ? 'Histórico indisponível' : !examAcceptingAnswers(exam) ? 'Fora do período disponível' : 'Realizar Prova 📝'}
+                      {queued || restored?.pending ? 'Consultar entrega pendente' : restored ? 'Continuar prova ou consultar entrega' : attemptsLoading ? 'Consultando entregas…' : attemptsError ? 'Histórico indisponível' : !examAcceptingAnswers(exam) ? 'Fora do período disponível' : 'Realizar Prova'}
                     </button>
                   )}
                 </div>
@@ -1018,7 +966,7 @@ function StudentDashboardSession() {
           {/* Exam Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
             <div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, textTransform: 'uppercase' }}>
                 {activeExam.disciplina}
               </span>
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.35rem', fontWeight: 800, margin: '0.2rem 0', fontFamily: 'var(--font-heading)' }}>
@@ -1029,8 +977,8 @@ function StudentDashboardSession() {
             {/* Timer if duration set */}
             {examTimeRemaining !== null && !examResult && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm, 10px)', background: examTimeRemaining < 300 ? 'rgba(188,57,31,0.15)' : 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', border: `1px solid ${examTimeRemaining < 300 ? 'var(--color-vermelho, #BC391F)' : 'var(--color-primary, #E4683F)'}` }}>
-                <Clock style={{ width: '1rem', height: '1rem', color: examTimeRemaining < 300 ? 'var(--color-vermelho, #BC391F)' : 'var(--color-primary-accessible, #B8441F)' }} />
-                <span style={{ fontWeight: 800, fontSize: '1.1rem', color: examTimeRemaining < 300 ? 'var(--color-vermelho, #BC391F)' : 'var(--color-primary-accessible, #B8441F)', fontFamily: 'monospace' }}>
+                <Clock style={{ width: '1rem', height: '1rem', color: examTimeRemaining < 300 ? 'var(--color-vermelho, #BC391F)' : 'var(--color-primary-accessible, #A63D1B)' }} />
+                <span style={{ fontWeight: 800, fontSize: '1.1rem', color: examTimeRemaining < 300 ? 'var(--color-vermelho, #BC391F)' : 'var(--color-primary-accessible, #A63D1B)', fontFamily: 'monospace' }}>
                   {Math.floor(examTimeRemaining / 60)}:{(examTimeRemaining % 60).toString().padStart(2, '0')}
                 </span>
               </div>
@@ -1055,7 +1003,7 @@ function StudentDashboardSession() {
                         borderRadius: 'var(--radius-sm, 10px)',
                         border: isCurrent ? '2px solid var(--color-primary, #E4683F)' : isAnswered ? '1px solid var(--color-verde-500, #3D5B36)' : '1px solid var(--border-color)',
                         background: isCurrent ? 'var(--color-primary-light, rgba(228, 104, 63, 0.25))' : isAnswered ? 'var(--color-verde-light, rgba(41, 62, 36, 0.2))' : 'var(--bg-glass)',
-                        color: isCurrent ? 'var(--color-primary-accessible, #B8441F)' : isAnswered ? 'var(--color-verde-700, #293E24)' : 'var(--text-secondary)',
+                        color: isCurrent ? 'var(--color-primary-accessible, #A63D1B)' : isAnswered ? 'var(--color-verde-700, #293E24)' : 'var(--text-secondary)',
                         fontWeight: 700,
                         fontSize: '0.85rem',
                         cursor: 'pointer'
@@ -1071,10 +1019,10 @@ function StudentDashboardSession() {
               {activeExam.questoes[examCurrentQIndex] && (
                 <div style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-glass)', border: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800 }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 800 }}>
                       Questão {examCurrentQIndex + 1} de {activeExam.questoes.length}
                     </span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', padding: '0.15rem 0.55rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #A63D1B)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', padding: '0.15rem 0.55rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
                       Peso: {activeExam.questoes[examCurrentQIndex].valorPeso} pts
                     </span>
                   </div>
@@ -1155,7 +1103,7 @@ function StudentDashboardSession() {
             /* EXAM RESULT VIEW: INSTANT SCORE + GABARITO COMENTADO */
             <div className="fade-in">
               <div style={{ textAlign: 'center', padding: '1.5rem 0 2rem' }}>
-                <span style={{ fontSize: '3rem' }}>🎉</span>
+                <span aria-hidden="true" style={{ display: 'inline-grid', placeItems: 'center', width: '4.5rem', height: '4.5rem', borderRadius: '50%', background: 'rgba(var(--color-primary-rgb), 0.12)', color: 'var(--color-primary-accessible)' }}><PartyPopper size={32} /></span>
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.6rem', fontWeight: 800, margin: '0.5rem 0' }}>
                   {examPending ? 'Prova guardada neste dispositivo' : 'Prova entregue'}
                 </h3>
@@ -1171,7 +1119,7 @@ function StudentDashboardSession() {
 
               {/* Gabarito Comentado com Justificativas Pedagógicas */}
               <h4 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
-                📖 Gabarito Comentado da Avaliação
+                Gabarito Comentado da Avaliação
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
                 {activeExam.questoes.map((q, idx) => {
@@ -1188,7 +1136,7 @@ function StudentDashboardSession() {
                         {q.enunciado}
                       </div>
                       <div style={{ padding: '0.6rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-glass)', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                        <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', display: 'block', marginBottom: '0.2rem' }}>Justificativa Pedagógica:</strong>
+                        <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)', display: 'block', marginBottom: '0.2rem' }}>Justificativa Pedagógica:</strong>
                         {q.justificativa}
                       </div>
                     </div>
@@ -1214,7 +1162,7 @@ function StudentDashboardSession() {
       {activeTab === 'lesson_plans' && (
         <div className="fade-in glass-card" style={{ padding: '1.75rem', borderRadius: 'var(--radius-lg, 14px)' }}>
           <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.5rem', fontFamily: 'var(--font-heading)' }}>
-            📅 Cronograma & Plano de Aulas da Turma
+            Cronograma & Plano de Aulas da Turma
           </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>
             Acompanhe a sequência didática planejada pelo professor para cada bimestre letivo.
@@ -1225,7 +1173,7 @@ function StudentDashboardSession() {
               {classLessonPlans.map((plan, idx) => (
                 <div key={plan.id} style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-glass)', border: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: '70px 1fr auto', gap: '1rem', alignItems: 'center' }}>
                   <div style={{ textAlign: 'center', padding: '0.45rem', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.12))', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color)' }}>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, display: 'block' }}>AULA</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, display: 'block' }}>AULA</span>
                     <strong style={{ fontSize: '1.15rem', color: 'var(--text-main)' }}>#{idx + 1}</strong>
                   </div>
 
@@ -1238,8 +1186,8 @@ function StudentDashboardSession() {
                       {plan.metodologia}
                     </div>
                     <div style={{ display: 'flex', gap: '1rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                      {plan.competenciasBNCC && <span>🎯 {plan.competenciasBNCC}</span>}
-                      {plan.dataPrevista && <span>🗓️ {plan.dataPrevista}</span>}
+                      {plan.competenciasBNCC && <span>{plan.competenciasBNCC}</span>}
+                      {plan.dataPrevista && <span>{plan.dataPrevista}</span>}
                     </div>
                   </div>
 
@@ -1254,7 +1202,7 @@ function StudentDashboardSession() {
                         className="btn-outline"
                         style={{ padding: '0.45rem 0.85rem', fontSize: '0.78rem', whiteSpace: 'nowrap', borderRadius: 'var(--radius-sm, 10px)' }}
                       >
-                        🔬 Abrir Laboratório da Aula
+                        Abrir Laboratório da Aula
                       </button>
                     )}
                   </div>
@@ -1273,7 +1221,7 @@ function StudentDashboardSession() {
       {activeTab === 'materials' && (
         <div className="fade-in glass-card" style={{ padding: '1.75rem' }}>
           <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-            📁 Materiais Didáticos & Downloads
+            Materiais Didáticos & Downloads
           </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>
             Acesse apostilas, PDFs, links de estudo recomendados e resumos postados pelo professor.
@@ -1288,7 +1236,7 @@ function StudentDashboardSession() {
                       <span style={{ fontSize: '0.72rem', color: 'var(--color-verde-700, #293E24)', fontWeight: 700 }}>
                         {mat.periodo || '1º Bimestre'}
                       </span>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #A63D1B)', background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}>
                         {mat.tipo}
                       </span>
                     </div>
@@ -1318,7 +1266,7 @@ function StudentDashboardSession() {
 
                     {mat.nomeArquivo && (
                       <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-                        📎 {mat.nomeArquivo} ({mat.tamanhoFormatado || ''})
+                        {mat.nomeArquivo} ({mat.tamanhoFormatado || ''})
                       </div>
                     )}
                   </div>
@@ -1383,7 +1331,7 @@ function StudentDashboardSession() {
           {/* Join New Class Form */}
           <div className="glass-card mb-4" style={{ padding: '1.5rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.35rem' }}>
-              ➕ Matricular-se em uma Nova Turma
+              Matricular-se em uma Nova Turma
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', marginBottom: '1rem' }}>
               Insira o <strong>código da turma</strong> fornecido pelo seu professor (ex: <code>K7M9P2</code>) para acessar os avisos, materiais e provas da turma.
@@ -1440,7 +1388,7 @@ function StudentDashboardSession() {
           {studentClasses.length > 0 && (
             <div className="glass-card mb-4" style={{ padding: '1.5rem' }}>
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
-                🏫 Suas Turmas Matriculadas ({studentClasses.length})
+                Suas Turmas Matriculadas ({studentClasses.length})
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1rem' }}>
                 {studentClasses.map(turma => {
@@ -1460,14 +1408,14 @@ function StudentDashboardSession() {
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                        <span style={{ fontSize: '0.72rem', color: isSelected ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <span style={{ fontSize: '0.72rem', color: isSelected ? 'var(--color-primary-accessible, #A63D1B)' : 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
                           {isSelected ? '● Turma Ativa' : 'Clique para Selecionar'}
                         </span>
                         <span style={{
                           fontSize: '0.75rem',
                           fontFamily: 'monospace',
                           fontWeight: 700,
-                          color: 'var(--color-primary-accessible, #B8441F)',
+                          color: 'var(--color-primary-accessible, #A63D1B)',
                           background: 'var(--color-primary-light, rgba(228, 104, 63, 0.15))',
                           padding: '0.15rem 0.45rem',
                           borderRadius: 'var(--radius-sm, 10px)'
@@ -1523,7 +1471,7 @@ function StudentDashboardSession() {
           {/* Dúvidas e Mensagens ao Professor */}
           <div className="glass-card" style={{ padding: '1.75rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem' }}>
-              💬 Enviar Dúvida ao Professor
+              Enviar Dúvida ao Professor
             </h3>
             <form onSubmit={handleSendMessageSubmit} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
               <input
@@ -1572,7 +1520,7 @@ function StudentDashboardSession() {
           {/* Shop Section */}
           <div className="glass-card mb-4" style={{ padding: '1.75rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-              🛍️ Loja de Customização do Perfil
+              Loja de Customização do Perfil
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>
               Use suas moedas virtuais para personalizar o perfil. Os itens adquiridos são aplicados automaticamente e permanecem após recarregar a página.
@@ -1588,7 +1536,7 @@ function StudentDashboardSession() {
                     <p>{item.description}</p>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
-                    <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.95rem' }}>🪙 {item.price}</span>
+                    <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.95rem' }}>{item.price}</span>
                     <button
                       onClick={() => buyItem(item.id)}
                       disabled={purchaseBusy || item.owned || coins < item.price}
@@ -1606,7 +1554,7 @@ function StudentDashboardSession() {
           {/* Achievements Section */}
           <div className="glass-card" style={{ padding: '1.75rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-              🏆 Conquistas & Medalhas Acadêmicas
+              Conquistas & Medalhas Acadêmicas
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>
               Desbloqueie conquistas ao concluir laboratórios, acumular experiência e colecionar itens. Cada medalha descreve seu requisito.

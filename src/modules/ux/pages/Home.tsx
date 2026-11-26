@@ -3,11 +3,14 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import {
   ArrowRight, Beaker, Trophy, BookOpen, Users,
-  GraduationCap, Building2, Sparkles, FileText,
+  GraduationCap, Building2, FileText,
   MessageSquare, Compass, LayoutDashboard,
   LogIn, Award, BarChart3,
-  BookMarked, PenTool
+  BookMarked, PenTool, Accessibility, Type, Volume2, Keyboard, Eye,
+  CheckCircle2, ChevronDown, Contrast, Moon
 } from 'lucide-react';
+import { LEARNING_LABS_CATALOG } from '../../core/constants/learningCatalog';
+import './Home.css';
 import { Logo } from '../components/Logo';
 import { HomeNextStep } from '../components/HomeNextStep';
 import { canAccessPath, getRoleHome, ROLE_LABELS, withReturnTo } from '../../core/utils/navigation';
@@ -222,7 +225,7 @@ export function Home({ onLoginOpen }: HomeProps) {
           description: 'Estruture o plano de estudos bimestral com alinhamento às competências da BNCC e sugestões adaptativas.',
           href: '/professor?tab=lesson_plans',
           icon: BookMarked,
-          color: '#B8441F',
+          color: 'var(--color-primary-accessible, #A63D1B)',
           badgeText: 'Gerador IA + BNCC',
           actionText: 'Abrir planejamento'
         },
@@ -277,7 +280,7 @@ export function Home({ onLoginOpen }: HomeProps) {
           description: 'Responda dúvidas enviadas pelos estudantes, promova discussões científicas e selecione a melhor resposta da turma.',
           href: '/professor?tab=lms_gradebook',
           icon: MessageSquare,
-          color: '#B8441F',
+          color: 'var(--color-primary-accessible, #A63D1B)',
           badgeText: 'Moderação docente',
           actionText: 'Ver discussões'
         },
@@ -386,7 +389,7 @@ export function Home({ onLoginOpen }: HomeProps) {
         description: 'Pratique a construção de teses, a coesão do texto e a proposta de intervenção nas atividades de redação.',
         href: '/simulacao?level=medio&subject=Reda%C3%A7%C3%A3o+Dissertativa+Nota+1000',
         icon: PenTool,
-        color: '#B8441F',
+        color: 'var(--color-primary-accessible, #A63D1B)',
         badgeText: 'Prática de escrita',
         actionText: 'Abrir atividades de redação'
       },
@@ -408,7 +411,7 @@ export function Home({ onLoginOpen }: HomeProps) {
         description: 'Ganhe XP em cada atividade, suba de nível, desbloqueie badges científicos e troque suas moedas por avatares.',
         href: '/estudante?tab=gamification',
         icon: Trophy,
-        color: '#B8441F',
+        color: 'var(--color-primary-accessible, #A63D1B)',
         badgeText: 'XP e conquistas',
         actionText: 'Acessar conquistas'
       },
@@ -467,7 +470,7 @@ export function Home({ onLoginOpen }: HomeProps) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#FFFFFF',
+                color: 'var(--color-on-primary, #172314)',
                 fontSize: '1.6rem',
                 fontWeight: 700,
                 fontFamily: 'var(--font-display)'
@@ -512,7 +515,7 @@ export function Home({ onLoginOpen }: HomeProps) {
           {/* Section Title */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Compass style={{ width: '1.4rem', height: '1.4rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+              <Compass style={{ width: '1.4rem', height: '1.4rem', color: 'var(--color-primary-accessible, #A63D1B)' }} />
               <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
                 Opções de navegação da plataforma
               </h2>
@@ -664,172 +667,255 @@ export function Home({ onLoginOpen }: HomeProps) {
           </div>
         </section>
       ) : (
-        /* ─── CASO 2: VISITANTE (LANDING PAGE COM IDENTIDADE VISUAL EDU-INTERACT) ─── */
-        <>
-          {/* Hero Section */}
-          <section className="bg-circuit-root" style={{ position: 'relative', overflow: 'hidden', padding: '4.5rem 1rem 3rem' }}>
-            <div style={{ position: 'relative', maxWidth: '80rem', margin: '0 auto', textAlign: 'center' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.95rem', borderRadius: '10px', background: 'rgba(228,104,63,0.1)', border: '1px solid rgba(184,68,31,0.25)', color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.8rem', fontWeight: 700, marginBottom: '1.5rem' }}>
-                <Sparkles style={{ width: '0.9rem', height: '0.9rem' }} />
-                Onde a raiz encontra o circuito • Educação científica inclusiva
+        /* ─── CASO 2: VISITANTE — landing page (padrão Product Demo + Features, UI UX Pro Max) ─── */
+        <div className="landing">
+          {/* 1. Hero com demonstração real do produto */}
+          <section className="lp-hero" aria-labelledby="landing-title">
+            <div className="lp-hero__bg" aria-hidden="true" />
+            <div className="lp-container lp-hero__grid">
+              <div className="lp-hero__copy">
+                <p className="lp-pill">
+                  <span className="lp-pill__dot" aria-hidden="true" />
+                  Educação científica inclusiva · DUA + BNCC
+                </p>
+                <h1 id="landing-title" className="lp-hero__title">
+                  Aprenda e ensine com atividades práticas
+                </h1>
+                <p className="lp-hero__lead">
+                  Laboratórios virtuais, turmas, simulado ENEM e um tutor que faz perguntas em vez de dar respostas. Tudo no navegador, com acessibilidade desde o primeiro clique.
+                </p>
+                <div className="lp-hero__actions">
+                  <button type="button" onClick={onLoginOpen} className="btn-primary lp-cta">
+                    <LogIn size={20} aria-hidden="true" />
+                    Entrar na plataforma
+                    <ArrowRight size={20} aria-hidden="true" />
+                  </button>
+                  <Link to="/simulacao" className="btn-outline lp-cta">
+                    <Beaker size={20} aria-hidden="true" />
+                    Entrar e explorar laboratórios
+                  </Link>
+                </div>
+                <ul className="lp-hero__trust" role="list">
+                  <li><CheckCircle2 size={18} aria-hidden="true" /> Funciona no navegador</li>
+                  <li><CheckCircle2 size={18} aria-hidden="true" /> Guarda entregas sem internet</li>
+                  <li><CheckCircle2 size={18} aria-hidden="true" /> <Link to="/enem">Testar simulado ENEM TRI</Link></li>
+                </ul>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-                <Logo symbolSize={44} showTagline={false} />
-              </div>
-              <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', color: 'var(--text-main)', marginBottom: '1rem' }}>Aprenda e ensine com atividades práticas</h1>
-
-              <p style={{
-                fontSize: 'clamp(1.05rem, 2.5vw, 1.25rem)',
-                color: 'var(--text-secondary)',
-                maxWidth: '46rem', margin: '0 auto 2.25rem',
-                lineHeight: 1.65,
-                fontFamily: 'var(--font-body)'
-              }}>
-                Estude com atividades práticas, acompanhe sua turma e treine para o ENEM. Escolha seu perfil para acessar as ferramentas de aprendizagem e ensino.
-              </p>
-
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem', justifyContent: 'center', marginBottom: '3.5rem' }}>
-                <button
-                  onClick={onLoginOpen}
-                  className="btn-primary"
-                  style={{ padding: '0.85rem 2rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                >
-                  <LogIn style={{ width: '1.15rem', height: '1.15rem' }} />
-                  Entrar na plataforma
-                  <ArrowRight style={{ width: '1.15rem', height: '1.15rem' }} />
-                </button>
-                <Link
-                  to="/simulacao"
-                  className="btn-secondary"
-                  style={{ padding: '0.85rem 2rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                >
-                  <Beaker style={{ width: '1.15rem', height: '1.15rem' }} />
-                  Entrar e explorar laboratórios
-                </Link>
-                <Link
-                  to="/enem"
-                  className="btn-outline"
-                  style={{ padding: '0.85rem 2rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                >
-                  <GraduationCap style={{ width: '1.15rem', height: '1.15rem' }} />
-                  Testar simulado ENEM TRI
-                </Link>
-              </div>
-
-              {/* Hub Preview for Visitors */}
-              <div style={{ maxWidth: '72rem', margin: '0 auto', textAlign: 'left' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1.25rem', textAlign: 'center' }}>
-                  Conheça os ambientes da plataforma
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1.25rem' }}>
-                  <Link
-                    to="/professor"
-                    className="card card-interactive"
-                    style={{ padding: '1.5rem', borderRadius: '14px', cursor: 'pointer', textDecoration: 'none' }}
-                  >
-                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '10px', background: 'rgba(41, 62, 36, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                      <Users style={{ width: '1.3rem', height: '1.3rem', color: 'var(--color-verde-700)' }} />
+              <div className="lp-demo">
+                <div className="lp-demo__window">
+                  <div className="lp-demo__bar" aria-hidden="true">
+                    <span /><span /><span />
+                    <p>Pêndulo simples · Física · Ensino Médio</p>
+                  </div>
+                  <div className="lp-demo__body">
+                    <div className="lp-demo__stage">
+                      <InteractivePendulum />
+                      <p className="lp-demo__hint">Arraste o pêndulo e solte</p>
                     </div>
-                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Área do professor</h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
-                      Criação de turmas com código de 6 dígitos, planos de aula BNCC com IA e avaliações com correção automática.
-                    </p>
-                  </Link>
-
-                  <Link
-                    to="/estudante"
-                    className="card card-interactive"
-                    style={{ padding: '1.5rem', borderRadius: '14px', cursor: 'pointer', textDecoration: 'none' }}
-                  >
-                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '10px', background: 'rgba(228, 104, 63, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                      <BookOpen style={{ width: '1.3rem', height: '1.3rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+                    <div className="lp-demo__panel" aria-hidden="true">
+                      <p className="lp-demo__label">Variáveis</p>
+                      <div className="lp-demo__var"><span>Comprimento</span><b>1,2 m</b><i style={{ width: '60%' }} /></div>
+                      <div className="lp-demo__var"><span>Gravidade</span><b>9,8 m/s²</b><i style={{ width: '75%' }} /></div>
+                      <div className="lp-demo__var"><span>Massa</span><b>0,5 kg</b><i style={{ width: '35%' }} /></div>
                     </div>
-                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Área do estudante</h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
-                      Mural da turma, atividades de laboratório, simulado ENEM para praticar e conquistas por atividades concluídas.
-                    </p>
-                  </Link>
-
-                  <Link
-                    to="/simulacao"
-                    className="card card-interactive"
-                    style={{ padding: '1.5rem', borderRadius: '14px', textDecoration: 'none' }}
-                  >
-                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '10px', background: 'rgba(41, 62, 36, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                      <Beaker style={{ width: '1.3rem', height: '1.3rem', color: 'var(--color-verde-700)' }} />
-                    </div>
-                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Laboratórios virtuais</h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
-                      Experimentos interativos de mecânica, gravitação, óptica, termodinâmica, eletromagnetismo e matemática prática.
-                    </p>
-                  </Link>
-
-                  <Link
-                    to="/enem"
-                    className="card card-interactive"
-                    style={{ padding: '1.5rem', borderRadius: '14px', textDecoration: 'none' }}
-                  >
-                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '10px', background: 'rgba(23, 35, 20, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                      <GraduationCap style={{ width: '1.3rem', height: '1.3rem', color: 'var(--color-verde-900)' }} />
-                    </div>
-                    <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Simulado ENEM para praticar</h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: 1.55 }}>
-                      Responda às questões e consulte uma nota estimada para orientar seus estudos. O resultado não substitui a nota oficial do exame.
-                    </p>
-                  </Link>
+                  </div>
+                </div>
+                <div className="lp-float lp-float--tutor" aria-hidden="true">
+                  <span className="lp-float__icon"><MessageSquare size={18} /></span>
+                  <div><b>Tutor socrático</b><span>E se você dobrar o comprimento, o período dobra também?</span></div>
+                </div>
+                <div className="lp-float lp-float--xp" aria-hidden="true">
+                  <Trophy size={18} /> <b>+20 XP</b> experimento concluído
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Preview Card with Pendulum */}
-          <section style={{ padding: '2rem 1rem 4rem' }}>
-            <div style={{ maxWidth: '64rem', margin: '0 auto' }}>
-              <div className="card" style={{
-                padding: '2rem',
-                borderRadius: '14px',
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-color)',
-              }}>
-                <div style={{
-                  display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
-                  gap: '2rem', alignItems: 'center',
-                }}>
+          {/* 2. Números reais do catálogo */}
+          <section className="lp-metrics" aria-label="A plataforma em números">
+            <dl className="lp-container lp-metrics__grid">
+              <div><dt>Laboratórios virtuais</dt><dd>{LEARNING_LABS_CATALOG.length}</dd></div>
+              <div><dt>Trilhas de estudo</dt><dd>{new Set(LEARNING_LABS_CATALOG.map(lab => lab.subjectId)).size}</dd></div>
+              <div><dt>Níveis de ensino</dt><dd>{new Set(LEARNING_LABS_CATALOG.map(lab => lab.academicLevel)).size}</dd></div>
+              <div><dt>Perfis de acesso</dt><dd>4</dd></div>
+            </dl>
+          </section>
+
+          {/* 3. Recursos em grade bento */}
+          <section id="recursos" className="lp-section" aria-labelledby="lp-features-title">
+            <div className="lp-container">
+              <header className="lp-section__head">
+                <p className="lp-eyebrow">Recursos</p>
+                <h2 id="lp-features-title" className="lp-section__title">Tudo o que uma turma precisa para aprender fazendo</h2>
+                <p className="lp-section__lead">Da primeira pergunta à nota do simulado, cada ferramenta conversa com a outra.</p>
+              </header>
+              <ul className="lp-bento" role="list">
+                <li className="lp-card lp-card--hero">
+                  <span className="ei-icon-box ei-icon-box--accent" aria-hidden="true"><Beaker size={22} /></span>
+                  <h3>Laboratórios virtuais</h3>
+                  <p>Física, química, biologia, matemática e muito mais. O estudante manipula variáveis, formula hipóteses e registra o que observou no caderno de laboratório.</p>
+                  <ul className="lp-chips" role="list" aria-label="Algumas disciplinas">
+                    {['Física', 'Química', 'Biologia', 'Matemática', 'Geografia', 'História', 'Português', 'Idiomas'].map(subject => <li key={subject}>{subject}</li>)}
+                  </ul>
+                  <Link to="/simulacao" className="lp-link">Ver catálogo completo <ArrowRight size={18} aria-hidden="true" /></Link>
+                </li>
+                <li className="lp-card">
+                  <span className="ei-icon-box" aria-hidden="true"><MessageSquare size={22} /></span>
+                  <h3>Tutor socrático</h3>
+                  <p>Em vez de entregar a resposta, faz perguntas que levam o estudante à própria conclusão.</p>
+                </li>
+                <li className="lp-card">
+                  <span className="ei-icon-box" aria-hidden="true"><GraduationCap size={22} /></span>
+                  <h3>Simulado ENEM</h3>
+                  <p>Treino com nota estimada por um modelo inspirado na TRI, para orientar os estudos.</p>
+                </li>
+                <li className="lp-card">
+                  <span className="ei-icon-box" aria-hidden="true"><Users size={22} /></span>
+                  <h3>Turmas e mural</h3>
+                  <p>Código de acesso, avisos, materiais, plano de aulas e dúvidas num só lugar.</p>
+                </li>
+                <li className="lp-card">
+                  <span className="ei-icon-box" aria-hidden="true"><BarChart3 size={22} /></span>
+                  <h3>Relatórios de aprendizagem</h3>
+                  <p>Entregas, critérios e sinais de apoio para planejar a retomada com cada estudante.</p>
+                </li>
+                <li className="lp-card lp-card--wide">
+                  <span className="ei-icon-box ei-icon-box--accent" aria-hidden="true"><Award size={22} /></span>
                   <div>
-                    <span className="badge badge-primary" style={{ marginBottom: '0.5rem' }}>
-                      Demonstração interativa
-                    </span>
-                    <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-main)', margin: '0.35rem 0 1rem' }}>
-                      Sinta a física em tempo real
-                    </h2>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.65 }}>
-                      Puxe e solte o pêndulo para testar a conservação de energia e a física newtoniana diretamente no seu navegador.
-                    </p>
-                    <Link to="/simulacao" style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                      color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700,
-                    }}>
-                      Acessar todos os laboratórios completos
-                      <ArrowRight style={{ width: '1rem', height: '1rem' }} />
+                    <h3>Conquistas que valorizam o processo</h3>
+                    <p>XP, moedas e certificados reconhecem experimentos concluídos — sem transformar a aprendizagem em competição.</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          {/* 4. Como funciona: Ciclo CSFA */}
+          <section id="como-funciona" className="lp-section lp-section--dark" aria-labelledby="lp-how-title">
+            <svg className="lp-pattern brand-circuit" viewBox="0 0 620 80" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M0 40c30-24 60-24 90 0s60 24 90 0h60l40 30c40-40 90-40 130 0s70 20 90-30h60l30 20" />
+              <circle cx="90" cy="40" r="4" fill="currentColor" /><circle cx="240" cy="40" r="4" fill="currentColor" /><circle cx="560" cy="40" r="4" fill="currentColor" />
+            </svg>
+            <div className="lp-container">
+              <header className="lp-section__head">
+                <p className="lp-eyebrow lp-eyebrow--light">Como funciona</p>
+                <h2 id="lp-how-title" className="lp-section__title">O Ciclo CSFA: três nós, como no nosso símbolo</h2>
+                <p className="lp-section__lead">Uma metodologia que une Sócrates, Aristóteles, Freire e o Desenho Universal para a Aprendizagem.</p>
+              </header>
+              <ol className="lp-steps">
+                {[
+                  { n: '01', title: 'Provocação', text: 'Uma pergunta real abre o tema e desperta a curiosidade antes de qualquer fórmula.', icon: Compass },
+                  { n: '02', title: 'Experimentação', text: 'No laboratório virtual, o estudante muda variáveis, observa e testa as próprias hipóteses.', icon: Beaker },
+                  { n: '03', title: 'Maiêutica', text: 'O tutor e o professor fazem perguntas que conduzem à conclusão — construída, não decorada.', icon: MessageSquare },
+                ].map(step => (
+                  <li key={step.n} className="lp-step">
+                    <span className="lp-step__node" aria-hidden="true" />
+                    <span className="lp-step__n" aria-hidden="true">{step.n}</span>
+                    <step.icon size={24} aria-hidden="true" className="lp-step__icon" />
+                    <h3>{step.title}</h3>
+                    <p>{step.text}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </section>
+
+          {/* 5. Para quem */}
+          <section id="para-quem" className="lp-section" aria-labelledby="landing-areas-title">
+            <div className="lp-container">
+              <header className="lp-section__head">
+                <p className="lp-eyebrow">Para quem</p>
+                <h2 id="landing-areas-title" className="lp-section__title">Conheça os ambientes da plataforma</h2>
+                <p className="lp-section__lead">Cada perfil tem um espaço próprio, com as ferramentas certas para estudar, ensinar e acompanhar.</p>
+              </header>
+              <ul className="lp-audience" role="list">
+                {[
+                  { to: '/estudante', icon: BookOpen, title: 'Área do estudante', points: ['Atividades e avisos da turma', 'Laboratórios do seu nível', 'Simulado ENEM e conquistas'] },
+                  { to: '/professor', icon: Users, title: 'Área do professor', points: ['Turmas com código de acesso', 'Planos de aula alinhados à BNCC', 'Avaliações com correção automática'] },
+                  { to: '/coordenacao', icon: Building2, title: 'Área da coordenação', points: ['Turmas vinculadas ao seu perfil', 'Entregas e critérios reais', 'Relatórios exportáveis'] },
+                  { to: '/simulacao', icon: Beaker, title: 'Laboratórios virtuais', points: ['Catálogo por nível e disciplina', 'Caderno de laboratório', 'Atividades guiadas passo a passo'] },
+                ].map(({ to, icon: Icon, title, points }) => (
+                  <li key={to}>
+                    <Link to={to} className="lp-audience__card card card-interactive">
+                      <span className="ei-icon-box ei-icon-box--accent" aria-hidden="true"><Icon size={22} /></span>
+                      <h3>{title}</h3>
+                      <ul role="list">
+                        {points.map(point => <li key={point}><CheckCircle2 size={16} aria-hidden="true" />{point}</li>)}
+                      </ul>
+                      <span className="lp-link" aria-hidden="true">Acessar <ArrowRight size={18} /></span>
                     </Link>
-                  </div>
-                  <div style={{
-                    height: '12rem', borderRadius: '10px',
-                    background: 'rgba(41, 62, 36, 0.03)',
-                    border: '1px solid var(--border-color)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    padding: '1rem',
-                    boxSizing: 'border-box'
-                  }}>
-                    <InteractivePendulum />
-                  </div>
-                </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          {/* 6. Acessibilidade como pilar */}
+          <section id="acessibilidade" className="lp-section lp-section--paper" aria-labelledby="landing-a11y-title">
+            <div className="lp-container lp-a11y">
+              <div>
+                <p className="lp-eyebrow"><Accessibility size={16} aria-hidden="true" /> Desenho Universal para a Aprendizagem</p>
+                <h2 id="landing-a11y-title" className="lp-section__title">Acessível desde o primeiro clique</h2>
+                <p className="lp-section__lead">
+                  Ajuste a plataforma ao seu jeito de ler e aprender pelo botão <strong>Opções de acessibilidade</strong>, no topo da página. Suas escolhas ficam salvas neste navegador.
+                </p>
+              </div>
+              <ul className="lp-a11y__grid" role="list">
+                {[
+                  { icon: Type, title: 'Texto do seu tamanho', text: 'Até 130%, fonte de leitura facilitada e espaçamento ampliado.' },
+                  { icon: Volume2, title: 'Leitura em voz alta', text: 'Ouça a página inteira ou só o trecho selecionado.' },
+                  { icon: Keyboard, title: 'Tudo pelo teclado', text: 'Foco sempre visível e busca rápida com Ctrl+K.' },
+                  { icon: Eye, title: 'Menos distrações', text: 'Remove animações para quem precisa de calma visual.' },
+                  { icon: Contrast, title: 'Alto contraste', text: 'Textos de apoio e contornos reforçados.' },
+                  { icon: Moon, title: 'Tema claro ou escuro', text: 'Segue a preferência do seu sistema.' },
+                ].map(({ icon: Icon, title, text }) => (
+                  <li key={title}>
+                    <span className="ei-icon-box" aria-hidden="true"><Icon size={20} /></span>
+                    <div><strong>{title}</strong><span>{text}</span></div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          {/* 7. Perguntas frequentes */}
+          <section id="perguntas" className="lp-section" aria-labelledby="lp-faq-title">
+            <div className="lp-container lp-faq">
+              <header className="lp-section__head">
+                <p className="lp-eyebrow">Perguntas</p>
+                <h2 id="lp-faq-title" className="lp-section__title">Perguntas frequentes</h2>
+              </header>
+              <div className="lp-faq__list">
+                {[
+                  { q: 'Preciso instalar alguma coisa?', a: 'Não. A plataforma funciona no navegador do computador, tablet ou celular. Os laboratórios rodam direto na página.' },
+                  { q: 'Quem pode usar?', a: 'Estudantes, professores e coordenação, cada um com seu próprio perfil e painel. As famílias acompanham pelo Portal da família, com o convite enviado pela escola.' },
+                  { q: 'A nota do simulado ENEM é oficial?', a: 'Não. O treino usa um modelo próprio inspirado na TRI para orientar os estudos. Ele não substitui a nota oficial do INEP.' },
+                  { q: 'E se a internet cair durante uma atividade?', a: 'As entregas ficam guardadas neste dispositivo e são enviadas quando a conexão voltar. O selo no topo mostra o que ainda aguarda envio.' },
+                  { q: 'Como os dados dos estudantes são tratados?', a: 'Cada perfil vê apenas o que lhe foi autorizado. Consulte a página Privacidade e seus dados para detalhes e solicitações.' },
+                ].map(item => (
+                  <details key={item.q} className="lp-faq__item">
+                    <summary>{item.q}<ChevronDown size={20} aria-hidden="true" /></summary>
+                    <p>{item.a}</p>
+                  </details>
+                ))}
               </div>
             </div>
           </section>
-        </>
+
+          {/* 8. Chamada final */}
+          <section className="lp-final" aria-labelledby="lp-final-title">
+            <div className="lp-container lp-final__box">
+              <Logo variant="symbol-only" symbolSize={56} colorMode="negative" />
+              <h2 id="lp-final-title">Raiz e circuito, sempre juntos.</h2>
+              <p>Comece agora: entre com seu perfil ou explore os laboratórios.</p>
+              <div className="lp-hero__actions" style={{ justifyContent: 'center' }}>
+                <button type="button" onClick={onLoginOpen} className="btn-primary lp-cta">Começar agora <ArrowRight size={20} aria-hidden="true" /></button>
+                <Link to="/simulacao" className="btn-secondary btn-on-dark lp-cta"><Beaker size={20} aria-hidden="true" /> Explorar laboratórios</Link>
+              </div>
+            </div>
+          </section>
+        </div>
       )}
     </div>
   );

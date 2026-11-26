@@ -1,9 +1,7 @@
 import { useNavigationParams } from '../hooks/useNavigationParams';
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import {
-  Play, Pause, RotateCcw, ArrowLeft, Home as HomeIcon,
-  ChevronDown, ChevronUp, HelpCircle, Settings2, Search
-} from 'lucide-react';
+import { Play, Pause, RotateCcw, ArrowLeft, Home as HomeIcon, ChevronDown, ChevronUp, HelpCircle, Settings2, Search, Target } from 'lucide-react';
+import { SubjectIcon } from '../components/common/SubjectIcon';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { useStudentLabCompletion } from '../../core/hooks/useStudentLabCompletion';
@@ -546,16 +544,22 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
   const frequency = (1 / (2 * Math.PI * Math.sqrt((length / 100) / gravity))).toFixed(2);
 
   return (
-    <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '80rem', margin: '0 auto' }}>
+    <div className="fade-in ei-page">
       {!embedded && <>
         <nav aria-label="Navegação dos laboratórios" style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
           <Link to="/" className="btn-outline"><HomeIcon size={16} /> Página inicial</Link>
           <Link to={getReturnDestination(userData?.role, searchParams.get('returnTo'))} className="btn-outline"><ArrowLeft size={16} /> {searchParams.get('returnTo') ? 'Voltar à tela anterior' : userData?.role === 'estudante' ? 'Meu aprendizado' : 'Voltar ao meu painel'}</Link>
           {selectedLab && <button type="button" className="btn-outline" onClick={() => setSearchParams(previous => { const next = new URLSearchParams(previous); next.delete('lab'); return next; })}>Voltar ao catálogo</button>}
         </nav>
-        <header style={{ marginBottom: '1.25rem' }}>
-          <h1 style={{ color: 'var(--text-main)', marginBottom: '0.4rem' }}>Laboratórios por nível de aprendizagem</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Escolha seu nível, a disciplina e a atividade. O catálogo reúne {LEARNING_LABS_CATALOG.length} laboratórios.</p>
+        <header className="ei-page-header">
+          <div>
+            <p className="ei-page-header__eyebrow">Experimentação</p>
+            <h1>Laboratórios por nível de aprendizagem</h1>
+            <p>Escolha seu nível, a disciplina e a atividade. O catálogo reúne {LEARNING_LABS_CATALOG.length} laboratórios.</p>
+          </div>
+          <div className="ei-page-header__stats">
+            <div className="ei-stat"><span className="ei-stat__label">Laboratórios</span><span className="ei-stat__value">{LEARNING_LABS_CATALOG.length}</span></div>
+          </div>
         </header>
         <section aria-label="Catálogo de laboratórios" className="glass-card lab-catalog" style={{ marginBottom: '1.5rem' }}>
           <div className="lab-catalog__heading">
@@ -585,11 +589,11 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
           {showCatalogExplorer && <>
             <p role="status" className="lab-catalog__result-count"><strong>{filteredLabs.length + customResults.length}</strong> atividades em {learningLevelLabel(catalogLevel)}.</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 270px), 1fr))', gap: '0.85rem', maxHeight: '500px', overflowY: 'auto', padding: '0.2rem' }}>
-              {[...customResults, ...filteredLabs].map(lab => <article key={lab.id} aria-label={lab.title} data-lab-id={lab.id} data-academic-level={lab.academicLevel} className="lab-catalog-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {[...customResults, ...filteredLabs].map(lab => <article key={lab.id} aria-label={lab.title} data-lab-id={lab.id} data-academic-level={lab.academicLevel} className="lab-catalog-card card card-interactive" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                 {/* A área inteira do card abre a atividade e recebe foco pelo teclado. */}
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{learningLevelLabel(lab.academicLevel)} · {lab.subject}</span>
-                <h2 className="lab-catalog-card__title" style={{ fontSize: '1rem', margin: 0 }}>{lab.icon} {lab.title}</h2>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{lab.topic}</p>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-secondary)', fontSize: '0.8125rem', fontWeight: 600 }}><span className="ei-icon-box ei-icon-box--accent" style={{ width: '2.25rem', height: '2.25rem' }}><SubjectIcon subject={lab.subject} size={18} /></span>{learningLevelLabel(lab.academicLevel)} · {lab.subject}</span>
+                <h3 className="lab-catalog-card__title" style={{ fontSize: '1.0625rem', margin: 0 }}>{lab.title}</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem', margin: 0 }}>{lab.topic}</p>
                 <button type="button" className="lab-catalog-card__action" aria-label={`Abrir ${lab.title}`} onClick={() => openLab(lab)} />
               </article>)}
             </div>
@@ -619,7 +623,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }} onClick={() => setShowMission(!showMission)}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <span style={{ fontSize: '1.3rem' }}>🎯</span>
+              <Target size={22} aria-hidden="true" style={{ color: 'var(--color-primary-accessible)' }} />
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)' }}>
@@ -651,7 +655,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
             <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
               {/* Steps */}
               <div style={{ marginBottom: '1.25rem' }}>
-                <strong style={{ fontSize: '0.85rem', color: 'var(--color-primary-accessible, #B8441F)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--color-primary-accessible, #A63D1B)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Passo a passo investigativo no laboratório:
                 </strong>
                 <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.25rem', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6 }}>
@@ -705,7 +709,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
                         <span style={{
                           fontWeight: 700,
                           minWidth: '1.2rem',
-                          color: isSelected ? 'var(--color-primary, #E4683F)' : 'var(--color-primary-accessible, #B8441F)'
+                          color: isSelected ? 'var(--color-primary, #E4683F)' : 'var(--color-primary-accessible, #A63D1B)'
                         }}>
                           {String.fromCharCode(65 + optIdx)})
                         </span>
@@ -754,12 +758,12 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
                       const isCorrect = LAB_MISSIONS[activeTab].options[selectedMissionOption].correct;
                       if (isCorrect) {
                         setMissionCompleted(true);
-                        setMissionFeedback('🎉 Excelente dedução científica! Sua resposta está correta e comprova a relação observada no simulador.');
+                        setMissionFeedback('Excelente dedução científica! Sua resposta está correta e comprova a relação observada no simulador.');
                         if (onComplete) {
                           onComplete(100);
                         }
                       } else {
-                        setMissionFeedback(`💡 Não exatamente. Dica: ${LAB_MISSIONS[activeTab].hint}`);
+                        setMissionFeedback(`Não exatamente. Dica: ${LAB_MISSIONS[activeTab].hint}`);
                       }
                     }}
                   >
@@ -801,7 +805,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="glass-card" style={{ padding: '1.5rem' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Settings2 style={{ width: '1.15rem', height: '1.15rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+                <Settings2 style={{ width: '1.15rem', height: '1.15rem', color: 'var(--color-primary-accessible, #A63D1B)' }} />
                 Variáveis Físicas
               </h3>
 
@@ -897,7 +901,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
 
           <div className="glass-card" style={{ padding: '1.5rem' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Settings2 style={{ width: '1.15rem', height: '1.15rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+              <Settings2 style={{ width: '1.15rem', height: '1.15rem', color: 'var(--color-primary-accessible, #A63D1B)' }} />
               Dinâmica de Colisões
             </h3>
 
@@ -916,7 +920,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                   <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Massa M1 (Laranja)</label>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--color-primary-accessible, #B8441F)' }}>{balls[0].mass.toFixed(1)}</span>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--color-primary-accessible, #A63D1B)' }}>{balls[0].mass.toFixed(1)}</span>
                 </div>
                 <input type="range" min="0.5" max="3" step="0.5"
                   value={balls[0].mass}
@@ -1016,7 +1020,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
 
               <div style={{ marginTop: '1rem', textAlign: 'center' }}>
                 {isTotalInternalReflection ? (
-                  <span className="badge badge-red">⚠️ Reflexão total interna ocorrida!</span>
+                  <span className="badge badge-red">Reflexão total interna ocorrida!</span>
                 ) : (
                   <span className="badge badge-primary">Ângulo de refração θ₂ = {refractedAngle.toFixed(1)}° (Lei de Snell-Descartes)</span>
                 )}
@@ -1031,7 +1035,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
                 <div>
                   <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Índice de refração Meio 1 (n₁)</label>
                   <input type="range" min="1.0" max="2.5" step="0.1" value={refractionIndex1} onChange={e => setRefractionIndex1(Number(e.target.value))} />
-                  <span style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)' }}>{refractionIndex1.toFixed(2)}</span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #A63D1B)' }}>{refractionIndex1.toFixed(2)}</span>
                 </div>
                 <div>
                   <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Índice de refração Meio 2 (n₂)</label>
@@ -1041,7 +1045,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
                 <div>
                   <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Ângulo incidente (θ₁)</label>
                   <input type="range" min="0" max="85" value={incidentAngle} onChange={e => setIncidentAngle(Number(e.target.value))} />
-                  <span style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #B8441F)' }}>{incidentAngle}°</span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--color-primary-accessible, #A63D1B)' }}>{incidentAngle}°</span>
                 </div>
               </div>
             </div>
@@ -1053,7 +1057,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
       {activeTab === 'electromagnetism' && (
         <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
           <div>
-            <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🧲 Eletromagnetismo — Força de Lorentz</h3>
+            <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>Eletromagnetismo — Força de Lorentz</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Exemplo de elétron com velocidade perpendicular a um campo magnético uniforme: r = mv / (|q|B). A figura é esquemática, sem escala; se houver velocidade paralela ao campo, a trajetória pode ser helicoidal.</p>
             <div className="lab-canvas-container" style={{ width: '100%', height: '280px', background: '#FAF7EE', borderRadius: 'var(--radius-sm, 10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2D7C3', position: 'relative' }}>
               <svg width="300" height="220" viewBox="0 0 300 220">
@@ -1069,7 +1073,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
             <h4 style={{ color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>Variáveis Magnéticas</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
               <div>Campo Magnético (B): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>0.5 T</strong></div>
-              <div>Carga Elétrica (q): <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>−1,6 × 10⁻¹⁹ C</strong></div>
+              <div>Carga Elétrica (q): <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>−1,6 × 10⁻¹⁹ C</strong></div>
               <div>Massa (m): <strong style={{ color: 'var(--text-main)' }}>9.1 × 10⁻³¹ kg</strong></div>
               <div>Velocidade (v): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>2.0 × 10⁶ m/s</strong></div>
               <div>Raio calculado: <strong>2,28 × 10⁻⁵ m</strong></div>
@@ -1082,7 +1086,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
       {activeTab === 'thermodynamics' && (
         <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
           <div>
-            <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🔥 Termodinâmica — Equação dos Gases Ideais</h3>
+            <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>Termodinâmica — Equação dos Gases Ideais</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Relação entre Pressão (P), Volume (V) e Temperatura (T) no modelo ideal P · V = n · R · T.</p>
             <div className="lab-canvas-container" style={{ width: '100%', height: '280px', background: '#FAF7EE', borderRadius: 'var(--radius-sm, 10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2D7C3' }}>
               <div style={{ width: '140px', height: '180px', border: '3px solid var(--color-danger, #BC391F)', borderTop: 'none', position: 'relative', background: 'rgba(188,57,31,0.05)' }}>
@@ -1091,7 +1095,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-danger, #BC391F)' }} />
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary, #E4683F)' }} />
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-verde-700, #293E24)' }} />
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary-accessible, #B8441F)' }} />
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary-accessible, #A63D1B)' }} />
                 </div>
               </div>
             </div>
@@ -1101,7 +1105,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
               <div>Pressão (P): <strong style={{ color: 'var(--color-danger, #BC391F)' }}>1.5 atm</strong></div>
               <div>Volume (V): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>2.0 L</strong></div>
-              <div>Temperatura (T): <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>300 K (27°C)</strong></div>
+              <div>Temperatura (T): <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>300 K (27°C)</strong></div>
               <div>Quantidade de Matéria (n): <strong style={{ color: 'var(--color-verde-700, #293E24)' }}>≈ 0,122 mol</strong></div>
               <div>n = PV/(RT), com R = 0,08206 L·atm/(mol·K).</div>
             </div>
@@ -1113,7 +1117,7 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
       {activeTab === 'modern_physics' && (
         <div className="fade-in glass-card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
           <div>
-            <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>⚛️ Física Moderna — Efeito Fotoelétrico</h3>
+            <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>Física Moderna — Efeito Fotoelétrico</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Fótons incidentes com energia E = h · f ejetam fotoelétrons com energia cinética K_máx = hf - Φ.</p>
             <div className="lab-canvas-container" style={{ width: '100%', height: '280px', background: '#FAF7EE', borderRadius: 'var(--radius-sm, 10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2D7C3' }}>
               <svg width="320" height="200" viewBox="0 0 320 200">
@@ -1121,10 +1125,10 @@ export const Simulacao: React.FC<SimulacaoProps> = ({ mode, labId, labTitle, onC
                 <text x="50" y="175" textAnchor="middle" fill="#172314" fontSize="11" fontWeight="700">Placa (Catodo)</text>
                 <path d="M 120,40 L 55,90" stroke="var(--color-primary, #E4683F)" strokeWidth="2.5" strokeDasharray="4 2" />
                 <path d="M 140,60 L 55,105" stroke="var(--color-primary, #E4683F)" strokeWidth="2.5" strokeDasharray="4 2" />
-                <text x="135" y="45" fill="var(--color-primary-accessible, #B8441F)" fontSize="11" fontWeight="bold">h·f (Fótons)</text>
+                <text x="135" y="45" fill="var(--color-primary-accessible, #A63D1B)" fontSize="11" fontWeight="bold">h·f (Fótons)</text>
                 <circle cx="160" cy="95" r="7" fill="var(--color-primary, #E4683F)" />
                 <line x1="60" y1="95" x2="154" y2="95" stroke="var(--color-primary, #E4683F)" strokeWidth="2" strokeDasharray="3 2" />
-                <text x="180" y="99" fill="var(--color-primary-accessible, #B8441F)" fontSize="11" fontWeight="bold">e⁻ (Fotoelétron)</text>
+                <text x="180" y="99" fill="var(--color-primary-accessible, #A63D1B)" fontSize="11" fontWeight="bold">e⁻ (Fotoelétron)</text>
               </svg>
             </div>
           </div>

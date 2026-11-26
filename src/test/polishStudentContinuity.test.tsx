@@ -55,7 +55,7 @@ describe('continuidade da matrícula e entregas de provas', () => {
     await screen.findByText(/Não foi possível consultar seu histórico de provas/);
     expect(screen.getByRole('button', { name: 'Histórico indisponível' })).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: 'Consultar histórico novamente' }));
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Realizar Prova 📝' })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Realizar Prova' })).toBeEnabled());
     expect(fixtures.deliver).not.toHaveBeenCalled();
   });
   it('limpa a turma perdida e ignora callback atrasado de sua assinatura', async () => {

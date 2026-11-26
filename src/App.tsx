@@ -58,13 +58,23 @@ function LoginDestination({ destination, onComplete }: { destination: string; on
 }
 
 function App() {
+  // Manual v1.1, seção 09: sem escolha salva, o tema segue o sistema operacional.
+  // Sem preferência declarada, vale o padrão da marca (Nude).
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    try { return localStorage.getItem('edu-theme') === 'light' ? 'light' : 'dark'; } catch { return 'dark'; }
+    try {
+      const saved = localStorage.getItem('edu-theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch { /* segue para a preferência do sistema */ }
+    try { return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { return 'light'; }
   });
   const [loginOpen, setLoginOpen] = useState(false);
   const openLogin = useCallback(() => setLoginOpen(true), []);
   const closeLogin = useCallback(() => setLoginOpen(false), []);
-  useEffect(() => { try { localStorage.setItem('edu-theme', theme); } catch { /* theme still works in memory */ } }, [theme]);
+  useEffect(() => {
+    // color-scheme faz barras de rolagem, seletores e campos nativos seguirem o tema
+    document.documentElement.style.colorScheme = theme;
+    try { localStorage.setItem('edu-theme', theme); } catch { /* theme still works in memory */ }
+  }, [theme]);
 
   const toggleTheme = () => {
     setTheme(t => t === 'light' ? 'dark' : 'light');

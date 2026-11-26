@@ -70,7 +70,7 @@ export function HistoryTimeline({ mode = 'timeline', labTitle, onComplete }: { m
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🌍 {labTitle || 'Linha do Tempo — História'}</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>{labTitle || 'Linha do Tempo — História'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>Explore os marcos históricos. Clique em um evento para ver detalhes.</p>
 
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
@@ -78,7 +78,7 @@ export function HistoryTimeline({ mode = 'timeline', labTitle, onComplete }: { m
           <button key={c} onClick={() => setFilter(c)}
             style={{ padding: '0.35rem 0.8rem', borderRadius: '20px', border: 'none', cursor: 'pointer',
               background: filter === c ? 'var(--color-primary)' : 'var(--bg-secondary)',
-              color: filter === c ? 'white' : 'var(--text-secondary)', fontSize: '0.82rem', fontWeight: filter === c ? 'bold' : 'normal' }}>
+              color: filter === c ? 'var(--color-on-primary, #172314)' : 'var(--text-secondary)', fontSize: '0.82rem', fontWeight: filter === c ? 'bold' : 'normal' }}>
             {c}
           </button>
         ))}
@@ -139,12 +139,12 @@ export function HistoryTimeline({ mode = 'timeline', labTitle, onComplete }: { m
         </div>
       ) : (
         <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
-          👆 Clique em um ponto da linha do tempo para ver os detalhes do evento.
+          Clique em um ponto da linha do tempo para ver os detalhes do evento.
         </div>
       )}
       {/* AI Historical Insight Box */}
       <div style={{ marginTop: '1.25rem', padding: '1rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-        <div style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.25rem' }}>Contextualização do roteiro</div>
+        <div style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.25rem' }}>Contextualização do roteiro</div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
           {selected 
             ? `Evento "${selected.label}" (${selected.year}): Note as relações de causa e efeito com o cenário geopolítico mundial.`

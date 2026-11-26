@@ -73,7 +73,7 @@ export function EssayModule({ mode = 'structure', labTitle, onComplete }: { mode
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>✍️ {labTitle || config.title}</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>{labTitle || config.title}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>{config.description}</p>
       <p>A análise é uma estimativa de prática. Sem IA disponível, critérios locais de palavras e estrutura oferecem orientações limitadas; não avaliam integralmente as competências nem produzem uma nota oficial.</p>{error&&<p role="alert">{error}</p>}
 
@@ -86,7 +86,7 @@ export function EssayModule({ mode = 'structure', labTitle, onComplete }: { mode
             border: config.focusCompetencias.includes(c.id) ? '1.5px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color)',
           }}>
             <div style={{ color: config.focusCompetencias.includes(c.id) ? 'var(--color-primary-accessible, #E4683F)' : 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700 }}>
-              {config.focusCompetencias.includes(c.id) ? '⭐ ' : ''}C{c.id} — {c.name}
+              {config.focusCompetencias.includes(c.id) ? 'Foco · ' : ''}C{c.id} — {c.name}
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', marginTop: '0.2rem' }}>{c.desc}</div>
           </div>
@@ -109,7 +109,7 @@ export function EssayModule({ mode = 'structure', labTitle, onComplete }: { mode
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem', marginBottom: '1rem' }}>
         <span style={{ color: wordCount < 40 ? '#f44336' : wordCount > 200 ? '#4caf50' : '#ffa726', fontSize: '0.85rem' }}>
-          {wordCount} palavras {wordCount < 40 ? '(mínimo 40 para análise)' : wordCount > 200 ? '✅ Tamanho adequado' : '(tente chegar a 200+)'}
+          {wordCount} palavras {wordCount < 40 ? '(mínimo 40 para análise)' : wordCount > 200 ? 'Tamanho adequado' : '(tente chegar a 200+)'}
         </span>
         <button onClick={analyzeEssay} disabled={wordCount < 40 || loading}
           style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', background: wordCount >= 40 ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
@@ -127,7 +127,7 @@ export function EssayModule({ mode = 'structure', labTitle, onComplete }: { mode
             <div>
               <div style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>Estimativa de prática / 1000 · {feedback.source==='gemini'?'Gemini':'Critérios locais'}</div>
               <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                {feedback.score >= 800 ? '🏆 Excelente! Texto bem elaborado.' : feedback.score >= 500 ? '📈 Bom potencial, com pontos a melhorar.' : '📚 Revise os fundamentos da dissertação argumentativa.'}
+                {feedback.score >= 800 ? 'Excelente! Texto bem elaborado.' : feedback.score >= 500 ? 'Bom potencial, com pontos a melhorar.' : 'Revise os fundamentos da dissertação argumentativa.'}
               </div>
             </div>
           </div>

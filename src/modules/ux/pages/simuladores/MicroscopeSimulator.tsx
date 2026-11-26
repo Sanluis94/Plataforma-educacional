@@ -341,7 +341,7 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
 
   return (
     <div onChangeCapture={() => setInteracted(true)} onClickCapture={event => { if ((event.target as HTMLElement).closest('button')) setInteracted(true); }} style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🔬 {labTitle || 'Laboratório de Biologia Virtual'}</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>{labTitle || 'Laboratório de Biologia Virtual'}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
         {mode === 'microscopy' ? 'Compare esquemas de células eucarióticas e procarióticas. As ilustrações não são micrografias nem estão em escala.' :
          mode === 'genetics' ? 'Esquema de células do sangue como apoio. A aparência das células não revela, sozinha, genótipos ou probabilidades de herança; investigue esses dados no roteiro.' :
@@ -381,7 +381,7 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
                   style={{
                     padding: '0.4rem', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '0.85rem',
                     background: zoom === z ? 'var(--color-primary)' : 'rgba(255,255,255,0.05)',
-                    color: zoom === z ? 'white' : 'var(--text-secondary)',
+                    color: zoom === z ? 'var(--color-on-primary, #172314)' : 'var(--text-secondary)',
                     fontWeight: zoom === z ? 'bold' : 'normal', transition: 'all 0.2s',
                   }}>
                   {z}× — {z === 10 ? 'Varredura' : z === 40 ? 'Baixo' : z === 100 ? 'Médio' : 'Alto'}
@@ -398,7 +398,7 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
             <input type="range" aria-label="Foco gráfico do esquema" min="-10" max="10" value={focusOffset} onChange={e => setFocusOffset(Number(e.target.value))}
               style={{ width: '100%', accentColor: 'var(--color-primary)', cursor: 'pointer' }} />
             <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-              {Math.abs(focusOffset) < 2 ? '✅ Foco Nítido' : Math.abs(focusOffset) < 5 ? '⚠️ Levemente desfocado' : '❌ Desfocado'}
+              {Math.abs(focusOffset) < 2 ? 'Foco Nítido' : Math.abs(focusOffset) < 5 ? 'Levemente desfocado' : 'Desfocado'}
             </div>
           </div>
         </div>
@@ -453,7 +453,7 @@ export function MicroscopeSimulator({ mode = 'microscopy', labTitle, onComplete 
 
             {/* AI Diagnostics Box */}
             <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-              <div style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, marginBottom: '0.2rem' }}>Orientação de observação</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, marginBottom: '0.2rem' }}>Orientação de observação</div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
                 {focusOffset === 0 
                   ? `O desenho de ${selectedSlide.name} está nítido nesta ampliação gráfica de ${zoom}×.`

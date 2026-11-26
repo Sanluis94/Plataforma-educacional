@@ -150,7 +150,7 @@ describe('trilha do estudante por nível de aprendizado', () => {
     renderStudent('/estudante?lab=math_3&tab=labs');
     await screen.findByTestId('legacy-bench');
     fireEvent.click(screen.getByRole('button', { name: /Plano de Aulas/ }));
-    expect(screen.getByText('📅 Cronograma & Plano de Aulas da Turma')).toBeInTheDocument();
+    expect(screen.getByText('Cronograma & Plano de Aulas da Turma')).toBeInTheDocument();
     expect(screen.queryByTestId('legacy-bench')).not.toBeInTheDocument();
   });
 
@@ -161,7 +161,7 @@ describe('trilha do estudante por nível de aprendizado', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Histórico anterior' }));
     expect(screen.getByRole('combobox', { name: 'Nível de aprendizado' })).toBeInTheDocument();
     expect(screen.getByTestId('panel-url')).toHaveTextContent('/estudante');
-    expect(screen.queryByText('📅 Cronograma & Plano de Aulas da Turma')).not.toBeInTheDocument();
+    expect(screen.queryByText('Cronograma & Plano de Aulas da Turma')).not.toBeInTheDocument();
   });
 
   it('preserva a turma e a subaba LMS nos links de retorno', async () => {

@@ -25,22 +25,7 @@ export function PricingModal({ onClose }: PricingModalProps) {
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'var(--bg-overlay)',
-        backdropFilter: 'blur(8px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '1rem'
-      }}
-      onClick={onClose}
+    <div className="ei-overlay" onClick={onClose}
     >
       <div
         ref={dialogRef}
@@ -49,18 +34,8 @@ export function PricingModal({ onClose }: PricingModalProps) {
         aria-modal="true"
         aria-labelledby="pricing-title"
         aria-describedby="pricing-demo"
-        className="card slide-down"
+        className="ei-modal ei-modal--wide"
         onClick={e => e.stopPropagation()}
-        style={{
-          width: '100%',
-          maxWidth: '860px',
-          borderRadius: '14px',
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
-          padding: 'clamp(1rem, 4vw, 2rem)',
-          maxHeight: '92vh',
-          overflowY: 'auto'
-        }}
       >
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '1.5rem' }}>
@@ -113,7 +88,7 @@ export function PricingModal({ onClose }: PricingModalProps) {
                 fontWeight: 700,
                 border: 'none',
                 background: billingCycle === 'mensal' ? 'var(--color-primary)' : 'transparent',
-                color: billingCycle === 'mensal' ? '#FFFFFF' : 'var(--text-secondary)',
+                color: billingCycle === 'mensal' ? 'var(--color-on-primary, #172314)' : 'var(--text-secondary)',
                 cursor: 'pointer',
                 transition: 'all 0.2s'
               }}
@@ -130,7 +105,7 @@ export function PricingModal({ onClose }: PricingModalProps) {
                 fontWeight: 700,
                 border: 'none',
                 background: billingCycle === 'anual' ? 'var(--color-primary)' : 'transparent',
-                color: billingCycle === 'anual' ? '#FFFFFF' : 'var(--text-secondary)',
+                color: billingCycle === 'anual' ? 'var(--color-on-primary, #172314)' : 'var(--text-secondary)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -210,14 +185,14 @@ export function PricingModal({ onClose }: PricingModalProps) {
               padding: '0.2rem 0.65rem',
               borderRadius: '8px',
               background: 'var(--color-primary)',
-              color: '#FFFFFF',
+              color: 'var(--color-on-primary, #172314)',
               fontWeight: 700,
               fontSize: '0.72rem'
             }}>
               Mais popular
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.8rem', marginBottom: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, fontSize: '0.8rem', marginBottom: '0.5rem' }}>
                 <Building2 style={{ width: '0.95rem', height: '0.95rem' }} /> B2B • Colégios
               </div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
@@ -340,7 +315,7 @@ export function PricingModal({ onClose }: PricingModalProps) {
 
             <div style={{ padding: '0.75rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Investimento anual Edu-Interact:</span>
-              <strong style={{ fontSize: '1.15rem', color: 'var(--color-primary-accessible, #B8441F)', display: 'block' }}>
+              <strong style={{ fontSize: '1.15rem', color: 'var(--color-primary-accessible, #A63D1B)', display: 'block' }}>
                 {formatarMoeda(custoPlataformaAno)}
               </strong>
             </div>

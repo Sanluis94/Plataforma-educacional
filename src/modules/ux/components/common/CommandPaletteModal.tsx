@@ -198,10 +198,10 @@ export function CommandPaletteModal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 100,
-        background: 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
+        zIndex: 1000,
+        background: 'rgba(13, 21, 11, 0.55)',
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
@@ -219,10 +219,11 @@ export function CommandPaletteModal({
         style={{
           width: '100%',
           maxWidth: '640px',
-          background: 'var(--bg-card, #FAF7EE)',
-          border: '1px solid var(--border-color, #E2D7C3)',
-          borderRadius: '16px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+          background: 'var(--bg-elevated)',
+          border: '1px solid var(--border-card)',
+          borderRadius: 'var(--radius-xl)',
+          boxShadow: 'var(--shadow-lg)',
+          animation: 'ei-pop 0.28s var(--ease-out) both',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -237,7 +238,7 @@ export function CommandPaletteModal({
             padding: '1rem 1.25rem',
             borderBottom: '1px solid var(--border-color, #E2D7C3)',
             gap: '0.75rem',
-            background: 'var(--bg-surface, #F1EAD9)'
+            background: 'var(--bg-card)'
           }}
         >
           <Search style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary, #E4683F)' }} />
@@ -338,7 +339,7 @@ export function CommandPaletteModal({
                     cursor: 'pointer',
                     transition: 'all 0.1s ease',
                     color: isSelected
-                      ? 'var(--color-primary-accessible, #B8441F)'
+                      ? 'var(--color-primary-accessible, #A63D1B)'
                       : 'var(--text-main, #172314)'
                   }}
                 >
@@ -372,7 +373,7 @@ export function CommandPaletteModal({
                               padding: '0.1rem 0.4rem',
                               borderRadius: '4px',
                               background: 'rgba(228, 104, 63, 0.15)',
-                              color: 'var(--color-primary-accessible, #B8441F)',
+                              color: 'var(--color-primary-accessible, #A63D1B)',
                               fontWeight: 800
                             }}
                           >
@@ -384,7 +385,7 @@ export function CommandPaletteModal({
                         style={{
                           fontSize: '0.78rem',
                           color: isSelected
-                            ? 'var(--color-primary-accessible, #B8441F)'
+                            ? 'var(--color-primary-accessible, #A63D1B)'
                             : 'var(--text-muted, #556B51)',
                           display: 'block',
                           marginTop: '0.1rem'
@@ -404,7 +405,7 @@ export function CommandPaletteModal({
                           gap: '0.2rem',
                           fontSize: '0.72rem',
                           fontWeight: 700,
-                          color: 'var(--color-primary-accessible, #B8441F)'
+                          color: 'var(--color-primary-accessible, #A63D1B)'
                         }}
                       >
                         <CornerDownLeft style={{ width: '0.8rem', height: '0.8rem' }} /> Enter
@@ -431,7 +432,7 @@ export function CommandPaletteModal({
           style={{
             padding: '0.65rem 1.25rem',
             borderTop: '1px solid var(--border-color, #E2D7C3)',
-            background: 'var(--bg-surface, #F1EAD9)',
+            background: 'var(--bg-card)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',

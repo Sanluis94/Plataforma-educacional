@@ -8,7 +8,7 @@ import {
   PlusCircle, Users, BookOpen, BarChart as BarChartIcon,
   Award, Download, MessageCircle, Send, Sparkles, Key, CheckCircle,
   AlertTriangle, Layers, RefreshCw, Plus, Trash2,
-  Calendar, FileText, Upload, ExternalLink, Bell, Copy, Check, Home as HomeIcon, Printer
+  Calendar, FileText, Upload, ExternalLink, Bell, Copy, Check, Home as HomeIcon, Printer, X
 } from 'lucide-react';
 import { useAuth } from '../../core/contexts/AuthContext';
 import { useProfessorDashboard } from '../../core/hooks/useProfessorDashboard';
@@ -735,8 +735,8 @@ export function ProfessorDashboard() {
       setNewExamQuestions([]); setNewExamDeadline(''); setNewExamTargetClass('');
       showFeedback(
         status === 'Aberta'
-          ? '🚀 Avaliação formal publicada e disponibilizada para os alunos!'
-          : '📝 Rascunho da avaliação salvo com sucesso!',
+          ? 'Avaliação formal publicada e disponibilizada para os alunos!'
+          : 'Rascunho da avaliação salvo com sucesso!',
         'success'
       );
     } catch (err) {
@@ -748,7 +748,7 @@ export function ProfessorDashboard() {
   };
 
   return (
-    <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '84rem', margin: '0 auto' }}>
+    <div className="fade-in ei-page">
       {/* Toast Feedback Notification Banner */}
       {toastMessage && (
         <div
@@ -759,10 +759,11 @@ export function ProfessorDashboard() {
             right: '1.5rem',
             zIndex: 9999,
             padding: '0.85rem 1.25rem',
-            borderRadius: 'var(--radius-sm, 10px)',
-            background: toastMessage.type === 'error' ? 'rgba(188,57,31,0.95)' : toastMessage.type === 'info' ? 'rgba(41,62,36,0.95)' : 'rgba(61,91,54,0.95)',
-            color: '#ffffff',
-            boxShadow: 'none',
+            borderRadius: 'var(--radius-md)',
+            background: toastMessage.type === 'error' ? '#BC391F' : '#293E24',
+            color: '#FAF7EE',
+            boxShadow: 'var(--shadow-lg)',
+            animation: 'ei-pop 0.28s var(--ease-out) both',
             fontWeight: 700,
             fontSize: '0.9rem',
             display: 'flex',
@@ -783,10 +784,11 @@ export function ProfessorDashboard() {
           <span style={{ flex: 1 }}>{toastMessage.text}</span>
           <button
             onClick={() => setToastMessage(null)}
-            style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.1rem', padding: '0 0.2rem', opacity: 0.8 }}
+            style={{ background: 'none', border: 'none', color: '#FAF7EE', cursor: 'pointer', width: '2rem', height: '2rem', display: 'grid', placeItems: 'center', borderRadius: '8px' }}
             title="Fechar aviso"
+            aria-label="Fechar aviso"
           >
-            ✕
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
       )}
@@ -795,107 +797,50 @@ export function ProfessorDashboard() {
       {examLoading && dashboardTab === 'exams' && <p role="status">Carregando suas avaliações…</p>}
       {examLoadError && dashboardTab === 'exams' && <div role="alert"><p>{examLoadError}</p><button type="button" onClick={() => setDataRetry(previous => previous + 1)}>Tentar carregar avaliações novamente</button></div>}
 
-      {/* Navigation Breadcrumb / Hub Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-        <Link
-          to="/"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.45rem 0.9rem',
-            borderRadius: 'var(--radius-sm, 10px)',
-            background: 'var(--color-primary-light, rgba(228, 104, 63, 0.12))',
-            border: '1px solid var(--color-primary-accessible, #B8441F)',
-            color: 'var(--color-primary-accessible, #B8441F)',
-            fontSize: '0.85rem',
-            fontWeight: 700,
-            textDecoration: 'none',
-            transition: 'all 0.2s',
-          }}
-          className="hover:scale-102"
-        >
-          <HomeIcon style={{ width: '1rem', height: '1rem' }} />
-          ← Página inicial
-        </Link>
+      {/* Trilha de navegação e atalhos */}
+      <nav aria-label="Trilha de navegação" className="ei-breadcrumb" style={{ justifyContent: 'space-between' }}>
+        <Link to="/"><HomeIcon size={16} aria-hidden="true" /> Página inicial</Link>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <span>Acesso rápido:</span>
+          <Link to={withReturnTo(`/simulacao?level=${catalogueLevel}`, panelLocation)}><Layers size={16} aria-hidden="true" /> Catálogo de Laboratórios</Link>
+          <Link to={withReturnTo('/enem', panelLocation)}><FileText size={16} aria-hidden="true" /> Simulado ENEM</Link>
+          {canAccessPath(userData?.role, '/coordenacao') && <Link to={withReturnTo('/coordenacao', panelLocation)}><Users size={16} aria-hidden="true" /> Coordenação</Link>}
+        </span>
+      </nav>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', minWidth: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          <span style={{ color: 'var(--text-secondary)' }}>Acesso rápido:</span>
-          <Link to={withReturnTo(`/simulacao?level=${catalogueLevel}`, panelLocation)} style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            🔬 Catálogo de Laboratórios
-          </Link>
-          <span>•</span>
-          <Link to={withReturnTo('/enem', panelLocation)} style={{ color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            📝 Simulado ENEM
-          </Link>
-          {canAccessPath(userData?.role, '/coordenacao') && <>
-            <span>•</span>
-            <Link to={withReturnTo('/coordenacao', panelLocation)} style={{ color: 'var(--color-verde-700, #293E24)', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              🏛️ Coordenação
-            </Link>
-          </>}
+      {/* Cabeçalho do painel */}
+      <header className="ei-page-header">
+        <div style={{ minWidth: 0 }}>
+          <p className="ei-page-header__eyebrow">Minhas turmas</p>
+          <h1>Painel do Professor</h1>
+          <p>Organize suas turmas, planeje aulas, crie provas e compartilhe materiais.</p>
         </div>
-      </div>
-
-      {/* Top Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-            <span style={{ fontSize: '1.75rem' }}>👨‍🏫</span>
-            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.5px', fontFamily: 'var(--font-heading)' }}>
-              Painel do Professor
-            </h1>
-          </div>
-          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
-            Organize suas turmas, planeje aulas, crie provas e compartilhe materiais.
-          </p>
-        </div>
-
-        {/* Global Action Buttons */}
-        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setShowGeminiModal(true)}
-            className="btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)' }}
-          >
-            <Key style={{ width: '0.9rem', height: '0.9rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
-            {localStorage.getItem('gemini_api_key') ? '🔑 Chave IA Conectada' : '⚙️ Configurar Chave IA'}
-          </button>
-          <button
-            onClick={() => { setDashboardTab('exams'); setExamMode('create'); }}
-            className="btn-gradient"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.25rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700, background: 'var(--gradient-primary)' }}
-          >
-            <PlusCircle style={{ width: '1rem', height: '1rem' }} />
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button onClick={() => { setDashboardTab('exams'); setExamMode('create'); }} className="btn-primary">
+            <PlusCircle size={18} aria-hidden="true" />
             Nova Prova / Avaliação
           </button>
-          <button
-            onClick={() => setIsBatchManagerOpen(true)}
-            className="btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 600 }}
-            title="Conferir lista de nomes e exportar o relatório da turma"
-          >
-            <FileSpreadsheet style={{ width: '0.9rem', height: '0.9rem', color: '#10b981' }} />
-            Planilhas (CSV)
-          </button>
-          <button
-            onClick={() => setShowEarlyWarning(!showEarlyWarning)}
-            className="btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 600, background: showEarlyWarning ? 'rgba(239, 68, 68, 0.15)' : 'transparent' }}
-            title="Conferir sinais de acompanhamento da turma"
-          >
-            <ShieldAlert style={{ width: '0.9rem', height: '0.9rem', color: '#ef4444' }} />
-            Acompanhamento dos alunos
-          </button>
-          <button
-            onClick={() => { setIsCreatingClass(true); setDashboardTab('classes'); }}
-            className="btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.1rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm, 10px)', fontWeight: 700 }}
-          >
-            <PlusCircle style={{ width: '1rem', height: '1rem' }} />
+          <button onClick={() => { setIsCreatingClass(true); setDashboardTab('classes'); }} className="btn-secondary btn-on-dark">
+            <Plus size={18} aria-hidden="true" />
             Nova Turma
           </button>
         </div>
+      </header>
+
+      {/* Ferramentas da turma */}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+        <button onClick={() => setShowGeminiModal(true)} className="btn-outline">
+          <Key size={18} aria-hidden="true" style={{ color: 'var(--color-primary-accessible)' }} />
+          {localStorage.getItem('gemini_api_key') ? 'Chave IA Conectada' : 'Configurar Chave IA'}
+        </button>
+        <button onClick={() => setIsBatchManagerOpen(true)} className="btn-outline" title="Conferir lista de nomes e exportar o relatório da turma">
+          <FileSpreadsheet size={18} aria-hidden="true" style={{ color: 'var(--color-success)' }} />
+          Planilhas (CSV)
+        </button>
+        <button onClick={() => setShowEarlyWarning(!showEarlyWarning)} className="btn-outline" aria-pressed={showEarlyWarning} title="Conferir sinais de acompanhamento da turma" style={showEarlyWarning ? { borderColor: 'var(--color-error)', background: 'var(--color-vermelho-bg)' } : undefined}>
+          <ShieldAlert size={18} aria-hidden="true" style={{ color: 'var(--color-error)' }} />
+          Acompanhamento dos alunos
+        </button>
       </div>
 
       {/* Acompanhamento a partir das evidências da turma selecionada. */}
@@ -912,28 +857,21 @@ export function ProfessorDashboard() {
         </div>
       )}
 
-      {statsError && <p role="alert" style={{ color: 'var(--color-primary-accessible, #B8441F)', marginBottom: '1rem' }}>{statsError}</p>}
+      {statsError && <p role="alert" style={{ color: 'var(--color-primary-accessible, #A63D1B)', marginBottom: '1rem' }}>{statsError}</p>}
       {/* Global Stats Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 14rem), 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={idx} className="glass-card" style={{ padding: '1.25rem', position: 'relative', overflow: 'hidden', borderRadius: 'var(--radius-lg, 14px)' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: stat.accent }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    {stat.label}
-                  </span>
-                  <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.35rem 0 0.2rem', fontFamily: 'var(--font-heading)' }}>
-                    {stat.value}
-                  </div>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{stat.desc}</span>
+            <div key={idx} className="stat-card" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
+              <div style={{ minWidth: 0 }}>
+                <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{stat.label}</span>
+                <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)', margin: '0.25rem 0', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+                  {stat.value}
                 </div>
-                <div style={{ width: '2.75rem', height: '2.75rem', borderRadius: 'var(--radius-sm, 10px)', background: `${stat.accent}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Icon style={{ width: '1.35rem', height: '1.35rem', color: stat.accent }} />
-                </div>
+                <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{stat.desc}</span>
               </div>
+              <span className={idx % 2 ? 'ei-icon-box' : 'ei-icon-box ei-icon-box--accent'} aria-hidden="true"><Icon size={22} /></span>
             </div>
           );
         })}
@@ -949,42 +887,29 @@ export function ProfessorDashboard() {
         </label>
       )}
 
-      {/* Reorganized Top Navigation Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--border-color)' }}>
+      {/* Abas do painel */}
+      <div className="ei-tabs" role="toolbar" aria-label="Seções do painel do professor">
         {[
-          { id: 'classes', label: '🏫 Minhas Turmas & Mural', icon: BookOpen },
-          { id: 'activities', label: '📋 Criar atividade', icon: PlusCircle },
-          { id: 'lms_gradebook', label: '📚 Diário, Notas e Fórum', icon: Award },
-          { id: 'lesson_plans', label: '📅 Plano de Aulas Bimestral', icon: Calendar },
-          { id: 'exams', label: `📝 Provas & Avaliações (${examsList.length})`, icon: FileText },
-          { id: 'materials', label: `📁 Materiais da Turma (${enhancedMaterials.length})`, icon: Upload },
-          { id: 'labs_overview', label: `🔬 Catálogo de Laboratórios`, icon: Layers },
-          { id: 'reports', label: '📊 Relatórios da Turma', icon: BarChartIcon },
-          { id: 'messages', label: `💬 Dúvidas (${profMessages.filter(m => !m.replied).length})`, icon: MessageCircle },
+          { id: 'classes', label: 'Minhas Turmas & Mural', icon: BookOpen },
+          { id: 'activities', label: 'Criar atividade', icon: PlusCircle },
+          { id: 'lms_gradebook', label: 'Diário, Notas e Fórum', icon: Award },
+          { id: 'lesson_plans', label: 'Plano de Aulas Bimestral', icon: Calendar },
+          { id: 'exams', label: 'Provas & Avaliações', icon: FileText, count: examsList.length },
+          { id: 'materials', label: 'Materiais da Turma', icon: Upload, count: enhancedMaterials.length },
+          { id: 'labs_overview', label: 'Catálogo de Laboratórios', icon: Layers },
+          { id: 'reports', label: 'Relatórios da Turma', icon: BarChartIcon },
+          { id: 'messages', label: 'Dúvidas', icon: MessageCircle, count: profMessages.filter(m => !m.replied).length },
         ].map(tab => (
           <button
             key={tab.id}
+            type="button"
+            className="ei-tab"
             onClick={() => setDashboardTab(tab.id as ProfessorTab)}
             aria-pressed={dashboardTab === tab.id}
-            style={{
-              padding: '0.65rem 1.25rem',
-              borderRadius: 'var(--radius-sm, 10px) var(--radius-sm, 10px) 0 0',
-              border: 'none',
-              borderBottom: dashboardTab === tab.id ? '2px solid var(--color-primary, #E4683F)' : '2px solid transparent',
-              background: dashboardTab === tab.id ? 'var(--color-primary-light, rgba(228, 104, 63, 0.1))' : 'transparent',
-              color: dashboardTab === tab.id ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
-              fontWeight: dashboardTab === tab.id ? 700 : 500,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.2s',
-              whiteSpace: 'nowrap',
-            }}
           >
-            <tab.icon style={{ width: '1rem', height: '1rem' }} />
+            <tab.icon size={18} aria-hidden="true" />
             {tab.label}
+            {tab.count !== undefined && <span className="ei-tab__count">{tab.count}</span>}
           </button>
         ))}
       </div>
@@ -1002,7 +927,7 @@ export function ProfessorDashboard() {
           {isCreatingClass && (
             <div className="glass-card mb-4" style={{ padding: '1.5rem', border: '1px solid var(--border-color)', background: 'var(--bg-glass)', borderRadius: 'var(--radius-lg, 14px)' }}>
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-heading)' }}>
-                <PlusCircle style={{ width: '1.2rem', height: '1.2rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+                <PlusCircle style={{ width: '1.2rem', height: '1.2rem', color: 'var(--color-primary-accessible, #A63D1B)' }} />
                 Cadastrar Nova Turma
               </h3>
               <form onSubmit={async event => {
@@ -1056,7 +981,7 @@ export function ProfessorDashboard() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                     <div>
-                      <span style={{ fontSize: '0.72rem', color: isSelected ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                      <span style={{ fontSize: '0.72rem', color: isSelected ? 'var(--color-primary-accessible, #A63D1B)' : 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
                         {isSelected ? '● Turma Selecionada' : 'Turma'}
                       </span>
                       <h3 style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1.15rem', margin: '0.2rem 0 0', fontFamily: 'var(--font-heading)' }}>
@@ -1086,7 +1011,7 @@ export function ProfessorDashboard() {
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         Código da Turma (6 dígitos):
                       </span>
-                      <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontFamily: 'monospace', fontWeight: 800, fontSize: '1.15rem', letterSpacing: '2px' }}>
+                      <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontFamily: 'monospace', fontWeight: 800, fontSize: '1.15rem', letterSpacing: '2px' }}>
                         {turma.code || turma.id.slice(0, 6).toUpperCase()}
                       </strong>
                     </div>
@@ -1171,8 +1096,8 @@ export function ProfessorDashboard() {
 
               {/* Form to Post New Notice */}
               <div style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', marginBottom: '1.5rem' }}>
-                <h4 style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.75rem' }}>
-                  📢 Publicar novo comunicado para os alunos
+                <h4 style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.75rem' }}>
+                  Publicar novo comunicado para os alunos
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <input
@@ -1254,7 +1179,7 @@ export function ProfessorDashboard() {
           <div className="glass-card mb-4" style={{ padding: '1.5rem', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', borderRadius: 'var(--radius-lg, 14px)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase' }}>
                   <Calendar style={{ width: '1.1rem', height: '1.1rem' }} /> Planejamento curricular & BNCC
                 </div>
                 <h2 style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: 800, margin: '0.2rem 0 0.35rem' }}>
@@ -1278,7 +1203,7 @@ export function ProfessorDashboard() {
                       fontWeight: 700,
                       border: selectedBimester === b ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color, #E2D7C3)',
                       background: selectedBimester === b ? 'var(--color-primary-light, rgba(228,104,63,0.15))' : 'var(--color-bg-subtle, #FAF7EE)',
-                      color: selectedBimester === b ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
+                      color: selectedBimester === b ? 'var(--color-primary-accessible, #A63D1B)' : 'var(--text-secondary)',
                       cursor: 'pointer'
                     }}
                   >
@@ -1292,7 +1217,7 @@ export function ProfessorDashboard() {
           {/* Form to Add / Plan Lesson */}
           <div className="glass-card mb-4" style={{ padding: '1.5rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.25rem' }}>
-              ➕ Planejar Nova Aula ({selectedBimester})
+              Planejar Nova Aula ({selectedBimester})
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
               <div>
@@ -1381,7 +1306,7 @@ export function ProfessorDashboard() {
                     style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(139,92,246,0.4)', background: 'rgba(139,92,246,0.15)', color: '#c4b5fd', cursor: 'pointer' }}
                     title="Inserir modelo de Maiêutica Socrática"
                   >
-                    🏛️ Sócrates
+                    Sócrates
                   </button>
                   <button
                     type="button"
@@ -1389,7 +1314,7 @@ export function ProfessorDashboard() {
                     style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-subtle, #FAF7EE)', color: 'var(--color-secondary, #293E24)', cursor: 'pointer' }}
                     title="Inserir modelo Empírico de Aristóteles"
                   >
-                    🔬 Aristóteles
+                    Aristóteles
                   </button>
                   <button
                     type="button"
@@ -1397,7 +1322,7 @@ export function ProfessorDashboard() {
                     style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.15)', color: '#6ee7b7', cursor: 'pointer' }}
                     title="Inserir modelo de Problematização Freiriana"
                   >
-                    🌱 Paulo Freire
+                    Paulo Freire
                   </button>
                   <button
                     type="button"
@@ -1405,7 +1330,7 @@ export function ProfessorDashboard() {
                     style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.15)', color: '#fcd34d', cursor: 'pointer' }}
                     title="Inserir modelo DUA / Acessibilidade Cognitiva"
                   >
-                    🧩 DUA (Inclusivo)
+                    DUA (Inclusivo)
                   </button>
                 </div>
               </div>
@@ -1442,7 +1367,7 @@ export function ProfessorDashboard() {
                 {classLessonPlans.filter(p => p.periodo === selectedBimester).map((plan, idx) => (
                   <div key={plan.id} style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', display: 'grid', gridTemplateColumns: '80px 1fr auto', gap: '1rem', alignItems: 'center' }}>
                     <div style={{ textAlign: 'center', padding: '0.5rem', background: 'var(--color-primary-light, rgba(228,104,63,0.12))', borderRadius: 'var(--radius-sm, 10px)', border: '1px solid var(--border-color, #E2D7C3)' }}>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, display: 'block' }}>AULA</span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, display: 'block' }}>AULA</span>
                       <strong style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>#{idx + 1}</strong>
                     </div>
 
@@ -1452,18 +1377,18 @@ export function ProfessorDashboard() {
                         <span style={{
                           fontSize: '0.72rem', padding: '0.15rem 0.55rem', borderRadius: '9999px', fontWeight: 700,
                           background: plan.status === 'concluida' ? 'rgba(41,62,36,0.15)' : plan.status === 'em_andamento' ? 'rgba(228,104,63,0.15)' : 'rgba(0,0,0,0.06)',
-                          color: plan.status === 'concluida' ? 'var(--color-secondary, #293E24)' : plan.status === 'em_andamento' ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)'
+                          color: plan.status === 'concluida' ? 'var(--color-secondary, #293E24)' : plan.status === 'em_andamento' ? 'var(--color-primary-accessible, #A63D1B)' : 'var(--text-secondary)'
                         }}>
-                          {plan.status === 'concluida' ? '✓ Concluída' : plan.status === 'em_andamento' ? '⏳ Em Andamento' : '📅 Planejada'}
+                          {plan.status === 'concluida' ? '✓ Concluída' : plan.status === 'em_andamento' ? 'Em Andamento' : 'Planejada'}
                         </span>
                       </div>
                       <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.4rem' }}>
                         {plan.metodologia}
                       </div>
                       <div style={{ display: 'flex', gap: '1rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                        {plan.competenciasBNCC && <span>🎯 {plan.competenciasBNCC}</span>}
-                        {plan.laboratorioTitulo && <span style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>🔬 Lab: {plan.laboratorioTitulo}</span>}
-                        {plan.dataPrevista && <span>🗓️ {plan.dataPrevista}</span>}
+                        {plan.competenciasBNCC && <span>{plan.competenciasBNCC}</span>}
+                        {plan.laboratorioTitulo && <span style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>Lab: {plan.laboratorioTitulo}</span>}
+                        {plan.dataPrevista && <span>{plan.dataPrevista}</span>}
                       </div>
                     </div>
 
@@ -1509,14 +1434,14 @@ export function ProfessorDashboard() {
                 className={examMode === 'list' ? 'btn-gradient' : 'btn-outline'}
                 style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600 }}
               >
-                📋 Provas Aplicadas ({examsList.length})
+                Provas Aplicadas ({examsList.length})
               </button>
               <button
                 onClick={() => setExamMode('create')}
                 className={examMode === 'create' ? 'btn-gradient' : 'btn-outline'}
                 style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600 }}
               >
-                ➕ Criar Nova Prova
+                Criar Nova Prova
               </button>
             </div>
           </div>
@@ -1528,13 +1453,13 @@ export function ProfessorDashboard() {
                 <div key={exam.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, textTransform: 'uppercase' }}>
                         {exam.disciplina}
                       </span>
                       <span style={{
                         fontSize: '0.72rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 700,
                         background: exam.status === 'Aberta' ? 'rgba(41,62,36,0.15)' : 'rgba(228,104,63,0.15)',
-                        color: exam.status === 'Aberta' ? 'var(--color-secondary, #293E24)' : 'var(--color-primary-accessible, #B8441F)',
+                        color: exam.status === 'Aberta' ? 'var(--color-secondary, #293E24)' : 'var(--color-primary-accessible, #A63D1B)',
                         border: `1px solid ${exam.status === 'Aberta' ? 'rgba(41,62,36,0.3)' : 'rgba(228,104,63,0.3)'}`
                       }}>
                         {exam.status}
@@ -1551,7 +1476,7 @@ export function ProfessorDashboard() {
                     <div style={{ padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-subtle, #FAF7EE)', border: '1px solid var(--border-color, #E2D7C3)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1rem' }}>
                       <div>Turma: <strong style={{ color: 'var(--text-main)' }}>{exam.turmaNome || 'Todas as turmas'}</strong></div>
                       <div>Duração: <strong style={{ color: 'var(--color-secondary, #293E24)' }}>{exam.duracaoMinutos ? `${exam.duracaoMinutos} minutos` : 'Sem limite'}</strong></div>
-                      <div>Questões: <strong style={{ color: 'var(--color-primary-accessible, #B8441F)' }}>{exam.questoes.length} (Peso Total: {exam.pesoTotal})</strong></div>
+                      <div>Questões: <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)' }}>{exam.questoes.length} (Peso Total: {exam.pesoTotal})</strong></div>
                     </div>
                   </div>
 
@@ -1564,7 +1489,7 @@ export function ProfessorDashboard() {
                       className="btn-gradient"
                       style={{ flex: 1, minWidth: '130px', padding: '0.55rem', fontSize: '0.82rem', fontWeight: 700 }}
                     >
-                      📊 Acertos
+                      Acertos
                     </button>
                     <button
                       onClick={() => setPrintingExam(exam)}
@@ -1615,7 +1540,7 @@ export function ProfessorDashboard() {
             <fieldset disabled={savingExam || examAiGenerating} className="glass-card" style={{ padding: '1.75rem', minWidth: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
-                  📝 Criador de Provas & Avaliações Formais
+                  Criador de Provas & Avaliações Formais
                 </h3>
                 <button onClick={() => setExamMode('list')} className="btn-outline" style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}>
                   ← Voltar à Lista
@@ -1626,7 +1551,7 @@ export function ProfessorDashboard() {
               <div style={{ padding: '1rem', borderRadius: 'var(--radius-lg, 14px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <Sparkles style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary, #E4683F)' }} />
                 <div style={{ flex: 1, minWidth: '220px' }}>
-                  <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.9rem', display: 'block' }}>Gerar questões com IA Gemini</strong>
+                  <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontSize: '0.9rem', display: 'block' }}>Gerar questões com IA Gemini</strong>
                   <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>Digite o assunto para formular automaticamente questões com gabarito e justificativa pedagógica.</span>
                 </div>
                 <input
@@ -1642,7 +1567,7 @@ export function ProfessorDashboard() {
                   className="btn-gradient"
                   style={{ padding: '0.55rem 1.25rem', fontSize: '0.82rem', fontWeight: 700 }}
                 >
-                  {examAiGenerating ? 'Gerando...' : '✨ Gerar Questões'}
+                  {examAiGenerating ? 'Gerando...' : 'Gerar Questões'}
                 </button>
               </div>
 
@@ -1716,7 +1641,7 @@ export function ProfessorDashboard() {
               {/* Questions List Editor */}
               <div style={{ marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <h4 style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
+                  <h4 style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
                     Questões da avaliação ({newExamQuestions.length})
                   </h4>
                   <button
@@ -1750,7 +1675,7 @@ export function ProfessorDashboard() {
                     <div key={qIndex} style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                          <span style={{ fontSize: '0.85rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 800 }}>Questão #{qIndex + 1}</span>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 800 }}>Questão #{qIndex + 1}</span>
                           <span style={{ fontSize: '0.75rem', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 600 }}>
                             Peso: {q.valorPeso} pts
                           </span>
@@ -1900,7 +1825,7 @@ export function ProfessorDashboard() {
                   className="btn-gradient"
                   style={{ padding: '0.65rem 2rem', fontWeight: 800, opacity: savingExam ? 0.7 : 1, cursor: savingExam ? 'not-allowed' : 'pointer' }}
                 >
-                  {savingExam ? 'Publicando Avaliação...' : '🚀 Aplicar Prova para a Turma'}
+                  {savingExam ? 'Publicando Avaliação...' : 'Aplicar Prova para a Turma'}
                 </button>
               </div>
             </fieldset>
@@ -1913,7 +1838,7 @@ export function ProfessorDashboard() {
               {analyticsError && <div role="alert"><p>{analyticsError}</p><button type="button" onClick={() => setDataRetry(previous => previous + 1)}>Tentar carregar respostas novamente</button></div>}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, textTransform: 'uppercase' }}>
                     Relatório analítico de prova
                   </span>
                   <h3 style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: 800, margin: '0.2rem 0' }}>
@@ -1964,7 +1889,7 @@ export function ProfessorDashboard() {
               {/* Análise por Questão com Alertas Pedagógicos */}
               <div style={{ marginBottom: '2rem' }}>
                 <h4 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
-                  📊 Taxa de Acerto por Questão (Identificação de Falhas de Aprendizagem)
+                  Taxa de Acerto por Questão (Identificação de Falhas de Aprendizagem)
                 </h4>
 
                 {examAnalytics && (
@@ -1981,7 +1906,7 @@ export function ProfessorDashboard() {
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <strong style={{ color: 'var(--color-primary-accessible, #B8441F)', fontSize: '0.95rem' }}>Questão #{q.questaoIndex + 1}</strong>
+                            <strong style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontSize: '0.95rem' }}>Questão #{q.questaoIndex + 1}</strong>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({q.tema})</span>
                             {q.alertaPedagogico && (
                               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.72rem', color: 'var(--color-danger, #BC391F)', background: 'rgba(188,57,31,0.15)', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 700 }}>
@@ -1989,7 +1914,7 @@ export function ProfessorDashboard() {
                               </span>
                             )}
                           </div>
-                          <div style={{ fontWeight: 800, fontSize: '1.05rem', color: q.taxaAcertoPercentual >= 70 ? 'var(--color-secondary, #293E24)' : q.taxaAcertoPercentual >= 50 ? 'var(--color-primary-accessible, #B8441F)' : 'var(--color-danger, #BC391F)' }}>
+                          <div style={{ fontWeight: 800, fontSize: '1.05rem', color: q.taxaAcertoPercentual >= 70 ? 'var(--color-secondary, #293E24)' : q.taxaAcertoPercentual >= 50 ? 'var(--color-primary-accessible, #A63D1B)' : 'var(--color-danger, #BC391F)' }}>
                             {q.taxaAcertoPercentual}% de Acerto
                           </div>
                         </div>
@@ -2018,7 +1943,7 @@ export function ProfessorDashboard() {
               {/* Tabela de Alunos e Notas na Prova */}
               <div>
                 <h4 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
-                  👥 Notas Individuais dos Estudantes ({examAttempts.length})
+                  Notas Individuais dos Estudantes ({examAttempts.length})
                 </h4>
                 {examAttempts.length > 0 ? (
                   <div style={{ overflowX: 'auto' }}>
@@ -2037,14 +1962,14 @@ export function ProfessorDashboard() {
                           <tr key={att.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}>
                             <td style={{ padding: '0.75rem', fontWeight: 600, color: 'var(--text-main)' }}>{att.alunoNome}</td>
                             <td style={{ padding: '0.75rem' }}>{att.pontuacaoObtida} / {att.pontuacaoMaxima} pts</td>
-                            <td style={{ padding: '0.75rem', fontWeight: 700, color: att.porcentagemAproveitamento >= 70 ? 'var(--color-secondary, #293E24)' : att.porcentagemAproveitamento >= 50 ? 'var(--color-primary-accessible, #B8441F)' : 'var(--color-danger, #BC391F)' }}>
+                            <td style={{ padding: '0.75rem', fontWeight: 700, color: att.porcentagemAproveitamento >= 70 ? 'var(--color-secondary, #293E24)' : att.porcentagemAproveitamento >= 50 ? 'var(--color-primary-accessible, #A63D1B)' : 'var(--color-danger, #BC391F)' }}>
                               {att.porcentagemAproveitamento}%
                             </td>
                             <td style={{ padding: '0.75rem' }}>
                               <span style={{
                                 padding: '0.2rem 0.5rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700,
                                 background: att.classificacao === 'Excelente' ? 'var(--color-secondary-light, rgba(41,62,36,0.15))' : att.classificacao === 'Bom' ? 'var(--color-primary-light, rgba(228,104,63,0.15))' : 'rgba(245,158,11,0.15)',
-                                color: att.classificacao === 'Excelente' ? 'var(--color-secondary, #293E24)' : att.classificacao === 'Bom' ? 'var(--color-primary-accessible, #B8441F)' : '#B8441F'
+                                color: att.classificacao === 'Excelente' ? 'var(--color-secondary, #293E24)' : att.classificacao === 'Bom' ? 'var(--color-primary-accessible, #A63D1B)' : '#B8441F'
                               }}>
                                 {att.classificacao}
                               </span>
@@ -2074,7 +1999,7 @@ export function ProfessorDashboard() {
           <fieldset disabled={uploadingMat || readingFile} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
           <div className="glass-card mb-4" style={{ padding: '1.75rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Upload style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+              <Upload style={{ width: '1.25rem', height: '1.25rem', color: 'var(--color-primary-accessible, #A63D1B)' }} />
               Compartilhar materiais de estudo
             </h3>
 
@@ -2110,7 +2035,7 @@ export function ProfessorDashboard() {
                   Você ainda não possui turmas cadastradas. Crie sua primeira turma na aba{' '}
                   <button
                     onClick={() => { setDashboardTab('classes'); setIsCreatingClass(true); }}
-                    style={{ background: 'none', border: 'none', color: 'var(--color-primary-accessible, #B8441F)', textDecoration: 'underline', cursor: 'pointer', fontWeight: 700, padding: 0 }}
+                    style={{ background: 'none', border: 'none', color: 'var(--color-primary-accessible, #A63D1B)', textDecoration: 'underline', cursor: 'pointer', fontWeight: 700, padding: 0 }}
                   >
                     Minhas Turmas
                   </button>
@@ -2143,9 +2068,9 @@ export function ProfessorDashboard() {
                   onChange={e => setMatType(e.target.value as any)}
                   style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-card, #F1EAD9)', color: 'var(--text-main)', fontSize: '0.88rem' }}
                 >
-                  <option value="arquivo">📄 Arquivo do computador (PDF ou imagem, até 550 KB)</option>
-                  <option value="link">🔗 Link Externo (YouTube, Google Drive, Artigo)</option>
-                  <option value="texto">📝 Resumo / Texto de Apoio Direto</option>
+                  <option value="arquivo">Arquivo do computador (PDF ou imagem, até 550 KB)</option>
+                  <option value="link">Link Externo (YouTube, Google Drive, Artigo)</option>
+                  <option value="texto">Resumo / Texto de Apoio Direto</option>
                 </select>
               </div>
 
@@ -2194,7 +2119,7 @@ export function ProfessorDashboard() {
                 />
                 <label
                   htmlFor="mat_file_input"
-                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.5rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-primary-light, rgba(228,104,63,0.15))', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, fontSize: '0.88rem' }}
+                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.5rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-primary-light, rgba(228,104,63,0.15))', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, fontSize: '0.88rem' }}
                 >
                   <Upload style={{ width: '1rem', height: '1rem' }} /> Selecionar Arquivo do Dispositivo
                 </label>
@@ -2272,7 +2197,7 @@ export function ProfessorDashboard() {
                 Materiais Disponibilizados para a Turma ({enhancedMaterials.length})
               </h3>
               {selectedClassId && turmas.length > 0 && (
-                <span style={{ fontSize: '0.82rem', color: 'var(--color-primary-accessible, #B8441F)', background: 'var(--color-primary-light, rgba(228,104,63,0.1))', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.82rem', color: 'var(--color-primary-accessible, #A63D1B)', background: 'var(--color-primary-light, rgba(228,104,63,0.1))', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 600 }}>
                   {turmas.find(t => t.id === selectedClassId)?.name}
                 </span>
               )}
@@ -2284,16 +2209,16 @@ export function ProfessorDashboard() {
                   <div key={mat.id} style={{ padding: '1.25rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                        <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, textTransform: 'uppercase' }}>
                           {mat.periodo || '1º Bimestre'}
                         </span>
                         <span style={{
                           fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 600,
                           background: mat.tipo === 'texto' ? 'var(--color-secondary-light, rgba(41,62,36,0.12))' : mat.tipo === 'link' ? 'var(--color-primary-light, rgba(228,104,63,0.12))' : 'rgba(61,91,54,0.12)',
-                          color: mat.tipo === 'texto' ? 'var(--color-secondary, #293E24)' : mat.tipo === 'link' ? 'var(--color-primary-accessible, #B8441F)' : 'var(--color-secondary, #293E24)',
+                          color: mat.tipo === 'texto' ? 'var(--color-secondary, #293E24)' : mat.tipo === 'link' ? 'var(--color-primary-accessible, #A63D1B)' : 'var(--color-secondary, #293E24)',
                           border: `1px solid ${mat.tipo === 'texto' ? 'var(--border-color, #E2D7C3)' : mat.tipo === 'link' ? 'var(--color-primary, #E4683F)' : 'var(--border-color, #E2D7C3)'}`
                         }}>
-                          {mat.tipo === 'texto' ? '📝 Resumo Textual' : mat.tipo === 'link' ? '🔗 Link Externo' : '📄 Arquivo / PDF'}
+                          {mat.tipo === 'texto' ? 'Resumo Textual' : mat.tipo === 'link' ? 'Link Externo' : 'Arquivo / PDF'}
                         </span>
                       </div>
                       <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.35rem' }}>{mat.title}</h4>
@@ -2322,7 +2247,7 @@ export function ProfessorDashboard() {
 
                       {mat.nomeArquivo && (
                         <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                          📎 {mat.nomeArquivo} ({mat.tamanhoFormatado || ''})
+                          {mat.nomeArquivo} ({mat.tamanhoFormatado || ''})
                         </div>
                       )}
                     </div>
@@ -2403,7 +2328,7 @@ export function ProfessorDashboard() {
         <div className="fade-in">
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 800, margin: '0 0 0.4rem' }}>
-              🔬 Catálogo de {LEARNING_LABS_CATALOG.length} Laboratórios Virtuais
+              Catálogo de {LEARNING_LABS_CATALOG.length} Laboratórios Virtuais
             </h3>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
               Explore os laboratórios da etapa escolhida e associe seus tópicos ao planejamento da turma.
@@ -2495,7 +2420,7 @@ export function ProfessorDashboard() {
           {reportError && <div role="alert" style={{ marginBottom: '1rem', color: 'var(--color-vermelho, #BC391F)' }}>{reportError}</div>}
           {reportLoading ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-              <RefreshCw className="animate-spin" style={{ width: '2rem', height: '2rem', margin: '0 auto 1rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+              <RefreshCw className="animate-spin" style={{ width: '2rem', height: '2rem', margin: '0 auto 1rem', color: 'var(--color-primary-accessible, #A63D1B)' }} />
               <p>Carregando relatório da turma...</p>
             </div>
           ) : classReport ? (
@@ -2516,7 +2441,7 @@ export function ProfessorDashboard() {
       {dashboardTab === 'messages' && (
         <div className="fade-in glass-card" style={{ padding: '1.5rem' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <MessageCircle style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+            <MessageCircle style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-primary-accessible, #A63D1B)' }} />
             Dúvidas recebidas ({profMessages.filter(m => !m.replied).length} pendentes)
           </h3>
           {profMessages.length > 0 ? (
@@ -2544,8 +2469,8 @@ export function ProfessorDashboard() {
                         style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color, #E2D7C3)', background: 'var(--color-bg-subtle, #FAF7EE)', color: 'var(--text-main)', fontSize: '0.85rem' }}
                       />
                       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Recompensa de Incentivo 🪙</label>
-                        <input aria-label="Recompensa de Incentivo 🪙"
+                        <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Recompensa de Incentivo</label>
+                        <input aria-label="Recompensa de Incentivo"
                           type="number"
                           min="0"
                           max="50"
@@ -2600,7 +2525,7 @@ export function ProfessorDashboard() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div className="glass-card" style={{ maxWidth: '500px', width: '100%', padding: '1.75rem', background: 'var(--color-bg-card, #F1EAD9)', border: '1px solid var(--border-color, #E2D7C3)', borderRadius: 'var(--radius-lg, 14px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-              <Key style={{ width: '1.35rem', height: '1.35rem', color: 'var(--color-primary-accessible, #B8441F)' }} />
+              <Key style={{ width: '1.35rem', height: '1.35rem', color: 'var(--color-primary-accessible, #A63D1B)' }} />
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
                 Configuração da chave Google Gemini IA
               </h3>

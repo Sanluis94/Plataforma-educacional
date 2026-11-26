@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Edu-Interact — Manual de identidade visual v1.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --verde-900:#172314; --verde-700:#293E24; --verde-500:#3D5B36; --verde-300:#76866F; --verde-200:#A8D5A2;
+    --laranja-700:#A63D1B; --laranja-600:#B8441F; --laranja-500:#E4683F; --laranja-400:#EC7E58; --laranja-300:#F59C7B; --laranja-100:#FCEEE9;
+    --vermelho-500:#BC391F; --vermelho-300:#F2A08A;
+    --nude-500:#F1EAD9; --nude-300:#E2D7C3; --nude-100:#FAF7EE;
+    --escuro-950:#0D150B; --escuro-850:#182616;
+    --display:'Space Grotesk',system-ui,sans-serif; --body:'Manrope',system-ui,sans-serif; --a11y:'Atkinson Hyperlegible',system-ui,sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { background:var(--nude-500); color:var(--verde-900); font-family:var(--body); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+  body { max-width:1040px; margin:0 auto; padding:0 24px 64px; }
+  h1,h2,h3 { font-family:var(--display); letter-spacing:-0.02em; color:var(--verde-700); line-height:1.2; }
+  h2 { font-size:2rem; margin-bottom:8px; }
+  h3 { font-size:1.125rem; margin:24px 0 8px; }
+  p { max-width:640px; }
+  p + p { margin-top:8px; }
+  a { color:var(--laranja-700); text-underline-offset:3px; }
+  :focus-visible { outline:3px solid var(--laranja-700); outline-offset:2px; border-radius:4px; }
+  .skip { position:absolute; left:-999px; top:8px; background:var(--verde-700); color:var(--nude-100); padding:8px 16px; border-radius:10px; }
+  .skip:focus { left:8px; }
+  .eyebrow { font-family:var(--display); font-weight:700; font-size:.8125rem; letter-spacing:.04em; color:var(--laranja-700); }
+  .lead { font-size:1.0625rem; color:var(--verde-700); }
+  section { padding:56px 0 8px; border-top:1px solid var(--nude-300); }
+  .grid { display:grid; gap:16px; }
+  .g2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .g3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .g4 { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  @media (max-width:760px){ .g2,.g3,.g4{ grid-template-columns:1fr; } }
+  .card { background:var(--nude-100); border:1px solid var(--nude-300); border-radius:14px; padding:20px; }
+  .card h3 { margin-top:0; }
+  .card p { font-size:.9375rem; }
+  .note { border-left:4px solid var(--laranja-700); background:var(--nude-100); border-radius:0 10px 10px 0; padding:14px 18px; margin-top:16px; }
+  .note strong { color:var(--laranja-700); }
+  .new { display:inline-block; font-family:var(--display); font-size:.75rem; font-weight:700; color:var(--verde-900); background:var(--laranja-500); border-radius:6px; padding:1px 8px; margin-left:8px; vertical-align:middle; letter-spacing:.02em; }
+
+  /* Capa */
+  .cover { background:var(--verde-700); color:var(--nude-100); border-radius:16px; padding:56px; margin-top:24px; position:relative; overflow:hidden; }
+  .cover h1 { color:var(--nude-100); font-size:3rem; margin:16px 0 12px; }
+  .cover .tagline { color:var(--laranja-300); font-size:1.25rem; max-width:620px; }
+  .cover dl { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:40px; }
+  .cover dt { color:var(--laranja-300); font-size:.8125rem; }
+  .cover dd { font-size:.9375rem; }
+  .cover .mark { width:72px; height:72px; background:var(--nude-500); border-radius:16px; display:grid; place-items:center; }
+  .cover svg.pattern { position:absolute; right:-40px; bottom:24px; width:620px; opacity:.35; }
+  @media (max-width:760px){ .cover{ padding:32px; } .cover h1{ font-size:2.25rem; } .cover dl{ grid-template-columns:1fr; } }
+
+  /* Changelog */
+  table { width:100%; border-collapse:collapse; font-size:.9375rem; background:var(--nude-100); border-radius:14px; overflow:hidden; }
+  caption { text-align:left; font-family:var(--display); font-weight:700; padding-bottom:8px; color:var(--verde-700); }
+  th, td { text-align:left; padding:12px 14px; border-bottom:1px solid var(--nude-300); vertical-align:top; }
+  th { font-family:var(--display); font-weight:600; font-size:.875rem; color:var(--verde-700); background:var(--nude-300); }
+  td.num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .pass { color:var(--verde-700); font-weight:700; }
+  .fail { color:var(--vermelho-500); font-weight:700; }
+
+  /* Símbolo */
+  .stage { display:grid; place-items:center; min-height:180px; border-radius:14px; border:1px solid var(--nude-300); }
+  .stage.light { background:var(--nude-100); }
+  .stage.dark { background:var(--verde-700); border-color:var(--verde-700); }
+  .stage figcaption { font-size:.875rem; margin-top:12px; }
+  .stage.dark figcaption { color:var(--nude-100); }
+  .lockup { display:flex; align-items:center; gap:12px; font-family:var(--display); font-weight:700; font-size:1.75rem; letter-spacing:-0.025em; }
+
+  /* Paleta */
+  .swatch { border-radius:14px; overflow:hidden; border:1px solid var(--nude-300); background:var(--nude-100); }
+  .swatch .chip { height:96px; display:flex; align-items:flex-end; padding:12px; font-family:var(--display); font-weight:700; }
+  .swatch .meta { padding:12px; font-size:.875rem; }
+  .swatch code { font-family:ui-monospace,Consolas,monospace; font-size:.8125rem; }
+  .ratio { display:flex; height:56px; border-radius:12px; overflow:hidden; border:1px solid var(--nude-300); font-size:.8125rem; font-weight:600; }
+  .ratio span { display:flex; align-items:center; justify-content:center; }
+  .scale { display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); gap:8px; }
+  .tone { border-radius:10px; padding:12px; min-height:84px; display:flex; flex-direction:column; justify-content:space-between; font-size:.8125rem; border:1px solid rgba(23,35,20,.08); }
+  .tone b { font-family:var(--display); font-size:.875rem; }
+
+  /* Pares de contraste */
+  .pair { border-radius:12px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px; border:1px solid var(--nude-300); }
+  .pair span:first-child { font-weight:600; }
+  .pair .badge { font-size:.75rem; font-weight:700; border-radius:6px; padding:2px 8px; background:var(--nude-100); color:var(--verde-900); white-space:nowrap; }
+
+  /* Tipografia */
+  .type-row { display:grid; grid-template-columns:200px 1fr; gap:24px; padding:20px 0; border-bottom:1px solid var(--nude-300); align-items:baseline; }
+  .type-row small { font-size:.8125rem; color:var(--verde-500); display:block; }
+  @media (max-width:760px){ .type-row{ grid-template-columns:1fr; gap:4px; } }
+
+  /* Ícones */
+  .icon-cell { background:var(--nude-100); border:1px solid var(--nude-300); border-radius:12px; padding:20px 12px; text-align:center; font-size:.875rem; font-weight:600; }
+  .icon-cell svg { width:32px; height:32px; stroke:var(--verde-700); stroke-width:1.75; fill:none; stroke-linecap:round; stroke-linejoin:round; display:block; margin:0 auto 8px; }
+
+  /* Componentes */
+  .demo { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:20px; border-radius:14px; }
+  .demo.light { background:var(--nude-500); border:1px solid var(--nude-300); }
+  .demo.dark { background:var(--escuro-950); }
+  .btn { font-family:var(--body); font-weight:700; font-size:.9375rem; min-height:44px; padding:10px 20px; border-radius:10px; border:1px solid transparent; display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
+  .btn-primary { background:var(--laranja-500); color:var(--verde-900); }
+  .btn-primary:hover { background:var(--laranja-400); }
+  .btn-secondary { background:var(--verde-700); color:var(--nude-100); }
+  .btn-outline { background:transparent; border-color:var(--verde-700); color:var(--verde-700); }
+  .dark .btn-outline { border-color:var(--verde-300); color:var(--nude-100); }
+  .dark .btn-secondary { background:var(--verde-200); color:var(--escuro-950); }
+  .btn.focus { outline:3px solid var(--laranja-700); outline-offset:2px; }
+  .dark .btn.focus { outline-color:var(--laranja-300); }
+  .field { display:grid; gap:6px; min-width:240px; font-size:.875rem; font-weight:600; }
+  .field input { font:inherit; font-weight:400; font-size:1rem; min-height:44px; padding:10px 12px; border-radius:10px; border:1px solid var(--verde-300); background:var(--nude-100); color:var(--verde-900); }
+  .field.error input { border:2px solid var(--vermelho-500); }
+  .field .msg { font-weight:600; color:var(--vermelho-500); display:flex; gap:6px; align-items:center; }
+  .status { display:inline-flex; align-items:center; gap:6px; font-size:.875rem; font-weight:700; border-radius:8px; padding:4px 10px; }
+  .status svg { width:16px; height:16px; stroke:currentColor; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .s-ok { color:var(--verde-700); background:rgba(41,62,36,.1); }
+  .s-warn { color:var(--laranja-700); background:var(--laranja-100); }
+  .s-err { color:var(--vermelho-500); background:rgba(188,57,31,.08); }
+
+  .dos { list-style:none; display:grid; gap:8px; }
+  .dos li { padding-left:28px; position:relative; }
+  .dos li::before { content:''; position:absolute; left:4px; top:.45em; width:12px; height:12px; border-radius:50%; background:var(--verde-700); }
+  .donts li::before { border-radius:2px; background:var(--vermelho-500); transform:rotate(45deg); }
+
+  footer { margin-top:56px; padding-top:24px; border-top:1px solid var(--nude-300); font-size:.875rem; color:var(--verde-700); }
+
+  @media (prefers-reduced-motion: no-preference) { .btn { transition:background-color .15s ease; } }
+  @media print {
+    html { font-size:13px; }
+    body { max-width:none; padding:0 12mm; }
+    section { break-inside:auto; padding-top:28px; }
+    .card, .swatch, table, .pair, .demo, .type-row, figure { break-inside:avoid; }
+    h2 { break-after:avoid; }
+    .skip { display:none; }
+    @page { size:A4; margin:14mm 0; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="cover" aria-labelledby="titulo">
+  <svg class="pattern" viewBox="0 0 620 80" aria-hidden="true" focusable="false" fill="none" stroke="#E4683F" stroke-width="1.5" stroke-linecap="round">
+    <path d="M0 40c30-24 60-24 90 0s60 24 90 0h60l40 30c40-40 90-40 130 0s70 20 90-30h60l30 20"/>
+    <circle cx="90" cy="40" r="4" fill="#E4683F"/><circle cx="240" cy="40" r="4" fill="#E4683F"/><circle cx="560" cy="40" r="4" fill="#E4683F"/>
+    <path d="M240 40V10M560 40V14"/>
+  </svg>
+  <div class="mark" aria-hidden="true">
+    <svg width="40" height="40" viewBox="0 0 32 32"><path d="M16 2.5C21.5 8 26.5 13.5 26.5 18 26.5 23.8 21.8 28.5 16 29.5 10.2 28.5 5.5 23.8 5.5 18 5.5 13.5 10.5 8 16 2.5Z" fill="#E4683F"/><path d="M16 7v18" stroke="#172314" stroke-width="1.75" stroke-linecap="round"/><circle cx="16" cy="9.5" r="2" fill="#172314"/><circle cx="16" cy="16" r="2" fill="#172314"/><circle cx="16" cy="22.5" r="2" fill="#172314"/></svg>
+  </div>
+  <p class="eyebrow" style="color:var(--laranja-300)">Manual de identidade visual</p>
+  <h1 id="titulo">Edu-Interact</h1>
+  <p class="tagline">Onde a raiz encontra o circuito — uma plataforma educacional que une o rigor da tecnologia à calidez do olhar humano.</p>
+  <dl>
+    <div><dt>Versão</dt><dd>1.1 — novembro de 2026</dd></div>
+    <div><dt>Aplicação</dt><dd>Produto, redes, impressos</dd></div>
+    <div><dt>Território</dt><dd>Educação científica inclusiva</dd></div>
+  </dl>
+</header>
+
+<main id="conteudo">
+
+<nav aria-label="Sumário" style="padding:32px 0">
+  <p class="eyebrow">Sumário</p>
+  <p style="max-width:none">
+    <a href="#revisao">O que mudou</a> · <a href="#conceito">00 Conceito</a> · <a href="#simbolo">01 Símbolo</a> · <a href="#logotipo">02 Logotipo</a> · <a href="#paleta">03 Paleta</a> · <a href="#tipografia">04 Tipografia</a> · <a href="#grafismos">05 Grafismos</a> · <a href="#icones">06 Ícones</a> · <a href="#padroes">07 Padrões visuais</a> · <a href="#interface">08 Interface e estados</a> · <a href="#escuro">09 Modo escuro</a> · <a href="#acessibilidade">10 Acessibilidade e DUA</a> · <a href="#imagens">11 Imagens</a> · <a href="#aplicacoes">12 Aplicações</a> · <a href="#incorretos">13 Usos incorretos</a> · <a href="#tokens">14 Tokens</a>
+  </p>
+</nav>
+
+<section id="revisao" aria-labelledby="h-rev">
+  <p class="eyebrow">Revisão v1.0 → v1.1</p>
+  <h2 id="h-rev">O que mudou e por quê</h2>
+  <p class="lead">A v1.0 já tinha uma base sólida, mas duas regras de cor geravam falhas de contraste no produto. A v1.1 corrige essas regras e inclui o que faltava para uma marca cuja promessa é educação inclusiva.</p>
+  <table style="margin-top:24px">
+    <caption>Correções de acessibilidade (contraste medido pela fórmula WCAG 2.2)</caption>
+    <thead><tr><th scope="col">Regra v1.0</th><th scope="col">Medição</th><th scope="col">Regra v1.1</th></tr></thead>
+    <tbody>
+      <tr><td>Laranja 500 sobre Nude em texto grande (24px+)</td><td class="num"><span class="fail">2,76:1 ✕</span></td><td>Texto laranja sempre em Laranja 700 <code>#A63D1B</code> — <span class="pass">5,30:1</span></td></tr>
+      <tr><td>Texto branco em botões Laranja 500 (produto)</td><td class="num"><span class="fail">3,31:1 ✕</span></td><td>Texto Verde 900 sobre Laranja 500 — <span class="pass">4,93:1</span></td></tr>
+      <tr><td>Laranja 700 <code>#B8441F</code> em texto pequeno</td><td class="num">4,51:1 (limite)</td><td>Laranja 700 escurecido para <code>#A63D1B</code>; o antigo vira Laranja 600</td></tr>
+      <tr><td>Borda de campo em Nude 300</td><td class="num"><span class="fail">1,19:1 ✕</span></td><td>Borda de controle em Verde 300 <code>#76866F</code> — <span class="pass">3,24:1</span></td></tr>
+      <tr><td>Sem regra de foco (produto usava Laranja 500)</td><td class="num"><span class="fail">2,76:1 ✕</span></td><td>Anel de 3px em Laranja 700 / Laranja 300 no escuro</td></tr>
+    </tbody>
+  </table>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card"><h3>Novo</h3><p>Modo escuro oficial, estados de interface, alvos de toque, movimento reduzido, tipografia de acessibilidade (Atkinson Hyperlegible) e uma seção de DUA.</p></div>
+    <div class="card"><h3>Esclarecido</h3><p>Wordmark em caixa de frase (não "minúsculo"). Nervura do símbolo em Verde 900, não branca. A borda separa superfícies; o espaço cria a hierarquia.</p></div>
+    <div class="card"><h3>Substituído</h3><p>Ícone de "Progresso" (relógio) por gráfico de tendência. Ícone de "Acessibilidade" (fone) pelo pictograma universal.</p></div>
+  </div>
+</section>
+
+<section id="conceito" aria-labelledby="h-00">
+  <p class="eyebrow">00</p>
+  <h2 id="h-00">Conceito da marca</h2>
+  <p class="lead">A Edu-Interact vive na fronteira entre duas naturezas: a precisão de um laboratório e o calor de uma sala de aula acolhedora.</p>
+  <p>O verde e o laranja vêm da terra, da raiz e do crescimento, de uma sala de aula com luz natural. Eles carregam a metáfora dos quatro pilares da metodologia: Sócrates, Aristóteles, Freire e o Desenho Universal para a Aprendizagem.</p>
+  <p>A camada tecnológica não mora na cor. Ela mora na geometria: na tipografia técnica, no grafismo de circuito e na precisão do grid. <strong>A acessibilidade não é um anexo da marca. Ela é a forma como a marca cuida das pessoas.</strong></p>
+</section>
+
+<section id="simbolo" aria-labelledby="h-01">
+  <p class="eyebrow">01</p>
+  <h2 id="h-01">Símbolo</h2>
+  <p class="lead">Uma semente com nervura de circuito. Raiz e dado, no mesmo traço.</p>
+  <p>A forma externa é uma folha orgânica, sem ângulos retos. Sobre ela passa uma linha com três nós, um para cada momento do Ciclo CSFA: provocação, experimentação e maiêutica.</p>
+  <div class="grid g2" style="margin-top:24px">
+    <figure class="stage light">
+      <div style="text-align:center"><svg width="72" height="72" viewBox="0 0 32 32" role="img" aria-label="Símbolo em cores padrão"><path d="M16 2.5C21.5 8 26.5 13.5 26.5 18 26.5 23.8 21.8 28.5 16 29.5 10.2 28.5 5.5 23.8 5.5 18 5.5 13.5 10.5 8 16 2.5Z" fill="#E4683F"/><path d="M16 7v18" stroke="#172314" stroke-width="1.75" stroke-linecap="round"/><circle cx="16" cy="9.5" r="2" fill="#172314"/><circle cx="16" cy="16" r="2" fill="#172314"/><circle cx="16" cy="22.5" r="2" fill="#172314"/></svg>
+      <figcaption>Padrão — folha Laranja 500, nervura Verde 900</figcaption></div>
+    </figure>
+    <figure class="stage dark">
+      <div style="text-align:center"><svg width="72" height="72" viewBox="0 0 32 32" role="img" aria-label="Símbolo em versão negativa"><path d="M16 2.5C21.5 8 26.5 13.5 26.5 18 26.5 23.8 21.8 28.5 16 29.5 10.2 28.5 5.5 23.8 5.5 18 5.5 13.5 10.5 8 16 2.5Z" fill="#F1EAD9"/><path d="M16 7v18" stroke="#E4683F" stroke-width="1.75" stroke-linecap="round"/><circle cx="16" cy="9.5" r="2" fill="#E4683F"/><circle cx="16" cy="16" r="2" fill="#E4683F"/><circle cx="16" cy="22.5" r="2" fill="#E4683F"/></svg>
+      <figcaption>Negativo — folha Nude, nervura Laranja 500</figcaption></div>
+    </figure>
+  </div>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card"><h3>Área de proteção</h3><p>Espaço livre ao redor equivalente à altura de um nó interno.</p></div>
+    <div class="card"><h3>Tamanho mínimo</h3><p>24px em telas / 8mm em impressos. Abaixo disso, só a folha, sem a nervura.</p></div>
+    <div class="card"><h3>Em código <span class="new">v1.1</span></h3><p>Quando o símbolo acompanha o nome da marca, use <code>aria-hidden="true"</code>. Quando está sozinho num link, o link recebe o nome acessível "Edu-Interact — página inicial".</p></div>
+  </div>
+</section>
+
+<section id="logotipo" aria-labelledby="h-02">
+  <p class="eyebrow">02</p>
+  <h2 id="h-02">Logotipo</h2>
+  <p class="lead">Wordmark técnico em caixa de frase — nunca em caixa alta.</p>
+  <p>"Edu-Interact" em Space Grotesk Bold, com rastreamento de −2,5%. O símbolo fica à esquerda na versão horizontal (padrão) ou acima na versão empilhada (selos, avatares, apps).</p>
+  <div class="grid g2" style="margin-top:24px">
+    <figure class="stage light"><div style="text-align:center"><div class="lockup" style="color:var(--verde-700)"><svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2.5C21.5 8 26.5 13.5 26.5 18 26.5 23.8 21.8 28.5 16 29.5 10.2 28.5 5.5 23.8 5.5 18 5.5 13.5 10.5 8 16 2.5Z" fill="#E4683F"/><path d="M16 7v18" stroke="#172314" stroke-width="1.75" stroke-linecap="round"/><circle cx="16" cy="9.5" r="2" fill="#172314"/><circle cx="16" cy="16" r="2" fill="#172314"/><circle cx="16" cy="22.5" r="2" fill="#172314"/></svg>Edu-Interact</div><figcaption>Padrão, sobre Nude</figcaption></div></figure>
+    <figure class="stage dark"><div style="text-align:center"><div class="lockup" style="color:var(--nude-500)"><svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2.5C21.5 8 26.5 13.5 26.5 18 26.5 23.8 21.8 28.5 16 29.5 10.2 28.5 5.5 23.8 5.5 18 5.5 13.5 10.5 8 16 2.5Z" fill="#F1EAD9"/><path d="M16 7v18" stroke="#E4683F" stroke-width="1.75" stroke-linecap="round"/><circle cx="16" cy="9.5" r="2" fill="#E4683F"/><circle cx="16" cy="16" r="2" fill="#E4683F"/><circle cx="16" cy="22.5" r="2" fill="#E4683F"/></svg>Edu-Interact</div><figcaption>Negativo, sobre Verde</figcaption></div></figure>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card"><h3>Nunca</h3><p>Caixa alta, itálico, sombra, contorno ou wordmark esticado para caber num espaço.</p></div>
+    <div class="card"><h3>Hierarquia</h3><p>Abaixo de 120px de largura, use só o símbolo, nunca o lockup completo.</p></div>
+  </div>
+</section>
+
+<section id="paleta" aria-labelledby="h-03">
+  <p class="eyebrow">03</p>
+  <h2 id="h-03">Paleta de cores</h2>
+  <p class="lead">Quatro cores, um só sentimento: terra, crescimento e atenção.</p>
+  <div class="grid g4" style="margin-top:24px">
+    <div class="swatch"><div class="chip" style="background:#293E24;color:#FAF7EE">Verde</div><div class="meta"><code>#293E24</code><br/>Texto, estrutura, marca dominante</div></div>
+    <div class="swatch"><div class="chip" style="background:#E4683F;color:#172314">Laranja</div><div class="meta"><code>#E4683F</code><br/>Ação, destaque, gamificação</div></div>
+    <div class="swatch"><div class="chip" style="background:#BC391F;color:#FAF7EE">Vermelho</div><div class="meta"><code>#BC391F</code><br/>Atenção pontual: prazos, erros</div></div>
+    <div class="swatch"><div class="chip" style="background:#F1EAD9;color:#172314">Nude</div><div class="meta"><code>#F1EAD9</code><br/>Fundo, respiro, papel</div></div>
+  </div>
+  <h3>Proporção</h3>
+  <div class="ratio" role="img" aria-label="Proporção de uso: Nude 50%, Verde 30%, Laranja 15%, Vermelho 5%">
+    <span style="flex:50;background:#F1EAD9;color:#172314">Nude 50%</span><span style="flex:30;background:#293E24;color:#FAF7EE">Verde 30%</span><span style="flex:15;background:#E4683F;color:#172314">Laranja 15%</span><span style="flex:5;background:#BC391F;color:#FAF7EE">5%</span>
+  </div>
+
+  <h3>Escala estendida <span class="new">hex na v1.1</span></h3>
+  <div class="scale">
+    <div class="tone" style="background:#172314;color:#FAF7EE"><b>Verde 900</b><code>#172314</code></div>
+    <div class="tone" style="background:#293E24;color:#FAF7EE"><b>Verde 700</b><code>#293E24</code></div>
+    <div class="tone" style="background:#3D5B36;color:#FAF7EE"><b>Verde 500</b><code>#3D5B36</code></div>
+    <div class="tone" style="background:#76866F;color:#172314"><b>Verde 300</b><code>#76866F</code></div>
+    <div class="tone" style="background:#A8D5A2;color:#172314"><b>Verde 200</b><code>#A8D5A2</code></div>
+  </div>
+  <div class="scale" style="margin-top:8px">
+    <div class="tone" style="background:#A63D1B;color:#FAF7EE"><b>Laranja 700</b><code>#A63D1B</code></div>
+    <div class="tone" style="background:#B8441F;color:#FAF7EE"><b>Laranja 600</b><code>#B8441F</code></div>
+    <div class="tone" style="background:#E4683F;color:#172314"><b>Laranja 500</b><code>#E4683F</code></div>
+    <div class="tone" style="background:#EC7E58;color:#172314"><b>Laranja 400</b><code>#EC7E58</code></div>
+    <div class="tone" style="background:#F59C7B;color:#172314"><b>Laranja 300</b><code>#F59C7B</code></div>
+    <div class="tone" style="background:#FCEEE9;color:#172314"><b>Laranja 100</b><code>#FCEEE9</code></div>
+  </div>
+  <div class="scale" style="margin-top:8px">
+    <div class="tone" style="background:#BC391F;color:#FAF7EE"><b>Vermelho 500</b><code>#BC391F</code></div>
+    <div class="tone" style="background:#F2A08A;color:#172314"><b>Vermelho 300</b><code>#F2A08A</code></div>
+    <div class="tone" style="background:#E2D7C3;color:#172314"><b>Nude 300</b><code>#E2D7C3</code></div>
+    <div class="tone" style="background:#F1EAD9;color:#172314"><b>Nude 500</b><code>#F1EAD9</code></div>
+    <div class="tone" style="background:#FAF7EE;color:#172314"><b>Nude 100</b><code>#FAF7EE</code></div>
+  </div>
+
+  <h3>Pares aprovados (texto e componentes)</h3>
+  <div class="grid g2">
+    <div class="pair" style="background:#F1EAD9;color:#293E24"><span>Verde 700 sobre Nude</span><span class="badge">9,68:1 · AAA</span></div>
+    <div class="pair" style="background:#F1EAD9;color:#A63D1B"><span>Laranja 700 sobre Nude</span><span class="badge">5,30:1 · AA</span></div>
+    <div class="pair" style="background:#E4683F;color:#172314"><span>Verde 900 sobre Laranja 500</span><span class="badge">4,93:1 · AA</span></div>
+    <div class="pair" style="background:#F1EAD9;color:#BC391F"><span>Vermelho sobre Nude</span><span class="badge">4,68:1 · AA</span></div>
+    <div class="pair" style="background:#293E24;color:#F1EAD9"><span>Nude sobre Verde 700</span><span class="badge">9,68:1 · AAA</span></div>
+    <div class="pair" style="background:#293E24;color:#F59C7B"><span>Laranja 300 sobre Verde 700</span><span class="badge">5,49:1 · AA</span></div>
+  </div>
+  <div class="note"><strong>Proibido em texto:</strong> Laranja 500 sobre Nude (2,76:1), branco sobre Laranja 500 (3,31:1) e Laranja 500 sobre Verde 700 em texto menor que 24px (3,51:1). Laranja 500 é cor de <em>preenchimento</em>, não de letra.</div>
+</section>
+
+<section id="tipografia" aria-labelledby="h-04">
+  <p class="eyebrow">04</p>
+  <h2 id="h-04">Tipografia</h2>
+  <p class="lead">Duas vozes — uma técnica, uma humana — e uma terceira voz de acessibilidade.</p>
+  <div style="margin-top:16px">
+    <div class="type-row"><div><b>Space Grotesk</b><small>Títulos, dados, UI técnica</small></div><div style="font-family:var(--display);font-weight:700;font-size:2.5rem;color:var(--verde-700);letter-spacing:-0.02em;line-height:1.1">Laboratórios virtuais</div></div>
+    <div class="type-row"><div><b>Manrope</b><small>Texto corrido, interface</small></div><div style="font-size:1.0625rem">O aluno manipula variáveis reais, formula hipóteses e constrói, com autonomia, seu próprio entendimento sobre o fenômeno observado.</div></div>
+    <div class="type-row"><div><b>Atkinson Hyperlegible</b> <span class="new">v1.1</span><small>Modo de leitura facilitada</small></div><div style="font-family:var(--a11y);font-size:1.125rem;letter-spacing:.02em;line-height:1.8">Il1 0O rn m — letras com formas inconfundíveis para baixa visão e dislexia.</div></div>
+  </div>
+  <table style="margin-top:24px">
+    <caption>Escala</caption>
+    <thead><tr><th scope="col">Uso</th><th scope="col">Tamanho / entrelinha</th><th scope="col">Fonte e peso</th></tr></thead>
+    <tbody>
+      <tr><td>Display</td><td class="num">44–48px / 1,1</td><td>Space Grotesk 700</td></tr>
+      <tr><td>H1 · H2 · H3</td><td class="num">32 · 24 · 20px / 1,25</td><td>Space Grotesk 700</td></tr>
+      <tr><td>Corpo (leitura)</td><td class="num">17px / 1,6</td><td>Manrope 400–500</td></tr>
+      <tr><td>Interface: botões e rótulos <span class="new">v1.1</span></td><td class="num">≥ 14px / 1,4</td><td>Manrope 600–700</td></tr>
+      <tr><td>Campos de formulário <span class="new">v1.1</span></td><td class="num">16px</td><td>Manrope 400 — evita o zoom automático do iOS</td></tr>
+      <tr><td>Legenda (não essencial)</td><td class="num">13px / 1,5</td><td>Manrope 500</td></tr>
+    </tbody>
+  </table>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card"><h3>Peso e caixa</h3><p>Títulos sempre em caixa de frase. Caixa alta só em siglas (BNCC, DUA, XP, ENEM).</p></div>
+    <div class="card"><h3>Legibilidade <span class="new">v1.1</span></h3><p>Coluna de texto ≤ 640px (~70 caracteres). O layout deve aceitar entrelinha 1,5, espaço entre parágrafos 2×, letras +0,12em e palavras +0,16em sem cortar conteúdo (WCAG 1.4.12).</p></div>
+  </div>
+</section>
+
+<section id="grafismos" aria-labelledby="h-05">
+  <p class="eyebrow">05</p>
+  <h2 id="h-05">Grafismos</h2>
+  <p class="lead">Padrão raiz-circuito: linhas retas encontram curvas orgânicas.</p>
+  <div class="stage dark" style="margin-top:16px;min-height:140px">
+    <svg viewBox="0 0 620 80" width="90%" aria-hidden="true" fill="none" stroke="#E4683F" stroke-width="1.5" stroke-linecap="round"><path d="M0 40c30-24 60-24 90 0s60 24 90 0h60l40 30c40-40 90-40 130 0s70 20 90-30h60l30 20"/><circle cx="90" cy="40" r="4" fill="#E4683F"/><circle cx="240" cy="40" r="4" fill="#E4683F"/><circle cx="560" cy="40" r="4" fill="#E4683F"/><path d="M240 40V10M560 40V14"/></svg>
+  </div>
+  <p style="margin-top:12px">Textura discreta em capas, fundos de seção e impressos. Fica sempre em uma única cor, com opacidade de até 35% sobre Verde e até 15% sobre Nude. Nunca fica atrás de texto corrido. Em código, é sempre decorativo: <code>aria-hidden="true"</code>.</p>
+</section>
+
+<section id="icones" aria-labelledby="h-06">
+  <p class="eyebrow">06</p>
+  <h2 id="h-06">Padrão de ícones</h2>
+  <p class="lead">Traço único, cantos levemente arredondados, nunca preenchidos.</p>
+  <p>Grid de 24px, traço de 1,75px constante, terminações arredondadas. No produto, use a biblioteca Lucide com <code>stroke-width: 1.75</code>. A cor padrão é Verde 700; em fundo escuro, Nude.</p>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="icon-cell"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6.5L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9.5V3"/><path d="M7 15h10"/></svg>Laboratório</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-6"/><path d="M15 8h5v5"/></svg>Progresso <span class="new">novo</span></div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>Tutor</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Turma</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg>Conquista</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="16" cy="4" r="1"/><path d="m18 19 1-7-6 1M5 8l3-3 5.5 3-2.36 3.5M4.24 14.5a5 5 0 0 0 6.88 6M13.76 17.5a5 5 0 0 0-6.88-6"/></svg>Acessibilidade <span class="new">novo</span></div>
+  </div>
+  <div class="note"><strong>Regra de acessibilidade:</strong> ícone sozinho num botão sempre tem nome acessível (<code>aria-label</code>). Ícone ao lado de texto é decorativo (<code>aria-hidden</code>). Emoji não substitui ícone de interface.</div>
+</section>
+
+<section id="padroes" aria-labelledby="h-07">
+  <p class="eyebrow">07</p>
+  <h2 id="h-07">Padrões visuais</h2>
+  <p class="lead">Grid generoso, cantos de 10 a 16px, hierarquia por espaço.</p>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card"><h3>Grid</h3><p>Coluna de leitura ≤ 640px. Espaçamentos em múltiplos de 8px (4px para ajustes finos). Nenhuma rolagem horizontal até 320px de largura (WCAG 1.4.10).</p></div>
+    <div class="card"><h3>Cantos</h3><p>10px em controles e cartões pequenos, 14–16px em blocos grandes e fotos. Nunca 0px nem pílula total.</p></div>
+    <div class="card"><h3>Divisórias e bordas</h3><p>Linha de 1px em Nude 300 para separar superfícies do mesmo tom (decorativa). Controles interativos usam Verde 300 (3:1). <b>Elevação suave em três níveis</b> (cartão, flutuante, diálogo), sempre tingida de Verde 900 e nunca preta — a hierarquia continua vindo primeiro do espaço.</p></div>
+    <div class="card"><h3>Contenção de cor</h3><p>Uma cor de destaque por composição. Laranja e Vermelho nunca com peso equivalente na mesma peça.</p></div>
+  </div>
+</section>
+
+<section id="interface" aria-labelledby="h-08">
+  <p class="eyebrow">08 · novo</p>
+  <h2 id="h-08">Interface e estados</h2>
+  <p class="lead">Cada estado é percebido por mais de um sentido: cor, forma e texto.</p>
+  <h3>Botões</h3>
+  <div class="demo light">
+    <button class="btn btn-primary" type="button">Entrar na plataforma</button>
+    <button class="btn btn-secondary" type="button">Explorar laboratórios</button>
+    <button class="btn btn-outline" type="button">Ver planos</button>
+    <button class="btn btn-primary focus" type="button">Foco de teclado</button>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card"><h3>Hierarquia</h3><p><b>Primário</b>: Laranja 500 com texto Verde 900, no máximo um por tela. <b>Secundário</b>: Verde 700 com texto Nude. <b>Contorno</b>: borda Verde 700. O hover clareia para Laranja 400; pressionar reduz a escala para 98%.</p></div>
+    <div class="card"><h3>Alvo e foco</h3><p>Altura mínima de 44px em ações principais e 24×24px em qualquer controle (WCAG 2.5.8). Foco: contorno de 3px em Laranja 700, afastado 2px. O foco nunca fica escondido sob cabeçalhos fixos (WCAG 2.4.11).</p></div>
+  </div>
+  <h3>Formulários e mensagens</h3>
+  <div class="demo light" style="align-items:flex-start">
+    <label class="field">E-mail institucional<input type="email" value="ana@escola.edu.br" /></label>
+    <div class="field error"><label for="demo-cod">Código da turma</label><input id="demo-cod" value="12AB" aria-invalid="true" aria-describedby="demo-cod-msg" /><span class="msg" id="demo-cod-msg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>O código tem 8 dígitos.</span></div>
+  </div>
+  <div class="demo light" style="margin-top:8px">
+    <span class="status s-ok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Entregue</span>
+    <span class="status s-warn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Prazo amanhã</span>
+    <span class="status s-err"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>Atrasado</span>
+  </div>
+  <ul class="dos" style="margin-top:16px">
+    <li>Rótulo visível acima de todo campo; o placeholder não substitui o rótulo.</li>
+    <li>Erro escrito perto do campo, ligado por <code>aria-describedby</code>, dizendo como corrigir.</li>
+    <li>Status sempre com ícone e palavra, nunca só um ponto colorido.</li>
+  </ul>
+  <h3>Movimento</h3>
+  <p>Durações de 150–300ms, com saída mais rápida que a entrada. Movimento só para explicar uma mudança (de onde veio, para onde foi). Respeitar <code>prefers-reduced-motion</code> e o modo "Reduzir distrações". Nada pisca mais de 3 vezes por segundo.</p>
+</section>
+
+<section id="escuro" aria-labelledby="h-09">
+  <p class="eyebrow">09 · novo</p>
+  <h2 id="h-09">Modo escuro</h2>
+  <p class="lead">A noite da mesma terra: verdes profundos, nude como luz e laranja como brasa.</p>
+  <div class="demo dark" style="margin-top:16px">
+    <button class="btn btn-primary" type="button">Entrar na plataforma</button>
+    <button class="btn btn-secondary" type="button">Explorar laboratórios</button>
+    <button class="btn btn-outline" type="button">Ver planos</button>
+    <button class="btn btn-primary focus" type="button">Foco</button>
+  </div>
+  <div class="scale" style="margin-top:16px">
+    <div class="tone" style="background:#0D150B;color:#FAF7EE;border-color:#3D5B36"><b>Fundo</b><code>#0D150B</code></div>
+    <div class="tone" style="background:#182616;color:#FAF7EE;border-color:#3D5B36"><b>Cartão</b><code>#182616</code></div>
+    <div class="tone" style="background:#182616;color:#FAF7EE;border-color:#3D5B36"><b>Texto</b><code style="color:#FAF7EE">#FAF7EE 14,8:1</code></div>
+    <div class="tone" style="background:#182616;color:#B6C7B3;border-color:#3D5B36"><b>Texto apoio</b><code>#B6C7B3 8,9:1</code></div>
+    <div class="tone" style="background:#182616;color:#F59C7B;border-color:#3D5B36"><b>Destaque</b><code>#F59C7B 7,5:1</code></div>
+    <div class="tone" style="background:#182616;color:#F2A08A;border-color:#3D5B36"><b>Erro</b><code>#F2A08A 7,7:1</code></div>
+  </div>
+  <ul class="dos" style="margin-top:16px">
+    <li>Texto em Nude 100, não branco puro: menos ofuscamento para leitores com astigmatismo e fotofobia.</li>
+    <li>Sucesso em Verde 200 <code>#A8D5A2</code>, erro em Vermelho 300 <code>#F2A08A</code>. Nada de verde-menta, azul ou vermelho fora da paleta.</li>
+    <li>A bancada dos laboratórios continua clara para preservar a leitura das simulações.</li>
+    <li>O tema inicial segue a preferência do sistema operacional (<code>prefers-color-scheme</code>).</li>
+  </ul>
+</section>
+
+<section id="acessibilidade" aria-labelledby="h-10">
+  <p class="eyebrow">10 · novo</p>
+  <h2 id="h-10">Acessibilidade e DUA</h2>
+  <p class="lead">O Desenho Universal para a Aprendizagem é o quarto pilar da metodologia. Na marca, ele vira regra visual.</p>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card"><h3>Engajamento</h3><p>Escolha e autonomia: o modo "Reduzir distrações" remove animações e ruído visual. A gamificação em laranja nunca é o único caminho para o conteúdo.</p></div>
+    <div class="card"><h3>Representação</h3><p>Múltiplas formas de perceber: tamanho de texto (100/115/130%), fonte de leitura facilitada, espaçamento ampliado, leitura em voz alta e alto contraste.</p></div>
+    <div class="card"><h3>Ação e expressão</h3><p>Múltiplas formas de agir: tudo funciona por teclado, alvos de toque generosos, atalhos documentados e nenhuma ação depende só de arrastar.</p></div>
+  </div>
+  <table style="margin-top:24px">
+    <caption>Requisitos mínimos (WCAG 2.2 nível AA)</caption>
+    <thead><tr><th scope="col">Critério</th><th scope="col">Regra da marca</th></tr></thead>
+    <tbody>
+      <tr><td>1.4.3 Contraste de texto</td><td>≥ 4,5:1 (texto normal) e ≥ 3:1 (≥ 24px ou 18,5px negrito). Usar só os pares aprovados.</td></tr>
+      <tr><td>1.4.11 Contraste não textual</td><td>Bordas de controles, ícones informativos e foco ≥ 3:1.</td></tr>
+      <tr><td>1.4.1 Uso de cor</td><td>Cor nunca é o único indicador: sempre acompanha texto, ícone ou padrão.</td></tr>
+      <tr><td>1.4.4 / 1.4.10 Redimensionar e refluxo</td><td>Zoom de 200% sem perda; nenhuma rolagem horizontal em 320px.</td></tr>
+      <tr><td>1.4.12 Espaçamento de texto</td><td>Os layouts aceitam espaçamento ampliado sem cortar conteúdo.</td></tr>
+      <tr><td>2.4.7 / 2.4.11 Foco visível e não encoberto</td><td>Anel de 3px; <code>scroll-padding-top</code> igual à altura do cabeçalho fixo.</td></tr>
+      <tr><td>2.5.8 Tamanho do alvo</td><td>≥ 24×24px; 44×44px em ações principais e em telas de toque.</td></tr>
+      <tr><td>2.3.3 Animação por interação</td><td>Respeitar <code>prefers-reduced-motion</code>.</td></tr>
+      <tr><td>Modo de cores forçadas</td><td>Componentes mantêm contorno e foco no Alto Contraste do Windows (<code>forced-colors</code>).</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="imagens" aria-labelledby="h-11">
+  <p class="eyebrow">11</p>
+  <h2 id="h-11">Estilo de imagens</h2>
+  <p class="lead">Fotografia com tratamento duotone verde/laranja, nunca banco de imagens de "tecnologia fria".</p>
+  <p>Estudantes e professores reais em interação, mãos manipulando objetos, luz natural. Duotone sutil: sombras em Verde 900, luzes em Nude ou Laranja claro. Na ilustração, só o traço de ícone da marca, sem 3D ou mascote.</p>
+  <ul class="dos" style="margin-top:12px">
+    <li>Mostrar diversidade real: deficiências visíveis e invisíveis, tecnologias assistivas, diferentes corpos e territórios.</li>
+    <li>Toda imagem informativa tem texto alternativo que descreve a função; imagens decorativas usam <code>alt=""</code>.</li>
+    <li>Nunca colocar texto essencial dentro da imagem.</li>
+  </ul>
+</section>
+
+<section id="aplicacoes" aria-labelledby="h-12">
+  <p class="eyebrow">12</p>
+  <h2 id="h-12">Aplicações</h2>
+  <p class="lead">Redes sociais, produto e impressos seguem a mesma contenção de cor.</p>
+  <div class="grid g2" style="margin-top:16px">
+    <div style="background:#293E24;color:#F1EAD9;border-radius:14px;padding:28px;min-height:200px;display:flex;flex-direction:column;justify-content:space-between"><span style="color:#F59C7B;font-size:.875rem">edu-interact · post 1:1</span><b style="font-family:var(--display);font-size:1.5rem;line-height:1.25">72 laboratórios virtuais. Um só clique de distância.</b></div>
+    <div style="background:#E4683F;color:#172314;border-radius:14px;padding:28px;min-height:200px"><b style="font-family:var(--display);font-size:1.5rem;display:block">Modo foco ativado.</b><span>Acessibilidade que aprende com você. — story 9:16</span></div>
+  </div>
+  <p style="margin-top:12px">Nas redes: legendas em vídeos, texto alternativo em todas as imagens e hashtags em CamelCase (#EducaçãoInclusiva), que os leitores de tela leem corretamente.</p>
+</section>
+
+<section id="incorretos" aria-labelledby="h-13">
+  <p class="eyebrow">13</p>
+  <h2 id="h-13">Usos incorretos</h2>
+  <p class="lead">A marca é simples de quebrar. Por isso, poucas regras, aplicadas sem exceção.</p>
+  <ul class="dos donts" style="margin-top:16px">
+    <li>Trocar as cores do símbolo por qualquer cor fora da paleta.</li>
+    <li>Escrever o wordmark em caixa alta, itálico, com sombra ou esticado.</li>
+    <li>Usar Laranja e Vermelho com o mesmo peso numa composição.</li>
+    <li>Esticar, girar ou espelhar o símbolo.</li>
+    <li><b>v1.1:</b> texto branco sobre Laranja 500, ou Laranja 500 como cor de texto sobre Nude.</li>
+    <li><b>v1.1:</b> remover o contorno de foco (<code>outline: none</code>) sem um substituto equivalente.</li>
+    <li><b>v1.1:</b> comunicar estado só por cor, ou usar emoji como ícone de interface.</li>
+  </ul>
+</section>
+
+<section id="tokens" aria-labelledby="h-14">
+  <p class="eyebrow">14 · novo</p>
+  <h2 id="h-14">Tokens de design</h2>
+  <p class="lead">Fonte única de verdade para designers e desenvolvedores, em <code>src/index.css</code>.</p>
+  <table style="margin-top:16px">
+    <thead><tr><th scope="col">Token</th><th scope="col">Claro</th><th scope="col">Escuro</th></tr></thead>
+    <tbody>
+      <tr><td><code>--bg-base</code></td><td><code>#F1EAD9</code></td><td><code>#0D150B</code></td></tr>
+      <tr><td><code>--bg-card</code></td><td><code>#FAF7EE</code></td><td><code>#182616</code></td></tr>
+      <tr><td><code>--text-main</code></td><td><code>#172314</code></td><td><code>#FAF7EE</code></td></tr>
+      <tr><td><code>--text-muted</code></td><td><code>#556B51</code></td><td><code>#B6C7B3</code></td></tr>
+      <tr><td><code>--color-primary</code> (preenchimento)</td><td><code>#E4683F</code></td><td><code>#E4683F</code></td></tr>
+      <tr><td><code>--color-on-primary</code></td><td><code>#172314</code></td><td><code>#172314</code></td></tr>
+      <tr><td><code>--color-primary-accessible</code> (texto)</td><td><code>#A63D1B</code></td><td><code>#F59C7B</code></td></tr>
+      <tr><td><code>--border-control</code></td><td><code>#76866F</code></td><td><code>#7C8F78</code></td></tr>
+      <tr><td><code>--focus-ring</code></td><td><code>#A63D1B</code></td><td><code>#F59C7B</code></td></tr>
+      <tr><td><code>--color-success</code></td><td><code>#293E24</code></td><td><code>#A8D5A2</code></td></tr>
+      <tr><td><code>--color-error</code></td><td><code>#BC391F</code></td><td><code>#F2A08A</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+<footer>
+  <p><b>Edu-Interact</b> — manual de identidade visual · v1.1 — Raiz e circuito, sempre juntos.</p>
+</footer>
+</body>
+</html>

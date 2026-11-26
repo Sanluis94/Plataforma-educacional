@@ -161,19 +161,19 @@ function EnemSimuladoSession({ userId, isStudent, studentName, destination, role
   const result = attempt.result;
 
   return (
-    <div className="fade-in" style={{ padding: '2rem 1rem', maxWidth: '80rem', margin: '0 auto' }}>
+    <div className="fade-in ei-page">
       <nav aria-label="Navegação do simulado" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
         <Link to={destination} className="btn-outline" style={actionStyle}><ArrowLeft size={16} aria-hidden="true" /> Voltar</Link>
         {destination !== roleHome && <Link to={roleHome} className="btn-outline" style={actionStyle}>Meu painel</Link>}
       </nav>
-      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+      <header className="ei-page-header">
         <div style={{ flex: '1 1 26rem' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>SIMULADO DE TREINO</span>
-          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', margin: '0.35rem 0', fontFamily: 'var(--font-heading)', color: 'var(--text-main)' }}>Treino para o ENEM</h1>
-          <p style={{ ...mutedStyle, margin: 0 }}>Pratique, revise suas respostas e receba uma nota estimada. Este treino usa um modelo próprio inspirado na TRI; não é uma prova nem um cálculo oficial do INEP.</p>
+          <p className="ei-page-header__eyebrow">Simulado de treino</p>
+          <h1>Treino para o ENEM</h1>
+          <p>Pratique, revise suas respostas e receba uma nota estimada. Este treino usa um modelo próprio inspirado na TRI; não é uma prova nem um cálculo oficial do INEP.</p>
         </div>
         {attempt.status === 'active' && (
-          <div role="timer" aria-label="Tempo restante" aria-live="off" style={{ padding: '0.75rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center', fontWeight: 800, border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm, 10px)', color: timeRemaining < 300 ? 'var(--color-vermelho, #BC391F)' : 'var(--text-main)' }}>
+          <div role="timer" aria-label="Tempo restante" aria-live="off" className="ei-stat" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, color: timeRemaining < 300 ? '#F2A08A' : '#FAF7EE' }}>
             <Clock size={20} aria-hidden="true" /> {formatTime(timeRemaining)}
           </div>
         )}
@@ -248,7 +248,7 @@ function EnemSimuladoSession({ userId, isStudent, studentName, destination, role
       {attempt.status === 'finished' && result && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <section className="glass-card" style={{ ...cardStyle, textAlign: 'center' }} aria-labelledby="enem-result-title">
-            <Award size={48} aria-hidden="true" style={{ color: 'var(--color-primary-accessible, #B8441F)' }} />
+            <Award size={48} aria-hidden="true" style={{ color: 'var(--color-primary-accessible, #A63D1B)' }} />
             <h2 id="enem-result-title" ref={resultHeadingRef} tabIndex={-1} style={{ color: 'var(--text-main)' }}>Resultado do treino</h2>
             <p role="status" style={mutedStyle}>{attempt.completionReason === 'expired' ? 'O tempo terminou. Entregamos as respostas que você marcou.' : 'Simulado entregue.'}</p>
             <p style={{ fontWeight: 700, color: 'var(--text-secondary)' }}>Nota estimada</p>

@@ -1,3 +1,4 @@
+import { Trophy, BookOpen } from 'lucide-react';
 import { useState } from 'react';
 import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
@@ -163,7 +164,7 @@ export function PortugueseModule({ mode = 'syntax', labTitle, onComplete }: { mo
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>📖 {labTitle || modeLabel}</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>{labTitle || modeLabel}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
         {mode === 'syntax' ? 'Analise a estrutura sintática das orações e identifique funções gramaticais.' :
          mode === 'morphology' ? 'Classifique palavras e identifique processos de formação e classes gramaticais.' :
@@ -230,11 +231,11 @@ export function PortugueseModule({ mode = 'syntax', labTitle, onComplete }: { mo
             </div>
             {answered !== null && (
               <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                💡 <strong>Explicação do roteiro:</strong> {question.explanation}
+                <strong>Explicação do roteiro:</strong> {question.explanation}
               </div>
             )}
             {answered !== null && (
-              <button onClick={next} style={{ marginTop: '1rem', padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
+              <button onClick={next} style={{ marginTop: '1rem', padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'var(--color-on-primary, #172314)', cursor: 'pointer', fontWeight: 'bold' }}>
                 {currentQ < selectedFragment.questions.length - 1 ? 'Próxima Questão →' : 'Ver Resultado'}
               </button>
             )}
@@ -242,12 +243,12 @@ export function PortugueseModule({ mode = 'syntax', labTitle, onComplete }: { mo
         </div>
       ) : (
         <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>{score === selectedFragment.questions.length ? '🏆' : '📚'}</div>
+          <div aria-hidden="true" style={{ display: 'grid', placeItems: 'center', width: '4.5rem', height: '4.5rem', margin: '0 auto 0.75rem', borderRadius: '50%', background: 'rgba(var(--color-primary-rgb), 0.12)', color: 'var(--color-primary-accessible)' }}>{score === selectedFragment.questions.length ? <Trophy size={32} /> : <BookOpen size={32} />}</div>
           <h3 style={{ color: 'var(--text-main)' }}>Resultado: {score}/{selectedFragment.questions.length}</h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
             {score === selectedFragment.questions.length ? `Você acertou todas as questões deste conjunto.` : 'Revise os conceitos e tente novamente!'}
           </p>
-          <button onClick={reset} style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer' }}>
+          <button onClick={reset} style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'var(--color-on-primary, #172314)', cursor: 'pointer' }}>
             Refazer Quiz
           </button>
         </div>

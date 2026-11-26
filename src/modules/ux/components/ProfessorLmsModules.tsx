@@ -633,7 +633,7 @@ export function ProfessorLmsModules({
             <div className="glass-card" style={{ padding: '1.5rem', border: '1px solid var(--border-color, #E2D7C3)', background: 'transparent' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <h3 style={{ color: 'var(--text-main)', fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
-                  📝 Realizar Chamada Escolar
+                  Realizar Chamada Escolar
                 </h3>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
@@ -859,7 +859,7 @@ export function ProfessorLmsModules({
           {/* Histórico das Chamadas Efetuadas */}
           <div className="glass-card" style={{ padding: '1.5rem' }}>
             <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
-              📋 Histórico de Aulas e Chamadas Registradas
+              Histórico de Aulas e Chamadas Registradas
             </h3>
             {attendanceRecords.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0 }}>
@@ -875,7 +875,7 @@ export function ProfessorLmsModules({
                     <div key={rec.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1rem', borderRadius: '8px', background: 'transparent', border: '1px solid var(--border-color, #E2D7C3)' }}>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>{rec.data}</span>
+                          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--color-primary-accessible, #A63D1B)' }}>{rec.data}</span>
                           <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>— {rec.conteudoResumo || 'Aula Prática'}</span>
                         </div>
                         <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -911,7 +911,7 @@ export function ProfessorLmsModules({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Award style={{ color: 'var(--color-primary-accessible, #B8441F)', width: '1.4rem', height: '1.4rem' }} />
+                <Award style={{ color: 'var(--color-primary-accessible, #A63D1B)', width: '1.4rem', height: '1.4rem' }} />
                 Livro de notas & boletim ponderado (Gradebook)
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
@@ -944,7 +944,7 @@ export function ProfessorLmsModules({
                 cursor: 'pointer'
               }}
             >
-              🏫 Educação Básica / Médio (Média 6.0)
+              Educação Básica / Médio (Média 6.0)
             </button>
             <button
               onClick={() => setIsUniversityGradeMode(true)}
@@ -959,7 +959,7 @@ export function ProfessorLmsModules({
                 cursor: 'pointer'
               }}
             >
-              🎓 Modelo semestral (P1 + P2 + Labs)
+              Modelo semestral (P1 + P2 + Labs)
             </button>
           </div>
 
@@ -971,8 +971,8 @@ export function ProfessorLmsModules({
             {!isUniversityGradeMode ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📝 Provas Formais</label>
-                  <input aria-label="📝 Provas Formais"
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Provas Formais</label>
+                  <input aria-label="Provas Formais"
                     type="number"
                     value={weights.pesoProvas}
                     onChange={(e) => setWeights(prev => ({ ...prev, pesoProvas: Number(e.target.value) }))}
@@ -980,8 +980,8 @@ export function ProfessorLmsModules({
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>🔬 Laboratórios Virtuais</label>
-                  <input aria-label="🔬 Laboratórios Virtuais"
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Laboratórios Virtuais</label>
+                  <input aria-label="Laboratórios Virtuais"
                     type="number"
                     value={weights.pesoLabs}
                     onChange={(e) => setWeights(prev => ({ ...prev, pesoLabs: Number(e.target.value) }))}
@@ -989,8 +989,8 @@ export function ProfessorLmsModules({
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📄 Atividades Práticas</label>
-                  <input aria-label="📄 Atividades Práticas"
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Atividades Práticas</label>
+                  <input aria-label="Atividades Práticas"
                     type="number"
                     value={weights.pesoAtividades}
                     onChange={(e) => setWeights(prev => ({ ...prev, pesoAtividades: Number(e.target.value) }))}
@@ -998,8 +998,8 @@ export function ProfessorLmsModules({
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>💬 Participação & Fórum</label>
-                  <input aria-label="💬 Participação & Fórum"
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Participação & Fórum</label>
+                  <input aria-label="Participação & Fórum"
                     type="number"
                     value={weights.pesoParticipacao}
                     onChange={(e) => setWeights(prev => ({ ...prev, pesoParticipacao: Number(e.target.value) }))}
@@ -1012,8 +1012,8 @@ export function ProfessorLmsModules({
                 <div><label htmlFor="gradebook-p1">Prova usada como P1</label><select id="gradebook-p1" value={p1ExamId} onChange={event => setP1ExamId(event.target.value)}><option value="">Selecione uma prova</option>{classExams.map(exam => <option key={exam.id} value={exam.id}>{exam.titulo}</option>)}</select></div>
                 <div><label htmlFor="gradebook-p2">Prova usada como P2</label><select id="gradebook-p2" value={p2ExamId} onChange={event => setP2ExamId(event.target.value)}><option value="">Selecione outra prova</option>{classExams.map(exam => <option key={exam.id} value={exam.id} disabled={exam.id === p1ExamId}>{exam.titulo}</option>)}</select></div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📚 Prova Teórica 1 (P1)</label>
-                  <input aria-label="📚 Prova Teórica 1 (P1)"
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Prova Teórica 1 (P1)</label>
+                  <input aria-label="Prova Teórica 1 (P1)"
                     type="number"
                     value={univWeights.p1}
                     onChange={(e) => setUnivWeights(prev => ({ ...prev, p1: Number(e.target.value) }))}
@@ -1021,8 +1021,8 @@ export function ProfessorLmsModules({
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>📚 Prova Teórica 2 (P2)</label>
-                  <input aria-label="📚 Prova Teórica 2 (P2)"
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Prova Teórica 2 (P2)</label>
+                  <input aria-label="Prova Teórica 2 (P2)"
                     type="number"
                     value={univWeights.p2}
                     onChange={(e) => setUnivWeights(prev => ({ ...prev, p2: Number(e.target.value) }))}
@@ -1030,8 +1030,8 @@ export function ProfessorLmsModules({
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>🔬 Prática / Laboratórios</label>
-                  <input aria-label="🔬 Prática / Laboratórios"
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Prática / Laboratórios</label>
+                  <input aria-label="Prática / Laboratórios"
                     type="number"
                     value={univWeights.labs}
                     onChange={(e) => setUnivWeights(prev => ({ ...prev, labs: Number(e.target.value) }))}
@@ -1039,8 +1039,8 @@ export function ProfessorLmsModules({
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>🎯 Nota de Corte Direta</label>
-                  <input aria-label="🎯 Nota de Corte Direta"
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Nota de Corte Direta</label>
+                  <input aria-label="Nota de Corte Direta"
                     type="number"
                     step="0.5"
                     value={univWeights.minPassDireta}
@@ -1089,7 +1089,7 @@ export function ProfessorLmsModules({
                           <td style={{ padding: '0.85rem 0.5rem', fontWeight: 600, color: 'var(--text-main)' }}>
                             {rep.studentName}
                           </td>
-                          <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
+                          <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700 }}>
                             {formatGrade(rep.notaProvas)}
                           </td>
                           <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-secondary, #293E24)', fontWeight: 700 }}>
@@ -1139,7 +1139,7 @@ export function ProfessorLmsModules({
                         <td style={{ padding: '0.85rem 0.5rem', fontWeight: 600, color: 'var(--text-main)' }}>
                           {rep.studentName}
                         </td>
-                        <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
+                        <td style={{ padding: '0.85rem 0.5rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700 }}>
                           {formatGrade(p1)}
                         </td>
                         <td style={{ padding: '0.85rem 0.5rem', color: '#38bdf8', fontWeight: 700 }}>
@@ -1217,7 +1217,7 @@ export function ProfessorLmsModules({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <MessageSquare style={{ color: 'var(--color-primary-accessible, #B8441F)', width: '1.4rem', height: '1.4rem' }} />
+                <MessageSquare style={{ color: 'var(--color-primary-accessible, #A63D1B)', width: '1.4rem', height: '1.4rem' }} />
                 Fórum pedagógico & discussões acadêmicas
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0.2rem 0 0' }}>
@@ -1238,7 +1238,7 @@ export function ProfessorLmsModules({
           {isCreatingTopic && (
             <form onSubmit={handleCreateTopic} className="glass-card" style={{ padding: '1.5rem', border: '1px solid var(--border-color, #E2D7C3)' }}>
               <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>
-                💬 Abrir Novo Tópico com a Turma
+                Abrir Novo Tópico com a Turma
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                 <div>
@@ -1310,7 +1310,7 @@ export function ProfessorLmsModules({
                 fontWeight: forumFilter === 'all' ? 700 : 500,
                 background: forumFilter === 'all' ? 'rgba(228, 104, 63, 0.15)' : 'transparent',
                 border: forumFilter === 'all' ? '1px solid var(--color-primary, #E4683F)' : '1px solid var(--border-color, #E2D7C3)',
-                color: forumFilter === 'all' ? 'var(--color-primary-accessible, #B8441F)' : 'var(--text-secondary)',
+                color: forumFilter === 'all' ? 'var(--color-primary-accessible, #A63D1B)' : 'var(--text-secondary)',
                 cursor: 'pointer'
               }}
             >
@@ -1329,7 +1329,7 @@ export function ProfessorLmsModules({
                 cursor: 'pointer'
               }}
             >
-              ⏳ Aguardando Professor ({forumTopics.filter(t => !t.respostas?.some(r => r.autorRole === 'professor')).length})
+              Aguardando Professor ({forumTopics.filter(t => !t.respostas?.some(r => r.autorRole === 'professor')).length})
             </button>
             <button
               onClick={() => setForumFilter('answered')}
@@ -1403,7 +1403,7 @@ export function ProfessorLmsModules({
                             </span>
                           ) : (
                             <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.15)', padding: '0.15rem 0.45rem', borderRadius: '4px', border: '1px solid rgba(245,158,11,0.3)' }}>
-                              ⏳ Aguarda Professor
+                              Aguarda Professor
                             </span>
                           )}
                         </div>
@@ -1430,8 +1430,8 @@ export function ProfessorLmsModules({
                       </p>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                         <span>Por: <strong style={{ color: 'var(--text-main)' }}>{top.autorNome}</strong></span>
-                        <span style={{ color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700 }}>
-                          💬 {top.respostas?.length || 0} respostas
+                        <span style={{ color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700 }}>
+                          {top.respostas?.length || 0} respostas
                         </span>
                       </div>
                     </div>
@@ -1445,7 +1445,7 @@ export function ProfessorLmsModules({
               <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: 'fit-content' }}>
                 <div style={{ borderBottom: '1px solid var(--border-color, #E2D7C3)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-primary-accessible, #B8441F)' }}>{selectedTopic.disciplina}</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-primary-accessible, #A63D1B)' }}>{selectedTopic.disciplina}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <button
                         disabled={forumMutation || sendingReply}

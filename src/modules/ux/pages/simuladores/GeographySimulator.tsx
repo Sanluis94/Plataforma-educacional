@@ -1,3 +1,4 @@
+import { Trophy, Globe } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { LabExplorationCompletion } from '../../components/labs/LabExplorationCompletion';
 
@@ -296,7 +297,7 @@ function TectonicsBench({ labTitle, onComplete }: GeographySimulatorProps) {
   return (
     <div onChangeCapture={() => setInteracted(true)} onClickCapture={event => { if ((event.target as HTMLElement).closest('button')) setInteracted(true); }} className="geography-simulator p-4 premium-glass-card" style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--shadow-md)' }}>
       <h3 style={{ color: 'var(--text-main)', marginBottom: '1.25rem' }}>
-        🌋 {labTitle || 'Laboratório Virtual: Dinâmica de Placas Tectônicas'}
+        {labTitle || 'Laboratório Virtual: Dinâmica de Placas Tectônicas'}
       </h3>
 
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap-reverse' }}>
@@ -310,7 +311,7 @@ function TectonicsBench({ labTitle, onComplete }: GeographySimulatorProps) {
             />
             {isQuake && (
               <div style={{ color: '#ff1744', fontSize: '0.8rem', fontWeight: 'bold', textAlign: 'center', marginTop: '8px', animation: 'pulse 0.3s infinite' }}>
-                ⚠️ AVISO: Terremoto Ativo! Tremor detectado na falha tectônica.
+                AVISO: Terremoto Ativo! Tremor detectado na falha tectônica.
               </div>
             )}
           </div>
@@ -340,10 +341,10 @@ function TectonicsBench({ labTitle, onComplete }: GeographySimulatorProps) {
             </p>
 
             <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: 'var(--radius-sm, 10px)', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-              <div style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #B8441F)', fontWeight: 700, marginBottom: '0.2rem' }}>Observações do modelo geológico</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--color-primary-accessible, #A63D1B)', fontWeight: 700, marginBottom: '0.2rem' }}>Observações do modelo geológico</div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, lineHeight: 1.4 }}>
                 {isQuake
-                  ? '⚠️ Pressão crítica atingida! O modelo representa uma ruptura no limite transformante.'
+                  ? 'Pressão crítica atingida! O modelo representa uma ruptura no limite transformante.'
                   : `Monitorando placa tectônica com pressão ${pressure}%.`}
               </p>
             </div>
@@ -390,7 +391,7 @@ function GeographyQuizMode({ mode, labTitle, onComplete }: { mode: string; labTi
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>🌍 {labTitle || quiz.title}</h2>
+      <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>{labTitle || quiz.title}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>{quiz.description}</p>
 
       {!showResult ? (
@@ -423,19 +424,19 @@ function GeographyQuizMode({ mode, labTitle, onComplete }: { mode: string; labTi
             </div>
           )}
           {answered !== null && (
-            <button onClick={next} style={{ marginTop: '1rem', padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
+            <button onClick={next} style={{ marginTop: '1rem', padding: '0.5rem 1.25rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'var(--color-on-primary, #172314)', cursor: 'pointer', fontWeight: 'bold' }}>
               {currentQ < quiz.questions.length - 1 ? 'Próxima Questão →' : 'Ver Resultado'}
             </button>
           )}
         </div>
       ) : (
         <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>{score === quiz.questions.length ? '🏆' : '🌍'}</div>
+          <div aria-hidden="true" style={{ display: 'grid', placeItems: 'center', width: '4.5rem', height: '4.5rem', margin: '0 auto 0.75rem', borderRadius: '50%', background: 'rgba(var(--color-primary-rgb), 0.12)', color: 'var(--color-primary-accessible)' }}>{score === quiz.questions.length ? <Trophy size={32} /> : <Globe size={32} />}</div>
           <h3 style={{ color: 'var(--text-main)' }}>Resultado: {score}/{quiz.questions.length}</h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
             {score === quiz.questions.length ? `Você acertou todas as questões deste conjunto.` : 'Revise os conceitos e tente novamente!'}
           </p>
-          <button onClick={reset} style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'white', cursor: 'pointer' }}>Refazer Quiz</button>
+          <button onClick={reset} style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', background: 'var(--color-primary)', border: 'none', color: 'var(--color-on-primary, #172314)', cursor: 'pointer' }}>Refazer Quiz</button>
         </div>
       )}
       <LabExplorationCompletion key={String(showResult)} onComplete={onComplete} ready={showResult} />
