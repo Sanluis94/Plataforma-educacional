@@ -4,3 +4,12 @@ it('data limite sem horário encerra no fim do dia escolhido pelo professor',()=
 it('horário absoluto preserva o prazo independente de quem consulta',()=>{expect(examDeadlineAt({dataLimite:'2026-10-14T02:59:59.999Z'})).toBe(Date.parse('2026-10-14T02:59:59.999Z'));});
 it('rascunho, encerramento, início futuro e prazo inválido não abrem prova',()=>{expect(examAcceptingAnswers({status:'Rascunho'})).toBe(false);expect(examAcceptingAnswers({status:'Encerrada'})).toBe(false);expect(examAcceptingAnswers({status:'Aberta',dataInicio:'2099-01-01T00:00:00Z'},0)).toBe(false);expect(examAcceptingAnswers({status:'Aberta',dataLimite:'inválido'})).toBe(false);});
 it('data inexistente e início inválido exigem correção do professor',()=>{expect(examDeadlineAt({dataLimite:'2026-02-31'})).toBeNull();expect(examAcceptingAnswers({status:'Aberta',dataInicio:'inválido'})).toBe(false);});
+
+it('inicia uma data sem horario a meia-noite local e rejeita datas de inicio inexistentes', () => {
+  const start = new Date(2026, 9, 13).getTime();
+  const exam = { status: 'Aberta' as const, dataInicio: '2026-10-13' };
+  expect(examAcceptingAnswers(exam, start - 1)).toBe(false);
+  expect(examAcceptingAnswers(exam, start)).toBe(true);
+  expect(examAcceptingAnswers({ ...exam, dataInicio: '2026-02-31' }, start)).toBe(false);
+  expect(examAcceptingAnswers({ status: 'Aberta' }, Number.NaN)).toBe(false);
+});

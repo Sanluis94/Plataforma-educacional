@@ -5,3 +5,8 @@ it('recupera parágrafos e entidades de conteúdo HTML antigo sem cortar compara
 it('atributos com maior-que não aparecem no texto de estudo',()=>expect(studyMaterialText('<p title="x>y">Compare os dois lados.</p>')).toBe('Compare os dois lados.'));
 it('HTML antigo não apresenta código de script nem estilo como conteúdo',()=>expect(studyMaterialText('<p>Conteúdo.</p><script>alert(1)</script><style>p{display:none}</style>')).toBe('Conteúdo.'));
 it('decodifica caracteres válidos e conserva entidades numéricas inválidas',()=>expect(studyMaterialText('<p>&#x03bb; &#60; 4; &#1114112;</p>')).toBe('λ < 4; &#1114112;'));
+
+it('mantem separadas as celulas adjacentes de tabelas antigas', () => {
+  expect(studyMaterialText('<table><tr><th>Massa</th><th>Tempo</th></tr><tr><td>10 g</td><td>3 s</td></tr></table>'))
+    .toBe('Massa Tempo\n\n10 g 3 s');
+});
