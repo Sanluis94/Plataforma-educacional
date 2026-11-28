@@ -49,7 +49,7 @@ O workflow `.github/workflows/ci.yml` valida testes e build em pushes e pull req
 
 Crie branches de trabalho a partir de `dev`, faça alterações pequenas e revise o diff antes de abrir pull request. A publicação de regras, índices e Hosting é uma operação separada; os comandos de desenvolvimento e CI não publicam no Firebase.
 
-O usuário autorizou publicar no GitHub e no Firebase Hosting após cada conjunto de alterações validado. Essa preferência está registrada em `AGENTS.md`. Não é um agendamento nem um deploy automático do CI: o agente deve concluir testes, enviar a revisão, integrar em `main` e publicar o artefato correspondente durante o trabalho. Alterações de dados, usuários ou regras do banco precisam de escopo próprio.
+O deploy manual abaixo continua disponível como contingência. O [deploy automático em produção](./DEPLOY_FIREBASE.md), depois de configurado e habilitado, publica o Firebase Hosting após o CI obrigatório de um push à `main`. Alterações de dados, usuários ou regras do banco precisam de escopo próprio.
 
 Arquivos `.env*`, `.local/`, contas de serviço e exportações privadas devem permanecer ignorados. Somente dados fictícios podem alimentar fixtures/seed versionados ou arquivos em `public/`; tudo nessa pasta pode chegar ao navegador. Exportações reais do Firestore devem usar um caminho privado em `.local/`, nunca `public/local-data/`. Para demonstrações, use a fonte seed de `npm.cmd run etl:seed`.
 
