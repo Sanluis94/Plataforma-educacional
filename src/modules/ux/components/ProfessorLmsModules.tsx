@@ -194,18 +194,23 @@ export function ProfessorLmsModules({
     if (!activeClassId) return;
 
     // Constrói relatório ponderado integrando frequência
+    const periodData = gradePolicyDataInPeriod({ startDate, endDate }, {
+      submissions: applyPublishedReviews(realSubmissions, reviews, { classId: activeClassId, reviewMode }),
+      examAttempts,
+      attendanceRecords,
+    });
     const reports = calculateClassGradebook(
       roster,
       activeClassId,
-      gradePolicyDataInPeriod({ startDate, endDate }, { submissions: applyPublishedReviews(realSubmissions, reviews, { classId: activeClassId, reviewMode }), examAttempts, attendanceRecords }).submissions,
-      gradePolicyDataInPeriod({ startDate, endDate }, { submissions: realSubmissions, examAttempts, attendanceRecords }).examAttempts,
+      periodData.submissions,
+      periodData.examAttempts,
       weights,
-      { attendanceRecords: gradePolicyDataInPeriod({ startDate, endDate }, { submissions: realSubmissions, examAttempts, attendanceRecords }).attendanceRecords, activities: classActivities, acceptedRecordIds, participationScores, p1ExamId, p2ExamId }
+      { attendanceRecords: periodData.attendanceRecords, activities: classActivities, acceptedRecordIds, participationScores, p1ExamId, p2ExamId }
     );
 
     // Mescla com taxas reais de presença
     const enriched = reports.map((rep: StudentGradeReport) => {
-      const att = calculateStudentAttendanceRate(rep.studentId, gradePolicyDataInPeriod({ startDate, endDate }, { submissions: realSubmissions, examAttempts, attendanceRecords }).attendanceRecords);
+      const att = calculateStudentAttendanceRate(rep.studentId, periodData.attendanceRecords);
       return {
         ...rep,
         frequenciaPercentual: att.taxaPercentual,
