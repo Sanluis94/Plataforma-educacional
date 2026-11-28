@@ -80,7 +80,7 @@ No topo da aplicação (acessível por teclado e leitor de tela), a **Barra de A
 ## 💻 Como Executar o Projeto
 
 ### Pré-requisitos
-- Node.js 22.12 ou superior da linha 22 e npm
+- Node.js 22.12 ou superior da linha 22 e npm (se usar nvm, execute `nvm install` e `nvm use` na raiz do projeto)
 - Git
 - JDK 21 ou superior para os emuladores Firebase
 
